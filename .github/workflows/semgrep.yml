@@ -1,46 +1,46 @@
 name: Semgrep (Advisory)
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - '.agentkit/engines/node/src/**'
-      - '.github/workflows/**'
-      - '.github/instructions/**'
-  workflow_dispatch:
+    pull_request:
+        branches: [main]
+        paths:
+            - ".agentkit/engines/node/src/**"
+            - ".github/workflows/**"
+            - ".github/instructions/**"
+    workflow_dispatch:
 
 permissions:
-  contents: read
-  security-events: write
+    contents: read
+    security-events: write
 
 jobs:
-  semgrep:
-    name: semgrep-advisory
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    semgrep:
+        name: semgrep-advisory
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.x"
 
-      - name: Install Semgrep
-        run: pip install semgrep
+            - name: Install Semgrep
+              run: pip install semgrep
 
-      - name: Run Semgrep (advisory)
-        continue-on-error: true
-        run: |
-          semgrep scan \
-            --config=.semgrep/semgrep.yml \
-            --include='.agentkit/engines/node/src/**' \
-            --include='.github/workflows/**' \
-            --include='.github/instructions/**' \
-            --sarif \
-            --output=semgrep.sarif
+            - name: Run Semgrep (advisory)
+              continue-on-error: true
+              run: |
+                  semgrep scan \
+                    --config=.semgrep/semgrep.yml \
+                    --include='.agentkit/engines/node/src/**' \
+                    --include='.github/workflows/**' \
+                    --include='.github/instructions/**' \
+                    --sarif \
+                    --output=semgrep.sarif
 
-      - name: Upload SARIF
-        if: always() && hashFiles('semgrep.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: semgrep.sarif
+            - name: Upload SARIF
+              if: always() && hashFiles('semgrep.sarif') != ''
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: semgrep.sarif
