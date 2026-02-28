@@ -72,7 +72,11 @@ Thumbs.db
 # =============================================================================
 .agentkit/.manifest.json
 .agentkit/package-lock.json
+/package-lock.json
+.agentkit/test_results.txt
+benchmark-check.mjs
+temp_benchmark
+temp_benchmark/
+temp_discover_benchmark/
 .benchmark/
 bench-temp/
-benchmark_temp/
-benchmark/

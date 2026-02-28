@@ -76,6 +76,10 @@ function getChangedFiles(projectRoot, flags) {
     }
 
     if (existsSync(abs)) {
+      const stats = statSync(abs);
+      if (!stats.isFile()) {
+        throw new Error(`File is not a regular file: ${flags.file}`);
+      }
       const realPath = realpathSync(abs);
       const realProjectRoot = realpathSync(projectRoot);
       if (!realPath.startsWith(realProjectRoot + sep) && realPath !== realProjectRoot) {

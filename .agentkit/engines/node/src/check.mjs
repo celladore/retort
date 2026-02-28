@@ -3,7 +3,8 @@
  * Auto-detects tech stacks and runs format, lint, typecheck, test, build in sequence.
  * Outputs a structured results table and logs to events.
  */
-import { existsSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
+import { readdir } from 'fs/promises';
 import { resolve } from 'path';
 import yaml from 'js-yaml';
 import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
@@ -187,25 +188,42 @@ function isAllowedLinter(resolved) {
  * @param {string} agentkitRoot
  * @param {string} projectRoot
  * @param {string} [filterStack] - Optional stack name to filter to
- * @returns {object[]}
+ * @returns {Promise<object[]>}
  */
-function detectStacks(agentkitRoot, projectRoot, filterStack) {
+async function detectStacks(agentkitRoot, projectRoot, filterStack) {
   const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
   if (!existsSync(teamsPath)) return [];
 
   const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
   const stacks = spec.techStacks || [];
 
+  // Optimization: Read project root directory once if any stack uses wildcard detection
+  let projectFiles = null;
+  const needsWildcard = stacks.some(stack =>
+    (!filterStack || stack.name === filterStack) &&
+    Array.isArray(stack.detect) &&
+    stack.detect.some(m => typeof m === 'string' && m.startsWith('*'))
+  );
+
+  if (needsWildcard) {
+    try {
+      projectFiles = await readdir(projectRoot);
+    } catch {
+      projectFiles = [];
+    }
+  }
+
   return stacks.filter(stack => {
     if (filterStack && stack.name !== filterStack) return false;
     // Check if any detect markers exist in the project
-    return (stack.detect || []).some(marker => {
+    if (!Array.isArray(stack.detect)) return false;
+    return stack.detect.some(marker => {
+      if (typeof marker !== 'string') return false;
       if (marker.startsWith('*')) {
-        // Wildcard: check for files with this extension at root
+        // Wildcard: check for files with this extension at root using cached file list
+        if (!projectFiles) return false;
         const ext = marker.replace('*', '');
-        try {
-          return readdirSync(projectRoot).some(f => f.endsWith(ext));
-        } catch { return false; }
+        return projectFiles.some(f => f.endsWith(ext));
       }
       return existsSync(resolve(projectRoot, marker));
     });
@@ -228,7 +246,7 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
   console.log('[agentkit:check] Running quality gates...');
   console.log('');
 
-  const detectedStacks = detectStacks(agentkitRoot, projectRoot, flags.stack);
+  const detectedStacks = await detectStacks(agentkitRoot, projectRoot, flags.stack);
 
   if (detectedStacks.length === 0) {
     console.log('[agentkit:check] No tech stacks detected. Nothing to check.');

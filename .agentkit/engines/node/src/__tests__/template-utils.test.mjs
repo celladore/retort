@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   renderTemplate,
   sanitizeTemplateValue,
@@ -9,6 +9,7 @@ import {
   isScaffoldOnce,
   resolveConditionals,
   resolveEachBlocks,
+  replacePlaceholders,
   evalTruthy,
   flattenProjectYaml,
   flattenCrosscutting,
@@ -56,6 +57,72 @@ describe('renderTemplate', () => {
   it('handles empty template', () => {
     const result = renderTemplate('', { key: 'value' });
     expect(result).toBe('');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// replacePlaceholders
+// ---------------------------------------------------------------------------
+describe('replacePlaceholders', () => {
+  let origDebug;
+  beforeEach(() => {
+    origDebug = process.env.DEBUG;
+    delete process.env.DEBUG;
+  });
+  afterEach(() => {
+    if (origDebug !== undefined) process.env.DEBUG = origDebug;
+    else delete process.env.DEBUG;
+  });
+
+  it('replaces simple placeholders', () => {
+    expect(replacePlaceholders('Hello {{name}}!', { name: 'World' })).toBe('Hello World!');
+  });
+
+  it('replaces longest keys first to prevent partial collisions', () => {
+    expect(
+      replacePlaceholders('{{version}} {{versionInfo}}', { version: '1.0', versionInfo: 'v1.0-beta' })
+    ).toBe('1.0 v1.0-beta');
+  });
+
+  it('serialises non-string values as JSON', () => {
+    expect(replacePlaceholders('items: {{list}}', { list: ['a', 'b'] })).toBe('items: ["a","b"]');
+  });
+
+  it('leaves unresolved placeholders intact', () => {
+    expect(replacePlaceholders('{{known}} {{unknown}}', { known: 'yes' })).toContain('{{unknown}}');
+  });
+
+  it('sanitizes string values by default', () => {
+    expect(replacePlaceholders('{{val}}', { val: '$(rm -rf /)' })).toBe('rm -rf /');
+  });
+
+  it('allows raw vars when allowRawVars is true and key is in RAW_TEMPLATE_VARS', () => {
+    // commandFlags is in RAW_TEMPLATE_VARS — should pass through unsanitized when allowRawVars=true
+    const raw = '| `--flag` | desc | — |';
+    expect(replacePlaceholders('{{commandFlags}}', { commandFlags: raw }, true)).toBe(raw);
+  });
+
+  it('still sanitizes non-raw keys even when allowRawVars is true', () => {
+    expect(replacePlaceholders('{{name}}', { name: '`injection`' }, true)).toBe('injection');
+  });
+
+  it('handles empty vars object', () => {
+    expect(replacePlaceholders('no vars', {})).toBe('no vars');
+  });
+
+  it('warns on unresolved placeholders when DEBUG is set', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    process.env.DEBUG = '1';
+    replacePlaceholders('{{unknown}}', {});
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('{{unknown}}'));
+    warnSpy.mockRestore();
+  });
+
+  it('does not warn when DEBUG is not set', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    replacePlaceholders('{{unknown}}', {});
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });
 

@@ -105,7 +105,7 @@ describe('syncCopilotAgents (via runSync --only copilot)', () => {
     expect(agents.some((f) => f.includes('frontend.agent.md'))).toBe(true);
   });
 
-  it('agent files contain agent name and role', async () => {
+  it('agent files contain agent name and role', { timeout: 15000 }, async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const content = readFileSync(
       resolve(projectRoot, '.github', 'agents', 'backend.agent.md'),

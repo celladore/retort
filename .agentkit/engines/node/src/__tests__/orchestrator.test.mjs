@@ -6,6 +6,7 @@ import {
   loadState, saveState, acquireLock, releaseLock, checkLock,
   appendEvent, readEvents, advancePhase, setPhase, updateTeamStatus,
   getStatus, PHASES, VALID_TEAM_IDS,
+  getTasksSummary, getTasksSummaryAsync,
 } from '../orchestrator.mjs';
 
 // Use a temporary directory for tests
@@ -243,6 +244,116 @@ describe('orchestrator', () => {
       expect(VALID_TEAM_IDS).toHaveLength(10);
       expect(VALID_TEAM_IDS).toContain('team-backend');
       expect(VALID_TEAM_IDS).toContain('team-quality');
+    });
+  });
+
+  describe('getTasksSummary()', () => {
+    const TASKS_DIR = resolve(TEST_ROOT, '.claude', 'state', 'tasks');
+
+    it('returns empty-queue message when tasks directory does not exist', () => {
+      const result = getTasksSummary(TEST_ROOT);
+      expect(result).toBe('No tasks in the task queue.');
+    });
+
+    it('returns empty-queue message when readdirSync throws', () => {
+      // Create a file at the tasks path so readdirSync throws ENOTDIR
+      mkdirSync(resolve(TEST_ROOT, '.claude', 'state'), { recursive: true });
+      writeFileSync(TASKS_DIR, 'not-a-directory');
+      const result = getTasksSummary(TEST_ROOT);
+      expect(result).toBe('No tasks in the task queue.');
+    });
+
+    it('skips corrupted JSON files and still returns valid output', () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      writeFileSync(resolve(TASKS_DIR, 'bad.json'), '{ invalid json !!');
+      writeFileSync(
+        resolve(TASKS_DIR, 'good.json'),
+        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Do something', priority: 'P1', assignees: ['team-backend'], createdAt: new Date().toISOString() })
+      );
+      const result = getTasksSummary(TEST_ROOT);
+      expect(result).toContain('Active tasks: 1');
+    });
+
+    it('ignores non-object JSON payloads (arrays, primitives)', () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      writeFileSync(resolve(TASKS_DIR, 'array.json'), JSON.stringify([1, 2, 3]));
+      writeFileSync(resolve(TASKS_DIR, 'number.json'), '42');
+      writeFileSync(resolve(TASKS_DIR, 'string.json'), '"just a string"');
+      const result = getTasksSummary(TEST_ROOT);
+      expect(result).toBe('No tasks in the task queue.');
+    });
+
+    it('counts non-terminal tasks as active and terminal tasks as completed', () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      const now = new Date().toISOString();
+      writeFileSync(
+        resolve(TASKS_DIR, 'active1.json'),
+        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Task 1', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+      );
+      writeFileSync(
+        resolve(TASKS_DIR, 'active2.json'),
+        JSON.stringify({ id: 'task-002', status: 'submitted', title: 'Task 2', priority: 'P2', assignees: ['team-frontend'], createdAt: now })
+      );
+      writeFileSync(
+        resolve(TASKS_DIR, 'done1.json'),
+        JSON.stringify({ id: 'task-003', status: 'completed', title: 'Task 3', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+      );
+      writeFileSync(
+        resolve(TASKS_DIR, 'done2.json'),
+        JSON.stringify({ id: 'task-004', status: 'failed', title: 'Task 4', priority: 'P3', assignees: ['team-backend'], createdAt: now })
+      );
+      const result = getTasksSummary(TEST_ROOT);
+      expect(result).toContain('Active tasks: 2');
+      expect(result).toContain('Completed/closed tasks: 2');
+    });
+
+    it('omits active section when all tasks are terminal', () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      const now = new Date().toISOString();
+      writeFileSync(
+        resolve(TASKS_DIR, 'done.json'),
+        JSON.stringify({ id: 'task-001', status: 'canceled', title: 'Done', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+      );
+      const result = getTasksSummary(TEST_ROOT);
+      expect(result).not.toContain('Active tasks');
+      expect(result).toContain('Completed/closed tasks: 1');
+    });
+  });
+
+  describe('getTasksSummaryAsync()', () => {
+    const TASKS_DIR = resolve(TEST_ROOT, '.claude', 'state', 'tasks');
+
+    it('returns empty-queue message when no tasks exist', async () => {
+      const result = await getTasksSummaryAsync(TEST_ROOT);
+      expect(result).toBe('No tasks in the task queue.');
+    });
+
+    it('counts non-terminal tasks as active and terminal tasks as completed', async () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      const now = new Date().toISOString();
+      writeFileSync(
+        resolve(TASKS_DIR, 'active.json'),
+        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Active', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+      );
+      writeFileSync(
+        resolve(TASKS_DIR, 'done.json'),
+        JSON.stringify({ id: 'task-002', status: 'completed', title: 'Done', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+      );
+      const result = await getTasksSummaryAsync(TEST_ROOT);
+      expect(result).toContain('Active tasks: 1');
+      expect(result).toContain('Completed/closed tasks: 1');
+    });
+
+    it('skips corrupted task files via listTasks and still returns valid output', async () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      writeFileSync(resolve(TASKS_DIR, 'corrupt.json'), '{ bad json !!');
+      const now = new Date().toISOString();
+      writeFileSync(
+        resolve(TASKS_DIR, 'valid.json'),
+        JSON.stringify({ id: 'task-001', status: 'submitted', title: 'Valid', priority: 'P2', assignees: ['team-backend'], createdAt: now })
+      );
+      const result = await getTasksSummaryAsync(TEST_ROOT);
+      expect(result).toContain('Active tasks: 1');
     });
   });
 });

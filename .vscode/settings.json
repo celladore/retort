@@ -5,6 +5,7 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "typescript.tsdk": "node_modules/typescript/lib",
+  "terminal.integrated.shellIntegration.enabled": true,
   "search.exclude": {
     ".claude/": true,
     ".cursor/": true,
