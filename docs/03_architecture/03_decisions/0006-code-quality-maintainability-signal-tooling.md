@@ -54,7 +54,8 @@ Adopt **ESLint + Prettier + typecheck + tests** as the primary quality and maint
 
 Optional extension:
 
-- Use SonarQube/Codacy as secondary advisory scoring only when needed by team/reporting requirements.
+- Use **SonarQube Cloud** as the preferred secondary advisory scorer when team/reporting requirements require a commercial dashboard.
+- Do not select Codacy while SonarQube Cloud remains available and meets requirements.
 
 ## Consequences
 
