@@ -52,16 +52,16 @@ Adopt a `<selected_strategy>` with:
 
 Use the current ADR version as a baseline and fill in a repository-specific weighted matrix:
 
-| Criterion | Weight | Option A | Option B | Option C |
-| --------- | -----: | -------: | -------: | -------: |
-| Coverage breadth | 25 | | | |
-| Developer velocity | 20 | | | |
-| CI predictability | 15 | | | |
-| Cost efficiency | 10 | | | |
-| Lock-in posture | 10 | | | |
-| Operational simplicity | 10 | | | |
-| Policy flexibility | 10 | | | |
-| **Total** | **100** | | | |
+| Criterion              |  Weight | Option A | Option B | Option C |
+| ---------------------- | ------: | -------: | -------: | -------: |
+| Coverage breadth       |      25 |          |          |          |
+| Developer velocity     |      20 |          |          |          |
+| CI predictability      |      15 |          |          |          |
+| Cost efficiency        |      10 |          |          |          |
+| Lock-in posture        |      10 |          |          |          |
+| Operational simplicity |      10 |          |          |          |
+| Policy flexibility     |      10 |          |          |          |
+| **Total**              | **100** |          |          |          |
 
 ## Repo-Specific Inputs
 

@@ -23,8 +23,8 @@ See [diagrams/](./01_diagrams/) for visual representations.
 
 ## High-Level Components
 
-| Component | Responsibility | Technology |
-|-----------|---------------|-----------|
+| Component     | Responsibility        | Technology     |
+| ------------- | --------------------- | -------------- |
 | <!-- Name --> | <!-- What it does --> | <!-- Stack --> |
 | <!-- Name --> | <!-- What it does --> | <!-- Stack --> |
 

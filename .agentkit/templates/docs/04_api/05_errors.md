@@ -21,15 +21,15 @@ All API errors should use a consistent envelope:
 
 ## Common Error Codes
 
-| Code | HTTP Status | Meaning |
-|------|-------------|---------|
-| `VALIDATION_ERROR` | 400 | Input validation failed |
-| `UNAUTHORIZED` | 401 | Authentication required or invalid |
-| `FORBIDDEN` | 403 | Authenticated but not authorized |
-| `NOT_FOUND` | 404 | Requested resource does not exist |
-| `CONFLICT` | 409 | State conflict or duplicate operation |
-| `RATE_LIMITED` | 429 | Too many requests |
-| `INTERNAL_ERROR` | 500 | Unexpected server-side failure |
+| Code               | HTTP Status | Meaning                               |
+| ------------------ | ----------- | ------------------------------------- |
+| `VALIDATION_ERROR` | 400         | Input validation failed               |
+| `UNAUTHORIZED`     | 401         | Authentication required or invalid    |
+| `FORBIDDEN`        | 403         | Authenticated but not authorized      |
+| `NOT_FOUND`        | 404         | Requested resource does not exist     |
+| `CONFLICT`         | 409         | State conflict or duplicate operation |
+| `RATE_LIMITED`     | 429         | Too many requests                     |
+| `INTERNAL_ERROR`   | 500         | Unexpected server-side failure        |
 
 ## Notes
 

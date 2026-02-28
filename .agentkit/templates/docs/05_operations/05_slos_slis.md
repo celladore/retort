@@ -17,11 +17,11 @@ Track at minimum:
 
 Define measurable targets per environment and service.
 
-| SLI | Example SLO |
-|-----|-------------|
+| SLI          | Example SLO   |
+| ------------ | ------------- |
 | Availability | 99.9% monthly |
-| P95 Latency | <= 300ms |
-| Error Rate | < 1% |
+| P95 Latency  | <= 300ms      |
+| Error Rate   | < 1%          |
 
 ## Error Budget Policy
 

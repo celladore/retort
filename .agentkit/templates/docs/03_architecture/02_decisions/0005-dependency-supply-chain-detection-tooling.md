@@ -35,14 +35,14 @@ Complementary policy:
 
 ## Weighted Decision Matrix
 
-| Criterion | Weight | Option A | Option B | Option C |
-| --------- | -----: | -------: | -------: | -------: |
-| Vulnerability detection coverage | 30 | | | |
-| Update automation quality | 30 | | | |
-| CI/governance fit | 20 | | | |
-| Developer experience | 10 | | | |
-| Cost + lock-in | 10 | | | |
-| **Total** | **100** | | | |
+| Criterion                        |  Weight | Option A | Option B | Option C |
+| -------------------------------- | ------: | -------: | -------: | -------: |
+| Vulnerability detection coverage |      30 |          |          |          |
+| Update automation quality        |      30 |          |          |          |
+| CI/governance fit                |      20 |          |          |          |
+| Developer experience             |      10 |          |          |          |
+| Cost + lock-in                   |      10 |          |          |          |
+| **Total**                        | **100** |          |          |          |
 
 ## Repo-Specific Inputs
 

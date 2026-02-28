@@ -10,13 +10,13 @@ Git branching strategy and contribution workflow for {{repoName}}.
 
 ## Branch Strategy
 
-| Branch | Purpose | Deploys To |
-|--------|---------|-----------|
-| `main` | Production-ready code | Production |
-| `develop` | Integration branch | Staging |
-| `feature/*` | New features | — |
-| `fix/*` | Bug fixes | — |
-| `release/*` | Release preparation | — |
+| Branch      | Purpose               | Deploys To |
+| ----------- | --------------------- | ---------- |
+| `main`      | Production-ready code | Production |
+| `develop`   | Integration branch    | Staging    |
+| `feature/*` | New features          | —          |
+| `fix/*`     | Bug fixes             | —          |
+| `release/*` | Release preparation   | —          |
 
 ## Workflow
 
