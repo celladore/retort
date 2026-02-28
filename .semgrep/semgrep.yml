@@ -1,0 +1,17 @@
+rules:
+  - id: javascript.security.no-eval
+    message: Avoid `eval(...)`; use safer parsing/execution alternatives.
+    languages: [javascript, typescript]
+    severity: ERROR
+    patterns:
+      - pattern: eval(...)
+
+  - id: javascript.security.no-child-process-exec
+    message: Avoid `child_process.exec(...)` with untrusted input; prefer safer APIs and strict input validation.
+    languages: [javascript, typescript]
+    severity: WARNING
+    patterns:
+      - pattern: exec(...)
+    metadata:
+      category: security
+      technology: [nodejs]
