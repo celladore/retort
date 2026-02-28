@@ -8,30 +8,31 @@
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import {
-  chmod,
-  cp,
-  mkdir,
-  readFile,
-  readdir,
-  rm,
-  unlink,
-  writeFile,
+    chmod,
+    cp,
+    mkdir,
+    mkdtemp,
+    readFile,
+    readdir,
+    rm,
+    unlink,
+    writeFile,
 } from 'fs/promises';
 import yaml from 'js-yaml';
+import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 import {
-  ALL_RENDER_TARGETS,
-  categorizeFile,
-  computeProjectCompleteness,
-  flattenProjectYaml,
-  formatCommandFlags,
-  insertHeader,
-  isScaffoldOnce,
-  mergePermissions,
-  printSyncSummary,
-  renderTemplate,
-  resolveRenderTargets,
-  simpleDiff,
+    categorizeFile,
+    computeProjectCompleteness,
+    flattenProjectYaml,
+    formatCommandFlags,
+    insertHeader,
+    isScaffoldOnce,
+    mergePermissions,
+    printSyncSummary,
+    renderTemplate,
+    resolveRenderTargets,
+    simpleDiff
 } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -842,9 +843,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   }
 
   // 4. Render templates to temp directory
-  const tmpDir = resolve(agentkitRoot, '.tmp');
-  await rm(tmpDir, { recursive: true, force: true });
-  await mkdir(tmpDir, { recursive: true });
+  const tmpDir = await mkdtemp(join(tmpdir(), 'agentkit-sync-'));
 
   const templatesDir = resolve(agentkitRoot, 'templates');
 

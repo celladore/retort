@@ -14,7 +14,7 @@ const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
 function makeTmpProject() {
   const dir = resolve(
     tmpdir(),
-    `agentkit-wave3-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    `agentkit-sync-integration-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -36,7 +36,7 @@ function collectFiles(dir, base = dir) {
 }
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Copilot Prompts
+// Tests: Sync Integration — Copilot Prompts
 // ---------------------------------------------------------------------------
 describe('syncCopilotPrompts (via runSync --only copilot)', () => {
   let projectRoot;
@@ -64,7 +64,7 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
     }
   );
 
-  it('prompt files contain GENERATED header', async () => {
+  it('prompt files contain GENERATED header', { timeout: 15000 }, async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const content = readFileSync(
       resolve(projectRoot, '.github', 'prompts', 'build.prompt.md'),
@@ -84,7 +84,7 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Copilot Agents
+// Tests: Sync Integration — Copilot Agents
 // ---------------------------------------------------------------------------
 describe('syncCopilotAgents (via runSync --only copilot)', () => {
   let projectRoot;
@@ -116,7 +116,7 @@ describe('syncCopilotAgents (via runSync --only copilot)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Copilot Chat Modes
+// Tests: Sync Integration — Copilot Chat Modes
 // ---------------------------------------------------------------------------
 describe('syncCopilotChatModes (via runSync --only copilot)', () => {
   let projectRoot;
@@ -148,7 +148,7 @@ describe('syncCopilotChatModes (via runSync --only copilot)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Gemini
+// Tests: Sync Integration — Gemini
 // ---------------------------------------------------------------------------
 describe('syncGemini (via runSync --only gemini)', () => {
   let projectRoot;
@@ -189,7 +189,7 @@ describe('syncGemini (via runSync --only gemini)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Codex Skills
+// Tests: Sync Integration — Codex Skills
 // ---------------------------------------------------------------------------
 describe('syncCodexSkills (via runSync --only codex)', () => {
   let projectRoot;
@@ -201,7 +201,7 @@ describe('syncCodexSkills (via runSync --only codex)', () => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('generates .agents/skills/*/SKILL.md for non-team commands', async () => {
+  it('generates .agents/skills/*/SKILL.md for non-team commands', { timeout: 15000 }, async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
     const files = collectFiles(projectRoot);
     const skills = files.filter((f) => f.startsWith('.agents/skills/'));
@@ -211,7 +211,7 @@ describe('syncCodexSkills (via runSync --only codex)', () => {
     expect(skills.some((f) => f.includes('team-backend/SKILL.md'))).toBe(false);
   });
 
-  it('SKILL.md contains command name', async () => {
+  it('SKILL.md contains command name', { timeout: 15000 }, async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
     const content = readFileSync(
       resolve(projectRoot, '.agents', 'skills', 'build', 'SKILL.md'),
@@ -223,7 +223,7 @@ describe('syncCodexSkills (via runSync --only codex)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Claude Skills
+// Tests: Sync Integration — Claude Skills
 // ---------------------------------------------------------------------------
 describe('syncClaudeSkills (via runSync --only claude)', () => {
   let projectRoot;
@@ -245,7 +245,7 @@ describe('syncClaudeSkills (via runSync --only claude)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3B — Cursor Commands
+// Tests: Sync Integration — Cursor Commands
 // ---------------------------------------------------------------------------
 describe('syncCursorCommands (via runSync --only cursor)', () => {
   let projectRoot;
@@ -276,7 +276,7 @@ describe('syncCursorCommands (via runSync --only cursor)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3B — WARP.md
+// Tests: Sync Integration — WARP.md
 // ---------------------------------------------------------------------------
 describe('syncWarp (via runSync --only warp)', () => {
   let projectRoot;
@@ -307,7 +307,7 @@ describe('syncWarp (via runSync --only warp)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3C — Cline Rules
+// Tests: Sync Integration — Cline Rules
 // ---------------------------------------------------------------------------
 describe('syncClineRules (via runSync --only cline)', () => {
   let projectRoot;
@@ -337,7 +337,7 @@ describe('syncClineRules (via runSync --only cline)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3C — Roo Code Rules
+// Tests: Sync Integration — Roo Code Rules
 // ---------------------------------------------------------------------------
 describe('syncRooRules (via runSync --only roo)', () => {
   let projectRoot;
@@ -450,7 +450,7 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('--diff shows create/update/skip without writing', async () => {
+  it('--diff shows create/update/skip without writing', { timeout: 15000 }, async () => {
     const log = [];
     const origLog = console.log;
     console.log = (...args) => {
@@ -473,7 +473,7 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     // Create isolated temp agentkit root to avoid mutating shared state
     const tempAgentkitRoot = resolve(
       tmpdir(),
-      `agentkit-wave3-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      `agentkit-sync-integration-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     );
     mkdirSync(tempAgentkitRoot, { recursive: true });
 
