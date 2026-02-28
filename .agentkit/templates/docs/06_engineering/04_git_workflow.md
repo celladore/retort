@@ -61,6 +61,32 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) standard
 - [ ] Documentation updated if needed
 - [ ] No security concerns introduced
 
+## Branch Protection Checklist
+
+Apply these settings on the default branch (`main`):
+
+- [ ] Require pull request before merge
+- [ ] Require at least 1 approval
+- [ ] Dismiss stale approvals when new commits are pushed
+- [ ] Require conversation resolution before merge
+- [ ] Require status checks to pass before merge
+- [ ] Restrict force-pushes and branch deletion
+
+### Required Status Checks
+
+Set these checks as **required**:
+
+- `CI`
+- `CodeQL`
+
+Keep these checks **advisory** (not required initially):
+
+- `Semgrep (Advisory)`
+
+Promotion guidance:
+
+- Promote selected Semgrep checks to required only after at least 2 sprints of low-noise results.
+
 ## References
 
 - [Coding Standards](./02_coding_standards.md)

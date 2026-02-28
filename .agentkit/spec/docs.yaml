@@ -213,7 +213,7 @@ specialDirectories:
 adrRanges:
   - range: "0001-0099"
     domain: Core
-    path: "docs/02_architecture/ADR/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Core architecture decisions: system design, service boundaries,
       technology choices, data architecture, API design patterns, and
@@ -225,7 +225,7 @@ adrRanges:
 
   - range: "0100-0199"
     domain: Security
-    path: "docs/02_architecture/ADR/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Security-related architecture decisions: authentication mechanisms,
       authorization models, encryption standards, secrets management,
@@ -237,7 +237,7 @@ adrRanges:
 
   - range: "0200-0299"
     domain: Blockchain
-    path: "docs/02_architecture/ADR/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Blockchain and Web3 architecture decisions: chain selection,
       smart contract patterns, wallet integration, payment protocols,
@@ -249,7 +249,7 @@ adrRanges:
 
   - range: "0300-0399"
     domain: AI/ML
-    path: "docs/02_architecture/ADR/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       AI and machine learning architecture decisions: model selection,
       inference patterns, agent orchestration, prompt engineering
@@ -261,7 +261,7 @@ adrRanges:
 
   - range: "0400-0499"
     domain: Infrastructure
-    path: "docs/02_architecture/ADR/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Infrastructure architecture decisions: cloud provider selection,
       container orchestration, networking topology, CDN strategy,
@@ -273,7 +273,7 @@ adrRanges:
 
   - range: "0500-0599"
     domain: API Design
-    path: "docs/02_architecture/ADR/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       API design decisions: protocol selection (REST, GraphQL, gRPC),
       pagination strategies, error handling conventions, rate limiting

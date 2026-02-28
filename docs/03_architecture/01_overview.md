@@ -17,9 +17,9 @@
 
 ## System Context Diagram
 
-<!-- Link to or embed a C4 Level 1 diagram from 02_diagrams/. -->
+<!-- Link to or embed a C4 Level 1 diagram from 01_diagrams/. -->
 
-See [diagrams/](./02_diagrams/) for visual representations.
+See [diagrams/](./01_diagrams/) for visual representations.
 
 ## High-Level Components
 
@@ -43,8 +43,16 @@ See [diagrams/](./02_diagrams/) for visual representations.
 ## Decision Records
 
 Architecture Decision Records (ADRs) are stored in
-[03_decisions/](./03_decisions/). See
-[ADR-0001](./03_decisions/0001-adopt-agentkit-forge.md) for the foundational decision.
+[02_decisions/](./02_decisions/).
+
+Current accepted ADRs:
+
+- [ADR-0001](./02_decisions/0001-adopt-agentkit-forge.md) — Adopt AgentKit Forge
+- [ADR-0002](./02_decisions/0002-fallback-policy-tokens-problem.md) — Fallback policy for missing tokens/problem evidence
+- [ADR-0003](./02_decisions/0003-tooling-strategy-kluster-alternatives.md) — Tooling strategy (kluster vs alternatives)
+- [ADR-0004](./02_decisions/0004-static-security-analysis-depth-tooling.md) — Static security analysis depth
+- [ADR-0005](./02_decisions/0005-dependency-supply-chain-detection-tooling.md) — Dependency and supply-chain detection
+- [ADR-0006](./02_decisions/0006-code-quality-maintainability-signal-tooling.md) — Code quality and maintainability signal
 
 ## References
 

@@ -10,7 +10,7 @@
 
 ## Entity Relationship Summary
 
-<!-- Include or link to an ER diagram in docs/03_architecture/02_diagrams/. -->
+<!-- Include or link to an ER diagram in docs/03_architecture/01_diagrams/. -->
 
 ## Models
 

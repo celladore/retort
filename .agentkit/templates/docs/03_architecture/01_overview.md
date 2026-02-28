@@ -17,9 +17,9 @@
 
 ## System Context Diagram
 
-<!-- Link to or embed a C4 Level 1 diagram from 02_diagrams/. -->
+<!-- Link to or embed a C4 Level 1 diagram from 01_diagrams/. -->
 
-See [diagrams/](./02_diagrams/) for visual representations.
+See [diagrams/](./01_diagrams/) for visual representations.
 
 ## High-Level Components
 
@@ -43,8 +43,8 @@ See [diagrams/](./02_diagrams/) for visual representations.
 ## Decision Records
 
 Architecture Decision Records (ADRs) are stored in
-[03_decisions/](./03_decisions/). See
-[ADR-0001](./03_decisions/0001-adopt-agentkit-forge.md) for the foundational decision.
+[02_decisions/](./02_decisions/). See
+[ADR-0001](./02_decisions/0001-adopt-agentkit-forge.md) for the foundational decision.
 
 ## References
 

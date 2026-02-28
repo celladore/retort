@@ -1,4 +1,4 @@
-# AKF-INFRA-001: Fallback Policy for Missing tokens/problem Evidence
+# ADR-0002 (AKF-INFRA-001): Fallback Policy for Missing tokens/problem Evidence
 
 ## Status
 
@@ -7,6 +7,10 @@
 ## Date
 
 2026-02-26
+
+## Decision ID
+
+AKF-INFRA-001
 
 ## Context
 
