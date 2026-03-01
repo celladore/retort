@@ -30,7 +30,7 @@ categories:
 
   - id: "02_architecture"
     name: Architecture
-    path: "docs/02_architecture/"
+    path: "docs/03_architecture/"
     description: >
       System architecture, design decisions, and technical foundations.
       Includes architecture diagrams, service boundaries, and integration
@@ -44,7 +44,7 @@ categories:
 
   - id: "03_api"
     name: API
-    path: "docs/03_api/"
+    path: "docs/04_api/"
     description: >
       API documentation including endpoint references, authentication
       flows, rate limiting, versioning strategy, and client SDK guides.
@@ -58,7 +58,7 @@ categories:
 
   - id: "04_development"
     name: Development
-    path: "docs/04_development/"
+    path: "docs/06_engineering/"
     description: >
       Developer guides, setup instructions, coding standards, and
       contribution workflows. Everything a new developer needs to
@@ -283,7 +283,7 @@ externalSources:
 adrRanges:
   - range: "0001-0099"
     domain: Core
-    path: "docs/03_architecture/03_decisions/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Core architecture decisions: system design, service boundaries,
       technology choices, data architecture, API design patterns, and
@@ -295,7 +295,7 @@ adrRanges:
 
   - range: "0100-0199"
     domain: Security
-    path: "docs/03_architecture/03_decisions/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Security-related architecture decisions: authentication mechanisms,
       authorization models, encryption standards, secrets management,
@@ -307,7 +307,7 @@ adrRanges:
 
   - range: "0200-0299"
     domain: Blockchain
-    path: "docs/03_architecture/03_decisions/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Blockchain and Web3 architecture decisions: chain selection,
       smart contract patterns, wallet integration, payment protocols,
@@ -319,7 +319,7 @@ adrRanges:
 
   - range: "0300-0399"
     domain: AI/ML
-    path: "docs/03_architecture/03_decisions/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       AI and machine learning architecture decisions: model selection,
       inference patterns, agent orchestration, prompt engineering
@@ -331,7 +331,7 @@ adrRanges:
 
   - range: "0400-0499"
     domain: Infrastructure
-    path: "docs/03_architecture/03_decisions/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       Infrastructure architecture decisions: cloud provider selection,
       container orchestration, networking topology, CDN strategy,
@@ -343,7 +343,7 @@ adrRanges:
 
   - range: "0500-0599"
     domain: API Design
-    path: "docs/03_architecture/03_decisions/"
+    path: "docs/03_architecture/02_decisions/"
     description: >
       API design decisions: protocol selection (REST, GraphQL, gRPC),
       pagination strategies, error handling conventions, rate limiting
