@@ -277,91 +277,31 @@ externalSources:
 
 # =============================================================================
 # ADR Numbering Ranges
-# Architecture Decision Records are numbered by domain for organization.
+# Architecture Decision Records use a two-digit sequence for consistency.
 # =============================================================================
 
 adrRanges:
-  - range: "0001-0099"
-    domain: Core
+  - range: "01-99"
+    domain: Architecture
     path: "docs/03_architecture/02_decisions/"
     description: >
       Core architecture decisions: system design, service boundaries,
-      technology choices, data architecture, API design patterns, and
-      foundational infrastructure decisions.
+      technology choices, data architecture, API design patterns,
+      and foundational infrastructure decisions.
     examples:
-      - "ADR-0001 — Monorepo structure with Nx/Turbo"
-      - "ADR-0002 — API versioning strategy"
-      - "ADR-0003 — Database selection and sharding strategy"
-
-  - range: "0100-0199"
-    domain: Security
-    path: "docs/03_architecture/02_decisions/"
-    description: >
-      Security-related architecture decisions: authentication mechanisms,
-      authorization models, encryption standards, secrets management,
-      and compliance frameworks.
-    examples:
-      - "ADR-0100 — Authentication with OAuth 2.0 + PKCE"
-      - "ADR-0101 — Role-based access control model"
-      - "ADR-0102 — Secrets management with HashiCorp Vault"
-
-  - range: "0200-0299"
-    domain: Blockchain
-    path: "docs/03_architecture/02_decisions/"
-    description: >
-      Blockchain and Web3 architecture decisions: chain selection,
-      smart contract patterns, wallet integration, payment protocols,
-      and cross-chain communication strategies.
-    examples:
-      - "ADR-0200 — Solana program architecture with Anchor"
-      - "ADR-0201 — EtherLink L2 integration pattern"
-      - "ADR-0202 — x402 payment protocol implementation"
-
-  - range: "0300-0399"
-    domain: AI/ML
-    path: "docs/03_architecture/02_decisions/"
-    description: >
-      AI and machine learning architecture decisions: model selection,
-      inference patterns, agent orchestration, prompt engineering
-      strategies, and AI safety guardrails.
-    examples:
-      - "ADR-0300 — LLM provider abstraction layer"
-      - "ADR-0301 — Agent orchestration with agentkit-forge"
-      - "ADR-0302 — RAG pipeline architecture"
-
-  - range: "0400-0499"
-    domain: Infrastructure
-    path: "docs/03_architecture/02_decisions/"
-    description: >
-      Infrastructure architecture decisions: cloud provider selection,
-      container orchestration, networking topology, CDN strategy,
-      and disaster recovery design.
-    examples:
-      - "ADR-0400 — Azure as primary cloud provider"
-      - "ADR-0401 — Kubernetes cluster topology"
-      - "ADR-0402 — Multi-region failover strategy"
-
-  - range: "0500-0599"
-    domain: API Design
-    path: "docs/03_architecture/02_decisions/"
-    description: >
-      API design decisions: protocol selection (REST, GraphQL, gRPC),
-      pagination strategies, error handling conventions, rate limiting
-      approaches, and API gateway patterns.
-    examples:
-      - "ADR-0500 — GraphQL federation for service composition"
-      - "ADR-0501 — Cursor-based pagination standard"
-      - "ADR-0502 — API gateway with rate limiting and circuit breaking"
+      - "ADR-01 — Monorepo structure with pnpm workspaces"
+      - "ADR-02 — API versioning strategy"
+      - "ADR-03 — Tooling strategy and quality gates"
 
 # =============================================================================
 # ADR Template
 # =============================================================================
 
 adrTemplate: |
-  # ADR-{NNNN}: {Title}
+  # ADR-{NN}: {Title}
 
   ## Status
-  Proposed | Accepted | Deprecated | Superseded by ADR-{NNNN}
+  Proposed | Accepted | Deprecated | Superseded by ADR-{NN}
 
   ## Date
   {YYYY-MM-DD}

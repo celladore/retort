@@ -2,7 +2,7 @@
 <!-- Source: .agentkit/spec + .agentkit/overlays/{{repoName}} -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# ADR-0005: Dependency and Supply-Chain Detection — Tool Selection
+# ADR-05: Dependency and Supply-Chain Detection — Tool Selection
 
 ## Status
 
@@ -51,4 +51,4 @@ Complementary policy:
 
 ## References
 
-- [ADR-0003: Tooling Strategy — kluster vs Alternatives](0003-tooling-strategy-kluster-alternatives.md)
+- [ADR-03: Tooling Strategy — Tool Selection](03-tooling-strategy.md)

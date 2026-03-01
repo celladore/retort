@@ -6,9 +6,9 @@
 
 ## Decision Records
 
-- [0001-adopt-agentkit-forge.md](./0001-adopt-agentkit-forge.md)
-- [0002-fallback-policy-tokens-problem.md](./0002-fallback-policy-tokens-problem.md)
-- [0003-tooling-strategy-kluster-alternatives.md](./0003-tooling-strategy-kluster-alternatives.md)
-- [0004-static-security-analysis-depth-tooling.md](./0004-static-security-analysis-depth-tooling.md)
-- [0005-dependency-supply-chain-detection-tooling.md](./0005-dependency-supply-chain-detection-tooling.md)
-- [0006-code-quality-maintainability-signal-tooling.md](./0006-code-quality-maintainability-signal-tooling.md)
+- [01-adopt-agentkit-forge.md](./01-adopt-agentkit-forge.md)
+- [02-fallback-policy-tokens-problem.md](./02-fallback-policy-tokens-problem.md)
+- [03-tooling-strategy.md](./03-tooling-strategy.md)
+- [04-static-security-analysis-depth-tooling.md](./04-static-security-analysis-depth-tooling.md)
+- [05-dependency-supply-chain-detection-tooling.md](./05-dependency-supply-chain-detection-tooling.md)
+- [06-code-quality-maintainability-signal-tooling.md](./06-code-quality-maintainability-signal-tooling.md)

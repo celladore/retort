@@ -2,7 +2,7 @@
 <!-- Source: .agentkit/spec + .agentkit/overlays/{{repoName}} -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# ADR-0003: Tooling Strategy — kluster vs Alternatives
+# ADR-03: Tooling Strategy — Tool Selection
 
 ## Status
 
@@ -77,5 +77,5 @@ Use the current ADR version as a baseline and fill in a repository-specific weig
 
 ## References
 
-- [ADR-0001: Adopt AgentKit Forge](0001-adopt-agentkit-forge.md)
+- [ADR-01: Adopt AgentKit Forge](01-adopt-agentkit-forge.md)
 - [Architecture Overview](../01_overview.md)
