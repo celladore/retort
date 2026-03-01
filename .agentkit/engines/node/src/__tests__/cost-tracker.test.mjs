@@ -261,6 +261,27 @@ describe('cost-tracker', () => {
       expect(updated.commandsRun[0].command).toBe('check');
     });
 
+    it('falls back to O(N) scan and self-heals when pointer contains only whitespace', () => {
+      const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+      const pointerPath = resolve(TEST_AGENTKIT, 'logs', 'active-session-id');
+
+      // Write a malformed (whitespace-only) pointer
+      writeFileSync(pointerPath, '   \n  ', 'utf-8');
+
+      expect(() => recordCommand(TEST_AGENTKIT, 'check')).not.toThrow();
+
+      // Pointer should be self-healed with the real active session ID
+      expect(existsSync(pointerPath)).toBe(true);
+      expect(readFileSync(pointerPath, 'utf-8').trim()).toBe(session.sessionId);
+
+      // Command should have been recorded
+      const sessDir = resolve(TEST_AGENTKIT, 'logs', 'sessions');
+      const sessionFile = resolve(sessDir, `session-${session.sessionId}.json`);
+      const updated = JSON.parse(readFileSync(sessionFile, 'utf-8'));
+      expect(updated.commandsRun).toHaveLength(1);
+      expect(updated.commandsRun[0].command).toBe('check');
+    });
+
     it('falls back to O(N) scan and removes stale pointer when it points to a completed session', () => {
       const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
       const sessDir = resolve(TEST_AGENTKIT, 'logs', 'sessions');
