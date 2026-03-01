@@ -872,14 +872,18 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   try {
 
+  // Use vars.repoName for file headers (resolved project name, e.g. "agentkit-forge")
+  // rather than the raw overlay dir name which may be "__TEMPLATE__".
+  const headerRepoName = vars.repoName;
+
   // --- Always-on outputs (not gated by renderTargets) ---
   await Promise.all([
-    syncAgentsMd(templatesDir, tmpDir, vars, version, repoName),
-    syncRootDocs(templatesDir, tmpDir, vars, version, repoName),
-    syncGitHub(templatesDir, tmpDir, vars, version, repoName),
-    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, repoName),
-    syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, repoName),
-    syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName)
+    syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
+    syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
+    syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
+    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName),
+    syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, headerRepoName),
+    syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
   ]);
 
   // --- Gated by renderTargets ---
@@ -887,22 +891,22 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   if (targets.has('claude')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, repoName),
+      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, headerRepoName),
       syncClaudeSettings(templatesDir, tmpDir, vars, version, mergedPermissionsResult, settingsSpec),
-      syncClaudeCommands(templatesDir, tmpDir, vars, version, repoName, teamsSpec, commandsSpec),
-      syncClaudeAgents(templatesDir, tmpDir, vars, version, repoName, agentsSpec, rulesSpec),
-      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, repoName),
-      syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, repoName),
-      syncClaudeMd(templatesDir, tmpDir, vars, version, repoName),
-      syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec)
+      syncClaudeCommands(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, commandsSpec),
+      syncClaudeAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
+      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
+      syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, headerRepoName),
+      syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
     );
   }
 
   if (targets.has('cursor')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, repoName),
-      syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec),
-      syncCursorCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec)
+      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
+      syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+      syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
     );
   }
 
@@ -915,9 +919,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         '.windsurf/rules',
         vars,
         version,
-        repoName
+        headerRepoName
       ),
-      syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec),
+      syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncDirectCopy(
         templatesDir,
         'windsurf/workflows',
@@ -925,49 +929,49 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         '.windsurf/workflows',
         vars,
         version,
-        repoName
+        headerRepoName
       ),
-      syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec)
+      syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
     );
   }
 
   if (targets.has('ai')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'ai', tmpDir, '.ai', vars, version, repoName)
+      syncDirectCopy(templatesDir, 'ai', tmpDir, '.ai', vars, version, headerRepoName)
     );
   }
 
   if (targets.has('copilot')) {
     gatedTasks.push(
-      syncCopilot(templatesDir, tmpDir, vars, version, repoName),
-      syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName, commandsSpec),
-      syncCopilotAgents(templatesDir, tmpDir, vars, version, repoName, agentsSpec, rulesSpec),
-      syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoName, teamsSpec)
+      syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+      syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
+      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
     );
   }
 
   if (targets.has('gemini')) {
-    gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, repoName));
+    gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
   if (targets.has('codex')) {
-    gatedTasks.push(syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec));
+    gatedTasks.push(syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec));
   }
 
   if (targets.has('warp')) {
-    gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, repoName));
+    gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
   if (targets.has('cline')) {
-    gatedTasks.push(syncClineRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec));
+    gatedTasks.push(syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec));
   }
 
   if (targets.has('roo')) {
-    gatedTasks.push(syncRooRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec));
+    gatedTasks.push(syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec));
   }
 
   if (targets.has('mcp')) {
-    gatedTasks.push(syncA2aConfig(tmpDir, vars, version, repoName, agentsSpec, teamsSpec, templatesDir));
+    gatedTasks.push(syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir));
   }
 
   await Promise.all(gatedTasks);
