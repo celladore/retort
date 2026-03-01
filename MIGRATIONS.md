@@ -50,6 +50,17 @@ When upgrading introduces new spec fields:
 
 ## Breaking Changes
 
+### v0.2.1
+
+ADR numbering in `docs/03_architecture/02_decisions/` now follows a two-digit sequence (`01`-`99`) instead of four-digit prefixes.
+
+Migration steps:
+
+1. Rename ADR files from `0001-*` format to `01-*` format.
+2. Update cross-links in docs that point to old ADR filenames.
+3. Regenerate generated docs/config with `pnpm -C .agentkit agentkit:sync`.
+4. Verify references with `rg "000[0-9]-" docs .agentkit/templates/docs` and remove stale links.
+
 ### v0.1.0
 
 No breaking changes — this is the initial release.
