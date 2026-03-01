@@ -15,11 +15,14 @@ files referenced in VS Code settings or the Copilot configuration.
 
 Files in this directory are organized by domain:
 
-| File              | Scope                                    |
-| ----------------- | ---------------------------------------- |
-| `docs.md`         | Documentation, Markdown, ADRs            |
-| `marketing.md`    | Marketing site, Next.js, React, CSS      |
-| `rust.md`         | Rust crates, error handling, testing      |
+| File                       | Scope                                         |
+| -------------------------- | --------------------------------------------- |
+| `docs.md`                  | Documentation, Markdown, ADRs                 |
+| `kluster-code-verify.md`   | Code verification, static analysis sign-off   |
+| `marketing.md`             | Marketing site, Next.js, React, CSS           |
+| `quality.md`               | Quality gates, PR standards, CI enforcement   |
+| `rust.md`                  | Rust crates, error handling, testing          |
+| `testing.md`               | Test authoring, coverage, mocking patterns    |
 
 ## Adding New Instructions
 
