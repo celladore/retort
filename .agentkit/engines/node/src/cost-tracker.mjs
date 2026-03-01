@@ -92,7 +92,9 @@ const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 export function generateSessionId() {
   const now = new Date();
   const dateStr = now.toISOString().replace(/[-:T]/g, '').slice(0, 14);
-  const random = Math.random().toString(16).slice(2, 8);
+  const randomBytes = new Uint8Array(3);
+  globalThis.crypto.getRandomValues(randomBytes);
+  const random = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
   return `${dateStr}-${random}`;
 }
 

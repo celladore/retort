@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, rmSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import * as child_process from 'child_process';
-import { initSession, endSession } from '../cost-tracker.mjs';
+import { initSession, endSession, generateSessionId } from '../cost-tracker.mjs';
 
 // Mock child_process
 vi.mock('child_process', () => {
@@ -102,4 +102,21 @@ describe('cost-tracker security', () => {
     // Should default to 0 files modified
     expect(endedSession.filesModified).toBe(0);
   });
+  describe('generateSessionId security', () => {
+    it('generates a secure session ID using crypto', () => {
+      const sessionId = generateSessionId();
+
+      // Ensure format YYYYMMDDHHMMSS-XXXXXX
+      expect(sessionId).toMatch(/^\d{14}-[a-f0-9]{6}$/);
+    });
+
+    it('generates unique session IDs across multiple calls', () => {
+      const ids = new Set();
+      for (let i = 0; i < 1000; i++) {
+        ids.add(generateSessionId());
+      }
+      expect(ids.size).toBeGreaterThan(990);
+    });
+  });
+
 });
