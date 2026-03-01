@@ -42,6 +42,19 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.storybook', dest: 'hasStorybook', type: 'boolean' },
   { src: 'documentation.designTokensPath', dest: 'designTokensPath' },
 
+  // External Knowledge Integration
+  { src: 'externalKnowledge.enabled', dest: 'hasExternalKnowledge', type: 'boolean' },
+  { src: 'externalKnowledge.mode', dest: 'externalKnowledgeMode' },
+  { src: 'externalKnowledge.sources.windsurfDomainGuidesPath', dest: 'windsurfDomainGuidesPath' },
+  { src: 'externalKnowledge.sources.windsurfDomainGuidesPath', dest: 'hasWindsurfDomainGuidesPath', type: 'boolean', check: 'not-none' },
+  { src: 'externalKnowledge.sources.mystiraDocsPath', dest: 'mystiraDocsPath' },
+  { src: 'externalKnowledge.sources.mystiraDocsPath', dest: 'hasMystiraDocsPath', type: 'boolean', check: 'not-none' },
+  { src: 'externalKnowledge.sources.markdownFiles', dest: 'externalMarkdownFiles', type: 'array-join' },
+  { src: 'externalKnowledge.sources.markdownFiles', dest: 'hasExternalMarkdownFiles', type: 'boolean-array-length' },
+  { src: 'externalKnowledge.sources.gitRepoUrls', dest: 'externalGitRepoUrls', type: 'array-join' },
+  { src: 'externalKnowledge.sources.gitRepoUrls', dest: 'hasExternalGitRepoUrls', type: 'boolean-array-length' },
+  { src: 'externalKnowledge.targetPlatforms', dest: 'externalKnowledgeTargetPlatforms', type: 'array-join' },
+
   // Deployment
   { src: 'deployment.cloudProvider', dest: 'cloudProvider' },
   { src: 'deployment.containerized', dest: 'containerized', type: 'boolean' },

@@ -59,6 +59,18 @@ documentation:
   storybook: false
   designTokensPath: null # e.g. styles/tokens/
 
+# External knowledge/doc sources used to seed template metadata + overlays
+# (no raw bulk copy by default).
+externalKnowledge:
+  enabled: false
+  mode: metadata-overlays # metadata-overlays | direct-copy | hybrid
+  sources:
+    windsurfDomainGuidesPath: null # e.g. C:/Users/<user>/.windsurf/plans/domain-guides
+    mystiraDocsPath: null # e.g. C:/Users/<user>/repos/Mystira.workspace/docs
+    markdownFiles: [] # e.g. [docs/strategy.md, docs/vision.md]
+    gitRepoUrls: [] # e.g. [https://github.com/org/repo]
+  targetPlatforms: [copilot, windsurf]
+
 # Deployment & infrastructure
 deployment:
   cloudProvider: none # aws | azure | gcp | vercel | netlify | self-hosted | none

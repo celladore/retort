@@ -22,90 +22,95 @@ categories:
       Contains high-level product direction and business context that
       informs engineering decisions.
     contents:
-      - "01_prd.md — Product requirements and scope"
-      - "02_user_stories.md — User stories and acceptance criteria"
-      - "03_roadmap.md — Roadmap and milestone planning"
-      - "04_personas.md — User personas and audience profiles"
-      - "README.md — Product docs index"
+      - "vision.md — Product vision and mission statement"
+      - "strategy.md — Go-to-market strategy and positioning"
+      - "personas.md — User personas and target audience profiles"
+      - "competitive-analysis.md — Competitive landscape and differentiation"
+      - "metrics.md — Key product metrics and success criteria"
 
-  - id: "02_specs"
-    name: Specifications
-    path: "docs/02_specs/"
-    description: >
-      Functional, technical, API, and data model specifications.
-      Defines implementation contracts and system behavior expectations.
-    contents:
-      - "01_functional_spec.md — Functional specification"
-      - "02_technical_spec.md — Technical architecture specification"
-      - "03_api_spec.md — API specification contract"
-      - "04_data_models.md — Data model definitions"
-      - "README.md — Specs docs index"
-
-  - id: "03_architecture"
+  - id: "02_architecture"
     name: Architecture
     path: "docs/03_architecture/"
     description: >
       System architecture, design decisions, and technical foundations.
-      Includes architecture diagrams and Architecture Decision Records (ADRs).
+      Includes architecture diagrams, service boundaries, and integration
+      patterns. Home of Architecture Decision Records (ADRs).
     contents:
-      - "01_overview.md — High-level architecture overview"
-      - "01_diagrams/README.md — Architecture diagrams index"
-      - "02_decisions/README.md — ADR index"
-      - "README.md — Architecture docs index"
+      - "overview.md — High-level system architecture overview"
+      - "service-map.md — Service boundaries and communication patterns"
+      - "data-flow.md — Data flow diagrams and pipeline architecture"
+      - "tech-stack.md — Technology choices and rationale"
+      - "ADR/ — Architecture Decision Records (see ADR numbering below)"
 
-  - id: "04_api"
+  - id: "03_api"
     name: API
     path: "docs/04_api/"
     description: >
-      API documentation including endpoint references, authentication,
-      examples, errors, and versioning strategy.
+      API documentation including endpoint references, authentication
+      flows, rate limiting, versioning strategy, and client SDK guides.
     contents:
-      - "01_overview.md — API overview and conventions"
-      - "02_endpoints.md — Endpoint reference"
-      - "03_authentication.md — Authentication and authorization"
-      - "04_examples.md — Request and response examples"
-      - "05_errors.md — Error model and codes"
-      - "06_versioning.md — API versioning strategy"
-      - "README.md — API docs index"
+      - "overview.md — API design principles and conventions"
+      - "authentication.md — Authentication and authorization flows"
+      - "versioning.md — API versioning strategy and migration guides"
+      - "rate-limiting.md — Rate limiting policies and headers"
+      - "errors.md — Error response format and error code catalog"
+      - "openapi/ — OpenAPI specification files"
 
-  - id: "05_operations"
-    name: Operations
-    path: "docs/05_operations/"
-    description: >
-      Operational runbooks including deployment, monitoring, incident
-      response, troubleshooting, and SLO/SLI definitions.
-    contents:
-      - "01_deployment.md — Deployment procedures"
-      - "02_monitoring.md — Monitoring and alerting"
-      - "03_incident_response.md — Incident response workflow"
-      - "04_troubleshooting.md — Troubleshooting guide"
-      - "05_slos_slis.md — SLO/SLI definitions"
-      - "README.md — Operations docs index"
-
-  - id: "06_engineering"
-    name: Engineering
+  - id: "04_development"
+    name: Development
     path: "docs/06_engineering/"
     description: >
-      Developer setup guides, coding standards, testing strategy,
-      git workflow, and engineering security practices.
+      Developer guides, setup instructions, coding standards, and
+      contribution workflows. Everything a new developer needs to
+      get productive.
     contents:
-      - "01_setup.md — Development setup"
-      - "02_coding_standards.md — Coding standards"
-      - "03_testing.md — Testing strategy"
-      - "04_git_workflow.md — Git workflow"
-      - "05_security.md — Engineering security practices"
-      - "README.md — Engineering docs index"
+      - "getting-started.md — Local development environment setup"
+      - "coding-standards.md — Language-specific coding conventions"
+      - "git-workflow.md — Branch strategy, commit conventions, PR process"
+      - "testing-guide.md — Test strategy, patterns, and running tests"
+      - "debugging.md — Debugging tools, techniques, and common issues"
+      - "contributing.md — Contribution guidelines and code review process"
 
-  - id: "07_integrations"
-    name: Integrations
-    path: "docs/07_integrations/"
+  - id: "05_deployment"
+    name: Deployment
+    path: "docs/05_deployment/"
     description: >
-      External API, webhook, and SDK integration references.
+      Deployment procedures, environment configurations, CI/CD pipeline
+      documentation, and release management processes.
     contents:
-      - "01_external_apis.md — External API integration inventory"
-      - "02_webhooks.md — Webhook contracts and delivery"
-      - "03_sdk.md — SDK integration guidance"
-      - "README.md — Integrations docs index"
+      - "environments.md — Environment inventory and configuration"
+      - "ci-cd.md — CI/CD pipeline architecture and workflow documentation"
+      - "release-process.md — Release checklist and versioning procedures"
+      - "rollback.md — Rollback procedures and disaster recovery"
+      - "monitoring.md — Monitoring, alerting, and observability setup"
+      - "runbooks/ — Operational runbooks for common scenarios"
+
+  - id: "06_security"
+    name: Security
+    path: "docs/06_security/"
+    description: >
+      Security documentation including threat models, compliance
+      requirements, incident response procedures, and audit logs.
+    contents:
+      - "overview.md — Security posture and policy summary"
+      - "threat-model.md — Threat model and risk assessment"
+      - "compliance.md — Compliance requirements (SOC2, GDPR, etc.)"
+      - "incident-response.md — Security incident response procedures"
+      - "audit-log.md — Security audit history and findings"
+      - "secrets-management.md — Secrets management practices and tooling"
+
+  - id: "07_operations"
+    name: Operations
+    path: "docs/07_operations/"
+    description: >
+      Operational documentation including SLAs, on-call procedures,
+      capacity planning, and performance benchmarks.
+    contents:
+      - "sla.md — Service level agreements and objectives"
+      - "on-call.md — On-call rotation and escalation procedures"
+      - "capacity.md — Capacity planning and scaling guidelines"
+      - "performance.md — Performance benchmarks and optimization history"
+      - "cost-management.md — Cloud cost tracking and optimization"
 
   - id: "08_reference"
     name: Reference
@@ -114,12 +119,11 @@ categories:
       Reference materials including glossary, acronym definitions,
       external resource links, and tool configuration references.
     contents:
-      - "01_glossary.md — Project terminology and definitions"
-      - "02_faq.md — Frequently asked questions"
-      - "03_changelog.md — Changelog reference"
-      - "04_contributing.md — Contributing reference"
-      - "05_project_yaml_reference.md — project.yaml reference"
-      - "README.md — Reference docs index"
+      - "glossary.md — Project-specific terminology and definitions"
+      - "acronyms.md — Acronym and abbreviation reference"
+      - "external-resources.md — Links to external documentation and tools"
+      - "tool-config.md — Configuration reference for project tooling"
+      - "faq.md — Frequently asked questions and answers"
 
 # =============================================================================
 # Special-Purpose Directories
@@ -129,7 +133,7 @@ specialDirectories:
 
   - id: prd
     name: Product Requirements Documents
-    path: "docs/prd/"
+    path: "docs/01_product/"
     description: >
       Individual Product Requirements Documents (PRDs) for features,
       enhancements, and initiatives. Each PRD follows a standardized
@@ -169,6 +173,42 @@ specialDirectories:
       | Milestone | Date | Status |
       |-----------|------|--------|
 
+  - id: history
+    name: PR History Documents
+    path: "docs/history/"
+    description: >
+      Historical documentation for significant PRs and implementations.
+      Covers major implementations, complex bug resolutions, new feature
+      launches, and major migrations. Documents use sequential numbering
+      and are generated from standardized templates via scripts/create-doc.sh.
+    naming: "XXXX-YYYY-MM-DD-{slug}-{type}.md"
+    subdirectories:
+      - "implementations/ — Major implementations and architecture changes"
+      - "bug-fixes/ — Complex or critical bug resolutions"
+      - "features/ — New feature launches"
+      - "migrations/ — Major migrations and upgrades"
+    template: |
+      # [{type} Title] - Historical Summary
+
+      **Completed**: {YYYY-MM-DD}
+      **PR**: #{PR-Number}
+
+      ## Overview
+
+      {Description}
+
+      ## Key Changes
+
+      - {Change 1}
+
+      ## Results
+
+      {Outcomes}
+
+      ## Lessons Learned
+
+      {Insights}
+
   - id: ai_handoffs
     name: AI Handoff Documents
     path: "docs/ai_handoffs/"
@@ -200,6 +240,40 @@ specialDirectories:
 
       ## Files Changed
       - {path/to/file — description of change}
+
+# =============================================================================
+# External Source Integration
+# Optional external knowledge sources that can feed template metadata + overlays.
+# No raw bulk copy is performed unless explicitly configured to do so.
+# =============================================================================
+
+externalSources:
+  - id: windsurf_domain_guides
+    name: Windsurf Domain Guides
+    enabled: false
+    path: null # e.g. C:/Users/<user>/.windsurf/plans/domain-guides
+    type: local-folder
+    ingestionMode: metadata-overlays # metadata-overlays | direct-copy | hybrid
+    targetDirectories:
+      - docs/06_engineering/
+      - docs/08_reference/
+    description: >
+      Structured domain and template guidance used to seed project documentation
+      metadata and overlay values during adoption/setup.
+
+  - id: mystira_docs
+    name: Mystira Workspace Docs
+    enabled: false
+    path: null # e.g. C:/Users/<user>/repos/Mystira.workspace/docs
+    type: local-folder
+    ingestionMode: metadata-overlays
+    targetDirectories:
+      - docs/01_product/
+      - docs/02_specs/
+      - docs/03_architecture/
+    description: >
+      Reference product/spec documentation that can be mapped into AgentKit
+      template variables and generated docs structure.
 
 # =============================================================================
 # ADR Numbering Ranges
