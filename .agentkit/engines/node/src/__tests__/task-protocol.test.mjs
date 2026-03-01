@@ -36,7 +36,7 @@ afterEach(() => {
 
 describe('generateTaskId', () => {
   it('generates sequential IDs for the same day', async () => {
-    const id1 = generateTaskId(tmpRoot);
+    const id1 = await generateTaskId(tmpRoot);
     expect(id1).toMatch(/^task-\d{8}-001-[a-z0-9]{6}$/);
 
     await createTask(tmpRoot, {
@@ -44,7 +44,7 @@ describe('generateTaskId', () => {
       delegator: 'test',
       assignees: ['team-backend'],
     });
-    const id2 = generateTaskId(tmpRoot);
+    const id2 = await generateTaskId(tmpRoot);
     expect(id2).toMatch(/^task-\d{8}-002-[a-z0-9]{6}$/);
   });
 });
@@ -187,19 +187,19 @@ describe('getTask', () => {
       delegator: 'test',
       assignees: ['x'],
     });
-    const result = getTask(tmpRoot, created.task.id);
+    const result = await getTask(tmpRoot, created.task.id);
     expect(result.task).toBeDefined();
     expect(result.task.title).toBe('Test');
   });
 
-  it('returns error for non-existent task', () => {
-    const result = getTask(tmpRoot, 'task-00000000-999');
+  it('returns error for non-existent task', async () => {
+    const result = await getTask(tmpRoot, 'task-00000000-999');
     expect(result.error).toContain('not found');
     expect(result.task).toBeNull();
   });
 
-  it('returns error for invalid task ID path traversal attempt', () => {
-    const result = getTask(tmpRoot, '../evil');
+  it('returns error for invalid task ID path traversal attempt', async () => {
+    const result = await getTask(tmpRoot, '../evil');
     expect(result.error).toContain('Invalid task ID');
     expect(result.task).toBeNull();
   });
@@ -210,32 +210,37 @@ describe('getTask', () => {
 // ---------------------------------------------------------------------------
 
 describe('listTasks', () => {
-  it('returns empty list when no tasks exist', () => {
-    expect(listTasks(tmpRoot).tasks).toEqual([]);
+  it('returns empty list when no tasks exist', async () => {
+    const result = await listTasks(tmpRoot);
+    expect(result.tasks).toEqual([]);
   });
 
   it('lists all tasks', async () => {
     await createTask(tmpRoot, { title: 'A', delegator: 'test', assignees: ['x'] });
     await createTask(tmpRoot, { title: 'B', delegator: 'test', assignees: ['y'] });
-    expect(listTasks(tmpRoot).tasks).toHaveLength(2);
+    const result = await listTasks(tmpRoot);
+    expect(result.tasks).toHaveLength(2);
   });
 
   it('filters by status', async () => {
     await createTask(tmpRoot, { title: 'A', delegator: 'test', assignees: ['x'] });
-    expect(listTasks(tmpRoot, { status: 'submitted' }).tasks).toHaveLength(1);
-    expect(listTasks(tmpRoot, { status: 'completed' }).tasks).toHaveLength(0);
+    const result1 = await listTasks(tmpRoot, { status: 'submitted' });
+    expect(result1.tasks).toHaveLength(1);
+    const result2 = await listTasks(tmpRoot, { status: 'completed' });
+    expect(result2.tasks).toHaveLength(0);
   });
 
   it('filters by assignee', async () => {
     await createTask(tmpRoot, { title: 'A', delegator: 'test', assignees: ['team-backend'] });
     await createTask(tmpRoot, { title: 'B', delegator: 'test', assignees: ['team-frontend'] });
-    expect(listTasks(tmpRoot, { assignee: 'team-backend' }).tasks).toHaveLength(1);
+    const result = await listTasks(tmpRoot, { assignee: 'team-backend' });
+    expect(result.tasks).toHaveLength(1);
   });
 
   it('sorts by priority then date', async () => {
     await createTask(tmpRoot, { title: 'Low', delegator: 'test', assignees: ['x'], priority: 'P3' });
     await createTask(tmpRoot, { title: 'High', delegator: 'test', assignees: ['x'], priority: 'P0' });
-    const { tasks } = listTasks(tmpRoot);
+    const { tasks } = await listTasks(tmpRoot);
     expect(tasks[0].title).toBe('High');
     expect(tasks[1].title).toBe('Low');
   });
@@ -418,7 +423,7 @@ describe('checkDependencies', () => {
     expect(unblocked).toContain(blocked.task.id);
 
     // Verify blockedBy is now empty
-    const updated = getTask(tmpRoot, blocked.task.id);
+    const updated = await getTask(tmpRoot, blocked.task.id);
     expect(updated.task.blockedBy).toEqual([]);
   });
 
@@ -513,7 +518,7 @@ describe('checkDependencies', () => {
     const { unblocked } = await checkDependencies(tmpRoot);
     expect(unblocked).toEqual([]);
 
-    const updated = getTask(tmpRoot, blocked.task.id);
+    const updated = await getTask(tmpRoot, blocked.task.id);
     expect(updated.task.blockedBy).toContain(dep.task.id);
     expect(updated.task.status).toBe('BLOCKED_ON_CANCELED');
     expect(updated.task.blockedReason).toBe('canceled');
@@ -613,7 +618,7 @@ describe('processHandoffs', () => {
     const firstRun = await processHandoffs(tmpRoot);
     expect(firstRun.errors.length).toBeGreaterThan(0);
     expect(firstRun.created).toHaveLength(0);
-    const after = getTask(tmpRoot, task.task.id);
+    const after = await getTask(tmpRoot, task.task.id);
     expect(after.task._handoffProcessed).toBeFalsy();
   });
 });
@@ -647,9 +652,10 @@ describe('formatTaskList', () => {
   it('produces a markdown table', async () => {
     await createTask(tmpRoot, { title: 'A', delegator: 'test', assignees: ['x'], priority: 'P0' });
     await createTask(tmpRoot, { title: 'B', delegator: 'test', assignees: ['y'], priority: 'P2' });
-    const { tasks } = listTasks(tmpRoot);
+    const { tasks } = await listTasks(tmpRoot);
     const table = formatTaskList(tasks);
     expect(table).toContain('| ID |');
     expect(table).toContain('submitted');
   });
 });
+

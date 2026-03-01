@@ -1,6 +1,11 @@
 ---
 description: "Session cost and usage tracking — summaries, session lists, and monthly reports"
 allowed-tools: Bash(node *), Read, Glob, Grep
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # Cost & Usage Tracking

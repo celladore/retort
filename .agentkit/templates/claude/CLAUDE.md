@@ -1,3 +1,6 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
+<!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
 # {{repoName}} — Claude Code Instructions
 
 ## Project Overview

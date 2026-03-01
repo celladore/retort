@@ -1,3 +1,6 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown style guide for Gemini Code Assist code review. -->
+<!-- Docs: https://developers.google.com/gemini-code-assist/docs/customize-gemini-behavior-github -->
 # Style Guide — {{repoName}}
 
 This style guide is auto-generated from the project's rule definitions.

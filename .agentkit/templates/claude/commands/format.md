@@ -1,6 +1,11 @@
 ---
 description: "Run code formatters — auto-detects tools, accepts optional scope"
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(prettier *), Bash(rustfmt *), Bash(black *), Bash(ruff *), Bash(gofmt *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # Code Formatter

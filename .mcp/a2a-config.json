@@ -1,0 +1,23 @@
+{
+  "a2a": {
+    "enabled": true,
+    "protocol_version": "1.0.0",
+    "task_format": "json",
+    "context_transfer": "memory",
+    "result_aggregation": "orchestrator",
+    "agents": [
+      { "id": "orchestrator", "role": "coordinator", "capabilities": ["delegate", "aggregate", "monitor"] },
+      { "id": "team-backend", "role": "executor", "domain": "api,services", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-frontend", "role": "executor", "domain": "ui,components", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-data", "role": "executor", "domain": "database,models", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-infra", "role": "executor", "domain": "iac,cloud", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-devops", "role": "executor", "domain": "ci,cd,automation", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-testing", "role": "executor", "domain": "tests,quality", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-security", "role": "executor", "domain": "auth,compliance", "capabilities": ["implement", "test", "review"] },
+      { "id": "team-docs", "role": "executor", "domain": "documentation", "capabilities": ["implement", "review"] },
+      { "id": "team-product", "role": "executor", "domain": "features,prd", "capabilities": ["implement", "review"] },
+      { "id": "team-quality", "role": "executor", "domain": "review,refactor", "capabilities": ["implement", "test", "review"] }
+    ],
+    "messageTypes": ["delegate", "report", "query", "broadcast"]
+  }
+}

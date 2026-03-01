@@ -169,8 +169,8 @@ export async function runHandoff({ agentkitRoot, projectRoot, flags = {} }) {
 
   const timestamp = new Date().toISOString();
   const git = getGitState(projectRoot);
-  const state = loadState(projectRoot);
-  const events = readEvents(projectRoot, 10);
+  const state = await loadState(projectRoot);
+  const events = await readEvents(projectRoot, 10);
 
   const doc = generateHandoffDoc(git, state, events, timestamp);
 
@@ -193,7 +193,7 @@ export async function runHandoff({ agentkitRoot, projectRoot, flags = {} }) {
 
   // Log event
   try {
-    appendEvent(projectRoot, 'handoff_generated', {
+    await appendEvent(projectRoot, 'handoff_generated', {
       branch: git.branch,
       uncommittedCount: git.uncommittedCount,
       phase: state.current_phase,

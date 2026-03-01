@@ -96,7 +96,7 @@ describe('fresh install (no node_modules)', () => {
     { skip: process.platform === 'win32', timeout: 130_000 },
     () => {
       const cliPath = join(projectRoot, '.agentkit', 'engines', 'node', 'src', 'cli.mjs');
-      const result = execFileSync('node', [cliPath, 'sync', '--dry-run'], {
+      const result = execFileSync('node', [cliPath, 'sync', '--dry-run', '--diff'], {
         encoding: 'utf-8',
         cwd: projectRoot,
         timeout: 120_000,

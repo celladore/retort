@@ -4,17 +4,8 @@
  * Tasks are JSON files in .claude/state/tasks/ with lifecycle states,
  * messages, artifacts, dependency tracking, and chained handoffs.
  */
-import { randomBytes } from 'crypto';
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  renameSync,
-  unlinkSync,
-  writeFileSync,
-} from 'fs';
-import { open } from 'fs/promises';
+import { existsSync } from 'fs';
+import { access, mkdir, open, readdir, readFile, rename, unlink, writeFile } from 'fs/promises';
 import { resolve } from 'path';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
@@ -81,11 +72,10 @@ function handoffLockPath(projectRoot, taskId) {
   return resolve(tasksDir(projectRoot), `${normalizeTaskId(taskId)}.handoff.lock`);
 }
 
-function ensureTasksDir(projectRoot) {
+async function ensureTasksDir(projectRoot) {
   const dir = tasksDir(projectRoot);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
+  // existsSync is fine for a quick check, but mkdir with recursive: true is safe to call anyway
+  await mkdir(dir, { recursive: true });
   return dir;
 }
 
@@ -98,7 +88,7 @@ function ensureTasksDir(projectRoot) {
  * @returns {Promise<T|null>}
  */
 async function withHandoffLock(projectRoot, taskId, fn) {
-  ensureTasksDir(projectRoot);
+  await ensureTasksDir(projectRoot);
   const lockPath = handoffLockPath(projectRoot, taskId);
   let fd;
   let acquiredLock = false;
@@ -123,9 +113,7 @@ async function withHandoffLock(projectRoot, taskId, fn) {
     }
     if (acquiredLock) {
       try {
-        if (existsSync(lockPath)) {
-          unlinkSync(lockPath);
-        }
+        await unlink(lockPath).catch(() => {});
       } catch {
         /* ignore cleanup */
       }
@@ -139,11 +127,18 @@ async function withHandoffLock(projectRoot, taskId, fn) {
 
 /**
  * Generate a fixed 6-character random suffix (hex) for collision resistance.
- * Uses crypto.randomBytes for reliable length; Math.random().toString(36) can produce fewer than 6 chars.
+ * Uses globalThis.crypto.getRandomValues (Web Crypto) for reliable length; Buffer.from converts the 3-byte Uint8Array to a 6-character hex string.
  * @returns {string}
  */
 function generateRandomSuffix() {
-  return randomBytes(3).toString('hex');
+  if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') {
+    throw new Error(
+      'AgentKit Forge Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).',
+    );
+  }
+  const bytes = new Uint8Array(3);
+  globalThis.crypto.getRandomValues(bytes);
+  return Buffer.from(bytes).toString('hex');
 }
 
 /**
@@ -151,9 +146,9 @@ function generateRandomSuffix() {
  * NNN is a zero-padded sequence number based on existing tasks for that day.
  * XXXXXX is a short collision-resistant suffix.
  * @param {string} projectRoot
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export function generateTaskId(projectRoot) {
+export async function generateTaskId(projectRoot) {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
   const prefix = `task-${dateStr}-`;
@@ -161,33 +156,46 @@ export function generateTaskId(projectRoot) {
   const dir = tasksDir(projectRoot);
   let seq = 1;
 
-  if (existsSync(dir)) {
-    const files = readdirSync(dir).filter((f) => f.startsWith(prefix) && f.endsWith('.json'));
-    const nums = files
-      .map((f) => {
-        const match = f.replace('.json', '').replace(prefix, '');
-        return parseInt(match, 10);
-      })
-      .filter((n) => !isNaN(n));
-    if (nums.length > 0) {
-      seq = Math.max(...nums) + 1;
+  try {
+    const dirExists = await access(dir).then(() => true).catch(() => false);
+    if (dirExists) {
+      const files = await readdir(dir);
+      // Single pass to find max sequence number
+      let maxSeq = 0;
+      for (const f of files) {
+        if (f.startsWith(prefix) && f.endsWith('.json')) {
+          const remainder = f.substring(prefix.length);
+          const seqStr = remainder.split('-')[0];
+          const n = parseInt(seqStr, 10);
+          if (!isNaN(n) && n > maxSeq) {
+            maxSeq = n;
+          }
+        }
+      }
+      seq = maxSeq + 1;
     }
+  } catch {
+    // Directory might not exist or other error, fallback to seq=1
   }
 
   const maxRetries = 1000;
   let attempts = 0;
   let candidate = `${prefix}${String(seq).padStart(3, '0')}-${generateRandomSuffix()}`;
-  while (existsSync(taskPath(projectRoot, candidate))) {
-    attempts += 1;
-    if (attempts >= maxRetries) {
-      throw new Error(
-        `generateTaskId: exceeded max retries (${maxRetries}) resolving collision in ${projectRoot}`
-      );
+
+  while (attempts < maxRetries) {
+    const p = taskPath(projectRoot, candidate);
+    const exists = await access(p).then(() => true).catch(() => false);
+    if (!exists) {
+      return candidate;
     }
+    attempts += 1;
     seq += 1;
     candidate = `${prefix}${String(seq).padStart(3, '0')}-${generateRandomSuffix()}`;
   }
-  return candidate;
+
+  throw new Error(
+    `generateTaskId: exceeded max retries (${maxRetries}) resolving collision in ${projectRoot}`
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -195,12 +203,12 @@ export function generateTaskId(projectRoot) {
 // ---------------------------------------------------------------------------
 
 async function writeTaskFile(projectRoot, taskId, data) {
-  ensureTasksDir(projectRoot);
+  await ensureTasksDir(projectRoot);
   const path = taskPath(projectRoot, taskId);
   const tmpPath = `${path}.${process.pid}.${Date.now()}.${generateRandomSuffix()}.tmp`;
-  writeFileSync(tmpPath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+  await writeFile(tmpPath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
   try {
-    renameSync(tmpPath, path);
+    await rename(tmpPath, path);
   } catch (err) {
     if (err?.code === 'EEXIST') {
       // Retry with exponential backoff without unlinking first
@@ -213,7 +221,7 @@ async function writeTaskFile(projectRoot, taskId, data) {
           // On Windows, attempt atomic replace by removing target first
           if (process.platform === 'win32') {
             try {
-              unlinkSync(path);
+              await unlink(path);
             } catch (unlinkErr) {
               if (unlinkErr?.code !== 'ENOENT') {
                 throw unlinkErr;
@@ -222,7 +230,7 @@ async function writeTaskFile(projectRoot, taskId, data) {
             }
           }
           // Attempt atomic replace directly
-          renameSync(tmpPath, path);
+          await rename(tmpPath, path);
           return;
         } catch (retryErr) {
           if (retryErr?.code === 'EEXIST' && retryCount < maxRetries - 1) {
@@ -233,7 +241,7 @@ async function writeTaskFile(projectRoot, taskId, data) {
           }
           // Final cleanup on last retry or different error
           try {
-            unlinkSync(tmpPath);
+            await unlink(tmpPath);
           } catch {
             /* ignore cleanup errors */
           }
@@ -243,7 +251,7 @@ async function writeTaskFile(projectRoot, taskId, data) {
     } else {
       // Non-EEXIST error, cleanup temp file
       try {
-        unlinkSync(tmpPath);
+        await unlink(tmpPath);
       } catch {
         /* ignore cleanup errors */
       }
@@ -308,7 +316,7 @@ export async function createTask(projectRoot, taskData) {
   }
 
   const now = new Date().toISOString();
-  const taskId = generateTaskId(projectRoot);
+  const taskId = await generateTaskId(projectRoot);
 
   const task = {
     id: taskId,
@@ -348,7 +356,7 @@ export async function createTask(projectRoot, taskData) {
   if (task.dependsOn.length > 0) {
     const blockers = new Set();
     for (const depId of task.dependsOn) {
-      const dep = getTask(projectRoot, depId);
+      const dep = await getTask(projectRoot, depId);
       if (!dep.task) continue;
       const depStatus = dep.task.status;
       if (depStatus !== 'completed') {
@@ -366,22 +374,24 @@ export async function createTask(projectRoot, taskData) {
  * Get a task by ID.
  * @param {string} projectRoot
  * @param {string} taskId
- * @returns {{ task: object|null, error?: string }}
+ * @returns {Promise<{ task: object|null, error?: string }>}
  */
-export function getTask(projectRoot, taskId) {
+export async function getTask(projectRoot, taskId) {
   let path;
   try {
     path = taskPath(projectRoot, taskId);
   } catch {
     return { task: null, error: `Invalid task ID: ${taskId}` };
   }
-  if (!existsSync(path)) {
-    return { task: null, error: `Task not found: ${taskId}` };
-  }
+
   try {
-    const data = JSON.parse(readFileSync(path, 'utf-8'));
+    const content = await readFile(path, 'utf-8');
+    const data = JSON.parse(content);
     return { task: data };
   } catch (err) {
+    if (err?.code === 'ENOENT') {
+      return { task: null, error: `Task not found: ${taskId}` };
+    }
     return { task: null, error: `Failed to parse task ${taskId}: ${err.message}` };
   }
 }
@@ -395,33 +405,56 @@ export function getTask(projectRoot, taskId) {
  * @param {string} [filters.delegator] - Filter by delegator
  * @param {string} [filters.type] - Filter by type
  * @param {string} [filters.priority] - Filter by priority
- * @returns {{ tasks: object[] }}
+ * @returns {Promise<{ tasks: object[] }>}
  */
-export function listTasks(projectRoot, filters = {}) {
+export async function listTasks(projectRoot, filters = {}) {
   const dir = tasksDir(projectRoot);
-  if (!existsSync(dir)) return { tasks: [] };
 
-  const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.endsWith('.tmp'));
-  const tasks = [];
-
-  for (const file of files) {
-    try {
-      const data = JSON.parse(readFileSync(resolve(dir, file), 'utf-8'));
-
-      if (filters.status && data.status !== filters.status) continue;
-      if (
-        filters.assignee &&
-        !(Array.isArray(data.assignees) && data.assignees.includes(filters.assignee))
-      )
-        continue;
-      if (filters.delegator && data.delegator !== filters.delegator) continue;
-      if (filters.type && data.type !== filters.type) continue;
-      if (filters.priority && data.priority !== filters.priority) continue;
-
-      tasks.push(data);
-    } catch {
-      // Skip corrupted task files
+  try {
+    await access(dir);
+  } catch (err) {
+    if (err?.code === 'ENOENT' || err?.code === 'ENOTDIR') {
+      return { tasks: [] };
     }
+    throw err;
+  }
+
+  let files;
+  try {
+    files = (await readdir(dir)).filter((f) => f.endsWith('.json') && !f.endsWith('.tmp'));
+  } catch (err) {
+    if (err?.code === 'ENOENT' || err?.code === 'ENOTDIR') {
+      return { tasks: [] };
+    }
+    throw err;
+  }
+
+  const tasks = [];
+  const readPromises = files.map(async (file) => {
+    try {
+      const content = await readFile(resolve(dir, file), 'utf-8');
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  });
+
+  const results = await Promise.all(readPromises);
+
+  for (const data of results) {
+    if (!data) continue;
+
+    if (filters.status && data.status !== filters.status) continue;
+    if (
+      filters.assignee &&
+      !(Array.isArray(data.assignees) && data.assignees.includes(filters.assignee))
+    )
+      continue;
+    if (filters.delegator && data.delegator !== filters.delegator) continue;
+    if (filters.type && data.type !== filters.type) continue;
+    if (filters.priority && data.priority !== filters.priority) continue;
+
+    tasks.push(data);
   }
 
   // Sort by priority (P0 first), then by creation date (newest first)
@@ -465,7 +498,7 @@ const VALID_TRANSITIONS = {
  * @returns {Promise<{ task: object|null, error?: string }>}
  */
 export async function updateTaskStatus(projectRoot, taskId, newStatus, messageData = {}) {
-  const result = getTask(projectRoot, taskId);
+  const result = await getTask(projectRoot, taskId);
   if (!result.task) return result;
 
   const task = result.task;
@@ -524,7 +557,7 @@ export async function updateTaskStatus(projectRoot, taskId, newStatus, messageDa
  * @returns {Promise<{ task: object|null, error?: string }>}
  */
 export async function addTaskMessage(projectRoot, taskId, message) {
-  const result = getTask(projectRoot, taskId);
+  const result = await getTask(projectRoot, taskId);
   if (!result.task) return result;
 
   if (!MESSAGE_ROLES.includes(message.role)) {
@@ -580,7 +613,7 @@ export async function addTaskMessage(projectRoot, taskId, message) {
  * @returns {Promise<{ task: object|null, error?: string }>}
  */
 export async function addTaskArtifact(projectRoot, taskId, artifact) {
-  const result = getTask(projectRoot, taskId);
+  const result = await getTask(projectRoot, taskId);
   if (!result.task) return result;
 
   if (!ARTIFACT_TYPES.includes(artifact.type)) {
@@ -616,7 +649,7 @@ export async function addTaskArtifact(projectRoot, taskId, artifact) {
  * @returns {Promise<{ unblocked: string[], errors: string[] }>}
  */
 export async function checkDependencies(projectRoot) {
-  const { tasks } = listTasks(projectRoot);
+  const { tasks } = await listTasks(projectRoot);
   const unblocked = [];
   const errors = [];
   const { errors: cycleErrors, cycleTaskIds } = detectDependencyCycles(tasks);
@@ -632,7 +665,7 @@ export async function checkDependencies(projectRoot) {
     let hasCanceledDep = false;
 
     for (const depId of task.dependsOn) {
-      const dep = getTask(projectRoot, depId);
+      const dep = await getTask(projectRoot, depId);
       if (!dep.task) {
         errors.push(`Task ${task.id}: dependency ${depId} not found`);
         continue;
@@ -731,16 +764,16 @@ function detectDependencyCycles(tasks) {
  * @returns {Promise<{ created: object[], errors: string[] }>}
  */
 export async function processHandoffs(projectRoot, delegator = 'orchestrator') {
-  const { tasks } = listTasks(projectRoot, { status: 'completed' });
+  const { tasks } = await listTasks(projectRoot, { status: 'completed' });
   const created = [];
   const errors = [];
-  const allTasks = listTasks(projectRoot).tasks;
+  const { tasks: allTasks } = await listTasks(projectRoot);
 
   for (const task of tasks) {
     if (!Array.isArray(task.handoffTo) || task.handoffTo.length === 0) continue;
 
     const result = await withHandoffLock(projectRoot, task.id, async () => {
-      const fresh = getTask(projectRoot, task.id);
+      const fresh = await getTask(projectRoot, task.id);
       if (!fresh.task) return { created: [], errors: [] };
       const t = fresh.task;
       if (!Array.isArray(t._handoffProcessedTargets)) {
@@ -870,14 +903,14 @@ export function formatTaskList(tasks) {
       .replace(/\r?\n/g, ' ');
 
   const statusIcon = {
-    submitted: '📩',
-    accepted: '✅',
-    working: '🔨',
-    'input-required': '❓',
-    completed: '✔️',
-    failed: '❌',
-    rejected: '🚫',
-    canceled: '🗑️',
+    submitted: '[SUBMITTED]',
+    accepted: '[ACCEPTED]',
+    working: '[WORKING]',
+    'input-required': '[INPUT-REQUIRED]',
+    completed: '[COMPLETED]',
+    failed: '[FAILED]',
+    rejected: '[REJECTED]',
+    canceled: '[CANCELED]',
   };
 
   const lines = [
@@ -895,3 +928,4 @@ export function formatTaskList(tasks) {
 
   return lines.join('\n');
 }
+

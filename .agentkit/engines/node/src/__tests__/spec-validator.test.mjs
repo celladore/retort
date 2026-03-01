@@ -2,9 +2,58 @@ import { describe, it, expect } from 'vitest';
 import { validate, validateCrossReferences, validateSpec, validateProjectYaml, PROJECT_ENUMS } from '../spec-validator.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
+
+function writeTempSpecRoot(commandsObj) {
+  const root = mkdtempSync(resolve(tmpdir(), 'agentkit-spec-validator-'));
+  const specDir = resolve(root, 'spec');
+  mkdirSync(specDir, { recursive: true });
+
+  const teams = {
+    teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }],
+    techStacks: [{ name: 'node', buildCommand: 'pnpm build', testCommand: 'pnpm test', detect: ['package.json'] }],
+  };
+  const agents = {
+    agents: {
+      engineering: [
+        {
+          id: 'backend',
+          name: 'Backend Engineer',
+          role: 'backend role',
+          focus: ['src/**'],
+          responsibilities: ['build api'],
+        },
+      ],
+    },
+  };
+  const rules = {
+    rules: [
+      {
+        domain: 'typescript',
+        description: 'ts conventions',
+        'applies-to': ['**/*.ts'],
+        conventions: [{ id: 'ts-1', rule: 'Use strict mode', severity: 'warning' }],
+      },
+    ],
+  };
+  const settings = { permissions: { allow: [], deny: [] }, hooks: {} };
+  const aliases = { aliases: { '/o': '/orchestrate' } };
+  const docs = { categories: [] };
+
+  writeFileSync(resolve(specDir, 'teams.yaml'), JSON.stringify(teams, null, 2));
+  writeFileSync(resolve(specDir, 'agents.yaml'), JSON.stringify(agents, null, 2));
+  writeFileSync(resolve(specDir, 'commands.yaml'), JSON.stringify(commandsObj, null, 2));
+  writeFileSync(resolve(specDir, 'rules.yaml'), JSON.stringify(rules, null, 2));
+  writeFileSync(resolve(specDir, 'settings.yaml'), JSON.stringify(settings, null, 2));
+  writeFileSync(resolve(specDir, 'aliases.yaml'), JSON.stringify(aliases, null, 2));
+  writeFileSync(resolve(specDir, 'docs.yaml'), JSON.stringify(docs, null, 2));
+
+  return root;
+}
 
 // ---------------------------------------------------------------------------
 // validate() — schema validation engine
@@ -51,6 +100,11 @@ describe('validate()', () => {
     const schema = { type: 'string', enum: ['a', 'b', 'c'] };
     expect(validate('a', schema, 'x')).toEqual([]);
     expect(validate('z', schema, 'x')).toHaveLength(1);
+  });
+
+  it('rejects empty string for enum fields', () => {
+    const schema = { type: 'string', enum: ['a', 'b', 'c'] };
+    expect(validate('', schema, 'x')).toHaveLength(1);
   });
 
   it('validates minLength', () => {
@@ -112,6 +166,174 @@ describe('validateCrossReferences()', () => {
       rules: { rules: [{ domain: 'ts', conventions: [{ id: 'ts-lint' }] }] },
     });
     expect(errors).toEqual([]);
+  });
+});
+
+describe('commands flag metadata validation', () => {
+  it('passes for valid enum and required metadata', () => {
+    const root = writeTempSpecRoot({
+      commands: [
+        {
+          name: 'orchestrate',
+          type: 'workflow',
+          description: 'desc',
+          flags: [
+            {
+              name: '--phase',
+              description: 'phase',
+              type: 'integer',
+              default: null,
+              required: false,
+              enum: [1, 2, 3, 4, 5],
+            },
+          ],
+          'allowed-tools': ['Read', 'Bash'],
+        },
+      ],
+    });
+
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails when required flag has null default', () => {
+    const root = writeTempSpecRoot({
+      commands: [
+        {
+          name: 'orchestrate',
+          type: 'workflow',
+          description: 'desc',
+          flags: [
+            {
+              name: '--phase',
+              description: 'phase',
+              type: 'integer',
+              default: null,
+              required: true,
+              enum: [1, 2, 3],
+            },
+          ],
+          'allowed-tools': ['Read', 'Bash'],
+        },
+      ],
+    });
+
+    try {
+      const result = validateSpec(root);
+      expect(result.errors.some((e) => e.includes('required flag cannot have null/undefined default'))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails when default is not in enum', () => {
+    const root = writeTempSpecRoot({
+      commands: [
+        {
+          name: 'review',
+          type: 'workflow',
+          description: 'desc',
+          flags: [
+            {
+              name: '--severity',
+              description: 'severity',
+              type: 'string',
+              default: 'warn',
+              required: false,
+              enum: ['info', 'warning', 'error', 'critical'],
+            },
+          ],
+          'allowed-tools': ['Read', 'Bash'],
+        },
+      ],
+    });
+
+    try {
+      const result = validateSpec(root);
+      expect(result.errors.some((e) => e.includes('.default: must be one of enum values'))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails when workflow routing flags are missing enum', () => {
+    const root = writeTempSpecRoot({
+      commands: [
+        {
+          name: 'orchestrate',
+          type: 'workflow',
+          description: 'desc',
+          flags: [
+            {
+              name: '--team',
+              description: 'target team',
+              type: 'string',
+              default: null,
+              required: false,
+            },
+            {
+              name: '--phase',
+              description: 'target phase',
+              type: 'integer',
+              default: null,
+              required: false,
+            },
+          ],
+          'allowed-tools': ['Read', 'Bash'],
+        },
+      ],
+    });
+
+    try {
+      const result = validateSpec(root);
+      expect(result.errors.some((e) => e.includes('--team'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('--phase'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('required for workflow routing flag'))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('passes when workflow routing flags define enum', () => {
+    const root = writeTempSpecRoot({
+      commands: [
+        {
+          name: 'orchestrate',
+          type: 'workflow',
+          description: 'desc',
+          flags: [
+            {
+              name: '--team',
+              description: 'target team',
+              type: 'string',
+              default: null,
+              required: false,
+              enum: ['backend', 'frontend'],
+            },
+            {
+              name: '--phase',
+              description: 'target phase',
+              type: 'integer',
+              default: null,
+              required: false,
+              enum: [1, 2, 3, 4, 5],
+            },
+          ],
+          'allowed-tools': ['Read', 'Bash'],
+        },
+      ],
+    });
+
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 
@@ -299,9 +521,9 @@ describe('validateProjectYaml', () => {
     expect(errors).toEqual([]);
   });
 
-  it('accepts empty string for enum fields without error', () => {
+  it('rejects empty string for enum fields', () => {
     const { errors } = validateProjectYaml({ phase: '' });
-    expect(errors).toEqual([]);
+    expect(errors.some(e => e.includes('phase'))).toBe(true);
   });
 
   it('validates architecture.monorepoTool enum', () => {

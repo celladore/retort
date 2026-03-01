@@ -1,6 +1,6 @@
 {
   "name": "agentkit-forge-runtime",
-  "version": "0.1.3",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "AgentKit Forge — unified AI agent team framework sync engine",

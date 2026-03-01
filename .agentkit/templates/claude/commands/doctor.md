@@ -1,3 +1,13 @@
+---
+description: "Diagnose AgentKit Forge setup and spec quality issues"
+allowed-tools: Bash(node *), Bash(find *), Bash(ls *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
+---
+
 # /doctor
 
 {{commandDescription}}

@@ -30,7 +30,15 @@ function validate(value, schema, path = '') {
   }
   if (schema.type === 'number' && typeof value !== 'number') {
     errors.push(`${path}: expected number, got ${typeof value}`);
+  } else if (schema.type === 'number') {
+    if (typeof schema.min === 'number' && value < schema.min) {
+      errors.push(`${path}: must be >= ${schema.min}, got ${value}`);
+    }
+    if (typeof schema.max === 'number' && value > schema.max) {
+      errors.push(`${path}: must be <= ${schema.max}, got ${value}`);
+    }
   }
+
   if (schema.type === 'boolean' && typeof value !== 'boolean') {
     errors.push(`${path}: expected boolean, got ${typeof value}`);
   }
@@ -108,6 +116,19 @@ const agentSchema = {
 // ---------------------------------------------------------------------------
 const VALID_COMMAND_TYPES = ['workflow', 'team', 'utility'];
 const VALID_TOOLS = ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash', 'WebSearch', 'WebFetch'];
+const VALID_FLAG_TYPES = ['string', 'boolean', 'integer', 'number'];
+
+const commandFlagSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', required: true, minLength: 1 },
+    description: { type: 'string', required: true, minLength: 1 },
+    type: { type: 'string', required: true, enum: VALID_FLAG_TYPES },
+    default: {},
+    required: { type: 'boolean' },
+    enum: { type: 'array' },
+  },
+};
 
 const commandSchema = {
   type: 'object',
@@ -115,8 +136,76 @@ const commandSchema = {
     name: { type: 'string', required: true, minLength: 1 },
     type: { type: 'string', required: true, enum: VALID_COMMAND_TYPES },
     description: { type: 'string', required: true },
+    flags: { type: 'array', items: commandFlagSchema },
+    'allowed-tools': { type: 'array', items: { type: 'string' } },
   },
 };
+
+function isValidFlagDefault(defaultValue, flagType) {
+  if (defaultValue === null || defaultValue === undefined) return true;
+  if (flagType === 'string') return typeof defaultValue === 'string';
+  if (flagType === 'boolean') return typeof defaultValue === 'boolean';
+  if (flagType === 'number') return typeof defaultValue === 'number' && Number.isFinite(defaultValue);
+  if (flagType === 'integer') return Number.isInteger(defaultValue);
+  return true;
+}
+
+function validateCommandFlagSemantics(command, commandPath) {
+  const errors = [];
+  const flags = command.flags || [];
+  if (!Array.isArray(flags)) return errors;
+
+  for (let i = 0; i < flags.length; i++) {
+    const flag = flags[i];
+    const flagPath = `${commandPath}.flags[${i}]`;
+
+    if (!flag || typeof flag !== 'object' || Array.isArray(flag)) {
+      continue;
+    }
+
+    if (!isValidFlagDefault(flag.default, flag.type)) {
+      errors.push(
+        `${flagPath}.default: invalid default for type "${flag.type}"`
+      );
+    }
+
+    if (flag.required === true && (flag.default === null || flag.default === undefined)) {
+      errors.push(
+        `${flagPath}: required flag cannot have null/undefined default`
+      );
+    }
+
+    if (Array.isArray(flag.enum)) {
+      const expectedPrimitive = flag.type === 'integer' || flag.type === 'number' ? 'number' : flag.type;
+      for (let enumIndex = 0; enumIndex < flag.enum.length; enumIndex++) {
+        const enumValue = flag.enum[enumIndex];
+        if (typeof enumValue !== expectedPrimitive) {
+          errors.push(
+            `${flagPath}.enum[${enumIndex}]: expected ${expectedPrimitive}, got ${typeof enumValue}`
+          );
+        }
+      }
+
+      if (flag.default !== null && flag.default !== undefined && !flag.enum.includes(flag.default)) {
+        errors.push(
+          `${flagPath}.default: must be one of enum values`
+        );
+      }
+    }
+
+    if (
+      command.type === 'workflow' &&
+      (flag.name === '--team' || flag.name === '--phase') &&
+      (!Array.isArray(flag.enum) || flag.enum.length === 0)
+    ) {
+      errors.push(
+        `${flagPath}.enum: required for workflow routing flag "${flag.name}"`
+      );
+    }
+  }
+
+  return errors;
+}
 
 // ---------------------------------------------------------------------------
 // Schema: rules.yaml
@@ -230,6 +319,215 @@ const PROJECT_ENUMS = {
   auditEventBus: ['service-bus', 'event-hub', 'sns', 'none'],
 };
 
+// ---------------------------------------------------------------------------
+// Schema: project.yaml
+// ---------------------------------------------------------------------------
+const projectSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', minLength: 1 },
+    description: { type: 'string' },
+    phase: { type: 'string', enum: PROJECT_ENUMS.phase },
+    stack: {
+      type: 'object',
+      properties: {
+        languages: { type: 'array', items: { type: 'string' } },
+        frameworks: {
+          type: 'object',
+          properties: {
+            frontend: { type: 'array', items: { type: 'string' } },
+            backend: { type: 'array', items: { type: 'string' } },
+            css: { type: 'array', items: { type: 'string' } },
+          },
+        },
+        database: { type: 'array', items: { type: 'string' } },
+        messaging: { type: 'array', items: { type: 'string' } },
+      },
+    },
+    architecture: {
+      type: 'object',
+      properties: {
+        pattern: { type: 'string', enum: PROJECT_ENUMS.architecturePattern },
+        apiStyle: { type: 'string', enum: PROJECT_ENUMS.apiStyle },
+        monorepoTool: { type: 'string', enum: PROJECT_ENUMS.monorepoTool },
+      },
+    },
+    patterns: {
+      type: 'object',
+      properties: {
+        repository: { type: 'boolean' },
+        cqrs: { type: 'boolean' },
+        eventSourcing: { type: 'boolean' },
+        mediator: { type: 'boolean' },
+        unitOfWork: { type: 'boolean' },
+      },
+    },
+    deployment: {
+      type: 'object',
+      properties: {
+        cloudProvider: { type: 'string', enum: PROJECT_ENUMS.cloudProvider },
+        environments: { type: 'array', items: { type: 'string' } },
+        iacTool: { type: 'string', enum: PROJECT_ENUMS.iacTool },
+      },
+    },
+    infrastructure: {
+      type: 'object',
+      properties: {
+        iacToolchain: { type: 'array', items: { type: 'string' } },
+        stateBackend: { type: 'string', enum: PROJECT_ENUMS.infraStateBackend },
+        lockProvider: { type: 'string', enum: PROJECT_ENUMS.infraLockProvider },
+        tagging: {
+          type: 'object',
+          properties: {
+            mandatory: { type: 'array', items: { type: 'string' } },
+            optional: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      },
+    },
+    observability: {
+      type: 'object',
+      properties: {
+        monitoring: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: PROJECT_ENUMS.monitoringProvider },
+          },
+        },
+        alerting: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: PROJECT_ENUMS.alertingProvider },
+            channels: { type: 'array', items: { type: 'string' } },
+          },
+        },
+        tracing: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: PROJECT_ENUMS.tracingProvider },
+            samplingRate: { type: 'number', min: 0, max: 1 },
+          },
+        },
+        logging: {
+          type: 'object',
+          properties: {
+            retentionDays: { type: 'number', min: 1 },
+          },
+        },
+      },
+    },
+    compliance: {
+      type: 'object',
+      properties: {
+        framework: { type: 'string', enum: PROJECT_ENUMS.complianceFramework },
+        disasterRecovery: {
+          type: 'object',
+          properties: {
+            rpoHours: { type: 'number' },
+            rtoHours: { type: 'number' },
+            backupSchedule: { type: 'string', enum: PROJECT_ENUMS.backupSchedule },
+          },
+        },
+        audit: {
+          type: 'object',
+          properties: {
+            eventBus: { type: 'string', enum: PROJECT_ENUMS.auditEventBus },
+          },
+        },
+      },
+    },
+    process: {
+      type: 'object',
+      properties: {
+        branchStrategy: { type: 'string', enum: PROJECT_ENUMS.branchStrategy },
+        commitConvention: { type: 'string', enum: PROJECT_ENUMS.commitConvention },
+        codeReview: { type: 'string', enum: PROJECT_ENUMS.codeReview },
+        teamSize: { type: 'string', enum: PROJECT_ENUMS.teamSize },
+      },
+    },
+    testing: {
+      type: 'object',
+      properties: {
+        unit: { type: 'array', items: { type: 'string' } },
+        integration: { type: 'array', items: { type: 'string' } },
+        e2e: { type: 'array', items: { type: 'string' } },
+        coverage: { type: 'number', min: 0, max: 100 },
+      },
+    },
+    integrations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', required: true },
+          purpose: { type: 'string', required: true },
+        },
+      },
+    },
+    crosscutting: {
+      type: 'object',
+      properties: {
+        logging: {
+          type: 'object',
+          properties: {
+            framework: { type: 'string', enum: PROJECT_ENUMS.loggingFramework },
+            level: { type: 'string', enum: PROJECT_ENUMS.loggingLevel },
+            sink: { type: 'array', items: { type: 'string' } },
+          },
+        },
+        errorHandling: {
+          type: 'object',
+          properties: {
+            strategy: { type: 'string', enum: PROJECT_ENUMS.errorStrategy },
+          },
+        },
+        authentication: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: PROJECT_ENUMS.authProvider },
+            strategy: { type: 'string', enum: PROJECT_ENUMS.authStrategy },
+          },
+        },
+        caching: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: PROJECT_ENUMS.cachingProvider },
+            patterns: { type: 'array', items: { type: 'string' } },
+          },
+        },
+        api: {
+          type: 'object',
+          properties: {
+            versioning: { type: 'string', enum: PROJECT_ENUMS.apiVersioning },
+            pagination: { type: 'string', enum: PROJECT_ENUMS.apiPagination },
+            responseFormat: { type: 'string', enum: PROJECT_ENUMS.apiResponseFormat },
+          },
+        },
+        database: {
+          type: 'object',
+          properties: {
+            migrations: { type: 'string', enum: PROJECT_ENUMS.dbMigrations },
+            transactionStrategy: { type: 'string', enum: PROJECT_ENUMS.dbTransactionStrategy },
+          },
+        },
+        featureFlags: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: PROJECT_ENUMS.featureFlagProvider },
+          },
+        },
+        environments: {
+          type: 'object',
+          properties: {
+            naming: { type: 'array', items: { type: 'string' } },
+            configStrategy: { type: 'string', enum: PROJECT_ENUMS.envConfigStrategy },
+          },
+        },
+      },
+    },
+  },
+};
+
 /**
  * Validates project.yaml against expected schema.
  * All fields are optional — returns errors only for values that are present but invalid.
@@ -241,259 +539,7 @@ function validateProjectYaml(project) {
   const warnings = [];
   if (!project || typeof project !== 'object') return { errors, warnings };
 
-  // Helper: check enum value
-  function checkEnum(value, fieldPath, enumName) {
-    if (value === null || value === undefined || value === '') return;
-    const allowed = PROJECT_ENUMS[enumName];
-    if (!allowed.includes(value)) {
-      errors.push(
-        `project.yaml: ${fieldPath} must be one of [${allowed.join(', ')}], got "${value}"`
-      );
-    }
-  }
-
-  // Helper: check array of strings
-  function checkStringArray(value, fieldPath) {
-    if (value === null || value === undefined) return;
-    if (!Array.isArray(value)) {
-      errors.push(`project.yaml: ${fieldPath} must be an array`);
-      return;
-    }
-    for (let i = 0; i < value.length; i++) {
-      if (typeof value[i] !== 'string') {
-        errors.push(`project.yaml: ${fieldPath}[${i}] must be a string`);
-      }
-    }
-  }
-
-  // Top-level
-  checkEnum(project.phase, 'phase', 'phase');
-
-  // Stack
-  const stack = project.stack;
-  if (
-    stack !== undefined &&
-    stack !== null &&
-    (typeof stack !== 'object' || Array.isArray(stack))
-  ) {
-    errors.push('project.yaml: stack must be an object');
-  } else if (stack && typeof stack === 'object' && !Array.isArray(stack)) {
-    checkStringArray(stack.languages, 'stack.languages');
-    if (stack.frameworks && typeof stack.frameworks === 'object') {
-      checkStringArray(stack.frameworks.frontend, 'stack.frameworks.frontend');
-      checkStringArray(stack.frameworks.backend, 'stack.frameworks.backend');
-      checkStringArray(stack.frameworks.css, 'stack.frameworks.css');
-    }
-    checkStringArray(stack.database, 'stack.database');
-    checkStringArray(stack.messaging, 'stack.messaging');
-  }
-
-  // Architecture
-  const arch = project.architecture;
-  if (arch !== undefined && arch !== null && (typeof arch !== 'object' || Array.isArray(arch))) {
-    errors.push('project.yaml: architecture must be an object');
-  } else if (arch && typeof arch === 'object' && !Array.isArray(arch)) {
-    checkEnum(arch.pattern, 'architecture.pattern', 'architecturePattern');
-    checkEnum(arch.apiStyle, 'architecture.apiStyle', 'apiStyle');
-    checkEnum(arch.monorepoTool, 'architecture.monorepoTool', 'monorepoTool');
-  }
-
-  // Explicit implementation patterns
-  const patterns = project.patterns;
-  if (
-    patterns !== undefined &&
-    patterns !== null &&
-    (typeof patterns !== 'object' || Array.isArray(patterns))
-  ) {
-    errors.push('project.yaml: patterns must be an object');
-  } else if (patterns && typeof patterns === 'object' && !Array.isArray(patterns)) {
-    const boolFields = ['repository', 'cqrs', 'eventSourcing', 'mediator', 'unitOfWork'];
-    for (const field of boolFields) {
-      if (
-        patterns[field] !== undefined &&
-        patterns[field] !== null &&
-        typeof patterns[field] !== 'boolean'
-      ) {
-        errors.push(`project.yaml: patterns.${field} must be a boolean`);
-      }
-    }
-  }
-
-  // Deployment
-  const deploy = project.deployment;
-  if (
-    deploy !== undefined &&
-    deploy !== null &&
-    (typeof deploy !== 'object' || Array.isArray(deploy))
-  ) {
-    errors.push('project.yaml: deployment must be an object');
-  } else if (deploy && typeof deploy === 'object' && !Array.isArray(deploy)) {
-    checkEnum(deploy.cloudProvider, 'deployment.cloudProvider', 'cloudProvider');
-    checkStringArray(deploy.environments, 'deployment.environments');
-    checkEnum(deploy.iacTool, 'deployment.iacTool', 'iacTool');
-  }
-
-  // Infrastructure
-  const infra = project.infrastructure;
-  if (
-    infra !== undefined &&
-    infra !== null &&
-    (typeof infra !== 'object' || Array.isArray(infra))
-  ) {
-    errors.push('project.yaml: infrastructure must be an object');
-  } else if (infra && typeof infra === 'object' && !Array.isArray(infra)) {
-    checkStringArray(infra.iacToolchain, 'infrastructure.iacToolchain');
-    checkEnum(infra.stateBackend, 'infrastructure.stateBackend', 'infraStateBackend');
-    checkEnum(infra.lockProvider, 'infrastructure.lockProvider', 'infraLockProvider');
-    if (infra.tagging && typeof infra.tagging === 'object') {
-      checkStringArray(infra.tagging.mandatory, 'infrastructure.tagging.mandatory');
-      checkStringArray(infra.tagging.optional, 'infrastructure.tagging.optional');
-    }
-  }
-
-  // Observability
-  const obs = project.observability;
-  if (obs && typeof obs === 'object') {
-    if (obs.monitoring && typeof obs.monitoring === 'object') {
-      checkEnum(obs.monitoring.provider, 'observability.monitoring.provider', 'monitoringProvider');
-    }
-    if (obs.alerting && typeof obs.alerting === 'object') {
-      checkEnum(obs.alerting.provider, 'observability.alerting.provider', 'alertingProvider');
-      checkStringArray(obs.alerting.channels, 'observability.alerting.channels');
-    }
-    if (obs.tracing && typeof obs.tracing === 'object') {
-      checkEnum(obs.tracing.provider, 'observability.tracing.provider', 'tracingProvider');
-      if (obs.tracing.samplingRate !== null && obs.tracing.samplingRate !== undefined) {
-        if (typeof obs.tracing.samplingRate !== 'number') {
-          errors.push('project.yaml: observability.tracing.samplingRate must be a number');
-        } else if (obs.tracing.samplingRate < 0 || obs.tracing.samplingRate > 1) {
-          errors.push(
-            `project.yaml: observability.tracing.samplingRate must be 0.0-1.0, got ${obs.tracing.samplingRate}`
-          );
-        }
-      }
-    }
-    if (obs.logging && typeof obs.logging === 'object') {
-      if (obs.logging.retentionDays !== null && obs.logging.retentionDays !== undefined) {
-        if (typeof obs.logging.retentionDays !== 'number') {
-          errors.push('project.yaml: observability.logging.retentionDays must be a number');
-        } else if (obs.logging.retentionDays < 1) {
-          errors.push(
-            `project.yaml: observability.logging.retentionDays must be >= 1, got ${obs.logging.retentionDays}`
-          );
-        }
-      }
-    }
-  }
-
-  // Compliance
-  const comp = project.compliance;
-  if (comp && typeof comp === 'object') {
-    checkEnum(comp.framework, 'compliance.framework', 'complianceFramework');
-    if (comp.disasterRecovery && typeof comp.disasterRecovery === 'object') {
-      const dr = comp.disasterRecovery;
-      if (dr.rpoHours !== null && dr.rpoHours !== undefined && typeof dr.rpoHours !== 'number') {
-        errors.push('project.yaml: compliance.disasterRecovery.rpoHours must be a number');
-      }
-      if (dr.rtoHours !== null && dr.rtoHours !== undefined && typeof dr.rtoHours !== 'number') {
-        errors.push('project.yaml: compliance.disasterRecovery.rtoHours must be a number');
-      }
-      checkEnum(dr.backupSchedule, 'compliance.disasterRecovery.backupSchedule', 'backupSchedule');
-    }
-    if (comp.audit && typeof comp.audit === 'object') {
-      checkEnum(comp.audit.eventBus, 'compliance.audit.eventBus', 'auditEventBus');
-    }
-  }
-
-  // Process
-  const proc = project.process;
-  if (proc && typeof proc === 'object') {
-    checkEnum(proc.branchStrategy, 'process.branchStrategy', 'branchStrategy');
-    checkEnum(proc.commitConvention, 'process.commitConvention', 'commitConvention');
-    checkEnum(proc.codeReview, 'process.codeReview', 'codeReview');
-    checkEnum(proc.teamSize, 'process.teamSize', 'teamSize');
-  }
-
-  // Testing
-  const testing = project.testing;
-  if (testing && typeof testing === 'object') {
-    checkStringArray(testing.unit, 'testing.unit');
-    checkStringArray(testing.integration, 'testing.integration');
-    checkStringArray(testing.e2e, 'testing.e2e');
-    if (testing.coverage !== null && testing.coverage !== undefined) {
-      if (typeof testing.coverage !== 'number') {
-        errors.push('project.yaml: testing.coverage must be a number');
-      } else if (testing.coverage < 0 || testing.coverage > 100) {
-        errors.push(`project.yaml: testing.coverage must be 0-100, got ${testing.coverage}`);
-      }
-    }
-  }
-
-  // Integrations
-  if (project.integrations !== null && project.integrations !== undefined) {
-    if (!Array.isArray(project.integrations)) {
-      errors.push('project.yaml: integrations must be an array');
-    } else {
-      for (let i = 0; i < project.integrations.length; i++) {
-        const integ = project.integrations[i];
-        if (!integ || typeof integ !== 'object') {
-          errors.push(`project.yaml: integrations[${i}] must be an object`);
-          continue;
-        }
-        if (!integ.name) errors.push(`project.yaml: integrations[${i}].name is required`);
-        if (!integ.purpose) errors.push(`project.yaml: integrations[${i}].purpose is required`);
-      }
-    }
-  }
-
-  // Cross-cutting concerns
-  const cc = project.crosscutting;
-  if (cc && typeof cc === 'object') {
-    if (cc.logging && typeof cc.logging === 'object') {
-      checkEnum(cc.logging.framework, 'crosscutting.logging.framework', 'loggingFramework');
-      checkEnum(cc.logging.level, 'crosscutting.logging.level', 'loggingLevel');
-      checkStringArray(cc.logging.sink, 'crosscutting.logging.sink');
-    }
-    if (cc.errorHandling && typeof cc.errorHandling === 'object') {
-      checkEnum(cc.errorHandling.strategy, 'crosscutting.errorHandling.strategy', 'errorStrategy');
-    }
-    if (cc.authentication && typeof cc.authentication === 'object') {
-      checkEnum(cc.authentication.provider, 'crosscutting.authentication.provider', 'authProvider');
-      checkEnum(cc.authentication.strategy, 'crosscutting.authentication.strategy', 'authStrategy');
-    }
-    if (cc.caching && typeof cc.caching === 'object') {
-      checkEnum(cc.caching.provider, 'crosscutting.caching.provider', 'cachingProvider');
-      checkStringArray(cc.caching.patterns, 'crosscutting.caching.patterns');
-    }
-    if (cc.api && typeof cc.api === 'object') {
-      checkEnum(cc.api.versioning, 'crosscutting.api.versioning', 'apiVersioning');
-      checkEnum(cc.api.pagination, 'crosscutting.api.pagination', 'apiPagination');
-      checkEnum(cc.api.responseFormat, 'crosscutting.api.responseFormat', 'apiResponseFormat');
-    }
-    if (cc.database && typeof cc.database === 'object') {
-      checkEnum(cc.database.migrations, 'crosscutting.database.migrations', 'dbMigrations');
-      checkEnum(
-        cc.database.transactionStrategy,
-        'crosscutting.database.transactionStrategy',
-        'dbTransactionStrategy'
-      );
-    }
-    if (cc.featureFlags && typeof cc.featureFlags === 'object') {
-      checkEnum(
-        cc.featureFlags.provider,
-        'crosscutting.featureFlags.provider',
-        'featureFlagProvider'
-      );
-    }
-    if (cc.environments && typeof cc.environments === 'object') {
-      checkStringArray(cc.environments.naming, 'crosscutting.environments.naming');
-      checkEnum(
-        cc.environments.configStrategy,
-        'crosscutting.environments.configStrategy',
-        'envConfigStrategy'
-      );
-    }
-  }
+  errors.push(...validate(project, projectSchema, 'project.yaml'));
 
   return { errors, warnings };
 }
@@ -810,9 +856,9 @@ export function validateSpec(agentkitRoot) {
       errors.push('commands.yaml: missing or invalid "commands" array');
     } else {
       for (let i = 0; i < commands.commands.length; i++) {
-        errors.push(
-          ...validate(commands.commands[i], commandSchema, `commands.yaml.commands[${i}]`)
-        );
+        const commandPath = `commands.yaml.commands[${i}]`;
+        errors.push(...validate(commands.commands[i], commandSchema, commandPath));
+        errors.push(...validateCommandFlagSemantics(commands.commands[i], commandPath));
       }
     }
   }

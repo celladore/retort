@@ -237,8 +237,8 @@ agents:
         - 'helm/**'
         - 'modules/**'
       naming-convention: '{org}-{env}-{project}-{resourcetype}-{region}'
-      default-region: null
-      org: null
+      default-region: global
+      org: akf
       iac-toolchain:
         - terraform
         - terragrunt
@@ -306,6 +306,8 @@ agents:
         - Maintain brand documentation and style guides
       preferred-tools:
         - Read
+        - Write
+        - Edit
         - Glob
         - Grep
 
@@ -508,7 +510,7 @@ agents:
         - 'middleware/auth*'
         - 'infra/**'
         - '.github/workflows/**'
-        - '**/*.env*'
+        - '**/.env*'
       responsibilities:
         - Perform regular security audits of code and configurations
         - Scan for hardcoded secrets, credentials, and sensitive data

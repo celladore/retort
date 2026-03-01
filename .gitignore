@@ -7,11 +7,20 @@
 /.cursor/
 /.windsurf/
 /.ai/
+/.clinerules/
+/.roo/
+/.agents/
+/.gemini/
 /mcp/
 /.github/workflows/ai-framework-ci.yml
+/.github/agents/
+/.github/chatmodes/
+/.github/prompts/
 
 # Generated AI instruction files (always regenerated)
 /CLAUDE.md
+/GEMINI.md
+/WARP.md
 /UNIFIED_AGENT_TEAMS.md
 /AGENT_TEAMS.md
 /QUALITY_GATES.md
@@ -72,3 +81,11 @@ Thumbs.db
 # =============================================================================
 .agentkit/.manifest.json
 .agentkit/package-lock.json
+/package-lock.json
+.agentkit/test_results.txt
+benchmark-check.mjs
+temp_benchmark
+temp_benchmark/
+temp_discover_benchmark/
+.benchmark/
+bench-temp/

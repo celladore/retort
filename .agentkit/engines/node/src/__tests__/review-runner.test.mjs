@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { existsSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as orchestrator from '../orchestrator.mjs';
 import { runReview } from '../review-runner.mjs';
 import * as runner from '../runner.mjs';
-import * as orchestrator from '../orchestrator.mjs';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-review');
@@ -202,6 +202,74 @@ describe('review-runner', () => {
           flags: { file: '../../etc/passwd' },
         })
       ).rejects.toThrow('must be within the project root');
+    });
+
+    it('rejects --file symlinks that point outside project root', async () => {
+      setupTestRepo();
+      const externalDir = resolve(TEST_ROOT, '..', 'external-target');
+      const secretFile = resolve(externalDir, 'secret.txt');
+      mkdirSync(externalDir, { recursive: true });
+      writeFileSync(secretFile, 'secret-data', 'utf-8');
+
+      try {
+        const linkDirPath = resolve(TEST_ROOT, 'linked-out');
+        if (existsSync(linkDirPath)) rmSync(linkDirPath, { recursive: true, force: true });
+
+        if (process.platform === 'win32') {
+          symlinkSync(externalDir, linkDirPath, 'junction');
+        } else {
+          symlinkSync(externalDir, linkDirPath);
+        }
+
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+
+        await expect(
+          runReview({
+            agentkitRoot: resolve(__dirname, '..', '..', '..', '..'),
+            projectRoot: TEST_ROOT,
+            flags: { file: 'linked-out/secret.txt' },
+          })
+        ).rejects.toThrow('symlinks traversing outside are not allowed');
+      } finally {
+        if (existsSync(externalDir)) rmSync(externalDir, { recursive: true, force: true });
+      }
+    });
+
+    it('rejects git-diff symlinks that point outside project root', async () => {
+      setupTestRepo();
+      const externalDir = resolve(TEST_ROOT, '..', 'external-target-diff');
+      const secretFile = resolve(externalDir, 'secret.txt');
+      mkdirSync(externalDir, { recursive: true });
+      writeFileSync(secretFile, 'secret-data', 'utf-8');
+
+      try {
+        const linkDirPath = resolve(TEST_ROOT, 'linked-out-diff');
+        if (existsSync(linkDirPath)) rmSync(linkDirPath, { recursive: true, force: true });
+
+        if (process.platform === 'win32') {
+          symlinkSync(externalDir, linkDirPath, 'junction');
+        } else {
+          symlinkSync(externalDir, linkDirPath);
+        }
+
+        // Mock git diff to return the symlink filename (simulating --range / default diff path)
+        vi.spyOn(runner, 'execCommand').mockImplementation((cmd) => {
+          if (cmd.includes('git diff')) return { exitCode: 0, stdout: 'linked-out-diff/secret.txt\n', stderr: '', durationMs: 5 };
+          return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
+        });
+        vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+
+        await expect(
+          runReview({
+            agentkitRoot: resolve(__dirname, '..', '..', '..', '..'),
+            projectRoot: TEST_ROOT,
+            flags: {}, // No --file: uses git diff output
+          })
+        ).rejects.toThrow('symlinks traversing outside are not allowed');
+      } finally {
+        if (existsSync(externalDir)) rmSync(externalDir, { recursive: true, force: true });
+      }
     });
   });
 

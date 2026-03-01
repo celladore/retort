@@ -1,3 +1,6 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown (no frontmatter). Gemini reads GEMINI.md as hierarchical context. -->
+<!-- Docs: https://geminicli.com/docs/cli/gemini-md/ -->
 # {{repoName}} — Gemini Instructions
 
 {{#if projectDescription}}{{projectDescription}}{{/if}}

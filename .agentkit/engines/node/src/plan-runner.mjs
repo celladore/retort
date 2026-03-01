@@ -166,7 +166,7 @@ export async function runPlan({ projectRoot, flags = {} }) {
   console.log('[agentkit:plan] Current plan and status...');
   console.log('');
 
-  const state = loadState(projectRoot);
+  const state = await loadState(projectRoot);
   const phase = state.current_phase;
   const guidance = PHASE_GUIDANCE[phase] || PHASE_GUIDANCE[1];
 
@@ -228,7 +228,7 @@ export async function runPlan({ projectRoot, flags = {} }) {
   }
 
   // --- Recent Events ---
-  const events = readEvents(projectRoot, 5);
+  const events = await readEvents(projectRoot, 5);
   if (events.length > 0) {
     console.log('--- Recent Activity ---');
     for (const evt of events) {
@@ -243,7 +243,7 @@ export async function runPlan({ projectRoot, flags = {} }) {
 
   // Log event
   try {
-    appendEvent(projectRoot, 'plan_viewed', { phase, phase_name: state.phase_name });
+    await appendEvent(projectRoot, 'plan_viewed', { phase, phase_name: state.phase_name });
   } catch (err) {
     console.warn(`[agentkit:plan] Event logging failed: ${err?.message ?? String(err)}`);
   }

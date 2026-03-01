@@ -1,3 +1,6 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown rule for Windsurf Cascade AI. -->
+<!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 # Security Rules
 
 These rules apply to all AI-assisted development in this repository.
