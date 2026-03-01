@@ -36,3 +36,20 @@ Describe how you tested these changes:
 - [ ] No secrets, tokens, or credentials in the diff
 - [ ] Breaking changes documented (if applicable)
 - [ ] Reviewed my own diff before requesting review
+
+## Documentation
+
+### Change Impact
+
+- [ ] **High** — Architecture, major refactor, new feature, security, or breaking change
+- [ ] **Medium** — Complex bug fix, major library upgrade, tooling change
+- [ ] **Low** — Minor fix, config change, style update
+
+### Documentation Checklist (required for High impact)
+
+- [ ] Not applicable (Low/Medium impact without historical record needed)
+- [ ] History document created using `./scripts/create-doc.sh <type> "<title>" <pr>`
+- [ ] All `[bracketed]` placeholder sections filled in
+- [ ] Filed in correct `docs/history/` subdirectory
+- [ ] Sequential number assigned via `.index.json`
+- [ ] Related ADRs cross-referenced

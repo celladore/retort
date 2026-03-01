@@ -173,6 +173,42 @@ specialDirectories:
       | Milestone | Date | Status |
       |-----------|------|--------|
 
+  - id: history
+    name: PR History Documents
+    path: "docs/history/"
+    description: >
+      Historical documentation for significant PRs and implementations.
+      Covers major implementations, complex bug resolutions, new feature
+      launches, and major migrations. Documents use sequential numbering
+      and are generated from standardized templates via scripts/create-doc.sh.
+    naming: "XXXX-YYYY-MM-DD-{slug}-{type}.md"
+    subdirectories:
+      - "implementations/ — Major implementations and architecture changes"
+      - "bug-fixes/ — Complex or critical bug resolutions"
+      - "features/ — New feature launches"
+      - "migrations/ — Major migrations and upgrades"
+    template: |
+      # [{type} Title] - Historical Summary
+
+      **Completed**: {YYYY-MM-DD}
+      **PR**: #{PR-Number}
+
+      ## Overview
+
+      {Description}
+
+      ## Key Changes
+
+      - {Change 1}
+
+      ## Results
+
+      {Outcomes}
+
+      ## Lessons Learned
+
+      {Insights}
+
   - id: ai_handoffs
     name: AI Handoff Documents
     path: "docs/ai_handoffs/"

@@ -1,0 +1,10 @@
+{
+  "nextNumber": 1,
+  "sequences": {
+    "implementation": 1,
+    "bugfix": 1,
+    "feature": 1,
+    "migration": 1
+  },
+  "entries": []
+}
