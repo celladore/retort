@@ -146,13 +146,19 @@ function applyExternalKnowledgeFlags(project, flags = {}) {
   }
 
   if (typeof flags['windsurf-guides-path'] === 'string') {
-    ek.sources.windsurfDomainGuidesPath = flags['windsurf-guides-path'].trim();
-    ek.enabled = true;
+    const windsurfPath = flags['windsurf-guides-path'].trim();
+    ek.sources.windsurfDomainGuidesPath = windsurfPath === '' ? null : windsurfPath;
+    if (windsurfPath !== '') {
+      ek.enabled = true;
+    }
   }
 
   if (typeof flags['mystira-docs-path'] === 'string') {
-    ek.sources.mystiraDocsPath = flags['mystira-docs-path'].trim();
-    ek.enabled = true;
+    const mystiraPath = flags['mystira-docs-path'].trim();
+    ek.sources.mystiraDocsPath = mystiraPath === '' ? null : mystiraPath;
+    if (mystiraPath !== '') {
+      ek.enabled = true;
+    }
   }
 
   if (typeof flags['external-markdown-files'] === 'string') {
@@ -406,12 +412,18 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Phase 3.5: External Knowledge Integration ---
   const ekFromFlags =
     flags['external-knowledge'] === true ||
-    typeof flags['external-mode'] === 'string' ||
-    typeof flags['windsurf-guides-path'] === 'string' ||
-    typeof flags['mystira-docs-path'] === 'string' ||
-    typeof flags['external-markdown-files'] === 'string' ||
-    typeof flags['external-git-repos'] === 'string' ||
-    typeof flags['external-target-platforms'] === 'string';
+    (typeof flags['external-mode'] === 'string' &&
+      flags['external-mode'].trim().length > 0) ||
+    (typeof flags['windsurf-guides-path'] === 'string' &&
+      flags['windsurf-guides-path'].trim().length > 0) ||
+    (typeof flags['mystira-docs-path'] === 'string' &&
+      flags['mystira-docs-path'].trim().length > 0) ||
+    (typeof flags['external-markdown-files'] === 'string' &&
+      flags['external-markdown-files'].trim().length > 0) ||
+    (typeof flags['external-git-repos'] === 'string' &&
+      flags['external-git-repos'].trim().length > 0) ||
+    (typeof flags['external-target-platforms'] === 'string' &&
+      flags['external-target-platforms'].trim().length > 0);
 
   if (!ekFromFlags) {
     const enableExternal = await clack.confirm({
@@ -462,6 +474,13 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
             initialValue: (project.externalKnowledge.sources?.gitRepoUrls || []).join(', '),
             placeholder: 'https://github.com/org/repo',
           }),
+        targetPlatforms: () =>
+          clack.multiselect({
+            message: 'Target platforms for external knowledge',
+            initialValues: project.externalKnowledge.targetPlatforms || ['copilot', 'windsurf'],
+            options: EXTERNAL_KNOWLEDGE_PLATFORMS.map((p) => ({ value: p, label: p })),
+            required: false,
+          }),
       });
 
       if (clack.isCancel(externalConfig)) {
@@ -476,6 +495,11 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
         externalConfig.mystiraPath?.trim() || null;
       project.externalKnowledge.sources.markdownFiles = parseCsvList(externalConfig.markdownFiles);
       project.externalKnowledge.sources.gitRepoUrls = parseCsvList(externalConfig.gitRepos);
+      if (Array.isArray(externalConfig.targetPlatforms)) {
+        project.externalKnowledge.targetPlatforms = externalConfig.targetPlatforms;
+      } else {
+        project.externalKnowledge.targetPlatforms = [];
+      }
     }
   }
 
