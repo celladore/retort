@@ -22,12 +22,14 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 - Own all code within scope: {{teamScope}}
 - Follow project conventions and quality gates
-- Coordinate with other teams for cross-cutting changes
+- Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing
 
 ## Workflow
 
-1. Review current backlog in `AGENT_BACKLOG.md`
-2. Implement changes within team scope
-3. Run quality checks before committing
-4. Document session state for continuity
+1. Read `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md` for assignments, ownership boundaries, and escalation paths
+2. Review project context in `CLAUDE.md` and architecture/runbook material in `docs/`
+3. Review current backlog in `AGENT_BACKLOG.md`
+4. Implement changes within team scope
+5. Run quality checks before committing
+6. Document session state for continuity

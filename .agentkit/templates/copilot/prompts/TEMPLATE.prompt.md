@@ -18,8 +18,8 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 
 1. **Understand** the request and any arguments provided
 2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions
-4. **Validate** the output meets quality gates
+3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
+4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
 5. **Report** results clearly
 
 ## Project Context
@@ -39,3 +39,8 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 ## References
 
 - See `AGENTS.md` for universal project instructions
+- See `UNIFIED_AGENT_TEAMS.md` for team ownership and escalation
+- See `AGENT_TEAMS.md` for repo-specific team boundaries
+- See `AGENT_BACKLOG.md` for active work items
+- See `CLAUDE.md` for project context and workflow
+- See `docs/` for architecture, runbooks, and guides

@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge ÔÇö Task Protocol
+ * AgentKit Forge — Task Protocol
  * File-based A2A-lite task delegation protocol.
  * Tasks are JSON files in .claude/state/tasks/ with lifecycle states,
  * messages, artifacts, dependency tracking, and chained handoffs.
@@ -27,7 +27,7 @@ export const TASK_STATES = [
   'BLOCKED_ON_CANCELED', // blocked only by canceled/failed/rejected deps; until manual descoping or retry
 ];
 
-/** Terminal states ÔÇö no further transitions allowed. */
+/** Terminal states — no further transitions allowed. */
 export const TERMINAL_STATES = ['completed', 'failed', 'rejected', 'canceled', 'BLOCKED_ON_CANCELED'];
 
 /** Valid task types. */
@@ -413,15 +413,21 @@ export async function listTasks(projectRoot, filters = {}) {
 
   try {
     await access(dir);
-  } catch {
-    return { tasks: [] };
+  } catch (err) {
+    if (err?.code === 'ENOENT' || err?.code === 'ENOTDIR') {
+      return { tasks: [] };
+    }
+    throw err;
   }
 
   let files;
   try {
     files = (await readdir(dir)).filter((f) => f.endsWith('.json') && !f.endsWith('.tmp'));
-  } catch {
-    return { tasks: [] };
+  } catch (err) {
+    if (err?.code === 'ENOENT' || err?.code === 'ENOTDIR') {
+      return { tasks: [] };
+    }
+    throw err;
   }
 
   const tasks = [];
@@ -506,7 +512,7 @@ export async function updateTaskStatus(projectRoot, taskId, newStatus, messageDa
   if (!allowed || !allowed.includes(newStatus)) {
     return {
       task: null,
-      error: `Invalid transition: ${task.status} ÔåÆ ${newStatus}. Allowed: ${(allowed || []).join(', ') || 'none (terminal state)'}`,
+      error: `Invalid transition: ${task.status} → ${newStatus}. Allowed: ${(allowed || []).join(', ') || 'none (terminal state)'}`,
     };
   }
 
@@ -666,7 +672,7 @@ export async function checkDependencies(projectRoot) {
         continue;
       }
       if (dep.task.status === 'completed') {
-        // Dependency satisfied ÔÇö don't add to blockers
+        // Dependency satisfied — don't add to blockers
       } else if (['failed', 'rejected', 'canceled'].includes(dep.task.status)) {
         hasCanceledDep = true;
         newBlockers.push(depId);
@@ -861,7 +867,7 @@ export function formatTaskSummary(task) {
     `Task: ${safeTask.id || 'unknown'}`,
     `Title: ${safeTask.title || '(untitled)'}`,
     `Type: ${safeTask.type || 'unknown'} | Priority: ${safeTask.priority || 'unknown'} | Status: ${safeTask.status || 'unknown'}`,
-    `Delegator: ${safeTask.delegator || 'unknown'} ÔåÆ Assignees: ${safeAssignees.join(', ')}`,
+    `Delegator: ${safeTask.delegator || 'unknown'} → Assignees: ${safeAssignees.join(', ')}`,
   ];
 
   if (safeDependsOn.length > 0) {
@@ -898,14 +904,14 @@ export function formatTaskList(tasks) {
       .replace(/\r?\n/g, ' ');
 
   const statusIcon = {
-    submitted: '­ƒô®',
-    accepted: 'Ô£à',
-    working: '­ƒö¿',
-    'input-required': 'ÔØô',
-    completed: 'Ô£ö´©Å',
-    failed: 'ÔØî',
-    rejected: '­ƒÜ½',
-    canceled: '­ƒùæ´©Å',
+    submitted: '[SUBMITTED]',
+    accepted: '[ACCEPTED]',
+    working: '[WORKING]',
+    'input-required': '[INPUT-REQUIRED]',
+    completed: '[COMPLETED]',
+    failed: '[FAILED]',
+    rejected: '[REJECTED]',
+    canceled: '[CANCELED]',
   };
 
   const lines = [

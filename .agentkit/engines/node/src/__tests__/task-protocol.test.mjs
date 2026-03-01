@@ -1,5 +1,5 @@
 /**
- * Tests for task-protocol.mjs ÔÇö A2A-lite task delegation protocol.
+ * Tests for task-protocol.mjs — A2A-lite task delegation protocol.
  */
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
@@ -50,7 +50,7 @@ describe('generateTaskId', () => {
 });
 
 // ---------------------------------------------------------------------------
-// CRUD ÔÇö createTask
+// CRUD — createTask
 // ---------------------------------------------------------------------------
 
 describe('createTask', () => {
@@ -177,7 +177,7 @@ describe('createTask', () => {
 });
 
 // ---------------------------------------------------------------------------
-// CRUD ÔÇö getTask
+// CRUD — getTask
 // ---------------------------------------------------------------------------
 
 describe('getTask', () => {
@@ -206,7 +206,7 @@ describe('getTask', () => {
 });
 
 // ---------------------------------------------------------------------------
-// CRUD ÔÇö listTasks
+// CRUD — listTasks
 // ---------------------------------------------------------------------------
 
 describe('listTasks', () => {
@@ -251,7 +251,7 @@ describe('listTasks', () => {
 // ---------------------------------------------------------------------------
 
 describe('updateTaskStatus', () => {
-  it('transitions submitted ÔåÆ accepted', async () => {
+  it('transitions submitted → accepted', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     const result = await updateTaskStatus(tmpRoot, created.task.id, 'accepted', {
       from: 'team-backend',
@@ -261,14 +261,14 @@ describe('updateTaskStatus', () => {
     expect(result.task.messages).toHaveLength(2);
   });
 
-  it('transitions accepted ÔåÆ working', async () => {
+  it('transitions accepted → working', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     await updateTaskStatus(tmpRoot, created.task.id, 'accepted', { from: 'x' });
     const result = await updateTaskStatus(tmpRoot, created.task.id, 'working', { from: 'x' });
     expect(result.task.status).toBe('working');
   });
 
-  it('transitions working ÔåÆ completed', async () => {
+  it('transitions working → completed', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     await updateTaskStatus(tmpRoot, created.task.id, 'accepted', { from: 'x' });
     await updateTaskStatus(tmpRoot, created.task.id, 'working', { from: 'x' });
@@ -276,7 +276,7 @@ describe('updateTaskStatus', () => {
     expect(result.task.status).toBe('completed');
   });
 
-  it('rejects invalid transition submitted ÔåÆ completed', async () => {
+  it('rejects invalid transition submitted → completed', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     const result = await updateTaskStatus(tmpRoot, created.task.id, 'completed', { from: 'x' });
     expect(result.error).toContain('Invalid transition');
@@ -289,7 +289,7 @@ describe('updateTaskStatus', () => {
     expect(result.error).toContain('none (terminal state)');
   });
 
-  it('supports submitted ÔåÆ rejected', async () => {
+  it('supports submitted → rejected', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     const result = await updateTaskStatus(tmpRoot, created.task.id, 'rejected', {
       from: 'team-backend',
@@ -298,7 +298,7 @@ describe('updateTaskStatus', () => {
     expect(result.task.status).toBe('rejected');
   });
 
-  it('supports submitted ÔåÆ canceled', async () => {
+  it('supports submitted → canceled', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     const result = await updateTaskStatus(tmpRoot, created.task.id, 'canceled', {
       from: 'orchestrator',
@@ -307,7 +307,7 @@ describe('updateTaskStatus', () => {
     expect(result.task.status).toBe('canceled');
   });
 
-  it('supports accepted ÔåÆ canceled', async () => {
+  it('supports accepted → canceled', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     await updateTaskStatus(tmpRoot, created.task.id, 'accepted', { from: 'x' });
     const result = await updateTaskStatus(tmpRoot, created.task.id, 'canceled', {
@@ -317,7 +317,7 @@ describe('updateTaskStatus', () => {
     expect(result.task.status).toBe('canceled');
   });
 
-  it('supports working ÔåÆ input-required ÔåÆ working', async () => {
+  it('supports working → input-required → working', async () => {
     const created = await createTask(tmpRoot, { title: 'T', delegator: 'test', assignees: ['x'] });
     await updateTaskStatus(tmpRoot, created.task.id, 'accepted', { from: 'x' });
     await updateTaskStatus(tmpRoot, created.task.id, 'working', { from: 'x' });

@@ -36,14 +36,14 @@ Optional extension:
 
 ## Weighted Decision Matrix
 
-| Criterion                    |  Weight | Option A | Option B | Option C |
-| ---------------------------- | ------: | -------: | -------: | -------: |
-| Quality signal breadth       |      30 |          |          |          |
-| Precision / low-noise signal |      25 |          |          |          |
-| CI/automation fit            |      20 |          |          |          |
-| Developer experience         |      15 |          |          |          |
-| Cost + lock-in               |      10 |          |          |          |
-| **Total**                    | **100** |          |          |          |
+| Criterion                    |  Weight | Option A | Option B | Option C | Option D |
+| ---------------------------- | ------: | -------: | -------: | -------: | -------: |
+| Quality signal breadth       |      30 |          |          |          |          |
+| Precision / low-noise signal |      25 |          |          |          |          |
+| CI/automation fit            |      20 |          |          |          |          |
+| Developer experience         |      15 |          |          |          |          |
+| Cost + lock-in               |      10 |          |          |          |          |
+| **Total**                    | **100** |          |          |          |          |
 
 ## Repo-Specific Inputs
 

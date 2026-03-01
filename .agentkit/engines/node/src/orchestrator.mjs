@@ -262,7 +262,13 @@ export function acquireLock(projectRoot, holder = {}) {
       return { acquired: false, existingLock: existing };
     }
     // Stale lock — remove and retry once
-    unlinkSync(lPath);
+    try {
+      unlinkSync(lPath);
+    } catch (unlinkErr) {
+      if (unlinkErr?.code !== 'ENOENT') {
+        throw unlinkErr;
+      }
+    }
     try {
       writeFileSync(lPath, JSON.stringify(lockData, null, 2) + '\n', {
         encoding: 'utf-8',
@@ -879,3 +885,4 @@ export { PHASES, VALID_TEAM_IDS, VALID_TEAM_STATUSES };
     listTasks,
     updateTaskStatus as updateTaskState
   } from './task-protocol.mjs';
+

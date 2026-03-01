@@ -63,7 +63,7 @@ if (!/^[a-zA-Z0-9._\-/:^~]+(?:\.{2,3}[a-zA-Z0-9._\-/:^~]+)?$/.test(flags.range))
 
 ## 3. Path Traversal Protection
 
-**Sync output confinement.** During `sync.mjs`, all rendered templates are first written
+**Sync output confinement.** During `synchronize.mjs`, all rendered templates are first written
 to a temporary directory, then copied to the project root. Before each copy, the
 resolved destination path is checked against the project root boundary:
 
@@ -92,13 +92,13 @@ if (!abs.startsWith(resolve(projectRoot) + sep) && abs !== resolve(projectRoot))
 The review runner (`review-runner.mjs`) scans changed files against a set of high-signal
 secret patterns:
 
-| Pattern Name      | Detection Regex                                           |
-|-------------------|-----------------------------------------------------------|
-| AWS Key           | `AKIA[0-9A-Z]{16}`                                       |
-| Private Key       | `-----BEGIN (RSA|EC|DSA )?PRIVATE KEY-----`               |
-| Generic Secret    | `(password|secret|api_key|apikey|token)\s*[:=]\s*'...'`   |
-| Connection String | `mongodb(+srv)?://...`                                    |
-| JWT               | `eyJ...` (three Base64url segments)                       |
+| Pattern Name      | Detection Regex                                                 |
+| ----------------- | --------------------------------------------------------------- |
+| AWS Key           | `AKIA[0-9A-Z]{16}`                                              |
+| Private Key       | `-----BEGIN (RSA \| EC \| DSA )?PRIVATE KEY-----`             |
+| Generic Secret    | `(password \| secret \| api_key \| apikey \| token)\s*[:=]\s*'...'` |
+| Connection String | `mongodb(+srv)?://...`                                          |
+| JWT               | `eyJ...` (three Base64url segments)                             |
 
 The validate command (`validate.mjs`) performs an additional scan of all generated
 output directories, adding patterns for GitHub tokens (`ghp_`), OpenAI/Anthropic keys
@@ -160,7 +160,7 @@ tracking.
 
 ## 6. Template Sanitization
 
-The `sanitizeTemplateValue()` function in `sync.mjs` strips shell metacharacters from
+The `sanitizeTemplateValue()` function in `synchronize.mjs` strips shell metacharacters from
 all string values before they are interpolated into templates:
 
 ```js

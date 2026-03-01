@@ -14,27 +14,27 @@
 
 # Project identity
 name: agentkit-forge # e.g. "chaufher", "phoenix", "my-api"
-description: null # Short project description
-phase: null # greenfield | active | maintenance | legacy
+description: AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
+phase: active # greenfield | active | maintenance | legacy
 
 # Tech stack (auto-detected + confirmed at init)
 stack:
-  languages: [] # e.g. [typescript, csharp, python]
+  languages: [javascript, yaml, markdown] # e.g. [typescript, csharp, python]
   frameworks:
     frontend: [] # e.g. [next.js, react]
-    backend: [] # e.g. [asp.net-core, express]
+    backend: [node.js] # e.g. [asp.net-core, express]
     css: [] # e.g. [tailwind, sass]
-  orm: null # e.g. ef-core, prisma, drizzle, sqlalchemy
-  database: [] # e.g. [postgresql, redis]
-  search: null # e.g. elasticsearch, meilisearch
-  messaging: [] # e.g. [signalr, rabbitmq]
+  orm: none # e.g. ef-core, prisma, drizzle, sqlalchemy
+  database: [none] # e.g. [postgresql, redis]
+  search: none # e.g. elasticsearch, meilisearch
+  messaging: [none] # e.g. [signalr, rabbitmq]
 
 # Architecture
 architecture:
-  pattern: null # clean | hexagonal | mvc | microservices | monolith | serverless
-  apiStyle: null # rest | graphql | grpc | mixed
+  pattern: monolith # clean | hexagonal | mvc | microservices | monolith | serverless
+  apiStyle: mixed # rest | graphql | grpc | mixed
   monorepo: false
-  monorepoTool: null # turborepo | nx | lerna | pnpm-workspaces
+  monorepoTool: pnpm-workspaces # turborepo | nx | lerna | pnpm-workspaces
 
 # Explicit implementation patterns (helps agents avoid reinventing architecture)
 patterns:
@@ -46,14 +46,14 @@ patterns:
 
 # Existing documentation & specs
 documentation:
-  hasPrd: false
-  prdPath: null # e.g. docs/prd/
-  hasAdr: false
-  adrPath: null # e.g. docs/03_architecture/03_decisions/
-  hasApiSpec: false
-  apiSpecPath: null # e.g. docs/api/openapi/
-  hasTechnicalSpec: false
-  technicalSpecPath: null
+  hasPrd: true
+  prdPath: docs/prd/ # e.g. docs/prd/
+  hasAdr: true
+  adrPath: docs/03_architecture/02_decisions/ # e.g. docs/03_architecture/03_decisions/
+  hasApiSpec: true
+  apiSpecPath: docs/04_api/ # e.g. docs/api/openapi/
+  hasTechnicalSpec: true
+  technicalSpecPath: docs/02_specs/
   hasDesignSystem: false
   designSystemPath: null # e.g. packages/ui/
   storybook: false
@@ -61,18 +61,18 @@ documentation:
 
 # Deployment & infrastructure
 deployment:
-  cloudProvider: null # aws | azure | gcp | vercel | netlify | self-hosted | none
+  cloudProvider: none # aws | azure | gcp | vercel | netlify | self-hosted | none
   containerized: false
-  environments: [] # e.g. [dev, staging, prod]
-  iacTool: null # terraform | bicep | pulumi | cdk | terragrunt | none
+  environments: [local, ci] # e.g. [dev, staging, prod]
+  iacTool: none # terraform | bicep | pulumi | cdk | terragrunt | none
 
 # Infrastructure — IaC conventions, naming, and resource management
 infrastructure:
-  namingConvention: null # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
-  defaultRegion: null # e.g. southafricanorth, eastus, westeurope
-  org: null # e.g. nl, contoso — the org prefix used in resource names
-  iacToolchain: [] # e.g. [terraform, terragrunt]
-  stateBackend: null # azurerm | s3 | gcs | consul | local | none
+  namingConvention: "{org}-{env}-{project}-{resourcetype}-{region}" # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
+  defaultRegion: global # e.g. southafricanorth, eastus, westeurope
+  org: akf # e.g. nl, contoso — the org prefix used in resource names
+  iacToolchain: [none] # e.g. [terraform, terragrunt]
+  stateBackend: none # azurerm | s3 | gcs | consul | local | none
   modulesRepo: null # e.g. git::https://github.com/org/tf-modules.git
   lockProvider: null # blob-lease | dynamodb | consul | none
   tagging:
@@ -82,13 +82,13 @@ infrastructure:
 # Observability — monitoring, alerting, and tracing defaults
 observability:
   monitoring:
-    provider: null # azure-monitor | datadog | prometheus | grafana-cloud | cloudwatch | none
+    provider: none # azure-monitor | datadog | prometheus | grafana-cloud | cloudwatch | none
     dashboards: false
   alerting:
-    provider: null # azure-monitor | pagerduty | opsgenie | grafana | none
-    channels: [] # e.g. [email, slack, teams]
+    provider: none # azure-monitor | pagerduty | opsgenie | grafana | none
+    channels: [none] # e.g. [email, slack, teams]
   tracing:
-    provider: null # application-insights | jaeger | zipkin | otel-collector | none
+    provider: none # application-insights | jaeger | zipkin | otel-collector | none
     samplingRate: null # 0.0–1.0, e.g. 0.1 for 10%
   logging:
     centralised: false # whether logs are shipped to a central store
@@ -109,17 +109,17 @@ compliance:
 
 # Process & conventions
 process:
-  branchStrategy: null # trunk-based | github-flow | gitflow
-  commitConvention: null # conventional | semantic | none
-  codeReview: null # required-pr | optional | none
-  teamSize: null # solo | small | medium | large
+  branchStrategy: github-flow # trunk-based | github-flow | gitflow
+  commitConvention: conventional # conventional | semantic | none
+  codeReview: required-pr # required-pr | optional | none
+  teamSize: solo # solo | small | medium | large
 
 # Testing strategy
 testing:
-  unit: [] # e.g. [vitest, xunit]
-  integration: [] # e.g. [playwright]
+  unit: [vitest] # e.g. [vitest, xunit]
+  integration: [vitest] # e.g. [playwright]
   e2e: [] # e.g. [playwright, cypress]
-  coverage: null # Target coverage percentage (0-100)
+  coverage: 80 # Target coverage percentage (0-100)
 
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:
@@ -144,19 +144,19 @@ crosscutting:
     customExceptions: false
     errorCodes: false
   authentication:
-    provider: null # azure-ad | azure-ad-b2c | auth0 | firebase | cognito | keycloak | custom-jwt | none
-    strategy: null # jwt-bearer | cookie | session | api-key | oauth2-code
+    provider: custom-jwt # azure-ad | azure-ad-b2c | auth0 | firebase | cognito | keycloak | custom-jwt | none
+    strategy: jwt-bearer # jwt-bearer | cookie | session | api-key | oauth2-code
     multiTenant: false
-    rbac: false
+    rbac: true
   caching:
     provider: null # redis | memcached | in-memory | none
     patterns: [] # e.g. [cache-aside, write-through]
     distributedCache: false
   api:
-    versioning: null # url-segment | header | query-string | media-type | none
-    pagination: null # cursor | offset | keyset | none
-    responseFormat: null # envelope | raw | json-api | hal
-    rateLimiting: false
+    versioning: url-segment # url-segment | header | query-string | media-type | none
+    pagination: cursor # cursor | offset | keyset | none
+    responseFormat: envelope # envelope | raw | json-api | hal
+    rateLimiting: true
   database:
     migrations: null # code-first | sql-scripts | auto | none
     seeding: false
