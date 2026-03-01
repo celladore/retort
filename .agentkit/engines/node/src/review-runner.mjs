@@ -4,8 +4,8 @@
  * TODO/FIXME scanning, and lint on changed files.
  * This is NOT the AI review — that's the /review slash command.
  */
-import { existsSync, promises as fsPromises, realpathSync, statSync } from 'fs';
-import { extname, resolve, sep } from 'path';
+import { promises as fsPromises, realpathSync, statSync } from 'node:fs';
+import { extname, resolve, sep } from 'node:path';
 import { appendEvent } from './orchestrator.mjs';
 import { execCommand, runInPool } from './runner.mjs';
 
@@ -47,6 +47,37 @@ const SKIP_SECRET_SCAN_EXTENSIONS = [
 ];
 
 // ---------------------------------------------------------------------------
+// Symlink traversal validation — applied to ALL changedFiles entries
+// ---------------------------------------------------------------------------
+
+/**
+ * Validate that every file in `files` resolves (via realpath) within `projectRoot`.
+ * This catches symlinks that point outside the project even when files come from
+ * `git diff --name-only` or `--range` (not just the `--file` flag).
+ */
+function validateChangedFilesForSymlinkTraversal(projectRoot, files) {
+  let realProjectRoot;
+  try {
+    realProjectRoot = realpathSync(projectRoot);
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err; // Re-throw permission errors and other unexpected OS errors
+    return; // If projectRoot doesn't exist (e.g. in tests before setup), skip
+  }
+  for (const file of files) {
+    const abs = resolve(projectRoot, file);
+    try {
+      const realPath = realpathSync(abs);
+      if (!realPath.startsWith(realProjectRoot + sep) && realPath !== realProjectRoot) {
+        throw new Error(`File must be within the project root (symlinks traversing outside are not allowed): ${file}`);
+      }
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+      // ENOENT: file doesn't exist yet (e.g. deleted between staging and scan) — let scanners skip it
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Diff scope detection
 // ---------------------------------------------------------------------------
 
@@ -74,21 +105,18 @@ function getChangedFiles(projectRoot, flags) {
     if (!abs.startsWith(resolve(projectRoot) + sep) && abs !== resolve(projectRoot)) {
       throw new Error(`--file must be within the project root: ${flags.file}`);
     }
-
-    if (existsSync(abs)) {
-      const stats = statSync(abs);
-      if (!stats.isFile()) {
-        throw new Error(`File is not a regular file: ${flags.file}`);
-      }
+    // Reject symlinks that resolve outside the project root.
+    // Use realpathSync directly (no existsSync pre-check) to avoid a TOCTOU window.
+    try {
       const realPath = realpathSync(abs);
       const realProjectRoot = realpathSync(projectRoot);
       if (!realPath.startsWith(realProjectRoot + sep) && realPath !== realProjectRoot) {
         throw new Error(`File must be within the project root (symlinks traversing outside are not allowed): ${flags.file}`);
       }
-    } else {
-      throw new Error(`File not found: ${flags.file}`);
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err; // re-throw our traversal error and unexpected OS errors
+      // ENOENT: file doesn't exist yet (e.g. deleted between staging and scan) — let scanners skip it
     }
-
     return [flags.file];
   }
 
@@ -237,6 +265,7 @@ export async function runReview({ agentkitRoot /* kept for interface compatibili
   console.log('');
 
   const changedFiles = getChangedFiles(projectRoot, flags);
+  validateChangedFilesForSymlinkTraversal(projectRoot, changedFiles);
 
   if (changedFiles.length === 0) {
     console.log('[agentkit:review] No changed files found.');
