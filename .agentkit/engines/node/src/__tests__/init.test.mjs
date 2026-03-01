@@ -181,6 +181,54 @@ describe('runInit', () => {
       expect(settings.renderTargets).toContain('claude');
       expect(settings.renderTargets).toContain('cursor');
     });
+
+    it('persists external knowledge flags to project.yaml', async () => {
+      const agentkitRoot = setupAgentkitRoot(resolve(tmpRoot, 'agentkit'));
+      vi.doMock('../discover.mjs', () => ({
+        runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
+      }));
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: vi.fn().mockResolvedValue(undefined),
+      }));
+      vi.resetModules();
+      const { runInit: initFn } = await import('../init.mjs');
+      await initFn({
+        agentkitRoot,
+        projectRoot,
+        flags: {
+          'non-interactive': true,
+          repoName: 'external-knowledge-test',
+          'external-knowledge': true,
+          'external-mode': 'metadata-overlays',
+          'windsurf-guides-path': 'C:/Users/test/.windsurf/plans/domain-guides',
+          'mystira-docs-path': 'C:/Users/test/repos/Mystira.workspace/docs',
+          'external-markdown-files': 'docs/vision.md, docs/strategy.md',
+          'external-git-repos': 'https://github.com/example/repo-a, https://github.com/example/repo-b',
+          'external-target-platforms': 'copilot,windsurf',
+        },
+      });
+
+      const projectYaml = yaml.load(
+        readFileSync(resolve(agentkitRoot, 'spec', 'project.yaml'), 'utf-8')
+      );
+      expect(projectYaml.externalKnowledge.enabled).toBe(true);
+      expect(projectYaml.externalKnowledge.mode).toBe('metadata-overlays');
+      expect(projectYaml.externalKnowledge.sources.windsurfDomainGuidesPath).toBe(
+        'C:/Users/test/.windsurf/plans/domain-guides'
+      );
+      expect(projectYaml.externalKnowledge.sources.mystiraDocsPath).toBe(
+        'C:/Users/test/repos/Mystira.workspace/docs'
+      );
+      expect(projectYaml.externalKnowledge.sources.markdownFiles).toEqual([
+        'docs/vision.md',
+        'docs/strategy.md',
+      ]);
+      expect(projectYaml.externalKnowledge.sources.gitRepoUrls).toEqual([
+        'https://github.com/example/repo-a',
+        'https://github.com/example/repo-b',
+      ]);
+      expect(projectYaml.externalKnowledge.targetPlatforms).toEqual(['copilot', 'windsurf']);
+    });
   });
 
   // ---------------------------------------------------------------------------

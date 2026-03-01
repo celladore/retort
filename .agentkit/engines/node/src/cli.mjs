@@ -54,7 +54,21 @@ const WORKFLOW_COMMANDS = ['orchestrate', 'plan', 'check', 'review', 'handoff', 
 const SLASH_ONLY_COMMANDS = ['project-review', 'scaffold', 'preflight'];
 
 const VALID_FLAGS = {
-  init: ['repoName', 'force', 'non-interactive', 'ci', 'preset', 'help'],
+  init: [
+    'repoName',
+    'force',
+    'non-interactive',
+    'ci',
+    'preset',
+    'external-knowledge',
+    'external-mode',
+    'windsurf-guides-path',
+    'mystira-docs-path',
+    'external-markdown-files',
+    'external-git-repos',
+    'external-target-platforms',
+    'help',
+  ],
   sync: [
     'overlay',
     'only',
@@ -120,6 +134,12 @@ const FLAG_TYPES = {
   // Strings
   repoName: 'string',
   preset: 'string',
+  'external-mode': 'string',
+  'windsurf-guides-path': 'string',
+  'mystira-docs-path': 'string',
+  'external-markdown-files': 'string',
+  'external-git-repos': 'string',
+  'external-target-platforms': 'string',
   only: 'string', // comma-separated
   output: 'string',
   depth: 'string',
@@ -155,6 +175,7 @@ const FLAG_TYPES = {
   force: 'boolean',
   'non-interactive': 'boolean',
   ci: 'boolean',
+  'external-knowledge': 'boolean',
   'dry-run': 'boolean',
   overwrite: 'boolean',
   'no-clean': 'boolean',
@@ -252,6 +273,13 @@ Commands:
                   --non-interactive   Skip prompts, use auto-detected defaults
                   --preset <name>     Use preset: minimal, full, team
                   --ci                Alias for --non-interactive
+                  --external-knowledge Enable external knowledge integration
+                  --external-mode <m> metadata-overlays | direct-copy | hybrid
+                  --windsurf-guides-path <path>
+                  --mystira-docs-path <path>
+                  --external-markdown-files <csv>
+                  --external-git-repos <csv>
+                  --external-target-platforms <csv>
   sync            Render all AI tool configs from spec + overlay
                   --only <targets>    Sync only specific targets (comma-separated)
                   --overwrite         Overwrite project-owned files (docs/, .vscode/, etc.)

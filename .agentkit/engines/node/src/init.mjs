@@ -87,6 +87,9 @@ const ALL_TOOL_OPTIONS = [
   { value: 'mcp', label: 'MCP configs', hint: 'mcp/' },
 ];
 
+const EXTERNAL_KNOWLEDGE_MODES = ['metadata-overlays', 'direct-copy', 'hybrid'];
+const EXTERNAL_KNOWLEDGE_PLATFORMS = ['copilot', 'windsurf', 'claude', 'cursor'];
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -99,6 +102,77 @@ function sanitizeRepoName(value) {
   if (/[/\\]/.test(trimmed)) return null;
   if (!REPO_NAME_PATTERN.test(trimmed)) return null;
   return trimmed;
+}
+
+function parseCsvList(value) {
+  if (typeof value !== 'string') return [];
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function applyExternalKnowledgeFlags(project, flags = {}) {
+  project.externalKnowledge = project.externalKnowledge || {
+    enabled: false,
+    mode: 'metadata-overlays',
+    sources: {
+      windsurfDomainGuidesPath: null,
+      mystiraDocsPath: null,
+      markdownFiles: [],
+      gitRepoUrls: [],
+    },
+    targetPlatforms: ['copilot', 'windsurf'],
+  };
+
+  const ek = project.externalKnowledge;
+  ek.sources = ek.sources || {
+    windsurfDomainGuidesPath: null,
+    mystiraDocsPath: null,
+    markdownFiles: [],
+    gitRepoUrls: [],
+  };
+
+  if (flags['external-knowledge'] === true) {
+    ek.enabled = true;
+  }
+
+  if (typeof flags['external-mode'] === 'string') {
+    const mode = flags['external-mode'].trim();
+    if (EXTERNAL_KNOWLEDGE_MODES.includes(mode)) {
+      ek.mode = mode;
+      ek.enabled = true;
+    }
+  }
+
+  if (typeof flags['windsurf-guides-path'] === 'string') {
+    ek.sources.windsurfDomainGuidesPath = flags['windsurf-guides-path'].trim();
+    ek.enabled = true;
+  }
+
+  if (typeof flags['mystira-docs-path'] === 'string') {
+    ek.sources.mystiraDocsPath = flags['mystira-docs-path'].trim();
+    ek.enabled = true;
+  }
+
+  if (typeof flags['external-markdown-files'] === 'string') {
+    ek.sources.markdownFiles = parseCsvList(flags['external-markdown-files']);
+    if (ek.sources.markdownFiles.length > 0) ek.enabled = true;
+  }
+
+  if (typeof flags['external-git-repos'] === 'string') {
+    ek.sources.gitRepoUrls = parseCsvList(flags['external-git-repos']);
+    if (ek.sources.gitRepoUrls.length > 0) ek.enabled = true;
+  }
+
+  if (typeof flags['external-target-platforms'] === 'string') {
+    const parsed = parseCsvList(flags['external-target-platforms']);
+    const valid = parsed.filter((platform) => EXTERNAL_KNOWLEDGE_PLATFORMS.includes(platform));
+    if (valid.length > 0) {
+      ek.targetPlatforms = valid;
+      ek.enabled = true;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -155,6 +229,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
 
   // Build project data from discovery defaults
   const project = buildProjectDefaults(report, repoName);
+  applyExternalKnowledgeFlags(project, flags);
 
   // --- Non-interactive fast path ---
   if (nonInteractive || process.env.CI) {
@@ -325,6 +400,82 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
     if (clack.isCancel(acceptDocs)) {
       clack.cancel('Init cancelled.');
       process.exit(0);
+    }
+  }
+
+  // --- Phase 3.5: External Knowledge Integration ---
+  const ekFromFlags =
+    flags['external-knowledge'] === true ||
+    typeof flags['external-mode'] === 'string' ||
+    typeof flags['windsurf-guides-path'] === 'string' ||
+    typeof flags['mystira-docs-path'] === 'string' ||
+    typeof flags['external-markdown-files'] === 'string' ||
+    typeof flags['external-git-repos'] === 'string' ||
+    typeof flags['external-target-platforms'] === 'string';
+
+  if (!ekFromFlags) {
+    const enableExternal = await clack.confirm({
+      message: 'Configure external knowledge/doc sources for template seeding?',
+      initialValue: project.externalKnowledge?.enabled || false,
+    });
+
+    if (clack.isCancel(enableExternal)) {
+      clack.cancel('Init cancelled.');
+      process.exit(0);
+    }
+
+    project.externalKnowledge.enabled = enableExternal;
+
+    if (enableExternal) {
+      const externalConfig = await clack.group({
+        mode: () =>
+          clack.select({
+            message: 'External knowledge ingestion mode',
+            initialValue: project.externalKnowledge.mode || 'metadata-overlays',
+            options: [
+              { value: 'metadata-overlays', label: 'metadata-overlays (recommended)' },
+              { value: 'direct-copy', label: 'direct-copy' },
+              { value: 'hybrid', label: 'hybrid' },
+            ],
+          }),
+        windsurfPath: () =>
+          clack.text({
+            message: 'Windsurf domain guides path (optional)',
+            initialValue: project.externalKnowledge.sources?.windsurfDomainGuidesPath || '',
+            placeholder: 'C:/Users/<user>/.windsurf/plans/domain-guides',
+          }),
+        mystiraPath: () =>
+          clack.text({
+            message: 'Mystira docs path (optional)',
+            initialValue: project.externalKnowledge.sources?.mystiraDocsPath || '',
+            placeholder: 'C:/Users/<user>/repos/Mystira.workspace/docs',
+          }),
+        markdownFiles: () =>
+          clack.text({
+            message: 'Extra markdown files CSV (optional)',
+            initialValue: (project.externalKnowledge.sources?.markdownFiles || []).join(', '),
+            placeholder: 'docs/vision.md, docs/strategy.md',
+          }),
+        gitRepos: () =>
+          clack.text({
+            message: 'External git repo URLs CSV (optional)',
+            initialValue: (project.externalKnowledge.sources?.gitRepoUrls || []).join(', '),
+            placeholder: 'https://github.com/org/repo',
+          }),
+      });
+
+      if (clack.isCancel(externalConfig)) {
+        clack.cancel('Init cancelled.');
+        process.exit(0);
+      }
+
+      project.externalKnowledge.mode = externalConfig.mode;
+      project.externalKnowledge.sources.windsurfDomainGuidesPath =
+        externalConfig.windsurfPath?.trim() || null;
+      project.externalKnowledge.sources.mystiraDocsPath =
+        externalConfig.mystiraPath?.trim() || null;
+      project.externalKnowledge.sources.markdownFiles = parseCsvList(externalConfig.markdownFiles);
+      project.externalKnowledge.sources.gitRepoUrls = parseCsvList(externalConfig.gitRepos);
     }
   }
 
@@ -522,6 +673,17 @@ function buildProjectDefaults(report, repoName) {
       designSystemPath: null,
       storybook: false,
       designTokensPath: null,
+    },
+    externalKnowledge: {
+      enabled: false,
+      mode: 'metadata-overlays',
+      sources: {
+        windsurfDomainGuidesPath: null,
+        mystiraDocsPath: null,
+        markdownFiles: [],
+        gitRepoUrls: [],
+      },
+      targetPlatforms: ['copilot', 'windsurf'],
     },
     deployment: {
       cloudProvider: null,
