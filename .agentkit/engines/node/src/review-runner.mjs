@@ -4,10 +4,10 @@
  * TODO/FIXME scanning, and lint on changed files.
  * This is NOT the AI review — that's the /review slash command.
  */
-import { existsSync, readFileSync, readdirSync, realpathSync, statSync, promises as fsPromises } from 'node:fs';
-import { resolve, relative, extname, sep } from 'node:path';
-import { execCommand, formatDuration, runInPool } from './runner.mjs';
+import { promises as fsPromises, realpathSync, statSync } from 'node:fs';
+import { extname, resolve, sep } from 'node:path';
 import { appendEvent } from './orchestrator.mjs';
+import { execCommand, runInPool } from './runner.mjs';
 
 // ---------------------------------------------------------------------------
 // Secret patterns — compiled once at module level to avoid per-call overhead.
