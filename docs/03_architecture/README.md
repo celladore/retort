@@ -12,11 +12,11 @@ This section uses independent numbering tracks:
 ## Contents
 
 - [01_overview.md](./01_overview.md)
-- [02_diagrams/](./02_diagrams/)
-- [03_decisions/](./03_decisions/)
+- [01_diagrams/](./01_diagrams/)
+- [02_decisions/](./02_decisions/)
 
 ## Notes
 
 - `01_overview.md` is the entry point for architecture context.
-- `02_diagrams/` stores architecture diagrams.
-- `03_decisions/` stores ADRs.
+- `01_diagrams/` stores architecture diagrams.
+- `02_decisions/` stores ADRs.

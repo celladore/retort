@@ -12,21 +12,20 @@ documentation category maintained by this repository.
 | # | Category | Description |
 |---|----------|-------------|
 | 1 | [Product](./01_product/) | Product vision, strategy, personas, and metrics |
-| 2 | [Architecture](./02_architecture/) | System design, diagrams, ADRs, and tech stack |
-| 3 | [API](./03_api/) | API reference, authentication, versioning, and errors |
-| 4 | [Development](./04_development/) | Setup, coding standards, testing, and contributing |
-| 5 | [Deployment](./05_deployment/) | CI/CD, environments, releases, and monitoring |
-| 6 | [Security](./06_security/) | Threat model, compliance, incident response |
-| 7 | [Operations](./07_operations/) | SLAs, on-call, capacity, and performance |
+| 2 | [Specs](./02_specs/) | Functional and technical specifications |
+| 3 | [Architecture](./03_architecture/) | System design, diagrams, ADRs, and tech stack |
+| 4 | [API](./04_api/) | API reference, authentication, versioning, and errors |
+| 5 | [Operations](./05_operations/) | CI/CD, deployments, monitoring, and troubleshooting |
+| 6 | [Engineering](./06_engineering/) | Setup, coding standards, testing, and contributing |
+| 7 | [Integrations](./07_integrations/) | External APIs, webhooks, and SDK |
 | 8 | [Reference](./08_reference/) | Glossary, acronyms, FAQ, and tool config |
 
 ## Quick Links
 
-- [Product Vision](./01_product/vision.md)
-- [Architecture Overview](./02_architecture/overview.md)
-- [API Overview](./03_api/overview.md)
-- [Getting Started](./04_development/getting-started.md)
-- [Changelog](./08_reference/faq.md)
+- [Architecture Overview](./03_architecture/01_overview.md)
+- [API Overview](./04_api/01_overview.md)
+- [Getting Started](./06_engineering/01_setup.md)
+- [Changelog](./08_reference/03_changelog.md)
 
 - [PRD Library](./prd/README.md)
 
