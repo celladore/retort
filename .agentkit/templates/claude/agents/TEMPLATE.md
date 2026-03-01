@@ -1,3 +1,6 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown agent persona definition. -->
+<!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory -->
 # {{agentName}}
 
 ## Role

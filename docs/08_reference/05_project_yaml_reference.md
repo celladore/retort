@@ -41,9 +41,9 @@
 | Field | Type | Example |
 |-------|------|---------|
 | `documentation.hasPrd` | boolean | `true` |
-| `documentation.prdPath` | string | `docs/prd/` |
+| `documentation.prdPath` | string | `docs/01_product/` |
 | `documentation.hasAdr` | boolean | `false` |
-| `documentation.adrPath` | string | `docs/adr/` |
+| `documentation.adrPath` | string | `docs/03_architecture/03_decisions/` |
 | `documentation.hasApiSpec` | boolean | `false` |
 | `documentation.apiSpecPath` | string | `docs/api/openapi/` |
 | `documentation.hasTechnicalSpec` | boolean | `false` |

@@ -1,6 +1,11 @@
 ---
 description: "Security audit — OWASP top 10, dependency vulnerabilities, auth flows, hardcoded secrets"
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(pip *), Bash(go *), Bash(grep *), Bash(find *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # Security Audit

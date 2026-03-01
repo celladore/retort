@@ -132,7 +132,7 @@ describe('cost-tracker', () => {
     });
 
     it('does nothing when no sessions directory exists', () => {
-      // No initSession called — directory does not exist
+      // No initSession called - directory does not exist
       expect(() => recordCommand(TEST_AGENTKIT, 'check')).not.toThrow();
     });
   });
@@ -189,3 +189,4 @@ describe('cost-tracker', () => {
     });
   });
 });
+

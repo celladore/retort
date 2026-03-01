@@ -1,6 +1,11 @@
 ---
 description: "Master orchestrator — coordinate work across unified teams with state persistence"
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(dotnet *), Bash(cargo *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # W1 Orchestrator

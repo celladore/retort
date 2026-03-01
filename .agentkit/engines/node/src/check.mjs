@@ -333,7 +333,7 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 
   // Log event
   try {
-    appendEvent(projectRoot, 'check_completed', {
+    await appendEvent(projectRoot, 'check_completed', {
       overallStatus,
       stacks: allResults.map(s => ({
         stack: s.stack,

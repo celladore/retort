@@ -27,6 +27,7 @@ commands:
         description: 'Limit orchestration to specific file paths or glob patterns'
         type: string
         default: null
+        required: false
       - name: --dry-run
         description: 'Show planned actions without executing them'
         type: boolean
@@ -35,10 +36,14 @@ commands:
         description: 'Delegate to a specific team instead of auto-routing'
         type: string
         default: null
+        required: false
+        enum: [backend, frontend, data, infra, devops, testing, security, docs, product, quality]
       - name: --phase
         description: 'Jump to a specific phase (1-5)'
         type: integer
         default: null
+        required: false
+        enum: [1, 2, 3, 4, 5]
       - name: --status
         description: 'Show current orchestrator state without executing'
         type: boolean
@@ -66,6 +71,8 @@ commands:
         description: 'Output format: json, yaml, or markdown'
         type: string
         default: 'yaml'
+        required: false
+        enum: [json, yaml, markdown]
       - name: --depth
         description: 'Directory traversal depth limit'
         type: integer
@@ -91,6 +98,8 @@ commands:
         description: 'Check only a specific tech stack (node, dotnet, rust, python)'
         type: string
         default: null
+        required: false
+        enum: [node, dotnet, rust, python]
       - name: --fix
         description: 'Attempt to auto-fix discovered issues'
         type: boolean
@@ -116,22 +125,29 @@ commands:
         description: 'GitHub PR number to review'
         type: integer
         default: null
+        required: false
       - name: --range
         description: 'Git commit range to review (e.g., main..HEAD)'
         type: string
         default: null
+        required: false
       - name: --file
         description: 'Review a specific file'
         type: string
         default: null
+        required: false
       - name: --focus
         description: 'Focus area: security, performance, correctness, style, or all'
         type: string
         default: 'all'
+        required: false
+        enum: [security, performance, correctness, style, all]
       - name: --severity
         description: 'Minimum severity to report: info, warning, error, critical'
         type: string
         default: 'warning'
+        required: false
+        enum: [info, warning, error, critical]
     allowed-tools:
       - Read
       - Glob
@@ -157,6 +173,8 @@ commands:
         description: 'Filter issues relevant to a specific team'
         type: string
         default: null
+        required: false
+        enum: [backend, frontend, data, infra, devops, testing, security, docs, product, quality]
     allowed-tools:
       - Read
       - Write
@@ -270,6 +288,8 @@ commands:
         description: 'Run only a specific review phase (0-4)'
         type: integer
         default: null
+        required: false
+        enum: [0, 1, 2, 3, 4]
     allowed-tools:
       - Read
       - Glob

@@ -56,7 +56,7 @@ generic `.ai` configs) from a single set of YAML specifications. It provides:
 
   engines/node/src/              Runtime engine (Node.js, ESM)
     cli.mjs                        CLI router and entry point
-    sync.mjs                       Sync engine core
+   synchronize.mjs                Sync engine core
     orchestrator.mjs               5-phase state machine
     spec-validator.mjs             YAML spec schema validation
     validate.mjs                   Post-sync output validation
@@ -70,7 +70,7 @@ generic `.ai` configs) from a single set of YAML specifications. It provides:
 
 ## 3. Sync Engine
 
-The sync engine (`sync.mjs`) is the core build step. It reads specs, applies
+The sync engine (`synchronize.mjs`) is the core build step. It reads specs, applies
 overlays, renders templates, and writes the final output.
 
 ### Execution Steps
@@ -160,12 +160,12 @@ preambles.
 
 The CLI router (`cli.mjs`) dispatches all commands.
 
-| Category   | Commands                                                    |
-|------------|-------------------------------------------------------------|
-| Core       | `init`, `sync`, `validate`, `discover`, `spec-validate`    |
+| Category   | Commands                                                           |
+| ---------- | ------------------------------------------------------------------ |
+| Core       | `init`, `sync`, `validate`, `discover`, `spec-validate`            |
 | Workflow   | `orchestrate`, `plan`, `check`, `review`, `handoff`, `healthcheck` |
-| Utility    | `cost`                                                      |
-| Slash-only | `project-review` (AI tool only, no CLI handler)             |
+| Utility    | `cost`                                                             |
+| Slash-only | `project-review` (AI tool only, no CLI handler)                    |
 
 ### Dispatch Flow
 
@@ -229,7 +229,7 @@ The orchestrator (`orchestrator.mjs`) implements a state machine for the
 ### Phases
 
 | Phase | Name           | Action                                        |
-|-------|----------------|-----------------------------------------------|
+| ----- | -------------- | --------------------------------------------- |
 | 1     | Discovery      | `/discover` -- scan repo, detect stacks       |
 | 2     | Planning       | `/plan` -- create implementation plans        |
 | 3     | Implementation | `/team-*` -- delegate to team agents          |
@@ -261,14 +261,14 @@ recent entries for the status display.
 
 YAML files in `.agentkit/spec/` serve as the single source of truth.
 
-| File | Defines |
-|------|---------|
-| `teams.yaml` | 10 team scopes (id, name, focus, scope globs) + `techStacks` (build/test/lint/format/typecheck commands, detect markers) |
-| `agents.yaml` | Agent personas by category (engineering, design, marketing, operations, product, testing, project-management) with role, focus globs, responsibilities, preferred tools |
-| `commands.yaml` | Slash commands with type (`workflow`/`team`/`utility`), description, flags, allowed-tools |
-| `settings.yaml` | Permission allow/deny lists, lifecycle hooks (sessionStart, preToolUse, postToolUse, stop), cost tracking, dependency management config |
-| `rules.yaml` | Coding convention domains (TypeScript, Rust, Python, .NET, security, blockchain) with severity-tagged rules |
-| `aliases.yaml` | Command aliases mapping short forms to full commands |
+| File            | Defines                                                                                                                                                                 |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `teams.yaml`    | 10 team scopes (id, name, focus, scope globs) + `techStacks` (build/test/lint/format/typecheck commands, detect markers)                                                |
+| `agents.yaml`   | Agent personas by category (engineering, design, marketing, operations, product, testing, project-management) with role, focus globs, responsibilities, preferred tools |
+| `commands.yaml` | Slash commands with type (`workflow`/`team`/`utility`), description, flags, allowed-tools                                                                               |
+| `settings.yaml` | Permission allow/deny lists, lifecycle hooks (sessionStart, preToolUse, postToolUse, stop), cost tracking, dependency management config                                 |
+| `rules.yaml`    | Coding convention domains (TypeScript, Rust, Python, .NET, security, blockchain) with severity-tagged rules                                                             |
+| `aliases.yaml`  | Command aliases mapping short forms to full commands                                                                                                                    |
 
 ---
 
@@ -313,7 +313,7 @@ Python).
 ### Steps Per Stack
 
 | Step      | Source               | Notes                          |
-|-----------|----------------------|--------------------------------|
+| --------- | -------------------- | ------------------------------ |
 | format    | `stack.formatter`    | `--check` mode; `--fix` writes |
 | lint      | `stack.linter`       | `--fix` auto-fixes             |
 | typecheck | `stack.typecheck`    | e.g., `tsc --noEmit`           |
@@ -341,7 +341,7 @@ gracefully. Results are logged as orchestrator events. Flags: `--fix`, `--fast`,
                              |
                              v
               +--------------+--------------+
-              |    Sync Engine (sync.mjs)   |
+              | Sync Engine (synchronize.mjs) |
               |                             |
               |  Load specs + overlay       |
               |  Merge permissions          |

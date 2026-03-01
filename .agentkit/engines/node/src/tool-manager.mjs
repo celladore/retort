@@ -104,7 +104,7 @@ export async function runAdd({ agentkitRoot, projectRoot, flags }) {
 
   // Run sync for only the new targets
   console.log(`[agentkit:add] Running sync for: ${added.join(', ')}`);
-  const { runSync } = await import('./sync.mjs');
+  const { runSync } = await import('./synchronize.mjs');
   await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName, only: added.join(',') } });
 }
 

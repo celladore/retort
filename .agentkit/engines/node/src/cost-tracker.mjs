@@ -209,7 +209,7 @@ export function endSession({ agentkitRoot, projectRoot, sessionId }) {
  * @param {string} agentkitRoot
  * @param {string} command - The command name (e.g. 'check', 'discover')
  */
-export function recordCommand(agentkitRoot, command) {
+export async function recordCommand(agentkitRoot, command) {
   const dir = sessionsDir(agentkitRoot);
   if (!existsSync(dir)) return;
 

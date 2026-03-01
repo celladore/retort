@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AgentKit Forge — Runtime Orchestration Engine
  * State machine for the 5-phase lifecycle: Discovery → Planning → Implementation → Validation → Ship.
  * Manages orchestrator state, event logging, and session locking.
@@ -8,6 +8,7 @@ import {
   appendFileSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   renameSync,
   unlinkSync,
@@ -17,12 +18,12 @@ import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { formatTimestamp } from './runner.mjs';
 import {
-  TERMINAL_STATES,
   checkDependencies,
   createTask,
   formatTaskList,
   listTasks,
   processHandoffs,
+  TERMINAL_STATES,
 } from './task-protocol.mjs';
 
 // ---------------------------------------------------------------------------
@@ -261,7 +262,13 @@ export function acquireLock(projectRoot, holder = {}) {
       return { acquired: false, existingLock: existing };
     }
     // Stale lock — remove and retry once
-    unlinkSync(lPath);
+    try {
+      unlinkSync(lPath);
+    } catch (unlinkErr) {
+      if (unlinkErr?.code !== 'ENOENT') {
+        throw unlinkErr;
+      }
+    }
     try {
       writeFileSync(lPath, JSON.stringify(lockData, null, 2) + '\n', {
         encoding: 'utf-8',
@@ -715,7 +722,55 @@ export async function orchestratorProcessHandoffs(projectRoot, state) {
  * @returns {string}
  */
 export function getTasksSummary(projectRoot) {
-  const listResult = listTasks(projectRoot);
+  const dir = resolve(projectRoot, '.claude', 'state', 'tasks');
+  if (!existsSync(dir)) return 'No tasks in the task queue.';
+
+  let files;
+  try {
+    files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.endsWith('.tmp'));
+  } catch {
+    return 'No tasks in the task queue.';
+  }
+
+  const activeTasks = [];
+  for (const file of files) {
+    try {
+      const content = readFileSync(resolve(dir, file), 'utf-8');
+      const task = JSON.parse(content);
+      if (task && typeof task === 'object' && !Array.isArray(task)) {
+        activeTasks.push(task);
+      }
+    } catch {
+      // Skip unreadable/corrupted task files in summary output
+    }
+  }
+
+  if (activeTasks.length === 0) return 'No tasks in the task queue.';
+
+  const nonTerminal = activeTasks.filter((t) => !TERMINAL_STATES.includes(t.status));
+  const terminal = activeTasks.filter((t) => TERMINAL_STATES.includes(t.status));
+  const lines = ['--- Task Queue ---', ''];
+
+  if (nonTerminal.length > 0) {
+    lines.push(`Active tasks: ${nonTerminal.length}`);
+    lines.push(formatTaskList(nonTerminal));
+    lines.push('');
+  }
+
+  if (terminal.length > 0) {
+    lines.push(`Completed/closed tasks: ${terminal.length}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Async task summary helper for callers already using async flows.
+ * @param {string} projectRoot
+ * @returns {Promise<string>}
+ */
+export async function getTasksSummaryAsync(projectRoot) {
+  const listResult = await listTasks(projectRoot);
   const activeTasks = Array.isArray(listResult?.tasks) ? listResult.tasks : [];
   if (activeTasks.length === 0) return 'No tasks in the task queue.';
 
@@ -821,12 +876,13 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
 export { PHASES, VALID_TEAM_IDS, VALID_TEAM_STATUSES };
 
 // Re-export task protocol for convenience
-export {
-  addTaskArtifact,
-  createTask,
-  formatTaskList,
-  formatTaskSummary,
-  getTask as getTaskById,
-  listTasks,
-  updateTaskStatus as updateTaskState,
-} from './task-protocol.mjs';
+  export {
+    addTaskArtifact,
+    createTask,
+    formatTaskList,
+    formatTaskSummary,
+    getTask as getTaskById,
+    listTasks,
+    updateTaskStatus as updateTaskState
+  } from './task-protocol.mjs';
+

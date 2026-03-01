@@ -207,11 +207,12 @@ function parseFlags(command, args) {
       options.status = { type: command === 'orchestrate' ? 'boolean' : 'string' };
     }
 
-    const { values, positionals } = parseArgs({
+    const { values, positionals, tokens } = parseArgs({
       args,
       options,
       strict: false, // allow unknown flags/positionals
-      allowPositionals: true
+      allowPositionals: true,
+      tokens: true,
     });
 
     // With strict: false, parseArgs returns boolean true for a known string option
@@ -223,30 +224,17 @@ function parseFlags(command, args) {
       }
     }
 
-    // With strict: false, unknown flag tokens end up in positionals instead of values.
-    // Filter them out, warn the user, and exclude them from the positional args.
-    // For flags without an inline value (e.g. --foo bar), also skip the next token
-    // so bare values don't end up as positional arguments.
-    const filteredPositionals = [];
-    for (let i = 0; i < positionals.length; i++) {
-      const token = positionals[i];
-      if (typeof token === 'string' && token.length >= 2 && token.startsWith('-')) {
-        console.warn(`[agentkit:${command}] Warning: unrecognised flag ${token} (ignored)`);
-        // Skip the next token if it looks like a value (not a flag) for flags
-        // that don't embed their value inline (e.g. --foo bar, but not --foo=bar).
-        if (
-          !token.includes('=') &&
-          i + 1 < positionals.length &&
-          !positionals[i + 1].startsWith('-')
-        ) {
-          i++;
-        }
-      } else {
-        filteredPositionals.push(token);
+    // Use the tokens list to detect and warn about unknown flags. With strict: false,
+    // unknown flags are silently discarded from values and do not appear in positionals,
+    // so the tokens API is the only reliable way to surface them to the user.
+    const knownFlags = new Set(Object.keys(options));
+    for (const token of tokens) {
+      if (token.kind === 'option' && !knownFlags.has(token.name)) {
+        console.warn(`[agentkit:${command}] Warning: unrecognized flag --${token.name} (ignored)`);
       }
     }
 
-    return { ...values, _args: filteredPositionals };
+    return { ...values, _args: positionals };
   } catch (err) {
     console.error(`Error parsing arguments: ${err.message}`);
     process.exit(1);
@@ -402,15 +390,6 @@ async function main() {
     process.exit(0);
   }
 
-  // Warn on unrecognised flags
-  const validForCommand = [...(VALID_FLAGS[command] || []), ...GLOBAL_FLAGS];
-  for (const key of Object.keys(flags)) {
-    if (key === '_args') continue;
-    if (!validForCommand.includes(key)) {
-      console.warn(`[agentkit:${command}] Warning: unrecognised flag --${key} (ignored)`);
-    }
-  }
-
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);
   }
@@ -431,7 +410,7 @@ async function main() {
         break;
       }
       case 'sync': {
-        const { runSync } = await import('./sync.mjs');
+        const { runSync } = await import('./synchronize.mjs');
         await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
         break;
       }

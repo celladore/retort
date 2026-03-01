@@ -658,3 +658,4 @@ describe('formatTaskList', () => {
     expect(table).toContain('submitted');
   });
 });
+

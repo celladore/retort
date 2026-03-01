@@ -116,6 +116,19 @@ const agentSchema = {
 // ---------------------------------------------------------------------------
 const VALID_COMMAND_TYPES = ['workflow', 'team', 'utility'];
 const VALID_TOOLS = ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash', 'WebSearch', 'WebFetch'];
+const VALID_FLAG_TYPES = ['string', 'boolean', 'integer', 'number'];
+
+const commandFlagSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', required: true, minLength: 1 },
+    description: { type: 'string', required: true, minLength: 1 },
+    type: { type: 'string', required: true, enum: VALID_FLAG_TYPES },
+    default: {},
+    required: { type: 'boolean' },
+    enum: { type: 'array' },
+  },
+};
 
 const commandSchema = {
   type: 'object',
@@ -123,8 +136,76 @@ const commandSchema = {
     name: { type: 'string', required: true, minLength: 1 },
     type: { type: 'string', required: true, enum: VALID_COMMAND_TYPES },
     description: { type: 'string', required: true },
+    flags: { type: 'array', items: commandFlagSchema },
+    'allowed-tools': { type: 'array', items: { type: 'string' } },
   },
 };
+
+function isValidFlagDefault(defaultValue, flagType) {
+  if (defaultValue === null || defaultValue === undefined) return true;
+  if (flagType === 'string') return typeof defaultValue === 'string';
+  if (flagType === 'boolean') return typeof defaultValue === 'boolean';
+  if (flagType === 'number') return typeof defaultValue === 'number' && Number.isFinite(defaultValue);
+  if (flagType === 'integer') return Number.isInteger(defaultValue);
+  return true;
+}
+
+function validateCommandFlagSemantics(command, commandPath) {
+  const errors = [];
+  const flags = command.flags || [];
+  if (!Array.isArray(flags)) return errors;
+
+  for (let i = 0; i < flags.length; i++) {
+    const flag = flags[i];
+    const flagPath = `${commandPath}.flags[${i}]`;
+
+    if (!flag || typeof flag !== 'object' || Array.isArray(flag)) {
+      continue;
+    }
+
+    if (!isValidFlagDefault(flag.default, flag.type)) {
+      errors.push(
+        `${flagPath}.default: invalid default for type "${flag.type}"`
+      );
+    }
+
+    if (flag.required === true && (flag.default === null || flag.default === undefined)) {
+      errors.push(
+        `${flagPath}: required flag cannot have null/undefined default`
+      );
+    }
+
+    if (Array.isArray(flag.enum)) {
+      const expectedPrimitive = flag.type === 'integer' || flag.type === 'number' ? 'number' : flag.type;
+      for (let enumIndex = 0; enumIndex < flag.enum.length; enumIndex++) {
+        const enumValue = flag.enum[enumIndex];
+        if (typeof enumValue !== expectedPrimitive) {
+          errors.push(
+            `${flagPath}.enum[${enumIndex}]: expected ${expectedPrimitive}, got ${typeof enumValue}`
+          );
+        }
+      }
+
+      if (flag.default !== null && flag.default !== undefined && !flag.enum.includes(flag.default)) {
+        errors.push(
+          `${flagPath}.default: must be one of enum values`
+        );
+      }
+    }
+
+    if (
+      command.type === 'workflow' &&
+      (flag.name === '--team' || flag.name === '--phase') &&
+      (!Array.isArray(flag.enum) || flag.enum.length === 0)
+    ) {
+      errors.push(
+        `${flagPath}.enum: required for workflow routing flag "${flag.name}"`
+      );
+    }
+  }
+
+  return errors;
+}
 
 // ---------------------------------------------------------------------------
 // Schema: rules.yaml
@@ -775,9 +856,9 @@ export function validateSpec(agentkitRoot) {
       errors.push('commands.yaml: missing or invalid "commands" array');
     } else {
       for (let i = 0; i < commands.commands.length; i++) {
-        errors.push(
-          ...validate(commands.commands[i], commandSchema, `commands.yaml.commands[${i}]`)
-        );
+        const commandPath = `commands.yaml.commands[${i}]`;
+        errors.push(...validate(commands.commands[i], commandSchema, commandPath));
+        errors.push(...validateCommandFlagSemantics(commands.commands[i], commandPath));
       }
     }
   }

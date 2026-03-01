@@ -1,3 +1,6 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown rules file. Warp reads WARP.md (or AGENTS.md) from the repo root. -->
+<!-- Docs: https://docs.warp.dev/agent-platform/capabilities/rules -->
 # {{repoName}} — Warp Instructions
 
 {{#if projectDescription}}{{projectDescription}}{{/if}}

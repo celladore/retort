@@ -474,7 +474,7 @@ async function finalizeInit({
 
   // 5. Run sync
   console.log(`[agentkit:init] Running sync...`);
-  const { runSync } = await import('./sync.mjs');
+  const { runSync } = await import('./synchronize.mjs');
   await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
 
   console.log(`[agentkit:init] Done! Repo initialized as: ${repoName}`);

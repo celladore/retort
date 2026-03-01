@@ -2,6 +2,11 @@
 description: "Security rules for AI-assisted development"
 globs:
 alwaysApply: true
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: MDC (Markdown with YAML frontmatter). Cursor rule file.
+# Docs: https://docs.cursor.com/context/rules
 ---
 # Security Rules
 - Never read, print, or commit secrets or tokens

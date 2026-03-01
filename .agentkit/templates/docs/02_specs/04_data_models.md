@@ -10,23 +10,23 @@
 
 ## Entity Relationship Summary
 
-<!-- Include or link to an ER diagram in docs/03_architecture/02_diagrams/. -->
+<!-- Include or link to an ER diagram in docs/03_architecture/01_diagrams/. -->
 
 ## Models
 
 ### Model: <!-- EntityName -->
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `UUID` | Yes | Primary key |
-| `created_at` | `DateTime` | Yes | Record creation timestamp |
-| `updated_at` | `DateTime` | Yes | Last modification timestamp |
-| <!-- field --> | <!-- type --> | <!-- Y/N --> | <!-- description --> |
+| Field          | Type          | Required     | Description                 |
+| -------------- | ------------- | ------------ | --------------------------- |
+| `id`           | `UUID`        | Yes          | Primary key                 |
+| `created_at`   | `DateTime`    | Yes          | Record creation timestamp   |
+| `updated_at`   | `DateTime`    | Yes          | Last modification timestamp |
+| <!-- field --> | <!-- type --> | <!-- Y/N --> | <!-- description -->        |
 
 #### Indexes
 
-| Name | Columns | Unique |
-|------|---------|--------|
+| Name              | Columns          | Unique       |
+| ----------------- | ---------------- | ------------ |
 | <!-- idx_name --> | <!-- columns --> | <!-- Y/N --> |
 
 #### Relationships
@@ -35,9 +35,9 @@
 
 ### Model: <!-- EntityName2 -->
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `UUID` | Yes | Primary key |
+| Field          | Type          | Required     | Description          |
+| -------------- | ------------- | ------------ | -------------------- |
+| `id`           | `UUID`        | Yes          | Primary key          |
 | <!-- field --> | <!-- type --> | <!-- Y/N --> | <!-- description --> |
 
 ## Migration Strategy
