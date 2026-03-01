@@ -29,15 +29,15 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
 
 ## Testing
 
+{{#if testingUnit}}- Unit test framework: **{{testingUnit}}**.{{/if}}
 - Place unit tests in a `#[cfg(test)] mod tests` block at the bottom of
   each module.
 - Use `#[test]` for synchronous tests and `#[tokio::test]` for async tests.
 - Name test functions descriptively: `test_<function>_<scenario>_<expected>`.
 - Use `assert_eq!` and `assert_ne!` over plain `assert!` for clearer failure
   messages.
-- Write integration tests in the `tests/` directory for cross-module behavior.
-- Aim for high coverage on public API surfaces; internal helpers can have
-  lighter coverage if they are exercised through public API tests.
+- Write integration tests in the `tests/` directory for cross-module behaviour.
+{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** on public API surfaces.{{/if}}
 
 ## Dependencies
 
@@ -47,17 +47,26 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
   - Minimal transitive dependency count
 - Pin exact versions in `Cargo.toml` for binaries; use semver ranges for
   libraries.
+- Run `cargo audit` before merging new dependencies.
 
 ## Performance
 
 - Avoid unnecessary allocations in hot paths; prefer iterators over collecting
   into `Vec`.
-- Use `#[bench]` or Criterion for performance-sensitive code and include
-  benchmarks in the PR.
-- Profile before optimizing; do not sacrifice readability for speculative gains.
+- Use `#[bench]` or Criterion for performance-sensitive code.
+- Profile before optimising; do not sacrifice readability for speculative gains.
 
 ## Documentation
 
 - Add `///` doc comments to all public items.
 - Include usage examples in doc comments for public functions and types.
 - Run `cargo doc --no-deps` to verify documentation builds without warnings.
+
+{{#if ruleConventions}}
+## Project Conventions
+
+The following conventions are enforced in **{{projectName}}** and derived from
+`.agentkit/spec/rules.yaml`:
+
+{{ruleConventions}}
+{{/if}}

@@ -63,11 +63,14 @@ npx {{testingUnit}} run --coverage
 {{#if testingIntegration}}# Integration tests
 npx {{testingIntegration}} run --config vitest.integration.config.ts
 {{/if}}
-# Static analysis (security + quality)
+{{#if hasStaticAnalysis}}# Static analysis
+# {{testingStaticAnalysis}}
+{{/if}}
+{{#unless hasStaticAnalysis}}# Static analysis (security + quality)
 # npx semgrep --config=auto .
-
+{{/unless}}
 # Dependency audit
-# npm audit
+# npm audit      (Node.js)
 # cargo audit    (Rust)
 # pip-audit      (Python)
 ```

@@ -559,6 +559,61 @@ async function syncCopilotChatModes(
   }
 }
 
+/**
+ * Generates .github/instructions/languages/<domain>.md for every domain in rulesSpec.
+ * Uses a domain-specific template (copilot/language-instructions/<domain>.md) when
+ * available, falling back to copilot/language-instructions/TEMPLATE.md for domains
+ * without a dedicated template.
+ * Template vars include both project-level vars and per-domain rule vars
+ * (ruleDomain, ruleDescription, ruleAppliesTo, ruleConventions).
+ * Also generates .github/instructions/languages/README.md from the README template.
+ */
+async function syncCopilotLanguageInstructions(
+  templatesDir,
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  rulesSpec
+) {
+  const langTplDir = join(templatesDir, 'copilot', 'language-instructions');
+  if (!existsSync(langTplDir)) return;
+
+  const fallbackTplPath = join(langTplDir, 'TEMPLATE.md');
+  const rules = rulesSpec?.rules || [];
+
+  for (const rule of rules) {
+    const domainTplPath = join(langTplDir, `${rule.domain}.md`);
+    const tplPath = existsSync(domainTplPath)
+      ? domainTplPath
+      : existsSync(fallbackTplPath)
+        ? fallbackTplPath
+        : null;
+    if (!tplPath) continue;
+
+    const template = await readTemplateText(tplPath);
+    const ruleVars = buildRuleVars(rule, vars);
+    const rendered = renderTemplate(template, ruleVars, tplPath);
+    const withHeader = insertHeader(rendered, '.md', version, repoName);
+    await writeOutput(
+      join(tmpDir, '.github', 'instructions', 'languages', `${rule.domain}.md`),
+      withHeader
+    );
+  }
+
+  // Generate README from template
+  const readmeTplPath = join(langTplDir, 'README.md');
+  if (existsSync(readmeTplPath)) {
+    const readmeTemplate = await readTemplateText(readmeTplPath);
+    const rendered = renderTemplate(readmeTemplate, vars, readmeTplPath);
+    const withHeader = insertHeader(rendered, '.md', version, repoName);
+    await writeOutput(
+      join(tmpDir, '.github', 'instructions', 'languages', 'README.md'),
+      withHeader
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Gemini sync helper
 // ---------------------------------------------------------------------------
@@ -946,7 +1001,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
       syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+      syncCopilotLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec)
     );
   }
 
