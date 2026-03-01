@@ -50,3 +50,4 @@ Describe how you tested these changes:
 - [ ] Filed in correct `docs/history/` subdirectory
 - [ ] Sequential number assigned via `.index.json`
 - [ ] Related ADRs cross-referenced
+- [ ] `CHANGELOG.md` updated (auto-updated by `create-doc.sh`, or run `./scripts/update-changelog.sh`)

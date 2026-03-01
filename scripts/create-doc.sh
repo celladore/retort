@@ -123,3 +123,23 @@ node - "$INDEX_FILE" "$TYPE" "$SEQ_NUM" "$TITLE" "$DATE" "${PR_NUMBER:-}" "$SUBD
 NODEEOF
 
 echo "Created: $DEST_FILE"
+
+# ---------------------------------------------------------------------------
+# Update CHANGELOG.md
+# ---------------------------------------------------------------------------
+
+# Map history doc type to changelog section
+case "$TYPE" in
+  feature)        CHANGELOG_SECTION="Added" ;;
+  implementation) CHANGELOG_SECTION="Added" ;;
+  bugfix)         CHANGELOG_SECTION="Fixed" ;;
+  migration)      CHANGELOG_SECTION="Changed" ;;
+esac
+
+UPDATE_CHANGELOG="$SCRIPT_DIR/update-changelog.sh"
+if [[ -f "$UPDATE_CHANGELOG" ]]; then
+  bash "$UPDATE_CHANGELOG" "$CHANGELOG_SECTION" "$TITLE" "${PR_NUMBER:-}" "$SUBDIR/$FILENAME" || \
+    echo "⚠️  Could not update CHANGELOG.md — please add the entry manually."
+else
+  echo "ℹ️  update-changelog.sh not found — skipping changelog update."
+fi

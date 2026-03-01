@@ -123,3 +123,27 @@ if ($null -eq $Index.entries) {
 $Index | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 $IndexFile
 
 Write-Host "Created: $DestFile"
+
+# ---------------------------------------------------------------------------
+# Update CHANGELOG.md
+# ---------------------------------------------------------------------------
+
+$ChangelogSectionMap = @{
+  feature        = 'Added'
+  implementation = 'Added'
+  bugfix         = 'Fixed'
+  migration      = 'Changed'
+}
+$ChangelogSection = $ChangelogSectionMap[$Type]
+
+$UpdateChangelogScript = Join-Path $ScriptDir 'update-changelog.ps1'
+if (Test-Path $UpdateChangelogScript) {
+  try {
+    & $UpdateChangelogScript -Section $ChangelogSection -Description $Title `
+      -PrNumber $PrNumber -HistoryDoc "$Subdir/$Filename"
+  } catch {
+    Write-Warning "Could not update CHANGELOG.md — please add the entry manually."
+  }
+} else {
+  Write-Host "ℹ️  update-changelog.ps1 not found — skipping changelog update."
+}

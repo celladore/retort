@@ -105,7 +105,30 @@ docs/history/features/0001-2026-03-01-user-authentication-feature.md
 ## PR Checklist Integration
 
 The PR template includes a documentation checklist. For changes classified as
-"High Impact", documentation is required before merging.
+"High Impact", documentation is required before merging, including a
+`CHANGELOG.md` entry.
+
+## Changelog Integration
+
+Creating a history document via `./scripts/create-doc.sh` automatically adds
+an entry to `CHANGELOG.md` under the `[Unreleased]` section:
+
+| History Doc Type | Changelog Section |
+|------------------|-------------------|
+| `feature` | `Added` |
+| `implementation` | `Added` |
+| `bugfix` | `Fixed` |
+| `migration` | `Changed` |
+
+To add a changelog entry independently:
+
+```bash
+./scripts/update-changelog.sh Added "New feature description" 42 \
+  "docs/history/features/0001-2026-03-01-my-feature-feature.md"
+```
+
+See [07_changelog.md](./07_changelog.md) for changelog best practices and
+optional automation tooling (release-please, conventional-changelog, git-cliff).
 
 ## GitHub Actions Enforcement
 
