@@ -2,7 +2,7 @@
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# ADR-0001: Adopt AgentKit Forge
+# ADR-01: Adopt AgentKit Forge
 
 ## Status
 
