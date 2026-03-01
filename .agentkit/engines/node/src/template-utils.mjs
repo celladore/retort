@@ -258,7 +258,6 @@ export function flattenProjectYaml(project, docsSpec = null) {
     !!vars.drRpoHours ||
     !!vars.drRtoHours ||
     !!vars.drBackupSchedule ||
-    !!vars.drTestSchedule ||
     !!vars.auditEventBus;
 
   // Integrations (kept as array for {{#each}})
