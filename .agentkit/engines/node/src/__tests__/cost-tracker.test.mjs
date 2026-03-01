@@ -1,15 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
-import { dirname, resolve } from 'path';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdirSync, rmSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-    endSession,
-    generateReport,
-    generateSessionId,
-    getSessions,
-    initSession,
-    logEvent,
-    recordCommand,
+  generateSessionId, initSession, endSession, logEvent,
+  getSessions, generateReport, recordCommand,
 } from '../cost-tracker.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -98,7 +93,8 @@ describe('cost-tracker', () => {
 
       const files = readdirSync(sessDir).filter(f => f.startsWith('session-') && f.endsWith('.json'));
       expect(files.length).toBeGreaterThan(0);
-      expect(files.some((f) => f.includes(session.sessionId))).toBe(true);
+      const sessionFile = files.find(f => f.includes(session.sessionId));
+      expect(sessionFile).toBeDefined();
     });
 
     it('creates a latest-session pointer file', () => {
@@ -136,7 +132,7 @@ describe('cost-tracker', () => {
     });
 
     it('does nothing when no sessions directory exists', () => {
-      // No initSession called — directory does not exist
+      // No initSession called - directory does not exist
       expect(() => recordCommand(TEST_AGENTKIT, 'check')).not.toThrow();
     });
   });
@@ -193,3 +189,4 @@ describe('cost-tracker', () => {
     });
   });
 });
+

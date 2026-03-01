@@ -8,7 +8,7 @@ directions we may explore based on community feedback and usage patterns.
 ## Near Term (v0.2.x)
 
 ### Plugin System for Sync Targets
-Dynamically discover `syncXxx()` functions instead of hard-coding them in `sync.mjs`.
+Dynamically discover `syncXxx()` functions instead of hard-coding them in `synchronize.mjs`.
 Enables third-party sync targets without forking the engine.
 
 ### ESLint + Prettier for Engine Source

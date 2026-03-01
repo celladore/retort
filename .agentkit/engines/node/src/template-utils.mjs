@@ -5,12 +5,13 @@
  */
 import { extname } from 'path';
 import { PROJECT_MAPPING, get, transform, check } from './project-mapping.mjs';
+import { computeProjectCompleteness as computeProjectCompletenessBase } from './project-completeness.mjs';
 
 // ---------------------------------------------------------------------------
 // Template rendering
 // ---------------------------------------------------------------------------
 
-const RAW_TEMPLATE_VARS = new Set(['commandFlags']);
+const RAW_TEMPLATE_VARS = new Set(['commandFlags', 'agentConventions', 'agentExamples']);
 
 function isShellScriptTarget(targetPath) {
   const ext = extname(targetPath || '').toLowerCase();
@@ -29,16 +30,16 @@ function isShellScriptTarget(targetPath) {
  */
 export function renderTemplate(template, vars, targetPath = '') {
   let result = template;
-  const allowRawVars = isShellScriptTarget(targetPath);
+  const sanitizeStrings = isShellScriptTarget(targetPath);
 
   // Phase 1: Resolve {{#if var}}...{{/if}} blocks (supports nesting)
   result = resolveConditionals(result, vars);
 
   // Phase 2: Resolve {{#each var}}...{{/each}} blocks
-  result = resolveEachBlocks(result, vars);
+  result = resolveEachBlocks(result, vars, sanitizeStrings);
 
   // Phase 3: Replace {{key}} placeholders
-  result = replacePlaceholders(result, vars, allowRawVars);
+  result = replacePlaceholders(result, vars, sanitizeStrings);
 
   // Phase 4: Collapse excessive blank lines left by removed conditionals
   result = collapseBlankLines(result);
@@ -61,7 +62,7 @@ export function collapseBlankLines(text) {
  * - Allows raw values for keys in RAW_TEMPLATE_VARS when allowRawVars is true
  * - Warns on unresolved placeholders when DEBUG is set
  */
-export function replacePlaceholders(template, vars, allowRawVars = false) {
+export function replacePlaceholders(template, vars, sanitizeStrings = false) {
   let result = template;
   const sortedKeys = Object.keys(vars).sort((a, b) => b.length - a.length);
   for (const key of sortedKeys) {
@@ -69,9 +70,9 @@ export function replacePlaceholders(template, vars, allowRawVars = false) {
     const placeholder = `{{${key}}}`;
     const safeValue =
       typeof value === 'string'
-        ? allowRawVars && RAW_TEMPLATE_VARS.has(key)
-          ? value
-          : sanitizeTemplateValue(value)
+        ? sanitizeStrings && !RAW_TEMPLATE_VARS.has(key)
+          ? sanitizeTemplateValue(value)
+          : value
         : JSON.stringify(value);
     result = result.split(placeholder).join(safeValue);
   }
@@ -147,7 +148,7 @@ export function resolveConditionals(template, vars) {
  * Inside the block, {{.}} refers to the current item (for string arrays).
  * For object arrays, {{.name}}, {{.purpose}} etc. access properties.
  */
-export function resolveEachBlocks(template, vars) {
+export function resolveEachBlocks(template, vars, sanitizeStrings = false) {
   const eachRegex = /\{\{#each\s+([a-zA-Z_][a-zA-Z0-9_]*)\}\}([\s\S]*?)\{\{\/each\}\}/g;
   return template.replace(eachRegex, (_, varName, body) => {
     const arr = vars[varName];
@@ -157,13 +158,19 @@ export function resolveEachBlocks(template, vars) {
         let rendered = body;
         // Replace {{.}} with the item itself (for string arrays)
         if (typeof item === 'string') {
-          rendered = rendered.split('{{.}}').join(sanitizeTemplateValue(item));
+          rendered = rendered
+            .split('{{.}}')
+            .join(sanitizeStrings ? sanitizeTemplateValue(item) : item);
         } else if (typeof item === 'object' && item !== null) {
           // Replace {{.prop}} with item.prop
           rendered = rendered.replace(/\{\{\.([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g, (__, prop) => {
             const val = item[prop];
             if (val === undefined || val === null) return '';
-            return typeof val === 'string' ? sanitizeTemplateValue(val) : JSON.stringify(val);
+            return typeof val === 'string'
+              ? sanitizeStrings
+                ? sanitizeTemplateValue(val)
+                : val
+              : JSON.stringify(val);
           });
         }
         // Replace {{@index}} with current index
@@ -251,7 +258,6 @@ export function flattenProjectYaml(project, docsSpec = null) {
     !!vars.drRpoHours ||
     !!vars.drRtoHours ||
     !!vars.drBackupSchedule ||
-    !!vars.drTestSchedule ||
     !!vars.auditEventBus;
 
   // Integrations (kept as array for {{#each}})
@@ -542,38 +548,5 @@ export function printSyncSummary(fileSummary, targets, opts) {
  * Returns { total, present, percent, missing }.
  */
 export function computeProjectCompleteness(projectSpec) {
-  if (!projectSpec || typeof projectSpec !== 'object') {
-    return { total: 0, present: 0, percent: 0, missing: [] };
-  }
-  const fields = [
-    'name',
-    'description',
-    'phase',
-    'stack.languages',
-    'stack.database',
-    'architecture.pattern',
-    'architecture.apiStyle',
-    'deployment.cloudProvider',
-    'deployment.environments',
-    'testing.coverage',
-  ];
-  const missing = [];
-  let present = 0;
-  for (const field of fields) {
-    const parts = field.split('.');
-    let val = projectSpec;
-    for (const p of parts) val = val?.[p];
-    const isEmpty =
-      val === undefined ||
-      val === null ||
-      val === '' ||
-      (Array.isArray(val) && val.length === 0);
-    if (!isEmpty) {
-      present++;
-    } else {
-      missing.push(field);
-    }
-  }
-  const percent = Math.round((present / fields.length) * 100);
-  return { total: fields.length, present, percent, missing };
+  return computeProjectCompletenessBase(projectSpec, { profile: 'generation' });
 }

@@ -10,13 +10,13 @@ Git branching strategy and contribution workflow for {{repoName}}.
 
 ## Branch Strategy
 
-| Branch | Purpose | Deploys To |
-|--------|---------|-----------|
-| `main` | Production-ready code | Production |
-| `develop` | Integration branch | Staging |
-| `feature/*` | New features | — |
-| `fix/*` | Bug fixes | — |
-| `release/*` | Release preparation | — |
+| Branch      | Purpose               | Deploys To |
+| ----------- | --------------------- | ---------- |
+| `main`      | Production-ready code | Production |
+| `develop`   | Integration branch    | Staging    |
+| `feature/*` | New features          | —          |
+| `fix/*`     | Bug fixes             | —          |
+| `release/*` | Release preparation   | —          |
 
 ## Workflow
 
@@ -60,6 +60,32 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) standard
 - [ ] Tests are included and passing
 - [ ] Documentation updated if needed
 - [ ] No security concerns introduced
+
+## Branch Protection Checklist
+
+Apply these settings on the default branch (`main`):
+
+- [ ] Require pull request before merge
+- [ ] Require at least 1 approval
+- [ ] Dismiss stale approvals when new commits are pushed
+- [ ] Require conversation resolution before merge
+- [ ] Require status checks to pass before merge
+- [ ] Restrict force-pushes and branch deletion
+
+### Required Status Checks
+
+Set these checks as **required**:
+
+- `CI`
+- `CodeQL`
+
+Keep these checks **advisory** (not required initially):
+
+- `Semgrep (Advisory)`
+
+Promotion guidance:
+
+- Promote selected Semgrep checks to required only after at least 2 sprints of low-noise results.
 
 ## References
 

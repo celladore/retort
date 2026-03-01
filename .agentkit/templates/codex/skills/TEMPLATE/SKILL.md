@@ -18,11 +18,17 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 
 ## Instructions
 
-1. Parse any arguments provided
-2. Scan relevant files to understand the current state
-3. Execute the task following project conventions
-4. Validate the output against quality gates
-5. Report results clearly
+1. Parse command arguments and identify requested scope/files
+2. Scan relevant files and adjacent tests/docs before changes
+3. Execute the task with minimal diffs and explicit error handling
+4. Validate using concrete checks (prefer `pnpm check-all`, plus command-specific test/lint/build)
+5. Report outcomes with changed files, checks run, and any follow-up actions
+
+## Output
+
+- Return a concise summary with status (`success`/`partial`/`failed`)
+- Include validation evidence (exit code, failing command, or passing summary)
+- Include next-step remediation when checks fail
 
 ## Project Context
 

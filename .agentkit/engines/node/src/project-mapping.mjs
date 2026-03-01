@@ -81,7 +81,6 @@ export const PROJECT_MAPPING = [
   { src: 'compliance.disasterRecovery.rpoHours', dest: 'drRpoHours', type: 'string' },
   { src: 'compliance.disasterRecovery.rtoHours', dest: 'drRtoHours', type: 'string' },
   { src: 'compliance.disasterRecovery.backupSchedule', dest: 'drBackupSchedule', check: 'not-none' },
-  { src: 'compliance.disasterRecovery.backupSchedule', dest: 'drTestSchedule', check: 'not-none' },
   { src: 'compliance.disasterRecovery.geoRedundancy', dest: 'hasGeoRedundancy', type: 'boolean' },
   { src: 'compliance.audit.enabled', dest: 'hasAudit', type: 'boolean' },
   { src: 'compliance.audit.appendOnly', dest: 'hasAppendOnlyAudit', type: 'boolean' },

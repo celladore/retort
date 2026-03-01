@@ -3,8 +3,8 @@
  * Scans the repository to detect tech stacks, project structure, team boundaries,
  * and build a structured discovery report.
  */
-import { existsSync } from 'fs';
-import { access, readdir, readFile } from 'fs/promises';
+import { existsSync, promises as fsPromises } from 'fs';
+const { readdir, access, readFile } = fsPromises;
 import yaml from 'js-yaml';
 import { basename, extname, join, resolve } from 'node:path';
 
@@ -393,42 +393,43 @@ const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.n
 
 async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
   let count = 0;
-  // Global semaphore — limits total concurrent readdir calls across the entire walk
-  // to prevent EMFILE errors on deep or wide repository trees.
-  const MAX_CONCURRENCY = 8;
+  // Simple concurrency limiter to avoid EMFILE
+  const CONCURRENCY_LIMIT = 50;
   let active = 0;
   const queue = [];
 
-  function schedule(fn) {
-    return new Promise((resolve, reject) => {
-      const run = async () => {
-        active++;
-        try {
-          resolve(await fn());
-        } catch (err) {
-          reject(err);
-        } finally {
+  const processQueue = () => {
+    while (active < CONCURRENCY_LIMIT && queue.length > 0) {
+      const { run, resolve, reject } = queue.shift();
+      active++;
+      run()
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
           active--;
-          if (queue.length > 0) queue.shift()();
-        }
-      };
-      if (active < MAX_CONCURRENCY) {
-        run();
-      } else {
-        queue.push(run);
-      }
+          processQueue();
+        });
+    }
+  };
+
+  // Limits execution of `fn`
+  const limit = (fn) => {
+    return new Promise((resolve, reject) => {
+      queue.push({ run: fn, resolve, reject });
+      processQueue();
     });
-  }
+  };
 
   async function walk(currentDir, currentDepth) {
     if (currentDepth > depth || count > maxFiles) return;
-    if (!existsSync(currentDir)) return;
 
     try {
-      const entries = await schedule(() => readdir(currentDir, { withFileTypes: true }));
-      const subdirs = [];
+      // Only limit the readdir call, not the recursive structure
+      const entries = await limit(() => fsPromises.readdir(currentDir, { withFileTypes: true }));
 
+      const tasks = [];
       for (const entry of entries) {
+        if (count > maxFiles) break;
         if (entry.name.startsWith('.') || SKIP_DIRS.has(entry.name)) continue;
         // Skip agentkit engine internals — framework code, not app code
         if (currentDepth === 0 && entry.name === '.agentkit') continue;
@@ -436,15 +437,15 @@ async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
         const full = join(currentDir, entry.name);
 
         if (entry.isDirectory()) {
-          subdirs.push(full);
+          tasks.push(walk(full, currentDepth + 1));
         } else if (extensions.includes(extname(entry.name))) {
-          count++;
+            count++;
         }
       }
 
-      await Promise.all(subdirs.map(full => walk(full, currentDepth + 1)));
-    } catch {
-      /* permission errors or other fs issues */
+      await Promise.all(tasks);
+    } catch (err) {
+      /* permission errors or ENOENT */
     }
   }
 
@@ -737,10 +738,9 @@ async function detectFromList(
     if (!matched && d.deps?.length && pythonDeps.size > 0) {
       if (d.deps.some((dep) => pythonDeps.has(dep.toLowerCase()))) matched = true;
     }
-    // Check file extensions (e.g. .scss files) - NOW ASYNC
+    // Check file extensions (e.g. .scss files)
     if (!matched && d.fileExt) {
-      const count = await countFilesByExt(projectRoot, [d.fileExt], 2, 5);
-      if (count > 0) matched = true;
+      if ((await countFilesByExt(projectRoot, [d.fileExt], 2, 5)) > 0) matched = true;
     }
 
     if (matched) return { name: d.name, label: d.label };
@@ -804,7 +804,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
     const markerFound = results.some(Boolean);
     if (markerFound) {
       const fileCount = await countFilesByExt(projectRoot, detector.filePatterns);
-      const configsFound = (await Promise.all(detector.configFiles.map(async (c) => ({ c, exists: await fileExists(projectRoot, c) })))).filter(r => r.exists).map(r => r.c);
+      const configsFound = detector.configFiles.filter((c) => existsSync(resolve(projectRoot, c)));
       return {
         name: detector.name,
         label: detector.label,
@@ -853,12 +853,12 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   };
 
   // --- Framework detection (§11a) ---
-  await Promise.all(Object.entries(FRAMEWORK_DETECTORS).map(async ([category, detectors]) => {
+  for (const [category, detectors] of Object.entries(FRAMEWORK_DETECTORS)) {
     const found = await detectFromList(detectors, depContext);
     if (found.length > 0) {
       report.frameworks[category] = found.map((f) => f.name);
     }
-  }));
+  }
 
   // --- Testing tool detection (§11b) ---
   const testingFound = await detectFromList(TESTING_DETECTORS, depContext);
@@ -915,12 +915,12 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   report.designSystem = designResults.filter(Boolean);
 
   // --- Cross-cutting concern detection (§11f) ---
-  await Promise.all(Object.entries(CROSSCUTTING_DETECTORS).map(async ([concern, detectors]) => {
+  for (const [concern, detectors] of Object.entries(CROSSCUTTING_DETECTORS)) {
     const found = await detectFromList(detectors, depContext);
     if (found.length > 0) {
       report.crosscutting[concern] = found.map((f) => f.name);
     }
-  }));
+  }
 
   // --- Environment config detection ---
   if (await fileExists(projectRoot, '.env.example')) {
@@ -1097,3 +1097,4 @@ function formatMarkdown(report) {
 
   return lines.join('\n');
 }
+

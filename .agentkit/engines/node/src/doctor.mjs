@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { resolve } from 'path';
 import { validateSpec } from './spec-validator.mjs';
+import { computeProjectCompleteness } from './project-completeness.mjs';
 
 function resolveSpecRoot(agentkitRoot, projectRoot) {
   const projectAgentkitRoot = resolve(projectRoot, '.agentkit');
@@ -65,54 +66,6 @@ function loadOverlayRenderTargets(agentkitRoot) {
       error: `Failed to parse overlay settings at ${overlayPath}: ${err.message}`,
     };
   }
-}
-
-function projectCompleteness(project) {
-  if (!project || typeof project !== 'object')
-    return { percent: 0, present: 0, total: 0, missing: [] };
-
-  const fields = [
-    'name',
-    'description',
-    'phase',
-    'stack.languages',
-    'stack.database',
-    'architecture.pattern',
-    'deployment.cloudProvider',
-    'deployment.iacTool',
-    'infrastructure.namingConvention',
-    'infrastructure.defaultRegion',
-    'infrastructure.org',
-    'observability.monitoring.provider',
-    'observability.alerting.provider',
-    'observability.tracing.provider',
-    'compliance.framework',
-    'compliance.disasterRecovery.rpoHours',
-    'compliance.disasterRecovery.rtoHours',
-    'compliance.audit.eventBus',
-  ];
-
-  const get = (obj, path) =>
-    path.split('.').reduce((a, k) => (a && a[k] !== undefined ? a[k] : undefined), obj);
-
-  const present = [];
-  const missing = [];
-  for (const f of fields) {
-    const val = get(project, f);
-    if (
-      val !== undefined &&
-      val !== null &&
-      val !== '' &&
-      !(Array.isArray(val) && val.length === 0)
-    ) {
-      present.push(f);
-    } else {
-      missing.push(f);
-    }
-  }
-
-  const percent = Math.round((present.length / fields.length) * 100);
-  return { percent, present: present.length, total: fields.length, missing };
 }
 
 export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
@@ -183,7 +136,7 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
     try {
       const project =
         yaml.load(readFileSync(projectPath, 'utf-8'), { schema: FAILSAFE_SCHEMA }) || {};
-      const c = projectCompleteness(project);
+      const c = computeProjectCompleteness(project, { profile: 'diagnostics' });
       findings.push({
         severity: 'info',
         message: `project.yaml completeness: ${c.percent}% (${c.present}/${c.total})`,

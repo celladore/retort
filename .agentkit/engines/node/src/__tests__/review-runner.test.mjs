@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { existsSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as orchestrator from '../orchestrator.mjs';
 import { runReview } from '../review-runner.mjs';
 import * as runner from '../runner.mjs';
-import * as orchestrator from '../orchestrator.mjs';
-import { mkdirSync, writeFileSync, rmSync, existsSync, symlinkSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-review');
@@ -206,15 +206,20 @@ describe('review-runner', () => {
 
     it('rejects symlinks traversing outside project root', async () => {
       setupTestRepo();
-      const secretFile = resolve(TEST_ROOT, '..', 'secret.txt');
-      // Create file outside project root
+      const externalDir = resolve(TEST_ROOT, '..', 'external-target');
+      const secretFile = resolve(externalDir, 'secret.txt');
+      mkdirSync(externalDir, { recursive: true });
       writeFileSync(secretFile, 'secret-data', 'utf-8');
 
       try {
-        // Create symlink inside project root pointing outside
-        const symlinkPath = resolve(TEST_ROOT, 'symlink.txt');
-        if (existsSync(symlinkPath)) rmSync(symlinkPath);
-        symlinkSync(secretFile, symlinkPath);
+        const linkDirPath = resolve(TEST_ROOT, 'linked-out');
+        if (existsSync(linkDirPath)) rmSync(linkDirPath, { recursive: true, force: true });
+
+        if (process.platform === 'win32') {
+          symlinkSync(externalDir, linkDirPath, 'junction');
+        } else {
+          symlinkSync(externalDir, linkDirPath);
+        }
 
         vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -222,12 +227,11 @@ describe('review-runner', () => {
           runReview({
             agentkitRoot: resolve(__dirname, '..', '..', '..', '..'),
             projectRoot: TEST_ROOT,
-            flags: { file: 'symlink.txt' },
+            flags: { file: 'linked-out/secret.txt' },
           })
         ).rejects.toThrow('File must be within the project root (symlinks traversing outside are not allowed)');
       } finally {
-        // Clean up the external file
-        if (existsSync(secretFile)) rmSync(secretFile);
+        if (existsSync(externalDir)) rmSync(externalDir, { recursive: true, force: true });
       }
     });
   });

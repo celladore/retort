@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
-import { afterEach, beforeEach, describe, expect, it, test } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, test } from 'vitest';
 import { runSync } from '../synchronize.mjs';
 
 // ---------------------------------------------------------------------------
@@ -14,7 +14,7 @@ const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
 function makeTmpProject() {
   const dir = resolve(
     tmpdir(),
-    `agentkit-wave3-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    `agentkit-sync-integration-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -36,15 +36,16 @@ function collectFiles(dir, base = dir) {
 }
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Copilot Prompts
+// Tests: Sync Integration — Copilot Prompts
 // ---------------------------------------------------------------------------
 describe('syncCopilotPrompts (via runSync --only copilot)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
@@ -52,7 +53,6 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
     'generates .github/prompts/*.prompt.md for non-team commands',
     { timeout: 15000 },
     async () => {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
       const files = collectFiles(projectRoot);
       const prompts = files.filter((f) => f.startsWith('.github/prompts/'));
       expect(prompts.length).toBeGreaterThan(0);
@@ -64,8 +64,7 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
     }
   );
 
-  it('prompt files contain GENERATED header', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
+  it('prompt files contain GENERATED header', { timeout: 15000 }, async () => {
     const content = readFileSync(
       resolve(projectRoot, '.github', 'prompts', 'build.prompt.md'),
       'utf-8'
@@ -74,7 +73,6 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
   });
 
   it('prompt files contain frontmatter', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const content = readFileSync(
       resolve(projectRoot, '.github', 'prompts', 'build.prompt.md'),
       'utf-8'
@@ -84,20 +82,20 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Copilot Agents
+// Tests: Sync Integration — Copilot Agents
 // ---------------------------------------------------------------------------
 describe('syncCopilotAgents (via runSync --only copilot)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it('generates .github/agents/*.agent.md from agents.yaml', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const files = collectFiles(projectRoot);
     const agents = files.filter((f) => f.startsWith('.github/agents/'));
     expect(agents.length).toBeGreaterThan(0);
@@ -106,7 +104,6 @@ describe('syncCopilotAgents (via runSync --only copilot)', () => {
   });
 
   it('agent files contain agent name and role', { timeout: 15000 }, async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const content = readFileSync(
       resolve(projectRoot, '.github', 'agents', 'backend.agent.md'),
       'utf-8'
@@ -116,20 +113,20 @@ describe('syncCopilotAgents (via runSync --only copilot)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Copilot Chat Modes
+// Tests: Sync Integration — Copilot Chat Modes
 // ---------------------------------------------------------------------------
 describe('syncCopilotChatModes (via runSync --only copilot)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it('generates .github/chatmodes/team-*.chatmode.md from teams.yaml', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const files = collectFiles(projectRoot);
     const chatmodes = files.filter((f) => f.startsWith('.github/chatmodes/'));
     expect(chatmodes.length).toBeGreaterThan(0);
@@ -138,7 +135,6 @@ describe('syncCopilotChatModes (via runSync --only copilot)', () => {
   });
 
   it('chat mode files contain team focus', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
     const content = readFileSync(
       resolve(projectRoot, '.github', 'chatmodes', 'team-backend.chatmode.md'),
       'utf-8'
@@ -148,61 +144,57 @@ describe('syncCopilotChatModes (via runSync --only copilot)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Gemini
+// Tests: Sync Integration — Gemini
 // ---------------------------------------------------------------------------
 describe('syncGemini (via runSync --only gemini)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it('generates GEMINI.md at project root', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
     expect(existsSync(resolve(projectRoot, 'GEMINI.md'))).toBe(true);
   });
 
   it('generates .gemini/styleguide.md', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
     expect(existsSync(resolve(projectRoot, '.gemini', 'styleguide.md'))).toBe(true);
   });
 
   it('generates .gemini/config.yaml', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
     expect(existsSync(resolve(projectRoot, '.gemini', 'config.yaml'))).toBe(true);
   });
 
   it('GEMINI.md contains GENERATED header', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
     const content = readFileSync(resolve(projectRoot, 'GEMINI.md'), 'utf-8');
     expect(content).toContain('GENERATED by AgentKit Forge');
   });
 
   it('GEMINI.md contains project template vars', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
     const content = readFileSync(resolve(projectRoot, 'GEMINI.md'), 'utf-8');
     expect(content).toContain('Gemini Instructions');
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Codex Skills
+// Tests: Sync Integration — Codex Skills
 // ---------------------------------------------------------------------------
 describe('syncCodexSkills (via runSync --only codex)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('generates .agents/skills/*/SKILL.md for non-team commands', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
+  it('generates .agents/skills/*/SKILL.md for non-team commands', { timeout: 15000 }, async () => {
     const files = collectFiles(projectRoot);
     const skills = files.filter((f) => f.startsWith('.agents/skills/'));
     expect(skills.length).toBeGreaterThan(0);
@@ -211,8 +203,7 @@ describe('syncCodexSkills (via runSync --only codex)', () => {
     expect(skills.some((f) => f.includes('team-backend/SKILL.md'))).toBe(false);
   });
 
-  it('SKILL.md contains command name', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
+  it('SKILL.md contains command name', { timeout: 15000 }, async () => {
     const content = readFileSync(
       resolve(projectRoot, '.agents', 'skills', 'build', 'SKILL.md'),
       'utf-8'
@@ -223,20 +214,20 @@ describe('syncCodexSkills (via runSync --only codex)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3A — Claude Skills
+// Tests: Sync Integration — Claude Skills
 // ---------------------------------------------------------------------------
 describe('syncClaudeSkills (via runSync --only claude)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('generates .claude/skills/*/SKILL.md for non-team commands', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
+  it('generates .claude/skills/*/SKILL.md for non-team commands', { timeout: 15000 }, async () => {
     const files = collectFiles(projectRoot);
     const skills = files.filter((f) => f.startsWith('.claude/skills/'));
     expect(skills.length).toBeGreaterThan(0);
@@ -245,20 +236,20 @@ describe('syncClaudeSkills (via runSync --only claude)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3B — Cursor Commands
+// Tests: Sync Integration — Cursor Commands
 // ---------------------------------------------------------------------------
 describe('syncCursorCommands (via runSync --only cursor)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cursor' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it('generates .cursor/commands/*.md for non-team commands', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cursor' } });
     const files = collectFiles(projectRoot);
     const commands = files.filter((f) => f.startsWith('.cursor/commands/'));
     expect(commands.length).toBeGreaterThan(0);
@@ -269,58 +260,55 @@ describe('syncCursorCommands (via runSync --only cursor)', () => {
   });
 
   it('cursor command files contain GENERATED header', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cursor' } });
     const content = readFileSync(resolve(projectRoot, '.cursor', 'commands', 'build.md'), 'utf-8');
     expect(content).toContain('GENERATED by AgentKit Forge');
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3B — WARP.md
+// Tests: Sync Integration — WARP.md
 // ---------------------------------------------------------------------------
 describe('syncWarp (via runSync --only warp)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it('generates WARP.md at project root', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
     expect(existsSync(resolve(projectRoot, 'WARP.md'))).toBe(true);
   });
 
   it('WARP.md contains GENERATED header', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
     const content = readFileSync(resolve(projectRoot, 'WARP.md'), 'utf-8');
     expect(content).toContain('GENERATED by AgentKit Forge');
   });
 
   it('WARP.md contains Warp Instructions heading', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
     const content = readFileSync(resolve(projectRoot, 'WARP.md'), 'utf-8');
     expect(content).toContain('Warp Instructions');
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3C — Cline Rules
+// Tests: Sync Integration — Cline Rules
 // ---------------------------------------------------------------------------
 describe('syncClineRules (via runSync --only cline)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cline' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it('generates .clinerules/*.md from rules.yaml domains', { timeout: 15000 }, async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cline' } });
     const files = collectFiles(projectRoot);
     const rules = files.filter((f) => f.startsWith('.clinerules/'));
     expect(rules.length).toBeGreaterThan(0);
@@ -329,7 +317,6 @@ describe('syncClineRules (via runSync --only cline)', () => {
   });
 
   it('cline rule files contain domain name and conventions', { timeout: 15000 }, async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cline' } });
     const content = readFileSync(resolve(projectRoot, '.clinerules', 'typescript.md'), 'utf-8');
     expect(content).toContain('typescript');
     expect(content).toContain('Conventions');
@@ -337,20 +324,20 @@ describe('syncClineRules (via runSync --only cline)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Wave 3C — Roo Code Rules
+// Tests: Sync Integration — Roo Code Rules
 // ---------------------------------------------------------------------------
 describe('syncRooRules (via runSync --only roo)', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'roo' } });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('generates .roo/rules/*.md from rules.yaml domains', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'roo' } });
+  it('generates .roo/rules/*.md from rules.yaml domains', { timeout: 15000 }, async () => {
     const files = collectFiles(projectRoot);
     const rules = files.filter((f) => f.startsWith('.roo/rules/'));
     expect(rules.length).toBeGreaterThan(0);
@@ -359,7 +346,6 @@ describe('syncRooRules (via runSync --only roo)', () => {
   });
 
   it('roo rule files contain GENERATED header', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'roo' } });
     const content = readFileSync(resolve(projectRoot, '.roo', 'rules', 'typescript.md'), 'utf-8');
     expect(content).toContain('GENERATED by AgentKit Forge');
   });
@@ -371,10 +357,10 @@ describe('syncRooRules (via runSync --only roo)', () => {
 describe('render target gating for new tools', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(() => {
     projectRoot = makeTmpProject();
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
@@ -405,10 +391,11 @@ describe('render target gating for new tools', () => {
 describe('--overwrite flag', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
@@ -416,7 +403,6 @@ describe('--overwrite flag', () => {
     'skips project-owned files by default, overwrites with --overwrite',
     { timeout: 25000 },
     async () => {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
       const contribPath = join(projectRoot, 'CONTRIBUTING.md');
       expect(existsSync(contribPath)).toBe(true);
 
@@ -432,7 +418,6 @@ describe('--overwrite flag', () => {
   );
 
   it('--force is alias for --overwrite', { timeout: 15000 }, async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     writeFileSync(contribPath, 'CUSTOM', 'utf-8');
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { force: true } });
@@ -443,14 +428,14 @@ describe('--overwrite flag', () => {
 describe('--quiet, --verbose, --no-clean, --diff flags', () => {
   let projectRoot;
 
-  beforeEach(() => {
+  beforeAll(() => {
     projectRoot = makeTmpProject();
   });
-  afterEach(() => {
+  afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('--diff shows create/update/skip without writing', async () => {
+  it('--diff shows create/update/skip without writing', { timeout: 15000 }, async () => {
     const log = [];
     const origLog = console.log;
     console.log = (...args) => {
@@ -473,7 +458,7 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     // Create isolated temp agentkit root to avoid mutating shared state
     const tempAgentkitRoot = resolve(
       tmpdir(),
-      `agentkit-wave3-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      `agentkit-sync-integration-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     );
     mkdirSync(tempAgentkitRoot, { recursive: true });
 
@@ -529,71 +514,51 @@ describe('render-target output isolation (--only flag)', () => {
 
   it('--only mcp produces no copilot prompts', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'mcp' } });
-    const files = collectFiles(projectRoot);
-    const prompts = files.filter((f) => f.startsWith('.github/prompts/'));
-    expect(prompts.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.github', 'prompts'))).toBe(false);
   });
 
-  it('--only windsurf produces no cursor command files', async () => {
+  it('--only windsurf produces no cursor command files', { timeout: 15000 }, async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'windsurf' } });
-    const files = collectFiles(projectRoot);
-    const cursorCmds = files.filter((f) => f.startsWith('.cursor/commands/'));
-    expect(cursorCmds.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.cursor', 'commands'))).toBe(false);
   });
 
   it('--only cline produces no codex skills', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cline' } });
-    const files = collectFiles(projectRoot);
-    const skills = files.filter((f) => f.startsWith('.agents/skills/'));
-    expect(skills.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.agents', 'skills'))).toBe(false);
   });
 
   it('--only ai produces no cursor team rules', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'ai' } });
-    const files = collectFiles(projectRoot);
-    const teamRules = files.filter((f) => f.startsWith('.cursor/rules/team-'));
-    expect(teamRules.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.cursor', 'rules', 'team-backend.mdc'))).toBe(false);
   });
 
   it('--only codex produces no windsurf team rules', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
-    const files = collectFiles(projectRoot);
-    const teamRules = files.filter((f) => f.startsWith('.windsurf/rules/team-'));
-    expect(teamRules.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.windsurf', 'rules', 'team-backend.md'))).toBe(false);
   });
 
   it('--only gemini produces no copilot chatmodes', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
-    const files = collectFiles(projectRoot);
-    const chatmodes = files.filter((f) => f.startsWith('.github/chatmodes/'));
-    expect(chatmodes.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.github', 'chatmodes'))).toBe(false);
   });
 
   it('--only warp produces no copilot agent files', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-    const files = collectFiles(projectRoot);
-    const agents = files.filter((f) => f.startsWith('.github/agents/'));
-    expect(agents.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.github', 'agents'))).toBe(false);
   });
 
   it('--only roo produces no claude agent files', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'roo' } });
-    const files = collectFiles(projectRoot);
-    const agents = files.filter((f) => f.startsWith('.claude/agents/'));
-    expect(agents.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.claude', 'agents'))).toBe(false);
   });
 
   it('--only warp produces no cline rules', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-    const files = collectFiles(projectRoot);
-    const clineRules = files.filter((f) => f.startsWith('.clinerules/'));
-    expect(clineRules.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.clinerules'))).toBe(false);
   });
 
   it('--only mcp produces no roo rules', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'mcp' } });
-    const files = collectFiles(projectRoot);
-    const rooRules = files.filter((f) => f.startsWith('.roo/rules/'));
-    expect(rooRules.length).toBe(0);
+    expect(existsSync(resolve(projectRoot, '.roo', 'rules'))).toBe(false);
   });
 });

@@ -57,9 +57,6 @@ function tasksDir(projectRoot) {
 
 const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/;
 
-/** Maximum number of task files read in parallel to avoid EMFILE errors. */
-const TASK_READ_CONCURRENCY = 8;
-
 function normalizeTaskId(taskId) {
   if (typeof taskId !== 'string' || !TASK_ID_PATH_PATTERN.test(taskId)) {
     throw new Error(`Invalid task ID: ${taskId}`);
@@ -415,53 +412,50 @@ export async function listTasks(projectRoot, filters = {}) {
 
   try {
     await access(dir);
-  } catch (error) {
-    if (error && (error.code === 'ENOENT' || error.code === 'ENOTDIR')) {
+  } catch (err) {
+    if (err?.code === 'ENOENT' || err?.code === 'ENOTDIR') {
       return { tasks: [] };
     }
-    throw error;
+    throw err;
   }
 
   let files;
   try {
     files = (await readdir(dir)).filter((f) => f.endsWith('.json') && !f.endsWith('.tmp'));
-  } catch (error) {
-    if (error && (error.code === 'ENOENT' || error.code === 'ENOTDIR')) {
+  } catch (err) {
+    if (err?.code === 'ENOENT' || err?.code === 'ENOTDIR') {
       return { tasks: [] };
     }
-    throw error;
+    throw err;
   }
 
-  // Limit concurrent file reads to avoid hitting OS file descriptor limits (EMFILE)
-  const results = [];
-  for (let i = 0; i < files.length; i += TASK_READ_CONCURRENCY) {
-    const batch = files.slice(i, i + TASK_READ_CONCURRENCY);
-    const batchResults = await Promise.all(
-      batch.map(async (file) => {
-        try {
-          const content = await readFile(resolve(dir, file), 'utf-8');
-          const data = JSON.parse(content);
+  const tasks = [];
+  const readPromises = files.map(async (file) => {
+    try {
+      const content = await readFile(resolve(dir, file), 'utf-8');
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  });
 
-          if (filters.status && data.status !== filters.status) return null;
-          if (
-            filters.assignee &&
-            !(Array.isArray(data.assignees) && data.assignees.includes(filters.assignee))
-          )
-            return null;
-          if (filters.delegator && data.delegator !== filters.delegator) return null;
-          if (filters.type && data.type !== filters.type) return null;
-          if (filters.priority && data.priority !== filters.priority) return null;
+  const results = await Promise.all(readPromises);
 
-          return data;
-        } catch {
-          // Skip corrupted task files
-          return null;
-        }
-      })
-    );
-    results.push(...batchResults);
+  for (const data of results) {
+    if (!data) continue;
+
+    if (filters.status && data.status !== filters.status) continue;
+    if (
+      filters.assignee &&
+      !(Array.isArray(data.assignees) && data.assignees.includes(filters.assignee))
+    )
+      continue;
+    if (filters.delegator && data.delegator !== filters.delegator) continue;
+    if (filters.type && data.type !== filters.type) continue;
+    if (filters.priority && data.priority !== filters.priority) continue;
+
+    tasks.push(data);
   }
-  const tasks = results.filter(Boolean);
 
   // Sort by priority (P0 first), then by creation date (newest first)
   tasks.sort((a, b) => {
@@ -909,14 +903,14 @@ export function formatTaskList(tasks) {
       .replace(/\r?\n/g, ' ');
 
   const statusIcon = {
-    submitted: '📩',
-    accepted: '✅',
-    working: '🔨',
-    'input-required': '❓',
-    completed: '✔️',
-    failed: '❌',
-    rejected: '🚫',
-    canceled: '🗑️',
+    submitted: '[SUBMITTED]',
+    accepted: '[ACCEPTED]',
+    working: '[WORKING]',
+    'input-required': '[INPUT-REQUIRED]',
+    completed: '[COMPLETED]',
+    failed: '[FAILED]',
+    rejected: '[REJECTED]',
+    canceled: '[CANCELED]',
   };
 
   const lines = [
@@ -934,3 +928,4 @@ export function formatTaskList(tasks) {
 
   return lines.join('\n');
 }
+

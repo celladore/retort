@@ -1,11 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { runAdd, runRemove, runList, ALL_TOOLS } from '../tool-manager.mjs';
 import {
-  mkdirSync, writeFileSync, existsSync, readFileSync, rmSync,
+    existsSync,
+    mkdirSync,
+    readFileSync, rmSync,
+    writeFileSync,
 } from 'fs';
-import { resolve } from 'path';
-import { tmpdir } from 'os';
 import yaml from 'js-yaml';
+import { tmpdir } from 'os';
+import { resolve } from 'path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ALL_TOOLS, runAdd, runList, runRemove } from '../tool-manager.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -105,7 +108,7 @@ describe('runAdd', () => {
     const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'add-test', ['claude']);
 
     // Mock sync since we just want to test the settings update
-    vi.doMock('../sync.mjs', () => ({
+    vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
 
@@ -124,7 +127,7 @@ describe('runAdd', () => {
   it('adds multiple tools at once', async () => {
     const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'multi-add', ['claude']);
 
-    vi.doMock('../sync.mjs', () => ({
+    vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
 
@@ -144,7 +147,7 @@ describe('runAdd', () => {
   it('skips tools already enabled', async () => {
     const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'dup-add', ['claude', 'cursor']);
 
-    vi.doMock('../sync.mjs', () => ({
+    vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
 

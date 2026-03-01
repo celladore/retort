@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Process Execution Helper
+ * AgentKit Forge ÔÇö Process Execution Helper
  * Shared utility for running shell commands with timeout, output capture, and timing.
  */
 import { spawnSync } from 'child_process';
@@ -18,7 +18,7 @@ function parseCommand(cmd) {
   let match;
   while ((match = regex.exec(cmd)) !== null) {
     // Strip quotes from each quoted segment while preserving content.
-    // Handles --format="%h %s" → --format=%h %s (not just boundary quotes).
+    // Handles --format="%h %s" ÔåÆ --format=%h %s (not just boundary quotes).
     parts.push(match[0].replace(/"([^"]*)"|'([^']*)'/g, '$1$2'));
   }
   return parts.length > 0 ? parts : [];
@@ -124,16 +124,20 @@ export function execCommand(cmd, { cwd, timeout = 300_000 } = {}) {
   let [executable, ...args] = parsed;
 
   // SECURITY (defense-in-depth):
-  // We manually resolve the executable path on Windows to avoid using shell:true.
+  // On Windows, manually resolve the executable path to avoid using shell:true by default.
   // This prevents command injection vulnerabilities via cmd.exe argument parsing quirks.
+  // However, .cmd and .bat files cannot be spawned directly without shell on Windows,
+  // so we fall back to spawning via cmd.exe /d /s /c for those extensions.
   if (process.platform === 'win32') {
-     executable = resolveWindowsExecutable(executable, cwd);
-     // .cmd/.bat scripts cannot be spawned directly with shell:false on Windows.
-     // Wrap them in `cmd.exe /d /s /c` using an array to avoid shell injection.
-     if (/\.(cmd|bat)$/i.test(executable)) {
-       args = ['/d', '/s', '/c', executable, ...args];
-       executable = 'cmd.exe';
-     }
+    const resolved = resolveWindowsExecutable(executable, cwd);
+    if (resolved.toLowerCase().endsWith('.cmd') || resolved.toLowerCase().endsWith('.bat')) {
+      // Spawn via cmd.exe to support .cmd/.bat files (e.g. npm.cmd, pnpm.cmd, npx.cmd).
+      // Use /d (disable AutoRun), /s (strip surrounding quotes), /c (execute and exit).
+      args = ['/d', '/s', '/c', resolved, ...args];
+      executable = process.env.ComSpec || 'cmd.exe';
+    } else {
+      executable = resolved;
+    }
   }
 
   const result = spawnSync(executable, args, {
@@ -142,8 +146,6 @@ export function execCommand(cmd, { cwd, timeout = 300_000 } = {}) {
     encoding: 'utf-8',
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env, FORCE_COLOR: '0' },
-    // Always use shell: false for security.
-    // Executable resolution is handled manually above for Windows.
     shell: false,
   });
 
@@ -195,7 +197,7 @@ export function formatDuration(ms) {
 
 /**
  * Format an ISO timestamp for display (strips T separator and milliseconds).
- * "2026-02-23T17:30:00.123Z" → "2026-02-23 17:30:00"
+ * "2026-02-23T17:30:00.123Z" ÔåÆ "2026-02-23 17:30:00"
  * @param {string} isoTimestamp
  * @returns {string}
  */
@@ -268,3 +270,4 @@ export async function runInPool(tasks, concurrency) {
   await Promise.all(workers);
   return results;
 }
+

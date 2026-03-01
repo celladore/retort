@@ -18,11 +18,10 @@ import {
   unlink,
   writeFile,
 } from 'fs/promises';
-import { tmpdir } from 'os';
 import yaml from 'js-yaml';
+import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 import {
-  ALL_RENDER_TARGETS,
   categorizeFile,
   computeProjectCompleteness,
   flattenProjectYaml,
@@ -33,7 +32,7 @@ import {
   printSyncSummary,
   renderTemplate,
   resolveRenderTargets,
-  simpleDiff,
+  simpleDiff
 } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -48,6 +47,17 @@ export function readYaml(filePath) {
 export function readText(filePath) {
   if (!existsSync(filePath)) return null;
   return readFileSync(filePath, 'utf-8');
+}
+
+const templateTextCache = new Map();
+
+async function readTemplateText(filePath) {
+  if (templateTextCache.has(filePath)) {
+    return templateTextCache.get(filePath);
+  }
+  const content = await readFile(filePath, 'utf-8');
+  templateTextCache.set(filePath, content);
+  return content;
 }
 
 export async function runConcurrent(items, fn, concurrency = 50) {
@@ -108,7 +118,12 @@ export async function syncDirectCopy(
 ) {
   const sourceDir = join(templatesDir, sourceSubdir);
   if (!existsSync(sourceDir)) return;
+  const sourceFiles = [];
   for await (const srcFile of walkDir(sourceDir)) {
+    sourceFiles.push(srcFile);
+  }
+
+  await runConcurrent(sourceFiles, async (srcFile) => {
     const relPath = relative(sourceDir, srcFile);
     const destFile =
       destSubdir === '.'
@@ -117,7 +132,7 @@ export async function syncDirectCopy(
     const ext = extname(srcFile).toLowerCase();
     let content;
     try {
-      content = await readFile(srcFile, 'utf-8');
+      content = await readTemplateText(srcFile);
     } catch {
       // Binary or unreadable — copy as-is
       await ensureDir(dirname(destFile));
@@ -126,12 +141,12 @@ export async function syncDirectCopy(
       } catch {
         /* ignore */
       }
-      continue;
+      return;
     }
     const rendered = renderTemplate(content, vars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
     await writeOutput(destFile, withHeader);
-  }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +204,7 @@ async function syncClaudeSettings(
   if (!existsSync(tplPath)) return;
   let settings;
   try {
-    settings = JSON.parse(await readFile(tplPath, 'utf-8'));
+    settings = JSON.parse(await readTemplateText(tplPath));
   } catch {
     return;
   }
@@ -220,7 +235,7 @@ async function syncClaudeCommands(
     const fname = basename(srcFile);
     if (fname === 'team-TEMPLATE.md') continue; // skip template
     const ext = extname(srcFile).toLowerCase();
-    const content = await readFile(srcFile, 'utf-8');
+    const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
     await writeOutput(join(tmpDir, '.claude', 'commands', fname), withHeader);
@@ -229,7 +244,7 @@ async function syncClaudeCommands(
   // Generate team commands from team-TEMPLATE.md
   const teamTemplatePath = join(commandsDir, 'team-TEMPLATE.md');
   if (!existsSync(teamTemplatePath)) return;
-  const teamTemplate = await readFile(teamTemplatePath, 'utf-8');
+  const teamTemplate = await readTemplateText(teamTemplatePath);
   for (const team of teamsSpec.teams || []) {
     const teamVars = {
       ...vars,
@@ -258,7 +273,7 @@ async function syncClaudeAgents(
 ) {
   const tplPath = join(templatesDir, 'claude', 'agents', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const [category, agents] of Object.entries(agentsSpec.agents || {})) {
     for (const agent of agents) {
@@ -276,7 +291,7 @@ async function syncClaudeAgents(
 async function syncClaudeMd(templatesDir, tmpDir, vars, version, repoName) {
   const tplPath = join(templatesDir, 'claude', 'CLAUDE.md');
   if (!existsSync(tplPath)) return;
-  const content = await readFile(tplPath, 'utf-8');
+  const content = await readTemplateText(tplPath);
   const rendered = renderTemplate(content, vars, tplPath);
   const withHeader = insertHeader(rendered, '.md', version, repoName);
   await writeOutput(join(tmpDir, 'CLAUDE.md'), withHeader);
@@ -295,7 +310,7 @@ async function syncClaudeSkills(
 ) {
   const tplPath = join(templatesDir, 'claude', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -315,8 +330,26 @@ async function syncClaudeSkills(
  */
 async function syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
   const tplPath = join(templatesDir, 'cursor', 'teams', 'TEMPLATE.mdc');
-  if (!existsSync(tplPath)) return;
-  const teamTemplate = await readFile(tplPath, 'utf-8');
+  const fallbackTemplate = `---
+description: "Team {{teamName}} — {{teamFocus}}"
+globs: []
+alwaysApply: false
+---
+# Team: {{teamName}}
+
+**Focus**: {{teamFocus}}
+**Scope**: {{teamScope}}
+
+## Persona
+
+You are a member of the {{teamName}} team. Your expertise is {{teamFocus}}.
+Scope all operations to the team's owned paths.
+
+## Scope
+
+{{teamScope}}
+`;
+  const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
     const teamVars = {
       ...vars,
@@ -344,7 +377,7 @@ async function syncCursorCommands(
 ) {
   const tplPath = join(templatesDir, 'cursor', 'commands', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -364,8 +397,17 @@ async function syncCursorCommands(
  */
 async function syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
   const tplPath = join(templatesDir, 'windsurf', 'teams', 'TEMPLATE.md');
-  if (!existsSync(tplPath)) return;
-  const teamTemplate = await readFile(tplPath, 'utf-8');
+  const fallbackTemplate = `# Team: {{teamName}}
+
+**Focus**: {{teamFocus}}
+**Scope**: {{teamScope}}
+
+## Persona
+
+You are a member of the {{teamName}} team. Your expertise is {{teamFocus}}.
+Scope all operations to the team's owned paths.
+`;
+  const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
     const teamVars = {
       ...vars,
@@ -393,7 +435,7 @@ async function syncWindsurfCommands(
 ) {
   const tplPath = join(templatesDir, 'windsurf', 'templates', 'command.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -415,7 +457,7 @@ async function syncCopilot(templatesDir, tmpDir, vars, version, repoName) {
   // copilot-instructions.md → .github/copilot-instructions.md
   const instrPath = join(templatesDir, 'copilot', 'copilot-instructions.md');
   if (existsSync(instrPath)) {
-    const content = await readFile(instrPath, 'utf-8');
+    const content = await readTemplateText(instrPath);
     const rendered = renderTemplate(content, vars, instrPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.github', 'copilot-instructions.md'), withHeader);
@@ -445,7 +487,7 @@ async function syncCopilotPrompts(
 ) {
   const tplPath = join(templatesDir, 'copilot', 'prompts', 'TEMPLATE.prompt.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -473,7 +515,7 @@ async function syncCopilotAgents(
 ) {
   const tplPath = join(templatesDir, 'copilot', 'agents', 'TEMPLATE.agent.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const [category, agents] of Object.entries(agentsSpec.agents || {})) {
     for (const agent of agents) {
@@ -498,7 +540,7 @@ async function syncCopilotChatModes(
 ) {
   const tplPath = join(templatesDir, 'copilot', 'chatmodes', 'TEMPLATE.chatmode.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const team of teamsSpec.teams || []) {
     const teamVars = {
@@ -532,7 +574,7 @@ async function syncGemini(templatesDir, tmpDir, vars, version, repoName) {
   for await (const srcFile of walkDir(geminiDir)) {
     const fname = basename(srcFile);
     const ext = extname(srcFile).toLowerCase();
-    const content = await readFile(srcFile, 'utf-8');
+    const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
 
@@ -564,7 +606,7 @@ async function syncCodexSkills(
 ) {
   const tplPath = join(templatesDir, 'codex', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -585,7 +627,7 @@ async function syncCodexSkills(
 async function syncWarp(templatesDir, tmpDir, vars, version, repoName) {
   const tplPath = join(templatesDir, 'warp', 'WARP.md');
   if (!existsSync(tplPath)) return;
-  const content = await readFile(tplPath, 'utf-8');
+  const content = await readTemplateText(tplPath);
   const rendered = renderTemplate(content, vars, tplPath);
   const withHeader = insertHeader(rendered, '.md', version, repoName);
   await writeOutput(join(tmpDir, 'WARP.md'), withHeader);
@@ -608,7 +650,7 @@ async function syncClineRules(
 ) {
   const tplPath = join(templatesDir, 'cline', 'clinerules', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const rule of rulesSpec.rules || []) {
     const ruleVars = buildRuleVars(rule, vars);
@@ -635,7 +677,7 @@ async function syncRooRules(
 ) {
   const tplPath = join(templatesDir, 'roo', 'rules', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
-  const template = await readFile(tplPath, 'utf-8');
+  const template = await readTemplateText(tplPath);
 
   for (const rule of rulesSpec.rules || []) {
     const ruleVars = buildRuleVars(rule, vars);
@@ -661,7 +703,7 @@ async function syncA2aConfig(tmpDir, vars, version, repoName, _agentsSpec, _team
     const ext = extname(srcFile).toLowerCase();
     let content;
     try {
-      content = await readFile(srcFile, 'utf-8');
+      content = await readTemplateText(srcFile);
     } catch {
       const destFile = join(tmpDir, '.mcp', relPath);
       await ensureDir(dirname(destFile));
@@ -743,7 +785,8 @@ function buildRuleVars(rule, vars) {
 export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const dryRun = flags?.['dry-run'] || false;
   const diff = flags?.diff || false;
-  const quiet = flags?.quiet || false;
+  const isTestEnv = process.env.VITEST === 'true' || process.env.NODE_ENV === 'test';
+  const quiet = flags?.quiet ?? (isTestEnv && !diff);
   const verbose = flags?.verbose || false;
   const noClean = flags?.['no-clean'] || false;
 
@@ -822,20 +865,25 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     log(`[agentkit:sync] Syncing only: ${[...targets].join(', ')}`);
   }
 
-  // 4. Render templates to temp directory (unique per invocation to avoid concurrency conflicts)
+  // 4. Render templates to temp directory
   const tmpDir = await mkdtemp(join(tmpdir(), 'agentkit-sync-'));
-  try {
 
   const templatesDir = resolve(agentkitRoot, 'templates');
 
+  try {
+
+  // Use vars.repoName for file headers (resolved project name, e.g. "agentkit-forge")
+  // rather than the raw overlay dir name which may be "__TEMPLATE__".
+  const headerRepoName = vars.repoName;
+
   // --- Always-on outputs (not gated by renderTargets) ---
   await Promise.all([
-    syncAgentsMd(templatesDir, tmpDir, vars, version, repoName),
-    syncRootDocs(templatesDir, tmpDir, vars, version, repoName),
-    syncGitHub(templatesDir, tmpDir, vars, version, repoName),
-    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, repoName),
-    syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, repoName),
-    syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName)
+    syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
+    syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
+    syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
+    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName),
+    syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, headerRepoName),
+    syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
   ]);
 
   // --- Gated by renderTargets ---
@@ -843,22 +891,22 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   if (targets.has('claude')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, repoName),
+      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, headerRepoName),
       syncClaudeSettings(templatesDir, tmpDir, vars, version, mergedPermissionsResult, settingsSpec),
-      syncClaudeCommands(templatesDir, tmpDir, vars, version, repoName, teamsSpec, commandsSpec),
-      syncClaudeAgents(templatesDir, tmpDir, vars, version, repoName, agentsSpec, rulesSpec),
-      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, repoName),
-      syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, repoName),
-      syncClaudeMd(templatesDir, tmpDir, vars, version, repoName),
-      syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec)
+      syncClaudeCommands(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, commandsSpec),
+      syncClaudeAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
+      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
+      syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, headerRepoName),
+      syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
     );
   }
 
   if (targets.has('cursor')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, repoName),
-      syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec),
-      syncCursorCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec)
+      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
+      syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+      syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
     );
   }
 
@@ -871,9 +919,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         '.windsurf/rules',
         vars,
         version,
-        repoName
+        headerRepoName
       ),
-      syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec),
+      syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncDirectCopy(
         templatesDir,
         'windsurf/workflows',
@@ -881,49 +929,49 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         '.windsurf/workflows',
         vars,
         version,
-        repoName
+        headerRepoName
       ),
-      syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec)
+      syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
     );
   }
 
   if (targets.has('ai')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'ai', tmpDir, '.ai', vars, version, repoName)
+      syncDirectCopy(templatesDir, 'ai', tmpDir, '.ai', vars, version, headerRepoName)
     );
   }
 
   if (targets.has('copilot')) {
     gatedTasks.push(
-      syncCopilot(templatesDir, tmpDir, vars, version, repoName),
-      syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName, commandsSpec),
-      syncCopilotAgents(templatesDir, tmpDir, vars, version, repoName, agentsSpec, rulesSpec),
-      syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoName, teamsSpec)
+      syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+      syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
+      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
     );
   }
 
   if (targets.has('gemini')) {
-    gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, repoName));
+    gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
   if (targets.has('codex')) {
-    gatedTasks.push(syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec));
+    gatedTasks.push(syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec));
   }
 
   if (targets.has('warp')) {
-    gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, repoName));
+    gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
   if (targets.has('cline')) {
-    gatedTasks.push(syncClineRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec));
+    gatedTasks.push(syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec));
   }
 
   if (targets.has('roo')) {
-    gatedTasks.push(syncRooRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec));
+    gatedTasks.push(syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec));
   }
 
   if (targets.has('mcp')) {
-    gatedTasks.push(syncA2aConfig(tmpDir, vars, version, repoName, agentsSpec, teamsSpec, templatesDir));
+    gatedTasks.push(syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir));
   }
 
   await Promise.all(gatedTasks);
@@ -963,7 +1011,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // --- Dry-run: print summary and exit without writing ---
   if (dryRun) {
-    await rm(tmpDir, { recursive: true, force: true });
     const total = Object.keys(newManifestFiles).length;
     log(`[agentkit:sync] Dry-run: would generate ${total} file(s):`);
     printSyncSummary(fileSummary, targets, { quiet });
@@ -1021,7 +1068,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         }
       }
     }
-    await rm(tmpDir, { recursive: true, force: true });
     log(
       `[agentkit:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
     );
@@ -1088,7 +1134,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   });
 
   if (failedFiles.length > 0) {
-    await rm(tmpDir, { recursive: true, force: true });
     console.error(`[agentkit:sync] Error: ${failedFiles.length} file(s) failed to write:`);
     for (const f of failedFiles) {
       console.error(`  - ${f.file}: ${f.error}`);
@@ -1140,9 +1185,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
   }
 
-  // 10. Cleanup temp
-  await rm(tmpDir, { recursive: true, force: true });
-
   if (skippedScaffold > 0) {
     log(`[agentkit:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
   }
@@ -1173,7 +1215,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
   }
   } finally {
-    // Clean up per-invocation temp directory
-    await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+    await rm(tmpDir, { recursive: true, force: true });
   }
 }

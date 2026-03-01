@@ -98,7 +98,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -119,7 +119,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -140,7 +140,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -162,7 +162,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -192,7 +192,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -214,7 +214,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -236,7 +236,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -353,7 +353,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -386,7 +386,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -415,7 +415,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(report),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -443,7 +443,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(report),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
 
@@ -475,7 +475,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(report),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
@@ -507,7 +507,7 @@ describe('runInit', () => {
       vi.doMock('../discover.mjs', () => ({
         runDiscover: vi.fn().mockResolvedValue(report),
       }));
-      vi.doMock('../sync.mjs', () => ({
+      vi.doMock('../synchronize.mjs', () => ({
         runSync: vi.fn().mockResolvedValue(undefined),
       }));
       vi.resetModules();
