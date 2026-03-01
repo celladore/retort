@@ -1,4 +1,4 @@
-# Contributing to __TEMPLATE__
+# Contributing to agentkit-forge
 
 > Guidelines for contributing to this project, including both human and
 > AI-assisted development workflows.
