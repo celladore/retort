@@ -98,6 +98,13 @@ export const PROJECT_MAPPING = [
   { src: 'testing.e2e', dest: 'testingE2e', type: 'array-join' },
   { src: 'testing.coverage', dest: 'testingCoverage', type: 'string' },
 
+  // Automation
+  { src: 'automation.baselineProfile', dest: 'baselineProfile' },
+  { src: 'automation.ciProfile', dest: 'ciProfile' },
+  { src: 'automation.checks.codeql', dest: 'enableCodeql', type: 'boolean' },
+  { src: 'automation.checks.semgrep', dest: 'enableSemgrep', type: 'boolean' },
+  { src: 'automation.checks.dependencyAudit', dest: 'enableDependencyAudit', type: 'boolean' },
+
   // Cross-cutting (formerly flattenCrosscutting)
   // Logging
   { src: 'crosscutting.logging.framework', dest: 'loggingFramework', check: 'not-none' },

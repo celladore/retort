@@ -121,6 +121,15 @@ testing:
   e2e: [] # e.g. [playwright, cypress]
   coverage: 80 # Target coverage percentage (0-100)
 
+# CI/workflow defaults
+automation:
+  baselineProfile: node-ts-react # generic | node-ts-react | node-api | library
+  ciProfile: medium # minimal | medium | strict
+  checks:
+    codeql: true
+    semgrep: true
+    dependencyAudit: true
+
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:
 # integrations:
