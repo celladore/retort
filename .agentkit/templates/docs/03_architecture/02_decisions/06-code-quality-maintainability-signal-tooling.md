@@ -2,7 +2,7 @@
 <!-- Source: .agentkit/spec + .agentkit/overlays/{{repoName}} -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# ADR-0006: Code Quality and Maintainability Signal — Tool Selection
+# ADR-06: Code Quality and Maintainability Signal — Tool Selection
 
 ## Status
 
@@ -52,4 +52,4 @@ Optional extension:
 
 ## References
 
-- [ADR-0003: Tooling Strategy — kluster vs Alternatives](0003-tooling-strategy-kluster-alternatives.md)
+- [ADR-03: Tooling Strategy — Tool Selection](03-tooling-strategy.md)
