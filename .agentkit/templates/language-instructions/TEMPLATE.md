@@ -1,7 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
-<!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
-<!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
-# Copilot Instructions — {{ruleDomain}}
+<!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+# Instructions — {{ruleDomain}}
 
 {{#if ruleDescription}}{{ruleDescription}}
 

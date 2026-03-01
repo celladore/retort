@@ -1,7 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
-<!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
-<!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
-# Copilot Instructions — Blockchain / Smart Contracts
+<!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+# Instructions — Blockchain / Smart Contracts
 
 Apply these rules when editing `.sol` files or code in `contracts/`,
 `programs/`, or `blockchain/` directories.
