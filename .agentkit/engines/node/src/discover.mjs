@@ -4,9 +4,9 @@
  * and build a structured discovery report.
  */
 import { existsSync, promises as fsPromises } from 'fs';
-const { readdir, access, readFile } = fsPromises;
 import yaml from 'js-yaml';
 import { basename, extname, join, resolve } from 'node:path';
+const { readdir, access, readFile } = fsPromises;
 
 // ---------------------------------------------------------------------------
 // Tech stack detection patterns
@@ -393,41 +393,41 @@ const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.n
 
 async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
   let count = 0;
-  // Simple concurrency limiter to avoid EMFILE
-  const CONCURRENCY_LIMIT = 50;
+  // Global semaphore — limits total concurrent readdir calls across the entire walk
+  // to prevent EMFILE errors on deep or wide repository trees.
+  const MAX_CONCURRENCY = 8;
   let active = 0;
   const queue = [];
 
-  const processQueue = () => {
-    while (active < CONCURRENCY_LIMIT && queue.length > 0) {
-      const { run, resolve, reject } = queue.shift();
-      active++;
-      run()
-        .then(resolve)
-        .catch(reject)
-        .finally(() => {
-          active--;
-          processQueue();
-        });
-    }
-  };
-
-  // Limits execution of `fn`
-  const limit = (fn) => {
+  function schedule(fn) {
     return new Promise((resolve, reject) => {
-      queue.push({ run: fn, resolve, reject });
-      processQueue();
+      const run = async () => {
+        active++;
+        try {
+          resolve(await fn());
+        } catch (err) {
+          reject(err);
+        } finally {
+          active--;
+          if (queue.length > 0) queue.shift()();
+        }
+      };
+
+      if (active < MAX_CONCURRENCY) {
+        run();
+      } else {
+        queue.push(run);
+      }
     });
-  };
+  }
 
   async function walk(currentDir, currentDepth) {
     if (currentDepth > depth || count > maxFiles) return;
 
     try {
-      // Only limit the readdir call, not the recursive structure
-      const entries = await limit(() => fsPromises.readdir(currentDir, { withFileTypes: true }));
+      const entries = await schedule(() => fsPromises.readdir(currentDir, { withFileTypes: true }));
+      const subdirs = [];
 
-      const tasks = [];
       for (const entry of entries) {
         if (count > maxFiles) break;
         if (entry.name.startsWith('.') || SKIP_DIRS.has(entry.name)) continue;
@@ -437,15 +437,15 @@ async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
         const full = join(currentDir, entry.name);
 
         if (entry.isDirectory()) {
-          tasks.push(walk(full, currentDepth + 1));
+          subdirs.push(full);
         } else if (extensions.includes(extname(entry.name))) {
-            count++;
+          count++;
         }
       }
 
-      await Promise.all(tasks);
-    } catch (err) {
-      /* permission errors or ENOENT */
+      await Promise.all(subdirs.map(full => walk(full, currentDepth + 1)));
+    } catch {
+      /* permission errors or other fs issues */
     }
   }
 
