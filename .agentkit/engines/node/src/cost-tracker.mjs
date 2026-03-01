@@ -90,10 +90,14 @@ const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
  * @returns {string}
  */
 export function generateSessionId() {
+  const crypto = globalThis.crypto;
+  if (!crypto || typeof crypto.getRandomValues !== 'function') {
+    throw new Error('[agentkit:cost] crypto.getRandomValues is not available in this environment. Ensure you are running on a Node.js runtime with Web Crypto support enabled.');
+  }
   const now = new Date();
   const dateStr = now.toISOString().replace(/[-:T]/g, '').slice(0, 14);
   const randomBytes = new Uint8Array(3);
-  globalThis.crypto.getRandomValues(randomBytes);
+  crypto.getRandomValues(randomBytes);
   const random = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
   return `${dateStr}-${random}`;
 }

@@ -104,18 +104,61 @@ describe('cost-tracker security', () => {
   });
   describe('generateSessionId security', () => {
     it('generates a secure session ID using crypto', () => {
-      const sessionId = generateSessionId();
+      const getRandomValuesSpy = vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation((array) => {
+        for (let i = 0; i < array.length; i++) {
+          array[i] = 0xab;
+        }
+        return array;
+      });
 
-      // Ensure format YYYYMMDDHHMMSS-XXXXXX
-      expect(sessionId).toMatch(/^\d{14}-[a-f0-9]{6}$/);
+      try {
+        const sessionId = generateSessionId();
+
+        // Ensure format YYYYMMDDHHMMSS-XXXXXX
+        expect(sessionId).toMatch(/^\d{14}-[a-f0-9]{6}$/);
+
+        // Ensure crypto.getRandomValues was used with a 3-byte Uint8Array
+        expect(getRandomValuesSpy).toHaveBeenCalledTimes(1);
+        const firstCallArg = getRandomValuesSpy.mock.calls[0][0];
+        expect(firstCallArg).toBeInstanceOf(Uint8Array);
+        expect(firstCallArg).toHaveLength(3);
+      } finally {
+        getRandomValuesSpy.mockRestore();
+      }
     });
 
     it('generates unique session IDs across multiple calls', () => {
-      const ids = new Set();
-      for (let i = 0; i < 1000; i++) {
-        ids.add(generateSessionId());
+      const randomSequences = [
+        Uint8Array.from([0x00, 0x01, 0x02]),
+        Uint8Array.from([0x0b, 0x0a, 0x09]),
+        Uint8Array.from([0xff, 0xfe, 0xfd]),
+      ];
+      let callIndex = 0;
+
+      const getRandomValuesSpy = vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation((typedArray) => {
+        const source = randomSequences[callIndex] ?? randomSequences[randomSequences.length - 1];
+        callIndex += 1;
+        typedArray.set(source.slice(0, typedArray.length));
+        return typedArray;
+      });
+
+      try {
+        const id1 = generateSessionId();
+        const id2 = generateSessionId();
+        const id3 = generateSessionId();
+
+        const idRegex = /^\d{14}-[a-f0-9]{6}$/;
+        expect(id1).toMatch(idRegex);
+        expect(id2).toMatch(idRegex);
+        expect(id3).toMatch(idRegex);
+
+        // Different random inputs should produce unique IDs
+        expect(id1).not.toEqual(id2);
+        expect(id2).not.toEqual(id3);
+        expect(id1).not.toEqual(id3);
+      } finally {
+        getRandomValuesSpy.mockRestore();
       }
-      expect(ids.size).toBeGreaterThan(990);
     });
   });
 
