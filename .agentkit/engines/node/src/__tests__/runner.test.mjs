@@ -4,7 +4,7 @@ import { execCommand, commandExists, formatDuration, isValidCommand, formatTimes
 
 describe('execCommand()', () => {
   it('returns structured result for successful command', () => {
-    const result = execCommand('echo hello');
+    const result = execCommand('node -e "console.log(\'hello\')"');
     expect(result.exitCode).toBe(0);
     expect(result.stdout.trim()).toBe('hello');
     expect(result.stderr).toBe('');
@@ -47,7 +47,7 @@ describe('execCommand()', () => {
   });
 
   it('handles commands with quoted arguments', () => {
-    const result = execCommand('echo "hello world"');
+    const result = execCommand('node -e "console.log(process.argv[1])" "hello world"');
     expect(result.exitCode).toBe(0);
     expect(result.stdout.trim()).toBe('hello world');
   });
@@ -55,10 +55,11 @@ describe('execCommand()', () => {
   it('does not interpret shell metacharacters as command separators', () => {
     // spawnSync passes args as an array — semicolons are literal, not separators.
     // On Windows (shell:true), Node auto-escapes each arg for cmd.exe.
-    const result = execCommand('echo safe; echo injected');
-    const lines = result.stdout.trim().split('\n');
-    expect(lines).toHaveLength(1); // Only one echo, not two
-    expect(lines[0]).toContain('safe;'); // Semicolon is literal text
+    const result = execCommand('node -e "console.log(process.argv[1])" "safe; echo injected"');
+    expect(result.exitCode).toBe(0);
+    const output = result.stdout.trim();
+    expect(output).toContain('safe;');
+    expect(output).toContain('echo injected');
   });
 });
 

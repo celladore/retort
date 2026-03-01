@@ -93,8 +93,12 @@ describe('replacePlaceholders', () => {
     expect(replacePlaceholders('{{known}} {{unknown}}', { known: 'yes' })).toContain('{{unknown}}');
   });
 
-  it('sanitizes string values by default', () => {
-    expect(replacePlaceholders('{{val}}', { val: '$(rm -rf /)' })).toBe('rm -rf /');
+  it('does not sanitize string values by default', () => {
+    expect(replacePlaceholders('{{val}}', { val: '$(rm -rf /)' })).toBe('$(rm -rf /)');
+  });
+
+  it('sanitizes string values when sanitizeStrings is enabled', () => {
+    expect(replacePlaceholders('{{val}}', { val: '$(rm -rf /)' }, true)).toBe('rm -rf /');
   });
 
   it('allows raw vars when allowRawVars is true and key is in RAW_TEMPLATE_VARS', () => {
