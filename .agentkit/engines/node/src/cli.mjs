@@ -180,33 +180,33 @@ const command = args[0];
 const commandArgs = args.slice(1);
 
 function parseFlags(command, args) {
-  // Scope options to flags valid for this command plus global flags
-  const commandFlags = VALID_FLAGS[command] ?? [];
-  const allFlags = new Set([...GLOBAL_FLAGS, ...commandFlags]);
-
-  const options = {};
-  for (const flagName of allFlags) {
-    // --status is handled separately with a command-specific type
-    if (flagName === 'status') continue;
-    const type = FLAG_TYPES[flagName];
-    if (!type) {
-      throw new Error(
-        `Internal CLI configuration error: flag "--${flagName}" is listed as valid for ` +
-        `command "${command}" but has no entry in FLAG_TYPES.`
-      );
-    }
-    options[flagName] = { type };
-    if (flagName === 'quiet') options[flagName].short = 'q';
-    if (flagName === 'verbose') options[flagName].short = 'v';
-  }
-
-  // Only add --status for commands that support it, with the correct type:
-  // orchestrate: boolean flag, tasks: string value
-  if (commandFlags.includes('status')) {
-    options.status = { type: command === 'orchestrate' ? 'boolean' : 'string' };
-  }
-
   try {
+    // Scope options to flags valid for this command plus global flags
+    const commandFlags = VALID_FLAGS[command] ?? [];
+    const allFlags = new Set([...GLOBAL_FLAGS, ...commandFlags]);
+
+    const options = {};
+    for (const flagName of allFlags) {
+      // --status is handled separately with a command-specific type
+      if (flagName === 'status') continue;
+      const type = FLAG_TYPES[flagName];
+      if (!type) {
+        throw new Error(
+          `Internal CLI configuration error: flag "--${flagName}" is listed as valid for ` +
+          `command "${command}" but has no entry in FLAG_TYPES.`
+        );
+      }
+      options[flagName] = { type };
+      if (flagName === 'quiet') options[flagName].short = 'q';
+      if (flagName === 'verbose') options[flagName].short = 'v';
+    }
+
+    // Only add --status for commands that support it, with the correct type:
+    // orchestrate: boolean flag, tasks: string value
+    if (commandFlags.includes('status')) {
+      options.status = { type: command === 'orchestrate' ? 'boolean' : 'string' };
+    }
+
     const { values, positionals } = parseArgs({
       args,
       options,
@@ -227,12 +227,10 @@ function parseFlags(command, args) {
     // Filter them out, warn the user, and exclude them from the positional args.
     // For flags without an inline value (e.g. --foo bar), also skip the next token
     // so bare values don't end up as positional arguments.
-    const unknownFlags = [];
     const filteredPositionals = [];
     for (let i = 0; i < positionals.length; i++) {
       const token = positionals[i];
       if (typeof token === 'string' && token.length >= 2 && token.startsWith('-')) {
-        unknownFlags.push(token);
         console.warn(`[agentkit:${command}] Warning: unrecognised flag ${token} (ignored)`);
         // Skip the next token if it looks like a value (not a flag) for flags
         // that don't embed their value inline (e.g. --foo bar, but not --foo=bar).
