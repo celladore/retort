@@ -11,14 +11,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [22]
+        node-version: [24]
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          package_json_file: .agentkit/package.json
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
@@ -42,11 +42,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          package_json_file: .agentkit/package.json
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 
@@ -85,11 +85,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          package_json_file: .agentkit/package.json
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 
@@ -112,11 +112,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          package_json_file: .agentkit/package.json
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 
