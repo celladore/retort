@@ -38,6 +38,31 @@ export function renderTemplate(template, vars, targetPath = '') {
   result = resolveEachBlocks(result, vars);
 
   // Phase 3: Replace {{key}} placeholders
+  result = replacePlaceholders(result, vars, allowRawVars);
+
+  // Phase 4: Collapse excessive blank lines left by removed conditionals
+  result = collapseBlankLines(result);
+
+  return result;
+}
+
+/**
+ * Collapses runs of 3+ consecutive blank lines down to a single blank line.
+ * Preserves one blank line between sections (standard Markdown paragraph break).
+ */
+export function collapseBlankLines(text) {
+  return text.replace(/\n{3,}/g, '\n\n');
+}
+
+/**
+ * Replaces {{key}} placeholders with values from vars.
+ * - Replaces longest keys first to prevent partial matches
+ * - Sanitizes string values to prevent shell metacharacter injection
+ * - Allows raw values for keys in RAW_TEMPLATE_VARS when allowRawVars is true
+ * - Warns on unresolved placeholders when DEBUG is set
+ */
+export function replacePlaceholders(template, vars, allowRawVars = false) {
+  let result = template;
   const sortedKeys = Object.keys(vars).sort((a, b) => b.length - a.length);
   for (const key of sortedKeys) {
     const value = vars[key];
@@ -95,6 +120,25 @@ export function resolveConditionals(template, vars) {
       );
     }
   }
+
+  // Process {{#unless var}}...{{/unless}} blocks (inverted #if).
+  // Supports nesting via innermost-first resolution (same strategy as #if above).
+  const unlessRegex =
+    /\{\{#unless\s+([a-zA-Z_][a-zA-Z0-9_]*)\}\}((?:(?!\{\{#unless\s)(?!\{\{\/unless\}\})[\s\S])*?)\{\{\/unless\}\}/g;
+  let unlessSafety = 50;
+  while (unlessRegex.test(result) && unlessSafety-- > 0) {
+    result = result.replace(unlessRegex, (_, varName, body) => {
+      const isTruthy = evalTruthy(vars[varName]);
+      const elseMarker = '{{else}}';
+      const elseIndex = body.indexOf(elseMarker);
+      if (elseIndex === -1) {
+        return isTruthy ? '' : body;
+      }
+      return isTruthy ? body.slice(elseIndex + elseMarker.length) : body.slice(0, elseIndex);
+    });
+    unlessRegex.lastIndex = 0;
+  }
+
   return result;
 }
 
@@ -335,10 +379,11 @@ export function insertHeader(content, ext, version, repoName) {
       const endFrontmatter = content.indexOf(closingMarker, 3);
       if (endFrontmatter !== -1) {
         const afterClose = endFrontmatter + closingMarker.length;
-        // Skip a trailing newline after ---
+        // Include the trailing newline after --- so header is on its own line,
+        // then add a blank line to separate front-matter from the generated comment.
         const insertPos =
           content[afterClose] === '\n' ? afterClose + 1 : afterClose;
-        return content.slice(0, insertPos) + header + content.slice(insertPos);
+        return content.slice(0, insertPos) + '\n' + header + content.slice(insertPos);
       }
     }
     return header + content;

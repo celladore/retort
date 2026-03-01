@@ -6,7 +6,7 @@ import {
   loadState, saveState, acquireLock, releaseLock, checkLock,
   appendEvent, readEvents, advancePhase, setPhase, updateTeamStatus,
   getStatus, PHASES, VALID_TEAM_IDS,
-  getTasksSummary, getTasksSummaryAsync,
+  getTasksSummary,
 } from '../orchestrator.mjs';
 
 // Use a temporary directory for tests
@@ -34,8 +34,8 @@ describe('orchestrator', () => {
   });
 
   describe('loadState()', () => {
-    it('creates default state when none exists', () => {
-      const state = loadState(TEST_ROOT);
+    it('creates default state when none exists', async () => {
+      const state = await loadState(TEST_ROOT);
       expect(state.schema_version).toBe('1.0.0');
       expect(state.repo_id).toBe('test-project');
       expect(state.current_phase).toBe(1);
@@ -44,7 +44,7 @@ describe('orchestrator', () => {
       expect(Object.keys(state.team_progress)).toHaveLength(10);
     });
 
-    it('reads existing state from disk', () => {
+    it('reads existing state from disk', async () => {
       const custom = {
         schema_version: '1.0.0',
         repo_id: 'custom',
@@ -58,16 +58,16 @@ describe('orchestrator', () => {
         JSON.stringify(custom),
         'utf-8'
       );
-      const state = loadState(TEST_ROOT);
+      const state = await loadState(TEST_ROOT);
       expect(state.repo_id).toBe('custom');
       expect(state.current_phase).toBe(3);
     });
   });
 
   describe('saveState()', () => {
-    it('writes state to disk', () => {
+    it('writes state to disk', async () => {
       const state = { schema_version: '1.0.0', repo_id: 'save-test', current_phase: 2 };
-      saveState(TEST_ROOT, state);
+      await saveState(TEST_ROOT, state);
 
       const onDisk = JSON.parse(readFileSync(resolve(STATE_DIR, 'orchestrator.json'), 'utf-8'));
       expect(onDisk.repo_id).toBe('save-test');
@@ -146,29 +146,29 @@ describe('orchestrator', () => {
   });
 
   describe('lock management', () => {
-    it('acquires and releases locks', () => {
-      const result = acquireLock(TEST_ROOT, { pid: 1234 });
+    it('acquires and releases locks', async () => {
+      const result = await acquireLock(TEST_ROOT, { pid: 1234 });
       expect(result.acquired).toBe(true);
 
-      const status = checkLock(TEST_ROOT);
+      const status = await checkLock(TEST_ROOT);
       expect(status.locked).toBe(true);
       expect(status.lock.pid).toBe(1234);
 
-      const released = releaseLock(TEST_ROOT);
+      const released = await releaseLock(TEST_ROOT);
       expect(released).toBe(true);
 
-      expect(checkLock(TEST_ROOT).locked).toBe(false);
+      expect((await checkLock(TEST_ROOT)).locked).toBe(false);
     });
 
-    it('rejects concurrent lock acquisition', () => {
-      acquireLock(TEST_ROOT, { pid: 1 });
-      const result = acquireLock(TEST_ROOT, { pid: 2 });
+    it('rejects concurrent lock acquisition', async () => {
+      await acquireLock(TEST_ROOT, { pid: 1 });
+      const result = await acquireLock(TEST_ROOT, { pid: 2 });
       expect(result.acquired).toBe(false);
       expect(result.existingLock.pid).toBe(1);
-      releaseLock(TEST_ROOT);
+      await releaseLock(TEST_ROOT);
     });
 
-    it('detects stale locks', () => {
+    it('detects stale locks', async () => {
       // Write a lock with old timestamp
       const lockData = {
         pid: 999,
@@ -182,23 +182,23 @@ describe('orchestrator', () => {
         'utf-8'
       );
 
-      const status = checkLock(TEST_ROOT);
+      const status = await checkLock(TEST_ROOT);
       expect(status.locked).toBe(true);
       expect(status.stale).toBe(true);
 
       // Stale lock should be overridden
-      const result = acquireLock(TEST_ROOT, { pid: 999 });
+      const result = await acquireLock(TEST_ROOT, { pid: 999 });
       expect(result.acquired).toBe(true);
-      releaseLock(TEST_ROOT);
+      await releaseLock(TEST_ROOT);
     });
   });
 
   describe('event logging', () => {
-    it('appends events and reads them back', () => {
-      appendEvent(TEST_ROOT, 'test_action', { team: 'team-backend', data: 'hello' });
-      appendEvent(TEST_ROOT, 'test_action_2', { data: 'world' });
+    it('appends events and reads them back', async () => {
+      await appendEvent(TEST_ROOT, 'test_action', { team: 'team-backend', data: 'hello' });
+      await appendEvent(TEST_ROOT, 'test_action_2', { data: 'world' });
 
-      const events = readEvents(TEST_ROOT);
+      const events = await readEvents(TEST_ROOT);
       expect(events).toHaveLength(2);
       expect(events[0].action).toBe('test_action');
       expect(events[0].team).toBe('team-backend');
@@ -206,16 +206,16 @@ describe('orchestrator', () => {
       expect(events[0].timestamp).toBeDefined();
     });
 
-    it('returns empty array when no events exist', () => {
-      const events = readEvents(TEST_ROOT);
+    it('returns empty array when no events exist', async () => {
+      const events = await readEvents(TEST_ROOT);
       expect(events).toEqual([]);
     });
 
-    it('respects the limit parameter', () => {
+    it('respects the limit parameter', async () => {
       for (let i = 0; i < 10; i++) {
-        appendEvent(TEST_ROOT, `action_${i}`);
+        await appendEvent(TEST_ROOT, `action_${i}`);
       }
-      const events = readEvents(TEST_ROOT, 3);
+      const events = await readEvents(TEST_ROOT, 3);
       expect(events).toHaveLength(3);
       // Should return the LAST 3 events
       expect(events[0].action).toBe('action_7');
@@ -223,10 +223,10 @@ describe('orchestrator', () => {
   });
 
   describe('getStatus()', () => {
-    it('returns a formatted status string', () => {
+    it('returns a formatted status string', async () => {
       // Create initial state
-      loadState(TEST_ROOT);
-      const status = getStatus(TEST_ROOT);
+      await loadState(TEST_ROOT);
+      const status = await getStatus(TEST_ROOT);
       expect(status).toContain('Orchestrator Status');
       expect(status).toContain('Phase');
       expect(status).toContain('Team Progress');
@@ -250,40 +250,40 @@ describe('orchestrator', () => {
   describe('getTasksSummary()', () => {
     const TASKS_DIR = resolve(TEST_ROOT, '.claude', 'state', 'tasks');
 
-    it('returns empty-queue message when tasks directory does not exist', () => {
-      const result = getTasksSummary(TEST_ROOT);
+    it('returns empty-queue message when tasks directory does not exist', async () => {
+      const result = await getTasksSummary(TEST_ROOT);
       expect(result).toBe('No tasks in the task queue.');
     });
 
-    it('returns empty-queue message when readdirSync throws', () => {
+    it('returns empty-queue message when readdirSync throws', async () => {
       // Create a file at the tasks path so readdirSync throws ENOTDIR
       mkdirSync(resolve(TEST_ROOT, '.claude', 'state'), { recursive: true });
       writeFileSync(TASKS_DIR, 'not-a-directory');
-      const result = getTasksSummary(TEST_ROOT);
+      const result = await getTasksSummary(TEST_ROOT);
       expect(result).toBe('No tasks in the task queue.');
     });
 
-    it('skips corrupted JSON files and still returns valid output', () => {
+    it('skips corrupted JSON files and still returns valid output', async () => {
       mkdirSync(TASKS_DIR, { recursive: true });
       writeFileSync(resolve(TASKS_DIR, 'bad.json'), '{ invalid json !!');
       writeFileSync(
         resolve(TASKS_DIR, 'good.json'),
         JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Do something', priority: 'P1', assignees: ['team-backend'], createdAt: new Date().toISOString() })
       );
-      const result = getTasksSummary(TEST_ROOT);
+      const result = await getTasksSummary(TEST_ROOT);
       expect(result).toContain('Active tasks: 1');
     });
 
-    it('ignores non-object JSON payloads (arrays, primitives)', () => {
+    it('ignores non-object JSON payloads (arrays, primitives)', async () => {
       mkdirSync(TASKS_DIR, { recursive: true });
       writeFileSync(resolve(TASKS_DIR, 'array.json'), JSON.stringify([1, 2, 3]));
       writeFileSync(resolve(TASKS_DIR, 'number.json'), '42');
       writeFileSync(resolve(TASKS_DIR, 'string.json'), '"just a string"');
-      const result = getTasksSummary(TEST_ROOT);
+      const result = await getTasksSummary(TEST_ROOT);
       expect(result).toBe('No tasks in the task queue.');
     });
 
-    it('counts non-terminal tasks as active and terminal tasks as completed', () => {
+    it('counts non-terminal tasks as active and terminal tasks as completed', async () => {
       mkdirSync(TASKS_DIR, { recursive: true });
       const now = new Date().toISOString();
       writeFileSync(
@@ -302,58 +302,43 @@ describe('orchestrator', () => {
         resolve(TASKS_DIR, 'done2.json'),
         JSON.stringify({ id: 'task-004', status: 'failed', title: 'Task 4', priority: 'P3', assignees: ['team-backend'], createdAt: now })
       );
-      const result = getTasksSummary(TEST_ROOT);
+      const result = await getTasksSummary(TEST_ROOT);
       expect(result).toContain('Active tasks: 2');
       expect(result).toContain('Completed/closed tasks: 2');
     });
 
-    it('omits active section when all tasks are terminal', () => {
+    it('omits active section when all tasks are terminal', async () => {
       mkdirSync(TASKS_DIR, { recursive: true });
       const now = new Date().toISOString();
       writeFileSync(
         resolve(TASKS_DIR, 'done.json'),
         JSON.stringify({ id: 'task-001', status: 'canceled', title: 'Done', priority: 'P1', assignees: ['team-backend'], createdAt: now })
       );
-      const result = getTasksSummary(TEST_ROOT);
+      const result = await getTasksSummary(TEST_ROOT);
       expect(result).not.toContain('Active tasks');
       expect(result).toContain('Completed/closed tasks: 1');
     });
-  });
 
-  describe('getTasksSummaryAsync()', () => {
-    const TASKS_DIR = resolve(TEST_ROOT, '.claude', 'state', 'tasks');
-
-    it('returns empty-queue message when no tasks exist', async () => {
-      const result = await getTasksSummaryAsync(TEST_ROOT);
-      expect(result).toBe('No tasks in the task queue.');
-    });
-
-    it('counts non-terminal tasks as active and terminal tasks as completed', async () => {
+    it('sorts active tasks by priority then newest createdAt first', async () => {
       mkdirSync(TASKS_DIR, { recursive: true });
-      const now = new Date().toISOString();
       writeFileSync(
-        resolve(TASKS_DIR, 'active.json'),
-        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Active', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        resolve(TASKS_DIR, 'task-low-priority.json'),
+        JSON.stringify({ id: 'task-low-priority', status: 'working', priority: 'P2', title: 'Low priority', assignees: [], createdAt: '2024-01-01T08:00:00Z' })
       );
       writeFileSync(
-        resolve(TASKS_DIR, 'done.json'),
-        JSON.stringify({ id: 'task-002', status: 'completed', title: 'Done', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        resolve(TASKS_DIR, 'task-high-older.json'),
+        JSON.stringify({ id: 'task-high-older', status: 'working', priority: 'P0', title: 'High priority older', assignees: [], createdAt: '2024-01-01T09:00:00Z' })
       );
-      const result = await getTasksSummaryAsync(TEST_ROOT);
-      expect(result).toContain('Active tasks: 1');
-      expect(result).toContain('Completed/closed tasks: 1');
-    });
-
-    it('skips corrupted task files via listTasks and still returns valid output', async () => {
-      mkdirSync(TASKS_DIR, { recursive: true });
-      writeFileSync(resolve(TASKS_DIR, 'corrupt.json'), '{ bad json !!');
-      const now = new Date().toISOString();
       writeFileSync(
-        resolve(TASKS_DIR, 'valid.json'),
-        JSON.stringify({ id: 'task-001', status: 'submitted', title: 'Valid', priority: 'P2', assignees: ['team-backend'], createdAt: now })
+        resolve(TASKS_DIR, 'task-high-newer.json'),
+        JSON.stringify({ id: 'task-high-newer', status: 'working', priority: 'P0', title: 'Newer high priority', assignees: [], createdAt: '2024-01-01T10:00:00Z' })
       );
-      const result = await getTasksSummaryAsync(TEST_ROOT);
-      expect(result).toContain('Active tasks: 1');
+      const result = await getTasksSummary(TEST_ROOT);
+      const newerPos = result.indexOf('task-high-newer');
+      const olderPos = result.indexOf('task-high-older');
+      const lowPos = result.indexOf('task-low-priority');
+      expect(newerPos).toBeLessThan(olderPos);
+      expect(olderPos).toBeLessThan(lowPos);
     });
   });
 });

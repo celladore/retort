@@ -68,7 +68,7 @@ function getChangedFiles(projectRoot, flags) {
     return r.exitCode === 0 ? r.stdout.trim().split('\n').filter(Boolean) : [];
   }
 
-    if (flags.file) {
+  if (flags.file) {
     // Constrain to project root to prevent path traversal
     const abs = resolve(projectRoot, flags.file);
     if (!abs.startsWith(resolve(projectRoot) + sep) && abs !== resolve(projectRoot)) {
@@ -308,7 +308,7 @@ export async function runReview({ agentkitRoot /* kept for interface compatibili
 
   // Log event
   try {
-    appendEvent(projectRoot, 'review_completed', {
+    await appendEvent(projectRoot, 'review_completed', {
       filesReviewed: changedFiles.length,
       totalFindings: allFindings.length,
       secretFindings: secrets.length,

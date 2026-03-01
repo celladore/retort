@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Discover Command
+ * AgentKit Forge ÔÇö Discover Command
  * Scans the repository to detect tech stacks, project structure, team boundaries,
  * and build a structured discovery report.
  */
@@ -72,7 +72,7 @@ const STACK_DETECTORS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Framework detection (§11a)
+// Framework detection (┬º11a)
 // ---------------------------------------------------------------------------
 
 const FRAMEWORK_DETECTORS = {
@@ -173,7 +173,7 @@ const FRAMEWORK_DETECTORS = {
 };
 
 // ---------------------------------------------------------------------------
-// Testing tool detection (§11b)
+// Testing tool detection (┬º11b)
 // ---------------------------------------------------------------------------
 
 const TESTING_DETECTORS = [
@@ -208,7 +208,7 @@ const TESTING_DETECTORS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Documentation artifact detection (§11c)
+// Documentation artifact detection (┬º11c)
 // ---------------------------------------------------------------------------
 
 const DOC_ARTIFACT_DETECTORS = [
@@ -234,7 +234,7 @@ const DOC_ARTIFACT_DETECTORS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Design system detection (§11d)
+// Design system detection (┬º11d)
 // ---------------------------------------------------------------------------
 
 const DESIGN_SYSTEM_DETECTORS = [
@@ -253,7 +253,7 @@ const DESIGN_SYSTEM_DETECTORS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Cross-cutting concern detection (§11f)
+// Cross-cutting concern detection (┬º11f)
 // ---------------------------------------------------------------------------
 
 const CROSSCUTTING_DETECTORS = {
@@ -387,7 +387,7 @@ async function fileExists(projectRoot, pattern) {
   }
 }
 
-// Directories to skip during discovery — framework internals and build artifacts
+// Directories to skip during discovery ÔÇö framework internals and build artifacts
 // should not be counted as application source code in consuming repos.
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt']);
 
@@ -431,7 +431,7 @@ async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
       for (const entry of entries) {
         if (count > maxFiles) break;
         if (entry.name.startsWith('.') || SKIP_DIRS.has(entry.name)) continue;
-        // Skip agentkit engine internals — framework code, not app code
+        // Skip agentkit engine internals ÔÇö framework code, not app code
         if (currentDepth === 0 && entry.name === '.agentkit') continue;
 
         const full = join(currentDir, entry.name);
@@ -607,7 +607,7 @@ async function getPomContent(projectRoot) {
  */
 async function getPythonDeps(projectRoot) {
   const deps = new Set();
-  // pyproject.toml — section-aware parsing to avoid false positives
+  // pyproject.toml ÔÇö section-aware parsing to avoid false positives
   try {
     const content = await readFile(resolve(projectRoot, 'pyproject.toml'), 'utf-8');
     const lines = content.split(/\r?\n/);
@@ -852,7 +852,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
     projectRoot,
   };
 
-  // --- Framework detection (§11a) ---
+  // --- Framework detection (┬º11a) ---
   for (const [category, detectors] of Object.entries(FRAMEWORK_DETECTORS)) {
     const found = await detectFromList(detectors, depContext);
     if (found.length > 0) {
@@ -860,11 +860,11 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
     }
   }
 
-  // --- Testing tool detection (§11b) ---
+  // --- Testing tool detection (┬º11b) ---
   const testingFound = await detectFromList(TESTING_DETECTORS, depContext);
   report.testing = testingFound.map((t) => t.name);
 
-  // --- Documentation artifact detection (§11c) ---
+  // --- Documentation artifact detection (┬º11c) ---
   const docTasks = DOC_ARTIFACT_DETECTORS.map(async (detector) => {
     let foundPath = null;
     // Check directories
@@ -894,7 +894,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   const docResults = await Promise.all(docTasks);
   report.documentation = docResults.filter(Boolean);
 
-  // --- Design system detection (§11d) ---
+  // --- Design system detection (┬º11d) ---
   const designTasks = DESIGN_SYSTEM_DETECTORS.map(async (detector) => {
     let found = false;
     if (detector.dirs) {
@@ -914,7 +914,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   const designResults = await Promise.all(designTasks);
   report.designSystem = designResults.filter(Boolean);
 
-  // --- Cross-cutting concern detection (§11f) ---
+  // --- Cross-cutting concern detection (┬º11f) ---
   for (const [concern, detectors] of Object.entries(CROSSCUTTING_DETECTORS)) {
     const found = await detectFromList(detectors, depContext);
     if (found.length > 0) {
@@ -1097,3 +1097,4 @@ function formatMarkdown(report) {
 
   return lines.join('\n');
 }
+

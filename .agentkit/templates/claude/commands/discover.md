@@ -6,6 +6,11 @@ description: {{escapeYamlString commandDescription}}
 # Write-capable tools are permitted ONLY for designated output artifacts: AGENT_TEAMS.md, .claude/state/, .claude/state/events.log.
 # Enforced path restrictions: mkdir only for .claude/state/; echo/printf/tee only for AGENT_TEAMS.md or appending to .claude/state/events.log.
 allowed-tools: Bash(git *), Bash(find *), Bash(ls *), Bash(cat *), Bash(head *), Bash(wc *), Bash(mkdir *), Bash(echo *), Bash(printf *), Bash(tee *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # Codebase Discovery

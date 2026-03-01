@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Task Protocol
+ * AgentKit Forge ÔÇö Task Protocol
  * File-based A2A-lite task delegation protocol.
  * Tasks are JSON files in .claude/state/tasks/ with lifecycle states,
  * messages, artifacts, dependency tracking, and chained handoffs.
@@ -27,7 +27,7 @@ export const TASK_STATES = [
   'BLOCKED_ON_CANCELED', // blocked only by canceled/failed/rejected deps; until manual descoping or retry
 ];
 
-/** Terminal states — no further transitions allowed. */
+/** Terminal states ÔÇö no further transitions allowed. */
 export const TERMINAL_STATES = ['completed', 'failed', 'rejected', 'canceled', 'BLOCKED_ON_CANCELED'];
 
 /** Valid task types. */
@@ -506,7 +506,7 @@ export async function updateTaskStatus(projectRoot, taskId, newStatus, messageDa
   if (!allowed || !allowed.includes(newStatus)) {
     return {
       task: null,
-      error: `Invalid transition: ${task.status} → ${newStatus}. Allowed: ${(allowed || []).join(', ') || 'none (terminal state)'}`,
+      error: `Invalid transition: ${task.status} ÔåÆ ${newStatus}. Allowed: ${(allowed || []).join(', ') || 'none (terminal state)'}`,
     };
   }
 
@@ -666,7 +666,7 @@ export async function checkDependencies(projectRoot) {
         continue;
       }
       if (dep.task.status === 'completed') {
-        // Dependency satisfied — don't add to blockers
+        // Dependency satisfied ÔÇö don't add to blockers
       } else if (['failed', 'rejected', 'canceled'].includes(dep.task.status)) {
         hasCanceledDep = true;
         newBlockers.push(depId);
@@ -861,7 +861,7 @@ export function formatTaskSummary(task) {
     `Task: ${safeTask.id || 'unknown'}`,
     `Title: ${safeTask.title || '(untitled)'}`,
     `Type: ${safeTask.type || 'unknown'} | Priority: ${safeTask.priority || 'unknown'} | Status: ${safeTask.status || 'unknown'}`,
-    `Delegator: ${safeTask.delegator || 'unknown'} → Assignees: ${safeAssignees.join(', ')}`,
+    `Delegator: ${safeTask.delegator || 'unknown'} ÔåÆ Assignees: ${safeAssignees.join(', ')}`,
   ];
 
   if (safeDependsOn.length > 0) {
@@ -898,14 +898,14 @@ export function formatTaskList(tasks) {
       .replace(/\r?\n/g, ' ');
 
   const statusIcon = {
-    submitted: '📩',
-    accepted: '✅',
-    working: '🔨',
-    'input-required': '❓',
-    completed: '✔️',
-    failed: '❌',
-    rejected: '🚫',
-    canceled: '🗑️',
+    submitted: '­ƒô®',
+    accepted: 'Ô£à',
+    working: '­ƒö¿',
+    'input-required': 'ÔØô',
+    completed: 'Ô£ö´©Å',
+    failed: 'ÔØî',
+    rejected: '­ƒÜ½',
+    canceled: '­ƒùæ´©Å',
   };
 
   const lines = [
@@ -923,3 +923,4 @@ export function formatTaskList(tasks) {
 
   return lines.join('\n');
 }
+

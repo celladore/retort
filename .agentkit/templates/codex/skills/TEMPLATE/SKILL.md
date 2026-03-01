@@ -1,6 +1,11 @@
 ---
 name: "{{commandName}}"
 description: "{{commandDescription}}"
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Codex agent skill definition.
+# Docs: https://developers.openai.com/codex/guides/agents-md
 ---
 
 # {{commandName}}

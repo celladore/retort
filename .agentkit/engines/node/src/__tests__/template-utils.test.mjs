@@ -15,6 +15,7 @@ import {
   flattenCrosscutting,
   resolveRenderTargets,
   ALL_RENDER_TARGETS,
+  collapseBlankLines,
 } from '../template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -463,6 +464,42 @@ describe('resolveConditionals', () => {
     const result = resolveConditionals('{{#if a}}A{{/if}}{{#if b}}B{{/if}}', { a: true, b: true });
     expect(result).toBe('AB');
   });
+
+  // {{#unless}} support
+  it('keeps content when unless var is falsy', () => {
+    const result = resolveConditionals('{{#unless flag}}shown{{/unless}}', { flag: false });
+    expect(result).toBe('shown');
+  });
+
+  it('removes content when unless var is truthy', () => {
+    const result = resolveConditionals('{{#unless flag}}hidden{{/unless}}', { flag: true });
+    expect(result).toBe('');
+  });
+
+  it('keeps content when unless var is undefined', () => {
+    const result = resolveConditionals('{{#unless missing}}shown{{/unless}}', {});
+    expect(result).toBe('shown');
+  });
+
+  it('handles unless with {{else}} — falsy', () => {
+    const result = resolveConditionals('{{#unless flag}}A{{else}}B{{/unless}}', { flag: false });
+    expect(result).toBe('A');
+  });
+
+  it('handles unless with {{else}} — truthy', () => {
+    const result = resolveConditionals('{{#unless flag}}A{{else}}B{{/unless}}', { flag: true });
+    expect(result).toBe('B');
+  });
+
+  it('handles unless with empty array (falsy)', () => {
+    const result = resolveConditionals('{{#unless items}}no items{{/unless}}', { items: [] });
+    expect(result).toBe('no items');
+  });
+
+  it('handles unless with non-empty array (truthy)', () => {
+    const result = resolveConditionals('{{#unless items}}no items{{/unless}}', { items: ['a'] });
+    expect(result).toBe('');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -733,5 +770,39 @@ describe('resolveRenderTargets', () => {
   it('returns all targets when flags is null', () => {
     const result = resolveRenderTargets(undefined, null);
     expect(result).toEqual(new Set(ALL_RENDER_TARGETS));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// collapseBlankLines
+// ---------------------------------------------------------------------------
+describe('collapseBlankLines', () => {
+  it('collapses 3+ consecutive blank lines to a single blank line', () => {
+    const input = 'A\n\n\n\nB';
+    expect(collapseBlankLines(input)).toBe('A\n\nB');
+  });
+
+  it('preserves a single blank line between paragraphs', () => {
+    const input = 'A\n\nB';
+    expect(collapseBlankLines(input)).toBe('A\n\nB');
+  });
+
+  it('collapses many blank lines', () => {
+    const input = 'A\n\n\n\n\n\n\n\n\nB';
+    expect(collapseBlankLines(input)).toBe('A\n\nB');
+  });
+
+  it('handles text with no blank lines', () => {
+    const input = 'A\nB\nC';
+    expect(collapseBlankLines(input)).toBe('A\nB\nC');
+  });
+
+  it('handles empty string', () => {
+    expect(collapseBlankLines('')).toBe('');
+  });
+
+  it('handles multiple sections with excessive blanks', () => {
+    const input = 'A\n\n\n\nB\n\n\n\n\nC';
+    expect(collapseBlankLines(input)).toBe('A\n\nB\n\nC');
   });
 });

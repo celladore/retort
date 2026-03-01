@@ -143,11 +143,11 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
 
   // Update orchestrator state
   try {
-    const state = loadState(projectRoot);
+    const state = await loadState(projectRoot);
     state.lastHealthcheck = results.timestamp;
     state.healthStatus = results.overallHealth;
-    saveState(projectRoot, state);
-    appendEvent(projectRoot, 'healthcheck_completed', {
+    await saveState(projectRoot, state);
+    await appendEvent(projectRoot, 'healthcheck_completed', {
       overallHealth: results.overallHealth,
       toolsFound: results.tools.filter(t => t.found).length,
       stacksChecked: results.stacks.length,

@@ -1,6 +1,11 @@
 ---
 description: "Universal quality gate — format, lint, typecheck, test, build in one pass"
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(pytest *), Bash(go *), Bash(rustfmt *), Bash(prettier *), Bash(eslint *), Bash(ruff *), Bash(black *), Bash(mypy *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # Universal Quality Gate

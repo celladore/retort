@@ -1,6 +1,11 @@
 ---
 name: '{{agentName}}'
 description: '{{agentRole}}'
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
+# Format: YAML frontmatter + Markdown body. Copilot agent definition.
+# Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
 
 # {{agentName}}

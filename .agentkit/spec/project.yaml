@@ -49,7 +49,7 @@ documentation:
   hasPrd: false
   prdPath: null # e.g. docs/prd/
   hasAdr: false
-  adrPath: null # e.g. docs/adr/
+  adrPath: null # e.g. docs/03_architecture/03_decisions/
   hasApiSpec: false
   apiSpecPath: null # e.g. docs/api/openapi/
   hasTechnicalSpec: false

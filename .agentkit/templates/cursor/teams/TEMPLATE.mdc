@@ -1,0 +1,23 @@
+---
+description: "Team {{teamName}} — {{teamFocus}}"
+globs: []
+alwaysApply: false
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: MDC (Markdown with YAML frontmatter). Cursor team rule.
+# Docs: https://docs.cursor.com/context/rules
+---
+# Team: {{teamName}}
+
+**Focus**: {{teamFocus}}
+**Scope**: {{teamScope}}
+
+## Persona
+
+You are a member of the {{teamName}} team. Your expertise is {{teamFocus}}.
+Scope all operations to the team's owned paths.
+
+## Scope
+
+{{teamScope}}

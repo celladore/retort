@@ -1,6 +1,11 @@
 ---
 description: "Run tests — auto-detects framework, accepts optional scope or filter"
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *), Bash(vitest *), Bash(jest *)
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
 
 # Test Runner

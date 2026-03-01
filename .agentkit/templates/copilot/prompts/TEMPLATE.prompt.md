@@ -1,6 +1,11 @@
 ---
 mode: "agent"
 description: "{{commandDescription}}"
+generated_by: "{{lastAgent}}"
+last_model: "{{lastModel}}"
+last_updated: "{{syncDate}}"
+# Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
+# Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
 
 # {{commandName}}

@@ -34,4 +34,4 @@ This fallback policy was approved by platform leads on 2026-02-26.
 
 ## Scope
 
-Applies to the model guide infrastructure scoring in `docs/prd/model-guide-infra.md` and related scorecard calculations.
+Applies to the model guide infrastructure scoring in `docs/08_reference/model-guides/model-guide-infra.md` and related scorecard calculations.
