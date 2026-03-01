@@ -75,4 +75,47 @@ describe('CLI', () => {
     const result = run('spec-validate');
     expect(result.exitCode).toBe(0);
   });
+
+  describe('parseArgs flag scoping', () => {
+    it('orchestrate --status is treated as a boolean flag (no value required)', () => {
+      // --status is boolean for orchestrate; --help exits before running the command
+      const result = run('orchestrate', '--status', '--help');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('AgentKit Forge');
+    });
+
+    it('tasks --status accepts a string value', () => {
+      // --status is string for tasks; --help exits before running the command
+      const result = run('tasks', '--status', 'submitted', '--help');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('AgentKit Forge');
+    });
+
+    it('tasks --status without a value exits non-zero', () => {
+      // --status is a string option for tasks; omitting the value should cause an error
+      const result = run('tasks', '--status');
+      expect(result.exitCode).not.toBe(0);
+    });
+
+    it('command without --status support does not error when --status is passed without a value', () => {
+      // spec-validate does not declare --status; with strict:false the unknown flag is
+      // tolerated and spec-validate runs to completion
+      const result = run('spec-validate', '--status');
+      expect(result.exitCode).toBe(0);
+    });
+
+    it('sync -q (short for --quiet) does not error', () => {
+      // -q is a short alias for --quiet; --help exits before running sync
+      const result = run('sync', '-q', '--help');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('AgentKit Forge');
+    });
+
+    it('sync -v (short for --verbose) does not error', () => {
+      // -v is a short alias for --verbose; --help exits before running sync
+      const result = run('sync', '-v', '--help');
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('AgentKit Forge');
+    });
+  });
 });

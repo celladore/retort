@@ -3,6 +3,7 @@
  * AgentKit Forge CLI Router
  * Routes subcommands to their handlers.
  */
+import { parseArgs } from 'node:util';
 import { spawnSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
@@ -106,38 +107,152 @@ const VALID_FLAGS = {
   list: ['help'],
 };
 
+// Global flags that apply to all commands
+const GLOBAL_FLAGS = ['help', 'quiet', 'verbose'];
+
+// Explicit flag types to ensure correct parsing via node:util parseArgs
+const FLAG_TYPES = {
+  // Global
+  help: 'boolean',
+  quiet: 'boolean',
+  verbose: 'boolean',
+
+  // Strings
+  repoName: 'string',
+  preset: 'string',
+  only: 'string', // comma-separated
+  output: 'string',
+  depth: 'string',
+  scope: 'string',
+  team: 'string',
+  phase: 'string',
+  issue: 'string',
+  pr: 'string',
+  range: 'string',
+  file: 'string',
+  focus: 'string',
+  severity: 'string',
+  format: 'string',
+  tag: 'string',
+  month: 'string',
+  last: 'string',
+  assignee: 'string',
+  type: 'string',
+  priority: 'string',
+  id: 'string',
+  to: 'string',
+  title: 'string',
+  description: 'string',
+  'depends-on': 'string',
+  'handoff-to': 'string',
+  name: 'string',
+  stack: 'string',
+  path: 'string',
+  base: 'string',
+  overlay: 'string',
+
+  // Booleans
+  force: 'boolean',
+  'non-interactive': 'boolean',
+  ci: 'boolean',
+  'dry-run': 'boolean',
+  overwrite: 'boolean',
+  'no-clean': 'boolean',
+  diff: 'boolean',
+  'include-deps': 'boolean',
+  'assess-only': 'boolean',
+  'force-unlock': 'boolean',
+  fix: 'boolean',
+  fast: 'boolean',
+  bail: 'boolean',
+  'include-diff': 'boolean',
+  save: 'boolean',
+  summary: 'boolean',
+  sessions: 'boolean',
+  report: 'boolean',
+  'process-handoffs': 'boolean',
+  clean: 'boolean',
+  strict: 'boolean',
+};
+
 const args = process.argv.slice(2);
 const command = args[0];
 const commandArgs = args.slice(1);
 
-function parseFlags(args) {
-  const flags = { _args: [] };
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg.startsWith('--')) {
-      const raw = arg.slice(2);
-      const eqIdx = raw.indexOf('=');
-      if (eqIdx !== -1) {
-        flags[raw.slice(0, eqIdx)] = raw.slice(eqIdx + 1);
-      } else {
-        const next = args[i + 1];
-        if (next && !next.startsWith('--')) {
-          flags[raw] = next;
-          i++;
-        } else {
-          flags[raw] = true;
-        }
-      }
-    } else if (arg.startsWith('-') && arg.length > 1 && arg !== '-') {
-      for (const c of arg.slice(1)) {
-        if (c === 'q') flags.quiet = true;
-        if (c === 'v') flags.verbose = true;
-      }
-    } else {
-      flags._args.push(arg);
+function parseFlags(command, args) {
+  // Scope options to flags valid for this command plus global flags
+  const commandFlags = VALID_FLAGS[command] ?? [];
+  const allFlags = new Set([...GLOBAL_FLAGS, ...commandFlags]);
+
+  const options = {};
+  for (const flagName of allFlags) {
+    // --status is handled separately with a command-specific type
+    if (flagName === 'status') continue;
+    const type = FLAG_TYPES[flagName];
+    if (!type) {
+      throw new Error(
+        `Internal CLI configuration error: flag "--${flagName}" is listed as valid for ` +
+        `command "${command}" but has no entry in FLAG_TYPES.`
+      );
     }
+    options[flagName] = { type };
+    if (flagName === 'quiet') options[flagName].short = 'q';
+    if (flagName === 'verbose') options[flagName].short = 'v';
   }
-  return flags;
+
+  // Only add --status for commands that support it, with the correct type:
+  // orchestrate: boolean flag, tasks: string value
+  if (commandFlags.includes('status')) {
+    options.status = { type: command === 'orchestrate' ? 'boolean' : 'string' };
+  }
+
+  try {
+    const { values, positionals } = parseArgs({
+      args,
+      options,
+      strict: false, // allow unknown flags/positionals
+      allowPositionals: true
+    });
+
+    // With strict: false, parseArgs returns boolean true for a known string option
+    // that is passed without a value (e.g. --status with no argument). Enforce that
+    // all known string options received an actual string value.
+    for (const [flagName, flagOpt] of Object.entries(options)) {
+      if (flagOpt.type === 'string' && Object.hasOwn(values, flagName) && typeof values[flagName] !== 'string') {
+        throw new TypeError(`Option '--${flagName} <value>' argument missing`);
+      }
+    }
+
+    // With strict: false, unknown flag tokens end up in positionals instead of values.
+    // Filter them out, warn the user, and exclude them from the positional args.
+    // For flags without an inline value (e.g. --foo bar), also skip the next token
+    // so bare values don't end up as positional arguments.
+    const unknownFlags = [];
+    const filteredPositionals = [];
+    for (let i = 0; i < positionals.length; i++) {
+      const token = positionals[i];
+      if (typeof token === 'string' && token.length >= 2 && token.startsWith('-')) {
+        unknownFlags.push(token);
+        console.warn(`[agentkit:${command}] Warning: unrecognised flag ${token} (ignored)`);
+        // Skip the next token if it looks like a value (not a flag) for flags
+        // that don't embed their value inline (e.g. --foo bar, but not --foo=bar).
+        if (
+          !token.includes('=') &&
+          i + 1 < positionals.length &&
+          !positionals[i + 1].startsWith('-')
+        ) {
+          i++;
+        }
+      } else {
+        filteredPositionals.push(token);
+      }
+    }
+
+    return { ...values, _args: filteredPositionals };
+  } catch (err) {
+    console.error(`Error parsing arguments: ${err.message}`);
+    process.exit(1);
+  }
 }
 
 function showHelp() {
@@ -281,7 +396,7 @@ async function main() {
     process.exit(1);
   }
 
-  const flags = parseFlags(commandArgs);
+  const flags = parseFlags(command, commandArgs);
 
   // Show command-specific help
   if (flags.help) {
@@ -290,7 +405,7 @@ async function main() {
   }
 
   // Warn on unrecognised flags
-  const validForCommand = VALID_FLAGS[command] || [];
+  const validForCommand = [...(VALID_FLAGS[command] || []), ...GLOBAL_FLAGS];
   for (const key of Object.keys(flags)) {
     if (key === '_args') continue;
     if (!validForCommand.includes(key)) {
