@@ -41,14 +41,20 @@ regressions are visible in the diff.
 ### Rust
 
 ```rust
-#[bench]
-fn bench_process_items(b: &mut Bencher) {
+use criterion::{criterion_group, criterion_main, Criterion};
+
+fn bench_process_items(c: &mut Criterion) {
     let dataset = make_dataset(1000);
-    b.iter(|| process_items(&dataset));
+    c.bench_function("process 1000 items", |b| {
+        b.iter(|| process_items(&dataset));
+    });
 }
+
+criterion_group!(benches, bench_process_items);
+criterion_main!(benches);
 ```
 
-Use Criterion for stable benchmarks: `criterion_group!` and `criterion_main!`.
+Use [Criterion.rs](https://github.com/bheisler/criterion.rs) for stable, statistically rigorous benchmarks.
 {{/if}}
 {{#if hasLanguagePython}}
 ### Python

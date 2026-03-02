@@ -617,17 +617,24 @@ async function syncLanguageInstructions(
   const overlayDir = platform ? join(templatesDir, platform, 'language-instructions') : null;
   const fallbackTplPath = join(sharedLangDir, 'TEMPLATE.md');
   const rules = rulesSpec?.rules || [];
+  const SAFE_DOMAIN_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
   for (const rule of rules) {
+    const domain = rule.domain;
+    if (typeof domain !== 'string' || !SAFE_DOMAIN_PATTERN.test(domain)) {
+      console.warn(`[agentkit:sync] Skipping rule with invalid domain: ${JSON.stringify(domain)}`);
+      continue;
+    }
+
     // Resolve template: overlay first, then shared domain-specific, then generic fallback
-    const tplPath = resolveLanguageTemplate(overlayDir, sharedLangDir, rule.domain, fallbackTplPath);
+    const tplPath = resolveLanguageTemplate(overlayDir, sharedLangDir, domain, fallbackTplPath);
     if (!tplPath) continue;
 
     const template = await readTemplateText(tplPath);
     const ruleVars = buildRuleVars(rule, vars);
     const rendered = renderTemplate(template, ruleVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, outputSubDir, `${rule.domain}.md`), withHeader);
+    await writeOutput(join(tmpDir, outputSubDir, `${domain}.md`), withHeader);
   }
 
   // Generate README from shared template (overlay README takes precedence if present)

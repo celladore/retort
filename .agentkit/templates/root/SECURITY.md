@@ -115,4 +115,4 @@ The `validate` command scans for common secret patterns:
 
 ---
 
-*This policy is maintained by AgentKit Forge. Run `pnpm -C agentkit agentkit:sync` to regenerate.*
+*This policy is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate.*

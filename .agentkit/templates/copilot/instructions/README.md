@@ -54,7 +54,7 @@ Languages not present in your project may still have a file — use
    instructions are loaded automatically.
 
 For language-specific instructions, add a domain to `.agentkit/spec/rules.yaml`
-and a corresponding template to `.agentkit/templates/copilot/language-instructions/`.
+and a corresponding template to `.agentkit/templates/language-instructions/`.
 
 ## Maintenance
 

@@ -113,4 +113,4 @@ If `.claude/state/orchestrator.json` becomes corrupted:
 
 ---
 
-*This runbook is maintained by AgentKit Forge. Run `pnpm -C agentkit agentkit:sync` to regenerate.*
+*This runbook is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate.*

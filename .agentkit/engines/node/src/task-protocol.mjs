@@ -430,6 +430,7 @@ export async function listTasks(projectRoot, filters = {}) {
   }
 
   const tasks = [];
+  let skippedTaskFiles = 0;
   const MAX_READ_CONCURRENCY = 32;
 
   for (let i = 0; i < files.length; i += MAX_READ_CONCURRENCY) {
@@ -440,7 +441,11 @@ export async function listTasks(projectRoot, filters = {}) {
         try {
           const content = await readFile(resolve(dir, file), 'utf-8');
           return JSON.parse(content);
-        } catch {
+        } catch (err) {
+          skippedTaskFiles++;
+          if (process.env.AGENTKIT_DEBUG) {
+            console.warn(`[agentkit:task] Skipped unreadable task file: ${file} — ${err?.message}`);
+          }
           return null;
         }
       }),
@@ -473,7 +478,7 @@ export async function listTasks(projectRoot, filters = {}) {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
-  return { tasks };
+  return { tasks, skippedTaskFiles };
 }
 
 // ---------------------------------------------------------------------------

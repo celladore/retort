@@ -268,7 +268,7 @@ export function flattenProjectYaml(project, docsSpec = null) {
 
   // Language detection booleans (derived from stack.languages array)
   const langs = Array.isArray(project?.stack?.languages)
-    ? project.stack.languages.map((l) => l.toLowerCase())
+    ? project.stack.languages.filter((l) => typeof l === 'string').map((l) => l.trim().toLowerCase())
     : [];
   vars.hasLanguageTypeScript = langs.some((l) => l === 'typescript' || l === 'ts');
   vars.hasLanguageJavaScript = langs.some((l) => l === 'javascript' || l === 'js');

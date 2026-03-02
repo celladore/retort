@@ -58,10 +58,10 @@ Code verification covers four dimensions:
 
 ```bash
 {{#if testingUnit}}# Unit tests + coverage report
-npx {{testingUnit}} run --coverage
+{{testingUnit}} run --coverage
 {{/if}}
 {{#if testingIntegration}}# Integration tests
-npx {{testingIntegration}} run --config vitest.integration.config.ts
+{{testingIntegration}} run --config vitest.integration.config.ts
 {{/if}}
 {{#if hasStaticAnalysis}}# Static analysis
 # {{testingStaticAnalysis}}

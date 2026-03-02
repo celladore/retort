@@ -13,12 +13,20 @@ Apply these rules when editing `.ts`, `.tsx`, `.js`, `.mjs`, or `.jsx` files.
 
 ## Type Safety
 
+### When using TypeScript
+
 - Enable `strict: true` in `tsconfig.json`.
 - All exported functions, classes, and module boundaries must have explicit
   type annotations.
 - Avoid `any` — use `unknown` with type guards when the type is truly dynamic.
 - Enable strict null checks; handle `null`/`undefined` explicitly.
 - Use `satisfies` for type-checked literals without widening.
+
+### When using JavaScript
+
+- Use JSDoc `@param`, `@returns`, and `@typedef` annotations for public APIs.
+- Enable `// @ts-check` at the top of files for editor-level type checking.
+- Prefer well-typed libraries and avoid dynamic property access patterns.
 
 ## Code Style
 
