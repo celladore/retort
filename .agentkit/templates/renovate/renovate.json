@@ -1,17 +1,56 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":dependencyDashboard"
+  ],
   "schedule": ["before 9am on monday"],
   "automerge": true,
   "automergeType": "pr",
+  "platformAutomerge": true,
+  "labels": ["dependencies"],
+  "prHourlyLimit": 3,
+  "prConcurrentLimit": 5,
+  "rangeStrategy": "pin",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security", "dependencies"],
+    "automerge": true
+  },
   "packageRules": [
     {
+      "description": "Auto-merge minor and patch updates",
       "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
+      "automerge": true,
+      "automergeType": "pr"
     },
     {
+      "description": "Require manual review for major updates",
       "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "breaking-change"]
+    },
+    {
+      "description": "AgentKit engine dependencies — require maintainer review",
+      "matchFileNames": [".agentkit/package.json"],
+      "labels": ["dependencies", "forge-source-change"],
+      "automerge": false
+    },
+    {
+      "description": "Pin GitHub Actions to full SHA for supply chain security",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true,
       "automerge": false
     }
+  ],
+  "ignorePaths": [
+    ".agentkit/templates/**",
+    ".agentkit/spec/**",
+    ".agentkit/engines/**"
   ]
 }

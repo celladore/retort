@@ -1,0 +1,88 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+# Enforce that all PRs to main pass required checks before merge.
+# Configure GitHub branch protection rules to require these status checks:
+#   - test (ubuntu-latest, 24)
+#   - validate
+#   - branch-rules
+
+jobs:
+  branch-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR is not targeting main from main
+        run: |
+          if [ "$GITHUB_HEAD_REF" = "main" ]; then
+            echo "::error::Cannot create a PR from main to main"
+            exit 1
+          fi
+
+      - name: Enforce conventional commit titles
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const pattern = /^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?!?:\s.+/;
+
+            if (!pattern.test(title)) {
+              core.setFailed(
+                `PR title "${title}" does not follow Conventional Commits.\n` +
+                `Expected format: type(scope): description\n` +
+                `Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert`
+              );
+            } else {
+              core.info(`PR title follows Conventional Commits: "${title}"`);
+            }
+
+      - name: Check for breaking changes documentation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+
+            if (title.includes('!:') || title.includes('BREAKING')) {
+              // Check if there's an ADR or breaking change note in the PR body
+              const body = context.payload.pull_request.body || '';
+              const hasBreakingDocs =
+                body.includes('## Breaking Changes') ||
+                body.includes('ADR') ||
+                body.includes('migration');
+
+              if (!hasBreakingDocs) {
+                core.warning(
+                  'This PR appears to contain breaking changes but the body does not ' +
+                  'mention an ADR, migration guide, or "## Breaking Changes" section. ' +
+                  'Please document breaking changes.'
+                );
+              }
+            }
+
+      - name: Verify no secrets in diff
+        run: |
+          # Check for common secret patterns in the PR diff
+          PATTERNS=(
+            'AKIA[0-9A-Z]{16}'
+            '-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'
+            'ghp_[A-Za-z0-9]{36}'
+            'sk-[A-Za-z0-9]{32,}'
+          )
+
+          DIFF=$(git diff origin/main...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' || true)
+
+          for pattern in "${PATTERNS[@]}"; do
+            if echo "$DIFF" | grep -qE "$pattern"; then
+              echo "::error::Potential secret detected matching pattern: $pattern"
+              echo "Please remove secrets before merging."
+              exit 1
+            fi
+          done
+          echo "No secrets detected in diff."
