@@ -12,7 +12,12 @@ $ErrorActionPreference = 'Stop'
 $rawInput = $input | Out-String
 $payload  = $rawInput | ConvertFrom-Json
 
-$filePath = $payload.tool_input.file_path
+# Null-safe property access for strict PowerShell modes
+$filePath = if ($payload.PSObject.Properties['tool_input'] -and $payload.tool_input.PSObject.Properties['file_path']) {
+    $payload.tool_input.file_path
+} else {
+    $null
+}
 
 if (-not $filePath) {
     exit 0

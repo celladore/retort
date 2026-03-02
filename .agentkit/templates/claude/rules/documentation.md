@@ -12,12 +12,12 @@ These rules govern project documentation, ADRs, and generated file handling.
 ## 8-Category Structure
 All documentation lives in `docs/` under these categories:
 - `01_product/` — Product vision, strategy, personas, metrics
-- `02_architecture/` — System design, diagrams, ADRs, tech stack
-- `03_api/` — API reference, authentication, versioning
-- `04_development/` — Setup, coding standards, testing, contributing
-- `05_deployment/` — CI/CD, environments, releases, monitoring
-- `06_security/` — Threat model, compliance, incident response
-- `07_operations/` — SLAs, on-call, capacity, performance
+- `02_specs/` — Architecture specifications, system design
+- `03_architecture/` — Diagrams, ADRs, tech stack decisions
+- `04_api/` — API reference, authentication, versioning
+- `05_operations/` — Deployment, monitoring, SLAs
+- `06_engineering/` — Setup, coding standards, testing, contributing
+- `07_integrations/` — External services, third-party connections
 - `08_reference/` — Glossary, acronyms, FAQ, tool config
 
 ## Architecture Decision Records (ADRs)

@@ -51,6 +51,8 @@
   "ignorePaths": [
     ".agentkit/templates/**",
     ".agentkit/spec/**",
-    ".agentkit/engines/**"
+    ".agentkit/engines/**",
+    ".agentkit/overlays/**",
+    ".agentkit/bin/**"
   ]
 }

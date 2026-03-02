@@ -43,7 +43,7 @@ The following tags are **required** on every taggable resource:
 ```hcl
 locals {
   mandatory_tags = {
-{{#each infraMandatoryTagsList}}    {{.}} = var.{{.}}
+{{#each infraMandatoryTagsList}}    "{{.}}" = var["{{.}}"]
 {{/each}}  }
 }
 
@@ -59,7 +59,7 @@ resource "azurerm_resource_group" "example" {
 ```hcl
 inputs = {
   tags = {
-{{#each infraMandatoryTagsList}}    {{.}} = "value"
+{{#each infraMandatoryTagsList}}    "{{.}}" = "value"
 {{/each}}  }
 }
 ```

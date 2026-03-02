@@ -267,13 +267,15 @@ export function flattenProjectYaml(project, docsSpec = null) {
   }
 
   // Infrastructure tags (kept as arrays for {{#each}} in IaC templates)
+  const normaliseTags = (arr) =>
+    [...new Set(arr.filter((t) => typeof t === 'string').map((t) => t.trim()).filter(Boolean))].sort();
   const mandatoryTags = project?.infrastructure?.tagging?.mandatory;
   if (Array.isArray(mandatoryTags) && mandatoryTags.length > 0) {
-    vars.infraMandatoryTagsList = mandatoryTags.filter((t) => typeof t === 'string');
+    vars.infraMandatoryTagsList = normaliseTags(mandatoryTags);
   }
   const optionalTags = project?.infrastructure?.tagging?.optional;
   if (Array.isArray(optionalTags) && optionalTags.length > 0) {
-    vars.infraOptionalTagsList = optionalTags.filter((t) => typeof t === 'string');
+    vars.infraOptionalTagsList = normaliseTags(optionalTags);
   }
 
   // Language detection booleans (derived from stack.languages array)

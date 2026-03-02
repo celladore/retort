@@ -15,19 +15,20 @@ jobs:
   branch-rules:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Check PR is not targeting main from main
         run: |
-          if [ "$GITHUB_HEAD_REF" = "main" ]; then
-            echo "::error::Cannot create a PR from main to main"
+          # Only block same-repo PRs from main to main; allow fork PRs with a main branch
+          if [ "$GITHUB_HEAD_REF" = "main" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+            echo "::error::Cannot create a PR from main to main in the same repository"
             exit 1
           fi
 
       - name: Enforce conventional commit titles
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             const title = context.payload.pull_request.title;
@@ -44,7 +45,7 @@ jobs:
             }
 
       - name: Check for breaking changes documentation
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             const title = context.payload.pull_request.title;
@@ -58,17 +59,17 @@ jobs:
                 body.includes('migration');
 
               if (!hasBreakingDocs) {
-                core.warning(
-                  'This PR appears to contain breaking changes but the body does not ' +
+                core.setFailed(
+                  'This PR contains breaking changes but the body does not ' +
                   'mention an ADR, migration guide, or "## Breaking Changes" section. ' +
-                  'Please document breaking changes.'
+                  'Please document breaking changes before merging.'
                 );
               }
             }
 
       - name: Verify no secrets in diff
         run: |
-          # Check for common secret patterns in the PR diff
+          # Check for common secret patterns in added lines only (not removals)
           PATTERNS=(
             'AKIA[0-9A-Z]{16}'
             '-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'
@@ -76,13 +77,14 @@ jobs:
             'sk-[A-Za-z0-9]{32,}'
           )
 
-          DIFF=$(git diff origin/main...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' || true)
+          # Filter to added lines only (lines starting with + but not +++)
+          ADDED=$(git diff --unified=0 origin/main...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' | grep -E '^\+[^+]' || true)
 
           for pattern in "${PATTERNS[@]}"; do
-            if echo "$DIFF" | grep -qE "$pattern"; then
-              echo "::error::Potential secret detected matching pattern: $pattern"
+            if echo "$ADDED" | grep -qE "$pattern"; then
+              echo "::error::Potential secret detected in added lines matching pattern: $pattern"
               echo "Please remove secrets before merging."
               exit 1
             fi
           done
-          echo "No secrets detected in diff."
+          echo "No secrets detected in added lines."

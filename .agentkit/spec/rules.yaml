@@ -621,10 +621,12 @@ rules:
       - id: tp-no-direct-edit
         rule: >
           AI agents must never directly modify files in .agentkit/templates/,
-          .agentkit/spec/, .agentkit/engines/, .agentkit/overlays/, or
-          .agentkit/bin/. These are the upstream source-of-truth for all
-          generated AI tool configurations. A PreToolUse hook enforces this
-          at runtime.
+          .agentkit/engines/, .agentkit/overlays/, or .agentkit/bin/. These
+          directories contain the upstream sync engine, templates, and CLI
+          scripts. A PreToolUse hook enforces this at runtime. Note:
+          .agentkit/spec/ is the intended edit point for project configuration
+          — users (not AI agents) may modify spec YAML files and run
+          agentkit sync to regenerate output.
         severity: critical
         autofix: false
 
@@ -734,10 +736,13 @@ rules:
       - id: doc-8-category-structure
         rule: >
           All project documentation must follow the unified 8-category
-          structure: 01_product, 02_architecture (was 02_specs), 03_api,
-          04_development (was 06_engineering), 05_deployment, 06_security,
-          07_operations, 08_reference. New documentation files must be
-          placed in the appropriate category.
+          structure under docs/. The canonical categories are: 01_product,
+          02_specs (architecture and specifications), 03_architecture
+          (system design, diagrams, ADRs), 04_api, 05_operations,
+          06_engineering, 07_integrations, 08_reference. New documentation
+          files must be placed in the appropriate category. If a repository
+          uses legacy names (e.g. 02_architecture instead of 02_specs),
+          respect the existing structure rather than renaming.
         severity: warning
         autofix: false
 
@@ -746,7 +751,7 @@ rules:
           Architecture Decision Records must follow the format: title,
           status (proposed/accepted/deprecated/superseded), context,
           decision, consequences. ADRs are numbered sequentially and
-          stored in docs/03_architecture/02_decisions/. Every significant
+          stored in docs/03_architecture/02_decisions/ (or the repository's equivalent ADR directory). Every significant
           architectural decision must have an ADR.
         severity: error
         autofix: false
