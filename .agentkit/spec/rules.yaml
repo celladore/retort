@@ -315,9 +315,13 @@ rules:
 
       - id: iac-tagging
         rule: >
-          All taggable resources must include mandatory tags: environment,
-          project, owner, and cost-center. Use a shared locals block or
-          Terragrunt inputs to enforce consistent tagging across all resources.
+          All taggable resources must include the mandatory tags defined in
+          project.yaml (infrastructure.tagging.mandatory). Use a shared
+          locals block, Terragrunt inputs, or provider default_tags to
+          enforce consistent tagging across all resources. Missing mandatory
+          tags will block PR review. Optional tags from
+          infrastructure.tagging.optional are recommended for cost analysis
+          and lifecycle tracking. See .claude/rules/iac.md for examples.
         severity: error
         autofix: false
 

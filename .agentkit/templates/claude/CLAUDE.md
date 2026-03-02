@@ -224,7 +224,14 @@ All project documentation follows the unified 8-category structure in `docs/`:
 {{#if infraIacToolchain}}- **Preferred IaC toolchain**: {{infraIacToolchain}}{{/if}}
 {{#if infraStateBackend}}- **State backend**: {{infraStateBackend}}{{/if}}
 {{#if infraLockProvider}}- **State lock provider**: {{infraLockProvider}}{{/if}}
-{{#if infraMandatoryTags}}- **Mandatory tags**: {{infraMandatoryTags}}{{/if}}
+{{#if infraMandatoryTags}}- **Mandatory tags** (required on every taggable resource): `{{infraMandatoryTags}}`{{/if}}
+{{#if infraOptionalTags}}- **Optional tags** (recommended): `{{infraOptionalTags}}`{{/if}}
+
+{{#if hasInfraTags}}
+> **Tagging is enforced.** When creating or modifying IaC resources, always include
+> the mandatory tags listed above. Use a shared `locals` block or Terragrunt `inputs`
+> for consistency. See `.claude/rules/iac.md` for examples.
+{{/if}}
 {{/if}}
 
 {{#if hasMonitoring}}
