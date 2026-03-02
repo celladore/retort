@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge ÔÇö Process Execution Helper
+ * AgentKit Forge — Process Execution Helper
  * Shared utility for running shell commands with timeout, output capture, and timing.
  */
 import { spawnSync } from 'child_process';
@@ -18,7 +18,7 @@ function parseCommand(cmd) {
   let match;
   while ((match = regex.exec(cmd)) !== null) {
     // Strip quotes from each quoted segment while preserving content.
-    // Handles --format="%h %s" ÔåÆ --format=%h %s (not just boundary quotes).
+    // Handles --format="%h %s" -> --format=%h %s (not just boundary quotes).
     parts.push(match[0].replace(/"([^"]*)"|'([^']*)'/g, '$1$2'));
   }
   return parts.length > 0 ? parts : [];
@@ -197,7 +197,7 @@ export function formatDuration(ms) {
 
 /**
  * Format an ISO timestamp for display (strips T separator and milliseconds).
- * "2026-02-23T17:30:00.123Z" ÔåÆ "2026-02-23 17:30:00"
+ * "2026-02-23T17:30:00.123Z" -> "2026-02-23 17:30:00"
  * @param {string} isoTimestamp
  * @returns {string}
  */
