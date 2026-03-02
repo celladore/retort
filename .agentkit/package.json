@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "description": "AgentKit Forge — unified AI agent team framework sync engine",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@10.30.3",
   "engines": {
     "node": ">=22.0.0"
   },
