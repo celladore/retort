@@ -559,6 +559,87 @@ async function syncCopilotChatModes(
   }
 }
 
+/**
+ * Resolves the template path for a given language domain using priority:
+ *   1. Platform overlay: <overlayDir>/<name>.md
+ *   2. Shared domain template: <sharedDir>/<name>.md
+ *   3. Generic fallback (provided by caller)
+ * Returns null if none of the candidates exist.
+ */
+function resolveLanguageTemplate(overlayDir, sharedDir, name, fallback) {
+  if (overlayDir) {
+    const overlayPath = join(overlayDir, `${name}.md`);
+    if (existsSync(overlayPath)) return overlayPath;
+  }
+  const sharedPath = join(sharedDir, `${name}.md`);
+  if (existsSync(sharedPath)) return sharedPath;
+  if (fallback && existsSync(fallback)) return fallback;
+  return null;
+}
+
+/**
+ * Generates per-domain language instruction files for a target platform.
+ *
+ * For each domain in rulesSpec.rules, the function renders a Markdown file
+ * using this priority order:
+ *   1. Platform overlay: <templatesDir>/<platform>/language-instructions/<domain>.md
+ *   2. Shared template:  <templatesDir>/language-instructions/<domain>.md
+ *   3. Generic fallback: <templatesDir>/language-instructions/TEMPLATE.md
+ *
+ * Rendered files are written to <tmpDir>/<outputSubDir>/<domain>.md.
+ * A README.md is also generated into the same directory if a README template exists.
+ *
+ * Template vars include both project-level vars and per-domain rule vars
+ * (ruleDomain, ruleDescription, ruleAppliesTo, ruleConventions).
+ *
+ * @param {string} templatesDir - Root templates directory
+ * @param {string} tmpDir - Output root directory
+ * @param {object} vars - Flattened project template variables
+ * @param {string} version - AgentKit version string
+ * @param {string} repoName - Repository name for header injection
+ * @param {object} rulesSpec - Parsed rules.yaml spec
+ * @param {string} outputSubDir - Output path relative to tmpDir (e.g. '.github/instructions/languages')
+ * @param {string|null} [platform=null] - Platform key for overlay lookup (e.g. 'copilot', 'claude')
+ */
+async function syncLanguageInstructions(
+  templatesDir,
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  rulesSpec,
+  outputSubDir,
+  platform = null
+) {
+  const sharedLangDir = join(templatesDir, 'language-instructions');
+  if (!existsSync(sharedLangDir)) return;
+
+  const overlayDir = platform ? join(templatesDir, platform, 'language-instructions') : null;
+  const fallbackTplPath = join(sharedLangDir, 'TEMPLATE.md');
+  const rules = rulesSpec?.rules || [];
+
+  for (const rule of rules) {
+    // Resolve template: overlay first, then shared domain-specific, then generic fallback
+    const tplPath = resolveLanguageTemplate(overlayDir, sharedLangDir, rule.domain, fallbackTplPath);
+    if (!tplPath) continue;
+
+    const template = await readTemplateText(tplPath);
+    const ruleVars = buildRuleVars(rule, vars);
+    const rendered = renderTemplate(template, ruleVars, tplPath);
+    const withHeader = insertHeader(rendered, '.md', version, repoName);
+    await writeOutput(join(tmpDir, outputSubDir, `${rule.domain}.md`), withHeader);
+  }
+
+  // Generate README from shared template (overlay README takes precedence if present)
+  const readmeTplPath = resolveLanguageTemplate(overlayDir, sharedLangDir, 'README', null);
+  if (readmeTplPath) {
+    const readmeTemplate = await readTemplateText(readmeTplPath);
+    const rendered = renderTemplate(readmeTemplate, vars, readmeTplPath);
+    const withHeader = insertHeader(rendered, '.md', version, repoName);
+    await writeOutput(join(tmpDir, outputSubDir, 'README.md'), withHeader);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Gemini sync helper
 // ---------------------------------------------------------------------------
@@ -898,7 +979,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
       syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, headerRepoName),
       syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
-      syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+      syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.claude/rules/languages', 'claude')
     );
   }
 
@@ -906,7 +988,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     gatedTasks.push(
       syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
       syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+      syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.cursor/rules/languages', 'cursor')
     );
   }
 
@@ -931,7 +1014,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         version,
         headerRepoName
       ),
-      syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+      syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.windsurf/rules/languages', 'windsurf')
     );
   }
 
@@ -946,7 +1030,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
       syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.github/instructions/languages', 'copilot')
     );
   }
 
@@ -963,11 +1048,17 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   }
 
   if (targets.has('cline')) {
-    gatedTasks.push(syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec));
+    gatedTasks.push(
+      syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.clinerules/languages', 'cline')
+    );
   }
 
   if (targets.has('roo')) {
-    gatedTasks.push(syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec));
+    gatedTasks.push(
+      syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.roo/rules/languages', 'roo')
+    );
   }
 
   if (targets.has('mcp')) {

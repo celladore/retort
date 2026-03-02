@@ -128,10 +128,14 @@ process:
 
 # Testing strategy
 testing:
-  unit: [vitest] # e.g. [vitest, xunit]
-  integration: [vitest] # e.g. [playwright]
+  unit: [vitest] # e.g. [vitest, xunit, pytest]
+  integration: [vitest] # e.g. [vitest, supertest, testcontainers]
   e2e: [] # e.g. [playwright, cypress]
   coverage: 80 # Target coverage percentage (0-100)
+  mutation: null # e.g. stryker, pitest — mutation testing tool (null to disable)
+  staticAnalysis: [semgrep] # e.g. [semgrep, eslint, sonarqube] — static analysis tools
+  contractTesting: null # e.g. pact — consumer-driven contract testing tool (null to disable)
+  performanceTesting: null # e.g. k6, artillery, criterion — performance/load testing tool (null to disable)
 
 # CI/workflow defaults
 automation:

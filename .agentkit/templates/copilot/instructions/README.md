@@ -15,20 +15,46 @@ files referenced in VS Code settings or the Copilot configuration.
 
 Files in this directory are organized by domain:
 
-| File              | Scope                                    |
-| ----------------- | ---------------------------------------- |
-| `docs.md`         | Documentation, Markdown, ADRs            |
-| `marketing.md`    | Marketing site, Next.js, React, CSS      |
-| `rust.md`         | Rust crates, error handling, testing      |
+| File                       | Scope                                         |
+| -------------------------- | --------------------------------------------- |
+| `code-verify.md`           | Code verification, static analysis sign-off   |
+| `docs.md`                  | Documentation, Markdown, ADRs                 |
+| `marketing.md`             | Marketing site, Next.js, React, CSS           |
+| `performance.md`           | Performance testing, benchmarks, load testing |
+| `quality.md`               | Quality gates, PR standards, CI enforcement   |
+| `testing.md`               | Test authoring, coverage, mocking patterns    |
+
+## Language-Specific Instructions
+
+Language-specific rules live in the [`languages/`](./languages/) subdirectory.
+One file is generated per domain defined in `.agentkit/spec/rules.yaml`, using
+domain-specific templates enriched with per-project YAML configuration:
+
+| File                           | Domain                           |
+| ------------------------------ | -------------------------------- |
+| `languages/typescript.md`      | TypeScript / JavaScript          |
+| `languages/python.md`          | Python                           |
+| `languages/rust.md`            | Rust                             |
+| `languages/dotnet.md`          | .NET / C#                        |
+| `languages/blockchain.md`      | Blockchain / Smart Contracts     |
+| `languages/security.md`        | Cross-cutting security rules     |
+| `languages/testing.md`         | Testing & QA conventions         |
+
+(Entries marked above are generated for every domain in `rules.yaml`.
+Languages not present in your project may still have a file — use
+`.github/instructions/languages/README.md` for the active-language index.)
 
 ## Adding New Instructions
 
-1. Create a new `.md` file named after the domain (e.g., `python.md`).
+1. Create a new `.md` file named after the domain (e.g., `accessibility.md`).
 2. Write clear, concise rules that Copilot should follow when editing files in
    that domain.
 3. Keep instructions actionable — prefer "use X pattern" over "consider X".
 4. Reference this directory in your Copilot or IDE configuration so the
    instructions are loaded automatically.
+
+For language-specific instructions, add a domain to `.agentkit/spec/rules.yaml`
+and a corresponding template to `.agentkit/templates/copilot/language-instructions/`.
 
 ## Maintenance
 

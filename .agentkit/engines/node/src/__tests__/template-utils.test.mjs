@@ -618,6 +618,61 @@ describe('flattenProjectYaml', () => {
     expect(vars.testingCoverage).toBe('80');
   });
 
+  it('maps extended testing fields (mutation, staticAnalysis, contractTesting, performanceTesting)', () => {
+    const vars = flattenProjectYaml({
+      testing: {
+        mutation: 'stryker',
+        staticAnalysis: ['semgrep', 'eslint'],
+        contractTesting: 'pact',
+        performanceTesting: 'k6',
+      },
+    });
+    expect(vars.testingMutation).toBe('stryker');
+    expect(vars.hasMutationTesting).toBe(true);
+    expect(vars.testingStaticAnalysis).toBe('semgrep, eslint');
+    expect(vars.hasStaticAnalysis).toBe(true);
+    expect(vars.testingContractTesting).toBe('pact');
+    expect(vars.hasContractTesting).toBe(true);
+    expect(vars.testingPerformanceTesting).toBe('k6');
+    expect(vars.hasPerformanceTesting).toBe(true);
+  });
+
+  it('sets hasStaticAnalysis false for empty staticAnalysis array', () => {
+    const vars = flattenProjectYaml({ testing: { staticAnalysis: [] } });
+    expect(vars.hasStaticAnalysis).toBe(false);
+  });
+
+  it('sets hasMutationTesting false when mutation is null', () => {
+    const vars = flattenProjectYaml({ testing: { mutation: null } });
+    expect(vars.hasMutationTesting).toBeFalsy();
+  });
+
+  it('derives hasLanguageRust from stack.languages', () => {
+    const vars = flattenProjectYaml({ stack: { languages: ['Rust', 'TypeScript'] } });
+    expect(vars.hasLanguageRust).toBe(true);
+    expect(vars.hasLanguageTypeScript).toBe(true);
+    expect(vars.hasLanguagePython).toBe(false);
+  });
+
+  it('derives hasLanguageDotnet for csharp variant', () => {
+    const vars = flattenProjectYaml({ stack: { languages: ['csharp'] } });
+    expect(vars.hasLanguageDotnet).toBe(true);
+  });
+
+  it('derives hasLanguageBlockchain for solidity variant', () => {
+    const vars = flattenProjectYaml({ stack: { languages: ['solidity'] } });
+    expect(vars.hasLanguageBlockchain).toBe(true);
+  });
+
+  it('all language booleans false for empty languages array', () => {
+    const vars = flattenProjectYaml({ stack: { languages: [] } });
+    expect(vars.hasLanguageRust).toBe(false);
+    expect(vars.hasLanguagePython).toBe(false);
+    expect(vars.hasLanguageTypeScript).toBe(false);
+    expect(vars.hasLanguageDotnet).toBe(false);
+    expect(vars.hasLanguageBlockchain).toBe(false);
+  });
+
   it('keeps integrations as array and sets hasIntegrations true', () => {
     const vars = flattenProjectYaml({
       integrations: [{ name: 'Stripe', purpose: 'payments' }],

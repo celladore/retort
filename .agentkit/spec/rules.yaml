@@ -478,3 +478,123 @@ rules:
           of state transitions. Log transaction hashes for cross-reference.
         severity: error
         autofix: false
+
+  # ===========================================================================
+  # Testing & Quality Assurance
+  # ===========================================================================
+  - domain: testing
+    description: >
+      Standards for all tests and quality assurance processes.
+      Covers test pyramid balance, coverage targets, naming conventions,
+      and CI quality gates.
+    applies-to:
+      - '**/*.test.*'
+      - '**/*.spec.*'
+      - 'tests/**'
+      - 'e2e/**'
+      - 'playwright/**'
+      - 'vitest.config.*'
+      - 'jest.config.*'
+      - 'playwright.config.*'
+    conventions:
+      - id: qa-coverage-threshold
+        rule: >
+          Test coverage must meet or exceed the project target. No PR may
+          decrease overall coverage. Enforce the threshold in CI so that
+          the build fails when coverage drops below the configured minimum.
+        severity: error
+        autofix: false
+        tool: 'vitest run --coverage'
+
+      - id: qa-test-naming
+        rule: >
+          Test files must mirror the source structure and use the pattern
+          <module>.test.<ext> or <module>.spec.<ext>. Describe blocks must
+          name the unit under test; it/test blocks must describe the
+          expected behaviour in plain English using the format
+          "should <verb> <expected outcome>".
+        severity: warning
+        autofix: false
+
+      - id: qa-aaa-pattern
+        rule: >
+          Every test body must follow the Arrange-Act-Assert (AAA) pattern.
+          Use blank lines or comments to separate the three sections.
+          Keep each test focused on a single behaviour; split compound
+          assertions into separate tests.
+        severity: warning
+        autofix: false
+
+      - id: qa-no-sleep
+        rule: >
+          Never use arbitrary sleep or delay calls (setTimeout, Thread.Sleep,
+          time.sleep) in tests. Use deterministic waits, polling helpers,
+          or test framework utilities (waitFor, waitUntil) instead.
+        severity: error
+        autofix: false
+
+      - id: qa-mock-boundaries
+        rule: >
+          Mock external dependencies (HTTP clients, databases, queues)
+          at system boundaries, not internal module details. Prefer
+          dependency injection to make units testable without patching
+          module internals. Document why each mock is necessary.
+        severity: warning
+        autofix: false
+
+      - id: qa-no-skipped-tests
+        rule: >
+          Do not leave permanently skipped tests (it.skip, @Ignore,
+          [Fact(Skip=...)]) in the codebase. Either fix and re-enable
+          the test or delete it. Temporary skips must have a linked
+          issue and be resolved within one sprint.
+        severity: warning
+        autofix: false
+
+      - id: qa-integration-isolation
+        rule: >
+          Integration tests must not share mutable state between runs.
+          Use per-test database transactions with rollback, or fresh
+          containers (Testcontainers / Docker Compose) per suite.
+          Integration tests must be runnable in any order.
+        severity: error
+        autofix: false
+
+      - id: qa-e2e-stability
+        rule: >
+          End-to-end tests must be stable and deterministic. Flaky tests
+          must be quarantined (moved to a separate suite) and fixed
+          within two sprints. Use explicit waits over arbitrary delays.
+          Tag smoke tests so a critical path subset can run on every deploy.
+        severity: error
+        autofix: false
+
+      - id: qa-mutation-testing
+        rule: >
+          Run mutation testing periodically to validate the effectiveness of
+          the test suite. A mutation score below 60% indicates insufficient
+          test assertions. Use Stryker (JavaScript/TypeScript), PIT (Java),
+          or mutmut (Python) as appropriate for the language. Address
+          surviving mutants in the next sprint.
+        severity: warning
+        autofix: false
+
+      - id: qa-contract-testing
+        rule: >
+          Use consumer-driven contract testing for all service-to-service
+          integrations. Consumers define the contract; providers verify it.
+          Contract tests must run in CI for both consumers and providers.
+          Use Pact or an equivalent framework. Never mock the wire protocol
+          in integration tests — use contract stubs instead.
+        severity: warning
+        autofix: false
+
+      - id: qa-performance-regression
+        rule: >
+          Performance-sensitive code paths must have benchmark tests that run
+          in CI. A regression of more than 10% from the baseline must block
+          the merge. Use language-appropriate tools: Vitest bench, Criterion
+          (Rust), pytest-benchmark (Python), or BenchmarkDotNet (.NET).
+          Store benchmark results as CI artefacts for historical comparison.
+        severity: warning
+        autofix: false
