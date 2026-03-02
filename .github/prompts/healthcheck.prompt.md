@@ -3,7 +3,7 @@ mode: "agent"
 description: "Performs a comprehensive health check of the repository: validates builds, runs tests, checks linting, verifies configuration files, and reports on the overall state of the codebase across all detected tech stacks."
 generated_by: "agentkit-forge"
 last_model: "sync-engine"
-last_updated: "2026-03-01"
+last_updated: "2026-03-02"
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
