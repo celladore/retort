@@ -33,8 +33,8 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
 
 - Unit test framework: **vitest**.
 - Use xUnit or NUnit for unit tests; name test classes `<Class>Tests`.
-- Use `[Fact]` for single-case and `[Theory]` + `[InlineData]` for parameterised
-  tests.
+- xUnit: `[Fact]` for single-case, `[Theory]` + `[InlineData]` for parameterised tests.
+- NUnit: `[Test]` for single-case, `[TestCase(...)]` for parameterised tests.
 - Follow Arrange-Act-Assert with blank lines separating each phase.
 - Use `Moq` or `NSubstitute` for mocking; mock interfaces, not concrete types.
 - Minimum coverage: **80%** line and branch.
@@ -49,7 +49,9 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
 
 - XML documentation comments for all public APIs.
 - Include `<summary>`, `<param>`, `<returns>`, and `<exception>` tags.
-- Run `dotnet doc` or equivalent to verify documentation builds.
+- Enable XML doc generation: set `<GenerateDocumentationFile>true</GenerateDocumentationFile>`
+  in the project file and verify with `dotnet build`. Use DocFX for publishing
+  API reference documentation.
 
 ## Project Conventions
 

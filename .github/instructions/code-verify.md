@@ -61,10 +61,10 @@ Code verification covers four dimensions:
 
 ```bash
 # Unit tests + coverage report
-npx vitest run --coverage
+vitest run --coverage
 
 # Integration tests
-npx vitest run --config vitest.integration.config.ts
+vitest run --config vitest.integration.config.ts
 
 # Static analysis
 # semgrep

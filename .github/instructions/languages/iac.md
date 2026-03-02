@@ -2,25 +2,114 @@
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
-<!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
-# Instructions — iac
+<!-- Format: Plain Markdown. Domain-specific AI assistant instructions for IaC. -->
+# Instructions — Infrastructure as Code
 
-Standards for all Infrastructure as Code. Covers Terraform and Terragrunt conventions, resource naming, state management, and module design.
+Apply these rules when editing `.tf`, `.tfvars`, `.hcl`, `terragrunt.hcl`, or
+files in `infra/`, `terraform/`, `terragrunt/`, or `modules/` directories.
 
-## Applies To
+## Toolchain
+
+- **IaC tools**: none
+
+## Resource Naming
+
+All cloud resources must follow this naming convention:
 
 ```
-**/*.tf
-**/*.tfvars
-**/terragrunt.hcl
-**/*.hcl
-infra/**
-terraform/**
-terragrunt/**
-modules/**
+{org}-{env}-{project}-{resourcetype}-{region}
 ```
 
-## Conventions
+- **Organisation prefix**: `akf`
+- **Default region**: `global`
+
+Use `locals` blocks to compose names from variables. Never hardcode organisation,
+environment, or region values.
+
+## Resource Tagging
+
+**Every taggable resource must include all mandatory tags.** This is enforced during
+code review. Use a shared `locals` block or Terragrunt `inputs` to apply tags
+consistently across all resources.
+
+### Mandatory Tags (required)
+
+- `cost-center`
+- `environment`
+- `owner`
+- `project`
+
+These tags must be present on every taggable resource — no exceptions.
+A missing mandatory tag will block the PR.
+
+**Example — Terraform `locals` block:**
+
+```hcl
+locals {
+  mandatory_tags = {
+    "cost-center" = var["cost-center"]
+    "environment" = var["environment"]
+    "owner" = var["owner"]
+    "project" = var["project"]
+  }
+}
+```
+
+**Example — Terragrunt `inputs`:**
+
+```hcl
+inputs = {
+  tags = {
+    "cost-center" = local["cost-center"]
+    "environment" = local["environment"]
+    "owner" = local["owner"]
+    "project" = local["project"]
+  }
+}
+```
+
+**Example — Azure provider default tags:**
+
+```hcl
+provider "azurerm" {
+  features {}
+  default_tags {
+    "cost-center" = var["cost-center"]
+    "environment" = var["environment"]
+    "owner" = var["owner"]
+    "project" = var["project"]
+  }
+}
+```
+
+### Optional Tags (recommended)
+
+- `created-by`
+- `managed-by`
+- `team`
+
+Add optional tags for cost analysis, team ownership, and lifecycle tracking.
+
+## Safety Rules
+
+1. **Plan before apply** — always run `terraform plan` and review the diff.
+   CI must include a plan stage with human approval before `apply`.
+   Never use `-auto-approve` in production.
+2. **Remote state** — state must be stored remotely with locking. Never commit
+   `.tfstate` files. Configure via Terragrunt to avoid duplication.
+3. **No hardcoded secrets** — use Key Vault / Secrets Manager references or
+   environment variables in CI. Mark sensitive variables `sensitive = true`.
+4. **Versioned modules** — reusable infrastructure must be in versioned modules
+   with `README.md`, `variables.tf`, `outputs.tf`, and `examples/`.
+5. **Format and validate** — `terraform fmt -check` and `terraform validate`
+   must pass. Run `terraform fmt` before committing.
+6. **No drift** — never manually modify Terraform-managed resources. Import
+   manual changes into state immediately.
+
+## Project Conventions
+
+The following conventions are enforced in **agentkit-forge** and derived from
+`.agentkit/spec/rules.yaml`:
 
 - **[iac-naming-convention]** All cloud resources must follow the naming convention {org}-{env}-{project}-{resourcetype}-{region}. Configure org and region in project.yaml (infrastructure.org, infrastructure.defaultRegion) or use Terraform variables — do not hardcode. Example placeholders: YOUR_ORG, YOUR_DEFAULT_REGION. Deviations require a comment explaining why. Use locals blocks to compose names from variables.
 
@@ -30,7 +119,7 @@ modules/**
 
 - **[iac-modules]** Reusable infrastructure must be extracted into versioned Terraform modules. Modules must have README.md, variables.tf, outputs.tf, and examples/. Pin module versions in consumers — never use unversioned source references.
 
-- **[iac-tagging]** All taggable resources must include mandatory tags: environment, project, owner, and cost-center. Use a shared locals block or Terragrunt inputs to enforce consistent tagging across all resources.
+- **[iac-tagging]** All taggable resources must include the mandatory tags defined in project.yaml (infrastructure.tagging.mandatory). Use a shared locals block, Terragrunt inputs, or provider default_tags to enforce consistent tagging across all resources. Missing mandatory tags will block PR review. Optional tags from infrastructure.tagging.optional are recommended for cost analysis and lifecycle tracking. See .claude/rules/iac.md for examples.
 
 - **[iac-plan-before-apply]** Always run 'terraform plan' (or 'terragrunt plan') and review the diff before applying. CI pipelines must include a plan stage with human approval gate before apply. Never use -auto-approve in production environments.
 
@@ -40,11 +129,3 @@ modules/**
 - **[iac-validate]** All Terraform configurations must pass 'terraform validate'
 - **[iac-drift-detection]** Infrastructure drift must be detected and corrected. Do not manually modify resources managed by Terraform. If manual changes are necessary, import them into state immediately and update the configuration.
 
-## Quality Gates
-
-Before committing changes in this domain:
-
-- Run `vitest` to execute tests.
-- Verify coverage meets the **80%** threshold.
-- Confirm the linter reports zero new errors.
-- Ensure no secrets or credentials appear in the diff.
