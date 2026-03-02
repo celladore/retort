@@ -3,7 +3,7 @@ name: Branch Protection
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited]
 
 # Enforce that all PRs to main pass required checks before merge.
 # Configure GitHub branch protection rules to require these status checks:

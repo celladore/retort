@@ -65,16 +65,23 @@ inputs = {
 }
 ```
 
-**Example — Azure provider default tags:**
+**Example — Azure resource with shared locals:**
 
 ```hcl
-provider "azurerm" {
-  features {}
-  default_tags {
-{{#each infraMandatoryTagsList}}    "{{.}}" = var["{{.}}"]
-{{/each}}  }
+locals {
+  common_tags = merge(local.mandatory_tags, local.optional_tags)
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "${var.org}-${var.environment}-${var.project}-rg-${var.region}"
+  location = var.region
+  tags     = local.common_tags
 }
 ```
+
+> **Note**: The `azurerm` provider does not support `default_tags`. Set tags
+> per-resource using `merge(local.mandatory_tags, local.optional_tags)` or
+> use Terragrunt `inputs` to enforce consistent tagging across all resources.
 {{/if}}
 {{#unless infraMandatoryTags}}
 > No mandatory tags are configured. Define them in `.agentkit/spec/project.yaml`
