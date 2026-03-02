@@ -47,10 +47,10 @@ A missing mandatory tag will block the PR.
 ```hcl
 locals {
   mandatory_tags = {
-    "cost-center" = var["cost-center"]
-    "environment" = var["environment"]
-    "owner" = var["owner"]
-    "project" = var["project"]
+    "cost-center" = var.tags["cost-center"]
+    "environment" = var.tags["environment"]
+    "owner" = var.tags["owner"]
+    "project" = var.tags["project"]
   }
 }
 ```
@@ -60,10 +60,10 @@ locals {
 ```hcl
 inputs = {
   tags = {
-    "cost-center" = local["cost-center"]
-    "environment" = local["environment"]
-    "owner" = local["owner"]
-    "project" = local["project"]
+    "cost-center" = local.tags["cost-center"]
+    "environment" = local.tags["environment"]
+    "owner" = local.tags["owner"]
+    "project" = local.tags["project"]
   }
 }
 ```

@@ -16,7 +16,6 @@ set -euo pipefail
 # -- Defaults ---------------------------------------------------------------
 BRANCH="main"
 DRY_RUN=false
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # -- Parse arguments --------------------------------------------------------
 while [[ $# -gt 0 ]]; do
