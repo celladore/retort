@@ -244,7 +244,25 @@ The `check.mjs` quality gate runner applies `isValidCommand()` to every command 
 from tech stack definitions (formatter, linter, typecheck, testCommand, buildCommand)
 before execution. Any command failing validation is skipped entirely.
 
-## 9. Recommendations for Users
+## 9. Branch Protection
+
+AgentKit Forge provides a setup script that configures GitHub branch protection
+rules using the GitHub CLI. Run `.github/scripts/setup-branch-protection.sh` after
+initial setup (see [.github/scripts/README.md](.github/scripts/README.md)).
+
+The script configures:
+
+- **Required status checks** (strict: up-to-date): `test`, `validate`, `branch-rules`
+- **Required PR reviews**: 1 approval, dismiss stale reviews, require CODEOWNERS
+- **Required conversation resolution**: all review threads must be resolved
+- **Linear history**: enforced (squash-merge)
+- **Force push / branch deletion**: blocked
+
+These rules complement the CODEOWNERS file and `template-protection.yml` workflow to
+create a layered defense: hooks block AI agents at runtime, CODEOWNERS requires human
+review, branch protection requires passing CI, and the workflow auto-labels and validates.
+
+## 10. Recommendations for Users
 
 1. **Run `/check` and `/review` before every PR.** These commands enforce quality gates
    and scan for exposed secrets in changed files.

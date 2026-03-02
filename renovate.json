@@ -6,7 +6,6 @@
     ":dependencyDashboard"
   ],
   "schedule": ["before 9am on monday"],
-  "timezone": "Africa/Johannesburg",
   "automerge": true,
   "automergeType": "pr",
   "platformAutomerge": true,
@@ -37,21 +36,10 @@
       "labels": ["dependencies", "breaking-change"]
     },
     {
-      "description": "Group vitest updates together",
-      "matchPackagePatterns": ["vitest"],
-      "groupName": "vitest"
-    },
-    {
-      "description": "Group markdownlint updates together",
-      "matchPackagePatterns": ["markdownlint"],
-      "groupName": "markdownlint"
-    },
-    {
       "description": "AgentKit engine dependencies — require maintainer review",
       "matchFileNames": [".agentkit/package.json"],
       "labels": ["dependencies", "forge-source-change"],
-      "automerge": false,
-      "reviewers": ["JustAGhosT"]
+      "automerge": false
     },
     {
       "description": "Pin GitHub Actions to full SHA for supply chain security",
