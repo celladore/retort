@@ -32,25 +32,27 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const body = `## AgentKit Forge Source Change Detected
-
-            This PR modifies files in the AgentKit Forge source directories:
-            - \`.agentkit/templates/\` — output templates
-            - \`.agentkit/spec/\` — YAML specifications
-            - \`.agentkit/engines/\` — sync engine code
-            - \`.agentkit/overlays/\` — per-repo customizations
-            - \`.agentkit/bin/\` — CLI scripts
-
-            **These are the upstream source-of-truth for all generated AI tool configs.**
-
-            ### Review checklist
-            - [ ] Changes are intentional and not accidental AI agent modifications
-            - [ ] Spec schema validation passes (\`pnpm -C .agentkit agentkit:spec-validate\`)
-            - [ ] Sync produces expected output (\`pnpm -C .agentkit agentkit:sync\`)
-            - [ ] No secrets or credentials in template variables
-            - [ ] Breaking changes documented in an ADR
-
-            > **AI agents**: Do not modify these files directly. Propose changes in a dedicated PR.`;
+            const body = [
+              '## AgentKit Forge Source Change Detected',
+              '',
+              'This PR modifies files in the AgentKit Forge source directories:',
+              '- `.agentkit/templates/` — output templates',
+              '- `.agentkit/spec/` — YAML specifications',
+              '- `.agentkit/engines/` — sync engine code',
+              '- `.agentkit/overlays/` — per-repo customizations',
+              '- `.agentkit/bin/` — CLI scripts',
+              '',
+              '**These are the upstream source-of-truth for all generated AI tool configs.**',
+              '',
+              '### Review checklist',
+              '- [ ] Changes are intentional and not accidental AI agent modifications',
+              '- [ ] Spec schema validation passes (`pnpm -C .agentkit agentkit:spec-validate`)',
+              '- [ ] Sync produces expected output (`pnpm -C .agentkit agentkit:sync`)',
+              '- [ ] No secrets or credentials in template variables',
+              '- [ ] Breaking changes documented in an ADR',
+              '',
+              '> **AI agents**: Do not modify these files directly. Propose changes in a dedicated PR.',
+            ].join('\n');
 
             // Check if we already posted this comment
             const comments = await github.rest.issues.listComments({
