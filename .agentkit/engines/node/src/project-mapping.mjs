@@ -110,6 +110,14 @@ export const PROJECT_MAPPING = [
   { src: 'testing.integration', dest: 'testingIntegration', type: 'array-join' },
   { src: 'testing.e2e', dest: 'testingE2e', type: 'array-join' },
   { src: 'testing.coverage', dest: 'testingCoverage', type: 'string' },
+  { src: 'testing.mutation', dest: 'testingMutation', check: 'not-none' },
+  { src: 'testing.mutation', dest: 'hasMutationTesting', type: 'boolean', check: 'not-none' },
+  { src: 'testing.staticAnalysis', dest: 'testingStaticAnalysis', type: 'array-join' },
+  { src: 'testing.staticAnalysis', dest: 'hasStaticAnalysis', type: 'boolean-array-length' },
+  { src: 'testing.contractTesting', dest: 'testingContractTesting', check: 'not-none' },
+  { src: 'testing.contractTesting', dest: 'hasContractTesting', type: 'boolean', check: 'not-none' },
+  { src: 'testing.performanceTesting', dest: 'testingPerformanceTesting', check: 'not-none' },
+  { src: 'testing.performanceTesting', dest: 'hasPerformanceTesting', type: 'boolean', check: 'not-none' },
 
   // Automation
   { src: 'automation.baselineProfile', dest: 'baselineProfile' },

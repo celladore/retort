@@ -430,31 +430,42 @@ export async function listTasks(projectRoot, filters = {}) {
   }
 
   const tasks = [];
-  const readPromises = files.map(async (file) => {
-    try {
-      const content = await readFile(resolve(dir, file), 'utf-8');
-      return JSON.parse(content);
-    } catch {
-      return null;
+  let skippedTaskFiles = 0;
+  const MAX_READ_CONCURRENCY = 32;
+
+  for (let i = 0; i < files.length; i += MAX_READ_CONCURRENCY) {
+    const batch = files.slice(i, i + MAX_READ_CONCURRENCY);
+
+    const results = await Promise.all(
+      batch.map(async (file) => {
+        try {
+          const content = await readFile(resolve(dir, file), 'utf-8');
+          return JSON.parse(content);
+        } catch (err) {
+          skippedTaskFiles++;
+          if (process.env.AGENTKIT_DEBUG) {
+            console.warn(`[agentkit:task] Skipped unreadable task file: ${file} — ${err?.message}`);
+          }
+          return null;
+        }
+      }),
+    );
+
+    for (const data of results) {
+      if (!data) continue;
+
+      if (filters.status && data.status !== filters.status) continue;
+      if (
+        filters.assignee &&
+        !(Array.isArray(data.assignees) && data.assignees.includes(filters.assignee))
+      )
+        continue;
+      if (filters.delegator && data.delegator !== filters.delegator) continue;
+      if (filters.type && data.type !== filters.type) continue;
+      if (filters.priority && data.priority !== filters.priority) continue;
+
+      tasks.push(data);
     }
-  });
-
-  const results = await Promise.all(readPromises);
-
-  for (const data of results) {
-    if (!data) continue;
-
-    if (filters.status && data.status !== filters.status) continue;
-    if (
-      filters.assignee &&
-      !(Array.isArray(data.assignees) && data.assignees.includes(filters.assignee))
-    )
-      continue;
-    if (filters.delegator && data.delegator !== filters.delegator) continue;
-    if (filters.type && data.type !== filters.type) continue;
-    if (filters.priority && data.priority !== filters.priority) continue;
-
-    tasks.push(data);
   }
 
   // Sort by priority (P0 first), then by creation date (newest first)
@@ -467,7 +478,7 @@ export async function listTasks(projectRoot, filters = {}) {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
-  return { tasks };
+  return { tasks, skippedTaskFiles };
 }
 
 // ---------------------------------------------------------------------------

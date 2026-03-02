@@ -266,6 +266,23 @@ export function flattenProjectYaml(project, docsSpec = null) {
     vars.hasIntegrations = project.integrations.length > 0;
   }
 
+  // Language detection booleans (derived from stack.languages array)
+  const langs = Array.isArray(project?.stack?.languages)
+    ? project.stack.languages.filter((l) => typeof l === 'string').map((l) => l.trim().toLowerCase())
+    : [];
+  vars.hasLanguageTypeScript = langs.some((l) => l === 'typescript' || l === 'ts');
+  vars.hasLanguageJavaScript = langs.some((l) => l === 'javascript' || l === 'js');
+  vars.hasLanguageRust = langs.includes('rust');
+  vars.hasLanguagePython = langs.includes('python');
+  vars.hasLanguageDotnet = langs.some((l) =>
+    ['csharp', 'c#', 'dotnet', '.net'].includes(l)
+  );
+  vars.hasLanguageBlockchain = langs.some((l) =>
+    ['solidity', 'blockchain'].includes(l)
+  );
+  vars.hasLanguageGo = langs.some((l) => l === 'go' || l === 'golang');
+  vars.hasLanguageJava = langs.includes('java');
+
   return vars;
 }
 

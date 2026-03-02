@@ -1,0 +1,97 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
+<!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+# Copilot Instructions — Code Verification
+
+Apply these rules when reviewing, verifying, or running automated checks
+on code in **{{projectName}}**.
+
+## Verification Scope
+
+Code verification covers four dimensions:
+
+| Dimension | What to check |
+|-----------|--------------|
+| **Correctness** | Logic matches the specification; edge cases handled |
+| **Safety** | No injection vectors, no secrets, no unsafe operations |
+| **Quality** | Naming clarity, single responsibility, no dead code |
+| **Test coverage** | New paths exercised by tests; no coverage regression |
+
+## Correctness Checks
+
+- Confirm the implementation matches the acceptance criteria in the linked issue.
+- Trace every new code path through at least one test scenario.
+- Check boundary conditions: empty collections, zero/negative numbers, null
+  inputs, maximum values.
+- Verify error paths return meaningful, actionable messages.
+- For API changes, confirm backwards compatibility or document the breaking
+  change with a migration guide.
+
+## Safety Checks
+
+- Scan for hardcoded credentials, tokens, connection strings, or PII.
+- Confirm all external input is validated at the boundary before use.
+- Check that new dependencies are pinned and free of known vulnerabilities.
+- Verify that logging does not expose sensitive fields (passwords, keys, PII).
+- For SQL/NoSQL queries, confirm parameterised statements — no string
+  concatenation.
+
+## Code Quality Checks
+
+- No functions longer than ~40 lines without strong justification.
+- No cyclomatic complexity > 10 per function without a comment explaining the
+  complexity.
+- No magic literals — extract named constants for any value that is not
+  self-explanatory.
+- No commented-out code blocks — delete dead code; rely on version control.
+- No `TODO` / `FIXME` comments merged to main without a linked issue.
+
+## Test Coverage Verification
+
+{{#if testingCoverage}}- Coverage must remain at or above **{{testingCoverage}}%**.{{/if}}
+- Every new public function or method must have at least one unit test.
+- Every new conditional branch must be exercised by at least one test.
+- New integration paths must be covered by an integration or E2E test.
+- Run the full test suite before approving — do not rely on CI alone.
+
+## Verification Commands
+
+```bash
+{{#if testingUnit}}# Unit tests + coverage report
+{{testingUnit}} run --coverage
+{{/if}}
+{{#if testingIntegration}}# Integration tests
+{{testingIntegration}} run --config vitest.integration.config.ts
+{{/if}}
+{{#if hasStaticAnalysis}}# Static analysis
+# {{testingStaticAnalysis}}
+{{/if}}
+{{#unless hasStaticAnalysis}}# Static analysis (security + quality)
+# npx semgrep --config=auto .
+{{/unless}}
+# Dependency audit
+# npm audit      (Node.js)
+# cargo audit    (Rust)
+# pip-audit      (Python)
+```
+
+## Verification Sign-Off Criteria
+
+A change passes code verification when:
+
+- [ ] No new lint errors or type errors
+- [ ] All tests pass (unit + integration{{#if testingE2e}} + E2E smoke{{/if}})
+- [ ] Coverage at or above threshold ({{#if testingCoverage}}{{testingCoverage}}%{{/if}}{{#unless testingCoverage}}project target{{/unless}})
+- [ ] No hardcoded secrets or credentials detected
+- [ ] All external inputs validated
+- [ ] No permanently skipped tests introduced
+- [ ] PR description includes test plan
+
+## Escalation
+
+If a verification check cannot be satisfied before merging:
+
+1. Document the gap in the PR description under **Known Limitations**.
+2. Create a follow-up issue with the `tech-debt` label.
+3. Get explicit approval from the team lead or project owner.
+4. Set a resolution deadline (maximum one sprint).

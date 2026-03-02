@@ -6,42 +6,36 @@
 
 ## Status
 
-Proposed
+**Accepted**
 
 ## Date
 
-<!-- YYYY-MM-DD -->
+2026-02-26
+
+## Decision ID
+
+AKF-INFRA-001
 
 ## Context
 
-The `agentkit-forge` project uses one or more evidence-driven scoring or gating metrics (for example: cost evidence, telemetry confidence, quality signal confidence). In some workflows, required evidence can be missing at decision time.
-
-Baseline source for this template: the current fallback ADR from `agentkit-forge`.
+The LLM model guide infrastructure scoring uses `tokens/problem` as a cost evidence metric. For many models in the ranked set, this evidence is not yet available or evaluated.
 
 ## Decision
 
-When `<evidence_metric>` is missing for an evaluated item:
+When `tokens/problem` is missing for a model:
 
-1. Keep current `<affected_score_or_gate>` unchanged.
-2. Mark evidence status as `Not evaluated`.
-3. Do not recalculate or adjust final outputs based only on missing evidence.
+1. Keep current Cost scores unchanged.
+2. Mark cost evidence as `Not evaluated`.
+3. Do not recalculate or adjust the final weighted scores based on missing cost evidence.
 
-This fallback policy is approved by `<approver_group>` on `<approval_date>`.
+This fallback policy was approved by platform leads on 2026-02-26.
 
 ## Rationale
 
-- Avoids penalising entities with incomplete evidence.
-- Preserves scoring consistency until evidence can be collected.
-- Sets an explicit timeline for evidence backfill.
+- Avoids penalising models with incomplete cost data.
+- Preserves scoring consistency until cost evidence can be collected.
+- Cost evidence evaluation is scheduled for Q2 2026 (target: 2026-04-15).
 
 ## Scope
 
-Applies to `<repo_specific_scope_path_or_process>` and related calculations/workflows.
-
-## Repo-Specific Inputs
-
-- `<evidence_metric>`
-- `<affected_score_or_gate>`
-- `<repo_specific_scope_path_or_process>`
-- `<approver_group>`
-- `<approval_date>`
+Applies to the model guide infrastructure scoring in `docs/prd/model-guide-infra.md` and related scorecard calculations.

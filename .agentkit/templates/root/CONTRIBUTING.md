@@ -100,4 +100,4 @@ Key conventions:
 
 ---
 
-This guide is maintained by AgentKit Forge. Run `pnpm -C agentkit agentkit:sync` to regenerate.
+This guide is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate.
