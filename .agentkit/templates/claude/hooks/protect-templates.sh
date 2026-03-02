@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# Hook: PreToolUse (matcher: Write|Edit)
+# Purpose: Block AI writes to AgentKit Forge source files (templates, spec,
+#          engines, overlays). Changes to these files must go through a PR
+#          to the agentkit-forge repository, not be made directly by agents.
+# Stdin:   JSON with session_id, cwd, hook_event_name, tool_name, tool_input
+# Stdout:  JSON deny response on match, empty otherwise
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+INPUT=$(cat)
+
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+if [[ -z "$FILE_PATH" ]]; then
+    exit 0
+fi
+
+# -- Protected directory patterns ---------------------------------------------
+# These are the source-of-truth paths for AgentKit Forge. AI agents must not
+# modify them directly. Instead, propose changes via a PR to the forge repo.
+PROTECTED_PATTERNS=(
+    '\.agentkit/templates/'
+    '\.agentkit/spec/'
+    '\.agentkit/engines/'
+    '\.agentkit/overlays/'
+    '\.agentkit/bin/'
+)
+
+for pattern in "${PROTECTED_PATTERNS[@]}"; do
+    if echo "$FILE_PATH" | grep -qE "$pattern"; then
+        jq -n \
+            --arg reason "Blocked: '${FILE_PATH}' is an AgentKit Forge source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template." \
+            '{
+                hookSpecificOutput: {
+                    hookEventName: "PreToolUse",
+                    permissionDecision: "deny",
+                    permissionDecisionReason: $reason
+                }
+            }'
+        exit 0
+    fi
+done
+
+exit 0

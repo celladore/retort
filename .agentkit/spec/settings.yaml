@@ -136,6 +136,8 @@ hooks:
   preToolUse:
     - matcher: "Write|Edit"
       hook: protect-sensitive
+    - matcher: "Write|Edit"
+      hook: protect-templates
     - matcher: "Bash"
       hook: guard-destructive-commands
 

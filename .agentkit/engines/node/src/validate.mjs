@@ -99,8 +99,8 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   // ─── Phase 5: Check hook files ─────────────────────────────────────────
   console.log('\n  --- Hooks ---');
   const requiredHooks = [
-    'session-start', 'protect-sensitive', 'guard-destructive-commands',
-    'warn-uncommitted', 'stop-build-check',
+    'session-start', 'protect-sensitive', 'protect-templates',
+    'guard-destructive-commands', 'warn-uncommitted', 'stop-build-check',
   ];
 
   for (const hook of requiredHooks) {

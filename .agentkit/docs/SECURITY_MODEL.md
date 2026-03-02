@@ -138,6 +138,26 @@ checked:
 Blocked commands receive a `permissionDecision: "deny"` response with a reason
 identifying the matched pattern.
 
+### protect-templates (PreToolUse -- Write|Edit)
+
+Blocks file writes to AgentKit Forge source directories. These directories are the
+upstream source-of-truth and must not be modified directly by AI agents. Protected
+paths include:
+
+- `.agentkit/templates/` — output templates for 15+ AI tools
+- `.agentkit/spec/` — YAML specifications
+- `.agentkit/engines/` — sync engine code
+- `.agentkit/overlays/` — per-repository customizations
+- `.agentkit/bin/` — CLI scripts
+
+When a match is found, the hook returns a `permissionDecision: "deny"` response with
+guidance to propose changes via a PR to the agentkit-forge repository instead.
+
+This hook is complemented by:
+- **CODEOWNERS** — requires maintainer review for PRs touching `.agentkit/` source
+- **template-protection.yml workflow** — auto-labels PRs and runs validation
+- **Claude rules** — `template-protection.md` rule explaining the rationale to agents
+
 ### warn-uncommitted (PostToolUse -- Write|Edit)
 
 After each file write or edit, counts uncommitted changes via `git status --porcelain`.
