@@ -10,7 +10,7 @@ files in `infra/`, `terraform/`, `terragrunt/`, or `modules/` directories.
 
 ## Toolchain
 
-- **IaC tools**: none
+- **IaC tools**: Terraform, Terragrunt
 
 ## Resource Naming
 
@@ -68,19 +68,25 @@ inputs = {
 }
 ```
 
-**Example — Azure provider default tags:**
+**Example — Azure resource with shared locals:**
 
 ```hcl
-provider "azurerm" {
-  features {}
-  default_tags {
-    "cost-center" = var["cost-center"]
-    "environment" = var["environment"]
-    "owner" = var["owner"]
-    "project" = var["project"]
-  }
+locals {
+  common_tags = merge(local.mandatory_tags, {
+    "team" = var.team
+  })
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "${var.org}-${var.environment}-${var.project}-rg-${var.region}"
+  location = var.region
+  tags     = local.common_tags
 }
 ```
+
+> **Note**: The `azurerm` provider does not support `default_tags`. Set tags
+> per-resource using `merge(local.mandatory_tags, local.optional_tags)` or
+> use Terragrunt `inputs` to enforce consistent tagging across all resources.
 
 ### Optional Tags (recommended)
 
