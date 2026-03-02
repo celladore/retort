@@ -43,7 +43,7 @@ The following tags are **required** on every taggable resource:
 ```hcl
 locals {
   mandatory_tags = {
-{{#each infraMandatoryTagsList}}    "{{.}}" = var["{{.}}"]
+{{#each infraMandatoryTagsList}}    "{{.}}" = var.tags["{{.}}"]
 {{/each}}  }
 }
 

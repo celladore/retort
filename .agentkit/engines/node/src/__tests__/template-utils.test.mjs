@@ -704,6 +704,32 @@ describe('flattenProjectYaml', () => {
     expect(vars.prdPath).toBe('docs/prd.md');
     expect(vars.hasAdr).toBe(false);
   });
+
+  it('produces infraMandatoryTagsList sorted and deduplicated', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: { tagging: { mandatory: ['owner', 'environment', 'project', 'owner', '  cost_center  '] } },
+    });
+    expect(vars.infraMandatoryTagsList).toEqual(['cost_center', 'environment', 'owner', 'project']);
+  });
+
+  it('produces infraOptionalTagsList sorted and deduplicated', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: { tagging: { optional: ['team', 'created_by', 'team'] } },
+    });
+    expect(vars.infraOptionalTagsList).toEqual(['created_by', 'team']);
+  });
+
+  it('omits infraMandatoryTagsList when mandatory tags array is empty', () => {
+    const vars = flattenProjectYaml({ infrastructure: { tagging: { mandatory: [] } } });
+    expect(vars.infraMandatoryTagsList).toBeUndefined();
+  });
+
+  it('filters non-string entries from infraMandatoryTagsList', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: { tagging: { mandatory: ['environment', 42, null, 'project'] } },
+    });
+    expect(vars.infraMandatoryTagsList).toEqual(['environment', 'project']);
+  });
 });
 
 // ---------------------------------------------------------------------------

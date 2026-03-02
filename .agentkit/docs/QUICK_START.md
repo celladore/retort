@@ -116,7 +116,7 @@ That is it. You are ready to go.
 .github/scripts/setup-branch-protection.sh             # Apply
 ```
 
-See [.github/scripts/README.md](.github/scripts/README.md) for details.
+See [.github/scripts/README.md](../../.github/scripts/README.md) for details.
 
 ---
 

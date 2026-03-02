@@ -129,7 +129,7 @@ force pushes to your default branch.
 .github/scripts/setup-branch-protection.sh
 ```
 
-See [.github/scripts/README.md](.github/scripts/README.md) for details on what
+See [.github/scripts/README.md](../../.github/scripts/README.md) for details on what
 gets configured and how to customize the status check names.
 
 **Prerequisites:** [GitHub CLI](https://cli.github.com/) installed and authenticated,

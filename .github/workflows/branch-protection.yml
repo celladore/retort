@@ -78,7 +78,7 @@ jobs:
           )
 
           # Filter to added lines only (lines starting with + but not +++)
-          ADDED=$(git diff --unified=0 origin/main...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' | grep -E '^\+[^+]' || true)
+          ADDED=$(git diff --unified=0 origin/main...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' ':!.agentkit/pnpm-lock.yaml' | grep -E '^\+[^+]' || true)
 
           for pattern in "${PATTERNS[@]}"; do
             if echo "$ADDED" | grep -qE "$pattern"; then

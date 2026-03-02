@@ -102,6 +102,7 @@ jobs:
         run: |
           node engines/node/src/cli.mjs sync
           node engines/node/src/cli.mjs validate
+          git diff --quiet || { echo "::error::Sync produced uncommitted changes — generated outputs are out of sync with sources."; git diff --stat; exit 1; }
         working-directory: .agentkit
 
       - name: Run tests

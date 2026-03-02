@@ -50,7 +50,7 @@ A missing mandatory tag will block the PR.
 ```hcl
 locals {
   mandatory_tags = {
-{{#each infraMandatoryTagsList}}    "{{.}}" = var["{{.}}"]
+{{#each infraMandatoryTagsList}}    "{{.}}" = var.tags["{{.}}"]
 {{/each}}  }
 }
 ```
