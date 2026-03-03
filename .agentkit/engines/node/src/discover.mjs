@@ -4,9 +4,9 @@
  * and build a structured discovery report.
  */
 import { existsSync, promises as fsPromises } from 'fs';
-const { readdir, access, readFile } = fsPromises;
 import yaml from 'js-yaml';
 import { basename, extname, join, resolve } from 'node:path';
+const { readdir, access, readFile } = fsPromises;
 
 // ---------------------------------------------------------------------------
 // Tech stack detection patterns
@@ -393,41 +393,41 @@ const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.n
 
 async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
   let count = 0;
-  // Simple concurrency limiter to avoid EMFILE
-  const CONCURRENCY_LIMIT = 50;
+  // Global semaphore — limits total concurrent readdir calls across the entire walk
+  // to prevent EMFILE errors on deep or wide repository trees.
+  const MAX_CONCURRENCY = 8;
   let active = 0;
   const queue = [];
 
-  const processQueue = () => {
-    while (active < CONCURRENCY_LIMIT && queue.length > 0) {
-      const { run, resolve, reject } = queue.shift();
-      active++;
-      run()
-        .then(resolve)
-        .catch(reject)
-        .finally(() => {
-          active--;
-          processQueue();
-        });
-    }
-  };
-
-  // Limits execution of `fn`
-  const limit = (fn) => {
+  function schedule(fn) {
     return new Promise((resolve, reject) => {
-      queue.push({ run: fn, resolve, reject });
-      processQueue();
+      const run = async () => {
+        active++;
+        try {
+          resolve(await fn());
+        } catch (err) {
+          reject(err);
+        } finally {
+          active--;
+          if (queue.length > 0) queue.shift()();
+        }
+      };
+
+      if (active < MAX_CONCURRENCY) {
+        run();
+      } else {
+        queue.push(run);
+      }
     });
-  };
+  }
 
   async function walk(currentDir, currentDepth) {
     if (currentDepth > depth || count > maxFiles) return;
 
     try {
-      // Only limit the readdir call, not the recursive structure
-      const entries = await limit(() => fsPromises.readdir(currentDir, { withFileTypes: true }));
+      const entries = await schedule(() => fsPromises.readdir(currentDir, { withFileTypes: true }));
+      const subdirs = [];
 
-      const tasks = [];
       for (const entry of entries) {
         if (count > maxFiles) break;
         if (entry.name.startsWith('.') || SKIP_DIRS.has(entry.name)) continue;
@@ -437,15 +437,15 @@ async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
         const full = join(currentDir, entry.name);
 
         if (entry.isDirectory()) {
-          tasks.push(walk(full, currentDepth + 1));
+          subdirs.push(full);
         } else if (extensions.includes(extname(entry.name))) {
-            count++;
+          count++;
         }
       }
 
-      await Promise.all(tasks);
-    } catch (err) {
-      /* permission errors or ENOENT */
+      await Promise.all(subdirs.map((full) => walk(full, currentDepth + 1)));
+    } catch {
+      /* permission errors or other fs issues */
     }
   }
 
@@ -550,14 +550,16 @@ async function getCsprojContent(projectRoot) {
         if (entry.isDirectory()) {
           tasks.push(walk(full, depth + 1));
         } else if (entry.name.endsWith('.csproj')) {
-          tasks.push((async () => {
-            try {
-              const fileContent = await readFile(full, 'utf-8');
-              content += fileContent + '\n';
-            } catch {
-              /* skip */
-            }
-          })());
+          tasks.push(
+            (async () => {
+              try {
+                const fileContent = await readFile(full, 'utf-8');
+                content += fileContent + '\n';
+              } catch {
+                /* skip */
+              }
+            })()
+          );
         }
       }
       await Promise.all(tasks);
@@ -709,14 +711,14 @@ async function detectFromList(
     }
     // Check config files
     if (!matched && d.configs?.length) {
-        // Run checks in parallel
-        const results = await Promise.all(d.configs.map(c => fileExists(projectRoot, c)));
-        if (results.some(Boolean)) matched = true;
+      // Run checks in parallel
+      const results = await Promise.all(d.configs.map((c) => fileExists(projectRoot, c)));
+      if (results.some(Boolean)) matched = true;
     }
     // Check markers (plain files)
     if (!matched && d.markers?.length) {
-        const results = await Promise.all(d.markers.map(m => fileExists(projectRoot, m)));
-        if (results.some(Boolean)) matched = true;
+      const results = await Promise.all(d.markers.map((m) => fileExists(projectRoot, m)));
+      if (results.some(Boolean)) matched = true;
     }
     // Check .csproj references
     if (!matched && d.csprojRefs?.length && csprojContent) {
@@ -789,10 +791,9 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   }
   if (await fileExists(projectRoot, '.agentkit-repo')) {
     try {
-      report.repository.agentkitOverlay = (await readFile(
-        resolve(projectRoot, '.agentkit-repo'),
-        'utf-8'
-      )).trim();
+      report.repository.agentkitOverlay = (
+        await readFile(resolve(projectRoot, '.agentkit-repo'), 'utf-8')
+      ).trim();
     } catch {
       /* ignore read errors for .agentkit-repo */
     }
@@ -826,21 +827,15 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
 
   // --- Cache dependency data for framework detection ---
   // Parallelize reading of deps
-  const [
-      nodeDeps,
-      csprojContent,
-      cargoContent,
-      gemfileContent,
-      pomContent,
-      pythonDeps
-  ] = await Promise.all([
+  const [nodeDeps, csprojContent, cargoContent, gemfileContent, pomContent, pythonDeps] =
+    await Promise.all([
       getNodeDeps(projectRoot),
       getCsprojContent(projectRoot),
       getCargoContent(projectRoot),
       getGemfileContent(projectRoot),
       getPomContent(projectRoot),
-      getPythonDeps(projectRoot)
-  ]);
+      getPythonDeps(projectRoot),
+    ]);
 
   const depContext = {
     nodeDeps,
@@ -898,12 +893,14 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   const designTasks = DESIGN_SYSTEM_DETECTORS.map(async (detector) => {
     let found = false;
     if (detector.dirs) {
-        const results = await Promise.all(detector.dirs.map(dir => fileExists(projectRoot, dir)));
-        if (results.some(Boolean)) found = true;
+      const results = await Promise.all(detector.dirs.map((dir) => fileExists(projectRoot, dir)));
+      if (results.some(Boolean)) found = true;
     }
     if (!found && detector.files) {
-         const results = await Promise.all(detector.files.map(file => fileExists(projectRoot, file)));
-         if (results.some(Boolean)) found = true;
+      const results = await Promise.all(
+        detector.files.map((file) => fileExists(projectRoot, file))
+      );
+      if (results.some(Boolean)) found = true;
     }
     if (found) {
       return detector.name;
@@ -931,18 +928,18 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
 
   // --- Infrastructure detection ---
   const infraTasks = INFRA_DETECTORS.map(async (detector) => {
-      const results = await Promise.all(detector.markers.map(m => fileExists(projectRoot, m)));
-      if (results.some(Boolean)) return detector.name;
-      return null;
+    const results = await Promise.all(detector.markers.map((m) => fileExists(projectRoot, m)));
+    if (results.some(Boolean)) return detector.name;
+    return null;
   });
   const infraResults = await Promise.all(infraTasks);
   report.infrastructure = infraResults.filter(Boolean);
 
   // --- CI/CD detection ---
   const cicdTasks = CI_DETECTORS.map(async (detector) => {
-      const results = await Promise.all(detector.markers.map(m => fileExists(projectRoot, m)));
-      if (results.some(Boolean)) return detector.name;
-      return null;
+    const results = await Promise.all(detector.markers.map((m) => fileExists(projectRoot, m)));
+    if (results.some(Boolean)) return detector.name;
+    return null;
   });
   const cicdResults = await Promise.all(cicdTasks);
   report.cicd = cicdResults.filter(Boolean);
@@ -1097,4 +1094,3 @@ function formatMarkdown(report) {
 
   return lines.join('\n');
 }
-

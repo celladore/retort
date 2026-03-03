@@ -7,9 +7,18 @@
  * are not available. This tracks operational metrics (session duration, commands
  * run, files modified) which are useful for understanding usage patterns.
  */
-import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync, readdirSync, renameSync, unlinkSync } from 'fs';
-import { resolve, basename } from 'path';
 import { execFileSync } from 'child_process';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from 'fs';
+import { basename, resolve } from 'path';
 import { formatTimestamp } from './runner.mjs';
 
 // ---------------------------------------------------------------------------
@@ -92,13 +101,17 @@ const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 export function generateSessionId() {
   const crypto = globalThis.crypto;
   if (!crypto || typeof crypto.getRandomValues !== 'function') {
-    throw new Error('[agentkit:cost] crypto.getRandomValues is not available in this environment. Ensure you are running on a Node.js runtime with Web Crypto support enabled.');
+    throw new Error(
+      '[agentkit:cost] crypto.getRandomValues is not available in this environment. Ensure you are running on a Node.js runtime with Web Crypto support enabled.'
+    );
   }
   const now = new Date();
   const dateStr = now.toISOString().replace(/[-:T]/g, '').slice(0, 14);
   const randomBytes = new Uint8Array(3);
   crypto.getRandomValues(randomBytes);
-  const random = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const random = Array.from(randomBytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
   return `${dateStr}-${random}`;
 }
 
@@ -117,10 +130,14 @@ export function initSession({ agentkitRoot, projectRoot }) {
   let user = 'unknown';
   try {
     branch = runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], projectRoot).trim();
-  } catch { /* git not available — using default branch */ }
+  } catch {
+    /* git not available — using default branch */
+  }
   try {
     user = runGitCommand(['config', 'user.email'], projectRoot).trim() || 'unknown';
-  } catch { /* git not available — using default user */ }
+  } catch {
+    /* git not available — using default user */
+  }
 
   let repoName = basename(projectRoot);
   const markerPath = resolve(projectRoot, '.agentkit-repo');
@@ -146,7 +163,11 @@ export function initSession({ agentkitRoot, projectRoot }) {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
-  writeFileSync(sessionFilePath(agentkitRoot, sessionId), JSON.stringify(session, null, 2) + '\n', 'utf-8');
+  writeFileSync(
+    sessionFilePath(agentkitRoot, sessionId),
+    JSON.stringify(session, null, 2) + '\n',
+    'utf-8'
+  );
 
   // Write active-session-id pointer for O(1) lookup in recordCommand (best-effort)
   try {
@@ -199,7 +220,12 @@ export function endSession({ agentkitRoot, projectRoot, sessionId }) {
   try {
     const result = runGitCommand(['diff', '--name-only', 'HEAD'], projectRoot);
     filesModified = result.trim().split('\n').filter(Boolean).length;
-  } catch (error) { console.warn('[agentkit:cost] git diff failed:', error.message); /* git not available — filesModified stays 0 */ }
+  } catch (error) {
+    console.warn(
+      '[agentkit:cost] git diff failed:',
+      error.message
+    ); /* git not available — filesModified stays 0 */
+  }
 
   session.endTime = now.toISOString();
   session.durationMs = now.getTime() - startTime.getTime();
@@ -214,7 +240,9 @@ export function endSession({ agentkitRoot, projectRoot, sessionId }) {
     if (existsSync(pointerPath) && readFileSync(pointerPath, 'utf-8').trim() === sessionId) {
       unlinkSync(pointerPath);
     }
-  } catch { /* pointer cleanup is best-effort */ }
+  } catch {
+    /* pointer cleanup is best-effort */
+  }
 
   // Log event
   logEvent(agentkitRoot, {
@@ -241,7 +269,11 @@ export async function recordCommand(agentkitRoot, command) {
   if (!existsSync(dir)) return;
 
   const tryUpdateSession = (filePath, session) => {
-    if (session.status === 'active' && typeof session.sessionId === 'string' && SESSION_ID_PATTERN.test(session.sessionId)) {
+    if (
+      session.status === 'active' &&
+      typeof session.sessionId === 'string' &&
+      SESSION_ID_PATTERN.test(session.sessionId)
+    ) {
       session.commandsRun = session.commandsRun || [];
       session.commandsRun.push({ command, timestamp: new Date().toISOString() });
       // Atomic write: temp file + rename to prevent partial reads
@@ -260,7 +292,9 @@ export async function recordCommand(agentkitRoot, command) {
   const clearPointer = () => {
     try {
       unlinkSync(pointerPath);
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
   };
 
   if (existsSync(pointerPath)) {
@@ -289,7 +323,7 @@ export async function recordCommand(agentkitRoot, command) {
 
   // O(N) fallback: scan all session files (self-heals the pointer when active session found)
   const files = readdirSync(dir)
-    .filter(f => f.startsWith('session-') && f.endsWith('.json'))
+    .filter((f) => f.startsWith('session-') && f.endsWith('.json'))
     .sort()
     .reverse();
 
@@ -308,7 +342,9 @@ export async function recordCommand(agentkitRoot, command) {
         } catch {}
         return;
       }
-    } catch { /* skip corrupted session files */ }
+    } catch {
+      /* skip corrupted session files */
+    }
   }
 }
 
@@ -354,7 +390,7 @@ export function getSessions(agentkitRoot, { last = '7d' } = {}) {
   const days = parsePeriodDays(last);
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const files = readdirSync(dir).filter(f => f.startsWith('session-') && f.endsWith('.json'));
+  const files = readdirSync(dir).filter((f) => f.startsWith('session-') && f.endsWith('.json'));
   const sessions = [];
 
   for (const file of files) {
@@ -363,7 +399,9 @@ export function getSessions(agentkitRoot, { last = '7d' } = {}) {
       if (new Date(session.startTime) >= cutoff) {
         sessions.push(session);
       }
-    } catch { /* skip invalid files */ }
+    } catch {
+      /* skip invalid files */
+    }
   }
 
   return sessions.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
@@ -379,8 +417,8 @@ function readMonthlyLogs(agentkitRoot, month) {
   const dir = logsDir(agentkitRoot);
   if (!existsSync(dir)) return [];
 
-  const files = readdirSync(dir).filter(f =>
-    f.startsWith(`usage-${month}`) && f.endsWith('.jsonl')
+  const files = readdirSync(dir).filter(
+    (f) => f.startsWith(`usage-${month}`) && f.endsWith('.jsonl')
   );
 
   const entries = [];
@@ -389,7 +427,9 @@ function readMonthlyLogs(agentkitRoot, month) {
     for (const line of content.split('\n').filter(Boolean)) {
       try {
         entries.push(JSON.parse(line));
-      } catch { /* skip invalid */ }
+      } catch {
+        /* skip invalid */
+      }
     }
   }
 
@@ -405,7 +445,7 @@ function readMonthlyLogs(agentkitRoot, month) {
  */
 export function generateReport(agentkitRoot, month, format = 'table') {
   const entries = readMonthlyLogs(agentkitRoot, month);
-  const sessions = getSessions(agentkitRoot, { last: '365d' }).filter(s =>
+  const sessions = getSessions(agentkitRoot, { last: '365d' }).filter((s) =>
     s.startTime.startsWith(month)
   );
 
