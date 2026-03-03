@@ -248,7 +248,7 @@ before execution. Any command failing validation is skipped entirely.
 
 AgentKit Forge provides a setup script that configures GitHub branch protection
 rules using the GitHub CLI. Run `.github/scripts/setup-branch-protection.sh` after
-initial setup (see [.github/scripts/README.md](.github/scripts/README.md)).
+initial setup (see [.github/scripts/README.md](../../.github/scripts/README.md)).
 
 The script configures:
 
