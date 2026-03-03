@@ -266,6 +266,18 @@ export function flattenProjectYaml(project, docsSpec = null) {
     vars.hasIntegrations = project.integrations.length > 0;
   }
 
+  // Infrastructure tags (kept as arrays for {{#each}} in IaC templates)
+  const normaliseTags = (arr) =>
+    [...new Set(arr.filter((t) => typeof t === 'string').map((t) => t.trim()).filter(Boolean))].sort();
+  const mandatoryTags = project?.infrastructure?.tagging?.mandatory;
+  if (Array.isArray(mandatoryTags) && mandatoryTags.length > 0) {
+    vars.infraMandatoryTagsList = normaliseTags(mandatoryTags);
+  }
+  const optionalTags = project?.infrastructure?.tagging?.optional;
+  if (Array.isArray(optionalTags) && optionalTags.length > 0) {
+    vars.infraOptionalTagsList = normaliseTags(optionalTags);
+  }
+
   // Language detection booleans (derived from stack.languages array)
   const langs = Array.isArray(project?.stack?.languages)
     ? project.stack.languages.filter((l) => typeof l === 'string').map((l) => l.trim().toLowerCase())

@@ -109,6 +109,15 @@ git commit -m "feat: add AgentKit Forge configuration"
 
 That is it. You are ready to go.
 
+**Optional:** Configure branch protection rules for your default branch:
+
+```bash
+.github/scripts/setup-branch-protection.sh --dry-run  # Preview
+.github/scripts/setup-branch-protection.sh             # Apply
+```
+
+See [.github/scripts/README.md](../../.github/scripts/README.md) for details.
+
 ---
 
 ## What Just Happened?

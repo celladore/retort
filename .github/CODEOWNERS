@@ -1,0 +1,19 @@
+# ---------------------------------------------------------------------------
+# CODEOWNERS — AgentKit Forge
+# ---------------------------------------------------------------------------
+# Changes to the forge source (templates, spec, engines) require review from
+# the core maintainers. This prevents AI agents or casual contributors from
+# modifying the upstream source-of-truth without explicit approval.
+# ---------------------------------------------------------------------------
+
+# AgentKit Forge source-of-truth — require maintainer review
+/.agentkit/templates/    @JustAGhosT
+/.agentkit/spec/         @JustAGhosT
+/.agentkit/engines/      @JustAGhosT
+/.agentkit/overlays/     @JustAGhosT
+/.agentkit/bin/          @JustAGhosT
+/.agentkit/package.json  @JustAGhosT
+
+# Security-sensitive files
+/.github/workflows/      @JustAGhosT
+/.github/CODEOWNERS      @JustAGhosT

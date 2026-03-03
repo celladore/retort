@@ -88,8 +88,8 @@ infrastructure:
   modulesRepo: null # e.g. git::https://github.com/org/tf-modules.git
   lockProvider: null # blob-lease | dynamodb | consul | none
   tagging:
-    mandatory: [] # e.g. [environment, project, owner, cost-center]
-    optional: [] # e.g. [team, created-by]
+    mandatory: [environment, project, owner, cost_center] # required on every taggable resource
+    optional: [team, created_by, managed_by] # recommended for cost analysis and lifecycle tracking
 
 # Observability — monitoring, alerting, and tracing defaults
 observability:

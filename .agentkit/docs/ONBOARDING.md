@@ -115,6 +115,26 @@ git add agentkit-forge/ .claude/ .cursor/ .windsurf/ .github/
 git commit -m "feat: add AgentKit Forge configuration"
 ```
 
+### Step 6: Configure Branch Protection (Optional)
+
+AgentKit Forge generates a setup script that configures GitHub branch protection
+rules using the GitHub CLI. This enforces PR reviews, status checks, and prevents
+force pushes to your default branch.
+
+```bash
+# Preview what will be applied
+.github/scripts/setup-branch-protection.sh --dry-run
+
+# Apply branch protection
+.github/scripts/setup-branch-protection.sh
+```
+
+See [.github/scripts/README.md](../../.github/scripts/README.md) for details on what
+gets configured and how to customize the status check names.
+
+**Prerequisites:** [GitHub CLI](https://cli.github.com/) installed and authenticated,
+with admin access to the repository.
+
 ---
 
 ## Customization
