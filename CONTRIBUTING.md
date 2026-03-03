@@ -21,7 +21,7 @@
 1. Fork and clone the repository
 2. Install dependencies for your stack (see `agentkit discover` output)
 3. Run `agentkit sync` to generate AI tool configurations
-4. Create a feature branch from `main`
+4. Create a feature branch from `dev`
 
 ---
 
@@ -64,13 +64,22 @@ __Examples__:
 
 ## Pull Request Process
 
-1. Ensure your branch is up to date with `main`
+1. Ensure your branch is up to date with `dev`
 2. Run all quality gates locally: `agentkit validate`
 3. Create a PR with a clear description and test plan
 4. All CI checks must pass
 5. Request review from the relevant team (see [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md))
 6. Address review feedback
 7. Squash-merge when approved
+
+### Mandatory Branch Flow (Enforced)
+
+- `feature/*`, `fix/*`, and other short-lived branches __must__ open PRs into `dev`.
+- Direct PRs from feature/fix branches to `main` are not allowed.
+- Only `dev` opens release/integration PRs into `main`.
+- `main` requires at least 1 approval, stale approval dismissal on push, up-to-date branch before merge, and required status checks.
+
+In short: __feature branches → `dev` → `main`__.
 
 ---
 
