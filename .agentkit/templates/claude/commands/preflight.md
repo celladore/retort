@@ -1,9 +1,9 @@
 ---
-description: "Run release-readiness checks beyond /check before merge/ship"
+description: 'Run release-readiness checks beyond /check before merge/ship'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(pytest *), Bash(go *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -71,14 +71,18 @@ Run release-readiness checks beyond `/check` before merge/ship.
      text after the literal prefix "coverage-waiver:" (e.g., heading pattern
      "## coverage-waiver: cw-2026-02-25-auth-refactor").
    - Example valid waiver entry:
+
      ```markdown
      ## coverage-waiver: cw-2026-02-25-auth-refactor
+
      - author: @team-quality
      - rationale: Integration migration temporarily lowers branch coverage
      - linkedIssueOrPr: https://github.com/org/repo/pull/1234
      - expiresAt: 2026-03-15T00:00:00Z
      ```
+
    - Evidence: include baseline %, current %, and delta in the output table
+
 6. Confirm docs updated for API/CLI behavior changes.
 
 ## Output

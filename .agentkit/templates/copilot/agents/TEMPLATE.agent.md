@@ -13,11 +13,12 @@ last_updated: '{{syncDate}}'
 {{agentRole}}
 
 ## Repository Context
+
 - **Repository:** {{repoName}}
 - **Default branch:** {{defaultBranch}}
 - **Primary context docs:** `CLAUDE.md`, `UNIFIED_AGENT_TEAMS.md`, `AGENT_TEAMS.md`, `AGENT_BACKLOG.md`, `docs/`
-{{#if stackLanguages}}- **Tech stack:** {{stackLanguages}}{{/if}}
-{{#if architecturePattern}}- **Architecture:** {{architecturePattern}}{{/if}}
+  {{#if stackLanguages}}- **Tech stack:** {{stackLanguages}}{{/if}}
+  {{#if architecturePattern}}- **Architecture:** {{architecturePattern}}{{/if}}
 
 Scan the codebase within your focus area before making changes. Read `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md` first for ownership/escalation, then `AGENT_BACKLOG.md` and `CLAUDE.md` for current project context.
 

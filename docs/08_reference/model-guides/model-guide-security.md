@@ -115,11 +115,11 @@ agents:
   threat-modeler:
     team: security
     model_override: claude-opus-4-6
-    reason: "Deeper reasoning for threat analysis"
+    reason: 'Deeper reasoning for threat analysis'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

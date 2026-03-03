@@ -6,11 +6,11 @@
 
 ## Prerequisites
 
-| Requirement | Minimum Version | Check Command    |
-| ----------- | --------------- | ---------------- |
+| Requirement | Minimum Version     | Check Command    |
+| ----------- | ------------------- | ---------------- |
 | Node.js     | 22.x LTS (>=22.0.0) | `node --version` |
-| pnpm        | 9+              | `pnpm --version` |
-| Git         | 2.30+           | `git --version`  |
+| pnpm        | 9+                  | `pnpm --version` |
+| Git         | 2.30+               | `git --version`  |
 
 > **Azure compatibility:** Azure Functions 4.x and Azure Static Web Apps support Node 22. See [Node.js release schedule](https://nodejs.org/en/about/releases/) and [Azure Functions supported versions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-versions).
 

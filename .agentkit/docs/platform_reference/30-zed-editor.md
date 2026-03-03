@@ -2,13 +2,13 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | High-Performance AI-Native Code Editor (Rust-based) |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — [zed.dev](https://zed.dev/) (macOS, Linux, Windows) |
-| **Documentation** | [zed.dev/docs](https://zed.dev/docs) |
-| **Performance Rating** | ⭐⭐⭐½ — **71/100** |
+|                        |                                                                   |
+| ---------------------- | ----------------------------------------------------------------- |
+| **Type**               | High-Performance AI-Native Code Editor (Rust-based)               |
+| **Categories**         | AI-Native IDE                                                     |
+| **Access**             | Desktop app — [zed.dev](https://zed.dev/) (macOS, Linux, Windows) |
+| **Documentation**      | [zed.dev/docs](https://zed.dev/docs)                              |
+| **Performance Rating** | ⭐⭐⭐½ — **71/100**                                              |
 
 ---
 
@@ -32,23 +32,23 @@ Open-source with an Apache 2.0 license.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                |
+| --------- | ----------- | ---------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 71/100 ⭐⭐⭐½ | Zeta prediction is fast; agentic editing is growing |
-| Developer Experience | 80/100 ⭐⭐⭐⭐ | Blazing fast; clean UI; real-time collab |
-| Cost & Value | 82/100 ⭐⭐⭐⭐ | Free tier with 2K predictions/mo; Pro $10/mo |
-| Customization | 55/100 ⭐⭐⭐ | Multi-model + ACP; limited rule system |
-| Privacy & Security | 75/100 ⭐⭐⭐½ | Local models via Ollama; no telemetry option |
-| Team & Enterprise | 55/100 ⭐⭐⭐ | Enterprise plan with SSO; multiplayer built-in |
-| **Weighted Total** | **72/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 71/100 ⭐⭐⭐½     | Zeta prediction is fast; agentic editing is growing                           |
+| Developer Experience | 80/100 ⭐⭐⭐⭐    | Blazing fast; clean UI; real-time collab                                      |
+| Cost & Value         | 82/100 ⭐⭐⭐⭐    | Free tier with 2K predictions/mo; Pro $10/mo                                  |
+| Customization        | 55/100 ⭐⭐⭐      | Multi-model + ACP; limited rule system                                        |
+| Privacy & Security   | 75/100 ⭐⭐⭐½     | Local models via Ollama; no telemetry option                                  |
+| Team & Enterprise    | 55/100 ⭐⭐⭐      | Enterprise plan with SSO; multiplayer built-in                                |
+| **Weighted Total**   | **72/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

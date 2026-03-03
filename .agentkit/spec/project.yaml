@@ -80,7 +80,7 @@ deployment:
 
 # Infrastructure — IaC conventions, naming, and resource management
 infrastructure:
-  namingConvention: "{org}-{env}-{project}-{resourcetype}-{region}" # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
+  namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}' # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
   defaultRegion: global # e.g. southafricanorth, eastus, westeurope
   org: akf # e.g. nl, contoso — the org prefix used in resource names
   iacToolchain: [none] # e.g. [terraform, terragrunt]

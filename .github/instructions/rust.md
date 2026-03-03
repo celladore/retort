@@ -4,6 +4,7 @@
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-01 -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Rust
 
 Apply these rules when editing `.rs` files or `Cargo.toml`.

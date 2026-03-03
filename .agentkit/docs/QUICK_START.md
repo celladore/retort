@@ -20,11 +20,11 @@
 
 Before you begin, make sure you have the following installed:
 
-| Requirement | Minimum Version | Check Command    |
-| ----------- | --------------- | ---------------- |
+| Requirement | Minimum Version     | Check Command    |
+| ----------- | ------------------- | ---------------- |
 | **Node.js** | 22.x LTS (>=22.0.0) | `node --version` |
-| **Git**     | 2.30+           | `git --version`  |
-| **AI Tool** | Latest          | See below        |
+| **Git**     | 2.30+               | `git --version`  |
+| **AI Tool** | Latest              | See below        |
 
 > **Azure:** Azure Functions 4.x and Static Web Apps support Node 22. See [Azure Functions versions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-versions).
 
@@ -80,10 +80,10 @@ After initialization, review and customize `.agentkit/overlays/my-project/settin
 ```yaml
 repoName: my-project
 defaultBranch: main
-primaryStack: auto          # auto | node | dotnet | rust | python
+primaryStack: auto # auto | node | dotnet | rust | python
 windowsFirst: false
 renderTargets:
-  - claude                  # Remove any tools your team does not use
+  - claude # Remove any tools your team does not use
   - cursor
   - windsurf
   - copilot
@@ -142,8 +142,8 @@ The `sync` command generated several directories and files in your repository ro
 | `UNIFIED_AGENT_TEAMS.md` | **Team specifications** -- Defines the 10 agent teams (Backend, Frontend, Data, Infrastructure, Auth, Integration, Documentation, DevEx, Platform, Quality), their responsibilities, scope patterns, and the 5-phase lifecycle model that governs all work. |
 | `AGENT_BACKLOG.md`       | **Work tracking** -- A prioritized backlog of tasks for AI agents to pick up, organized by team and priority.                                                                                                                                               |
 | `QUALITY_GATES.md`       | **Definition of done** -- Quality gates for each of the 5 lifecycle phases, ensuring work meets standards before advancing.                                                                                                                                 |
-| `.gitignore`             | **Excludes build artifacts** — Lists common ignore patterns such as `node_modules/`, `.tmp/`, `*.log`, `.env`, `dist/` and other sensitive or temporary build artifacts.                                                                         |
-| `.gitattributes`         | **EOL and diff** -- Configures EOL (e.g., `* text=auto`) and diff/merge handling for repo files. Typical rules: `*.md text`, `*.sh text eol=lf`, `*.bat text eol=crlf`.                                                                                    |
+| `.gitignore`             | **Excludes build artifacts** — Lists common ignore patterns such as `node_modules/`, `.tmp/`, `*.log`, `.env`, `dist/` and other sensitive or temporary build artifacts.                                                                                    |
+| `.gitattributes`         | **EOL and diff** -- Configures EOL (e.g., `* text=auto`) and diff/merge handling for repo files. Typical rules: `*.md text`, `*.sh text eol=lf`, `*.bat text eol=crlf`.                                                                                     |
 
 ### Documentation Structure
 

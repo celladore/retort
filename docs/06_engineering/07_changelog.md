@@ -31,18 +31,18 @@ Commit messages follow the [Conventional Commits 1.0](https://www.conventionalco
 
 **Types and their changelog sections:**
 
-| Commit Type | Changelog Section | Description |
-|-------------|-------------------|-------------|
-| `feat` | Added | New feature |
-| `fix` | Fixed | Bug fix |
-| `refactor` | Changed | Code change without feature/fix |
-| `perf` | Changed | Performance improvement |
-| `docs` | Changed | Documentation only |
-| `chore` | Changed | Tooling, dependencies |
-| `BREAKING CHANGE` | Changed | Breaking API change (also bumps major) |
-| `security` | Security | Security fix |
-| `deprecated` | Deprecated | Deprecation notice |
-| `removed` | Removed | Removed feature |
+| Commit Type       | Changelog Section | Description                            |
+| ----------------- | ----------------- | -------------------------------------- |
+| `feat`            | Added             | New feature                            |
+| `fix`             | Fixed             | Bug fix                                |
+| `refactor`        | Changed           | Code change without feature/fix        |
+| `perf`            | Changed           | Performance improvement                |
+| `docs`            | Changed           | Documentation only                     |
+| `chore`           | Changed           | Tooling, dependencies                  |
+| `BREAKING CHANGE` | Changed           | Breaking API change (also bumps major) |
+| `security`        | Security          | Security fix                           |
+| `deprecated`      | Deprecated        | Deprecation notice                     |
+| `removed`         | Removed           | Removed feature                        |
 
 ### Commit Message Template
 
@@ -58,11 +58,11 @@ When a history document is created via `./scripts/create-doc.sh`, a changelog
 entry is automatically added to `CHANGELOG.md`. The mapping is:
 
 | History Doc Type | Changelog Section |
-|------------------|-------------------|
-| `feature` | `Added` |
-| `implementation` | `Added` |
-| `bugfix` | `Fixed` |
-| `migration` | `Changed` |
+| ---------------- | ----------------- |
+| `feature`        | `Added`           |
+| `implementation` | `Added`           |
+| `bugfix`         | `Fixed`           |
+| `migration`      | `Changed`         |
 
 You can also add changelog entries directly:
 
@@ -82,12 +82,14 @@ commit history. They are **optional** — the manual workflow above is the defau
 automatically creates release PRs with updated `CHANGELOG.md` and version bumps.
 
 **Strengths:**
+
 - Native GitHub Actions integration via `google-github-actions/release-please-action`
 - Full automation: changelog → version bump → GitHub Release
 - First-class monorepo support
 - Low configuration overhead
 
 **Setup:**
+
 ```yaml
 # .github/workflows/release-please.yml
 name: Release Please
@@ -114,11 +116,13 @@ jobs:
 generates changelogs from commit history using Conventional Commits.
 
 **Strengths:**
+
 - Native Node.js/npm tooling
 - Highly customizable presets (Angular, conventionalcommits, etc.)
 - Integrates with `semantic-release` and `commitizen`
 
 **Setup:**
+
 ```bash
 npm install --save-dev conventional-changelog-cli
 ```
@@ -139,12 +143,14 @@ npm install --save-dev conventional-changelog-cli
 generator. Available as an npm package or standalone binary.
 
 **Strengths:**
+
 - Extremely fast (Rust-based core)
 - TOML-based configuration with Tera templates
 - Advanced filtering, grouping, and PR metadata resolution
 - Works across any language/ecosystem
 
 **Setup:**
+
 ```bash
 npm install --save-dev git-cliff
 ```
@@ -182,6 +188,7 @@ These tools enforce Conventional Commits at commit time:
 - **[commitlint](https://commitlint.js.org/)** — validates commit messages via git hook
 
 **Setup (with husky):**
+
 ```bash
 npm install --save-dev @commitlint/cli @commitlint/config-conventional commitizen cz-conventional-changelog husky
 ```
@@ -193,13 +200,13 @@ export default { extends: ['@commitlint/config-conventional'] };
 
 ## Recommendation for New Projects
 
-| Scenario | Recommended Tool |
-|----------|-----------------|
-| Fully automated GitHub releases | `release-please` |
-| Node.js project with custom release scripts | `conventional-changelog` |
-| Non-JS project or custom changelog format | `git-cliff` |
-| Enforce commit quality at workstation | `commitlint` + `husky` |
-| All of the above (enterprise) | `commitlint` + `release-please` |
+| Scenario                                    | Recommended Tool                |
+| ------------------------------------------- | ------------------------------- |
+| Fully automated GitHub releases             | `release-please`                |
+| Node.js project with custom release scripts | `conventional-changelog`        |
+| Non-JS project or custom changelog format   | `git-cliff`                     |
+| Enforce commit quality at workstation       | `commitlint` + `husky`          |
+| All of the above (enterprise)               | `commitlint` + `release-please` |
 
 ## References
 

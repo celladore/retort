@@ -203,7 +203,8 @@ describe('runInit', () => {
           'windsurf-guides-path': 'C:/Users/test/.windsurf/plans/domain-guides',
           'mystira-docs-path': 'C:/Users/test/repos/Mystira.workspace/docs',
           'external-markdown-files': 'docs/vision.md, docs/strategy.md',
-          'external-git-repos': 'https://github.com/example/repo-a, https://github.com/example/repo-b',
+          'external-git-repos':
+            'https://github.com/example/repo-a, https://github.com/example/repo-b',
           'external-target-platforms': 'copilot,windsurf',
         },
       });

@@ -146,30 +146,30 @@ agents:
   backend:
     default_model: claude-3-5-sonnet
     quirks:
-      positive: ["native_mcp", "consistent_quality", "strong_agentic"]
-      negative: ["verbose_high_context", "premium_pricing", "rate_limiting"]
-      operational: ["context_inconsistency"]
+      positive: ['native_mcp', 'consistent_quality', 'strong_agentic']
+      negative: ['verbose_high_context', 'premium_pricing', 'rate_limiting']
+      operational: ['context_inconsistency']
 ```
 
 Scores are computed at runtime by `calculateQuirksScore`; do not store `scores.base`, `scores.penalty`, `scores.bonus` in config. Optionally add `validateQuirksScores` to warn when stored scores drift from computed values.
 
 **Quirk Key Reference:** Human-readable names map to snake_case config keys used in `.agentkit.yaml` and by `calculateQuirksScore`/`validateQuirksScores`:
 
-| Human-readable name      | Config key              |
-| ------------------------ | ----------------------- |
-| Native MCP Support        | `native_mcp`            |
-| Consistent Quality       | `consistent_quality`    |
-| Strong Agentic           | `strong_agentic`        |
-| Token Efficiency         | `token_efficiency`      |
-| Massive Context          | `massive_context`       |
-| Open Weights Available   | `open_weights_available`|
-| Platform Coverage        | `platform_coverage`      |
-| Strong Embeddings        | `strong_embeddings`     |
-| Tool-Using Agents        | `tool_using_agents`     |
-| Tool-Use Training       | `tool_use_training`     |
-| Limited Coding Data      | `limited_coding_data`   |
-| Enterprise Focus        | `enterprise_focus`      |
-| Platform Dependencies   | `platform_dependencies` |
+| Human-readable name    | Config key               |
+| ---------------------- | ------------------------ |
+| Native MCP Support     | `native_mcp`             |
+| Consistent Quality     | `consistent_quality`     |
+| Strong Agentic         | `strong_agentic`         |
+| Token Efficiency       | `token_efficiency`       |
+| Massive Context        | `massive_context`        |
+| Open Weights Available | `open_weights_available` |
+| Platform Coverage      | `platform_coverage`      |
+| Strong Embeddings      | `strong_embeddings`      |
+| Tool-Using Agents      | `tool_using_agents`      |
+| Tool-Use Training      | `tool_use_training`      |
+| Limited Coding Data    | `limited_coding_data`    |
+| Enterprise Focus       | `enterprise_focus`       |
+| Platform Dependencies  | `platform_dependencies`  |
 
 This table is a partial example. See the canonical `QUIRK_SCORES` object for the full key list.
 
@@ -248,20 +248,20 @@ function calculateQuirksScore(agentConfig) {
   const operational = Array.isArray(quirks.operational) ? quirks.operational : [];
   let baseScore = 0;
 
-  positive.forEach(quirk => {
+  positive.forEach((quirk) => {
     baseScore += QUIRK_SCORES[quirk] || 0;
   });
-  negative.forEach(quirk => {
+  negative.forEach((quirk) => {
     baseScore += QUIRK_SCORES[quirk] || 0;
   });
-  operational.forEach(quirk => {
+  operational.forEach((quirk) => {
     baseScore += QUIRK_SCORES[quirk] || 0;
   });
 
   return {
     base: baseScore,
     penalty: Math.max(0, -baseScore),
-    bonus: Math.max(0, baseScore)
+    bonus: Math.max(0, baseScore),
   };
 }
 ```
@@ -299,9 +299,9 @@ backend:
   quirks_weighting:
     # Override default quirk weights for team-specific priorities
     # Keys reference QUIRK_SCORES entries; values are multipliers (default: 1.0)
-    native_mcp: 0.4      # Multiply MCP impact by 0.4 (reduces from +0.3 to +0.12)
+    native_mcp: 0.4 # Multiply MCP impact by 0.4 (reduces from +0.3 to +0.12)
     token_efficiency: 0.3 # Multiply token efficiency impact by 0.3
-    rate_limiting: 0.4    # Scale penalty: 0.4 means 40% of original (-0.2 × 0.4 = -0.08)
+    rate_limiting: 0.4 # Scale penalty: 0.4 means 40% of original (-0.2 × 0.4 = -0.08)
 ```
 
 > **Note:** The `quirks_weighting` config multiplies the base QUIRK_SCORES values as plain scalars. Negative base × positive multiplier remains negative. A value of 1.0 keeps the default weight. Use positive magnitude (e.g., 0.4 for 40% of original) to scale penalties. This allows teams to tune quirk importance without redefining the base scores.
@@ -314,9 +314,9 @@ frontend:
     primary: gemini-3-flash
     fallback: gpt-4o
   quirks_weighting:
-    native_multimodal: 0.3   # UI/UX advantage (maps to QUIRK_SCORES.native_multimodal)
-    speed_advantage: 0.4     # Fast iteration (maps to QUIRK_SCORES.speed_advantage)
-    api_evolution: 0.2      # Scale down penalty (positive multiplier reduces negative base)
+    native_multimodal: 0.3 # UI/UX advantage (maps to QUIRK_SCORES.native_multimodal)
+    speed_advantage: 0.4 # Fast iteration (maps to QUIRK_SCORES.speed_advantage)
+    api_evolution: 0.2 # Scale down penalty (positive multiplier reduces negative base)
 ```
 
 ## Monitoring Metrics

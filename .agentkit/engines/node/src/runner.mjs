@@ -57,7 +57,9 @@ export function resolveWindowsExecutable(command, cwd) {
 
   // Helper to check extensions
   const checkExtensions = (basePath) => {
-    const pathExt = (process.env.PATHEXT || '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH').split(';');
+    const pathExt = (
+      process.env.PATHEXT || '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH'
+    ).split(';');
 
     // Check if the path itself is a file first (e.g. strict match or already has extension)
     if (isFile(basePath)) return basePath;
@@ -270,4 +272,3 @@ export async function runInPool(tasks, concurrency) {
   await Promise.all(workers);
   return results;
 }
-

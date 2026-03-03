@@ -1,12 +1,12 @@
 name: phase-execution
-description: "Execute a specific workflow phase"
+description: 'Execute a specific workflow phase'
 inputs:
   phase:
     required: false
-    default: "1"
-    description: "Phase number (1=Discovery, 2=Planning, 3=Implementation, 4=Validation, 5=Ship)"
+    default: '1'
+    description: 'Phase number (1=Discovery, 2=Planning, 3=Implementation, 4=Validation, 5=Ship)'
 steps:
   - name: Run Phase
     run: orchestrate
     with:
-      phase: "${{ inputs.phase }}"
+      phase: '${{ inputs.phase }}'

@@ -10,12 +10,12 @@
 
 ## Severity Levels
 
-| Level | Name | Description | Response Time |
-|-------|------|-------------|---------------|
-| SEV-1 | Critical | Complete service outage | <!-- e.g. 15 minutes --> |
-| SEV-2 | Major | Significant degradation | <!-- e.g. 30 minutes --> |
-| SEV-3 | Minor | Limited impact, workaround available | <!-- e.g. 4 hours --> |
-| SEV-4 | Low | Cosmetic or minor issue | <!-- e.g. Next business day --> |
+| Level | Name     | Description                          | Response Time                   |
+| ----- | -------- | ------------------------------------ | ------------------------------- |
+| SEV-1 | Critical | Complete service outage              | <!-- e.g. 15 minutes -->        |
+| SEV-2 | Major    | Significant degradation              | <!-- e.g. 30 minutes -->        |
+| SEV-3 | Minor    | Limited impact, workaround available | <!-- e.g. 4 hours -->           |
+| SEV-4 | Low      | Cosmetic or minor issue              | <!-- e.g. Next business day --> |
 
 ## Incident Workflow
 
@@ -28,11 +28,11 @@
 
 ## Roles
 
-| Role | Responsibility |
-|------|---------------|
-| Incident Commander | Coordinates response and communication |
-| Technical Lead | Diagnoses and implements fix |
-| Communications Lead | Updates stakeholders and status page |
+| Role                | Responsibility                         |
+| ------------------- | -------------------------------------- |
+| Incident Commander  | Coordinates response and communication |
+| Technical Lead      | Diagnoses and implements fix           |
+| Communications Lead | Updates stakeholders and status page   |
 
 ## Communication Channels
 

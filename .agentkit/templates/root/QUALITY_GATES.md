@@ -47,19 +47,19 @@ Each gate is evaluated as:
 
 ### Required Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| D1 | Product docs updated | `docs/01_product/` contains problem statement and user stories for this work item | File exists and is non-empty |
-| D2 | Issue created | A tracking issue exists in the issue tracker with labels, assignee, and milestone | Issue URL recorded in backlog |
-| D3 | Scope identified | Affected teams and file scope patterns are documented | Listed in backlog entry |
-| D4 | Stakeholders notified | Relevant teams have been tagged or notified of the upcoming work | Notification logged in state |
+| #   | Gate                  | Criteria                                                                          | Verification                  |
+| --- | --------------------- | --------------------------------------------------------------------------------- | ----------------------------- |
+| D1  | Product docs updated  | `docs/01_product/` contains problem statement and user stories for this work item | File exists and is non-empty  |
+| D2  | Issue created         | A tracking issue exists in the issue tracker with labels, assignee, and milestone | Issue URL recorded in backlog |
+| D3  | Scope identified      | Affected teams and file scope patterns are documented                             | Listed in backlog entry       |
+| D4  | Stakeholders notified | Relevant teams have been tagged or notified of the upcoming work                  | Notification logged in state  |
 
 ### Optional Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| D5 | User research | User interviews or data analysis supporting the problem statement | Link to research artifact |
-| D6 | Competitive analysis | Review of how similar problems are solved elsewhere | Document in `docs/01_product/` |
+| #   | Gate                 | Criteria                                                          | Verification                   |
+| --- | -------------------- | ----------------------------------------------------------------- | ------------------------------ |
+| D5  | User research        | User interviews or data analysis supporting the problem statement | Link to research artifact      |
+| D6  | Competitive analysis | Review of how similar problems are solved elsewhere               | Document in `docs/01_product/` |
 
 ### Discovery Checklist
 
@@ -79,21 +79,21 @@ Each gate is evaluated as:
 
 ### Required Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| P1 | ADRs authored | Architecture Decision Records created for significant technical decisions | Files exist in `docs/adr/` or `docs/02_specs/adr/` |
-| P2 | ADRs approved | ADRs have been reviewed and approved by relevant team leads | Approval recorded (comment or status) |
-| P3 | Specs complete | Technical specification in `docs/02_specs/` covers approach, API contracts, data models, and edge cases | Spec document exists and reviewed |
-| P4 | Tasks broken down | Work is decomposed into tasks assigned to specific teams | Tasks listed in AGENT_BACKLOG.md |
-| P5 | Dependencies mapped | Cross-team dependencies identified and sequenced | Dependency table updated |
+| #   | Gate                | Criteria                                                                                                | Verification                                       |
+| --- | ------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| P1  | ADRs authored       | Architecture Decision Records created for significant technical decisions                               | Files exist in `docs/adr/` or `docs/02_specs/adr/` |
+| P2  | ADRs approved       | ADRs have been reviewed and approved by relevant team leads                                             | Approval recorded (comment or status)              |
+| P3  | Specs complete      | Technical specification in `docs/02_specs/` covers approach, API contracts, data models, and edge cases | Spec document exists and reviewed                  |
+| P4  | Tasks broken down   | Work is decomposed into tasks assigned to specific teams                                                | Tasks listed in AGENT_BACKLOG.md                   |
+| P5  | Dependencies mapped | Cross-team dependencies identified and sequenced                                                        | Dependency table updated                           |
 
 ### Optional Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| P6 | Risk assessment | Identified risks with mitigation strategies | Section in spec document |
-| P7 | Prototype/spike | Proof of concept for high-risk technical approaches | Branch or document reference |
-| P8 | Capacity check | Team has bandwidth for the estimated effort | Sprint capacity confirmed |
+| #   | Gate            | Criteria                                            | Verification                 |
+| --- | --------------- | --------------------------------------------------- | ---------------------------- |
+| P6  | Risk assessment | Identified risks with mitigation strategies         | Section in spec document     |
+| P7  | Prototype/spike | Proof of concept for high-risk technical approaches | Branch or document reference |
+| P8  | Capacity check  | Team has bandwidth for the estimated effort         | Sprint capacity confirmed    |
 
 ### Planning Checklist
 
@@ -115,22 +115,22 @@ Each gate is evaluated as:
 
 ### Required Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| I1 | `/check` passes | Running `/check` (lint, type-check, unit tests) completes without errors | Exit code 0 |
-| I2 | Tests added | New or modified code has corresponding test coverage | Coverage diff shows no decrease |
-| I3 | Coverage threshold | Test coverage meets or exceeds project minimum (default: 80%) | Coverage report |
-| I4 | No lint violations | Zero lint errors (warnings acceptable if pre-existing) | Lint report clean |
-| I5 | Type-safe | No TypeScript errors (for TS projects) or equivalent type checks pass | Type-check exit code 0 |
-| I6 | Conventional commits | All commits follow conventional commit format | Commit messages validated |
+| #   | Gate                 | Criteria                                                                 | Verification                    |
+| --- | -------------------- | ------------------------------------------------------------------------ | ------------------------------- |
+| I1  | `/check` passes      | Running `/check` (lint, type-check, unit tests) completes without errors | Exit code 0                     |
+| I2  | Tests added          | New or modified code has corresponding test coverage                     | Coverage diff shows no decrease |
+| I3  | Coverage threshold   | Test coverage meets or exceeds project minimum (default: 80%)            | Coverage report                 |
+| I4  | No lint violations   | Zero lint errors (warnings acceptable if pre-existing)                   | Lint report clean               |
+| I5  | Type-safe            | No TypeScript errors (for TS projects) or equivalent type checks pass    | Type-check exit code 0          |
+| I6  | Conventional commits | All commits follow conventional commit format                            | Commit messages validated       |
 
 ### Optional Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| I7 | Performance baseline | No regression in benchmark results | Benchmark comparison |
-| I8 | Bundle size check | No unexpected increase in build output size | Size report |
-| I9 | Documentation inline | Public APIs have JSDoc/TSDoc comments | Doc coverage tool |
+| #   | Gate                 | Criteria                                    | Verification         |
+| --- | -------------------- | ------------------------------------------- | -------------------- |
+| I7  | Performance baseline | No regression in benchmark results          | Benchmark comparison |
+| I8  | Bundle size check    | No unexpected increase in build output size | Size report          |
+| I9  | Documentation inline | Public APIs have JSDoc/TSDoc comments       | Doc coverage tool    |
 
 ### Implementation Checklist
 
@@ -152,22 +152,22 @@ Each gate is evaluated as:
 
 ### Required Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| V1 | PR created | Pull request opened with description, test plan, and linked issue | PR URL exists |
-| V2 | CI passes | All continuous integration checks pass (lint, test, build, type-check) | CI status green |
-| V3 | Code review approved | At least one approval from a team member with relevant expertise | PR approval count >= 1 |
-| V4 | No merge conflicts | PR is rebased or merged with the target branch without conflicts | Git status clean |
-| V5 | PR description complete | Description includes: summary, test plan, breaking changes (if any) | PR template filled |
+| #   | Gate                    | Criteria                                                               | Verification           |
+| --- | ----------------------- | ---------------------------------------------------------------------- | ---------------------- |
+| V1  | PR created              | Pull request opened with description, test plan, and linked issue      | PR URL exists          |
+| V2  | CI passes               | All continuous integration checks pass (lint, test, build, type-check) | CI status green        |
+| V3  | Code review approved    | At least one approval from a team member with relevant expertise       | PR approval count >= 1 |
+| V4  | No merge conflicts      | PR is rebased or merged with the target branch without conflicts       | Git status clean       |
+| V5  | PR description complete | Description includes: summary, test plan, breaking changes (if any)    | PR template filled     |
 
 ### Optional Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| V6 | E2E tests pass | End-to-end test suite passes against the PR branch | E2E CI job green |
-| V7 | Manual testing | UI or user-facing changes manually verified | Tester sign-off |
-| V8 | Security scan | No new vulnerabilities introduced | Security scan report |
-| V9 | Accessibility audit | UI changes meet WCAG 2.1 AA standards | Audit report |
+| #   | Gate                | Criteria                                           | Verification         |
+| --- | ------------------- | -------------------------------------------------- | -------------------- |
+| V6  | E2E tests pass      | End-to-end test suite passes against the PR branch | E2E CI job green     |
+| V7  | Manual testing      | UI or user-facing changes manually verified        | Tester sign-off      |
+| V8  | Security scan       | No new vulnerabilities introduced                  | Security scan report |
+| V9  | Accessibility audit | UI changes meet WCAG 2.1 AA standards              | Audit report         |
 
 ### Validation Checklist
 
@@ -189,21 +189,21 @@ Each gate is evaluated as:
 
 ### Required Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| S1 | PR merged | Pull request merged to the target branch | Merge commit exists |
-| S2 | Operations docs updated | `docs/05_operations/` reflects any new operational procedures, configuration changes, or monitoring requirements | Docs updated |
-| S3 | CHANGELOG updated | CHANGELOG.md has an entry for this change under the appropriate section | Entry exists |
-| S4 | Deployment successful | Change deployed to target environment without errors | Deployment log |
-| S5 | Monitoring confirmed | No anomalies in error rates, latency, or resource usage post-deploy | Monitoring dashboard |
+| #   | Gate                    | Criteria                                                                                                         | Verification         |
+| --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
+| S1  | PR merged               | Pull request merged to the target branch                                                                         | Merge commit exists  |
+| S2  | Operations docs updated | `docs/05_operations/` reflects any new operational procedures, configuration changes, or monitoring requirements | Docs updated         |
+| S3  | CHANGELOG updated       | CHANGELOG.md has an entry for this change under the appropriate section                                          | Entry exists         |
+| S4  | Deployment successful   | Change deployed to target environment without errors                                                             | Deployment log       |
+| S5  | Monitoring confirmed    | No anomalies in error rates, latency, or resource usage post-deploy                                              | Monitoring dashboard |
 
 ### Optional Gates
 
-| # | Gate | Criteria | Verification |
-|---|------|----------|--------------|
-| S6 | Rollback tested | Rollback procedure verified in staging | Rollback log |
-| S7 | Stakeholder notification | Relevant stakeholders informed of the change | Notification sent |
-| S8 | Feature flag cleanup | Temporary feature flags removed or documented for cleanup | Flag audit |
+| #   | Gate                     | Criteria                                                  | Verification      |
+| --- | ------------------------ | --------------------------------------------------------- | ----------------- |
+| S6  | Rollback tested          | Rollback procedure verified in staging                    | Rollback log      |
+| S7  | Stakeholder notification | Relevant stakeholders informed of the change              | Notification sent |
+| S8  | Feature flag cleanup     | Temporary feature flags removed or documented for cleanup | Flag audit        |
 
 ### Ship Checklist
 
@@ -240,11 +240,11 @@ The following gates require human or AI agent verification:
 
 ### Override Authority
 
-| Role | Can Override |
-|------|-------------|
-| Team Lead | Optional gates for their own team |
-| Orchestrator | Conditional pass on non-critical required gates |
-| Project Owner | Any gate (must document reason) |
+| Role          | Can Override                                    |
+| ------------- | ----------------------------------------------- |
+| Team Lead     | Optional gates for their own team               |
+| Orchestrator  | Conditional pass on non-critical required gates |
+| Project Owner | Any gate (must document reason)                 |
 
 ---
 
@@ -264,12 +264,12 @@ When a quality gate cannot be satisfied and an exemption is needed:
 
 ### Tracked Metrics
 
-| Metric | Definition | Target |
-|--------|-----------|--------|
-| Gate pass rate | Percentage of gates passed on first attempt | > 85% |
-| Phase cycle time | Average time to move through a single phase | < 2 days |
-| Exemption rate | Percentage of gates exempted vs. total evaluations | < 5% |
-| Rework rate | Percentage of items sent back to a previous phase | < 10% |
+| Metric           | Definition                                         | Target   |
+| ---------------- | -------------------------------------------------- | -------- |
+| Gate pass rate   | Percentage of gates passed on first attempt        | > 85%    |
+| Phase cycle time | Average time to move through a single phase        | < 2 days |
+| Exemption rate   | Percentage of gates exempted vs. total evaluations | < 5%     |
+| Rework rate      | Percentage of items sent back to a previous phase  | < 10%    |
 
 ### Reporting Cadence
 
@@ -279,5 +279,5 @@ When a quality gate cannot be satisfied and an exemption is needed:
 
 ---
 
-*Quality gates are maintained by AgentKit Forge. See UNIFIED_AGENT_TEAMS.md*
-*for the lifecycle model that these gates support.*
+_Quality gates are maintained by AgentKit Forge. See UNIFIED_AGENT_TEAMS.md_
+_for the lifecycle model that these gates support._

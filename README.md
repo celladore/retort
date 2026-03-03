@@ -99,7 +99,7 @@ Edit `.agentkit/overlays/my-project/settings.yaml`:
 ```yaml
 repoName: my-project
 defaultBranch: main
-primaryStack: node          # node | dotnet | rust | python | auto
+primaryStack: node # node | dotnet | rust | python | auto
 windowsFirst: true
 renderTargets:
   - claude
@@ -220,11 +220,11 @@ Edit `.agentkit/overlays/my-existing-project/settings.yaml`:
 
 ```yaml
 repoName: my-existing-project
-defaultBranch: main            # or develop, trunk, etc.
-primaryStack: auto             # auto-detects from Cargo.toml, package.json, etc.
-windowsFirst: false            # set to true for Windows-primary teams
+defaultBranch: main # or develop, trunk, etc.
+primaryStack: auto # auto-detects from Cargo.toml, package.json, etc.
+windowsFirst: false # set to true for Windows-primary teams
 renderTargets:
-  - claude                     # only enable tools your team uses
+  - claude # only enable tools your team uses
   - cursor
 ```
 

@@ -37,12 +37,12 @@ Consumer repos currently carry generated router-specialist content that can drif
 
 ## Repository Responsibility Model
 
-| Concern | Primary Repo | Secondary/Consumer |
-| --- | --- | --- |
-| Router-specialist specs/templates/contracts | `justaghost/agentkit-forge` | Generated copies in consumer repos |
-| Gateway runtime behavior and SLO operations | `phoenixvc/ai-gateway` | N/A |
-| Consumer overlays and local integration notes | Consumer repos | N/A |
-| Cost analytics and KPI dashboards | `phoenixvc/pvc-costops-analytics` | Downstream consumer |
+| Concern                                       | Primary Repo                      | Secondary/Consumer                 |
+| --------------------------------------------- | --------------------------------- | ---------------------------------- |
+| Router-specialist specs/templates/contracts   | `justaghost/agentkit-forge`       | Generated copies in consumer repos |
+| Gateway runtime behavior and SLO operations   | `phoenixvc/ai-gateway`            | N/A                                |
+| Consumer overlays and local integration notes | Consumer repos                    | N/A                                |
+| Cost analytics and KPI dashboards             | `phoenixvc/pvc-costops-analytics` | Downstream consumer                |
 
 ## Deliverables
 

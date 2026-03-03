@@ -8,17 +8,17 @@ Each tool corresponds to a **render target** in your overlay's `settings.yaml`:
 
 ```yaml
 renderTargets:
-  - claude      # Claude Code
-  - cursor      # Cursor IDE
-  - windsurf    # Windsurf IDE
-  - copilot     # GitHub Copilot
-  - gemini      # Gemini CLI / Code Assist
-  - codex       # OpenAI Codex
-  - warp        # Warp terminal/IDE
-  - cline       # Cline
-  - roo         # Roo Code
-  - ai          # Continue / portable rules
-  - mcp         # MCP/A2A protocol
+  - claude # Claude Code
+  - cursor # Cursor IDE
+  - windsurf # Windsurf IDE
+  - copilot # GitHub Copilot
+  - gemini # Gemini CLI / Code Assist
+  - codex # OpenAI Codex
+  - warp # Warp terminal/IDE
+  - cline # Cline
+  - roo # Roo Code
+  - ai # Continue / portable rules
+  - mcp # MCP/A2A protocol
 ```
 
 `AGENTS.md` is **always generated** (not gated by renderTargets) — it's the universal standard.
@@ -31,8 +31,8 @@ Use `agentkit add <tool>` / `agentkit remove <tool>` to manage targets increment
 
 **Always generated** — not gated by renderTargets.
 
-| Output | Path |
-|--------|------|
+| Output             | Path        |
+| ------------------ | ----------- |
 | Agent instructions | `AGENTS.md` |
 
 The universal agent instruction file, stewarded by the Agentic AI Foundation under the Linux Foundation. Natively read by:
@@ -53,16 +53,16 @@ Content is generated from `project.yaml` (tech stack, architecture, conventions,
 
 **Render target**: `claude`
 
-| Output | Path | Source |
-|--------|------|--------|
-| Root instructions | `CLAUDE.md` | `templates/claude/CLAUDE.md` + project.yaml |
-| Commands | `.claude/commands/*.md` | `commands.yaml` + team commands from `teams.yaml` |
-| Skills | `.claude/skills/*/SKILL.md` | `commands.yaml` (non-team commands) |
-| Agents | `.claude/agents/**/*.md` | `agents.yaml` |
-| Rules | `.claude/rules/*.md` | `templates/claude/rules/` |
-| Hooks | `.claude/hooks/*.sh`, `*.ps1` | `templates/claude/hooks/` |
-| State | `.claude/state/` | Orchestrator state schema |
-| Settings | `.claude/settings.json` | Permissions from `settings.yaml` |
+| Output            | Path                          | Source                                            |
+| ----------------- | ----------------------------- | ------------------------------------------------- |
+| Root instructions | `CLAUDE.md`                   | `templates/claude/CLAUDE.md` + project.yaml       |
+| Commands          | `.claude/commands/*.md`       | `commands.yaml` + team commands from `teams.yaml` |
+| Skills            | `.claude/skills/*/SKILL.md`   | `commands.yaml` (non-team commands)               |
+| Agents            | `.claude/agents/**/*.md`      | `agents.yaml`                                     |
+| Rules             | `.claude/rules/*.md`          | `templates/claude/rules/`                         |
+| Hooks             | `.claude/hooks/*.sh`, `*.ps1` | `templates/claude/hooks/`                         |
+| State             | `.claude/state/`              | Orchestrator state schema                         |
+| Settings          | `.claude/settings.json`       | Permissions from `settings.yaml`                  |
 
 Claude Code is the most feature-rich integration. Skills (SKILL.md) are the modern replacement for legacy commands — both are generated.
 
@@ -72,13 +72,13 @@ Claude Code is the most feature-rich integration. Skills (SKILL.md) are the mode
 
 **Render target**: `copilot`
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output            | Path                              | Source                                      |
+| ----------------- | --------------------------------- | ------------------------------------------- |
 | Main instructions | `.github/copilot-instructions.md` | `templates/copilot/copilot-instructions.md` |
-| Path instructions | `.github/instructions/*.md` | `templates/copilot/instructions/` |
-| Prompt files | `.github/prompts/*.prompt.md` | `commands.yaml` (non-team commands) |
-| Custom agents | `.github/agents/*.agent.md` | `agents.yaml` |
-| Chat modes | `.github/chatmodes/*.chatmode.md` | `teams.yaml` |
+| Path instructions | `.github/instructions/*.md`       | `templates/copilot/instructions/`           |
+| Prompt files      | `.github/prompts/*.prompt.md`     | `commands.yaml` (non-team commands)         |
+| Custom agents     | `.github/agents/*.agent.md`       | `agents.yaml`                               |
+| Chat modes        | `.github/chatmodes/*.chatmode.md` | `teams.yaml`                                |
 
 **Prompt files** are reusable slash commands in VS Code. Each non-team command from `commands.yaml` gets its own `.prompt.md` with frontmatter (`mode`, `description`).
 
@@ -92,11 +92,11 @@ Claude Code is the most feature-rich integration. Skills (SKILL.md) are the mode
 
 **Render target**: `cursor`
 
-| Output | Path | Source |
-|--------|------|--------|
-| Rules | `.cursor/rules/*.mdc` | `templates/cursor/rules/` |
-| Team rules | `.cursor/rules/team-*.mdc` | `teams.yaml` |
-| Commands | `.cursor/commands/*.md` | `commands.yaml` (non-team commands) |
+| Output     | Path                       | Source                              |
+| ---------- | -------------------------- | ----------------------------------- |
+| Rules      | `.cursor/rules/*.mdc`      | `templates/cursor/rules/`           |
+| Team rules | `.cursor/rules/team-*.mdc` | `teams.yaml`                        |
+| Commands   | `.cursor/commands/*.md`    | `commands.yaml` (non-team commands) |
 
 Cursor 1.6+ supports `.cursor/commands/*.md` for slash commands — analogous to Claude commands.
 
@@ -106,11 +106,11 @@ Cursor 1.6+ supports `.cursor/commands/*.md` for slash commands — analogous to
 
 **Render target**: `windsurf`
 
-| Output | Path | Source |
-|--------|------|--------|
-| Rules | `.windsurf/rules/*.md` | `templates/windsurf/rules/` |
-| Team rules | `.windsurf/rules/team-*.md` | `teams.yaml` |
-| Workflows | `.windsurf/workflows/*.yml` | `templates/windsurf/workflows/` |
+| Output     | Path                        | Source                          |
+| ---------- | --------------------------- | ------------------------------- |
+| Rules      | `.windsurf/rules/*.md`      | `templates/windsurf/rules/`     |
+| Team rules | `.windsurf/rules/team-*.md` | `teams.yaml`                    |
+| Workflows  | `.windsurf/workflows/*.yml` | `templates/windsurf/workflows/` |
 
 ---
 
@@ -118,11 +118,11 @@ Cursor 1.6+ supports `.cursor/commands/*.md` for slash commands — analogous to
 
 **Render target**: `gemini`
 
-| Output | Path | Source |
-|--------|------|--------|
-| Root instructions | `GEMINI.md` | `templates/gemini/GEMINI.md` + project.yaml |
-| Style guide | `.gemini/styleguide.md` | `templates/gemini/styleguide.md` + project.yaml |
-| Config | `.gemini/config.yaml` | Code review settings |
+| Output            | Path                    | Source                                          |
+| ----------------- | ----------------------- | ----------------------------------------------- |
+| Root instructions | `GEMINI.md`             | `templates/gemini/GEMINI.md` + project.yaml     |
+| Style guide       | `.gemini/styleguide.md` | `templates/gemini/styleguide.md` + project.yaml |
+| Config            | `.gemini/config.yaml`   | Code review settings                            |
 
 Gemini Code Assist and Gemini CLI both read `GEMINI.md` from the repo root. The `.gemini/` directory provides additional configuration for GitHub-based code review.
 
@@ -132,8 +132,8 @@ Gemini Code Assist and Gemini CLI both read `GEMINI.md` from the repo root. The 
 
 **Render target**: `codex`
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output | Path                        | Source                              |
+| ------ | --------------------------- | ----------------------------------- |
 | Skills | `.agents/skills/*/SKILL.md` | `commands.yaml` (non-team commands) |
 
 Codex uses the open SKILL.md standard. Each non-team command from `commands.yaml` generates a skill folder with `SKILL.md` containing frontmatter (`name`, `description`) and instructions.
@@ -146,8 +146,8 @@ Codex also reads `AGENTS.md` (always generated) for project-level context.
 
 **Render target**: `warp`
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output            | Path      | Source                                  |
+| ----------------- | --------- | --------------------------------------- |
 | Root instructions | `WARP.md` | `templates/warp/WARP.md` + project.yaml |
 
 Warp reads `WARP.md` from the repo root for project context. The template includes tech stack, coding standards, cross-cutting conventions, testing, and infrastructure details from `project.yaml`.
@@ -158,9 +158,9 @@ Warp reads `WARP.md` from the repo root for project context. The template includ
 
 **Render target**: `cline`
 
-| Output | Path | Source |
-|--------|------|--------|
-| Rules | `.clinerules/*.md` | `rules.yaml` (one file per domain) |
+| Output | Path               | Source                             |
+| ------ | ------------------ | ---------------------------------- |
+| Rules  | `.clinerules/*.md` | `rules.yaml` (one file per domain) |
 
 Cline reads `.clinerules/` for project-specific rules. Each domain from `rules.yaml` (typescript, dotnet, python, rust, security, blockchain) generates a dedicated rule file with conventions and applies-to patterns.
 
@@ -172,9 +172,9 @@ Cline also reads `AGENTS.md` for universal project context.
 
 **Render target**: `roo`
 
-| Output | Path | Source |
-|--------|------|--------|
-| Rules | `.roo/rules/*.md` | `rules.yaml` (one file per domain) |
+| Output | Path              | Source                             |
+| ------ | ----------------- | ---------------------------------- |
+| Rules  | `.roo/rules/*.md` | `rules.yaml` (one file per domain) |
 
 Roo Code (a Cline fork) reads `.roo/rules/` for project rules. Generated from the same `rules.yaml` source as Cline rules.
 
@@ -186,10 +186,10 @@ Roo Code also loads `AGENTS.md` after mode-specific rules.
 
 **Render target**: `ai`
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output         | Path                | Source                       |
+| -------------- | ------------------- | ---------------------------- |
 | Continue rules | `.ai/continuerules` | `templates/ai/continuerules` |
-| Cursor rules | `.ai/cursorrules` | `templates/ai/cursorrules` |
+| Cursor rules   | `.ai/cursorrules`   | `templates/ai/cursorrules`   |
 | Windsurf rules | `.ai/windsurfrules` | `templates/ai/windsurfrules` |
 
 Portable rule files that work across multiple IDEs.
@@ -200,10 +200,10 @@ Portable rule files that work across multiple IDEs.
 
 **Render target**: `mcp`
 
-| Output | Path | Source |
-|--------|------|--------|
-| MCP servers | `mcp/servers.json` | `templates/mcp/servers.json` |
-| A2A config | `mcp/a2a-config.json` | `templates/mcp/a2a-config.json` |
+| Output      | Path                  | Source                          |
+| ----------- | --------------------- | ------------------------------- |
+| MCP servers | `mcp/servers.json`    | `templates/mcp/servers.json`    |
+| A2A config  | `mcp/a2a-config.json` | `templates/mcp/a2a-config.json` |
 
 Model Context Protocol and Agent-to-Agent protocol configurations.
 
@@ -213,12 +213,12 @@ Model Context Protocol and Agent-to-Agent protocol configurations.
 
 These tools natively read `AGENTS.md` and require no dedicated template:
 
-| Tool | How it reads AGENTS.md |
-|------|----------------------|
-| **Google Jules** | Automatically reads from repo root before every task |
-| **Amp** | Native support |
-| **Factory** | Native support |
-| **OpenCode** | Native support |
-| **Amazon Q Developer** | Announced support |
-| **Sourcegraph Cody** | Reads AGENTS.md |
-| **Aider** | Reads AGENTS.md + conventions file |
+| Tool                   | How it reads AGENTS.md                               |
+| ---------------------- | ---------------------------------------------------- |
+| **Google Jules**       | Automatically reads from repo root before every task |
+| **Amp**                | Native support                                       |
+| **Factory**            | Native support                                       |
+| **OpenCode**           | Native support                                       |
+| **Amazon Q Developer** | Announced support                                    |
+| **Sourcegraph Cody**   | Reads AGENTS.md                                      |
+| **Aider**              | Reads AGENTS.md + conventions file                   |

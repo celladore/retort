@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+
 # Instructions — security
 
 Cross-cutting security rules that apply to all code in the repository. These rules take precedence over domain-specific rules when they conflict.

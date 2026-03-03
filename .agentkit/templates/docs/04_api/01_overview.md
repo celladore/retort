@@ -33,10 +33,10 @@ curl https://api.example.com/v1/resource \
 
 ## Rate Limiting
 
-| Tier | Requests / minute | Burst |
-|------|-------------------|-------|
-| Free | <!-- e.g. 60 --> | <!-- e.g. 10 --> |
-| Pro | <!-- e.g. 600 --> | <!-- e.g. 100 --> |
+| Tier | Requests / minute | Burst             |
+| ---- | ----------------- | ----------------- |
+| Free | <!-- e.g. 60 -->  | <!-- e.g. 10 -->  |
+| Pro  | <!-- e.g. 600 --> | <!-- e.g. 100 --> |
 
 ## Further Reading
 

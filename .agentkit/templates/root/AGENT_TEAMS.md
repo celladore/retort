@@ -21,18 +21,18 @@ orchestrator skips them during dispatch.
 
 ## Team Roster
 
-| Team | ID  | Status   | Primary Scope             | Tech Stack         | Lead Agent      | Notes                        |
-|------|-----|----------|---------------------------|--------------------|-----------------|------------------------------|
-| Backend       | T1  | Active   | `src/server/`, `src/api/`        | Node.js, Express   | `@backend-lead`  | REST API primary             |
-| Frontend      | T2  | Active   | `src/client/`, `src/components/` | React, TypeScript  | `@frontend-lead` | SPA architecture             |
-| Data          | T3  | Active   | `src/db/`, `migrations/`         | PostgreSQL, Prisma | `@data-lead`     | Schema owner                 |
-| Infrastructure| T4  | Active   | `infra/`, `.github/workflows/`   | Terraform, Docker  | `@infra-lead`    | CI/CD pipeline owner         |
-| Auth          | T5  | Active   | `src/auth/`, `src/middleware/`   | JWT, OAuth2        | `@auth-lead`     | Security-sensitive           |
-| Integration   | T6  | Inactive | `src/integrations/`              | —                  | —               | Enable when integrations added|
-| Documentation | T7  | Active   | `docs/`, `*.md`                  | Markdown, MDX      | `@docs-lead`     | Cross-cutting                |
-| DevEx         | T8  | Active   | `scripts/`, `tools/`             | Bash, Node.js      | `@devex-lead`    | Tooling and DX               |
-| Platform      | T9  | Inactive | `src/lib/`, `src/core/`          | TypeScript         | —               | Enable for shared libs       |
-| Quality       | T10 | Active   | `tests/`, `e2e/`                 | Vitest, Playwright | `@quality-lead`  | Gate enforcement             |
+| Team           | ID  | Status   | Primary Scope                    | Tech Stack         | Lead Agent       | Notes                          |
+| -------------- | --- | -------- | -------------------------------- | ------------------ | ---------------- | ------------------------------ |
+| Backend        | T1  | Active   | `src/server/`, `src/api/`        | Node.js, Express   | `@backend-lead`  | REST API primary               |
+| Frontend       | T2  | Active   | `src/client/`, `src/components/` | React, TypeScript  | `@frontend-lead` | SPA architecture               |
+| Data           | T3  | Active   | `src/db/`, `migrations/`         | PostgreSQL, Prisma | `@data-lead`     | Schema owner                   |
+| Infrastructure | T4  | Active   | `infra/`, `.github/workflows/`   | Terraform, Docker  | `@infra-lead`    | CI/CD pipeline owner           |
+| Auth           | T5  | Active   | `src/auth/`, `src/middleware/`   | JWT, OAuth2        | `@auth-lead`     | Security-sensitive             |
+| Integration    | T6  | Inactive | `src/integrations/`              | —                  | —                | Enable when integrations added |
+| Documentation  | T7  | Active   | `docs/`, `*.md`                  | Markdown, MDX      | `@docs-lead`     | Cross-cutting                  |
+| DevEx          | T8  | Active   | `scripts/`, `tools/`             | Bash, Node.js      | `@devex-lead`    | Tooling and DX                 |
+| Platform       | T9  | Inactive | `src/lib/`, `src/core/`          | TypeScript         | —                | Enable for shared libs         |
+| Quality        | T10 | Active   | `tests/`, `e2e/`                 | Vitest, Playwright | `@quality-lead`  | Gate enforcement               |
 
 ---
 
@@ -82,29 +82,29 @@ these priority rules:
 
 ### Common Overlap Scenarios
 
-| File Path                        | T1 Backend | T5 Auth | Resolution        |
-|----------------------------------|-----------|---------|-------------------|
-| `src/server/routes/auth.ts`      | Match     | Match   | T5 (auth routes)  |
-| `src/server/routes/users.ts`     | Match     | —       | T1 (general API)  |
-| `src/middleware/auth/guard.ts`   | —         | Match   | T5 (auth scope)   |
-| `src/middleware/logging.ts`      | Match     | —       | T1 or T9          |
+| File Path                      | T1 Backend | T5 Auth | Resolution       |
+| ------------------------------ | ---------- | ------- | ---------------- |
+| `src/server/routes/auth.ts`    | Match      | Match   | T5 (auth routes) |
+| `src/server/routes/users.ts`   | Match      | —       | T1 (general API) |
+| `src/middleware/auth/guard.ts` | —          | Match   | T5 (auth scope)  |
+| `src/middleware/logging.ts`    | Match      | —       | T1 or T9         |
 
 ---
 
 ## Team Communication Channels
 
-| Team           | Primary Channel               | Escalation Channel          |
-|----------------|-------------------------------|-----------------------------|
-| Backend (T1)   | `#team-backend`               | `#escalation-backend`       |
-| Frontend (T2)  | `#team-frontend`              | `#escalation-frontend`      |
-| Data (T3)      | `#team-data`                  | `#escalation-data`          |
-| Infra (T4)     | `#team-infra`                 | `#escalation-infra`         |
-| Auth (T5)      | `#team-auth`                  | `#escalation-security`      |
-| Integration (T6)| `#team-integrations`         | `#escalation-integrations`  |
-| Docs (T7)      | `#team-docs`                  | `#escalation-docs`          |
-| DevEx (T8)     | `#team-devex`                 | `#escalation-devex`         |
-| Platform (T9)  | `#team-platform`              | `#escalation-platform`      |
-| Quality (T10)  | `#team-quality`               | `#escalation-quality`       |
+| Team             | Primary Channel      | Escalation Channel         |
+| ---------------- | -------------------- | -------------------------- |
+| Backend (T1)     | `#team-backend`      | `#escalation-backend`      |
+| Frontend (T2)    | `#team-frontend`     | `#escalation-frontend`     |
+| Data (T3)        | `#team-data`         | `#escalation-data`         |
+| Infra (T4)       | `#team-infra`        | `#escalation-infra`        |
+| Auth (T5)        | `#team-auth`         | `#escalation-security`     |
+| Integration (T6) | `#team-integrations` | `#escalation-integrations` |
+| Docs (T7)        | `#team-docs`         | `#escalation-docs`         |
+| DevEx (T8)       | `#team-devex`        | `#escalation-devex`        |
+| Platform (T9)    | `#team-platform`     | `#escalation-platform`     |
+| Quality (T10)    | `#team-quality`      | `#escalation-quality`      |
 
 ---
 
@@ -116,5 +116,5 @@ these priority rules:
 
 ---
 
-*Customize this file for your repository. The canonical team definitions live*
-*in [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md).*
+_Customize this file for your repository. The canonical team definitions live_
+_in [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md)._

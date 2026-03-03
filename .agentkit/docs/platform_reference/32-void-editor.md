@@ -2,13 +2,13 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | Open-Source AI Code Editor (VS Code fork) |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — [voideditor.com](https://voideditor.com/) (macOS, Windows, Linux) |
-| **Documentation** | [github.com/voideditor/void](https://github.com/voideditor/void) |
-| **Performance Rating** | ⭐⭐⭐ — **60/100** |
+|                        |                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| **Type**               | Open-Source AI Code Editor (VS Code fork)                                       |
+| **Categories**         | AI-Native IDE                                                                   |
+| **Access**             | Desktop app — [voideditor.com](https://voideditor.com/) (macOS, Windows, Linux) |
+| **Documentation**      | [github.com/voideditor/void](https://github.com/voideditor/void)                |
+| **Performance Rating** | ⭐⭐⭐ — **60/100**                                                             |
 
 ---
 
@@ -32,23 +32,23 @@ model provider. Y Combinator-backed with 28K+ GitHub stars.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                |
+| --------- | ----------- | ---------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 60/100 ⭐⭐⭐ | Depends entirely on chosen LLM; no proprietary magic |
-| Developer Experience | 70/100 ⭐⭐⭐½ | VS Code familiarity; agent/gather modes are clean |
-| Cost & Value | 95/100 ⭐⭐⭐⭐½ | Completely free; BYOK only |
-| Customization | 55/100 ⭐⭐⭐ | Multi-model + prompt customization; limited rules |
-| Privacy & Security | 90/100 ⭐⭐⭐⭐½ | Best-in-class: no telemetry, no intermediary, local option |
-| Team & Enterprise | 20/100 ⭐ | No team features; individual-focused |
-| **Weighted Total** | **67/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 60/100 ⭐⭐⭐      | Depends entirely on chosen LLM; no proprietary magic                          |
+| Developer Experience | 70/100 ⭐⭐⭐½     | VS Code familiarity; agent/gather modes are clean                             |
+| Cost & Value         | 95/100 ⭐⭐⭐⭐½   | Completely free; BYOK only                                                    |
+| Customization        | 55/100 ⭐⭐⭐      | Multi-model + prompt customization; limited rules                             |
+| Privacy & Security   | 90/100 ⭐⭐⭐⭐½   | Best-in-class: no telemetry, no intermediary, local option                    |
+| Team & Enterprise    | 20/100 ⭐          | No team features; individual-focused                                          |
+| **Weighted Total**   | **67/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

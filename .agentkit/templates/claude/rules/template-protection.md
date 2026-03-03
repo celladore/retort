@@ -13,13 +13,13 @@ The following directories are the **upstream source-of-truth** for AgentKit Forg
 They generate all AI tool configurations via `agentkit sync`. **AI agents MUST NOT
 modify these files directly.**
 
-| Directory | Purpose |
-| --- | --- |
-| `.agentkit/templates/` | Output templates for 15+ AI tools |
-| `.agentkit/spec/` | YAML specifications (project, teams, commands, rules, settings) |
-| `.agentkit/engines/` | Node.js sync engine and CLI |
-| `.agentkit/overlays/` | Per-repository customizations |
-| `.agentkit/bin/` | Cross-platform CLI scripts |
+| Directory              | Purpose                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `.agentkit/templates/` | Output templates for 15+ AI tools                               |
+| `.agentkit/spec/`      | YAML specifications (project, teams, commands, rules, settings) |
+| `.agentkit/engines/`   | Node.js sync engine and CLI                                     |
+| `.agentkit/overlays/`  | Per-repository customizations                                   |
+| `.agentkit/bin/`       | Cross-platform CLI scripts                                      |
 
 ## What To Do Instead
 

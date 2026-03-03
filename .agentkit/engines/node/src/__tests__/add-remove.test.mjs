@@ -1,9 +1,4 @@
-import {
-    existsSync,
-    mkdirSync,
-    readFileSync, rmSync,
-    writeFileSync,
-} from 'fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
@@ -17,7 +12,7 @@ import { ALL_TOOLS, runAdd, runList, runRemove } from '../tool-manager.mjs';
 function makeTmpDir() {
   const dir = resolve(
     tmpdir(),
-    `agentkit-toolmgr-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `agentkit-toolmgr-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -37,7 +32,7 @@ function setupProject(tmpRoot, repoName = 'test-project', initialTargets = ['cla
   writeFileSync(
     resolve(overlayDir, 'settings.yaml'),
     yaml.dump({ repoName, renderTargets: initialTargets }),
-    'utf-8',
+    'utf-8'
   );
 
   // Create spec directory and minimal files for sync
@@ -49,7 +44,7 @@ function setupProject(tmpRoot, repoName = 'test-project', initialTargets = ['cla
   writeFileSync(
     resolve(agentkitRoot, 'package.json'),
     JSON.stringify({ name: 'test', version: '0.0.1' }),
-    'utf-8',
+    'utf-8'
   );
 
   // Create project root with .agentkit-repo marker
@@ -61,10 +56,7 @@ function setupProject(tmpRoot, repoName = 'test-project', initialTargets = ['cla
 
 function readSettings(agentkitRoot, repoName) {
   return yaml.load(
-    readFileSync(
-      resolve(agentkitRoot, 'overlays', repoName, 'settings.yaml'),
-      'utf-8',
-    ),
+    readFileSync(resolve(agentkitRoot, 'overlays', repoName, 'settings.yaml'), 'utf-8')
   );
 }
 
@@ -160,7 +152,7 @@ describe('runAdd', () => {
 
     const settings = readSettings(agentkitRoot, 'dup-add');
     // Should not duplicate claude
-    const claudeCount = settings.renderTargets.filter(t => t === 'claude').length;
+    const claudeCount = settings.renderTargets.filter((t) => t === 'claude').length;
     expect(claudeCount).toBe(1);
     expect(settings.renderTargets).toContain('windsurf');
   });
@@ -174,9 +166,7 @@ describe('runAdd', () => {
       flags: { _args: ['claude'] },
     });
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringContaining('already enabled'),
-    );
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('already enabled'));
   });
 
   it('throws on unknown tool name', async () => {
@@ -187,7 +177,7 @@ describe('runAdd', () => {
         agentkitRoot,
         projectRoot,
         flags: { _args: ['invalidtool'] },
-      }),
+      })
     ).rejects.toThrow('Unknown tool(s)');
   });
 
@@ -199,7 +189,7 @@ describe('runAdd', () => {
         agentkitRoot,
         projectRoot,
         flags: { _args: [] },
-      }),
+      })
     ).rejects.toThrow('Usage');
   });
 
@@ -213,7 +203,7 @@ describe('runAdd', () => {
         agentkitRoot,
         projectRoot,
         flags: { _args: ['cursor'] },
-      }),
+      })
     ).rejects.toThrow('No .agentkit-repo marker found');
   });
 });
@@ -236,9 +226,11 @@ describe('runRemove', () => {
   });
 
   it('removes a tool from renderTargets', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'rm-test', ['claude', 'cursor', 'windsurf'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'rm-test', [
+      'claude',
+      'cursor',
+      'windsurf',
+    ]);
 
     await runRemove({
       agentkitRoot,
@@ -253,9 +245,7 @@ describe('runRemove', () => {
   });
 
   it('logs message when removing a tool that is not enabled', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'rm-missing', ['claude'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'rm-missing', ['claude']);
 
     await runRemove({
       agentkitRoot,
@@ -263,15 +253,11 @@ describe('runRemove', () => {
       flags: { _args: ['windsurf'] },
     });
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringContaining('not currently enabled'),
-    );
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('not currently enabled'));
   });
 
   it('cleans generated files with --clean flag', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'rm-clean', ['claude', 'warp'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'rm-clean', ['claude', 'warp']);
 
     // Create a manifest and a fake generated file
     const manifestPath = resolve(agentkitRoot, '.manifest.json');
@@ -283,7 +269,7 @@ describe('runRemove', () => {
           'CLAUDE.md': { hash: 'def456' },
         },
       }),
-      'utf-8',
+      'utf-8'
     );
     writeFileSync(resolve(projectRoot, 'WARP.md'), '# WARP', 'utf-8');
 
@@ -300,9 +286,7 @@ describe('runRemove', () => {
   });
 
   it('does not clean files without --clean flag', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'rm-noclean', ['claude', 'warp'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'rm-noclean', ['claude', 'warp']);
 
     writeFileSync(resolve(projectRoot, 'WARP.md'), '# WARP', 'utf-8');
 
@@ -324,7 +308,7 @@ describe('runRemove', () => {
         agentkitRoot,
         projectRoot,
         flags: { _args: ['fakeTool'] },
-      }),
+      })
     ).rejects.toThrow('Unknown tool(s)');
   });
 
@@ -336,20 +320,14 @@ describe('runRemove', () => {
         agentkitRoot,
         projectRoot,
         flags: { _args: [] },
-      }),
+      })
     ).rejects.toThrow('Usage');
   });
 
   it('handles corrupt manifest gracefully with --clean', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'rm-corrupt', ['claude', 'warp'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'rm-corrupt', ['claude', 'warp']);
 
-    writeFileSync(
-      resolve(agentkitRoot, '.manifest.json'),
-      'not valid json',
-      'utf-8',
-    );
+    writeFileSync(resolve(agentkitRoot, '.manifest.json'), 'not valid json', 'utf-8');
 
     // Should not throw, just warn
     await runRemove({
@@ -358,9 +336,7 @@ describe('runRemove', () => {
       flags: { _args: ['warp'], clean: true },
     });
 
-    expect(console.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Corrupt manifest'),
-    );
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Corrupt manifest'));
   });
 });
 
@@ -381,9 +357,7 @@ describe('runList', () => {
   });
 
   it('lists enabled and available tools', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'list-test', ['claude', 'cursor'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'list-test', ['claude', 'cursor']);
 
     await runList({
       agentkitRoot,
@@ -392,20 +366,16 @@ describe('runList', () => {
     });
 
     // Should log enabled tools
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringContaining('claude'),
-    );
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('claude'));
     // Should show available (not-yet-enabled) tools
-    const availableCall = vi.mocked(console.log).mock.calls.find(
-      c => typeof c[0] === 'string' && c[0].includes('Available'),
-    );
+    const availableCall = vi
+      .mocked(console.log)
+      .mock.calls.find((c) => typeof c[0] === 'string' && c[0].includes('Available'));
     expect(availableCall).toBeDefined();
   });
 
   it('shows always-on targets', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'list-always', ['claude'],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'list-always', ['claude']);
 
     await runList({
       agentkitRoot,
@@ -413,15 +383,11 @@ describe('runList', () => {
       flags: {},
     });
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringContaining('Always-on'),
-    );
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Always-on'));
   });
 
   it('shows "(all enabled)" when all tools are enabled', async () => {
-    const { agentkitRoot, projectRoot } = setupProject(
-      tmpRoot, 'list-all', [...ALL_TOOLS],
-    );
+    const { agentkitRoot, projectRoot } = setupProject(tmpRoot, 'list-all', [...ALL_TOOLS]);
 
     await runList({
       agentkitRoot,
@@ -429,8 +395,6 @@ describe('runList', () => {
       flags: {},
     });
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringContaining('all enabled'),
-    );
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('all enabled'));
   });
 });

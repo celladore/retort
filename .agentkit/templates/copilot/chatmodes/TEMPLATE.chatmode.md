@@ -1,9 +1,9 @@
 ---
-name: "{{teamName}}"
-description: "Team {{teamName}} — {{teamFocus}}"
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+name: '{{teamName}}'
+description: 'Team {{teamName}} — {{teamFocus}}'
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

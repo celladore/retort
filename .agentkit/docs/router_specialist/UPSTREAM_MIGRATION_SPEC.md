@@ -37,12 +37,12 @@ Move router-specialist authoritative planning/docs ownership to `justaghost/agen
 
 ## 3) Repository Responsibility Model
 
-| Concern | Primary Repo | Secondary/Consumer |
-| --- | --- | --- |
-| Router-specialist specs/templates/contracts | `justaghost/agentkit-forge` | Generated copies in consumer repos |
-| Gateway runtime behavior and SLO operations | `phoenixvc/ai-gateway` | N/A |
-| Consumer overlays and local integration notes | Consumer repo (`phoenixvc/chaufher`) | N/A |
-| Cost analytics and KPI dashboards | `phoenixvc/pvc-costops-analytics` | Downstream consumer of canonical contracts |
+| Concern                                       | Primary Repo                         | Secondary/Consumer                         |
+| --------------------------------------------- | ------------------------------------ | ------------------------------------------ |
+| Router-specialist specs/templates/contracts   | `justaghost/agentkit-forge`          | Generated copies in consumer repos         |
+| Gateway runtime behavior and SLO operations   | `phoenixvc/ai-gateway`               | N/A                                        |
+| Consumer overlays and local integration notes | Consumer repo (`phoenixvc/chaufher`) | N/A                                        |
+| Cost analytics and KPI dashboards             | `phoenixvc/pvc-costops-analytics`    | Downstream consumer of canonical contracts |
 
 ## 4) Migration Deliverables
 

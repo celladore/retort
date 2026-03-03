@@ -22,18 +22,18 @@
 
 ## Active Sprint
 
-| Priority | Team | Task | Phase | Status | Notes |
-|----------|------|------|-------|--------|-------|
-| P0 | T4-Infrastructure | Configure CI pipeline for main branch | Implementation | In Progress | GitHub Actions workflow |
-| P0 | T10-Quality | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul |
-| P1 | T1-Backend | Define core API route structure | Planning | In Progress | REST endpoints for v1 |
-| P1 | T3-Data | Design initial database schema | Planning | Todo | Depends on T1 API design |
-| P1 | T8-DevEx | Configure linting and formatting rules | Implementation | Done | ESLint + Prettier |
-| P2 | T7-Documentation | Write initial ADR for tech stack decisions | Discovery | In Progress | ADR-001 through ADR-003 |
-| P2 | T2-Frontend | Scaffold component library structure | Planning | Todo | Waiting on design system |
-| P2 | T5-Auth | Evaluate authentication providers | Discovery | Todo | OAuth2 + JWT candidates |
-| P3 | T6-Integration | Inventory third-party service requirements | Discovery | Todo | Not yet scoped |
-| P3 | T9-Platform | Identify shared utility functions | Discovery | Todo | Cross-cutting concerns |
+| Priority | Team              | Task                                          | Phase          | Status      | Notes                    |
+| -------- | ----------------- | --------------------------------------------- | -------------- | ----------- | ------------------------ |
+| P0       | T4-Infrastructure | Configure CI pipeline for main branch         | Implementation | In Progress | GitHub Actions workflow  |
+| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul        |
+| P1       | T1-Backend        | Define core API route structure               | Planning       | In Progress | REST endpoints for v1    |
+| P1       | T3-Data           | Design initial database schema                | Planning       | Todo        | Depends on T1 API design |
+| P1       | T8-DevEx          | Configure linting and formatting rules        | Implementation | Done        | ESLint + Prettier        |
+| P2       | T7-Documentation  | Write initial ADR for tech stack decisions    | Discovery      | In Progress | ADR-001 through ADR-003  |
+| P2       | T2-Frontend       | Scaffold component library structure          | Planning       | Todo        | Waiting on design system |
+| P2       | T5-Auth           | Evaluate authentication providers             | Discovery      | Todo        | OAuth2 + JWT candidates  |
+| P3       | T6-Integration    | Inventory third-party service requirements    | Discovery      | Todo        | Not yet scoped           |
+| P3       | T9-Platform       | Identify shared utility functions             | Discovery      | Todo        | Cross-cutting concerns   |
 
 ---
 
@@ -41,18 +41,18 @@
 
 Items not yet scheduled for the active sprint.
 
-| Priority | Team | Task | Phase | Status | Notes |
-|----------|------|------|-------|--------|-------|
-| P1 | T1-Backend | Implement health check endpoint | Implementation | Todo | `/api/health` |
-| P1 | T3-Data | Create migration tooling setup | Planning | Todo | Prisma or Drizzle |
-| P1 | T4-Infrastructure | Set up staging environment | Planning | Todo | Docker Compose |
-| P2 | T2-Frontend | Implement error boundary components | Planning | Todo | React Error Boundary |
-| P2 | T5-Auth | Implement JWT token refresh flow | Planning | Todo | Access + refresh tokens |
-| P2 | T10-Quality | Write E2E test scaffolding | Planning | Todo | Playwright config |
-| P3 | T7-Documentation | Create API documentation template | Planning | Todo | OpenAPI/Swagger |
-| P3 | T8-DevEx | Set up git hooks with Husky | Implementation | Todo | Pre-commit + pre-push |
-| P3 | T9-Platform | Create shared logging module | Planning | Todo | Structured JSON logs |
-| P3 | T6-Integration | Define webhook payload schemas | Discovery | Todo | Event-driven patterns |
+| Priority | Team              | Task                                | Phase          | Status | Notes                   |
+| -------- | ----------------- | ----------------------------------- | -------------- | ------ | ----------------------- |
+| P1       | T1-Backend        | Implement health check endpoint     | Implementation | Todo   | `/api/health`           |
+| P1       | T3-Data           | Create migration tooling setup      | Planning       | Todo   | Prisma or Drizzle       |
+| P1       | T4-Infrastructure | Set up staging environment          | Planning       | Todo   | Docker Compose          |
+| P2       | T2-Frontend       | Implement error boundary components | Planning       | Todo   | React Error Boundary    |
+| P2       | T5-Auth           | Implement JWT token refresh flow    | Planning       | Todo   | Access + refresh tokens |
+| P2       | T10-Quality       | Write E2E test scaffolding          | Planning       | Todo   | Playwright config       |
+| P3       | T7-Documentation  | Create API documentation template   | Planning       | Todo   | OpenAPI/Swagger         |
+| P3       | T8-DevEx          | Set up git hooks with Husky         | Implementation | Todo   | Pre-commit + pre-push   |
+| P3       | T9-Platform       | Create shared logging module        | Planning       | Todo   | Structured JSON logs    |
+| P3       | T6-Integration    | Define webhook payload schemas      | Discovery      | Todo   | Event-driven patterns   |
 
 ---
 
@@ -60,12 +60,12 @@ Items not yet scheduled for the active sprint.
 
 Items finished in previous sprints.
 
-| Priority | Team | Task | Phase | Completed | Notes |
-|----------|------|------|-------|-----------|-------|
-| P0 | T8-DevEx | Initialize project repository | Ship | Sprint 0 | Monorepo structure |
-| P0 | T4-Infrastructure | Create initial Dockerfile | Ship | Sprint 0 | Multi-stage build |
-| P0 | T7-Documentation | Generate root documentation templates | Ship | Sprint 0 | AgentKit Forge sync |
-| P1 | T10-Quality | Define quality gate criteria | Ship | Sprint 0 | See QUALITY_GATES.md |
+| Priority | Team              | Task                                  | Phase | Completed | Notes                |
+| -------- | ----------------- | ------------------------------------- | ----- | --------- | -------------------- |
+| P0       | T8-DevEx          | Initialize project repository         | Ship  | Sprint 0  | Monorepo structure   |
+| P0       | T4-Infrastructure | Create initial Dockerfile             | Ship  | Sprint 0  | Multi-stage build    |
+| P0       | T7-Documentation  | Generate root documentation templates | Ship  | Sprint 0  | AgentKit Forge sync  |
+| P1       | T10-Quality       | Define quality gate criteria          | Ship  | Sprint 0  | See QUALITY_GATES.md |
 
 ---
 
@@ -104,23 +104,23 @@ Items finished in previous sprints.
 
 ## Priority Definitions
 
-| Priority | Label    | Definition                                                   | SLA          |
-|----------|----------|--------------------------------------------------------------|--------------|
-| P0       | Critical | Blocks all other work or affects production stability        | Same day     |
-| P1       | High     | Required for current milestone; has downstream dependencies  | Within sprint|
-| P2       | Medium   | Important but not blocking; can be deferred one sprint       | Next sprint  |
-| P3       | Low      | Nice to have; backlog filler; exploratory                    | Best effort  |
+| Priority | Label    | Definition                                                  | SLA           |
+| -------- | -------- | ----------------------------------------------------------- | ------------- |
+| P0       | Critical | Blocks all other work or affects production stability       | Same day      |
+| P1       | High     | Required for current milestone; has downstream dependencies | Within sprint |
+| P2       | Medium   | Important but not blocking; can be deferred one sprint      | Next sprint   |
+| P3       | Low      | Nice to have; backlog filler; exploratory                   | Best effort   |
 
 ---
 
 ## Status Definitions
 
-| Status      | Description                                                        |
-|-------------|--------------------------------------------------------------------|
-| Todo        | Not yet started; waiting for sprint allocation or dependencies     |
-| In Progress | Actively being worked on by the assigned team                      |
-| Done        | Completed and passed quality gates for the current phase           |
-| Blocked     | Cannot proceed; waiting on an external dependency or resolution    |
+| Status      | Description                                                     |
+| ----------- | --------------------------------------------------------------- |
+| Todo        | Not yet started; waiting for sprint allocation or dependencies  |
+| In Progress | Actively being worked on by the assigned team                   |
+| Done        | Completed and passed quality gates for the current phase        |
+| Blocked     | Cannot proceed; waiting on an external dependency or resolution |
 
 ### Phase Progression
 
@@ -140,14 +140,14 @@ the team immediately begins work (then it moves to **In Progress**).
 Track inter-team dependencies here for visibility during orchestration.
 
 | Upstream Team | Downstream Team | Dependency Description          | Status   |
-|---------------|-----------------|--------------------------------|----------|
+| ------------- | --------------- | ------------------------------- | -------- |
 | T1-Backend    | T2-Frontend     | API contract for user endpoints | Pending  |
 | T3-Data       | T1-Backend      | Database schema for user model  | Pending  |
-| T5-Auth       | T1-Backend      | Auth middleware interface        | Pending  |
+| T5-Auth       | T1-Backend      | Auth middleware interface       | Pending  |
 | T4-Infra      | T10-Quality     | CI pipeline for test execution  | Resolved |
 | T8-DevEx      | All Teams       | Linting configuration           | Resolved |
 
 ---
 
-*This backlog is maintained by AgentKit Forge. Use `/orchestrate` to manage*
-*tasks programmatically or edit this file directly for manual adjustments.*
+_This backlog is maintained by AgentKit Forge. Use `/orchestrate` to manage_
+_tasks programmatically or edit this file directly for manual adjustments._
