@@ -93,6 +93,52 @@ git merge forge-upstream/main --allow-unrelated-histories
 
 Combine Options B and D. The npm package handles local development (`npx agentkit-forge sync`). The GitHub Action handles CI enforcement (drift detection, auto-sync on version bumps). Both share the same engine and templates from the npm package.
 
+### Option G: PWA / Lightweight Desktop UI
+
+Wrap the forge engine in a small UI shell — either a Progressive Web App (served locally via the CLI or hosted) or a lightweight desktop app (Tauri preferred over Electron for size). The UI provides a visual overlay editor, sync dashboard, version manager, and diff previewer. Under the hood it delegates to the same engine as the npm package.
+
+**Architecture:**
+
+```
+┌─────────────────────────────────────┐
+│  PWA / Tauri Desktop Shell          │
+│  ┌───────────┐  ┌────────────────┐  │
+│  │ Overlay   │  │ Sync Dashboard │  │
+│  │ Editor    │  │ (status, diff) │  │
+│  └───────────┘  └────────────────┘  │
+│  ┌───────────┐  ┌────────────────┐  │
+│  │ Version   │  │ Tool Toggle    │  │
+│  │ Manager   │  │ (add/remove)   │  │
+│  └───────────┘  └────────────────┘  │
+├─────────────────────────────────────┤
+│  agentkit-forge engine (npm pkg)    │
+│  specs ─► templates ─► outputs      │
+└─────────────────────────────────────┘
+```
+
+**Consumer workflow (PWA):**
+```bash
+npx agentkit-forge ui              # launches localhost:4827
+# Browser opens → visual wizard for init, overlay editing, sync
+```
+
+**Consumer workflow (Tauri desktop):**
+```bash
+# Download from releases page or:
+brew install agentkit-forge         # macOS
+winget install agentkit-forge       # Windows
+# Open app → point at repo → visual init + sync
+```
+
+**What the UI surfaces:**
+- **Overlay editor** — form-based editing of `settings.yaml` with validation, autocomplete for render targets, and live preview of what sync will generate.
+- **Sync dashboard** — one-click sync with a visual diff of what changed, grouped by tool (Claude, Cursor, Copilot, etc.).
+- **Version manager** — see current version, available updates, changelog, one-click upgrade with rollback.
+- **Tool toggle** — visual grid of available render targets. Enable/disable with checkboxes instead of `cli add`/`remove` commands.
+- **Health check** — visual report from `doctor` and `healthcheck` commands.
+
+**Key trade-off:** The UI is a *complement* to the CLI, not a replacement. Power users and CI still use the CLI/action. The UI lowers the barrier for the other 80% of the team who interact with forge configuration infrequently.
+
 ## Key Metrics
 
 | Metric | Definition | Why It Matters |
@@ -107,24 +153,26 @@ Combine Options B and D. The npm package handles local development (`npx agentki
 | **Private registry support** | Works with private npm registries / GitHub Packages / Artifactory? | Enterprise requirement for internal distribution |
 | **Multi-language support** | Does it require Node.js in the consumer repo? | Rust, Python, .NET consumers may not have Node.js |
 | **Rollback speed** | Time to revert to previous forge version after a bad update | Safety net for breaking changes |
+| **Non-CLI accessibility** | Can non-terminal users (PMs, designers, leads) use it effectively? | Determines whole-team adoption vs. dev-only tooling |
 
 ## Weighted Decision Matrix
 
-Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100.
+Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100. The addition of Option G (PWA/Desktop UI) prompted a new metric — **Non-CLI accessibility** — which shifts 3 points from Repo footprint (10 → 7) and 2 points from Offline capability (5 → 3) to fund the new 5-point weight, reflecting the reality that whole-team adoption matters more than disk savings or air-gap edge cases.
 
-| Criterion | Weight | A: Submodule | B: npm pkg | C: Standalone CLI | D: GH Action | E: Template Repo | F: npm + GH Action |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Onboarding time** | 20 | 2 | 4 | 5 | 3 | 3 | 4 |
-| **Update friction** | 15 | 1 | 4 | 5 | 4 | 2 | 5 |
-| **CI integration effort** | 10 | 2 | 4 | 3 | 5 | 2 | 5 |
-| **Repo footprint** | 10 | 1 | 3 | 5 | 5 | 1 | 4 |
-| **Customization depth** | 15 | 5 | 5 | 4 | 3 | 5 | 5 |
-| **Version pinning** | 10 | 3 | 5 | 4 | 5 | 2 | 5 |
-| **Offline capability** | 5 | 5 | 5 | 2 | 1 | 5 | 4 |
-| **Private registry support** | 5 | 4 | 5 | 4 | 4 | 3 | 5 |
-| **Multi-language support** | 5 | 3 | 2 | 3 | 5 | 4 | 3 |
-| **Rollback speed** | 5 | 3 | 5 | 4 | 5 | 2 | 5 |
-| **Weighted Total** | **100** | **253** | **410** | **400** | **385** | **278** | **460** |
+| Criterion | Weight | A: Submodule | B: npm pkg | C: Standalone CLI | D: GH Action | E: Template Repo | F: npm + GH Action | G: PWA / Desktop UI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Onboarding time** | 20 | 2 | 4 | 5 | 3 | 3 | 4 | 5 |
+| **Update friction** | 15 | 1 | 4 | 5 | 4 | 2 | 5 | 5 |
+| **CI integration effort** | 10 | 2 | 4 | 3 | 5 | 2 | 5 | 3 |
+| **Repo footprint** | 7 | 1 | 3 | 5 | 5 | 1 | 4 | 4 |
+| **Customization depth** | 15 | 5 | 5 | 4 | 3 | 5 | 5 | 4 |
+| **Version pinning** | 10 | 3 | 5 | 4 | 5 | 2 | 5 | 4 |
+| **Offline capability** | 3 | 5 | 5 | 2 | 1 | 5 | 4 | 4 |
+| **Private registry support** | 5 | 4 | 5 | 4 | 4 | 3 | 5 | 4 |
+| **Multi-language support** | 5 | 3 | 2 | 3 | 5 | 4 | 3 | 4 |
+| **Rollback speed** | 5 | 3 | 5 | 4 | 5 | 2 | 5 | 5 |
+| **Non-CLI accessibility** | 5 | 1 | 1 | 1 | 2 | 1 | 2 | 5 |
+| **Weighted Total** | **100** | **241** | **393** | **390** | **377** | **266** | **445** | **430** |
 
 ### Score Breakdown
 
@@ -132,12 +180,13 @@ Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100.
 
 | Option | Calculation | Total |
 | --- | --- | ---: |
-| **A: Submodule** | 20(2) + 15(1) + 10(2) + 10(1) + 15(5) + 10(3) + 5(5) + 5(4) + 5(3) + 5(3) | **253** |
-| **B: npm Package** | 20(4) + 15(4) + 10(4) + 10(3) + 15(5) + 10(5) + 5(5) + 5(5) + 5(2) + 5(5) | **410** |
-| **C: Standalone CLI** | 20(5) + 15(5) + 10(3) + 10(5) + 15(4) + 10(4) + 5(2) + 5(4) + 5(3) + 5(4) | **400** |
-| **D: GH Action** | 20(3) + 15(4) + 10(5) + 10(5) + 15(3) + 10(5) + 5(1) + 5(4) + 5(5) + 5(5) | **385** |
-| **E: Template Repo** | 20(3) + 15(2) + 10(2) + 10(1) + 15(5) + 10(2) + 5(5) + 5(3) + 5(4) + 5(2) | **278** |
-| **F: npm + GH Action** | 20(4) + 15(5) + 10(5) + 10(4) + 15(5) + 10(5) + 5(4) + 5(5) + 5(3) + 5(5) | **460** |
+| **A: Submodule** | 20(2) + 15(1) + 10(2) + 7(1) + 15(5) + 10(3) + 3(5) + 5(4) + 5(3) + 5(3) + 5(1) | **241** |
+| **B: npm Package** | 20(4) + 15(4) + 10(4) + 7(3) + 15(5) + 10(5) + 3(5) + 5(5) + 5(2) + 5(5) + 5(1) | **393** |
+| **C: Standalone CLI** | 20(5) + 15(5) + 10(3) + 7(5) + 15(4) + 10(4) + 3(2) + 5(4) + 5(3) + 5(4) + 5(1) | **390** |
+| **D: GH Action** | 20(3) + 15(4) + 10(5) + 7(5) + 15(3) + 10(5) + 3(1) + 5(4) + 5(5) + 5(5) + 5(2) | **377** |
+| **E: Template Repo** | 20(3) + 15(2) + 10(2) + 7(1) + 15(5) + 10(2) + 3(5) + 5(3) + 5(4) + 5(2) + 5(1) | **266** |
+| **F: npm + GH Action** | 20(4) + 15(5) + 10(5) + 7(4) + 15(5) + 10(5) + 3(4) + 5(5) + 5(3) + 5(5) + 5(2) | **445** |
+| **G: PWA / Desktop UI** | 20(5) + 15(5) + 10(3) + 7(4) + 15(4) + 10(4) + 3(4) + 5(4) + 5(4) + 5(5) + 5(5) | **430** |
 
 ## Score Justifications
 
@@ -178,19 +227,42 @@ Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100.
 - **Update friction (2):** `git merge` from upstream causes conflicts on every customized file.
 - **Version pinning (2):** No semantic versioning. Consumers merge arbitrary upstream commits.
 
-### Option F: npm Package + GitHub Action — 460 (Winner)
+### Option F: npm Package + GitHub Action — 445
 
 - **Update friction (5):** Dependabot/Renovate auto-creates PRs. CI validates the bump. Merge and done.
 - **CI integration (5):** Action handles drift detection, auto-sync, and validation.
 - **Customization (5):** Full overlay system preserved for local and CI use.
 - **Version pinning (5):** Semantic versioning via npm. Lock file pins exact version.
 - **Rollback (5):** `npm install agentkit-forge@previous-version` + sync. One command.
+- **Non-CLI accessibility (2):** Still terminal-first. Non-dev team members must ask a developer to run commands.
+
+### Option G: PWA / Desktop UI — 430
+
+- **Onboarding (5):** Visual wizard walks through init. No terminal required. "Open app, point at repo, click Create." A PM or designer can configure an overlay without learning YAML.
+- **Update friction (5):** App auto-updates (Tauri updater / PWA service worker). One-click "Update forge to v3.5" with changelog preview.
+- **CI integration (3):** The UI is a local development tool. CI still needs the action or CLI underneath — the UI doesn't replace CI, it complements it.
+- **Customization (4):** Form-based overlay editing handles 90% of use cases. Power users who need raw template overrides or engine extensions still drop to the CLI. The UI can expose an "eject to YAML" escape hatch.
+- **Version pinning (4):** Managed through app settings rather than a lock file. Less explicit than `package-lock.json`, but the underlying npm package still supports lock files for CI.
+- **Offline (4):** Tauri bundles the engine locally. PWA caches via service worker. Both work offline after first launch.
+- **Multi-language (4):** Tauri bundles its own runtime — consumer repo doesn't need Node.js installed. PWA requires a browser (universal).
+- **Non-CLI accessibility (5):** The entire point. Visual interface for overlay editing, sync, version management. Team members who never open a terminal can participate in forge configuration.
+- **Rollback (5):** Visual version history with one-click rollback and diff preview.
+
+**Why G scores lower than F overall:** The UI adds significant maintenance surface area (cross-platform builds, UI framework, app distribution) and doesn't solve CI integration, which still needs the action. It excels at a different axis: team breadth of adoption.
 
 ## Decision
 
-**Adopt Option F: Hybrid npm Package + GitHub Action.**
+**Adopt Option F+G: npm Package + GitHub Action + PWA/Desktop UI.**
 
-This approach scores highest across all weighted criteria (460/500) and addresses every pain point identified in the current submodule delivery:
+Option F (445) and Option G (430) are not competing — they're complementary layers targeting different users:
+
+| Layer | Audience | Problem it solves |
+| --- | --- | --- |
+| **npm package** | Developers | Local sync, version pinning, offline support |
+| **GitHub Action** | CI/DevOps | Drift detection, automated validation |
+| **PWA / Desktop UI** | Whole team | Visual config editing, discoverability, non-CLI access |
+
+The combined approach scores highest and addresses every pain point identified in the current submodule delivery:
 
 ### Implementation Plan
 
@@ -229,8 +301,26 @@ This approach scores highest across all weighted criteria (460/500) and addresse
 2. **Update documentation** (Quick Start, CLI Installation, Onboarding).
 3. **Deprecate the submodule approach** with a 6-month sunset period.
 
+#### Phase 4 — PWA / Desktop UI (weeks 7–12)
+
+1. **Choose the shell framework:**
+   - **PWA (recommended first)** — lower build/distribution overhead. Ship as `npx agentkit-forge ui` which starts a local server on `localhost:4827`. Uses a lightweight framework (Preact, Svelte, or plain web components). Runs in any browser. No app store, no code signing, no platform-specific builds.
+   - **Tauri (follow-up)** — for teams that want a native app experience. Wraps the same web UI. Smaller binary than Electron (~5 MB vs ~150 MB). Auto-updater built in. Distribute via GitHub Releases, Homebrew, or winget.
+2. **Core UI screens:**
+   - **Init wizard** — repo name, tech stack detection (from `discover`), render target selection via checkboxes, overlay creation.
+   - **Overlay editor** — schema-driven form that mirrors `settings.yaml`. Field validation, autocomplete for known values, "Show YAML" toggle for power users.
+   - **Sync dashboard** — one-click sync button. Output grouped by tool (Claude Code, Cursor, Copilot, Windsurf). Inline diff viewer (Monaco or CodeMirror) showing what changed.
+   - **Version manager** — current version badge, available update with changelog summary, "Update + Re-sync" button, rollback to previous version.
+   - **Health report** — visual rendering of `doctor` and `healthcheck` output. Red/amber/green status per check.
+3. **API boundary** — the UI communicates with the forge engine via a thin JSON-RPC or REST layer over the local server. No direct file system access from the browser. The same API can be consumed by IDE extensions later.
+4. **Distribution:**
+   - PWA: `npx agentkit-forge ui` (zero install, opens browser).
+   - Tauri: GitHub Releases with `brew install agentkit-forge` / `winget install agentkit-forge`.
+   - Both auto-update when the underlying npm package updates.
+
 ### Consumer Experience After Migration
 
+**Developer (CLI-first):**
 ```bash
 # Install
 npm install -D agentkit-forge
@@ -252,22 +342,40 @@ npx agentkit-forge sync
 #     overlay: my-project
 ```
 
+**Non-developer / visual preference (UI):**
+```bash
+npx agentkit-forge ui
+# Browser opens → visual wizard → click through init → toggle tools → sync
+```
+
+**Or with the desktop app:**
+```
+1. Open AgentKit Forge app
+2. Click "Open Repo" → select project folder
+3. Visual wizard detects stack, suggests render targets
+4. Click "Sync" → see diff of generated files
+5. Commit from the app or switch to your git client
+```
+
 ## Consequences
 
 ### Positive
 
-- **82% faster onboarding** — from ~15 min (submodule + install + init + sync) to ~3 min (npm install + init + sync).
-- **Zero-friction updates** — Dependabot/Renovate creates a PR, CI validates, developer merges. No manual submodule dance.
+- **82% faster onboarding** — from ~15 min (submodule + install + init + sync) to ~3 min (npm install + init + sync), or ~1 min via the UI wizard.
+- **Zero-friction updates** — Dependabot/Renovate creates a PR, CI validates, developer merges. UI users get one-click update with changelog preview.
 - **Smaller repo footprint** — overlay directory (~10 KB) instead of full forge repo (~2 MB).
 - **CI drift detection** — the GitHub Action catches stale generated outputs before they reach production.
 - **Semantic versioning** — consumers get clear breaking-change signals via semver.
 - **Private registry support** — npm, GitHub Packages, and Artifactory all supported out of the box.
+- **Whole-team adoption** — the UI lets non-developers (PMs, designers, team leads) configure overlays, toggle tools, and review sync diffs without touching a terminal. This shifts forge configuration from "developer chore" to "team capability."
 
 ### Negative
 
-- **Node.js required** — consumers must have Node.js installed (already a prerequisite today). Non-Node repos (Rust, Python, .NET) need Node.js as a dev dependency.
+- **Node.js required** — consumers must have Node.js installed (already a prerequisite today). Non-Node repos (Rust, Python, .NET) need Node.js as a dev dependency. The Tauri app partially mitigates this by bundling its own runtime.
 - **Publishing overhead** — requires npm publishing infrastructure, CI for the package itself, and version management discipline.
-- **Two artifacts to maintain** — the npm package and the GitHub Action must stay in sync.
+- **Three artifacts to maintain** — the npm package, GitHub Action, and UI app must stay in sync. Mitigated by having the UI be a thin shell over the same engine.
+- **UI maintenance cost** — cross-platform testing, accessibility compliance, UI framework updates. PWA-first approach minimizes this (no native builds until Tauri phase).
+- **Feature parity risk** — new CLI features may lag behind in the UI. Mitigated by building the UI against the same JSON-RPC API the CLI uses internally, not a separate interface.
 
 ### Risks and Mitigations
 
@@ -277,6 +385,9 @@ npx agentkit-forge sync
 | Private registry not available for some orgs | Support `--registry` flag and document GitHub Packages / Artifactory setup. |
 | Template resolution path changes break existing overlays | Migration script validates output parity before completing. |
 | GitHub Action marketplace approval delays | Ship the npm package first (Phase 1). Action is additive, not blocking. |
+| UI becomes a maintenance burden that distracts from core engine work | PWA-first (Phase 4a) keeps the build simple. Tauri native app (Phase 4b) is optional and only pursued if adoption data justifies it. |
+| UI and CLI diverge in behavior | Single JSON-RPC API layer used by both. UI is a presentation layer only — all logic lives in the engine. |
+| Desktop app distribution (code signing, notarization) | Defer Tauri to Phase 4b. PWA has zero distribution overhead — it's just a web page. |
 
 ## References
 
