@@ -704,6 +704,47 @@ describe('flattenProjectYaml', () => {
     expect(vars.prdPath).toBe('docs/prd.md');
     expect(vars.hasAdr).toBe(false);
   });
+
+  it('produces infraMandatoryTagsList sorted and deduplicated from infrastructure.tagging.mandatory', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: {
+        tagging: { mandatory: ['project', 'environment', 'owner', 'project'] },
+      },
+    });
+    expect(vars.infraMandatoryTagsList).toEqual(['environment', 'owner', 'project']);
+  });
+
+  it('produces infraOptionalTagsList sorted and deduplicated from infrastructure.tagging.optional', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: {
+        tagging: { optional: ['team', 'cost-center', 'team'] },
+      },
+    });
+    expect(vars.infraOptionalTagsList).toEqual(['cost-center', 'team']);
+  });
+
+  it('trims whitespace from tags and filters non-string entries', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: {
+        tagging: { mandatory: [' owner ', 'project', null, 42, ''] },
+      },
+    });
+    expect(vars.infraMandatoryTagsList).toEqual(['owner', 'project']);
+  });
+
+  it('omits infraMandatoryTagsList when mandatory tags are empty', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: { tagging: { mandatory: [] } },
+    });
+    expect(vars.infraMandatoryTagsList).toBeUndefined();
+  });
+
+  it('omits infraOptionalTagsList when optional tags are absent', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: { tagging: { mandatory: ['owner'] } },
+    });
+    expect(vars.infraOptionalTagsList).toBeUndefined();
+  });
 });
 
 // ---------------------------------------------------------------------------

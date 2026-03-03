@@ -64,9 +64,9 @@ $Payload = @{
     required_status_checks = @{
         strict   = $true
         contexts = @(
-            "test (ubuntu-latest, 24)",
-            "validate",
-            "branch-rules"
+            "CI / test (ubuntu-latest, 24)",
+            "CI / validate",
+            "Branch Protection / branch-rules"
         )
     }
     enforce_admins = $false
@@ -103,7 +103,7 @@ Write-Host ""
 Write-Host "Branch protection applied successfully."
 Write-Host ""
 Write-Host "Configured:"
-Write-Host "  - Required status checks: test, validate, branch-rules (strict: up-to-date)"
+Write-Host "  - Required status checks: CI / test, CI / validate, Branch Protection / branch-rules (strict: up-to-date)"
 Write-Host "  - Required PR reviews: 1 approval, dismiss stale, require CODEOWNERS"
 Write-Host "  - Required conversation resolution: enabled"
 Write-Host "  - Required linear history: enabled (squash-merge)"

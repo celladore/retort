@@ -72,9 +72,9 @@ PAYLOAD=$(cat <<'ENDJSON'
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "test (ubuntu-latest, 24)",
-      "validate",
-      "branch-rules"
+      "CI / test (ubuntu-latest, 24)",
+      "CI / validate",
+      "Branch Protection / branch-rules"
     ]
   },
   "enforce_admins": false,
@@ -116,7 +116,7 @@ echo ""
 echo "Branch protection applied successfully."
 echo ""
 echo "Configured:"
-echo "  - Required status checks: test, validate, branch-rules (strict: up-to-date)"
+echo "  - Required status checks: CI / test, CI / validate, Branch Protection / branch-rules (strict: up-to-date)"
 echo "  - Required PR reviews: 1 approval, dismiss stale, require CODEOWNERS"
 echo "  - Required conversation resolution: enabled"
 echo "  - Required linear history: enabled (squash-merge)"
