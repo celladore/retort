@@ -3,17 +3,26 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-    endSession,
-    generateReport,
-    generateSessionId,
-    getSessions,
-    initSession,
-    logEvent,
-    recordCommand,
+  endSession,
+  generateReport,
+  generateSessionId,
+  getSessions,
+  initSession,
+  logEvent,
+  recordCommand,
 } from '../cost-tracker.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_AGENTKIT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-cost-tracker', 'agentkit');
+const TEST_AGENTKIT = resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  '..',
+  '.test-cost-tracker',
+  'agentkit'
+);
 const TEST_PROJECT = resolve(TEST_AGENTKIT, '..');
 
 describe('cost-tracker', () => {
@@ -96,9 +105,11 @@ describe('cost-tracker', () => {
       const sessDir = resolve(TEST_AGENTKIT, 'logs', 'sessions');
       expect(existsSync(sessDir)).toBe(true);
 
-      const files = readdirSync(sessDir).filter(f => f.startsWith('session-') && f.endsWith('.json'));
+      const files = readdirSync(sessDir).filter(
+        (f) => f.startsWith('session-') && f.endsWith('.json')
+      );
       expect(files.length).toBeGreaterThan(0);
-      const sessionFile = files.find(f => f.includes(session.sessionId));
+      const sessionFile = files.find((f) => f.includes(session.sessionId));
       expect(sessionFile).toBeDefined();
     });
 
@@ -116,7 +127,12 @@ describe('cost-tracker', () => {
       recordCommand(TEST_AGENTKIT, 'check');
 
       const pointerPath = resolve(TEST_AGENTKIT, 'logs', 'sessions', 'latest-session.txt');
-      const sessionPath = resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${session.sessionId}.json`);
+      const sessionPath = resolve(
+        TEST_AGENTKIT,
+        'logs',
+        'sessions',
+        `session-${session.sessionId}.json`
+      );
       const updated = JSON.parse(readFileSync(sessionPath, 'utf-8'));
       expect(updated.commandsRun).toHaveLength(1);
       expect(updated.commandsRun[0].command).toBe('check');
@@ -131,9 +147,14 @@ describe('cost-tracker', () => {
 
       recordCommand(TEST_AGENTKIT, 'discover');
 
-      const sessionPath = resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${session.sessionId}.json`);
+      const sessionPath = resolve(
+        TEST_AGENTKIT,
+        'logs',
+        'sessions',
+        `session-${session.sessionId}.json`
+      );
       const updated = JSON.parse(readFileSync(sessionPath, 'utf-8'));
-      expect(updated.commandsRun.some(c => c.command === 'discover')).toBe(true);
+      expect(updated.commandsRun.some((c) => c.command === 'discover')).toBe(true);
     });
 
     it('does nothing when no sessions directory exists', () => {
@@ -197,7 +218,11 @@ describe('cost-tracker', () => {
       const pointerPath = resolve(TEST_AGENTKIT, 'logs', 'active-session-id');
       expect(existsSync(pointerPath)).toBe(true);
 
-      endSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT, sessionId: session.sessionId });
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session.sessionId,
+      });
       expect(existsSync(pointerPath)).toBe(false);
     });
 
@@ -207,7 +232,11 @@ describe('cost-tracker', () => {
       const pointerPath = resolve(TEST_AGENTKIT, 'logs', 'active-session-id');
 
       // pointer now points to session2; ending session1 should not remove it
-      endSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT, sessionId: session1.sessionId });
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session1.sessionId,
+      });
       expect(existsSync(pointerPath)).toBe(true);
       expect(readFileSync(pointerPath, 'utf-8').trim()).toBe(session2.sessionId);
     });
@@ -323,4 +352,3 @@ describe('cost-tracker', () => {
     });
   });
 });
-

@@ -443,7 +443,7 @@ async function countFilesByExt(dir, extensions, depth = 4, maxFiles = 5000) {
         }
       }
 
-      await Promise.all(subdirs.map(full => walk(full, currentDepth + 1)));
+      await Promise.all(subdirs.map((full) => walk(full, currentDepth + 1)));
     } catch {
       /* permission errors or other fs issues */
     }
@@ -550,14 +550,16 @@ async function getCsprojContent(projectRoot) {
         if (entry.isDirectory()) {
           tasks.push(walk(full, depth + 1));
         } else if (entry.name.endsWith('.csproj')) {
-          tasks.push((async () => {
-            try {
-              const fileContent = await readFile(full, 'utf-8');
-              content += fileContent + '\n';
-            } catch {
-              /* skip */
-            }
-          })());
+          tasks.push(
+            (async () => {
+              try {
+                const fileContent = await readFile(full, 'utf-8');
+                content += fileContent + '\n';
+              } catch {
+                /* skip */
+              }
+            })()
+          );
         }
       }
       await Promise.all(tasks);
@@ -709,14 +711,14 @@ async function detectFromList(
     }
     // Check config files
     if (!matched && d.configs?.length) {
-        // Run checks in parallel
-        const results = await Promise.all(d.configs.map(c => fileExists(projectRoot, c)));
-        if (results.some(Boolean)) matched = true;
+      // Run checks in parallel
+      const results = await Promise.all(d.configs.map((c) => fileExists(projectRoot, c)));
+      if (results.some(Boolean)) matched = true;
     }
     // Check markers (plain files)
     if (!matched && d.markers?.length) {
-        const results = await Promise.all(d.markers.map(m => fileExists(projectRoot, m)));
-        if (results.some(Boolean)) matched = true;
+      const results = await Promise.all(d.markers.map((m) => fileExists(projectRoot, m)));
+      if (results.some(Boolean)) matched = true;
     }
     // Check .csproj references
     if (!matched && d.csprojRefs?.length && csprojContent) {
@@ -789,10 +791,9 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   }
   if (await fileExists(projectRoot, '.agentkit-repo')) {
     try {
-      report.repository.agentkitOverlay = (await readFile(
-        resolve(projectRoot, '.agentkit-repo'),
-        'utf-8'
-      )).trim();
+      report.repository.agentkitOverlay = (
+        await readFile(resolve(projectRoot, '.agentkit-repo'), 'utf-8')
+      ).trim();
     } catch {
       /* ignore read errors for .agentkit-repo */
     }
@@ -826,21 +827,15 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
 
   // --- Cache dependency data for framework detection ---
   // Parallelize reading of deps
-  const [
-      nodeDeps,
-      csprojContent,
-      cargoContent,
-      gemfileContent,
-      pomContent,
-      pythonDeps
-  ] = await Promise.all([
+  const [nodeDeps, csprojContent, cargoContent, gemfileContent, pomContent, pythonDeps] =
+    await Promise.all([
       getNodeDeps(projectRoot),
       getCsprojContent(projectRoot),
       getCargoContent(projectRoot),
       getGemfileContent(projectRoot),
       getPomContent(projectRoot),
-      getPythonDeps(projectRoot)
-  ]);
+      getPythonDeps(projectRoot),
+    ]);
 
   const depContext = {
     nodeDeps,
@@ -898,12 +893,14 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   const designTasks = DESIGN_SYSTEM_DETECTORS.map(async (detector) => {
     let found = false;
     if (detector.dirs) {
-        const results = await Promise.all(detector.dirs.map(dir => fileExists(projectRoot, dir)));
-        if (results.some(Boolean)) found = true;
+      const results = await Promise.all(detector.dirs.map((dir) => fileExists(projectRoot, dir)));
+      if (results.some(Boolean)) found = true;
     }
     if (!found && detector.files) {
-         const results = await Promise.all(detector.files.map(file => fileExists(projectRoot, file)));
-         if (results.some(Boolean)) found = true;
+      const results = await Promise.all(
+        detector.files.map((file) => fileExists(projectRoot, file))
+      );
+      if (results.some(Boolean)) found = true;
     }
     if (found) {
       return detector.name;
@@ -931,18 +928,18 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
 
   // --- Infrastructure detection ---
   const infraTasks = INFRA_DETECTORS.map(async (detector) => {
-      const results = await Promise.all(detector.markers.map(m => fileExists(projectRoot, m)));
-      if (results.some(Boolean)) return detector.name;
-      return null;
+    const results = await Promise.all(detector.markers.map((m) => fileExists(projectRoot, m)));
+    if (results.some(Boolean)) return detector.name;
+    return null;
   });
   const infraResults = await Promise.all(infraTasks);
   report.infrastructure = infraResults.filter(Boolean);
 
   // --- CI/CD detection ---
   const cicdTasks = CI_DETECTORS.map(async (detector) => {
-      const results = await Promise.all(detector.markers.map(m => fileExists(projectRoot, m)));
-      if (results.some(Boolean)) return detector.name;
-      return null;
+    const results = await Promise.all(detector.markers.map((m) => fileExists(projectRoot, m)));
+    if (results.some(Boolean)) return detector.name;
+    return null;
   });
   const cicdResults = await Promise.all(cicdTasks);
   report.cicd = cicdResults.filter(Boolean);
@@ -1097,4 +1094,3 @@ function formatMarkdown(report) {
 
   return lines.join('\n');
 }
-

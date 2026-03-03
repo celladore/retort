@@ -214,7 +214,7 @@ function parseFlags(command, args) {
       if (!type) {
         throw new Error(
           `Internal CLI configuration error: flag "--${flagName}" is listed as valid for ` +
-          `command "${command}" but has no entry in FLAG_TYPES.`
+            `command "${command}" but has no entry in FLAG_TYPES.`
         );
       }
       options[flagName] = { type };
@@ -240,7 +240,11 @@ function parseFlags(command, args) {
     // that is passed without a value (e.g. --status with no argument). Enforce that
     // all known string options received an actual string value.
     for (const [flagName, flagOpt] of Object.entries(options)) {
-      if (flagOpt.type === 'string' && Object.hasOwn(values, flagName) && typeof values[flagName] !== 'string') {
+      if (
+        flagOpt.type === 'string' &&
+        Object.hasOwn(values, flagName) &&
+        typeof values[flagName] !== 'string'
+      ) {
         throw new TypeError(`Option '--${flagName} <value>' argument missing`);
       }
     }
