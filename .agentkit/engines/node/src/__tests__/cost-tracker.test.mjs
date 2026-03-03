@@ -1,10 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  generateSessionId, initSession, endSession, logEvent,
-  getSessions, generateReport, recordCommand,
+    endSession,
+    generateReport,
+    generateSessionId,
+    getSessions,
+    initSession,
+    logEvent,
+    recordCommand,
 } from '../cost-tracker.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

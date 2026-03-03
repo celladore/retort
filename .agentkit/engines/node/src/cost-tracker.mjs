@@ -7,9 +7,9 @@
  * are not available. This tracks operational metrics (session duration, commands
  * run, files modified) which are useful for understanding usage patterns.
  */
-import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync, readdirSync, renameSync, unlinkSync } from 'fs';
-import { resolve, basename } from 'path';
 import { execFileSync } from 'child_process';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'fs';
+import { basename, resolve } from 'path';
 import { formatTimestamp } from './runner.mjs';
 
 // ---------------------------------------------------------------------------
