@@ -60,7 +60,7 @@ locals {
 ```hcl
 inputs = {
   tags = {
-{{#each infraMandatoryTagsList}}    "{{.}}" = local["{{.}}"]
+{{#each infraMandatoryTagsList}}    "{{.}}" = local.tags["{{.}}"]
 {{/each}}  }
 }
 ```

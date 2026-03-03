@@ -60,11 +60,14 @@ Code verification covers four dimensions:
 ## Verification Commands
 
 ```bash
-# Unit tests + coverage report
-vitest run --coverage
+# Unit tests + coverage report (run from repo root)
+pnpm -C .agentkit test
+
+# Unit tests with coverage
+pnpm -C .agentkit vitest run --coverage
 
 # Integration tests
-vitest run --config vitest.integration.config.ts
+pnpm -C .agentkit vitest run --config vitest.integration.config.ts
 
 # Static analysis
 # semgrep

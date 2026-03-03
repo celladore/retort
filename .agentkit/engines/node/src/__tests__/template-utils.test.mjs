@@ -705,30 +705,45 @@ describe('flattenProjectYaml', () => {
     expect(vars.hasAdr).toBe(false);
   });
 
-  it('produces infraMandatoryTagsList sorted and deduplicated', () => {
+  it('produces infraMandatoryTagsList sorted and deduplicated from infrastructure.tagging.mandatory', () => {
     const vars = flattenProjectYaml({
-      infrastructure: { tagging: { mandatory: ['owner', 'environment', 'project', 'owner', '  cost_center  '] } },
+      infrastructure: {
+        tagging: { mandatory: ['project', 'environment', 'owner', 'project'] },
+      },
     });
-    expect(vars.infraMandatoryTagsList).toEqual(['cost_center', 'environment', 'owner', 'project']);
+    expect(vars.infraMandatoryTagsList).toEqual(['environment', 'owner', 'project']);
   });
 
-  it('produces infraOptionalTagsList sorted and deduplicated', () => {
+  it('produces infraOptionalTagsList sorted and deduplicated from infrastructure.tagging.optional', () => {
     const vars = flattenProjectYaml({
-      infrastructure: { tagging: { optional: ['team', 'created_by', 'team'] } },
+      infrastructure: {
+        tagging: { optional: ['team', 'cost-center', 'team'] },
+      },
     });
-    expect(vars.infraOptionalTagsList).toEqual(['created_by', 'team']);
+    expect(vars.infraOptionalTagsList).toEqual(['cost-center', 'team']);
   });
 
-  it('omits infraMandatoryTagsList when mandatory tags array is empty', () => {
-    const vars = flattenProjectYaml({ infrastructure: { tagging: { mandatory: [] } } });
+  it('trims whitespace from tags and filters non-string entries', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: {
+        tagging: { mandatory: [' owner ', 'project', null, 42, ''] },
+      },
+    });
+    expect(vars.infraMandatoryTagsList).toEqual(['owner', 'project']);
+  });
+
+  it('omits infraMandatoryTagsList when mandatory tags are empty', () => {
+    const vars = flattenProjectYaml({
+      infrastructure: { tagging: { mandatory: [] } },
+    });
     expect(vars.infraMandatoryTagsList).toBeUndefined();
   });
 
-  it('filters non-string entries from infraMandatoryTagsList', () => {
+  it('omits infraOptionalTagsList when optional tags are absent', () => {
     const vars = flattenProjectYaml({
-      infrastructure: { tagging: { mandatory: ['environment', 42, null, 'project'] } },
+      infrastructure: { tagging: { mandatory: ['owner'] } },
     });
-    expect(vars.infraMandatoryTagsList).toEqual(['environment', 'project']);
+    expect(vars.infraOptionalTagsList).toBeUndefined();
   });
 });
 
