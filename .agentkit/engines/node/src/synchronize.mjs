@@ -235,10 +235,20 @@ async function syncClaudeCommands(
   const commandsDir = join(templatesDir, 'claude', 'commands');
   if (!existsSync(commandsDir)) return;
 
-  // Copy non-template command files
+  // Build lookup: command-name → command spec (for requiredFeature gating)
+  const cmdByName = new Map();
+  for (const cmd of commandsSpec?.commands || []) {
+    cmdByName.set(cmd.name, cmd);
+  }
+
+  // Copy non-template command files, skipping feature-gated commands
   for await (const srcFile of walkDir(commandsDir)) {
     const fname = basename(srcFile);
     if (fname === 'team-TEMPLATE.md') continue; // skip template
+    // Check if this file corresponds to a feature-gated command
+    const cmdName = fname.replace(/\.md$/i, '');
+    const cmdSpec = cmdByName.get(cmdName);
+    if (cmdSpec && isFeatureGated(cmdSpec, vars)) continue;
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
@@ -319,6 +329,7 @@ async function syncClaudeSkills(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (isFeatureGated(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -386,6 +397,7 @@ async function syncCursorCommands(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (isFeatureGated(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -444,6 +456,7 @@ async function syncWindsurfCommands(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (isFeatureGated(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -496,6 +509,7 @@ async function syncCopilotPrompts(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (isFeatureGated(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -703,6 +717,7 @@ async function syncCodexSkills(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (isFeatureGated(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -812,6 +827,17 @@ async function syncA2aConfig(tmpDir, vars, version, repoName, _agentsSpec, _team
 // ---------------------------------------------------------------------------
 // Variable builder helpers (private — used by tool-specific sync functions)
 // ---------------------------------------------------------------------------
+
+/**
+ * Returns true if a command/agent should be skipped because its requiredFeature is disabled.
+ * Maps requiredFeature (e.g. 'team-orchestration') to the canonical template var
+ * `feature_team_orchestration` and checks vars.
+ */
+function isFeatureGated(item, vars) {
+  if (!item.requiredFeature) return false;
+  const featureVar = `feature_${item.requiredFeature.replace(/-/g, '_')}`;
+  return vars[featureVar] === false;
+}
 
 function buildCommandVars(cmd, vars) {
   return {

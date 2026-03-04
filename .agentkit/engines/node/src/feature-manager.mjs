@@ -197,8 +197,16 @@ export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
 
 /**
  * Generates template variables from the resolved feature set.
- * Each feature defines templateVars (e.g., hasTeamOrchestration).
- * Enabled features get their vars set to true; disabled get false.
+ *
+ * For each feature:
+ * - Sets its declared templateVars to true/false
+ * - Sets a canonical `feature_<id>` var (hyphens → underscores)
+ *
+ * Also generates aggregate vars for use in templates and agent prompts:
+ * - `enabledFeaturesList`: Comma-separated list of enabled feature IDs
+ * - `enabledFeaturesCount`: Number of enabled features
+ * - `totalFeaturesCount`: Total number of features
+ * - `featureSummary`: Multi-line summary for embedding in agent/command templates
  *
  * @param {object[]} features - Feature definitions from features.yaml
  * @param {Set<string>} enabledFeatures - Resolved set of enabled feature IDs
@@ -214,6 +222,39 @@ export function buildFeatureVars(features, enabledFeatures) {
     // Also set a canonical feature-id-based var: feature_<id> (with hyphens as underscores)
     vars[`feature_${feature.id.replace(/-/g, '_')}`] = isEnabled;
   }
+
+  // Aggregate feature vars for agent/command template consumption
+  const enabledList = features.filter((f) => enabledFeatures.has(f.id));
+  const disabledList = features.filter((f) => !enabledFeatures.has(f.id) && !f.alwaysOn);
+
+  vars.enabledFeaturesList = enabledList.map((f) => f.id).join(', ');
+  vars.enabledFeaturesCount = String(enabledFeatures.size);
+  vars.totalFeaturesCount = String(features.length);
+
+  // Build a multi-line summary suitable for embedding in templates
+  const summaryLines = [];
+  summaryLines.push(`- **Enabled**: ${enabledFeatures.size} / ${features.length} features`);
+
+  // Group by category for the summary
+  const categories = {};
+  for (const f of features) {
+    const cat = f.category || 'other';
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(f);
+  }
+
+  for (const [cat, catFeatures] of Object.entries(categories)) {
+    const catEnabled = catFeatures.filter((f) => enabledFeatures.has(f.id));
+    const catDisabled = catFeatures.filter((f) => !enabledFeatures.has(f.id) && !f.alwaysOn);
+    summaryLines.push(`- **${cat}**: ${catEnabled.map((f) => f.id).join(', ') || 'none'}`);
+  }
+
+  if (disabledList.length > 0) {
+    summaryLines.push(`- **Disabled**: ${disabledList.map((f) => f.id).join(', ')}`);
+  }
+
+  vars.featureSummary = summaryLines.join('\n');
+
   return vars;
 }
 
