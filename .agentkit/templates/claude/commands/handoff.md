@@ -108,10 +108,13 @@ Do NOT create the `docs/ai_handoffs/` directory if it does not exist. Only write
 
 Before finalizing the handoff, check whether this session produced significant work that warrants a history document. Evaluate the "What Was Done" list:
 
-- If the session involved **non-trivial changes** (bug fixes touching 2+ files, new features, architecture changes, migrations), create history docs:
-  ```bash
-  ./scripts/create-doc.sh <type> "<title>" [pr-number]
-  ```
+**Deduplication check (always do this first):**
+- Read `docs/history/.index.json` and check if a history document was already created during this session (matching today's date and a similar title/slug).
+- If `/orchestrate` Phase 5 invoked this handoff, it has already created history documents — skip creation and note: "History doc: already created by orchestrate Phase 5 — see `docs/history/.index.json`".
+- You can detect orchestrate context by checking `.claude/state/orchestrator.json` for `currentPhase: 5` or by checking if `events.log` contains a recent `[DOCS]` entry for this session.
+
+**If no existing history doc covers this work:**
+- If the session involved **non-trivial changes** (bug fixes touching 2+ files, new features, architecture changes, migrations), run `/document-history --auto` (or `./scripts/create-doc.sh <type> "<title>" [pr-number]` directly).
 - Fill in the generated document with details from the session (use the information you already gathered for the handoff).
 - If no significant work was done (only planning, investigation, or trivial fixes), skip and note in the handoff: "History doc: not needed — <brief reason>".
 

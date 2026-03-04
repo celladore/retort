@@ -121,22 +121,26 @@ Do NOT update docs for internal-only refactors.
 
 ### Step 4b: Create History Document
 
-If this session involved **significant work** (not trivial one-line fixes), create a history document:
+If this session involved **significant work** (not trivial one-line fixes), create a history document using the `/document-history` command:
 
-1. **Determine the type:**
-   - `bugfix` — Non-trivial bug fix (2+ files, root-cause analysis, or regression risk)
-   - `feature` — New user-facing feature or capability
-   - `implementation` — Architecture change, new subsystem, or major refactor
-   - `migration` — Library upgrade, data migration, or infrastructure change
+1. **Preview first (optional):**
+   ```
+   /document-history --auto --dry-run
+   ```
+   This shows what type and title would be auto-detected without writing files.
 
-2. **Generate from template:**
-   ```bash
-   ./scripts/create-doc.sh <type> "<descriptive title>" [pr-number]
+2. **Create the document:**
+   ```
+   /document-history --auto
+   ```
+   The command auto-detects the document type (`bugfix`, `feature`, `implementation`, or `migration`) from commit messages, gathers session context, generates the file via `./scripts/create-doc.sh`, fills in all sections, and checks `docs/history/.index.json` for duplicates before creating.
+
+   To override auto-detection, specify flags explicitly:
+   ```
+   /document-history --type implementation --title "My Feature"
    ```
 
-3. **Fill in all sections** of the generated document. At minimum complete: Overview, Key Changes, Results, and Lessons Learned.
-
-4. **Skip this step only if** the work was purely cosmetic (formatting, typo fixes, comment updates) or a single-line config change.
+3. **Skip this step only if** deduplication indicates the work is already documented (a matching entry exists in `docs/history/.index.json` for today's date with a similar title), or the work was purely cosmetic (formatting, typo fixes, comment updates).
 
 The history document ensures institutional memory persists across sessions. Templates are in `docs/history/`.
 

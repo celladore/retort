@@ -64,7 +64,7 @@ esac
 # ---------------------------------------------------------------------------
 
 if [[ ! -f "$INDEX_FILE" ]]; then
-  echo '{"nextNumber":1,"sequences":{"implementation":1,"bugfix":1,"feature":1,"migration":1},"entries":[]}' > "$INDEX_FILE"
+  echo '{"nextNumber":1,"sequences":{"implementation":1,"bugfix":1,"feature":1,"migration":1,"issue":1,"lesson":1},"entries":[]}' > "$INDEX_FILE"
 fi
 
 # Use node to read the current sequence number safely (no user input interpolated)

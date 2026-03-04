@@ -1,6 +1,6 @@
 ---
 description: 'Create a history document from templates for significant work (bug fixes, features, implementations, migrations)'
-allowed-tools: Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
 last_updated: '{{syncDate}}'
@@ -28,11 +28,21 @@ If no arguments are provided, use `--auto` behavior.
 
 When `--auto` is specified or no arguments are given:
 
-1. **Scan recent git history:**
+1. **Scan recent git history (safe for shallow clones and short branches):**
    ```bash
-   git log --oneline -20
-   # Use merge-base if available (handles shallow clones and short branches)
-   git diff --stat $(git merge-base origin/main HEAD 2>/dev/null || echo HEAD~5)..HEAD
+   # Use --max-count to avoid errors on repos with few commits
+   git log --oneline --max-count=20
+
+   # Compute a safe diff range
+   commit_count=$(git rev-list --count HEAD 2>/dev/null || echo 1)
+   if git merge-base origin/main HEAD &>/dev/null; then
+     diff_base=$(git merge-base origin/main HEAD)
+   elif [ "$commit_count" -le 10 ]; then
+     diff_base="HEAD~$((commit_count > 0 ? commit_count - 1 : 0))"
+   else
+     diff_base="HEAD~10"
+   fi
+   git diff --stat "${diff_base}..HEAD"
    ```
 
 2. **Determine document type from commit messages and changed files:**
