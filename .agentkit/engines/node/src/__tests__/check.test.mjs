@@ -11,10 +11,41 @@ import {
 } from '../check.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
+
+function createCheckFixture({ withBuild = true } = {}) {
+  const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-test-'));
+  const agentkitRoot = resolve(root, '.agentkit');
+  const projectRoot = resolve(root, 'project');
+
+  mkdirSync(resolve(agentkitRoot, 'spec'), { recursive: true });
+  mkdirSync(projectRoot, { recursive: true });
+
+  writeFileSync(resolve(projectRoot, 'package.json'), '{}\n', 'utf-8');
+
+  const buildLine = withBuild ? '    buildCommand: "node -e \\\"\\\""\n' : '';
+  const teamsYaml = `techStacks:
+  - name: test-stack
+    detect:
+      - package.json
+    typecheck: "node -e \\\"\\\""
+    testCommand: "node -e \\\"\\\""
+${buildLine}`;
+
+  writeFileSync(resolve(agentkitRoot, 'spec', 'teams.yaml'), teamsYaml, 'utf-8');
+  return { root, agentkitRoot, projectRoot };
+}
+
+function cleanupFixture(root) {
+  if (existsSync(root)) {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
 
 describe('runCheck()', () => {
   afterEach(() => {
@@ -25,48 +56,65 @@ describe('runCheck()', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
-    const result = await runCheck({
-      agentkitRoot: AGENTKIT_ROOT,
-      projectRoot: PROJECT_ROOT,
-      flags: {},
-    });
+    const fixture = createCheckFixture();
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: {},
+      });
 
-    expect(result).toHaveProperty('stacks');
-    expect(result).toHaveProperty('overallStatus');
-    expect(result).toHaveProperty('overallPassed');
-    expect(Array.isArray(result.stacks)).toBe(true);
-  }, 120_000);
+      expect(result).toHaveProperty('stacks');
+      expect(result).toHaveProperty('overallStatus');
+      expect(result).toHaveProperty('overallPassed');
+      expect(Array.isArray(result.stacks)).toBe(true);
+      expect(result.stacks.length).toBe(1);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 
   it('respects --fast flag structure', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
-    const result = await runCheck({
-      agentkitRoot: AGENTKIT_ROOT,
-      projectRoot: PROJECT_ROOT,
-      flags: { fast: true },
-    });
+    const fixture = createCheckFixture({ withBuild: true });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
 
-    for (const stackResult of result.stacks) {
-      const buildStep = stackResult.steps.find((s) => s.step === 'build');
-      expect(buildStep).toBeUndefined();
+      for (const stackResult of result.stacks) {
+        const buildStep = stackResult.steps.find((s) => s.step === 'build');
+        expect(buildStep).toBeUndefined();
+      }
+      expect(result.stacks[0].steps.some((s) => s.step === 'test')).toBe(true);
+    } finally {
+      cleanupFixture(fixture.root);
     }
-  }, 120_000);
+  }, 20_000);
 
   it('handles --stack filter for unknown stacks gracefully', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
-    const result = await runCheck({
-      agentkitRoot: AGENTKIT_ROOT,
-      projectRoot: PROJECT_ROOT,
-      flags: { stack: 'nonexistent-stack' },
-    });
+    const fixture = createCheckFixture();
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { stack: 'nonexistent-stack' },
+      });
 
-    expect(result.stacks).toEqual([]);
-    expect(result.overallStatus).toBe('SKIP');
-    expect(result.overallPassed).toBe(true);
-  }, 120_000);
+      expect(result.stacks).toEqual([]);
+      expect(result.overallStatus).toBe('SKIP');
+      expect(result.overallPassed).toBe(true);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 });
 
 describe('resolveFormatter()', () => {
