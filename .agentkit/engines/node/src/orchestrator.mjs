@@ -120,6 +120,42 @@ const DEFAULT_AREA_ROUTING = {
 };
 
 /**
+ * Cache for parsed teams.yaml to avoid re-reading on every call.
+ * Keyed by resolved agentkitRoot path. Invalidated by process lifetime.
+ */
+const _teamsSpecCache = new Map();
+
+/**
+ * Load and cache teams.yaml spec from disk.
+ * @param {string} [agentkitRoot] - Path to .agentkit directory
+ * @returns {object|null} Parsed teams.yaml or null if unavailable
+ */
+function loadTeamsSpec(agentkitRoot) {
+  if (!agentkitRoot) return null;
+  const key = resolve(agentkitRoot);
+  if (_teamsSpecCache.has(key)) return _teamsSpecCache.get(key);
+  try {
+    const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
+    if (existsSync(teamsPath)) {
+      const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+      _teamsSpecCache.set(key, spec);
+      return spec;
+    }
+  } catch {
+    /* fall through */
+  }
+  _teamsSpecCache.set(key, null);
+  return null;
+}
+
+/**
+ * Clear the cached teams spec (useful for testing).
+ */
+export function clearTeamsSpecCache() {
+  _teamsSpecCache.clear();
+}
+
+/**
  * Resolve an issue area to the assigned team ID.
  * Reads intake.routing from teams.yaml if available, falls back to defaults.
  * @param {string} area - One of the canonical issue area values
@@ -127,19 +163,11 @@ const DEFAULT_AREA_ROUTING = {
  * @returns {string} Team ID (e.g. 'team-backend')
  */
 export function resolveTeamByArea(area, agentkitRoot) {
-  if (agentkitRoot) {
-    try {
-      const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
-      if (existsSync(teamsPath)) {
-        const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
-        const routing = spec?.intake?.routing;
-        if (routing && routing[area]) {
-          return routing[area];
-        }
-      }
-    } catch {
-      /* fall through to defaults */
-    }
+  const spec = loadTeamsSpec(agentkitRoot);
+  const routing = spec?.intake?.routing;
+  if (routing && routing[area]) {
+    const team = routing[area];
+    return team.startsWith('team-') ? team : `team-${team}`;
   }
   return DEFAULT_AREA_ROUTING[area] || 'team-quality';
 }
@@ -157,26 +185,22 @@ export function resolveTeamByArea(area, agentkitRoot) {
  */
 export function computeEscalation({ area, priority, severity, impact }, agentkitRoot) {
   const escalateTeams = new Set();
+  const spec = loadTeamsSpec(agentkitRoot);
+  const esc = spec?.intake?.escalation;
 
   let securityTeams = ['team-security', 'team-devops'];
   let blockedTeams = ['team-product'];
+  let opsTeam = 'team-quality';
 
-  if (agentkitRoot) {
-    try {
-      const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
-      if (existsSync(teamsPath)) {
-        const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
-        const esc = spec?.intake?.escalation;
-        if (esc?.securityCritical) {
-          securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
-        }
-        if (esc?.blockedCrossTeam) {
-          blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
-        }
-      }
-    } catch {
-      /* use defaults */
-    }
+  if (esc?.securityCritical) {
+    securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+  }
+  if (esc?.blockedCrossTeam) {
+    blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+  }
+  const configOps = spec?.intake?.operationsTeam;
+  if (configOps) {
+    opsTeam = configOps.startsWith('team-') ? configOps : `team-${configOps}`;
   }
 
   // Rule 1: Critical severity in security-sensitive areas → security escalation
@@ -191,7 +215,7 @@ export function computeEscalation({ area, priority, severity, impact }, agentkit
 
   // Rule 3: Any P0 → notify operations team
   if (priority === 'P0') {
-    escalateTeams.add('team-quality');
+    escalateTeams.add(opsTeam);
   }
 
   return [...escalateTeams];

@@ -1017,6 +1017,27 @@ async function syncA2aConfig(
 // Variable builder helpers (private — used by tool-specific sync functions)
 // ---------------------------------------------------------------------------
 
+/**
+ * Build a compact area→team routing string from teams.yaml intake config.
+ * Used as a template variable so all platform templates share the same routing.
+ */
+function buildAreaRoutingTable(teamsIntake) {
+  const defaultRouting = {
+    backend: 'team-backend', frontend: 'team-frontend', data: 'team-data',
+    infra: 'team-infra', devops: 'team-devops', testing: 'team-testing',
+    security: 'team-security', docs: 'team-docs', product: 'team-product',
+    quality: 'team-quality', cli: 'team-backend', 'sync-engine': 'team-devops',
+  };
+  const routing = teamsIntake?.routing || {};
+  const merged = { ...defaultRouting };
+  for (const [area, team] of Object.entries(routing)) {
+    merged[area] = team.startsWith('team-') ? team : `team-${team}`;
+  }
+  return Object.entries(merged)
+    .map(([area, team]) => `\`${area}\`→${team}`)
+    .join(', ');
+}
+
 function buildCommandVars(cmd, vars) {
   return {
     ...vars,
@@ -1154,6 +1175,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     intakeCadence: projectVars.intakeCadence || processIntake.cadence || 'daily',
     intakeSecurityEscalationTeams: securityEscalationTeams,
     intakeBlockedEscalationTeams: blockedEscalationTeams,
+    intakeAreaRoutingTable: buildAreaRoutingTable(teamsIntake),
     version,
     overlayTemplatesDir: resolve(overlayDir, 'templates'),
     repoName:

@@ -261,7 +261,7 @@ gh issue create \
 
 ### Priority
 
-<P0|P1> — map CRITICAL→P0, HIGH→P1
+<P0|P1> — map critical→P0, high→P1
 
 ### Severity
 

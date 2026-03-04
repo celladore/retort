@@ -237,7 +237,9 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
           if (id === 'area') {
             for (const opt of options) {
-              if (!PROJECT_ENUMS.issueArea.includes(opt)) {
+              // Extract bare area value before any description separator (e.g. "backend — Server-side" → "backend")
+              const areaValue = String(opt).split(' — ')[0].trim();
+              if (!PROJECT_ENUMS.issueArea.includes(areaValue)) {
                 console.error(`  FAIL: ${file} field "area" has invalid option "${opt}"`);
                 errors++;
                 fieldErrors++;

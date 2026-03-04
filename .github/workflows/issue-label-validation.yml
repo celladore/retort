@@ -3,6 +3,12 @@ name: Issue Field Validation
 on:
   issues:
     types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to validate (dry-run)'
+        required: false
+        type: string
 
 permissions:
   issues: write
