@@ -1,5 +1,5 @@
 ---
-description: 'Structured code review — check correctness, security, performance, tests, docs, and session retrospectives'
+description: 'Structured review across 10 quality criteria — correctness, security, performance, tests, docs, compatibility, completeness, doc gaps, bugs, enhancements — plus session retrospectives'
 allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
@@ -31,10 +31,12 @@ Evaluate every changed file against the following criteria. Not all criteria app
 
 Each criterion lists the **specialist agents** whose expertise applies and any **CI workflows** that provide automated coverage. The review agent synthesizes findings from all sources.
 
-### 1. Correctness
+### 1. Correctness (`--focus=correctness`)
 
 > **Agents:** backend, frontend, data, test-lead, integration-tester
 > **CI:** `ci.yml` (unit tests)
+
+Verify that the code does what it claims — logic, error handling, and edge cases:
 
 - Does the logic do what the commit message / backlog item claims?
 - Are there off-by-one errors, null/undefined checks missing, or incorrect branching?
@@ -42,10 +44,12 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 - Are error paths handled gracefully (try/catch, Result types, error boundaries)?
 - Are async operations awaited properly?
 
-### 2. Security
+### 2. Security (`--focus=security`)
 
 > **Agents:** security-auditor, dependency-watcher, environment-manager
 > **CI:** `dependency-audit.yml` (vulnerability scanning, license checks)
+
+Check for vulnerabilities, secrets exposure, and unsafe dependencies:
 
 - **Injection:** Are user inputs sanitized before use in SQL, shell commands, or HTML?
 - **Auth/AuthZ:** Are endpoints properly guarded? Are permissions checked?
@@ -53,20 +57,24 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 - **Dependencies:** Are new dependencies well-maintained and free of known vulnerabilities? (The dependency-watcher agent and dependency-audit CI workflow provide automated coverage here.)
 - **Data exposure:** Could sensitive data leak through logs, error messages, or API responses?
 
-### 3. Performance
+### 3. Performance (`--focus=performance`)
 
 > **Agents:** backend, frontend, coverage-tracker
 > **CI:** —
+
+Identify operations that could be expensive at scale or leak resources:
 
 - Are there N+1 query patterns or unbounded loops?
 - Could any operation be expensive at scale (large arrays, deep recursion, unindexed queries)?
 - Are there unnecessary re-renders in UI components (missing memoization, unstable keys)?
 - Are resources properly cleaned up (event listeners, subscriptions, file handles)?
 
-### 4. Tests & Coverage
+### 4. Tests & Coverage (`--focus=tests`)
 
 > **Agents:** test-lead, coverage-tracker, integration-tester
 > **CI:** `ci.yml` (test pass/fail), `coverage-report.yml` (coverage metrics and threshold enforcement)
+
+Verify that changed behaviour is tested and coverage has not regressed:
 
 - Are there tests for the changed behavior?
 - Do the tests cover the happy path AND at least one error/edge case?
@@ -75,10 +83,12 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 - Is test quality sufficient? (Not just asserting `true === true`)
 - Has code coverage regressed? (The coverage-tracker agent and coverage-report CI workflow track this.)
 
-### 5. Documentation & Readability
+### 5. Documentation & Readability (`--focus=style`)
 
 > **Agents:** content-strategist, product-manager, ui-designer
 > **CI:** `ci.yml` (markdown-lint), `documentation-quality.yml` (structure validation)
+
+Check that code is readable and public interfaces are documented:
 
 - Are public APIs documented (JSDoc, XML comments, doc comments)?
 - Are complex algorithms explained with comments?
@@ -86,10 +96,12 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 - Is the code organized logically (related code grouped together)?
 - Are magic numbers replaced with named constants?
 
-### 6. Compatibility & Standards
+### 6. Compatibility & Standards (`--focus=compatibility`)
 
 > **Agents:** release-manager, backend, project-shipper, devops
 > **CI:** `breaking-change-detection.yml` (export removals, signature changes, deprecation tracking, changelog verification)
+
+Verify that changes are backwards-compatible and follow established patterns:
 
 - Does the change follow existing patterns in the codebase?
 - Are breaking changes documented and versioned appropriately? (The release-manager agent and breaking-change-detection CI workflow provide automated coverage here.)
@@ -278,7 +290,7 @@ Append to `.claude/state/events.log`:
 3. **Suggest fixes.** When you identify a problem, suggest how to fix it.
 4. **Separate required from optional.** The author needs to know what blocks the merge.
 5. **Acknowledge good work.** Positive reinforcement encourages good patterns.
-6. **Do NOT make changes.** You review only. Teams make the fixes.
+6. **Do NOT make changes.** You review only. Teams make the fixes. The only exception is `--focus=retrospective` mode, which writes exclusively to `docs/history/issues/`, `docs/history/lessons-learned/`, and `docs/history/.index.json`. Write/Edit tools MUST NOT be used outside retrospective mode.
 
 ---
 

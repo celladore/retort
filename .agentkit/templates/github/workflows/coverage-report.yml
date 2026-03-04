@@ -18,7 +18,7 @@ jobs:
     name: Node.js coverage
     runs-on: ubuntu-latest
     continue-on-error: true
-    if: hashFiles('package.json') != ''
+    if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,11 +32,17 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
-          cache-dependency-path: .agentkit/pnpm-lock.yaml
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: .agentkit
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          elif [ -f .agentkit/pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile --dir .agentkit
+          else
+            pnpm install --frozen-lockfile 2>/dev/null || true
+          fi
 
       - name: Run tests with coverage
         run: |
@@ -83,8 +89,9 @@ jobs:
           print(f'| Branches | {branches}% |')
           print(f'| Functions | {functions}% |')
           print(f'| Statements | {stmts}% |')
-          print(f'::set-output name=lines::{lines}')
           " >> $GITHUB_STEP_SUMMARY
+            # Export coverage value for threshold enforcement step
+            echo "lines=${lines}" >> $GITHUB_OUTPUT
           else
             echo "No coverage-summary.json found — coverage data unavailable" >> $GITHUB_STEP_SUMMARY
             echo "::notice::Configure your test runner to output coverage-summary.json for automated tracking"

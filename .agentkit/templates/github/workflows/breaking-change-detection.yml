@@ -22,20 +22,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache diff output
+        id: diff
+        run: |
+          BASE="${{ github.base_ref }}"
+          git diff "origin/${BASE}...HEAD" > /tmp/full-diff.patch
+          git diff "origin/${BASE}...HEAD" --name-only > /tmp/diff-files.txt
+          git diff "origin/${BASE}...HEAD" -- '*.ts' '*.js' '*.tsx' '*.jsx' > /tmp/js-diff.patch 2>/dev/null || true
+
       - name: Detect version file changes
         run: |
           echo "## Breaking Change Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          BASE="${{ github.base_ref }}"
-          DIFF=$(git diff "origin/${BASE}...HEAD" --name-only)
-
           # Track version-bearing files that changed
           VERSION_FILES_CHANGED=false
-          for pattern in package.json Cargo.toml pyproject.toml *.csproj; do
-            if echo "$DIFF" | grep -q "$pattern"; then
+          for pattern in 'package.json' 'Cargo.toml' 'pyproject.toml' '\.csproj$'; do
+            if grep -qE "$pattern" /tmp/diff-files.txt; then
               VERSION_FILES_CHANGED=true
-              echo "::notice::Version file changed: $(echo "$DIFF" | grep "$pattern" | head -5 | tr '\n' ', ')"
+              echo "::notice::Version file changed: $(grep -E "$pattern" /tmp/diff-files.txt | head -5 | tr '\n' ', ')"
             fi
           done
 
@@ -43,15 +48,12 @@ jobs:
 
       - name: Check for version bump on breaking changes
         run: |
-          BASE="${{ github.base_ref }}"
-
-          # Look for indicators of breaking changes in the diff
+          # Look for indicators of breaking changes in the cached diff
           BREAKING_INDICATORS=0
           DETAILS=""
 
           # 1. Removed exports (JS/TS)
-          REMOVED_EXPORTS=$(git diff "origin/${BASE}...HEAD" -- '*.ts' '*.js' '*.tsx' '*.jsx' | \
-            grep -c '^-export ' 2>/dev/null || echo "0")
+          REMOVED_EXPORTS=$(grep -c '^-export ' /tmp/js-diff.patch 2>/dev/null || echo "0")
           if [ "$REMOVED_EXPORTS" -gt 0 ]; then
             BREAKING_INDICATORS=$((BREAKING_INDICATORS + 1))
             DETAILS="${DETAILS}\n- $REMOVED_EXPORTS export statement(s) removed"
@@ -59,8 +61,7 @@ jobs:
           fi
 
           # 2. Changed function signatures (added required params, changed return types)
-          CHANGED_SIGS=$(git diff "origin/${BASE}...HEAD" -- '*.ts' '*.js' '*.tsx' '*.jsx' | \
-            grep -cE '^-\s*(export\s+)?(async\s+)?function\s+' 2>/dev/null || echo "0")
+          CHANGED_SIGS=$(grep -cE '^-\s*(export\s+)?(async\s+)?function\s+' /tmp/js-diff.patch 2>/dev/null || echo "0")
           if [ "$CHANGED_SIGS" -gt 0 ]; then
             BREAKING_INDICATORS=$((BREAKING_INDICATORS + 1))
             DETAILS="${DETAILS}\n- $CHANGED_SIGS public function signature(s) modified"
@@ -68,8 +69,7 @@ jobs:
           fi
 
           # 3. Removed public methods (any language with class syntax)
-          REMOVED_METHODS=$(git diff "origin/${BASE}...HEAD" | \
-            grep -cE '^-\s*public\s+(static\s+)?(async\s+)?\w+' 2>/dev/null || echo "0")
+          REMOVED_METHODS=$(grep -cE '^-\s*public\s+(static\s+)?(async\s+)?\w+' /tmp/full-diff.patch 2>/dev/null || echo "0")
           if [ "$REMOVED_METHODS" -gt 0 ]; then
             BREAKING_INDICATORS=$((BREAKING_INDICATORS + 1))
             DETAILS="${DETAILS}\n- $REMOVED_METHODS public method(s) removed"
@@ -77,8 +77,7 @@ jobs:
           fi
 
           # 4. Database migration files added (schema change)
-          MIGRATIONS=$(git diff "origin/${BASE}...HEAD" --name-only | \
-            grep -cE '(migrations?|migrate)/' 2>/dev/null || echo "0")
+          MIGRATIONS=$(grep -cE '(migrations?|migrate)/' /tmp/diff-files.txt 2>/dev/null || echo "0")
           if [ "$MIGRATIONS" -gt 0 ]; then
             DETAILS="${DETAILS}\n- $MIGRATIONS migration file(s) added"
             echo "::notice::$MIGRATIONS migration file(s) detected — verify rollback strategy"
@@ -86,7 +85,7 @@ jobs:
 
           # 5. Check if CHANGELOG was updated when breaking changes detected
           if [ "$BREAKING_INDICATORS" -gt 0 ]; then
-            CHANGELOG_UPDATED=$(git diff "origin/${BASE}...HEAD" --name-only | grep -ci 'CHANGELOG' || echo "0")
+            CHANGELOG_UPDATED=$(grep -ci 'CHANGELOG' /tmp/diff-files.txt || echo "0")
             if [ "$CHANGELOG_UPDATED" -eq 0 ]; then
               echo "::warning::Breaking changes detected but CHANGELOG.md was not updated"
               DETAILS="${DETAILS}\n- ⚠ CHANGELOG.md not updated"
@@ -105,15 +104,11 @@ jobs:
 
       - name: Check deprecation markers
         run: |
-          BASE="${{ github.base_ref }}"
-
           # Find newly added deprecation markers
-          NEW_DEPRECATIONS=$(git diff "origin/${BASE}...HEAD" | \
-            grep -cE '^\+.*(@deprecated|@obsolete|DEPRECATED|TODO.*deprecat)' 2>/dev/null || echo "0")
+          NEW_DEPRECATIONS=$(grep -cE '^\+.*(@deprecated|@obsolete|DEPRECATED|TODO.*deprecat)' /tmp/full-diff.patch 2>/dev/null || echo "0")
 
           # Find removed deprecation markers (cleanup)
-          REMOVED_DEPRECATIONS=$(git diff "origin/${BASE}...HEAD" | \
-            grep -cE '^-.*(@deprecated|@obsolete|DEPRECATED)' 2>/dev/null || echo "0")
+          REMOVED_DEPRECATIONS=$(grep -cE '^-.*(@deprecated|@obsolete|DEPRECATED)' /tmp/full-diff.patch 2>/dev/null || echo "0")
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deprecations" >> $GITHUB_STEP_SUMMARY

@@ -77,18 +77,19 @@ try:
         for name, info in list(vulns.items())[:10]:
             severity = info.get('severity', 'unknown')
             print(f'::warning::{severity.upper()}: {name}')
-except: pass
+except Exception: pass
 " 2>/dev/null || echo "Audit parsing skipped" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Check for new dependencies in diff
         run: |
           # Detect newly added dependencies in the PR
-          git diff origin/${{ github.base_ref }}...HEAD -- package.json */package.json 2>/dev/null | \
+          BASE="${{ github.base_ref }}"
+          git diff "origin/${BASE}...HEAD" -- package.json '*/package.json' 2>/dev/null | \
             grep -E '^\+.*"(dependencies|devDependencies|peerDependencies)"' -A 50 | \
             grep -E '^\+\s+"[^"]+":\s+"' | \
             sed 's/^\+\s*//' | while IFS= read -r line; do
-              pkg=$(echo "$line" | grep -oP '"[^"]+"' | head -1 | tr -d '"')
+              pkg=$(echo "$line" | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
               echo "::notice::New dependency added: $pkg — verify it is well-maintained and license-compatible"
             done
 
