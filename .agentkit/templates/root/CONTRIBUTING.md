@@ -66,11 +66,14 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 1. Ensure your branch is up to date with `{{defaultBranch}}`
 2. Run all quality gates locally: `agentkit validate`
-3. Create a PR with a clear description and test plan
-4. All CI checks must pass
-5. Request review from the relevant team (see [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md))
-6. Address review feedback
-7. Squash-merge when approved
+3. If you changed `.agentkit/spec/*.yaml`, run `pnpm -C .agentkit agentkit:sync` and commit the regenerated outputs
+4. Create a PR — **title MUST use Conventional Commits format**: `type(scope): description`
+   - Example: `feat(auth): add OAuth2 login flow` — NOT `Plan: Add OAuth2 login flow`
+   - CI enforces this and will reject non-conforming titles
+5. All CI checks must pass (including drift check for generated files)
+6. Request review from the relevant team (see [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md))
+7. Address review feedback
+8. Squash-merge when approved
 
 ---
 

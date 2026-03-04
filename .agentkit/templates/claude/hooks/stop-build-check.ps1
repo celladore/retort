@@ -38,15 +38,22 @@ function Invoke-Check {
     param(
         [string]$Label,
         [string]$Command,
-        [string[]]$Arguments
+        [string[]]$Arguments,
+        [string]$WorkingDirectory
     )
 
     try {
-        $output = & $Command @Arguments 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) {
-            return @{ Success = $false; Output = "$Label failed:`n$output" }
+        $prevDir = $PWD.Path
+        if ($WorkingDirectory) { Set-Location $WorkingDirectory }
+        try {
+            $output = & $Command @Arguments 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) {
+                return @{ Success = $false; Output = "$Label failed:`n$output" }
+            }
+            return @{ Success = $true; Output = "" }
+        } finally {
+            Set-Location $prevDir
         }
-        return @{ Success = $true; Output = "" }
     } catch {
         return @{ Success = $false; Output = "$Label failed:`n$($_.Exception.Message)" }
     }
@@ -101,17 +108,17 @@ if (Test-Path $packageJsonPath) {
     }
 
     if ($scripts -contains "lint") {
-        $result = Invoke-PmRun -Script "lint"
+        $result = Invoke-Check -Label "$pm lint" -Command $pm -Arguments @("run", "lint") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 
     if ($scripts -contains "test") {
-        $result = Invoke-PmRun -Script "test"
+        $result = Invoke-Check -Label "$pm test" -Command $pm -Arguments @("run", "test") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 
     if ($scripts -contains "build") {
-        $result = Invoke-PmRun -Script "build"
+        $result = Invoke-Check -Label "$pm build" -Command $pm -Arguments @("run", "build") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 }
@@ -122,10 +129,10 @@ if ($slnFiles -and (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
     $ranCheck = $true
     $slnPath = $slnFiles.FullName
 
-    $result = Invoke-Check -Label "dotnet build" -Command "dotnet" -Arguments @("build", $slnPath, "--nologo", "--verbosity", "quiet")
+    $result = Invoke-Check -Label "dotnet build" -Command "dotnet" -Arguments @("build", $slnPath, "--nologo", "--verbosity", "quiet") -WorkingDirectory $cwd
     if (-not $result.Success) { Send-Block -Reason $result.Output }
 
-    $result = Invoke-Check -Label "dotnet test" -Command "dotnet" -Arguments @("test", $slnPath, "--nologo", "--verbosity", "quiet", "--no-build")
+    $result = Invoke-Check -Label "dotnet test" -Command "dotnet" -Arguments @("test", $slnPath, "--nologo", "--verbosity", "quiet", "--no-build") -WorkingDirectory $cwd
     if (-not $result.Success) { Send-Block -Reason $result.Output }
 }
 
@@ -134,10 +141,10 @@ $cargoTomlPath = Join-Path $cwd "Cargo.toml"
 if ((Test-Path $cargoTomlPath) -and (Get-Command "cargo" -ErrorAction SilentlyContinue)) {
     $ranCheck = $true
 
-    $result = Invoke-Check -Label "cargo check" -Command "cargo" -Arguments @("check", "--manifest-path", $cargoTomlPath, "--quiet")
+    $result = Invoke-Check -Label "cargo check" -Command "cargo" -Arguments @("check", "--manifest-path", $cargoTomlPath, "--quiet") -WorkingDirectory $cwd
     if (-not $result.Success) { Send-Block -Reason $result.Output }
 
-    $result = Invoke-Check -Label "cargo test" -Command "cargo" -Arguments @("test", "--manifest-path", $cargoTomlPath, "--quiet")
+    $result = Invoke-Check -Label "cargo test" -Command "cargo" -Arguments @("test", "--manifest-path", $cargoTomlPath, "--quiet") -WorkingDirectory $cwd
     if (-not $result.Success) { Send-Block -Reason $result.Output }
 }
 
@@ -147,13 +154,13 @@ if (Test-Path $pyprojectPath) {
     $ranCheck = $true
 
     if (Get-Command "pytest" -ErrorAction SilentlyContinue) {
-        $result = Invoke-Check -Label "pytest" -Command "pytest" -Arguments @("--rootdir", $cwd, "-q")
+        $result = Invoke-Check -Label "pytest" -Command "pytest" -Arguments @("--rootdir", $cwd, "-q") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     } elseif (Get-Command "python3" -ErrorAction SilentlyContinue) {
-        $result = Invoke-Check -Label "python -m pytest" -Command "python3" -Arguments @("-m", "pytest", "--rootdir", $cwd, "-q")
+        $result = Invoke-Check -Label "python -m pytest" -Command "python3" -Arguments @("-m", "pytest", "--rootdir", $cwd, "-q") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     } elseif (Get-Command "python" -ErrorAction SilentlyContinue) {
-        $result = Invoke-Check -Label "python -m pytest" -Command "python" -Arguments @("-m", "pytest", "--rootdir", $cwd, "-q")
+        $result = Invoke-Check -Label "python -m pytest" -Command "python" -Arguments @("-m", "pytest", "--rootdir", $cwd, "-q") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 }

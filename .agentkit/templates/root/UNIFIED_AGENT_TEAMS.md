@@ -210,8 +210,9 @@ criteria, activities, and exit criteria (quality gates).
 
 - **Objective**: Verify the solution meets requirements.
 - **Activities**:
-  - Create pull request with description and test plan
-  - All CI checks must pass
+  - Create pull request — **title MUST use Conventional Commits**: `type(scope): description`
+  - Run `pnpm -C .agentkit agentkit:sync` if any spec files changed, and commit regenerated outputs
+  - All CI checks must pass (including PR title validation and drift check)
   - Code review by relevant team members
   - Manual testing for UI or user-facing changes
 - **Exit criteria**: PR created, all checks pass, approvals received.
