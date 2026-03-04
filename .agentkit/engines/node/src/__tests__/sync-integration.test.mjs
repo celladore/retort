@@ -137,7 +137,7 @@ describe('overlay resolution and template precedence regressions', () => {
     };
 
     try {
-      await runSync({ agentkitRoot, projectRoot, flags: {} });
+      await runSync({ agentkitRoot, projectRoot, flags: { quiet: false } });
     } finally {
       console.log = originalLog;
     }
