@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  runCheck,
-  resolveFormatter,
-  resolveLinter,
-  isAllowedFormatter,
-  isAllowedLinter,
-  ALLOWED_FORMATTER_BASES,
-  ALLOWED_NPX_PACKAGES,
-  ALLOWED_LINTER_BASES,
-} from '../check.mjs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  ALLOWED_FORMATTER_BASES,
+  ALLOWED_LINTER_BASES,
+  ALLOWED_NPX_PACKAGES,
+  isAllowedFormatter,
+  isAllowedLinter,
+  resolveFormatter,
+  resolveLinter,
+  runCheck,
+} from '../check.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
@@ -40,7 +40,7 @@ function createCheckFixture({ withBuild = true, formatter = null, withPrettierBi
   - name: test-stack
     detect:
       - package.json
-${formatterLine}    
+${formatterLine}
     typecheck: "node -e \\\"\\\""
     testCommand: "node -e \\\"\\\""
 ${buildLine}`;
