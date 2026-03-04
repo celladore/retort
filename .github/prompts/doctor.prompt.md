@@ -16,15 +16,19 @@ last_updated: '2026-03-04'
 
 Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.
 
-## Instructions
+## Workflow
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+1. Validate all spec files (commands.yaml, teams.yaml, agents.yaml, rules.yaml, settings.yaml)
+2. Verify required template roots exist for active render targets
+3. Check `.agentkit-repo` marker and overlay alignment
+4. Highlight high-impact missing `project.yaml` fields
+5. Suggest next actions sorted by impact
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Output
+
+- Overall status: PASS / WARN / FAIL
+- Findings list with severity (ERROR, WARN, INFO)
+- Suggested command sequence to remediate each finding
 
 ## Project Context
 

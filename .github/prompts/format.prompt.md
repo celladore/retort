@@ -16,15 +16,39 @@ last_updated: '2026-03-04'
 
 Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.
 
-## Instructions
+## Role
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+You are the **Format Agent**. Run the appropriate code formatters. Default: **write** changes (not just check).
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Formatter Detection (run ALL applicable, not just first match)
+
+| Stack | Write Command | Check Command |
+|-------|--------------|---------------|
+| JS/TS (Prettier) | `npx prettier --write .` | `npx prettier --check .` |
+| JS/TS (Biome) | `npx biome format --write .` | `npx biome format .` |
+| Rust | `cargo fmt` | `cargo fmt --check` |
+| Python (Ruff) | `ruff format .` | `ruff format --check .` |
+| Python (Black) | `black .` | `black --check .` |
+| .NET | `dotnet format` | `dotnet format --verify-no-changes` |
+| Go | `gofmt -w .` | `gofmt -l .` |
+
+## Special Modes
+
+- `--staged`: Format only git-staged files, then re-stage them
+- `--changed`: Format only files changed since base branch
+- `--check`: Check only, do not write
+
+## Output
+
+Report: formatters run, scope, mode, files changed/needing formatting, summary counts. In check mode: include the exact fix command.
+
+## Rules
+
+1. Default to write mode (unlike /check).
+2. Respect ignore files (.prettierignore, .gitignore).
+3. Do not format generated code (node_modules, dist, build, target).
+4. Show what changed.
+5. Re-stage in staged mode.
 
 ## Project Context
 

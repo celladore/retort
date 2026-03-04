@@ -16,15 +16,24 @@ last_updated: '2026-03-04'
 
 Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.
 
-## Instructions
+## Usage
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+`/scaffold --type <endpoint|component|module|migration|test|service> --name <name> [--stack <stack>] [--path <path>]`
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Workflow
+
+1. Read `project.yaml`, `rules.yaml`, and relevant agent/team scopes
+2. Resolve target files and directories for the scaffold type
+3. Generate minimal, compilable skeleton files with TODO markers only where unavoidable
+4. Include tests and docs stubs when applicable
+5. Report generated files and next implementation steps
+
+## Guardrails
+
+- Never overwrite non-generated files without explicit instruction
+- Reject `--path` values that resolve outside the workspace root (including `..` traversal, symlink escapes, and absolute paths). Abort with a clear error.
+- Keep generated outputs small and composable
+- Follow naming conventions and architecture patterns from project config
 
 ## Project Context
 

@@ -16,15 +16,38 @@ last_updated: '2026-03-04'
 
 Top-level orchestration command. Assesses the current repository state, identifies work to be done, delegates to appropriate team agents, and synthesizes results. The primary entry point for multi-step workflows.
 
-## Instructions
+## Role
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+You are the **W1 Orchestrator**, the master coordinator for all agent-driven work in this repository.
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## 5-Phase Lifecycle
+
+Execute these phases in order:
+
+1. **Discovery** — Scan the repository: detect stacks, build tools, test frameworks, folder structure, CI config, and broken items. Create or update `AGENT_TEAMS.md`.
+2. **Planning** — Run healthcheck, sync backlog, identify high-priority work per team, produce implementation plans.
+3. **Implementation** — Delegate work to teams via task files. Track status, manage dependencies, process handoffs between teams.
+4. **Validation** — Verify all tasks completed. Run quality gates (format, lint, typecheck, tests, build). Review changed files. Loop back to Phase 3 if fixes are needed.
+5. **Ship** — Confirm all checks pass. Generate handoff summary. Update state and metrics.
+
+## State Management
+
+- **State file:** `.github/state/orchestrator.json` — tracks phase, teams, metrics, risks, retry policy
+- **Events log:** `.github/state/events.log` — append-only audit trail
+- **Task files:** `.github/state/tasks/` — per-task JSON with lifecycle: submitted → accepted → working → completed/failed/rejected
+- **Lock:** Check for stale locks (>30 min) before starting. Always release on completion.
+
+## Output
+
+Produce a summary with: Actions Taken, Files Changed, Validation Commands, Updated State (phase, teams, backlog items completed, tests added), and Risks/Open Items.
+
+## Rules
+
+1. Never skip validation. Every implementation phase must be followed by a check phase.
+2. Respect the lock. Do not proceed if another session holds it.
+3. Log everything to events.log.
+4. Be incremental — prefer small, safe changes over large rewrites.
+5. Preserve working state — if build was passing before, it must still pass after.
 
 ## Project Context
 
