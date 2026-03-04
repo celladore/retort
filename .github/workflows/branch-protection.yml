@@ -84,7 +84,11 @@ jobs:
               (response) => response.data
             );
 
-            const touchesAgentkit = files.some((file) => file.filename.startsWith('.agentkit/'));
+            const touchesAgentkit = files.some(
+              (file) =>
+                file.filename.startsWith('.agentkit/') ||
+                (file.previous_filename && file.previous_filename.startsWith('.agentkit/'))
+            );
 
             if (!touchesAgentkit) {
               core.info('No .agentkit changes detected; upstream issue link check skipped.');
