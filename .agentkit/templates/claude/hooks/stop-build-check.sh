@@ -100,11 +100,13 @@ if [[ -f "${CWD}/package.json" ]]; then
     fi
 
     # Try lint, then test, then build -- stop at first failure.
-    # pnpm uses -C <dir> before the subcommand; npm/yarn use --prefix after.
+    # Each package manager uses a different flag to set the working directory.
     pm_run() {
         local script="$1"
         if [[ "$pm" == "pnpm" ]]; then
             "$pm" -C "$CWD" run "$script"
+        elif [[ "$pm" == "yarn" ]]; then
+            "$pm" --cwd "$CWD" run "$script"
         else
             "$pm" run "$script" --prefix "$CWD"
         fi
