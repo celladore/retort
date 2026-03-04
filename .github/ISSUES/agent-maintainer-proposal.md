@@ -228,13 +228,21 @@ The CI pipeline (`ci.yml`) now runs `doctor` in the validate job (added in this 
 
 ---
 
-## Implementation Notes
+## Sub-Issues (with implementation plans)
 
-This issue is intentionally scoped as a **tracking/umbrella issue**. Individual items should be broken into sub-issues:
+| # | File | Title | Priority | Status |
+|---|------|-------|----------|--------|
+| 001 | `001-missing-cli-handlers.md` | CRITICAL: Implement 6 missing CLI command handlers | P0 | Open |
+| 002 | `002-maintenance-coordinator-agent.md` | Add `maintenance-coordinator` agent | P1 | Open |
+| 003 | `003-task-delegation-completion.md` | Complete task delegation lifecycle | P1 | Open |
+| 004 | `004-rules-yaml-ownership.md` | Assign ownership for rules.yaml | P2 | Open |
+| 005 | `005-script-ownership.md` | Assign agent ownership for scripts | P2 | Open |
+| 006 | `006-reverse-spec-mismatch.md` | Document 8 CLI-only commands missing from spec | P2 | Open |
+| 007 | `007-team-context-routing.md` | Clarify or implement team command routing | P3 | Open |
+| 008 | `008-check-allowlist-spec-sync.md` | Sync check.mjs allowlists with spec | P3 | Open |
+| 009 | `009-doctor-presync-healthcheck.md` | Wire doctor into pre-sync and healthcheck | P2 | Open |
+| 010 | `010-security-command-from-review.md` | Build security command on review-runner | P1 | Open |
+| 011 | `011-hook-validation.md` | Add hook executable and shebang validation | P2 | Open |
+| 012 | `012-ci-review-secret-scanning.md` | Add per-commit secret scanning in CI | P2 | Open |
 
-1. **Sub-issue: Add `maintenance-coordinator` agent** — spec + sync + docs
-2. **Sub-issue: Implement missing CLI handlers** — build, test, format, deploy, security, sync-backlog
-3. **Sub-issue: Complete task delegation system** — state transitions, handoffs, dependencies
-4. **Sub-issue: Rules governance process** — ownership, review cadence, change proposals
-5. **Sub-issue: Hook audit integration** — executable check, shebang validation, matcher verification
-6. **Sub-issue: CI review integration** — per-commit secret scanning, PR check gate
+All sub-issues are in `.github/ISSUES/` with detailed implementation plans, code samples, and acceptance criteria.
