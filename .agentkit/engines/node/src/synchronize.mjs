@@ -220,6 +220,29 @@ async function syncClaudeSettings(
 }
 
 /**
+ * Copies hook files from templates/claude/hooks, skipping hooks whose
+ * owning feature is disabled. Uses HOOK_FEATURE_MAP for the mapping.
+ */
+async function syncClaudeHooks(templatesDir, tmpDir, vars, version, repoName) {
+  const hooksDir = join(templatesDir, 'claude', 'hooks');
+  if (!existsSync(hooksDir)) return;
+
+  for await (const srcFile of walkDir(hooksDir)) {
+    const fname = basename(srcFile);
+    // Strip extension(s) to get the hook name stem (e.g. 'protect-sensitive' from 'protect-sensitive.sh')
+    const stem = fname.replace(/\.(sh|ps1)$/i, '');
+    const requiredFeature = HOOK_FEATURE_MAP[stem];
+    if (requiredFeature && !isFeatureEnabled(requiredFeature, vars)) continue;
+
+    const ext = extname(srcFile).toLowerCase();
+    const content = await readTemplateText(srcFile);
+    const rendered = renderTemplate(content, vars, srcFile);
+    const withHeader = insertHeader(rendered, ext, version, repoName);
+    await writeOutput(join(tmpDir, '.claude', 'hooks', fname), withHeader);
+  }
+}
+
+/**
  * Copies individual command templates and generates team commands.
  * Skips team-TEMPLATE.md; uses it as the generator for team commands.
  */
@@ -256,7 +279,8 @@ async function syncClaudeCommands(
     await writeOutput(join(tmpDir, '.claude', 'commands', fname), withHeader);
   }
 
-  // Generate team commands from team-TEMPLATE.md
+  // Generate team commands from team-TEMPLATE.md (gated by team-orchestration)
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const teamTemplatePath = join(commandsDir, 'team-TEMPLATE.md');
   if (!existsSync(teamTemplatePath)) return;
   const teamTemplate = await readTemplateText(teamTemplatePath);
@@ -286,6 +310,7 @@ async function syncClaudeAgents(
   agentsSpec,
   _rulesSpec
 ) {
+  if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'claude', 'agents', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -345,6 +370,7 @@ async function syncClaudeSkills(
  * Generates .cursor/rules/team-<id>.mdc for each team.
  */
 async function syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'cursor', 'teams', 'TEMPLATE.mdc');
   const fallbackTemplate = `---
 description: "Team {{teamName}} — {{teamFocus}}"
@@ -413,6 +439,7 @@ async function syncCursorCommands(
  * Generates .windsurf/rules/team-<id>.md for each team.
  */
 async function syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'windsurf', 'teams', 'TEMPLATE.md');
   const fallbackTemplate = `# Team: {{teamName}}
 
@@ -532,6 +559,7 @@ async function syncCopilotAgents(
   agentsSpec,
   _rulesSpec
 ) {
+  if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'agents', 'TEMPLATE.agent.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -557,6 +585,7 @@ async function syncCopilotChatModes(
   repoName,
   teamsSpec
 ) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'chatmodes', 'TEMPLATE.chatmode.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -839,6 +868,28 @@ function isFeatureGated(item, vars) {
   return vars[featureVar] === false;
 }
 
+/**
+ * Returns true if a feature is enabled (or if feature vars are not loaded).
+ * Uses the canonical `feature_<id>` var. Missing vars default to enabled
+ * (graceful degradation for repos without features.yaml).
+ */
+function isFeatureEnabled(featureId, vars) {
+  const featureVar = `feature_${featureId.replace(/-/g, '_')}`;
+  return vars[featureVar] !== false;
+}
+
+/**
+ * Maps hook filenames to the feature that gates them.
+ * Hooks not listed here are always generated (core).
+ */
+const HOOK_FEATURE_MAP = {
+  'guard-destructive-commands': 'permission-guards',
+  'protect-sensitive': 'sensitive-file-protection',
+  'protect-templates': 'permission-guards',
+  'stop-build-check': 'quality-gates',
+};
+
+
 function buildCommandVars(cmd, vars) {
   return {
     ...vars,
@@ -1009,53 +1060,62 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // rather than the raw overlay dir name which may be "__TEMPLATE__".
   const headerRepoName = vars.repoName;
 
-  // --- Always-on outputs (not gated by renderTargets) ---
-  await Promise.all([
+  // --- Always-on outputs (not gated by renderTargets or features) ---
+  const alwaysOnTasks = [
     syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
     syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName),
     syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, headerRepoName),
-    syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
-  ]);
+  ];
+
+  // Feature-gated always-on outputs (no render-target gate, but feature-gated)
+  if (isFeatureEnabled('ci-automation', vars)) {
+    alwaysOnTasks.push(syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName));
+  }
+  if (isFeatureEnabled('doc-scaffolding', vars)) {
+    alwaysOnTasks.push(syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName));
+  }
+  if (isFeatureEnabled('dependency-management', vars)) {
+    alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
+  }
+
+  await Promise.all(alwaysOnTasks);
 
   // --- Gated by renderTargets ---
   const gatedTasks = [];
 
   if (targets.has('claude')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, headerRepoName),
+      syncClaudeHooks(templatesDir, tmpDir, vars, version, headerRepoName),
       syncClaudeSettings(templatesDir, tmpDir, vars, version, mergedPermissionsResult, settingsSpec),
       syncClaudeCommands(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, commandsSpec),
       syncClaudeAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
       syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, headerRepoName),
       syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
       syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.claude/rules/languages', 'claude')
     );
+    if (isFeatureEnabled('coding-rules', vars)) {
+      gatedTasks.push(
+        syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
+        syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.claude/rules/languages', 'claude')
+      );
+    }
   }
 
   if (targets.has('cursor')) {
     gatedTasks.push(
-      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
       syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
       syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.cursor/rules/languages', 'cursor')
     );
+    if (isFeatureEnabled('coding-rules', vars)) {
+      gatedTasks.push(
+        syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
+        syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.cursor/rules/languages', 'cursor')
+      );
+    }
   }
 
   if (targets.has('windsurf')) {
     gatedTasks.push(
-      syncDirectCopy(
-        templatesDir,
-        'windsurf/rules',
-        tmpDir,
-        '.windsurf/rules',
-        vars,
-        version,
-        headerRepoName
-      ),
       syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncDirectCopy(
         templatesDir,
@@ -1067,8 +1127,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         headerRepoName
       ),
       syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.windsurf/rules/languages', 'windsurf')
     );
+    if (isFeatureEnabled('coding-rules', vars)) {
+      gatedTasks.push(
+        syncDirectCopy(templatesDir, 'windsurf/rules', tmpDir, '.windsurf/rules', vars, version, headerRepoName),
+        syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.windsurf/rules/languages', 'windsurf')
+      );
+    }
   }
 
   if (targets.has('ai')) {
@@ -1083,8 +1148,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
       syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.github/instructions/languages', 'copilot')
     );
+    if (isFeatureEnabled('coding-rules', vars)) {
+      gatedTasks.push(
+        syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.github/instructions/languages', 'copilot')
+      );
+    }
   }
 
   if (targets.has('gemini')) {
@@ -1099,21 +1168,21 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
-  if (targets.has('cline')) {
+  if (targets.has('cline') && isFeatureEnabled('coding-rules', vars)) {
     gatedTasks.push(
       syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
       syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.clinerules/languages', 'cline')
     );
   }
 
-  if (targets.has('roo')) {
+  if (targets.has('roo') && isFeatureEnabled('coding-rules', vars)) {
     gatedTasks.push(
       syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
       syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.roo/rules/languages', 'roo')
     );
   }
 
-  if (targets.has('mcp')) {
+  if (targets.has('mcp') && isFeatureEnabled('mcp-integration', vars)) {
     gatedTasks.push(syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir));
   }
 
