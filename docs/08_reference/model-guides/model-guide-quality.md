@@ -73,10 +73,10 @@
 
 ### Tier 2: Strong Alternatives (Score 8.00-8.59)
 
-| Model                 | Score | Key Strengths             | Notes                                    |
-| --------------------- | ----- | ------------------------- | ---------------------------------------- |
-| Claude Sonnet 4.6     | 8.45  | Lower-cost Claude profile | Routine review workflows                 |
-| Gemini 2.5 Pro        | 8.40  | Large context support     | Good for wide monorepo audits            |
+| Model                 | Score | Key Strengths             | Notes                                                                                                             |
+| --------------------- | ----- | ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Claude Sonnet 4.6     | 8.45  | Lower-cost Claude profile | Routine review workflows                                                                                          |
+| Gemini 2.5 Pro        | 8.40  | Large context support     | Good for wide monorepo audits                                                                                     |
 | GLM-5 (prior version) | 8.20  | Multilingual support      | Deprecated; use prior until GLM-5 (New) completes scoring. Fallback: GLM-5 (prior) remains active during interim. |
 
 ### Tier 3: Cost-Aware (Score 7.00-7.99)
@@ -121,11 +121,11 @@ agents:
   code-reviewer:
     team: quality
     model_override: swe-llama
-    reason: "Refactor-heavy PR analysis"
+    reason: 'Refactor-heavy PR analysis'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

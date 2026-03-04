@@ -10,11 +10,11 @@
 
 ## Environments
 
-| Environment | URL | Purpose |
-|-------------|-----|---------|
+| Environment | URL          | Purpose                   |
+| ----------- | ------------ | ------------------------- |
 | Development | <!-- URL --> | Local and feature testing |
-| Staging | <!-- URL --> | Pre-production validation |
-| Production | <!-- URL --> | Live traffic |
+| Staging     | <!-- URL --> | Pre-production validation |
+| Production  | <!-- URL --> | Live traffic              |
 
 ## Prerequisites
 
@@ -53,11 +53,11 @@
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NODE_ENV` | Yes | Runtime environment |
-| `DATABASE_URL` | Yes | Database connection string |
-| <!-- VAR --> | <!-- Y/N --> | <!-- Description --> |
+| Variable       | Required     | Description                |
+| -------------- | ------------ | -------------------------- |
+| `NODE_ENV`     | Yes          | Runtime environment        |
+| `DATABASE_URL` | Yes          | Database connection string |
+| <!-- VAR -->   | <!-- Y/N --> | <!-- Description -->       |
 
 ## References
 

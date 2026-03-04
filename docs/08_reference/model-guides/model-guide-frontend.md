@@ -108,22 +108,22 @@ Fallback triggers:
 
 ## Model Identifier Mapping
 
-| Display Name | Config ID |
-| ------------ | --------- |
-| Gemini 2.5 Pro | gemini-2-5-pro |
+| Display Name                 | Config ID                    |
+| ---------------------------- | ---------------------------- |
+| Gemini 2.5 Pro               | gemini-2-5-pro               |
 | GPT-5.2 Medium Thinking Fast | gpt-5.2-medium-thinking-fast |
-| SWE-Llama | swe-llama |
-| Claude Sonnet 4.6 | claude-sonnet-4-6 |
-| Claude Opus 4.6 | claude-opus-4-6 |
-| Minimax M2.5 | minimax-m2-5 |
-| GPT-5.1 Fast | gpt-5-1-fast |
+| SWE-Llama                    | swe-llama                    |
+| Claude Sonnet 4.6            | claude-sonnet-4-6            |
+| Claude Opus 4.6              | claude-opus-4-6              |
+| Minimax M2.5                 | minimax-m2-5                 |
+| GPT-5.1 Fast                 | gpt-5-1-fast                 |
 | GPT-5.1 Medium Thinking Fast | gpt-5-1-medium-thinking-fast |
-| Kimi K2.5 | kimi-k2-5 |
-| o3 | o3 |
-| xAI Grok-3 | xai-grok-3 |
-| GPT-5.1-Codex-Mini | gpt-5-1-codex-mini |
-| GPT-5.3 Codex High | gpt-5-3-codex-high |
-| GLM-5 | glm-5 |
+| Kimi K2.5                    | kimi-k2-5                    |
+| o3                           | o3                           |
+| xAI Grok-3                   | xai-grok-3                   |
+| GPT-5.1-Codex-Mini           | gpt-5-1-codex-mini           |
+| GPT-5.3 Codex High           | gpt-5-3-codex-high           |
+| GLM-5                        | glm-5                        |
 
 YAML fields `team_defaults.frontend.default_model`, `team_defaults.frontend.fallback_model`, and `agents.<agent>.model_override` must use **Config ID** values. Models referenced by Decision Policy must have a corresponding Config ID entry; documentation-only models may be omitted.
 
@@ -145,11 +145,11 @@ agents:
   component-builder:
     team: frontend
     model_override: swe-llama
-    reason: "Complex component behavior and test coupling"
+    reason: 'Complex component behavior and test coupling'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

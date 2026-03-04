@@ -15,18 +15,18 @@ When to use which team, how teams interact, and when to let `/orchestrate` handl
 
 ## Quick Reference Table
 
-| Team | Command | Owns | Use When |
-|------|---------|------|----------|
-| Backend (T1) | `/team-backend` | API endpoints, services, server-side logic, request validation | You need to build, fix, or modify API routes, service-layer code, or backend error handling |
-| Frontend (T2) | `/team-frontend` | UI components, pages, client state, routing, accessibility | You need to build or fix React components, client-side state management, or layout issues |
-| Data (T3) | `/team-data` | Database schemas, migrations, ORM, seed data, query optimization | You need to create or modify database schemas, write migrations, or optimize queries |
-| Infrastructure (T4) | `/team-infra` | Terraform, Docker, cloud resources, environment provisioning | You need to modify Dockerfiles, Terraform configs, or cloud resource definitions |
-| DevOps (T5) | `/team-devops` | CI/CD pipelines, GitHub Actions, containers, deployment automation | You need to fix or create CI/CD workflows, build pipelines, or container configurations |
-| Testing (T6) | `/team-testing` | Test strategy, coverage, E2E tests, performance benchmarks | You need to write tests, improve coverage, set up test infrastructure, or fix flaky tests |
-| Security (T7) | `/team-security` | Authentication, authorization, security middleware, compliance | You need to implement auth flows, fix security vulnerabilities, or harden endpoints |
-| Documentation (T8) | `/team-docs` | Docs, ADRs, runbooks, onboarding guides, API documentation | You need to write or update documentation, create ADRs, or maintain operational runbooks |
-| Product (T9) | `/team-product` | PRDs, feature specs, user stories, roadmap, personas | You need to draft product requirements, write user stories, or define acceptance criteria |
-| Quality (T10) | `/team-quality` | Code review, refactoring, quality gates, standards enforcement | You need code reviewed for quality, want to refactor for maintainability, or enforce standards |
+| Team                | Command          | Owns                                                               | Use When                                                                                       |
+| ------------------- | ---------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Backend (T1)        | `/team-backend`  | API endpoints, services, server-side logic, request validation     | You need to build, fix, or modify API routes, service-layer code, or backend error handling    |
+| Frontend (T2)       | `/team-frontend` | UI components, pages, client state, routing, accessibility         | You need to build or fix React components, client-side state management, or layout issues      |
+| Data (T3)           | `/team-data`     | Database schemas, migrations, ORM, seed data, query optimization   | You need to create or modify database schemas, write migrations, or optimize queries           |
+| Infrastructure (T4) | `/team-infra`    | Terraform, Docker, cloud resources, environment provisioning       | You need to modify Dockerfiles, Terraform configs, or cloud resource definitions               |
+| DevOps (T5)         | `/team-devops`   | CI/CD pipelines, GitHub Actions, containers, deployment automation | You need to fix or create CI/CD workflows, build pipelines, or container configurations        |
+| Testing (T6)        | `/team-testing`  | Test strategy, coverage, E2E tests, performance benchmarks         | You need to write tests, improve coverage, set up test infrastructure, or fix flaky tests      |
+| Security (T7)       | `/team-security` | Authentication, authorization, security middleware, compliance     | You need to implement auth flows, fix security vulnerabilities, or harden endpoints            |
+| Documentation (T8)  | `/team-docs`     | Docs, ADRs, runbooks, onboarding guides, API documentation         | You need to write or update documentation, create ADRs, or maintain operational runbooks       |
+| Product (T9)        | `/team-product`  | PRDs, feature specs, user stories, roadmap, personas               | You need to draft product requirements, write user stories, or define acceptance criteria      |
+| Quality (T10)       | `/team-quality`  | Code review, refactoring, quality gates, standards enforcement     | You need code reviewed for quality, want to refactor for maintainability, or enforce standards |
 
 ---
 
@@ -71,13 +71,13 @@ Enforce coding standards across files     --> /team-quality
 
 ### Edge Cases: When Two Teams Could Apply
 
-| Scenario | Primary Team | Reason |
-|----------|-------------|--------|
-| Auth-related API endpoint | `/team-security` | Security owns auth routes even though they are technically API endpoints |
-| Database-heavy API endpoint | `/team-backend` | Backend owns the endpoint; coordinate with `/team-data` for schema work |
-| Test for a frontend component | `/team-testing` | Testing owns test strategy; frontend may write the test if it is tightly coupled to a component change |
-| CI pipeline for security scanning | `/team-devops` | DevOps owns pipelines; coordinate with `/team-security` for scan configuration |
-| API documentation | `/team-docs` | Docs owns documentation; backend provides the technical content |
+| Scenario                          | Primary Team     | Reason                                                                                                 |
+| --------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Auth-related API endpoint         | `/team-security` | Security owns auth routes even though they are technically API endpoints                               |
+| Database-heavy API endpoint       | `/team-backend`  | Backend owns the endpoint; coordinate with `/team-data` for schema work                                |
+| Test for a frontend component     | `/team-testing`  | Testing owns test strategy; frontend may write the test if it is tightly coupled to a component change |
+| CI pipeline for security scanning | `/team-devops`   | DevOps owns pipelines; coordinate with `/team-security` for scan configuration                         |
+| API documentation                 | `/team-docs`     | Docs owns documentation; backend provides the technical content                                        |
 
 ---
 
@@ -136,6 +136,7 @@ This is the standard feature lifecycle from requirements to verification.
 ```
 
 **What gets handed off:**
+
 - Product to Backend/Frontend: PRD document with user stories, acceptance criteria, and priority.
 - Backend/Frontend to Testing: Feature branch with implementation and unit tests. Testing uses the acceptance criteria from the PRD to write verification tests.
 
@@ -170,6 +171,7 @@ This pattern is used for security hardening and vulnerability remediation.
 ```
 
 **What gets handed off:**
+
 - Security to Backend: Audit report with severity-classified findings, exact file/line references, and remediation guidance.
 - Backend to Quality: Branch with fixes, tests, and documentation updates. Quality verifies the fixes are correct and complete.
 
@@ -183,25 +185,25 @@ When should you let `/orchestrate` handle team delegation automatically, and whe
 
 ### Use `/orchestrate` When
 
-| Scenario | Why Orchestrate |
-|----------|-----------------|
-| Multi-team feature development | Orchestrate manages the handoff sequence between teams and tracks state |
-| You do not know which teams are needed | Orchestrate runs discovery first and identifies the right teams |
-| Full lifecycle needed (discover through ship) | Orchestrate moves through all 5 phases automatically |
-| Resuming a previous session | Orchestrate reads its state file and picks up where it left off |
-| You want automated validation between steps | Orchestrate runs `/check` and `/review` between implementation and shipping |
+| Scenario                                      | Why Orchestrate                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------- |
+| Multi-team feature development                | Orchestrate manages the handoff sequence between teams and tracks state     |
+| You do not know which teams are needed        | Orchestrate runs discovery first and identifies the right teams             |
+| Full lifecycle needed (discover through ship) | Orchestrate moves through all 5 phases automatically                        |
+| Resuming a previous session                   | Orchestrate reads its state file and picks up where it left off             |
+| You want automated validation between steps   | Orchestrate runs `/check` and `/review` between implementation and shipping |
 
 **How it works:** `/orchestrate` reads the backlog, assigns items to teams based on their scope patterns, delegates work, runs validation after each team completes, and produces a consolidated summary. It manages the `.claude/state/orchestrator.json` state file and `.claude/state/events.log` to maintain continuity across sessions.
 
 ### Use Manual Team Invocation When
 
-| Scenario | Why Manual |
-|----------|-----------|
-| Quick, single-team task | Overhead of full orchestration is unnecessary for a small fix |
-| You know exactly which team should do the work | Skip the discovery and planning phases and go straight to implementation |
-| You want fine-grained control over execution order | Invoke teams in the exact sequence you want |
-| Debugging a specific team's output | Run just that team to reproduce and fix the issue |
-| Parallel independent tasks | Invoke multiple teams in separate sessions for unrelated work |
+| Scenario                                           | Why Manual                                                               |
+| -------------------------------------------------- | ------------------------------------------------------------------------ |
+| Quick, single-team task                            | Overhead of full orchestration is unnecessary for a small fix            |
+| You know exactly which team should do the work     | Skip the discovery and planning phases and go straight to implementation |
+| You want fine-grained control over execution order | Invoke teams in the exact sequence you want                              |
+| Debugging a specific team's output                 | Run just that team to reproduce and fix the issue                        |
+| Parallel independent tasks                         | Invoke multiple teams in separate sessions for unrelated work            |
 
 **Example:** If you need to fix a single failing test, run `/team-testing` directly instead of spinning up the full orchestration loop.
 

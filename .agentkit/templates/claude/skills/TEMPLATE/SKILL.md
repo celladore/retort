@@ -1,9 +1,9 @@
 ---
-name: "{{commandName}}"
-description: "{{commandDescription}}"
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+name: '{{commandName}}'
+description: '{{commandDescription}}'
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -28,7 +28,7 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 
 - Repository: {{repoName}}
 - Default branch: {{defaultBranch}}
-{{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
+  {{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
 
 ## Conventions
 

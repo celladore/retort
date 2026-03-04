@@ -2,12 +2,12 @@
 
 **Render target:** `cursor`
 
-| | |
-|---|---|
-| **Type** | AI-Native Code Editor (VS Code fork) |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — download from [cursor.com](https://cursor.com/) (macOS, Windows, Linux) |
-| **Documentation** | [docs.cursor.com](https://docs.cursor.com/) |
+|                        |                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| **Type**               | AI-Native Code Editor (VS Code fork)                                                                |
+| **Categories**         | AI-Native IDE                                                                                       |
+| **Access**             | Desktop app — download from [cursor.com](https://cursor.com/) (macOS, Windows, Linux)               |
+| **Documentation**      | [docs.cursor.com](https://docs.cursor.com/)                                                         |
 | **Performance Rating** | ⭐⭐⭐⭐ — **77/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)) |
 
 ---
@@ -22,11 +22,11 @@ project rules and `.cursor/commands/` for custom slash commands. Rules use the
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Rules | `.cursor/rules/*.mdc` | MDC (YAML frontmatter + Markdown) |
-| Commands | `.cursor/commands/*.md` | Plain Markdown |
-| Legacy rules | `.cursorrules` (deprecated) | Plain text |
+| Feature      | Location                    | Format                            |
+| ------------ | --------------------------- | --------------------------------- |
+| Rules        | `.cursor/rules/*.mdc`       | MDC (YAML frontmatter + Markdown) |
+| Commands     | `.cursor/commands/*.md`     | Plain Markdown                    |
+| Legacy rules | `.cursorrules` (deprecated) | Plain text                        |
 
 ### Key Capabilities
 
@@ -47,8 +47,8 @@ Each rule file uses the `.mdc` extension with YAML frontmatter:
 
 ```yaml
 ---
-description: "Core TypeScript standards"
-globs: ["**/*.ts", "**/*.tsx"]
+description: 'Core TypeScript standards'
+globs: ['**/*.ts', '**/*.tsx']
 alwaysApply: false
 ---
 # Actual rule content, guidelines, examples, etc.
@@ -80,30 +80,30 @@ alwaysApply: false
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
-| Project context rule | `.cursor/rules/project-context.mdc` | `templates/cursor/rules/` |
-| Security rule | `.cursor/rules/security.mdc` | `templates/cursor/rules/` |
-| Orchestrate rule | `.cursor/rules/orchestrate.mdc` | `templates/cursor/rules/` |
-| Team rules (10) | `.cursor/rules/team-*.mdc` | `teams.yaml` |
-| Commands (19) | `.cursor/commands/*.md` | `commands.yaml` (non-team commands) |
+| Output               | Path                                | Source                              |
+| -------------------- | ----------------------------------- | ----------------------------------- |
+| Project context rule | `.cursor/rules/project-context.mdc` | `templates/cursor/rules/`           |
+| Security rule        | `.cursor/rules/security.mdc`        | `templates/cursor/rules/`           |
+| Orchestrate rule     | `.cursor/rules/orchestrate.mdc`     | `templates/cursor/rules/`           |
+| Team rules (10)      | `.cursor/rules/team-*.mdc`          | `teams.yaml`                        |
+| Commands (19)        | `.cursor/commands/*.md`             | `commands.yaml` (non-team commands) |
 
 ---
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| Rules (.mdc) | ✅ Rich YAML frontmatter + Markdown | ✅ 13 rules generated | None |
-| Commands | ✅ Slash commands (Cursor 1.6+) | ✅ 19 generated | None |
-| Glob-based activation | ✅ In rule frontmatter | ✅ Used in generated rules | None |
-| `alwaysApply` flag | ✅ For global rules | ✅ Used where appropriate | None |
-| Subfolder rules | ✅ Monorepo support | ❌ Not generated | Generate per-package rules in monorepos |
-| `@rule-name` references | ✅ Manual invocation | ⚠️ Not documented in output | Add usage docs to generated rules |
-| Dynamic rule activation | ✅ AI-decided based on description | ✅ Descriptions included | None |
-| Project/user/team hierarchy | ✅ User → project → team | ⚠️ Project only | Could document user-level rules setup |
-| AGENTS.md support | ✅ Recognized | ✅ Always generated | None |
-| Legacy `.cursorrules` | ⚠️ Deprecated | ❌ Not generated | Correct — deprecated format should not be generated |
+| Feature                     | Platform Supports                   | AgentKit Forge Status       | Gap                                                 |
+| --------------------------- | ----------------------------------- | --------------------------- | --------------------------------------------------- |
+| Rules (.mdc)                | ✅ Rich YAML frontmatter + Markdown | ✅ 13 rules generated       | None                                                |
+| Commands                    | ✅ Slash commands (Cursor 1.6+)     | ✅ 19 generated             | None                                                |
+| Glob-based activation       | ✅ In rule frontmatter              | ✅ Used in generated rules  | None                                                |
+| `alwaysApply` flag          | ✅ For global rules                 | ✅ Used where appropriate   | None                                                |
+| Subfolder rules             | ✅ Monorepo support                 | ❌ Not generated            | Generate per-package rules in monorepos             |
+| `@rule-name` references     | ✅ Manual invocation                | ⚠️ Not documented in output | Add usage docs to generated rules                   |
+| Dynamic rule activation     | ✅ AI-decided based on description  | ✅ Descriptions included    | None                                                |
+| Project/user/team hierarchy | ✅ User → project → team            | ⚠️ Project only             | Could document user-level rules setup               |
+| AGENTS.md support           | ✅ Recognized                       | ✅ Always generated         | None                                                |
+| Legacy `.cursorrules`       | ⚠️ Deprecated                       | ❌ Not generated            | Correct — deprecated format should not be generated |
 
 **Summary:** Cursor IDE is well-supported. Primary gap is subfolder rules for
 monorepo layouts. The `.mdc` format with YAML frontmatter is fully utilized.
@@ -112,15 +112,15 @@ monorepo layouts. The `.mdc` format with YAML frontmatter is fully utilized.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 77/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides) |
-| Developer Experience | 84/100 ⭐⭐⭐⭐ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ai-native-ides) |
-| Cost & Value | 68/100 ⭐⭐⭐½ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ai-native-ides) |
-| Customization | 79/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ai-native-ides) |
-| Privacy & Security | 63/100 ⭐⭐⭐ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ai-native-ides) |
-| Team & Enterprise | 63/100 ⭐⭐⭐ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ai-native-ides) |
-| **Weighted Total** | **74/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 77/100 ⭐⭐⭐⭐    | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)   |
+| Developer Experience | 84/100 ⭐⭐⭐⭐    | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ai-native-ides) |
+| Cost & Value         | 68/100 ⭐⭐⭐½     | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ai-native-ides)        |
+| Customization        | 79/100 ⭐⭐⭐⭐    | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ai-native-ides)        |
+| Privacy & Security   | 63/100 ⭐⭐⭐      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ai-native-ides)     |
+| Team & Enterprise    | 63/100 ⭐⭐⭐      | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ai-native-ides)      |
+| **Weighted Total**   | **74/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

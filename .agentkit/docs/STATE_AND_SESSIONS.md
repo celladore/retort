@@ -10,20 +10,20 @@ This is the primary state file that tracks where the orchestrator is in its work
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `schema_version` | string | Version of the state file schema |
-| `repo_id` | string | Unique identifier for the repository |
-| `branch` | string | Current working branch |
-| `session_id` | string | Identifier for the current orchestration session |
-| `current_phase` | number (1-5) | Which phase the orchestrator is currently in |
-| `phase_name` | string | Human-readable name of the current phase |
-| `last_phase_completed` | number | The most recent phase that finished successfully |
-| `next_action` | string | Description of what the orchestrator will do next |
-| `team_progress` | object | Progress tracking for all 10 agent teams |
-| `todo_items` | array | Outstanding work items across all teams |
-| `recent_results` | array | Results from the most recently completed actions |
-| `completed` | boolean | Whether the full orchestration run has finished |
+| Field                  | Type         | Description                                       |
+| ---------------------- | ------------ | ------------------------------------------------- |
+| `schema_version`       | string       | Version of the state file schema                  |
+| `repo_id`              | string       | Unique identifier for the repository              |
+| `branch`               | string       | Current working branch                            |
+| `session_id`           | string       | Identifier for the current orchestration session  |
+| `current_phase`        | number (1-5) | Which phase the orchestrator is currently in      |
+| `phase_name`           | string       | Human-readable name of the current phase          |
+| `last_phase_completed` | number       | The most recent phase that finished successfully  |
+| `next_action`          | string       | Description of what the orchestrator will do next |
+| `team_progress`        | object       | Progress tracking for all 10 agent teams          |
+| `todo_items`           | array        | Outstanding work items across all teams           |
+| `recent_results`       | array        | Results from the most recently completed actions  |
+| `completed`            | boolean      | Whether the full orchestration run has finished   |
 
 ### How to Read
 
@@ -39,13 +39,13 @@ This prints a formatted summary of the current phase, team progress, and next ac
 
 The orchestrator moves through five phases in order:
 
-| Phase | Name | Description |
-|---|---|---|
-| 1 | Discovery | Analyze the repository, identify structure, and gather requirements |
-| 2 | Planning | Break work into tasks and assign to agent teams |
-| 3 | Implementation | Agent teams execute their assigned tasks |
-| 4 | Validation | Run tests, linting, and verification across all changes |
-| 5 | Ship | Finalize changes, generate summaries, and prepare for merge |
+| Phase | Name           | Description                                                         |
+| ----- | -------------- | ------------------------------------------------------------------- |
+| 1     | Discovery      | Analyze the repository, identify structure, and gather requirements |
+| 2     | Planning       | Break work into tasks and assign to agent teams                     |
+| 3     | Implementation | Agent teams execute their assigned tasks                            |
+| 4     | Validation     | Run tests, linting, and verification across all changes             |
+| 5     | Ship           | Finalize changes, generate summaries, and prepare for merge         |
 
 ## Events Log
 
@@ -91,12 +91,12 @@ The lock file prevents concurrent orchestration sessions from conflicting with e
 
 ### Contents
 
-| Field | Description |
-|---|---|
-| `pid` | Process ID of the session holding the lock |
-| `hostname` | Machine hostname where the session is running |
+| Field        | Description                                      |
+| ------------ | ------------------------------------------------ |
+| `pid`        | Process ID of the session holding the lock       |
+| `hostname`   | Machine hostname where the session is running    |
 | `started_at` | ISO 8601 timestamp of when the lock was acquired |
-| `session_id` | Session identifier matching the state file |
+| `session_id` | Session identifier matching the state file       |
 
 ### Stale Lock Detection
 

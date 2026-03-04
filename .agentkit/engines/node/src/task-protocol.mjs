@@ -27,7 +27,13 @@ export const TASK_STATES = [
 ];
 
 /** Terminal states — no further transitions allowed. */
-export const TERMINAL_STATES = ['completed', 'failed', 'rejected', 'canceled', 'BLOCKED_ON_CANCELED'];
+export const TERMINAL_STATES = [
+  'completed',
+  'failed',
+  'rejected',
+  'canceled',
+  'BLOCKED_ON_CANCELED',
+];
 
 /** Valid task types. */
 export const TASK_TYPES = VALID_TASK_TYPES;
@@ -133,7 +139,7 @@ async function withHandoffLock(projectRoot, taskId, fn) {
 function generateRandomSuffix() {
   if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') {
     throw new Error(
-      'AgentKit Forge Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).',
+      'AgentKit Forge Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).'
     );
   }
   const bytes = new Uint8Array(3);
@@ -157,7 +163,9 @@ export async function generateTaskId(projectRoot) {
   let seq = 1;
 
   try {
-    const dirExists = await access(dir).then(() => true).catch(() => false);
+    const dirExists = await access(dir)
+      .then(() => true)
+      .catch(() => false);
     if (dirExists) {
       const files = await readdir(dir);
       // Single pass to find max sequence number
@@ -184,7 +192,9 @@ export async function generateTaskId(projectRoot) {
 
   while (attempts < maxRetries) {
     const p = taskPath(projectRoot, candidate);
-    const exists = await access(p).then(() => true).catch(() => false);
+    const exists = await access(p)
+      .then(() => true)
+      .catch(() => false);
     if (!exists) {
       return candidate;
     }
@@ -448,7 +458,7 @@ export async function listTasks(projectRoot, filters = {}) {
           }
           return null;
         }
-      }),
+      })
     );
 
     for (const data of results) {
@@ -699,7 +709,10 @@ export async function checkDependencies(projectRoot) {
     if (newBlockers.length > 0 && !hasInProgressDep && hasCanceledDep) {
       task.blockedReason = 'canceled';
       task.status = 'BLOCKED_ON_CANCELED';
-    } else if (task.status === 'BLOCKED_ON_CANCELED' && (newBlockers.length === 0 || hasInProgressDep)) {
+    } else if (
+      task.status === 'BLOCKED_ON_CANCELED' &&
+      (newBlockers.length === 0 || hasInProgressDep)
+    ) {
       delete task.blockedReason;
       task.status = 'submitted';
     }
@@ -829,7 +842,9 @@ export async function processHandoffs(projectRoot, delegator = 'orchestrator') {
         });
 
         if (createResult.error) {
-          localErrors.push(`Failed to create handoff task for ${targetTeam}: ${createResult.error}`);
+          localErrors.push(
+            `Failed to create handoff task for ${targetTeam}: ${createResult.error}`
+          );
         } else {
           localCreated.push(createResult.task);
           t._handoffProcessedTargets.push(targetTeam);
@@ -939,4 +954,3 @@ export function formatTaskList(tasks) {
 
   return lines.join('\n');
 }
-

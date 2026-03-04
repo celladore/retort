@@ -2,12 +2,12 @@
 
 **Render target:** `claude`
 
-| | |
-|---|---|
-| **Type** | AI Coding Agent (CLI + IDE integration) |
-| **Categories** | CLI Agent |
-| **Access** | CLI tool — `npm install -g @anthropic-ai/claude-code` or `brew install claude-code` |
-| **Documentation** | [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code) |
+|                        |                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| **Type**               | AI Coding Agent (CLI + IDE integration)                                                          |
+| **Categories**         | CLI Agent                                                                                        |
+| **Access**             | CLI tool — `npm install -g @anthropic-ai/claude-code` or `brew install claude-code`              |
+| **Documentation**      | [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code)         |
 | **Performance Rating** | ⭐⭐⭐⭐½ — **89/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents)) |
 
 ---
@@ -22,16 +22,16 @@ agents, rules, hooks, settings, and orchestrator state.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Root instructions | `CLAUDE.md` (repo root) | Plain Markdown |
-| Commands | `.claude/commands/*.md` | YAML frontmatter + Markdown |
-| Skills | `.claude/skills/*/SKILL.md` | YAML frontmatter + Markdown |
-| Agents | `.claude/agents/*.md` | Plain Markdown with persona/scope |
-| Rules | `.claude/rules/*.md` | Plain Markdown (optional YAML frontmatter for path targeting) |
-| Hooks | `.claude/hooks/*.sh`, `*.ps1` | Shell/PowerShell scripts |
-| Settings | `.claude/settings.json` | JSON (permissions, deny lists) |
-| State | `.claude/state/` | JSON (orchestrator state, session tracking) |
+| Feature           | Location                      | Format                                                        |
+| ----------------- | ----------------------------- | ------------------------------------------------------------- |
+| Root instructions | `CLAUDE.md` (repo root)       | Plain Markdown                                                |
+| Commands          | `.claude/commands/*.md`       | YAML frontmatter + Markdown                                   |
+| Skills            | `.claude/skills/*/SKILL.md`   | YAML frontmatter + Markdown                                   |
+| Agents            | `.claude/agents/*.md`         | Plain Markdown with persona/scope                             |
+| Rules             | `.claude/rules/*.md`          | Plain Markdown (optional YAML frontmatter for path targeting) |
+| Hooks             | `.claude/hooks/*.sh`, `*.ps1` | Shell/PowerShell scripts                                      |
+| Settings          | `.claude/settings.json`       | JSON (permissions, deny lists)                                |
+| State             | `.claude/state/`              | JSON (orchestrator state, session tracking)                   |
 
 ### Key Capabilities
 
@@ -52,33 +52,33 @@ agents, rules, hooks, settings, and orchestrator state.
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
-| Root instructions | `CLAUDE.md` | `templates/claude/CLAUDE.md` + `project.yaml` |
-| Commands (28) | `.claude/commands/*.md` | `commands.yaml` + team commands from `teams.yaml` |
-| Skills (19) | `.claude/skills/*/SKILL.md` | `commands.yaml` (non-team commands) |
-| Agents (19) | `.claude/agents/*.md` | `agents.yaml` |
-| Rules (6) | `.claude/rules/*.md` | `templates/claude/rules/` |
-| Hooks (10) | `.claude/hooks/*.sh`, `*.ps1` | `templates/claude/hooks/` |
-| State schema | `.claude/state/` | Orchestrator state schema |
-| Settings | `.claude/settings.json` | Permissions from `settings.yaml` |
+| Output            | Path                          | Source                                            |
+| ----------------- | ----------------------------- | ------------------------------------------------- |
+| Root instructions | `CLAUDE.md`                   | `templates/claude/CLAUDE.md` + `project.yaml`     |
+| Commands (28)     | `.claude/commands/*.md`       | `commands.yaml` + team commands from `teams.yaml` |
+| Skills (19)       | `.claude/skills/*/SKILL.md`   | `commands.yaml` (non-team commands)               |
+| Agents (19)       | `.claude/agents/*.md`         | `agents.yaml`                                     |
+| Rules (6)         | `.claude/rules/*.md`          | `templates/claude/rules/`                         |
+| Hooks (10)        | `.claude/hooks/*.sh`, `*.ps1` | `templates/claude/hooks/`                         |
+| State schema      | `.claude/state/`              | Orchestrator state schema                         |
+| Settings          | `.claude/settings.json`       | Permissions from `settings.yaml`                  |
 
 ---
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| CLAUDE.md | ✅ Hierarchical placement | ✅ Generated (root) | None |
-| Commands | ✅ Slash-invoked with sandboxing | ✅ 28 generated | None |
-| Skills | ✅ Modular folders with SKILL.md | ✅ 19 generated | Could add more domain-specific skills |
-| Agents/subagents | ✅ Isolated context, parallel work | ✅ 19 generated | None |
-| Rules | ✅ Path-filtered with globs | ✅ 6 generated | Could add more language/framework-specific rules |
-| Hooks | ✅ 5 lifecycle events | ✅ 10 generated (sh + ps1) | None |
-| Settings | ✅ Permissions, deny lists | ✅ Generated | None |
-| State | ✅ Orchestrator state | ✅ Schema generated | None |
-| Hierarchical CLAUDE.md | ✅ `~/.claude/`, `.claude/`, repo root | ⚠️ Root only | Could generate `.claude/CLAUDE.md` for workspace scope |
-| Tool permissions | ✅ Fine-grained in settings.json | ✅ Generated | None |
+| Feature                | Platform Supports                      | AgentKit Forge Status      | Gap                                                    |
+| ---------------------- | -------------------------------------- | -------------------------- | ------------------------------------------------------ |
+| CLAUDE.md              | ✅ Hierarchical placement              | ✅ Generated (root)        | None                                                   |
+| Commands               | ✅ Slash-invoked with sandboxing       | ✅ 28 generated            | None                                                   |
+| Skills                 | ✅ Modular folders with SKILL.md       | ✅ 19 generated            | Could add more domain-specific skills                  |
+| Agents/subagents       | ✅ Isolated context, parallel work     | ✅ 19 generated            | None                                                   |
+| Rules                  | ✅ Path-filtered with globs            | ✅ 6 generated             | Could add more language/framework-specific rules       |
+| Hooks                  | ✅ 5 lifecycle events                  | ✅ 10 generated (sh + ps1) | None                                                   |
+| Settings               | ✅ Permissions, deny lists             | ✅ Generated               | None                                                   |
+| State                  | ✅ Orchestrator state                  | ✅ Schema generated        | None                                                   |
+| Hierarchical CLAUDE.md | ✅ `~/.claude/`, `.claude/`, repo root | ⚠️ Root only               | Could generate `.claude/CLAUDE.md` for workspace scope |
+| Tool permissions       | ✅ Fine-grained in settings.json       | ✅ Generated               | None                                                   |
 
 **Summary:** Claude Code is the most comprehensively supported platform. Minor
 gaps exist in hierarchical CLAUDE.md placement and domain-specific skill/rule expansion.
@@ -87,15 +87,15 @@ gaps exist in hierarchical CLAUDE.md placement and domain-specific skill/rule ex
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 89/100 ⭐⭐⭐⭐½ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents) |
-| Developer Experience | 80/100 ⭐⭐⭐⭐ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cli-agents) |
-| Cost & Value | 64/100 ⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cli-agents) |
-| Customization | 84/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cli-agents) |
-| Privacy & Security | 66/100 ⭐⭐⭐½ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cli-agents) |
-| Team & Enterprise | 68/100 ⭐⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cli-agents) |
-| **Weighted Total** | **78/100 ⭐⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score               | Details                                                                       |
+| -------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 89/100 ⭐⭐⭐⭐½    | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents)       |
+| Developer Experience | 80/100 ⭐⭐⭐⭐     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cli-agents)     |
+| Cost & Value         | 64/100 ⭐⭐⭐       | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cli-agents)            |
+| Customization        | 84/100 ⭐⭐⭐⭐     | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cli-agents)            |
+| Privacy & Security   | 66/100 ⭐⭐⭐½      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cli-agents)         |
+| Team & Enterprise    | 68/100 ⭐⭐⭐½      | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cli-agents)          |
+| **Weighted Total**   | **78/100 ⭐⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

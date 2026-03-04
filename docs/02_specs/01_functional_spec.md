@@ -13,8 +13,8 @@
 
 ## Feature Inventory
 
-| ID | Feature | Status | Owner |
-|----|---------|--------|-------|
+| ID    | Feature               | Status                            | Owner                   |
+| ----- | --------------------- | --------------------------------- | ----------------------- |
 | F-001 | <!-- Feature name --> | <!-- Draft / Approved / Built --> | <!-- Team or person --> |
 
 ## Feature Details
@@ -42,11 +42,11 @@
 
 ## Non-Functional Requirements
 
-| Requirement | Target |
-|-------------|--------|
+| Requirement   | Target                    |
+| ------------- | ------------------------- |
 | Response time | <!-- e.g. < 200ms p95 --> |
-| Availability | <!-- e.g. 99.9% --> |
-| Throughput | <!-- e.g. 1000 req/s --> |
+| Availability  | <!-- e.g. 99.9% -->       |
+| Throughput    | <!-- e.g. 1000 req/s -->  |
 
 ## References
 

@@ -16,15 +16,15 @@
 
 ## Quick Reference
 
-| Command | Purpose |
-|---------|---------|
-| `agentkit sync` | Regenerate all AI tool configs from spec |
-| `agentkit validate` | Check config integrity and security |
-| `agentkit discover` | Scan repo and detect tech stacks |
-| `agentkit init` | Initialize a new repo overlay |
-| `/orchestrate` | Run multi-team coordination workflow |
-| `/check` | Run quality gates locally |
-| `/review` | Request code review from relevant teams |
+| Command             | Purpose                                  |
+| ------------------- | ---------------------------------------- |
+| `agentkit sync`     | Regenerate all AI tool configs from spec |
+| `agentkit validate` | Check config integrity and security      |
+| `agentkit discover` | Scan repo and detect tech stacks         |
+| `agentkit init`     | Initialize a new repo overlay            |
+| `/orchestrate`      | Run multi-team coordination workflow     |
+| `/check`            | Run quality gates locally                |
+| `/review`           | Request code review from relevant teams  |
 
 ---
 
@@ -113,4 +113,4 @@ If `.claude/state/orchestrator.json` becomes corrupted:
 
 ---
 
-*This runbook is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate.*
+_This runbook is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate._

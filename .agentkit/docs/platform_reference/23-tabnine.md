@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI Code Completion & Agent (IDE extension) |
-| **Categories** | IDE Extension |
-| **Access** | VS Code / JetBrains / Visual Studio extension — requires Tabnine account (free tier available) |
-| **Documentation** | [docs.tabnine.com](https://docs.tabnine.com/) |
+|                        |                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Type**               | AI Code Completion & Agent (IDE extension)                                                         |
+| **Categories**         | IDE Extension                                                                                      |
+| **Access**             | VS Code / JetBrains / Visual Studio extension — requires Tabnine account (free tier available)     |
+| **Documentation**      | [docs.tabnine.com](https://docs.tabnine.com/)                                                      |
 | **Performance Rating** | ⭐⭐⭐½ — **68/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)) |
 
 ---
@@ -31,31 +31,31 @@ air-gapped environments, and local model execution.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                |
+| --------- | ----------- | ---------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions |
 
 ### Gap Analysis
 
-| Capability | Native Support | AgentKit Forge Coverage | Gap |
-|-----------|---------------|------------------------|-----|
-| AGENTS.md | ✅ Supported | ✅ Generated | ✔ Covered |
-| Agent config | ✅ Built-in | ❌ Not generated | 🟡 Tabnine-specific |
-| Code policies | ✅ Enterprise | ❌ Not generated | 🔴 Gap for enterprise |
+| Capability    | Native Support | AgentKit Forge Coverage | Gap                   |
+| ------------- | -------------- | ----------------------- | --------------------- |
+| AGENTS.md     | ✅ Supported   | ✅ Generated            | ✔ Covered             |
+| Agent config  | ✅ Built-in    | ❌ Not generated        | 🟡 Tabnine-specific   |
+| Code policies | ✅ Enterprise  | ❌ Not generated        | 🔴 Gap for enterprise |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 68/100 ⭐⭐⭐½ | Solid completions; agent mode is newer and improving |
-| Developer Experience | 75/100 ⭐⭐⭐½ | Mature product; smooth IDE integration |
-| Cost & Value | 72/100 ⭐⭐⭐½ | Free tier; Pro at $12/mo; Enterprise custom |
-| Customization | 50/100 ⭐⭐½ | AGENTS.md + policy config; less depth than Cursor |
-| Privacy & Security | 85/100 ⭐⭐⭐⭐ | Best-in-class: on-prem, air-gapped, local models |
-| Team & Enterprise | 82/100 ⭐⭐⭐⭐ | Strong enterprise: SSO, audit, governance, VPC deploy |
-| **Weighted Total** | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 68/100 ⭐⭐⭐½     | Solid completions; agent mode is newer and improving                          |
+| Developer Experience | 75/100 ⭐⭐⭐½     | Mature product; smooth IDE integration                                        |
+| Cost & Value         | 72/100 ⭐⭐⭐½     | Free tier; Pro at $12/mo; Enterprise custom                                   |
+| Customization        | 50/100 ⭐⭐½       | AGENTS.md + policy config; less depth than Cursor                             |
+| Privacy & Security   | 85/100 ⭐⭐⭐⭐    | Best-in-class: on-prem, air-gapped, local models                              |
+| Team & Enterprise    | 82/100 ⭐⭐⭐⭐    | Strong enterprise: SSO, audit, governance, VPC deploy                         |
+| **Weighted Total**   | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

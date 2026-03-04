@@ -14,16 +14,16 @@ evaluations in **{{projectName}}**.
 
 A work item is complete only when all of the following pass:
 
-| Gate | Minimum requirement |
-|------|-------------------|
-| Lint | Zero new lint errors |
-| Type safety | No new type errors |
-| Unit tests | All tests green |
-| Coverage | ≥ {{#if testingCoverage}}{{testingCoverage}}{{/if}}{{#unless testingCoverage}}project target{{/unless}}% |
-| Integration tests | All green |
-| Secrets scan | Clean — no credentials in diff |
-| PR description | Template completely filled |
-| Code review | ≥ 1 approval from a reviewer with relevant expertise |
+| Gate              | Minimum requirement                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Lint              | Zero new lint errors                                                                                     |
+| Type safety       | No new type errors                                                                                       |
+| Unit tests        | All tests green                                                                                          |
+| Coverage          | ≥ {{#if testingCoverage}}{{testingCoverage}}{{/if}}{{#unless testingCoverage}}project target{{/unless}}% |
+| Integration tests | All green                                                                                                |
+| Secrets scan      | Clean — no credentials in diff                                                                           |
+| PR description    | Template completely filled                                                                               |
+| Code review       | ≥ 1 approval from a reviewer with relevant expertise                                                     |
 
 ## Code Review Checklist
 
@@ -42,12 +42,18 @@ When reviewing a pull request, verify every item:
 Before committing, run:
 
 {{#if hasStaticAnalysis}}```bash
+
 # Static analysis: {{testingStaticAnalysis}}
+
 {{/if}}
 {{#unless hasStaticAnalysis}}```bash
+
 # Static analysis (recommended)
+
 # npx semgrep --config=auto .
+
 {{/unless}}
+
 ```
 
 ## Test Quality Signals
@@ -82,11 +88,13 @@ Reject tests that:
 Follow the **{{#if commitConvention}}{{commitConvention}}{{/if}}{{#unless commitConvention}}conventional{{/unless}}** commit convention:
 
 ```
+
 <type>(<scope>): <short description>
 
 [optional body]
 
 [optional footer — Closes #123]
+
 ```
 
 Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`.
@@ -105,3 +113,4 @@ Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`.
 3. Create a tracking issue with `flaky-test` label and resolve within two
    sprints.
 4. Never merge a change that introduces a new flaky test.
+```

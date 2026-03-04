@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+
 # Instructions — dependency-management
 
 Rules for managing project dependencies, supply chain security, automated updates, and lockfile hygiene.
@@ -25,7 +26,7 @@ renovate.json
 
 ## Conventions
 
-- **[dep-pin-versions]** Pin all dependency versions in package manifests. Use exact versions or narrow ranges. Rely on Renovate for automated version bumps via PR. Never use latest, *, or wide ranges like >=.
+- **[dep-pin-versions]** Pin all dependency versions in package manifests. Use exact versions or narrow ranges. Rely on Renovate for automated version bumps via PR. Never use latest, \*, or wide ranges like >=.
 
 - **[dep-lockfile-committed]** Lockfiles (pnpm-lock.yaml, Cargo.lock, poetry.lock) must be committed to version control. Install with --frozen-lockfile in CI. Never delete or regenerate lockfiles without reviewing the diff.
 

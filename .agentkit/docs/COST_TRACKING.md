@@ -60,7 +60,7 @@ Token usage logs are written to the `.agentkit/logs/` directory. To enable loggi
 costTracking:
   enabled: true
   logDir: logs
-  granularity: session  # Options: session, command, detailed
+  granularity: session # Options: session, command, detailed
 ```
 
 ### Log Format
@@ -126,20 +126,20 @@ A session begins when an AI assistant starts processing a task and ends when the
 
 Each session records:
 
-| Field | Description |
-|-------|-------------|
-| `sessionId` | Unique identifier for the session |
-| `startTime` | When the session began |
-| `endTime` | When the session ended |
-| `totalInputTokens` | Sum of all input tokens across API calls |
-| `totalOutputTokens` | Sum of all output tokens across API calls |
-| `totalCacheReadTokens` | Tokens read from prompt cache |
-| `totalCacheWriteTokens` | Tokens written to prompt cache |
-| `estimatedTotalCostUSD` | Estimated total cost for the session |
-| `commandsRun` | List of AgentKit commands executed |
-| `filesModified` | Number of files created or modified |
-| `user` | Developer who initiated the session |
-| `branch` | Git branch the work was performed on |
+| Field                   | Description                               |
+| ----------------------- | ----------------------------------------- |
+| `sessionId`             | Unique identifier for the session         |
+| `startTime`             | When the session began                    |
+| `endTime`               | When the session ended                    |
+| `totalInputTokens`      | Sum of all input tokens across API calls  |
+| `totalOutputTokens`     | Sum of all output tokens across API calls |
+| `totalCacheReadTokens`  | Tokens read from prompt cache             |
+| `totalCacheWriteTokens` | Tokens written to prompt cache            |
+| `estimatedTotalCostUSD` | Estimated total cost for the session      |
+| `commandsRun`           | List of AgentKit commands executed        |
+| `filesModified`         | Number of files created or modified       |
+| `user`                  | Developer who initiated the session       |
+| `branch`                | Git branch the work was performed on      |
 
 ### Session Summary Files
 
@@ -189,20 +189,20 @@ The monthly report includes:
 
 #### Breakdown by User
 
-| User | Sessions | Input Tokens | Output Tokens | Est. Cost |
-|------|----------|-------------|--------------|-----------|
-| alice@example.com | 42 | 1,250,000 | 380,000 | $45.20 |
-| bob@example.com | 35 | 980,000 | 290,000 | $34.10 |
-| **Total** | **77** | **2,230,000** | **670,000** | **$79.30** |
+| User              | Sessions | Input Tokens  | Output Tokens | Est. Cost  |
+| ----------------- | -------- | ------------- | ------------- | ---------- |
+| alice@example.com | 42       | 1,250,000     | 380,000       | $45.20     |
+| bob@example.com   | 35       | 980,000       | 290,000       | $34.10     |
+| **Total**         | **77**   | **2,230,000** | **670,000**   | **$79.30** |
 
 #### Breakdown by Command
 
-| Command | Invocations | Input Tokens | Output Tokens | Est. Cost |
-|---------|------------|-------------|--------------|-----------|
-| plan | 120 | 800,000 | 250,000 | $30.50 |
-| orchestrate | 45 | 650,000 | 180,000 | $22.80 |
-| review | 88 | 480,000 | 140,000 | $16.20 |
-| discover | 30 | 300,000 | 100,000 | $9.80 |
+| Command     | Invocations | Input Tokens | Output Tokens | Est. Cost |
+| ----------- | ----------- | ------------ | ------------- | --------- |
+| plan        | 120         | 800,000      | 250,000       | $30.50    |
+| orchestrate | 45          | 650,000      | 180,000       | $22.80    |
+| review      | 88          | 480,000      | 140,000       | $16.20    |
+| discover    | 30          | 300,000      | 100,000       | $9.80     |
 
 #### Breakdown by Branch
 
@@ -230,7 +230,7 @@ name: Monthly AI Cost Report
 
 on:
   schedule:
-    - cron: '0 9 1 * *'  # 9 AM on the 1st of each month
+    - cron: '0 9 1 * *' # 9 AM on the 1st of each month
 
 jobs:
   report:
@@ -292,10 +292,10 @@ Different tasks have different complexity requirements. Configure model selectio
 ```yaml
 costTracking:
   modelPreferences:
-    discover: claude-haiku    # Low-cost for scanning/discovery
-    plan: claude-sonnet       # Mid-range for planning
-    orchestrate: claude-opus  # High-capability for complex orchestration
-    check: claude-haiku       # Low-cost for validation
+    discover: claude-haiku # Low-cost for scanning/discovery
+    plan: claude-sonnet # Mid-range for planning
+    orchestrate: claude-opus # High-capability for complex orchestration
+    check: claude-haiku # Low-cost for validation
 ```
 
 ### 4. Use the Plan Command Before Orchestrate

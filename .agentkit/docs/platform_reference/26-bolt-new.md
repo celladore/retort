@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI App Builder (prompt-to-app) |
-| **Categories** | Vibe Coding / App Builder |
-| **Access** | Web app — [bolt.new](https://bolt.new/) — browser-based, no install required |
-| **Documentation** | [docs.bolt.new](https://docs.bolt.new/) |
+|                        |                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Type**               | AI App Builder (prompt-to-app)                                                                                |
+| **Categories**         | Vibe Coding / App Builder                                                                                     |
+| **Access**             | Web app — [bolt.new](https://bolt.new/) — browser-based, no install required                                  |
+| **Documentation**      | [docs.bolt.new](https://docs.bolt.new/)                                                                       |
 | **Performance Rating** | ⭐⭐⭐½ — **68/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--vibe-coding--app-builders)) |
 
 ---
@@ -31,8 +31,8 @@ prototyping and MVP development.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                                       |
+| --------- | ----------- | --------------------------------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions (if repo is connected) |
 
 ### Gap Analysis
@@ -44,15 +44,15 @@ configuration files. AGENTS.md may be useful when working with existing repos.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 68/100 ⭐⭐⭐½ | Good for greenfield; weaker on existing codebases |
-| Developer Experience | 82/100 ⭐⭐⭐⭐ | Zero-setup browser experience; instant preview |
-| Cost & Value | 65/100 ⭐⭐⭐ | Free limited; paid ~$25/mo token-based |
-| Customization | 30/100 ⭐½ | Primarily prompt-driven; minimal file-based config |
-| Privacy & Security | 45/100 ⭐⭐ | Cloud-only; code processed on Bolt servers |
-| Team & Enterprise | 35/100 ⭐⭐ | Limited team features; collaborative but not enterprise |
-| **Weighted Total** | **60/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                       |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 68/100 ⭐⭐⭐½    | Good for greenfield; weaker on existing codebases                             |
+| Developer Experience | 82/100 ⭐⭐⭐⭐   | Zero-setup browser experience; instant preview                                |
+| Cost & Value         | 65/100 ⭐⭐⭐     | Free limited; paid ~$25/mo token-based                                        |
+| Customization        | 30/100 ⭐½        | Primarily prompt-driven; minimal file-based config                            |
+| Privacy & Security   | 45/100 ⭐⭐       | Cloud-only; code processed on Bolt servers                                    |
+| Team & Enterprise    | 35/100 ⭐⭐       | Limited team features; collaborative but not enterprise                       |
+| **Weighted Total**   | **60/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — TypeScript / JavaScript
 
 Apply these rules when editing `.ts`, `.tsx`, `.js`, `.mjs`, or `.jsx` files.
@@ -86,4 +87,3 @@ The following conventions are enforced in **agentkit-forge** and derived from
 - **[ts-no-console]** No console.log in production code. Use the project's structured logger instead. console.log is acceptable in scripts/ and test files.
 
 - **[ts-strict-null]** Strict null checks must be enabled. Handle null/undefined explicitly rather than relying on truthiness checks for non-boolean values.
-

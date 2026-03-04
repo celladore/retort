@@ -31,22 +31,22 @@
 
 ## Latest benchmark signals
 
-| Signal                 | Value                                                                        | Source                                                               | Quality                        |
-| ---------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------ |
-| MRCR v2 (8-needle, 1M) | Opus 4.6: 76%; Claude Sonnet v4.5: 18.5%                                    | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
-| SWE-bench Verified     | Averaged over 25 trials; 81.42% with prompt modification                     | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
-| MCP Atlas              | 62.7% at high effort                                                         | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
-| BrowseComp             | 86.8% with multi-agent harness                                               | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
+| Signal                 | Value                                                                             | Source                                                               | Quality                        |
+| ---------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------ |
+| MRCR v2 (8-needle, 1M) | Opus 4.6: 76%; Claude Sonnet v4.5: 18.5%                                          | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
+| SWE-bench Verified     | Averaged over 25 trials; 81.42% with prompt modification                          | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
+| MCP Atlas              | 62.7% at high effort                                                              | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
+| BrowseComp             | 86.8% with multi-agent harness                                                    | [Anthropic Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) | Fetched, vendor claim          |
 | SWE-rebench status     | Claude Opus 4.6 reported at #1; Claude Sonnet v4.5 (code-specialized) best pass@5 | [SWE-rebench](https://swe-rebench.com/)                              | Fetched, independent benchmark |
 
 > **Note:** Anthropic uses "Claude Sonnet v4.5" / "Sonnet 4.5" for the same model; internal naming may differ from vendor marketing.
 
 ## Models tracked from PRD-002 (base + profiles)
 
-| Base model        | Environment      | Profile variants covered | Cost tier            | Cost multiplier range | Tokens/problem | SWE-bench / Verified                       | HLE           | SWE-rebench                            | Aider         | Coding ability summary                                       | Decision Readiness | When to use                                                  | Source quality               | Last verified |
-| ----------------- | ---------------- | ------------------------ | -------------------- | --------------------: | -------------: | ------------------------------------------ | ------------- | -------------------------------------- | ------------- | ------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ | ---------------------------- | ------------- |
+| Base model        | Environment      | Profile variants covered | Cost tier                 | Cost multiplier range | Tokens/problem | SWE-bench / Verified                       | HLE           | SWE-rebench                            | Aider         | Coding ability summary                                       | Decision Readiness | When to use                                                  | Source quality               | Last verified |
+| ----------------- | ---------------- | ------------------------ | ------------------------- | --------------------: | -------------: | ------------------------------------------ | ------------- | -------------------------------------- | ------------- | ------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ | ---------------------------- | ------------- |
 | Claude Opus 4.6   | Cursor, Windsurf | Opus 4.6                 | Paid (cost not evaluated) |         Not evaluated |  Not evaluated | 81.42% (25-trial average, prompt-modified) | Not evaluated | #1 reported on SWE-rebench news stream | Not evaluated | Highest-confidence Claude line for deep coding reasoning     | Medium             | Complex refactoring, architecture, deep reasoning            | Vendor + independent mix     | 2026-02-26    |
-| Claude 3.5 Sonnet | Windsurf/Intake  | Claude 3.5 Sonnet        | Paid                 |                   2.0 |  Not evaluated | 49.0% (SWE-bench Verified)                 | Not evaluated | Not evaluated                          | Not evaluated | State-of-the-art coding; beats previous SOTA; strong agentic | High               | Production coding where quality and reliability are critical | PRD-002 + Anthropic research | 2026-02-26    |
+| Claude 3.5 Sonnet | Windsurf/Intake  | Claude 3.5 Sonnet        | Paid                      |                   2.0 |  Not evaluated | 49.0% (SWE-bench Verified)                 | Not evaluated | Not evaluated                          | Not evaluated | State-of-the-art coding; beats previous SOTA; strong agentic | High               | Production coding where quality and reliability are critical | PRD-002 + Anthropic research | 2026-02-26    |
 
 ## Operational notes
 

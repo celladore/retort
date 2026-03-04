@@ -1,9 +1,9 @@
 ---
-description: "Run tests — auto-detects framework, accepts optional scope or filter"
+description: 'Run tests — auto-detects framework, accepts optional scope or filter'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *), Bash(vitest *), Bash(jest *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -15,6 +15,7 @@ You are the **Test Agent**. You run the test suite for this repository, auto-det
 ## Arguments
 
 `$ARGUMENTS` may contain:
+
 - **Scope:** A file path, directory, package name, or test name pattern (e.g., `src/auth/`, `auth.test.ts`, `packages/core`, `"should validate token"`).
 - **Flags:**
   - `--watch` — Run tests in watch mode (for interactive development).
@@ -29,19 +30,20 @@ If no arguments are provided, run the full test suite.
 
 Detect the test framework in the following priority order:
 
-| Priority | Signal | Run Command |
-|----------|--------|-------------|
-| 1 | `vitest` in devDependencies or vitest config file | `npx vitest run` |
-| 2 | `jest` in devDependencies or jest config file | `npx jest` |
-| 3 | `test` script in `package.json` | `pnpm test` / `npm test` |
-| 4 | `Cargo.toml` | `cargo test` |
-| 5 | `*.csproj` with test framework references | `dotnet test` |
-| 6 | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest` |
-| 7 | `go.mod` | `go test ./...` |
+| Priority | Signal                                                                | Run Command              |
+| -------- | --------------------------------------------------------------------- | ------------------------ |
+| 1        | `vitest` in devDependencies or vitest config file                     | `npx vitest run`         |
+| 2        | `jest` in devDependencies or jest config file                         | `npx jest`               |
+| 3        | `test` script in `package.json`                                       | `pnpm test` / `npm test` |
+| 4        | `Cargo.toml`                                                          | `cargo test`             |
+| 5        | `*.csproj` with test framework references                             | `dotnet test`            |
+| 6        | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest`                 |
+| 7        | `go.mod`                                                              | `go test ./...`          |
 
 ## Scoped Test Runs
 
 ### File or Directory Scope
+
 - **Vitest:** `npx vitest run <path>`
 - **Jest:** `npx jest <path>`
 - **Cargo:** `cargo test --test <name>` or `cargo test -p <package>`
@@ -50,6 +52,7 @@ Detect the test framework in the following priority order:
 - **Go:** `go test ./<path>/...`
 
 ### Pattern / Name Filter
+
 - **Vitest:** `npx vitest run -t "<pattern>"`
 - **Jest:** `npx jest -t "<pattern>"`
 - **Cargo:** `cargo test <pattern>`
@@ -58,6 +61,7 @@ Detect the test framework in the following priority order:
 - **Go:** `go test ./... -run "<pattern>"`
 
 ### Monorepo Scope
+
 - **pnpm workspaces:** `pnpm --filter <scope> test`
 - **npm workspaces:** `npm test --workspace=<scope>`
 - **Cargo workspaces:** `cargo test -p <package>`
@@ -67,14 +71,14 @@ Detect the test framework in the following priority order:
 
 When `--coverage` is passed or when running the full suite, enable coverage if the tooling supports it:
 
-| Framework | Coverage Command |
-|-----------|-----------------|
-| Vitest | `npx vitest run --coverage` |
-| Jest | `npx jest --coverage` |
-| Cargo | `cargo tarpaulin` (if installed) or `cargo llvm-cov` |
-| dotnet | `dotnet test --collect:"XPlat Code Coverage"` |
-| pytest | `pytest --cov=. --cov-report=term-missing` |
-| Go | `go test ./... -coverprofile=coverage.out` |
+| Framework | Coverage Command                                     |
+| --------- | ---------------------------------------------------- |
+| Vitest    | `npx vitest run --coverage`                          |
+| Jest      | `npx jest --coverage`                                |
+| Cargo     | `cargo tarpaulin` (if installed) or `cargo llvm-cov` |
+| dotnet    | `dotnet test --collect:"XPlat Code Coverage"`        |
+| pytest    | `pytest --cov=. --cov-report=term-missing`           |
+| Go        | `go test ./... -coverprofile=coverage.out`           |
 
 ## Output
 
@@ -129,6 +133,7 @@ If tests fail:
 ## Pre-Test Checks
 
 Before running tests:
+
 1. Verify dependencies are installed. Install if missing.
 2. Check if a build step is required before tests (some projects need `tsc` or `build` first).
 3. Check for required environment variables or test configuration (`.env.test`, test database, etc.).

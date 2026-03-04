@@ -247,10 +247,7 @@ export function flattenProjectYaml(project, docsSpec = null) {
 
   // hasDr
   vars.hasDr =
-    !!vars.drRpoHours ||
-    !!vars.drRtoHours ||
-    !!vars.drBackupSchedule ||
-    vars.hasGeoRedundancy;
+    !!vars.drRpoHours || !!vars.drRtoHours || !!vars.drBackupSchedule || vars.hasGeoRedundancy;
 
   // hasAnyComplianceConfig
   vars.hasAnyComplianceConfig =
@@ -268,7 +265,14 @@ export function flattenProjectYaml(project, docsSpec = null) {
 
   // Infrastructure tags (kept as arrays for {{#each}} in IaC templates)
   const normaliseTags = (arr) =>
-    [...new Set(arr.filter((t) => typeof t === 'string').map((t) => t.trim()).filter(Boolean))].sort();
+    [
+      ...new Set(
+        arr
+          .filter((t) => typeof t === 'string')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      ),
+    ].sort();
   const mandatoryTags = project?.infrastructure?.tagging?.mandatory;
   if (Array.isArray(mandatoryTags) && mandatoryTags.length > 0) {
     vars.infraMandatoryTagsList = normaliseTags(mandatoryTags);
@@ -280,18 +284,16 @@ export function flattenProjectYaml(project, docsSpec = null) {
 
   // Language detection booleans (derived from stack.languages array)
   const langs = Array.isArray(project?.stack?.languages)
-    ? project.stack.languages.filter((l) => typeof l === 'string').map((l) => l.trim().toLowerCase())
+    ? project.stack.languages
+        .filter((l) => typeof l === 'string')
+        .map((l) => l.trim().toLowerCase())
     : [];
   vars.hasLanguageTypeScript = langs.some((l) => l === 'typescript' || l === 'ts');
   vars.hasLanguageJavaScript = langs.some((l) => l === 'javascript' || l === 'js');
   vars.hasLanguageRust = langs.includes('rust');
   vars.hasLanguagePython = langs.includes('python');
-  vars.hasLanguageDotnet = langs.some((l) =>
-    ['csharp', 'c#', 'dotnet', '.net'].includes(l)
-  );
-  vars.hasLanguageBlockchain = langs.some((l) =>
-    ['solidity', 'blockchain'].includes(l)
-  );
+  vars.hasLanguageDotnet = langs.some((l) => ['csharp', 'c#', 'dotnet', '.net'].includes(l));
+  vars.hasLanguageBlockchain = langs.some((l) => ['solidity', 'blockchain'].includes(l));
   vars.hasLanguageGo = langs.some((l) => l === 'go' || l === 'golang');
   vars.hasLanguageJava = langs.includes('java');
 
@@ -312,11 +314,13 @@ export function flattenCrosscutting(cc, vars) {
   // Copy mapped crosscutting vars into the target vars object
   // Filter out keys that don't belong to crosscutting to avoid noise
   for (const [key, val] of Object.entries(mapped)) {
-    if (key !== 'hasAnyPattern' &&
-        key !== 'hasAnyInfraConfig' &&
-        key !== 'hasAnyMonitoring' &&
-        key !== 'hasDr' &&
-        key !== 'hasAnyComplianceConfig') {
+    if (
+      key !== 'hasAnyPattern' &&
+      key !== 'hasAnyInfraConfig' &&
+      key !== 'hasAnyMonitoring' &&
+      key !== 'hasDr' &&
+      key !== 'hasAnyComplianceConfig'
+    ) {
       vars[key] = val;
     }
   }
@@ -417,8 +421,7 @@ export function insertHeader(content, ext, version, repoName) {
         const afterClose = endFrontmatter + closingMarker.length;
         // Include the trailing newline after --- so header is on its own line,
         // then add a blank line to separate front-matter from the generated comment.
-        const insertPos =
-          content[afterClose] === '\n' ? afterClose + 1 : afterClose;
+        const insertPos = content[afterClose] === '\n' ? afterClose + 1 : afterClose;
         return content.slice(0, insertPos) + '\n' + header + content.slice(insertPos);
       }
     }
@@ -513,8 +516,17 @@ export function mergePermissions(base, overlay) {
  * All available render targets.
  */
 export const ALL_RENDER_TARGETS = [
-  'claude', 'cursor', 'windsurf', 'ai', 'copilot', 'gemini', 'codex',
-  'warp', 'cline', 'roo', 'mcp',
+  'claude',
+  'cursor',
+  'windsurf',
+  'ai',
+  'copilot',
+  'gemini',
+  'codex',
+  'warp',
+  'cline',
+  'roo',
+  'mcp',
 ];
 
 /**

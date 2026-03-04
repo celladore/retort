@@ -29,7 +29,10 @@ describe('runDoctor', () => {
       throw new Error('Validation exploded');
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     expect(result.ok).toBe(false);
     expect(result.status).toBe('FAIL');
@@ -51,13 +54,19 @@ describe('runDoctor', () => {
       warnings: [],
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     expect(result.ok).toBe(false);
     expect(result.status).toBe('FAIL');
     expect(result.findings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ severity: 'error', message: expect.stringContaining('Spec validation failed') }),
+        expect.objectContaining({
+          severity: 'error',
+          message: expect.stringContaining('Spec validation failed'),
+        }),
         expect.objectContaining({ severity: 'error', message: 'Invalid field X' }),
       ])
     );
@@ -73,18 +82,24 @@ describe('runDoctor', () => {
 
     // Mock overlay settings to avoid other errors
     vi.spyOn(fs, 'readFileSync').mockImplementation((path) => {
-        if (path.includes('overlays') && path.includes('settings.yaml')) {
-            return 'renderTargets: ["claude"]';
-        }
-        return '';
+      if (path.includes('overlays') && path.includes('settings.yaml')) {
+        return 'renderTargets: ["claude"]';
+      }
+      return '';
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     // It might fail later due to other checks, but we check for spec success message
     expect(result.findings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ severity: 'info', message: expect.stringContaining('Spec validation passed') }),
+        expect.objectContaining({
+          severity: 'info',
+          message: expect.stringContaining('Spec validation passed'),
+        }),
         expect.objectContaining({ severity: 'warning', message: 'Deprecation warning' }),
       ])
     );
@@ -96,16 +111,23 @@ describe('runDoctor', () => {
 
     vi.spyOn(fs, 'existsSync').mockImplementation((p) => {
       // overlay settings missing
-      if (typeof p === 'string' && p.includes('overlays') && p.includes('settings.yaml')) return false;
+      if (typeof p === 'string' && p.includes('overlays') && p.includes('settings.yaml'))
+        return false;
       return true;
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     expect(result.findings).toEqual(
-        expect.arrayContaining([
-             expect.objectContaining({ severity: 'warning', message: expect.stringContaining('No renderTargets defined') })
-        ])
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('No renderTargets defined'),
+        }),
+      ])
     );
   });
 
@@ -120,12 +142,18 @@ describe('runDoctor', () => {
       return '';
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     expect(result.ok).toBe(false);
     expect(result.findings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ severity: 'error', message: expect.stringContaining('Failed to parse overlay settings') }),
+        expect.objectContaining({
+          severity: 'error',
+          message: expect.stringContaining('Failed to parse overlay settings'),
+        }),
       ])
     );
   });
@@ -141,11 +169,17 @@ describe('runDoctor', () => {
       return '';
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     expect(result.findings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ severity: 'warning', message: expect.stringContaining('No renderTargets defined') }),
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('No renderTargets defined'),
+        }),
       ])
     );
   });
@@ -168,12 +202,18 @@ describe('runDoctor', () => {
       return true;
     });
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     expect(result.ok).toBe(false);
     expect(result.findings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ severity: 'error', message: expect.stringContaining("Missing template root for target 'cursor'") }),
+        expect.objectContaining({
+          severity: 'error',
+          message: expect.stringContaining("Missing template root for target 'cursor'"),
+        }),
       ])
     );
   });
@@ -184,57 +224,69 @@ describe('runDoctor', () => {
 
     // Mock overlay to be valid
     vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
-        if (typeof p === 'string') {
-            if (p.includes('overlays') && p.includes('settings.yaml')) {
-                return 'renderTargets: ["claude"]';
-            }
-            if (p.endsWith('project.yaml')) {
-                return `
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
 name: Test Project
 description: A test
 phase: active
 stack:
   languages: [javascript]
 `;
-            }
         }
-        return '';
+      }
+      return '';
     });
 
     // existSync must return true for project.yaml
     vi.spyOn(fs, 'existsSync').mockReturnValue(true);
 
-    const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
     // It should calculate completeness
     expect(result.findings).toEqual(
-        expect.arrayContaining([
-            expect.objectContaining({ severity: 'info', message: expect.stringContaining('project.yaml completeness') })
-        ])
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'info',
+          message: expect.stringContaining('project.yaml completeness'),
+        }),
+      ])
     );
   });
 
   it('should report warning if project.yaml is missing', async () => {
-      const { validateSpec } = await import('../spec-validator.mjs');
-      validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
 
-      // Overlay valid
-      vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
-          if (p.includes('overlays') && p.includes('settings.yaml')) return 'renderTargets: ["claude"]';
-          return '';
-      });
+    // Overlay valid
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (p.includes('overlays') && p.includes('settings.yaml')) return 'renderTargets: ["claude"]';
+      return '';
+    });
 
-      vi.spyOn(fs, 'existsSync').mockImplementation((p) => {
-          if (typeof p === 'string' && p.endsWith('project.yaml')) return false;
-          return true;
-      });
+    vi.spyOn(fs, 'existsSync').mockImplementation((p) => {
+      if (typeof p === 'string' && p.endsWith('project.yaml')) return false;
+      return true;
+    });
 
-      const result = await runDoctor({ agentkitRoot: mockAgentkitRoot, projectRoot: mockProjectRoot });
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
 
-      expect(result.findings).toEqual(
-          expect.arrayContaining([
-              expect.objectContaining({ severity: 'warning', message: expect.stringContaining('project.yaml not found') })
-          ])
-      );
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('project.yaml not found'),
+        }),
+      ])
+    );
   });
 });

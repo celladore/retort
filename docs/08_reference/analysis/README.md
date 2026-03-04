@@ -5,9 +5,9 @@ defined in [PRD-001](../../01_product/PRD-001-llm-decision-engine.md).
 
 ## Documents
 
-| File | Description |
-| --- | --- |
-| [model-quirks-analysis.md](./model-quirks-analysis.md) | Systematic analysis of model-specific quirks for the decision engine |
+| File                                                                   | Description                                                            |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| [model-quirks-analysis.md](./model-quirks-analysis.md)                 | Systematic analysis of model-specific quirks for the decision engine   |
 | [quirks-scoring-implementation.md](./quirks-scoring-implementation.md) | Implementation plan for numerical quirk scoring in the decision engine |
 
 ## Related

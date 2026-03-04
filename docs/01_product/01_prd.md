@@ -36,8 +36,8 @@
 
 ## Success Metrics
 
-| Metric | Target | Measurement Method |
-|--------|--------|--------------------|
+| Metric                      | Target            | Measurement Method      |
+| --------------------------- | ----------------- | ----------------------- |
 | <!-- e.g. Adoption rate --> | <!-- e.g. 80% --> | <!-- e.g. Analytics --> |
 
 ## Dependencies
@@ -46,8 +46,8 @@
 
 ## Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
+| Risk          | Likelihood     | Impact         | Mitigation    |
+| ------------- | -------------- | -------------- | ------------- |
 | <!-- Risk --> | <!-- H/M/L --> | <!-- H/M/L --> | <!-- Plan --> |
 
 ## References

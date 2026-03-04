@@ -8,30 +8,35 @@
 # Blockchain / Web3 Rules
 
 ## Solana
+
 - Use Anchor framework conventions for Solana programs
 - Validate all account constraints using Anchor macros
 - Use PDAs (Program Derived Addresses) for deterministic account addressing
 - All instructions must have explicit error codes and documentation
 
 ## EtherLink
+
 - Follow the bridge contract pattern for EtherLink integrations
 - Validate all cross-chain messages
 - Implement replay protection
 - Handle finality differences between L1 and L2 explicitly
 
 ## x402 Payment Protocol
+
 - Follow the HTTP 402 payment-required flow
 - Implement proper payment verification before granting resource access
 - Support idempotent payment processing
 - Include receipt generation and verification
 
 ## Gas Optimization
+
 - Minimize storage operations
 - Batch transactions where possible
 - Use calldata over memory for read-only function parameters
 - Document gas cost estimates for public functions
 
 ## Audit Trail
+
 - All state-changing operations must emit events for off-chain indexing
 - Include sufficient context in events for state reconstruction
 - Log transaction hashes for cross-reference

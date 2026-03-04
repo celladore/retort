@@ -99,15 +99,23 @@ function buildSteps(stack, flags) {
 // one of these (after resolveFormatter mapping) to prevent a compromised spec
 // from executing arbitrary binaries.
 const ALLOWED_FORMATTER_BASES = new Set([
-  'prettier', 'black', 'cargo', 'dotnet', 'gofmt', 'rustfmt',
-  'clang-format', 'autopep8', 'yapf', 'isort', 'shfmt', 'stylua',
+  'prettier',
+  'black',
+  'cargo',
+  'dotnet',
+  'gofmt',
+  'rustfmt',
+  'clang-format',
+  'autopep8',
+  'yapf',
+  'isort',
+  'shfmt',
+  'stylua',
 ]);
 
 // Packages allowed to run via npx. 'npx' alone is too broad — a compromised
 // spec could set formatter: "npx malicious-package" and pass the base check.
-const ALLOWED_NPX_PACKAGES = new Set([
-  'prettier',
-]);
+const ALLOWED_NPX_PACKAGES = new Set(['prettier']);
 
 /**
  * Resolve a formatter shorthand to its check/fix command variants.
@@ -118,10 +126,18 @@ const ALLOWED_NPX_PACKAGES = new Set([
  */
 function resolveFormatter(formatter) {
   const map = {
-    prettier:        { cmd: 'npx prettier',  check: 'npx prettier --check .',            fix: 'npx prettier --write .' },
-    black:           { cmd: 'black',         check: 'black --check .',                   fix: 'black .' },
-    'cargo fmt':     { cmd: 'cargo fmt',     check: 'cargo fmt -- --check',              fix: 'cargo fmt' },
-    'dotnet format': { cmd: 'dotnet format', check: 'dotnet format --verify-no-changes', fix: 'dotnet format' },
+    prettier: {
+      cmd: 'npx prettier',
+      check: 'npx prettier --check .',
+      fix: 'npx prettier --write .',
+    },
+    black: { cmd: 'black', check: 'black --check .', fix: 'black .' },
+    'cargo fmt': { cmd: 'cargo fmt', check: 'cargo fmt -- --check', fix: 'cargo fmt' },
+    'dotnet format': {
+      cmd: 'dotnet format',
+      check: 'dotnet format --verify-no-changes',
+      fix: 'dotnet format',
+    },
   };
   const entry = map[formatter];
   if (entry) return entry;
@@ -136,10 +152,10 @@ function resolveFormatter(formatter) {
  */
 function resolveLinter(linter) {
   const map = {
-    eslint:          { cmd: 'eslint',        check: 'eslint .',       fix: 'eslint --fix .' },
-    'cargo clippy':  { cmd: 'cargo clippy',  check: 'cargo clippy',   fix: 'cargo clippy --fix' },
-    pylint:          { cmd: 'pylint',        check: 'pylint .',       fix: null },
-    flake8:          { cmd: 'flake8',        check: 'flake8 .',       fix: null },
+    eslint: { cmd: 'eslint', check: 'eslint .', fix: 'eslint --fix .' },
+    'cargo clippy': { cmd: 'cargo clippy', check: 'cargo clippy', fix: 'cargo clippy --fix' },
+    pylint: { cmd: 'pylint', check: 'pylint .', fix: null },
+    flake8: { cmd: 'flake8', check: 'flake8 .', fix: null },
   };
   const entry = map[linter];
   if (entry) return entry;
@@ -167,8 +183,15 @@ function isAllowedFormatter(resolved) {
 // Allowed linter base executables. Values from the YAML spec must resolve to
 // one of these to prevent a compromised spec from executing arbitrary binaries.
 const ALLOWED_LINTER_BASES = new Set([
-  'eslint', 'cargo', 'pylint', 'flake8', 'rubocop', 'golangci-lint',
-  'tslint', 'stylelint', 'shellcheck',
+  'eslint',
+  'cargo',
+  'pylint',
+  'flake8',
+  'rubocop',
+  'golangci-lint',
+  'tslint',
+  'stylelint',
+  'shellcheck',
 ]);
 
 /**
@@ -180,8 +203,6 @@ function isAllowedLinter(resolved) {
   const base = resolved.cmd.split(/\s+/)[0];
   return ALLOWED_LINTER_BASES.has(base);
 }
-
-
 
 /**
  * Detect tech stacks from teams.yaml techStacks config.
@@ -199,10 +220,11 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
 
   // Optimization: Read project root directory once if any stack uses wildcard detection
   let projectFiles = null;
-  const needsWildcard = stacks.some(stack =>
-    (!filterStack || stack.name === filterStack) &&
-    Array.isArray(stack.detect) &&
-    stack.detect.some(m => typeof m === 'string' && m.startsWith('*'))
+  const needsWildcard = stacks.some(
+    (stack) =>
+      (!filterStack || stack.name === filterStack) &&
+      Array.isArray(stack.detect) &&
+      stack.detect.some((m) => typeof m === 'string' && m.startsWith('*'))
   );
 
   if (needsWildcard) {
@@ -213,17 +235,17 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
     }
   }
 
-  return stacks.filter(stack => {
+  return stacks.filter((stack) => {
     if (filterStack && stack.name !== filterStack) return false;
     // Check if any detect markers exist in the project
     if (!Array.isArray(stack.detect)) return false;
-    return stack.detect.some(marker => {
+    return stack.detect.some((marker) => {
       if (typeof marker !== 'string') return false;
       if (marker.startsWith('*')) {
         // Wildcard: check for files with this extension at root using cached file list
         if (!projectFiles) return false;
         const ext = marker.replace('*', '');
-        return projectFiles.some(f => f.endsWith(ext));
+        return projectFiles.some((f) => f.endsWith(ext));
       }
       return existsSync(resolve(projectRoot, marker));
     });
@@ -267,11 +289,16 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
       // Check if the base command exists
       const parts = step.command.split(' ').filter(Boolean);
       const isNpx = parts[0] === 'npx';
-      const baseCmd = isNpx ? (parts[1] || '') : parts[0];
+      const baseCmd = isNpx ? parts[1] || '' : parts[0];
 
       let result;
       if (!isNpx && baseCmd && !commandExists(baseCmd)) {
-        result = { exitCode: -1, stdout: '', stderr: `Command not found: ${baseCmd}`, durationMs: 0 };
+        result = {
+          exitCode: -1,
+          stdout: '',
+          stderr: `Command not found: ${baseCmd}`,
+          durationMs: 0,
+        };
         console.log(`SKIP (${baseCmd} not found)`);
       } else {
         // If --fix and we have a fix command, run that first
@@ -304,8 +331,8 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
   }
 
   // --- Summary ---
-  const overallPassed = allResults.every(s =>
-    s.steps.every(step => step.status === 'PASS' || step.status === 'SKIP')
+  const overallPassed = allResults.every((s) =>
+    s.steps.every((step) => step.status === 'PASS' || step.status === 'SKIP')
   );
   const overallStatus = overallPassed ? 'PASS' : 'FAIL';
 
@@ -335,13 +362,19 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
   try {
     await appendEvent(projectRoot, 'check_completed', {
       overallStatus,
-      stacks: allResults.map(s => ({
+      stacks: allResults.map((s) => ({
         stack: s.stack,
-        steps: s.steps.map(st => ({ step: st.step, status: st.status, durationMs: st.durationMs })),
+        steps: s.steps.map((st) => ({
+          step: st.step,
+          status: st.status,
+          durationMs: st.durationMs,
+        })),
       })),
       flags: { fix: !!flags.fix, fast: !!flags.fast, stack: flags.stack || null },
     });
-  } catch (err) { console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`); }
+  } catch (err) {
+    console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`);
+  }
 
   return { stacks: allResults, overallStatus, overallPassed };
 }

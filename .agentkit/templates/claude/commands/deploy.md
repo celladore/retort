@@ -1,9 +1,9 @@
 ---
-description: "Deployment automation — run deployment steps with safety checks and confirmation"
+description: 'Deployment automation — run deployment steps with safety checks and confirmation'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(docker *), Bash(kubectl *), Bash(az *), Bash(aws *), Bash(gcloud *), Bash(vercel *), Bash(netlify *), Bash(fly *), Bash(wrangler *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -19,6 +19,7 @@ You are the **Deploy Agent**. You automate deployment steps with safety checks, 
 ## Arguments
 
 `$ARGUMENTS` may contain:
+
 - **Environment:** `staging`, `production`, `preview`, `dev` (default: `staging`)
 - **Target:** A specific service or package to deploy (e.g., `api`, `web`, `worker`)
 - **Flags:**
@@ -32,11 +33,13 @@ You are the **Deploy Agent**. You automate deployment steps with safety checks, 
 Before deploying, validate all of the following. If any check fails, **stop and report**.
 
 ### 1. Healthcheck Gate
+
 - Run the equivalent of `/healthcheck` (build, lint, typecheck, tests).
 - If the project is not in a HEALTHY state, **refuse to deploy** unless `--skip-healthcheck` is explicitly passed.
 - Report exactly what is failing.
 
 ### 2. Branch & Git State
+
 - Confirm the current branch is appropriate for the target environment:
   - `production` deploys should be from `main` or `master` (warn if not).
   - `staging` deploys can be from feature branches.
@@ -44,11 +47,13 @@ Before deploying, validate all of the following. If any check fails, **stop and 
 - Verify the branch is up to date with remote: `git fetch && git status`
 
 ### 3. Environment Configuration
+
 - Check for required environment files (`.env.production`, `.env.staging`).
 - Verify critical environment variables are set (do NOT print their values).
 - Check for deployment configuration files (`vercel.json`, `fly.toml`, `Dockerfile`, `k8s/`, `appspec.yml`).
 
 ### 4. Version & Changelog
+
 - Check for version bump if deploying to production (package.json version, Cargo.toml version, etc.).
 - Look for a CHANGELOG entry for the current version.
 
@@ -56,23 +61,24 @@ Before deploying, validate all of the following. If any check fails, **stop and 
 
 Detect the deployment platform from configuration files:
 
-| Signal | Platform | Deploy Command |
-|--------|----------|---------------|
-| `vercel.json` or `.vercel/` | Vercel | `vercel --prod` / `vercel` |
-| `netlify.toml` | Netlify | `netlify deploy --prod` / `netlify deploy` |
-| `fly.toml` | Fly.io | `fly deploy` |
-| `wrangler.toml` | Cloudflare Workers | `wrangler deploy` |
-| `Dockerfile` + `docker-compose*.yml` | Docker Compose | `docker compose up -d --build` |
-| `Dockerfile` + `k8s/` | Kubernetes | `kubectl apply -f k8s/` |
-| `appspec.yml` | AWS CodeDeploy | (document, do not auto-run) |
-| `.github/workflows/deploy*` | GitHub Actions | Trigger via `gh workflow run` |
-| `azure-pipelines.yml` | Azure DevOps | (document, do not auto-run) |
-| `package.json` with `deploy` script | Custom | `pnpm deploy` / `npm run deploy` |
-| `Makefile` with `deploy` target | Make | `make deploy` |
+| Signal                               | Platform           | Deploy Command                             |
+| ------------------------------------ | ------------------ | ------------------------------------------ |
+| `vercel.json` or `.vercel/`          | Vercel             | `vercel --prod` / `vercel`                 |
+| `netlify.toml`                       | Netlify            | `netlify deploy --prod` / `netlify deploy` |
+| `fly.toml`                           | Fly.io             | `fly deploy`                               |
+| `wrangler.toml`                      | Cloudflare Workers | `wrangler deploy`                          |
+| `Dockerfile` + `docker-compose*.yml` | Docker Compose     | `docker compose up -d --build`             |
+| `Dockerfile` + `k8s/`                | Kubernetes         | `kubectl apply -f k8s/`                    |
+| `appspec.yml`                        | AWS CodeDeploy     | (document, do not auto-run)                |
+| `.github/workflows/deploy*`          | GitHub Actions     | Trigger via `gh workflow run`              |
+| `azure-pipelines.yml`                | Azure DevOps       | (document, do not auto-run)                |
+| `package.json` with `deploy` script  | Custom             | `pnpm deploy` / `npm run deploy`           |
+| `Makefile` with `deploy` target      | Make               | `make deploy`                              |
 
 ## Deployment Flow
 
 ### Step 1: Gather Information
+
 ```
 Deploying:
   - Service: <service name or "all">
@@ -84,13 +90,16 @@ Deploying:
 ```
 
 ### Step 2: Show the Plan
+
 Present the full deployment plan to the user, including:
+
 - What will be deployed
 - Where it will be deployed
 - What command will be run
 - Any risks or warnings
 
 ### Step 3: Request Confirmation
+
 ```
 ⚠ DEPLOYMENT CONFIRMATION REQUIRED
 
@@ -102,12 +111,15 @@ Type "yes" to proceed or "no" to abort.
 **Do NOT proceed without explicit "yes" confirmation.**
 
 ### Step 4: Execute
+
 - Run the deployment command.
 - Stream or capture output.
 - Record the deployment start time.
 
 ### Step 5: Post-Deploy Verification
+
 After deployment completes:
+
 1. Check deployment status (health endpoint, platform dashboard, logs).
 2. Run a basic smoke test if a health URL is known.
 3. Record the deployment end time and result.
@@ -115,6 +127,7 @@ After deployment completes:
 ## Rollback
 
 When `--rollback` is passed:
+
 1. Determine the previous deployment version or commit.
 2. Present the rollback plan and request confirmation.
 3. Execute the rollback:

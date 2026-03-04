@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown (no frontmatter). Gemini reads GEMINI.md as hierarchical context. -->
 <!-- Docs: https://geminicli.com/docs/cli/gemini-md/ -->
+
 # {{repoName}} — Gemini Instructions
 
 {{#if projectDescription}}{{projectDescription}}{{/if}}
@@ -17,8 +18,9 @@
 {{#if architecturePattern}}- **Architecture**: {{architecturePattern}}{{/if}}
 {{#if architectureApiStyle}}- **API Style**: {{architectureApiStyle}}{{/if}}
 {{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
+
 - **Default Branch**: {{defaultBranch}}
-{{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
+  {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
 
 ## Coding Standards
 
@@ -28,11 +30,12 @@
 - Never commit secrets, API keys, or credentials. Use environment variables.
 - Prefer explicit error handling over silent failures.
 - Use the strongest type safety available for the language.
-{{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
-{{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
-{{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
+  {{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
+  {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
+  {{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
 
 {{#if hasLogging}}
+
 ## Logging
 
 Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use structured logging — never use raw `console.log` or `Console.WriteLine`.{{/if}}{{#if hasCorrelationId}} Include correlation IDs in all log entries.{{/if}}
@@ -41,24 +44,28 @@ Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use struct
 {{/if}}
 
 {{#if hasErrorHandling}}
+
 ## Error Handling
 
 Strategy: {{errorStrategy}}.{{#if hasGlobalHandler}} A global error handler is configured.{{/if}}{{#if hasCustomExceptions}} Use the project's custom exception types.{{/if}}
 {{/if}}
 
 {{#if hasAuth}}
+
 ## Authentication & Authorization
 
 Provider: {{authProvider}}{{#if authStrategy}}, strategy: {{authStrategy}}{{/if}}.{{#if hasRbac}} RBAC is enforced.{{/if}}{{#if hasMultiTenant}} Multi-tenant — never leak data across tenants.{{/if}}
 {{/if}}
 
 {{#if hasCaching}}
+
 ## Caching
 
 Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPatterns}}.{{/if}}{{#if hasDistributedCache}} Distributed cache — consider invalidation across nodes.{{/if}}
 {{/if}}
 
 {{#if hasApiVersioning}}
+
 ## API Conventions
 
 {{#if hasApiVersioning}}- Versioning: {{apiVersioning}}{{/if}}
@@ -68,12 +75,13 @@ Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPattern
 {{/if}}
 
 {{#if hasDbMigrations}}
+
 ## Database
 
 - Migrations: {{dbMigrations}}{{#if hasDbSeeding}} with seeding{{/if}}
-{{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
-{{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
-{{/if}}
+  {{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
+  {{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
+  {{/if}}
 
 ## Testing
 
@@ -85,6 +93,7 @@ Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPattern
 Always run the full test suite before creating a pull request.
 
 {{#if hasIntegrations}}
+
 ## External Integrations
 
 {{#each integrations}}- {{.name}} — {{.purpose}}
@@ -99,23 +108,27 @@ Treat external service boundaries carefully. Mock integrations in tests.
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+
 - See `AGENTS.md` for universal agent instructions.
 - See `QUALITY_GATES.md` for quality gate definitions.
 
 {{#if hasFeatureFlags}}
+
 ## Feature Flags
 
 Provider: {{featureFlagProvider}}. Gate new features behind flags.
 {{/if}}
 
 {{#if containerized}}
+
 ## Infrastructure
 
 {{#if cloudProvider}}- **Cloud**: {{cloudProvider}}{{/if}}
 {{#if iacTool}}- **IaC**: {{iacTool}}{{/if}}
+
 - **Containerized**: Docker
-{{#if environments}}- **Environments**: {{environments}}{{/if}}
-{{/if}}
+  {{#if environments}}- **Environments**: {{environments}}{{/if}}
+  {{/if}}
 
 ## Code Review Guidelines
 

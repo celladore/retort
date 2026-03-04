@@ -9,9 +9,9 @@ auto-detect values or `agentkit discover` to preview what would be detected.
 ## Project Identity
 
 ```yaml
-name: my-project               # Repository / project name
-description: "Short description of the project"
-phase: active                  # greenfield | active | maintenance | legacy
+name: my-project # Repository / project name
+description: 'Short description of the project'
+phase: active # greenfield | active | maintenance | legacy
 ```
 
 - **`name`** — Used as `{{projectName}}` in templates.
@@ -35,11 +35,11 @@ stack:
       - asp.net-core
     css:
       - tailwind
-  orm: prisma                  # prisma | ef-core | drizzle | typeorm | sqlalchemy | diesel | sequelize
+  orm: prisma # prisma | ef-core | drizzle | typeorm | sqlalchemy | diesel | sequelize
   database:
     - postgresql
     - redis
-  search: elasticsearch        # elasticsearch | meilisearch | algolia
+  search: elasticsearch # elasticsearch | meilisearch | algolia
   messaging:
     - signalr
     - rabbitmq
@@ -60,10 +60,10 @@ stack:
 
 ```yaml
 architecture:
-  pattern: clean-architecture  # clean-architecture | hexagonal | mvc | microservices | monolith | serverless
-  apiStyle: rest               # rest | graphql | grpc | mixed
+  pattern: clean-architecture # clean-architecture | hexagonal | mvc | microservices | monolith | serverless
+  apiStyle: rest # rest | graphql | grpc | mixed
   monorepo: true
-  monorepoTool: turborepo      # turborepo | nx | lerna | pnpm-workspaces
+  monorepoTool: turborepo # turborepo | nx | lerna | pnpm-workspaces
 ```
 
 - **`pattern`** → `{{architecturePattern}}`.
@@ -102,13 +102,13 @@ generated configs — for example, templates can include PRD references only whe
 
 ```yaml
 deployment:
-  cloudProvider: azure         # aws | azure | gcp | vercel | netlify | self-hosted | none
+  cloudProvider: azure # aws | azure | gcp | vercel | netlify | self-hosted | none
   containerized: true
   environments:
     - dev
     - staging
     - prod
-  iacTool: bicep               # terraform | bicep | pulumi | cdk | none
+  iacTool: bicep # terraform | bicep | pulumi | cdk | none
 ```
 
 - **`cloudProvider`** → `{{cloudProvider}}`.
@@ -122,10 +122,10 @@ deployment:
 
 ```yaml
 process:
-  branchStrategy: github-flow  # trunk-based | github-flow | gitflow
+  branchStrategy: github-flow # trunk-based | github-flow | gitflow
   commitConvention: conventional # conventional | semantic | none
-  codeReview: required-pr      # required-pr | optional | none
-  teamSize: small              # solo | small | medium | large
+  codeReview: required-pr # required-pr | optional | none
+  teamSize: small # solo | small | medium | large
 ```
 
 All fields map to same-named template variables: `{{branchStrategy}}`,
@@ -144,7 +144,7 @@ testing:
     - supertest
   e2e:
     - playwright
-  coverage: 80                 # Target coverage percentage (0-100)
+  coverage: 80 # Target coverage percentage (0-100)
 ```
 
 - **`unit`** → `{{testingUnit}}` (comma-separated).
@@ -179,10 +179,10 @@ Available as `{{integrations}}` (array for `{{#each}}` blocks) and
 ```yaml
 crosscutting:
   logging:
-    framework: serilog         # serilog | winston | pino | bunyan | python-logging | log4net | nlog | none
+    framework: serilog # serilog | winston | pino | bunyan | python-logging | log4net | nlog | none
     structured: true
     correlationId: true
-    level: information         # trace | debug | information | warning | error | critical
+    level: information # trace | debug | information | warning | error | critical
     sink:
       - console
       - applicationInsights
@@ -197,11 +197,11 @@ crosscutting:
 ### Error Handling
 
 ```yaml
-  errorHandling:
-    strategy: problem-details  # problem-details | custom-envelope | raw | none
-    globalHandler: true
-    customExceptions: true
-    errorCodes: false
+errorHandling:
+  strategy: problem-details # problem-details | custom-envelope | raw | none
+  globalHandler: true
+  customExceptions: true
+  errorCodes: false
 ```
 
 - **`strategy`** → `{{errorStrategy}}`, `{{hasErrorHandling}}`.
@@ -211,11 +211,11 @@ crosscutting:
 ### Authentication
 
 ```yaml
-  authentication:
-    provider: azure-ad-b2c     # azure-ad | azure-ad-b2c | auth0 | firebase | cognito | keycloak | custom-jwt | none
-    strategy: jwt-bearer       # jwt-bearer | cookie | session | api-key | oauth2-code
-    multiTenant: false
-    rbac: true
+authentication:
+  provider: azure-ad-b2c # azure-ad | azure-ad-b2c | auth0 | firebase | cognito | keycloak | custom-jwt | none
+  strategy: jwt-bearer # jwt-bearer | cookie | session | api-key | oauth2-code
+  multiTenant: false
+  rbac: true
 ```
 
 - **`provider`** → `{{authProvider}}`, `{{hasAuth}}`.
@@ -226,12 +226,12 @@ crosscutting:
 ### Caching
 
 ```yaml
-  caching:
-    provider: redis            # redis | memcached | in-memory | none
-    patterns:
-      - cache-aside
-      - write-through
-    distributedCache: true
+caching:
+  provider: redis # redis | memcached | in-memory | none
+  patterns:
+    - cache-aside
+    - write-through
+  distributedCache: true
 ```
 
 - **`provider`** → `{{cachingProvider}}`, `{{hasCaching}}`.
@@ -241,11 +241,11 @@ crosscutting:
 ### API
 
 ```yaml
-  api:
-    versioning: url-segment    # url-segment | header | query-string | media-type | none
-    pagination: cursor         # cursor | offset | keyset | none
-    responseFormat: envelope   # envelope | raw | json-api | hal
-    rateLimiting: true
+api:
+  versioning: url-segment # url-segment | header | query-string | media-type | none
+  pagination: cursor # cursor | offset | keyset | none
+  responseFormat: envelope # envelope | raw | json-api | hal
+  rateLimiting: true
 ```
 
 - **`versioning`** → `{{apiVersioning}}`, `{{hasApiVersioning}}`.
@@ -256,11 +256,11 @@ crosscutting:
 ### Database
 
 ```yaml
-  database:
-    migrations: code-first     # code-first | sql-scripts | auto | none
-    seeding: true
-    transactionStrategy: unit-of-work # unit-of-work | per-request | manual | none
-    connectionPooling: true
+database:
+  migrations: code-first # code-first | sql-scripts | auto | none
+  seeding: true
+  transactionStrategy: unit-of-work # unit-of-work | per-request | manual | none
+  connectionPooling: true
 ```
 
 - **`migrations`** → `{{dbMigrations}}`, `{{hasDbMigrations}}`.
@@ -271,10 +271,10 @@ crosscutting:
 ### Performance
 
 ```yaml
-  performance:
-    bundleBudget: 250          # KB limit for frontend bundles
-    lazyLoading: true
-    imageOptimization: true
+performance:
+  bundleBudget: 250 # KB limit for frontend bundles
+  lazyLoading: true
+  imageOptimization: true
 ```
 
 - **`bundleBudget`** → `{{bundleBudget}}`.
@@ -284,8 +284,8 @@ crosscutting:
 ### Feature Flags
 
 ```yaml
-  featureFlags:
-    provider: launchdarkly     # launchdarkly | azure-app-config | unleash | flagsmith | custom | none
+featureFlags:
+  provider: launchdarkly # launchdarkly | azure-app-config | unleash | flagsmith | custom | none
 ```
 
 - **`provider`** → `{{featureFlagProvider}}`, `{{hasFeatureFlags}}`.
@@ -293,13 +293,13 @@ crosscutting:
 ### Environments
 
 ```yaml
-  environments:
-    naming:
-      - dev
-      - staging
-      - prod
-    configStrategy: env-vars   # env-vars | config-files | vault | app-config | none
-    envFilePattern: .env.example
+environments:
+  naming:
+    - dev
+    - staging
+    - prod
+  configStrategy: env-vars # env-vars | config-files | vault | app-config | none
+  envFilePattern: .env.example
 ```
 
 - **`naming`** → `{{envNames}}` (comma-separated).

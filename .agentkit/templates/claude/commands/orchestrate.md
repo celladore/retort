@@ -1,9 +1,9 @@
 ---
-description: "Master orchestrator — coordinate work across unified teams with state persistence"
+description: 'Master orchestrator — coordinate work across unified teams with state persistence'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(dotnet *), Bash(cargo *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -31,11 +31,11 @@ The user may pass the following flags via `$ARGUMENTS`:
 
 The orchestrator, `/plan`, and `/project-review` all use the same state files. The orchestrator, `/plan`, and `/project-review` may each acquire `orchestrator.lock` when writing to shared state (orchestrator for full sessions; `/plan` and `/project-review` when appending to `events.log`).
 
-| Asset               | Purpose                | Orchestrator    | Plan              | Project-Review    |
-| ------------------- | ---------------------- | --------------- | ----------------- | ----------------- |
-| `AGENT_BACKLOG.md`  | Work items, priorities | Read/Write      | Read              | Read              |
-| `orchestrator.json` | Phase, teams, metrics  | Read/Write      | Read              | Read              |
-| `events.log`        | Audit trail            | Append          | Append            | Append            |
+| Asset               | Purpose                | Orchestrator    | Plan                 | Project-Review       |
+| ------------------- | ---------------------- | --------------- | -------------------- | -------------------- |
+| `AGENT_BACKLOG.md`  | Work items, priorities | Read/Write      | Read                 | Read                 |
+| `orchestrator.json` | Phase, teams, metrics  | Read/Write      | Read                 | Read                 |
+| `events.log`        | Audit trail            | Append          | Append               | Append               |
 | `orchestrator.lock` | Session lock           | Acquire/Release | Acquire when writing | Acquire when writing |
 
 **Coordination requirement for `events.log`:** Writers (orchestrator,
@@ -57,7 +57,7 @@ acquisition protocol and abort after timeout. Example atomic append (Node.js):
 
 ```js
 const fs = require('fs');
-const fd = fs.openSync(path, 'a');  // O_APPEND flag ensures atomic append
+const fd = fs.openSync(path, 'a'); // O_APPEND flag ensures atomic append
 fs.writeSync(fd, jsonLine + '\n');
 fs.closeSync(fd);
 ```
@@ -126,26 +126,32 @@ Required fields for DESCOPED events: `eventType` (must be "DESCOPED"), `taskId`,
 
 **Required and optional fields by eventType:**
 
-| eventType                     | Required fields                                                               | Optional fields     |
-| ----------------------------- | ----------------------------------------------------------------------------- | ------------------- |
-| `COMPLETED`                   | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `FAILED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `REJECTED`                    | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED`                    | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED` (dependency-cycle) | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp` | `actor`, `metadata` |
-| `DESCOPED`                    | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `STARTED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `BLOCKED`                     | `taskId`, `blockedBy`, `timestamp`                                            | `actor`, `metadata` |
-| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                 | `actor`, `metadata` |
-| `UNBLOCKED`                   | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `DELEGATED`                   | `taskId`, `assignees`, `timestamp`                                            | `actor`, `metadata` |
-| `ACCEPTED`                    | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `RETRY_ESCALATED`             | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                          | `actor`, `metadata` |
+| eventType                       | Required fields                                                               | Optional fields     |
+| ------------------------------- | ----------------------------------------------------------------------------- | ------------------- |
+| `COMPLETED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
+| `FAILED`                        | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
+| `REJECTED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
+| `CANCELED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
+| `CANCELED` (dependency-cycle)   | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp` | `actor`, `metadata` |
+| `DESCOPED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
+| `STARTED`                       | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
+| `BLOCKED`                       | `taskId`, `blockedBy`, `timestamp`                                            | `actor`, `metadata` |
+| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                | `actor`, `metadata` |
+| `UNBLOCKED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
+| `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                            | `actor`, `metadata` |
+| `ACCEPTED`                      | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
+| `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                          | `actor`, `metadata` |
 
 Example with all optional fields:
 
 ```json
-{"eventType": "COMPLETED", "taskId": "task-20260226-001", "actor": "team-backend", "metadata": {"duration_ms": 45000}, "timestamp": "2026-02-26T10:30:00Z"}
+{
+  "eventType": "COMPLETED",
+  "taskId": "task-20260226-001",
+  "actor": "team-backend",
+  "metadata": { "duration_ms": 45000 },
+  "timestamp": "2026-02-26T10:30:00Z"
+}
 ```
 
 Create this file if it does not exist.
@@ -203,7 +209,14 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      "handoffContext": "",
      "supersedes": "<task-id of failed/rejected/canceled task this replaces>",
      "backlogItemId": "<reference to original backlog item>",
-     "messages": [{"role":"delegator","from":"orchestrator","timestamp":"<ISO>","content":"<instructions>"}],
+     "messages": [
+       {
+         "role": "delegator",
+         "from": "orchestrator",
+         "timestamp": "<ISO>",
+         "content": "<instructions>"
+       }
+     ],
      "artifacts": []
    }
    ```
@@ -262,7 +275,13 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      1. Append a structured entry to `events.log`:
 
         ```json
-        {"eventType": "RETRY_ESCALATED", "reason": "retry-limit-reached", "roundKey": "round-4", "roundRetryCount": 2, "timestamp": "2026-02-26T10:30:00Z"}
+        {
+          "eventType": "RETRY_ESCALATED",
+          "reason": "retry-limit-reached",
+          "roundKey": "round-4",
+          "roundRetryCount": 2,
+          "timestamp": "2026-02-26T10:30:00Z"
+        }
         ```
 
      2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
@@ -272,6 +291,7 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
    - **`isTimestampNewer(newTs?: string | null, oldTs?: string | null): boolean`** — Validate non-null ISO-8601 strings; normalize both to UTC; return false for null, undefined, malformed inputs.
    - **`shouldResetRetryState(retryPolicy, retryEscalated): Promise<{allowed: boolean, reason?: string}>`** — Require `retryPolicy.allowReset === true`. If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison needed). If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be non-null and a valid ISO-8601 timestamp; call `isTimestampNewer(retryPolicy.lastResetAt, retryEscalated.at)` and only allow clearing `retryPolicy.roundRetries` when it returns true. When `isTimestampNewer` returns false: do NOT clear `roundRetries`; return `{allowed: false, reason: "reset prevented: lastResetAt not newer than retryEscalated.at"}` and ensure calling code logs/surfaces this reason.
    - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where isTimestampNewer returns false (roundRetries remains unchanged).
+
 6. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 
 ### Phase 5 — Ship
@@ -295,21 +315,26 @@ At the end of each orchestration run, produce a summary with the following secti
 ## Orchestration Summary
 
 ### Actions Taken
+
 - <bulleted list of actions performed>
 
 ### Files Changed
+
 - <bulleted list of file paths modified>
 
 ### Validation Commands
+
 - <exact commands to verify the changes>
 
 ### Updated State
+
 - Phase: <current phase>
 - Teams active: <list>
 - Backlog items completed: <count>
 - Tests added: <count>
 
 ### Risks & Open Items
+
 - <any risks, blockers, or items requiring human attention>
 ```
 

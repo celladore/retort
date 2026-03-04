@@ -10,22 +10,26 @@
 These rules govern supply chain security, automated updates, and lockfile hygiene.
 
 ## Version Pinning
+
 - Pin all dependency versions — no `*`, `latest`, or wide `>=` ranges
 - Rely on Renovate for automated version bumps via PR
 - Minor/patch updates auto-merge; major updates require manual review
 
 ## Lockfiles
+
 - Always commit lockfiles (pnpm-lock.yaml, Cargo.lock, poetry.lock)
 - Install with `--frozen-lockfile` in CI
 - Never delete or regenerate lockfiles without reviewing the diff
 
 ## Supply Chain Security
+
 - Audit dependencies before adoption: maintenance status, security advisories, license, bundle size
 - Run vulnerability audits regularly (npm audit, cargo audit, pip-audit)
 - Critical/high vulnerabilities must be addressed within one sprint
 - Renovate vulnerability alerts create PRs for known CVEs automatically
 
 ## Engine Dependencies
+
 - `.agentkit/package.json` dependencies are part of the forge engine
 - Changes require maintainer review (labelled `forge-source-change`)
 - Do not modify engine dependencies without understanding the sync pipeline

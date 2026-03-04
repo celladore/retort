@@ -8,23 +8,27 @@
 # TypeScript / JavaScript Rules
 
 ## Linting & Formatting
+
 - All code must pass ESLint with the project configuration
 - All code must be formatted with Prettier
 - Run `eslint --fix` and `prettier --write` before committing
 
 ## Type Safety
+
 - Enable `strict: true` in tsconfig.json
 - All exported functions, classes, and module boundaries must have explicit type annotations
 - Avoid `any` type — use `unknown` with type guards when the type is truly dynamic
 - Enable strict null checks; handle null/undefined explicitly
 
 ## Code Style
+
 - Prefer `const` and `let` over `var`
 - Use async/await over raw Promise chains
 - Prefer named exports over default exports
 - No `console.log` in production code — use the project's structured logger
 
 ## Accessibility (UI Components)
+
 - All UI components must meet WCAG AA standards
 - Use semantic HTML elements
 - Include ARIA attributes where needed
@@ -32,6 +36,7 @@
 - Maintain sufficient color contrast (4.5:1 normal text, 3:1 large text)
 
 ## Testing
-- Co-locate test files with source (*.test.ts / *.spec.ts)
+
+- Co-locate test files with source (_.test.ts / _.spec.ts)
 - Use descriptive test names that explain the expected behavior
 - Mock external dependencies, not internal modules

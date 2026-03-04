@@ -14,7 +14,8 @@ const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 
 describe('runHealthcheck()', () => {
   afterEach(() => {
-    if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
+    if (existsSync(TEST_ROOT))
+      rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
     vi.restoreAllMocks();
   });
 
@@ -27,11 +28,12 @@ describe('runHealthcheck()', () => {
     // verifies result shape, not actual tool detection (tests below cover that).
     // Real spawns are slow on cold CI caches and hold directory handles that
     // cause EBUSY on Windows cleanup.
-    vi.spyOn(runner, 'commandExists').mockImplementation(
-      (cmd) => cmd === 'node' || cmd === 'git',
-    );
+    vi.spyOn(runner, 'commandExists').mockImplementation((cmd) => cmd === 'node' || cmd === 'git');
     vi.spyOn(runner, 'execCommand').mockReturnValue({
-      exitCode: 0, stdout: 'v22.0.0\n', stderr: '', durationMs: 5,
+      exitCode: 0,
+      stdout: 'v22.0.0\n',
+      stderr: '',
+      durationMs: 5,
     });
 
     // Prevent orchestrator from writing state files into TEST_ROOT.
@@ -62,12 +64,12 @@ describe('runHealthcheck()', () => {
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
     // Mock tool detection to avoid spawning real processes (slow on Windows with shell:true)
-    vi.spyOn(runner, 'commandExists').mockImplementation(
-      (cmd) => cmd === 'node' || cmd === 'git',
-    );
+    vi.spyOn(runner, 'commandExists').mockImplementation((cmd) => cmd === 'node' || cmd === 'git');
     vi.spyOn(runner, 'execCommand').mockImplementation((cmd) => {
-      if (cmd.startsWith('node')) return { exitCode: 0, stdout: 'v22.0.0\n', stderr: '', durationMs: 5 };
-      if (cmd.startsWith('git')) return { exitCode: 0, stdout: 'git version 2.40.0\n', stderr: '', durationMs: 5 };
+      if (cmd.startsWith('node'))
+        return { exitCode: 0, stdout: 'v22.0.0\n', stderr: '', durationMs: 5 };
+      if (cmd.startsWith('git'))
+        return { exitCode: 0, stdout: 'git version 2.40.0\n', stderr: '', durationMs: 5 };
       return { exitCode: 1, stdout: '', stderr: 'not found', durationMs: 0 };
     });
 
@@ -83,12 +85,12 @@ describe('runHealthcheck()', () => {
       flags: {},
     });
 
-    const nodeTool = result.tools.find(t => t.name === 'node');
+    const nodeTool = result.tools.find((t) => t.name === 'node');
     expect(nodeTool).toBeDefined();
     expect(nodeTool.found).toBe(true);
     expect(nodeTool.version).toMatch(/\d+/);
 
-    const gitTool = result.tools.find(t => t.name === 'git');
+    const gitTool = result.tools.find((t) => t.name === 'git');
     expect(gitTool).toBeDefined();
     expect(gitTool.found).toBe(true);
   });
@@ -101,7 +103,10 @@ describe('runHealthcheck()', () => {
     // Mock tool detection to avoid spawning real processes
     vi.spyOn(runner, 'commandExists').mockReturnValue(false);
     vi.spyOn(runner, 'execCommand').mockReturnValue({
-      exitCode: 1, stdout: '', stderr: '', durationMs: 0,
+      exitCode: 1,
+      stdout: '',
+      stderr: '',
+      durationMs: 0,
     });
 
     vi.spyOn(orchestrator, 'loadState').mockReturnValue({});
@@ -140,7 +145,10 @@ describe('runHealthcheck()', () => {
     // Mock tool detection to avoid spawning real processes (slow on Windows CI)
     vi.spyOn(runner, 'commandExists').mockReturnValue(false);
     vi.spyOn(runner, 'execCommand').mockReturnValue({
-      exitCode: 1, stdout: '', stderr: '', durationMs: 0,
+      exitCode: 1,
+      stdout: '',
+      stderr: '',
+      durationMs: 0,
     });
 
     vi.spyOn(orchestrator, 'loadState').mockReturnValue({});

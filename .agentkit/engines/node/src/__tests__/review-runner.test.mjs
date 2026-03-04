@@ -11,14 +11,16 @@ const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-review
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 
 function setupTestRepo() {
-  if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
+  if (existsSync(TEST_ROOT))
+    rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
   mkdirSync(STATE_DIR, { recursive: true });
   writeFileSync(resolve(TEST_ROOT, '.agentkit-repo'), 'test-project', 'utf-8');
   mkdirSync(resolve(TEST_ROOT, '.git'), { recursive: true });
 }
 
 function teardownTestRepo() {
-  if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
+  if (existsSync(TEST_ROOT))
+    rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
 }
 
 describe('review-runner', () => {
@@ -42,7 +44,11 @@ describe('review-runner', () => {
     it('detects AWS access keys', async () => {
       setupTestRepo();
       // Create file with fake AWS key
-      writeFileSync(resolve(TEST_ROOT, 'config.js'), 'const key = "AKIAIOSFODNN7EXAMPLE";', 'utf-8');
+      writeFileSync(
+        resolve(TEST_ROOT, 'config.js'),
+        'const key = "AKIAIOSFODNN7EXAMPLE";',
+        'utf-8'
+      );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -53,12 +59,18 @@ describe('review-runner', () => {
       });
 
       expect(result.secrets).toBeGreaterThan(0);
-      expect(result.findings.some(f => f.type === 'secret' && f.pattern === 'AWS Key')).toBe(true);
+      expect(result.findings.some((f) => f.type === 'secret' && f.pattern === 'AWS Key')).toBe(
+        true
+      );
     });
 
     it('detects private keys', async () => {
       setupTestRepo();
-      writeFileSync(resolve(TEST_ROOT, 'key.pem'), '-----BEGIN RSA PRIVATE KEY-----\nfake', 'utf-8');
+      writeFileSync(
+        resolve(TEST_ROOT, 'key.pem'),
+        '-----BEGIN RSA PRIVATE KEY-----\nfake',
+        'utf-8'
+      );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -69,7 +81,7 @@ describe('review-runner', () => {
       });
 
       expect(result.secrets).toBeGreaterThan(0);
-      expect(result.findings.some(f => f.pattern === 'Private Key')).toBe(true);
+      expect(result.findings.some((f) => f.pattern === 'Private Key')).toBe(true);
     });
 
     it('passes clean files', async () => {
@@ -96,7 +108,7 @@ describe('review-runner', () => {
       writeFileSync(
         resolve(TEST_ROOT, 'node_modules', 'some-pkg', 'index.js'),
         'const key = "AKIAIOSFODNN7EXAMPLE";',
-        'utf-8',
+        'utf-8'
       );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -116,7 +128,7 @@ describe('review-runner', () => {
       writeFileSync(
         resolve(TEST_ROOT, 'yarn.lock'),
         'const key = "AKIAIOSFODNN7EXAMPLE";',
-        'utf-8',
+        'utf-8'
       );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -135,7 +147,7 @@ describe('review-runner', () => {
       writeFileSync(
         resolve(TEST_ROOT, 'test.snap'),
         'const key = "AKIAIOSFODNN7EXAMPLE";',
-        'utf-8',
+        'utf-8'
       );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -151,11 +163,7 @@ describe('review-runner', () => {
 
     it('skips .sum files', async () => {
       setupTestRepo();
-      writeFileSync(
-        resolve(TEST_ROOT, 'go.sum'),
-        'const key = "AKIAIOSFODNN7EXAMPLE";',
-        'utf-8',
-      );
+      writeFileSync(resolve(TEST_ROOT, 'go.sum'), 'const key = "AKIAIOSFODNN7EXAMPLE";', 'utf-8');
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -174,7 +182,7 @@ describe('review-runner', () => {
       writeFileSync(
         resolve(TEST_ROOT, 'vendor', 'lib', 'util.go'),
         'const key = "AKIAIOSFODNN7EXAMPLE";',
-        'utf-8',
+        'utf-8'
       );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -254,7 +262,13 @@ describe('review-runner', () => {
 
         // Mock git diff to return the symlink filename (simulating --range / default diff path)
         vi.spyOn(runner, 'execCommand').mockImplementation((cmd) => {
-          if (cmd.includes('git diff')) return { exitCode: 0, stdout: 'linked-out-diff/secret.txt\n', stderr: '', durationMs: 5 };
+          if (cmd.includes('git diff'))
+            return {
+              exitCode: 0,
+              stdout: 'linked-out-diff/secret.txt\n',
+              stderr: '',
+              durationMs: 5,
+            };
           return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
         });
         vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
@@ -357,7 +371,11 @@ describe('review-runner', () => {
   describe('TODO scanning', () => {
     it('detects TODO comments', async () => {
       setupTestRepo();
-      writeFileSync(resolve(TEST_ROOT, 'code.js'), '// TODO: fix this\n// FIXME: broken\nconst x = 1;', 'utf-8');
+      writeFileSync(
+        resolve(TEST_ROOT, 'code.js'),
+        '// TODO: fix this\n// FIXME: broken\nconst x = 1;',
+        'utf-8'
+      );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
