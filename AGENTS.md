@@ -59,6 +59,8 @@ Always run the full test suite before creating a pull request. Never disable or 
 - **API Spec**: `docs/04_api/`
 - **Technical Spec**: `docs/02_specs/`
 
+- **Brand Guide**: `.agentkit/spec/brand.yaml` — AgentKit Forge (primary: `#1976D2`)
+
 - **Quality Gates**: `QUALITY_GATES.md`
 - **Runbook**: `RUNBOOK_AI.md`
 
