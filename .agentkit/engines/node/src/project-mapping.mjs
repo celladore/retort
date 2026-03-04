@@ -41,6 +41,12 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.designSystemPath', dest: 'designSystemPath' },
   { src: 'documentation.storybook', dest: 'hasStorybook', type: 'boolean' },
   { src: 'documentation.designTokensPath', dest: 'designTokensPath' },
+  { src: 'documentation.hasBrandGuide', dest: 'hasBrandGuide', type: 'boolean' },
+  { src: 'documentation.brandGuidePath', dest: 'brandGuidePath' },
+
+  // Editor Theme
+  { src: 'editorTheme.enabled', dest: 'editorThemeEnabled', type: 'boolean' },
+  { src: 'editorTheme.source', dest: 'editorThemeSource', check: 'not-none' },
 
   // External Knowledge Integration
   { src: 'externalKnowledge.enabled', dest: 'hasExternalKnowledge', type: 'boolean' },

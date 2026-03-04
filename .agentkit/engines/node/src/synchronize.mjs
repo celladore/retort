@@ -34,6 +34,11 @@ import {
   resolveRenderTargets,
   simpleDiff
 } from './template-utils.mjs';
+import {
+  mergeThemeIntoSettings,
+  resolveThemeMapping,
+  validateBrandSpec,
+} from './brand-resolver.mjs';
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -182,6 +187,117 @@ async function syncGitHub(templatesDir, tmpDir, vars, version, repoName) {
  */
 async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) {
   await syncDirectCopy(templatesDir, 'renovate', tmpDir, '.', vars, version, repoName);
+}
+
+// ---------------------------------------------------------------------------
+// Editor theme sync — brand-driven .vscode/settings.json color customizations
+// ---------------------------------------------------------------------------
+
+/**
+ * Generates workbench.colorCustomizations in editor settings files
+ * by resolving editor-theme.yaml mappings against brand.yaml colors.
+ *
+ * Supports multiple output targets (VS Code, Cursor, Windsurf) and
+ * per-tool overlay overrides. Runs after syncDirectCopy('vscode', ...)
+ * so it can merge into the base settings.
+ */
+async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
+  if (!vars.editorThemeEnabled) return;
+
+  const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
+  if (!brandSpec) {
+    log('[agentkit:sync] Editor theme enabled but no brand.yaml found — skipping');
+    return;
+  }
+
+  // Validate brand spec
+  const validation = validateBrandSpec(brandSpec);
+  for (const err of validation.errors) {
+    log(`[agentkit:sync] Brand error: ${err}`);
+  }
+  for (const warn of validation.warnings) {
+    if (process.env.DEBUG) log(`[agentkit:sync] Brand warning: ${warn}`);
+  }
+  if (validation.errors.length > 0) {
+    log('[agentkit:sync] Brand validation failed — skipping editor theme');
+    return;
+  }
+
+  const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
+  if (!themeSpec || !themeSpec.enabled) {
+    log('[agentkit:sync] Editor theme spec not found or disabled — skipping');
+    return;
+  }
+
+  // Determine which mode mapping(s) to resolve
+  const mode = themeSpec.mode || 'dark';
+  let mapping;
+  if (mode === 'both') {
+    // Merge light and dark, dark takes precedence
+    mapping = { ...(themeSpec.light || {}), ...(themeSpec.dark || {}) };
+  } else {
+    mapping = themeSpec[mode] || {};
+  }
+
+  // Resolve brand color references
+  const { resolved: colorCustomizations, warnings } = resolveThemeMapping(mapping, brandSpec);
+  for (const warn of warnings) {
+    log(`[agentkit:sync] Theme warning: ${warn}`);
+  }
+
+  if (Object.keys(colorCustomizations).length === 0) {
+    log('[agentkit:sync] No colors resolved from editor theme — skipping');
+    return;
+  }
+
+  // Build metadata sentinel
+  const meta = {
+    brand: brandSpec.identity?.name || 'unknown',
+    mode,
+    version: brandSpec.version || '1.0.0',
+  };
+
+  // Determine output targets — default to vscode only
+  const defaultOutputs = { vscode: '.vscode/settings.json' };
+  const outputs = themeSpec.outputs || defaultOutputs;
+
+  // Write theme into each output target
+  const writePromises = [];
+  for (const [tool, outputPath] of Object.entries(outputs)) {
+    if (!outputPath) continue; // null = skip this target
+
+    const settingsPath = join(tmpDir, outputPath);
+
+    writePromises.push((async () => {
+      // Read existing settings if already rendered by prior sync step
+      let existingSettings = {};
+      if (existsSync(settingsPath)) {
+        try {
+          const raw = await readFile(settingsPath, 'utf-8');
+          existingSettings = JSON.parse(raw);
+        } catch {
+          existingSettings = {};
+        }
+      }
+
+      // Check for per-tool overrides in themeSpec (e.g. themeSpec.cursor: { ... })
+      let toolColors = colorCustomizations;
+      if (themeSpec[tool] && typeof themeSpec[tool] === 'object' && tool !== 'light' && tool !== 'dark') {
+        // Tool-specific overrides: resolve and merge on top of base colors
+        const { resolved: toolOverrides } = resolveThemeMapping(themeSpec[tool], brandSpec);
+        toolColors = { ...colorCustomizations, ...toolOverrides };
+      }
+
+      const mergedSettings = mergeThemeIntoSettings(existingSettings, toolColors, meta);
+
+      await ensureDir(dirname(settingsPath));
+      await writeFile(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n', 'utf-8');
+
+      log(`[agentkit:sync] Editor theme → ${outputPath}: ${Object.keys(toolColors).length} color(s) from "${meta.brand}" (${mode} mode)`);
+    })());
+  }
+
+  await Promise.all(writePromises);
 }
 
 // ---------------------------------------------------------------------------
@@ -973,6 +1089,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, headerRepoName),
     syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
   ]);
+
+  // --- Editor theme (must run after vscode template copy to merge into settings) ---
+  await syncEditorTheme(agentkitRoot, tmpDir, vars, log);
 
   // --- Gated by renderTargets ---
   const gatedTasks = [];

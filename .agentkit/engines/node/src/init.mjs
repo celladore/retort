@@ -697,6 +697,12 @@ function buildProjectDefaults(report, repoName) {
       designSystemPath: null,
       storybook: false,
       designTokensPath: null,
+      hasBrandGuide: false,
+      brandGuidePath: null,
+    },
+    editorTheme: {
+      enabled: false,
+      source: 'none',
     },
     externalKnowledge: {
       enabled: false,
@@ -777,6 +783,14 @@ function buildProjectDefaults(report, repoName) {
       project.documentation.designSystemPath = 'packages/ui/';
     }
     if (ds === 'design-tokens') project.documentation.designTokensPath = 'styles/tokens/';
+    if (ds === 'brand-guide') {
+      project.documentation.hasBrandGuide = true;
+      project.documentation.brandGuidePath = '.agentkit/spec/brand.yaml';
+    }
+    if (ds === 'editor-theme') {
+      project.editorTheme.enabled = true;
+      project.editorTheme.source = 'brand';
+    }
   }
 
   // Populate testing from discovery
