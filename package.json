@@ -6,7 +6,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "test": "pnpm -C .agentkit test",
+    "test": "bash -c 'pnpm -C .agentkit test'",
     "build": "pnpm -C .agentkit agentkit:validate",
     "lint:md": "pnpm -C .agentkit lint:md",
     "lint:md:fix": "pnpm -C .agentkit lint:md:fix"
