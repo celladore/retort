@@ -12,6 +12,13 @@
 2. [Scenario 2: Bug Fix](#scenario-2-bug-fix)
 3. [Scenario 3: Full Project Assessment](#scenario-3-full-project-assessment)
 4. [Scenario 4: Multi-Session Continuity](#scenario-4-multi-session-continuity)
+5. [Scenario 5: Code Refactoring](#scenario-5-code-refactoring)
+6. [Scenario 6: Security Hardening](#scenario-6-security-hardening)
+7. [Scenario 7: Dependency Upgrade](#scenario-7-dependency-upgrade)
+8. [Scenario 8: Infrastructure Fitness Evaluation (Incoming)](#scenario-8-infrastructure-fitness-evaluation-incoming)
+9. [Scenario 9: Feature Management Setup (Incoming)](#scenario-9-feature-management-setup-incoming)
+10. [Scenario 10: Session Retrospective (Incoming)](#scenario-10-session-retrospective-incoming)
+11. [Scenario 11: Brand & Editor Theme Setup (Incoming)](#scenario-11-brand--editor-theme-setup-incoming)
 
 ---
 
@@ -1038,3 +1045,776 @@ Total time: 10-15 minutes for the continuation session.
 - If the orchestrator lock is stale (left over from a crashed session), use `/orchestrate --force-unlock` to clear it
 - Handoff documents accumulate in `docs/ai_handoffs/`. Periodically review and archive old ones
 - The events log is append-only and grows over time. It is a useful audit trail but does not need to be read end-to-end -- the last 10-20 entries are usually sufficient
+
+---
+
+## Scenario 5: Code Refactoring
+
+### Goal
+
+Refactor a monolithic service file (`src/services/orderService.ts`, 800+ lines) into smaller, focused modules. The file handles order creation, payment processing, inventory checks, and email notifications — all in one file with tightly coupled logic.
+
+### When to Use This Flow
+
+Use this flow for refactoring tasks that improve code quality without changing behavior. The emphasis is on preserving existing tests and behavior while restructuring code for maintainability.
+
+### Step-by-Step
+
+#### Step 1: Assess the Current State
+
+```
+/discover
+```
+
+Run discovery to understand the project structure and identify dependencies on the file being refactored.
+
+```
+/check
+```
+
+Run a full quality gate to establish a passing baseline. Refactoring should start and end with green tests.
+
+---
+
+#### Step 2: Plan the Refactoring
+
+```
+/plan Refactor src/services/orderService.ts into smaller modules: extract payment processing, inventory management, and notification logic into separate service files. Maintain all existing behavior and test coverage.
+```
+
+**What the AI does:**
+
+- Analyzes the existing file to identify logical boundaries
+- Maps all imports and dependents that reference `orderService`
+- Produces a plan with extraction steps, new file locations, and updated imports
+- Includes a validation strategy to confirm no behavior changes
+
+**Expected plan highlights:**
+
+```
+## Steps
+1. Extract payment logic into src/services/paymentService.ts
+2. Extract inventory logic into src/services/inventoryService.ts
+3. Extract notification logic into src/services/notificationService.ts
+4. Update orderService.ts to import and delegate to new services
+5. Update all import paths in dependent files
+6. Run existing tests -- all must pass without changes to test code
+
+## Risks
+- Circular dependencies if services reference each other
+- Subtle behavior changes if execution order matters
+```
+
+---
+
+#### Step 3: Execute the Refactoring
+
+```
+/team-backend Refactor orderService.ts per the plan: extract paymentService, inventoryService, and notificationService. Update all imports. Do NOT change any test files -- all existing tests must pass as-is.
+```
+
+**What the AI does:**
+
+- Extracts each module one at a time, running tests after each extraction
+- Updates import paths in all dependent files
+- Keeps the original function signatures on `orderService.ts` to maintain the public API
+- Verifies that no test files were modified
+
+---
+
+#### Step 4: Verify Behavior Preservation
+
+```
+/check
+```
+
+Run the full quality gate. The key check: **all existing tests pass without modification**. If any test needed changes, the refactoring may have altered behavior.
+
+```
+/review --focus correctness
+```
+
+Review the changes specifically for correctness — are the extracted modules functionally identical to the original? Are there any subtle changes in error handling, execution order, or side effects?
+
+---
+
+#### Step 5: Hand Off
+
+```
+/handoff --save --tag refactoring
+```
+
+**Expected output:**
+
+```
+## What Was Done
+- Extracted paymentService.ts (120 lines) from orderService.ts
+- Extracted inventoryService.ts (95 lines) from orderService.ts
+- Extracted notificationService.ts (80 lines) from orderService.ts
+- orderService.ts reduced from 847 lines to 210 lines
+- All 142 existing tests pass without modification
+
+## Next 3 Actions
+1. Add unit tests for the new individual service modules
+2. Consider adding integration tests for the service boundaries
+3. Update API documentation to reflect the new module structure
+```
+
+---
+
+### Summary of Commands Used
+
+```
+/discover            Understand the codebase structure
+/check               Establish a passing baseline
+/plan                Design the refactoring strategy
+/team-backend        Execute the refactoring
+/check               Verify all existing tests pass
+/review              Confirm no behavior changes
+/handoff --save      Document the session
+```
+
+---
+
+## Scenario 6: Security Hardening
+
+### Goal
+
+Harden the application security after a penetration test report identified several vulnerabilities: missing input validation on API endpoints, insufficient CORS configuration, and missing rate limiting on public endpoints.
+
+### When to Use This Flow
+
+Use this flow when responding to security audit findings, penetration test reports, or when proactively hardening an application. Security changes require careful validation to avoid breaking existing functionality.
+
+### Step-by-Step
+
+#### Step 1: Run the Security Audit
+
+```
+/security
+```
+
+**What the AI does:**
+
+- Scans for OWASP Top 10 vulnerabilities
+- Checks dependency vulnerabilities via `npm audit` or equivalent
+- Scans for hardcoded secrets and credentials
+- Reviews authentication and authorization flows
+- Reports findings by severity
+
+**Expected output:**
+
+```
+## Security Audit
+
+### Findings
+
+| ID   | Severity | Category         | Finding                                      | Location              |
+|------|----------|-----------------|----------------------------------------------|-----------------------|
+| S-01 | CRITICAL | Input Validation | User input passed directly to SQL query      | src/api/search.ts:45  |
+| S-02 | HIGH     | CORS             | CORS allows all origins in production        | src/server/app.ts:12  |
+| S-03 | HIGH     | Rate Limiting    | No rate limit on /api/auth/* endpoints       | src/routes/auth.ts    |
+| S-04 | MEDIUM   | Dependencies     | express@4.17.1 has known prototype pollution | package.json          |
+| S-05 | LOW      | Headers          | Missing security headers (HSTS, X-Frame)     | src/server/app.ts     |
+```
+
+---
+
+#### Step 2: Plan the Fixes
+
+```
+/plan Fix all CRITICAL and HIGH security findings from the audit: parameterize the SQL query in search, restrict CORS to allowed origins, and add rate limiting to auth endpoints
+```
+
+---
+
+#### Step 3: Fix Security Issues
+
+```
+/team-security Fix the SQL injection vulnerability in src/api/search.ts, restrict CORS configuration to allowed origins, and add rate limiting to /api/auth/* endpoints
+```
+
+**What the AI does:**
+
+- Replaces raw SQL with parameterized queries
+- Configures CORS with an explicit allowlist read from environment variables
+- Adds rate-limiting middleware with configurable thresholds
+- Adds tests for each security fix (input validation, CORS rejection, rate limit enforcement)
+- Runs quality gates to ensure nothing breaks
+
+---
+
+#### Step 4: Fix Dependency Vulnerabilities
+
+```
+/security --scan-type deps --fix
+```
+
+**What the AI does:**
+
+- Identifies packages with known vulnerabilities
+- Upgrades to patched versions where available
+- Reports any vulnerabilities that cannot be auto-fixed (no patch available)
+
+---
+
+#### Step 5: Validate and Review
+
+```
+/check
+/review --focus security
+```
+
+Run the full quality gate, then a security-focused code review to verify the fixes are correct and complete.
+
+---
+
+#### Step 6: Re-run the Security Audit
+
+```
+/security
+```
+
+Run the security audit again to confirm all CRITICAL and HIGH findings are resolved. The output should show the remaining items are MEDIUM or LOW only.
+
+```
+/handoff --save --tag security
+```
+
+---
+
+### Summary of Commands Used
+
+```
+/security            Initial security audit
+/plan                Plan fixes for critical findings
+/team-security       Implement security fixes
+/security --fix      Auto-fix dependency vulnerabilities
+/check               Validate nothing is broken
+/review              Security-focused code review
+/security            Confirm findings are resolved
+/handoff --save      Document the session
+```
+
+---
+
+## Scenario 7: Dependency Upgrade
+
+### Goal
+
+Upgrade a major dependency (e.g., React 18 to React 19, or Express 4 to Express 5) across the project. Major upgrades involve breaking changes, API migrations, and updated patterns that must be applied consistently.
+
+### When to Use This Flow
+
+Use this flow for major version upgrades of core dependencies. Minor and patch upgrades typically do not require this level of planning. This flow is also useful for Node.js major version upgrades (e.g., Node 20 to Node 22) or framework migrations (e.g., Webpack to Vite).
+
+### Step-by-Step
+
+#### Step 1: Assess Current State
+
+```
+/discover
+/healthcheck
+```
+
+Run discovery and healthcheck to establish a baseline. You need to know what is passing before you start — any pre-existing failures will be harder to distinguish from upgrade-related regressions.
+
+---
+
+#### Step 2: Plan the Upgrade
+
+```
+/plan Upgrade React from v18 to v19. Identify all breaking changes, deprecated APIs in use, and files that need migration. Include a rollback strategy.
+```
+
+**What the AI does:**
+
+- Reviews the changelog and migration guide for the target version
+- Scans the codebase for deprecated patterns and breaking change impacts
+- Produces a file-by-file migration plan
+- Lists specific API changes (e.g., removed hooks, changed signatures)
+
+**Expected plan highlights:**
+
+```
+## Breaking Changes Affecting This Project
+1. `ReactDOM.render` removed -- must use `createRoot` (4 files affected)
+2. `ReactDOM.hydrate` removed -- must use `hydrateRoot` (if SSR is used)
+3. `propTypes` and `defaultProps` on function components deprecated -- use ES default parameters
+4. Legacy Context API (`contextTypes`, `childContextTypes`) removed -- use `React.createContext`
+5. String refs removed -- use `useRef` or callback refs
+6. `ReactDOM.findDOMNode` removed -- use ref forwarding
+7. New error handling: `onUncaughtError` and `onCaughtError` on `createRoot`
+
+## Steps
+1. Update package.json: react@19, react-dom@19, @types/react@19
+2. Run the official codemod: `npx codemod@latest react/19/migration-recipe`
+3. Migrate ReactDOM.render to createRoot in src/client/index.tsx
+4. Replace `defaultProps` with ES default parameters on function components
+5. Remove any string refs and legacy context usage
+6. Update test utilities: @testing-library/react to compatible version
+7. Run full test suite and fix any failures
+
+## Rollback Plan
+1. git stash or revert the upgrade commit
+2. Run pnpm install to restore previous lockfile
+```
+
+---
+
+#### Step 3: Perform the Upgrade
+
+Option A — use the orchestrator for multi-team coordination:
+
+```
+/orchestrate Upgrade React from v18 to v19 per the plan above
+```
+
+Option B — use a single team for a more controlled approach:
+
+```
+/team-frontend Upgrade React from v18 to v19. Start by updating package.json and running pnpm install, then migrate each breaking change one at a time, running tests after each change.
+```
+
+**What the AI does:**
+
+- Updates the dependency version in `package.json`
+- Applies each migration step incrementally
+- Runs tests after each change to catch regressions immediately
+- If a test fails, investigates and fixes before moving to the next step
+- Keeps changes atomic (one migration concern per commit when possible)
+
+---
+
+#### Step 4: Validate Thoroughly
+
+```
+/check
+```
+
+Run the full quality gate. Pay special attention to:
+
+- **Typecheck:** New type definitions may cause errors
+- **Tests:** Behavioral changes in the dependency may cause test failures
+- **Build:** New peer dependency requirements may cause build failures
+
+```
+/review --range main..HEAD
+```
+
+Review all changes since the upgrade started. Look for:
+
+- Incomplete migrations (some files updated, others missed)
+- Inconsistent patterns (mixing old and new APIs)
+- Missing test updates
+
+---
+
+#### Step 5: Test in Context
+
+If your project has E2E tests or a staging environment:
+
+```
+/deploy staging --dry-run
+```
+
+Preview what would be deployed to catch any deployment-specific issues from the upgrade.
+
+---
+
+#### Step 6: Document and Hand Off
+
+```
+/handoff --save --tag dependency-upgrade
+```
+
+**Expected output:**
+
+```
+## What Was Done
+- Upgraded React from 18.2.0 to 19.0.0
+- Migrated ReactDOM.render to createRoot (4 files)
+- Removed forwardRef wrappers (6 components)
+- Removed manual batching (3 files)
+- Updated @testing-library/react to v16
+- All 165 tests pass
+- Build clean, no type errors
+
+## Current Blockers
+- None
+
+## Next 3 Actions
+1. Monitor production for any rendering regressions after deployment
+2. Remove legacy React 18 compatibility shims in src/utils/compat.ts
+3. Audit remaining useEffect hooks for cleanup timing changes
+```
+
+---
+
+### Summary of Commands Used
+
+```
+/discover            Understand the codebase
+/healthcheck         Establish a passing baseline
+/plan                Plan the migration with rollback strategy
+/team-frontend       Execute the upgrade incrementally
+/check               Full quality gate validation
+/review              Review all changes for completeness
+/handoff --save      Document the session
+```
+
+**Tips for major dependency upgrades:**
+
+- Always start from a clean, passing baseline. Run `/healthcheck` first.
+- Make changes incrementally and test after each step. Do not update everything at once.
+- If the upgrade breaks too many things, consider a staged migration (adapter pattern) instead of a big-bang upgrade.
+- Keep the rollback plan ready. If the upgrade is not going well after 30 minutes, revert and reassess.
+- For framework upgrades that touch many files, use `/orchestrate` to coordinate multiple teams. For library upgrades, a single `/team-*` command is usually sufficient.
+
+---
+
+## Scenario 8: Infrastructure Fitness Evaluation (Incoming)
+
+> **Branch:** `claude/agentforge-template-integration-eCegs` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Run a quarterly infrastructure fitness evaluation to assess reliability, cost efficiency, security, and operational maturity. Produce a scored report with actionable recommendations.
+
+### When to Use This Flow
+
+Use this flow for periodic infrastructure health assessments, pre-funding due diligence, or before major architectural decisions. The evaluation scores 8 weighted dimensions and enforces non-negotiable hard gates.
+
+### Prerequisites
+
+- Repository initialized with AgentKit Forge
+- `evaluation.infraEval: true` set in `.agentkit/spec/project.yaml`
+- Run `agentkit sync` after enabling the evaluation feature
+
+### Step-by-Step
+
+#### Step 1: Enable Infrastructure Evaluation
+
+In `.agentkit/spec/project.yaml`:
+
+```yaml
+evaluation:
+  infraEval: true
+  weights:
+    reliability: 18
+    cost: 16
+    security: 14
+    infra: 12
+    scalability: 12
+    architecture: 10
+    code: 10
+    ops: 8
+```
+
+#### Step 2: Run the Evaluation
+
+```
+/infra-eval
+```
+
+**What the AI does:**
+
+- Scans the repository for evidence across all 8 dimensions
+- Scores each dimension on a 0–5 scale
+- Runs 5 hard gate checks (backup restore, cost attribution, content moderation, rollback strategy, identity boundaries)
+- Computes a weighted overall score
+
+#### Step 3: Review the Report
+
+The evaluation produces:
+
+- **Scored summary** with narrative risk analysis
+- **Top 5 risk drivers** ranked by impact × likelihood
+- **Top 5 fixes by ROI** — most impactful improvements
+- **Scale ceiling narrative** — what breaks at 10×? 50×?
+
+Score interpretation:
+
+| Score Range | Meaning                        |
+| ----------- | ------------------------------ |
+| 50–65       | High risk, significant gaps    |
+| 65–75       | Healthy startup baseline       |
+| 75–85       | Strong infrastructure posture  |
+| >85         | Likely over-engineered         |
+
+#### Step 4: Address Hard Gate Failures
+
+Any hard gate failure results in an overall FAIL regardless of dimension scores. Fix these first:
+
+```
+/team-infra --task "Address hard gate G1: implement tested backup restore"
+/check
+```
+
+#### Step 5: Plan Remediation
+
+```
+/plan "Address top 3 risk drivers from infra-eval report"
+/orchestrate
+```
+
+### Command Sequence Summary
+
+```
+/infra-eval                          Full evaluation with all dimensions
+/infra-eval --gates-only             Quick check — hard gates only
+/infra-eval --focus reliability      Single dimension deep dive
+/infra-eval --output json --save     Machine-readable report saved to docs/evaluations/
+```
+
+---
+
+## Scenario 9: Feature Management Setup (Incoming)
+
+> **Branch:** `claude/feature-management-strategy-1jUSw` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Configure which AgentKit Forge features are enabled for your repository, choosing between presets (minimal, lean, standard, full) or custom feature selection.
+
+### When to Use This Flow
+
+Use this flow when onboarding a new repository, when a solo developer wants to disable team orchestration overhead, or when you want to audit which features are actually in use.
+
+### Step-by-Step
+
+#### Step 1: Review Available Features
+
+```
+/feature-review
+```
+
+**What the AI does:**
+
+- Lists all features by category with current enabled/disabled status
+- Highlights dependency issues or conflicts
+- Shows which preset is currently active
+
+#### Step 2: Choose a Preset or Customize
+
+**Option A — Apply a preset:**
+
+```
+/feature-configure
+```
+
+The AI walks you through an interactive preset selection with diff preview.
+
+**Option B — CLI direct:**
+
+```bash
+agentkit features preset lean              # Solo developer, no team overhead
+agentkit features enable mcp-integration   # Add a specific feature
+```
+
+#### Step 3: Verify and Regenerate
+
+```bash
+agentkit sync                              # Regenerate configs with new feature set
+```
+
+#### Step 4: Audit the Configuration
+
+```
+/feature-review --audit
+```
+
+**What the AI does:**
+
+- Checks that every enabled feature has corresponding generated files
+- Flags stale configurations (enabled features with missing output)
+- Reports features that could be disabled based on actual usage
+
+#### Step 5: Trace a Specific Feature (Debugging)
+
+```
+/feature-flow team-orchestration --show-output
+```
+
+**What the AI does:**
+
+- Shows the full resolution chain: spec definition → overlay config → template variables → generated output
+- Useful for debugging why a command or agent is missing from generated configs
+
+### Preset Comparison
+
+| Preset     | Features | Best For                              |
+| ---------- | -------- | ------------------------------------- |
+| `minimal`  | 5        | CI-only validation, no AI interaction |
+| `lean`     | 8        | Solo developer, no team overhead      |
+| `standard` | 12       | Small-to-medium teams (default)       |
+| `full`     | 20       | Enterprise, full orchestration        |
+
+### Command Sequence Summary
+
+```
+/feature-review                       Audit current feature state
+/feature-configure --preset standard  Apply a preset
+/feature-configure --toggle <name>    Enable/disable individual features
+agentkit sync                         Regenerate configs with new feature set
+/feature-review --audit               Verify post-sync consistency
+/feature-flow <feature>               Trace a feature from spec to output
+```
+
+---
+
+## Scenario 10: Session Retrospective (Incoming)
+
+> **Branch:** `claude/elegant-knuth-iSy89` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Capture issues encountered and lessons learned during a development session, building an institutional knowledge library for future sessions.
+
+### When to Use This Flow
+
+Use this flow at the end of a sprint, after resolving a difficult bug, or periodically to extract patterns from development work.
+
+### Step-by-Step
+
+#### Step 1: Complete Your Development Work
+
+Finish whatever task you were working on. The retrospective works best when there is a meaningful session to analyze.
+
+#### Step 2: Run the Retrospective
+
+```
+/review --focus=retrospective
+```
+
+**What the AI does:**
+
+- Reviews the full conversation history for the current session
+- Identifies issues encountered (bugs, blockers, misunderstandings, tooling failures)
+- Extracts lessons learned (patterns, debugging techniques, architectural insights)
+- Classifies each by severity/category
+- Writes structured records to `docs/history/`
+
+#### Step 3: Review and Refine
+
+The AI produces:
+
+- **Issue records** in `docs/history/issues/XXXX-YYYY-MM-DD-slug-issue.md`
+- **Lesson records** in `docs/history/lessons-learned/XXXX-YYYY-MM-DD-slug-lesson.md`
+
+Review the generated records and edit as needed. The sequential numbering and deduplication are handled automatically.
+
+#### Step 4: Optionally File External Issues
+
+```
+/review --focus=retrospective --open-issues
+```
+
+This files unresolved issues to your external tracker (GitHub Issues or Linear) in addition to local records.
+
+#### Step 5: Preview Without Writing (Dry Run)
+
+```
+/review --focus=retrospective --dry-run
+```
+
+Shows what would be captured without writing any files.
+
+### Command Sequence Summary
+
+```
+/review --focus=retrospective              Full retrospective capture
+/review --focus=retrospective --dry-run    Preview without writing files
+/review --focus=retrospective --open-issues File unresolved issues to tracker
+```
+
+---
+
+## Scenario 11: Brand & Editor Theme Setup (Incoming)
+
+> **Branch:** `claude/repo-specific-editor-theme-zMOG1` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Define a brand identity for your repository and generate matching editor themes for VS Code, Cursor, and Windsurf.
+
+### When to Use This Flow
+
+Use this flow when you want consistent visual identity in your editor workspace, when onboarding a team to a project with established brand guidelines, or when auditing accessibility of your color palette.
+
+### Step-by-Step
+
+#### Step 1: Scaffold Brand Files
+
+```
+/brand --init
+```
+
+**What the AI does:**
+
+- Creates `.agentkit/spec/brand.yaml` with a template brand identity
+- Creates `.agentkit/spec/editor-theme.yaml` with default color mappings
+- Guides you through filling in brand colors, typography, and accessibility requirements
+
+#### Step 2: Customize the Brand Spec
+
+Edit `.agentkit/spec/brand.yaml` with your brand's colors, fonts, and identity attributes. The spec supports:
+
+- Simple hex colors (`#1a73e8`) or detailed objects with role/rationale
+- Dark mode variants
+- WCAG accessibility compliance levels
+- Typography scale with semantic names
+
+#### Step 3: Validate and Preview
+
+```
+/brand --validate
+/brand --palette
+/brand --contrast
+```
+
+**What the AI does:**
+
+- Validates required fields and color format
+- Previews the resolved color palette
+- Audits WCAG compliance of color combinations and flags failures
+
+#### Step 4: Generate Editor Themes
+
+```
+/brand --theme
+```
+
+Or regenerate everything through the sync pipeline:
+
+```bash
+agentkit sync
+```
+
+The sync engine reads `brand.yaml` and `editor-theme.yaml`, resolves brand colors using dot-notation paths, and generates `workbench.colorCustomizations` in:
+
+- `.vscode/settings.json`
+- `.cursor/settings.json`
+- `.windsurf/settings.json`
+
+#### Step 5: Per-Repo Overrides
+
+For repository-specific theme tweaks, create:
+
+```yaml
+# .agentkit/overlays/my-repo/editor-theme.yaml
+mode: dark
+cursor:
+  statusBar.background: colors.secondary.lilac
+```
+
+### Command Sequence Summary
+
+```
+/brand --init                    Scaffold brand.yaml with interactive prompts
+/brand --validate                Validate required fields and color format
+/brand --palette                 Preview resolved color palette
+/brand --contrast                Audit WCAG compliance of color combinations
+/brand --theme                   Generate editor themes from brand spec
+agentkit sync                    Full sync including brand-resolved themes
+```

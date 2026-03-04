@@ -57,6 +57,13 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Grep
 - Bash
 
+## Domain Rules
+
+- Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles
+- Follow security domain rules [sec-input-validation, sec-no-secrets, sec-least-privilege, sec-deny-by-default, sec-encryption] — enforce all OWASP Top 10 protections, validate secrets hygiene
+- Follow dependency-management domain rules [dep-audit-before-adopt, dep-regular-audit, dep-pin-versions] — audit supply chain, check for known CVEs
+- Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
+
 ## Conventions
 
 - Work only within your focus area unless explicitly asked to cross boundaries

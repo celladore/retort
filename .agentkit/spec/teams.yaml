@@ -78,7 +78,7 @@ teams:
 
   - id: quality
     name: QUALITY
-    focus: 'Code review, refactoring, bugs, reliability'
+    focus: 'Code review, refactoring, bugs, reliability, session retrospectives'
     scope: ['**/*']
     accepts: [review, investigate]
     handoff-chain: []

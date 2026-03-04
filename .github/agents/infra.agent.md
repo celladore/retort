@@ -55,7 +55,6 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Implement disaster recovery and backup strategies
 - Enforce mandatory resource tagging (environment, project, owner, cost-center)
 - Manage Terraform state backend and locking configuration
-- Execute /infra-eval assessments when evaluation.infraEval is enabled
 
 ## Tools
 
@@ -65,6 +64,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Glob
 - Grep
 - Bash
+
+## Domain Rules
+
+- Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles
+- Follow iac domain rules [iac-naming-convention, iac-tagging, iac-no-hardcoded-secrets, iac-plan-before-apply] — use naming conventions, tag resources, no hardcoded secrets
+- Follow security domain rules [sec-least-privilege, sec-encryption, sec-no-secrets] — enforce least-privilege IAM, encrypt at rest and in transit
+- Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
+- Execute /infra-eval assessments when evaluation.infraEval is enabled
 
 ## Agent Conventions
 

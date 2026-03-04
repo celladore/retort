@@ -4,7 +4,9 @@
     "implementation": 1,
     "bugfix": 1,
     "feature": 1,
-    "migration": 1
+    "migration": 1,
+    "issue": 1,
+    "lesson": 1
   },
   "entries": []
 }
