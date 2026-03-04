@@ -23,6 +23,7 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 import {
   buildFeatureVars,
+  buildHookFeatureMap,
   loadFeatureSpec,
   resolveFeatures,
 } from './feature-manager.mjs';
@@ -183,9 +184,9 @@ async function syncGitHub(templatesDir, tmpDir, vars, version, repoName) {
 }
 
 /**
- * Copies templates/renovate to tmpDir root.
+ * Copies templates/renovate to tmpDir root (renovate.json).
  */
-async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) {
+async function syncRenovateConfig(templatesDir, tmpDir, vars, version, repoName) {
   await syncDirectCopy(templatesDir, 'renovate', tmpDir, '.', vars, version, repoName);
 }
 
@@ -221,17 +222,21 @@ async function syncClaudeSettings(
 
 /**
  * Copies hook files from templates/claude/hooks, skipping hooks whose
- * owning feature is disabled. Uses HOOK_FEATURE_MAP for the mapping.
+ * owning feature is disabled. The hook→feature mapping is derived from
+ * features.yaml affectsTemplates via buildHookFeatureMap().
  */
-async function syncClaudeHooks(templatesDir, tmpDir, vars, version, repoName) {
+async function syncClaudeHooks(templatesDir, tmpDir, vars, version, repoName, hookFeatureMap) {
   const hooksDir = join(templatesDir, 'claude', 'hooks');
   if (!existsSync(hooksDir)) return;
+
+  const { specific, defaultFeature } = hookFeatureMap;
 
   for await (const srcFile of walkDir(hooksDir)) {
     const fname = basename(srcFile);
     // Strip extension(s) to get the hook name stem (e.g. 'protect-sensitive' from 'protect-sensitive.sh')
     const stem = fname.replace(/\.(sh|ps1)$/i, '');
-    const requiredFeature = HOOK_FEATURE_MAP[stem];
+    // Check specific mapping first, then fall back to directory-level default feature
+    const requiredFeature = specific[stem] || defaultFeature;
     if (requiredFeature && !isFeatureEnabled(requiredFeature, vars)) continue;
 
     const ext = extname(srcFile).toLowerCase();
@@ -271,7 +276,7 @@ async function syncClaudeCommands(
     // Check if this file corresponds to a feature-gated command
     const cmdName = fname.replace(/\.md$/i, '');
     const cmdSpec = cmdByName.get(cmdName);
-    if (cmdSpec && isFeatureGated(cmdSpec, vars)) continue;
+    if (cmdSpec && !isItemFeatureEnabled(cmdSpec, vars)) continue;
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
@@ -354,7 +359,7 @@ async function syncClaudeSkills(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    if (isFeatureGated(cmd, vars)) continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -423,7 +428,7 @@ async function syncCursorCommands(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    if (isFeatureGated(cmd, vars)) continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -483,7 +488,7 @@ async function syncWindsurfCommands(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    if (isFeatureGated(cmd, vars)) continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -536,7 +541,7 @@ async function syncCopilotPrompts(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    if (isFeatureGated(cmd, vars)) continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -746,7 +751,7 @@ async function syncCodexSkills(
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    if (isFeatureGated(cmd, vars)) continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -858,14 +863,12 @@ async function syncA2aConfig(tmpDir, vars, version, repoName, _agentsSpec, _team
 // ---------------------------------------------------------------------------
 
 /**
- * Returns true if a command/agent should be skipped because its requiredFeature is disabled.
- * Maps requiredFeature (e.g. 'team-orchestration') to the canonical template var
- * `feature_team_orchestration` and checks vars.
+ * Returns true if the item's requiredFeature is enabled (or if it has no requiredFeature).
+ * Items without a requiredFeature are always enabled.
  */
-function isFeatureGated(item, vars) {
-  if (!item.requiredFeature) return false;
-  const featureVar = `feature_${item.requiredFeature.replace(/-/g, '_')}`;
-  return vars[featureVar] === false;
+function isItemFeatureEnabled(item, vars) {
+  if (!item.requiredFeature) return true;
+  return isFeatureEnabled(item.requiredFeature, vars);
 }
 
 /**
@@ -878,16 +881,8 @@ function isFeatureEnabled(featureId, vars) {
   return vars[featureVar] !== false;
 }
 
-/**
- * Maps hook filenames to the feature that gates them.
- * Hooks not listed here are always generated (core).
- */
-const HOOK_FEATURE_MAP = {
-  'guard-destructive-commands': 'permission-guards',
-  'protect-sensitive': 'sensitive-file-protection',
-  'protect-templates': 'permission-guards',
-  'stop-build-check': 'quality-gates',
-};
+// HOOK_FEATURE_MAP is derived at sync time from features.yaml affectsTemplates
+// via buildHookFeatureMap(). See syncClaudeHooks() for usage.
 
 
 function buildCommandVars(cmd, vars) {
@@ -1019,10 +1014,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // Resolve enabled features from spec + overlay settings
   let featureVars = {};
+  let hookFeatureMap = { specific: {}, defaultFeature: null };
   try {
     const { features, presets } = loadFeatureSpec(agentkitRoot);
     const enabledFeatures = resolveFeatures(features, overlaySettings, presets);
     featureVars = buildFeatureVars(features, enabledFeatures);
+    hookFeatureMap = buildHookFeatureMap(features);
     log(`[agentkit:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
   } catch {
     // features.yaml may not exist yet in older repos — degrade gracefully
@@ -1075,7 +1072,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     alwaysOnTasks.push(syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName));
   }
   if (isFeatureEnabled('dependency-management', vars)) {
-    alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
+    alwaysOnTasks.push(syncRenovateConfig(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
   await Promise.all(alwaysOnTasks);
@@ -1085,7 +1082,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   if (targets.has('claude')) {
     gatedTasks.push(
-      syncClaudeHooks(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncClaudeHooks(templatesDir, tmpDir, vars, version, headerRepoName, hookFeatureMap),
       syncClaudeSettings(templatesDir, tmpDir, vars, version, mergedPermissionsResult, settingsSpec),
       syncClaudeCommands(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, commandsSpec),
       syncClaudeAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
@@ -1168,18 +1165,22 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
   }
 
-  if (targets.has('cline') && isFeatureEnabled('coding-rules', vars)) {
-    gatedTasks.push(
-      syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.clinerules/languages', 'cline')
-    );
+  if (targets.has('cline')) {
+    if (isFeatureEnabled('coding-rules', vars)) {
+      gatedTasks.push(
+        syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+        syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.clinerules/languages', 'cline')
+      );
+    }
   }
 
-  if (targets.has('roo') && isFeatureEnabled('coding-rules', vars)) {
-    gatedTasks.push(
-      syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.roo/rules/languages', 'roo')
-    );
+  if (targets.has('roo')) {
+    if (isFeatureEnabled('coding-rules', vars)) {
+      gatedTasks.push(
+        syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+        syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.roo/rules/languages', 'roo')
+      );
+    }
   }
 
   if (targets.has('mcp') && isFeatureEnabled('mcp-integration', vars)) {

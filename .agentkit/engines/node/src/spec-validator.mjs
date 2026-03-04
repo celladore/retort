@@ -6,7 +6,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
-import { validateFeatureSpec } from './feature-manager.mjs';
+import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
@@ -810,6 +810,13 @@ export function validateSpec(agentkitRoot) {
           );
           errors.push(...featureResult.errors);
           warnings.push(...featureResult.warnings);
+
+          // Validate affectsTemplates paths reference real template files/dirs
+          const templatesDir = resolve(agentkitRoot, 'templates');
+          if (existsSync(templatesDir)) {
+            const affectsResult = validateAffectsTemplates(featuresData.features, templatesDir);
+            warnings.push(...affectsResult.warnings);
+          }
         }
       }
     } catch (err) {

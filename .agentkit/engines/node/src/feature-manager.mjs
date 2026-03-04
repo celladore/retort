@@ -32,9 +32,9 @@
  * If the schema version is higher than SUPPORTED_SCHEMA_VERSION, a warning is emitted
  * (but loading continues for forward-compatibility).
  */
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { REPO_NAME_PATTERN } from './repo-name.mjs';
 
 /**
@@ -279,6 +279,43 @@ export function getFeatureListInfo(features, enabledFeatures) {
 }
 
 // ---------------------------------------------------------------------------
+// Hook-to-feature mapping (derived from affectsTemplates)
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds a mapping of hook file stems to owning feature IDs by scanning
+ * each feature's `affectsTemplates` for paths matching `claude/hooks/`.
+ *
+ * - `claude/hooks/` (directory) → all hooks not claimed by a more specific match
+ *   are gated by this feature (stored as `__default__`)
+ * - `claude/hooks/<name>.sh` → the specific hook stem is gated by this feature
+ *
+ * @param {object[]} features - Feature definitions from features.yaml
+ * @returns {{ specific: Record<string, string>, defaultFeature: string|null }}
+ */
+export function buildHookFeatureMap(features) {
+  const specific = {};
+  let defaultFeature = null;
+
+  for (const feature of features) {
+    for (const tplPath of feature.affectsTemplates || []) {
+      // Match exact hook file: claude/hooks/<name>.sh or claude/hooks/<name>.ps1
+      const fileMatch = tplPath.match(/^claude\/hooks\/([^/]+)\.(sh|ps1)$/);
+      if (fileMatch) {
+        specific[fileMatch[1]] = feature.id;
+        continue;
+      }
+      // Match directory-level claim: claude/hooks/ (trailing slash)
+      if (tplPath === 'claude/hooks/' || tplPath === 'claude/hooks') {
+        defaultFeature = feature.id;
+      }
+    }
+  }
+
+  return { specific, defaultFeature };
+}
+
+// ---------------------------------------------------------------------------
 // Overlay management
 // ---------------------------------------------------------------------------
 
@@ -401,9 +438,13 @@ export async function runFeatureEnable({ agentkitRoot, projectRoot, flags }) {
     return;
   }
 
-  // Switch to explicit enabledFeatures mode
+  // Switch to explicit enabledFeatures mode — clear featurePreset to avoid conflict
   if (!Array.isArray(settings.enabledFeatures)) {
     settings.enabledFeatures = [...currentEnabled];
+    if (settings.featurePreset) {
+      console.log(`[agentkit:features] Switching from preset "${settings.featurePreset}" to explicit mode.`);
+      delete settings.featurePreset;
+    }
   }
 
   for (const id of toEnable) {
@@ -490,9 +531,13 @@ export async function runFeatureDisable({ agentkitRoot, projectRoot, flags }) {
     );
   }
 
-  // Apply disablement
+  // Apply disablement — switch to explicit mode, clear featurePreset to avoid conflict
   if (!Array.isArray(settings.enabledFeatures)) {
     settings.enabledFeatures = [...currentEnabled];
+    if (settings.featurePreset) {
+      console.log(`[agentkit:features] Switching from preset "${settings.featurePreset}" to explicit mode.`);
+      delete settings.featurePreset;
+    }
   }
   settings.enabledFeatures = settings.enabledFeatures.filter((id) => !disableSet.has(id));
 
@@ -701,6 +746,63 @@ export function validateFeatureSpec(features, presets) {
   }
 
   return { errors, warnings };
+}
+
+/**
+ * Validates that affectsTemplates paths in feature definitions reference
+ * actual files or directories in the templates directory.
+ *
+ * @param {object[]} features - Feature definitions from features.yaml
+ * @param {string} templatesDir - Path to the templates directory
+ * @returns {{ warnings: string[] }}
+ */
+export function validateAffectsTemplates(features, templatesDir) {
+  const warnings = [];
+
+  for (const feature of features) {
+    for (const tplPath of feature.affectsTemplates || []) {
+      // Directory references end with / — check if directory exists
+      if (tplPath.endsWith('/')) {
+        const dirPath = resolve(templatesDir, tplPath);
+        if (!existsSync(dirPath)) {
+          warnings.push(
+            `features.yaml: feature "${feature.id}" affectsTemplates references directory "${tplPath}" ` +
+              `which does not exist in templates/`
+          );
+        }
+        continue;
+      }
+
+      // Glob-style patterns (with *) — check that the parent directory exists
+      if (tplPath.includes('*')) {
+        const parts = tplPath.split('/');
+        // Find the deepest non-glob directory segment
+        let parentDir = templatesDir;
+        for (const part of parts) {
+          if (part.includes('*')) break;
+          parentDir = join(parentDir, part);
+        }
+        if (!existsSync(parentDir)) {
+          warnings.push(
+            `features.yaml: feature "${feature.id}" affectsTemplates references pattern "${tplPath}" ` +
+              `but base directory does not exist in templates/`
+          );
+        }
+        continue;
+      }
+
+      // Exact file reference — check if file exists
+      const filePath = resolve(templatesDir, tplPath);
+      if (!existsSync(filePath)) {
+        warnings.push(
+          `features.yaml: feature "${feature.id}" affectsTemplates references "${tplPath}" ` +
+            `which does not exist in templates/`
+        );
+      }
+    }
+  }
+
+  return { warnings };
 }
 
 /**

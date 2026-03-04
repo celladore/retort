@@ -52,8 +52,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 | `/security`     | Security audit                               |
 | `/sync-backlog` | Update AGENT_BACKLOG.md                      |
 {{#if hasSessionHandoff}}| `/handoff`      | Session handoff summary                      |
-{{/if}}
-{{/if}}
+{{/if}}{{/if}}
 
 {{#if hasTeamOrchestration}}
 ## Team Commands
@@ -71,7 +70,6 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 | `/team-product`  | Product (T9)        | Features, PRDs            |
 | `/team-quality`  | Quality (T10)       | Review, refactor          |
 {{/if}}
-
 ## Workflow
 
 ### 5-Phase Lifecycle
