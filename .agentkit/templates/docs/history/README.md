@@ -40,15 +40,14 @@ Use the provided script to generate a new document from the correct template:
 ./scripts/create-doc.sh lesson "Lesson Title"
 ```
 
-The `retrospective` command automates issue and lesson creation at end-of-session:
+The `/review` command with `--focus=retrospective` automates issue and lesson
+creation at end-of-session (non-blocking — never gates delivery):
 
 ```bash
 # Via agent command
-/retrospective                    # Full retrospective: issues + lessons
-/retrospective --issues-only      # Only log issues
-/retrospective --lessons-only     # Only log lessons
-/retrospective --dry-run          # Preview without writing
-/retrospective --open-issues      # Also create GitHub issues for unresolved problems
+/review --focus=retrospective                  # Full retrospective: issues + lessons
+/review --focus=retrospective --dry-run        # Preview without writing
+/review --focus=retrospective --open-issues    # Also create GitHub issues for unresolved problems
 ```
 
 ```powershell

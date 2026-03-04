@@ -78,17 +78,10 @@ teams:
 
   - id: quality
     name: QUALITY
-    focus: 'Code review, refactoring, bugs, reliability'
+    focus: 'Code review, refactoring, bugs, reliability, session retrospectives'
     scope: ['**/*']
     accepts: [review, investigate]
     handoff-chain: []
-
-  - id: retrospective
-    name: RETROSPECTIVE
-    focus: 'Session issues, lessons learned, knowledge capture'
-    scope: ['docs/history/issues/**', 'docs/history/lessons-learned/**', 'docs/history/.index.json']
-    accepts: [investigate, review]
-    handoff-chain: [product, quality]
 
 # =============================================================================
 # Tech Stack Definitions

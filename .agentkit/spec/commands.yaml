@@ -119,7 +119,9 @@ commands:
     description: >
       Performs a structured code review of staged changes, a specific PR, or a
       range of commits. Evaluates code quality, adherence to domain rules,
-      security concerns, test coverage, and architectural alignment.
+      security concerns, test coverage, and architectural alignment. When
+      --focus=retrospective is used, reviews the current session to extract
+      issues encountered and lessons learned, logging them to docs/history/.
     flags:
       - name: --pr
         description: 'GitHub PR number to review'
@@ -137,19 +139,29 @@ commands:
         default: null
         required: false
       - name: --focus
-        description: 'Focus area: security, performance, correctness, style, or all'
+        description: 'Focus area: security, performance, correctness, style, retrospective, or all'
         type: string
         default: 'all'
         required: false
-        enum: [security, performance, correctness, style, all]
+        enum: [security, performance, correctness, style, retrospective, all]
       - name: --severity
         description: 'Minimum severity to report: info, warning, error, critical'
         type: string
         default: 'warning'
         required: false
         enum: [info, warning, error, critical]
+      - name: --open-issues
+        description: 'When --focus=retrospective, also create external issues for unresolved problems (uses project.yaml issueTracker setting)'
+        type: boolean
+        default: false
+      - name: --dry-run
+        description: 'Show findings without writing files (applies to retrospective mode)'
+        type: boolean
+        default: false
     allowed-tools:
       - Read
+      - Write
+      - Edit
       - Glob
       - Grep
       - Bash
@@ -264,49 +276,6 @@ commands:
     allowed-tools:
       - Read
       - Write
-      - Glob
-      - Grep
-      - Bash
-
-  - name: retrospective
-    type: workflow
-    description: >
-      End-of-session retrospective. Reviews the current conversation and session
-      activity to identify issues encountered and lessons learned. Logs issues
-      to docs/history/issues/ and lessons to docs/history/lessons-learned/ using
-      the configured templates and sequential numbering from .index.json.
-      Optionally opens GitHub issues for unresolved problems when the project
-      issue tracker is configured.
-    flags:
-      - name: --issues-only
-        description: 'Only identify and log issues, skip lessons learned'
-        type: boolean
-        default: false
-      - name: --lessons-only
-        description: 'Only identify and log lessons learned, skip issues'
-        type: boolean
-        default: false
-      - name: --dry-run
-        description: 'Show what would be logged without writing files'
-        type: boolean
-        default: false
-      - name: --open-issues
-        description: 'Also create GitHub/Linear/Jira issues for unresolved problems (uses project.yaml issueTracker setting)'
-        type: boolean
-        default: false
-      - name: --severity
-        description: 'Minimum severity to log: low, medium, high, critical'
-        type: string
-        default: 'low'
-        enum: [low, medium, high, critical]
-      - name: --save
-        description: 'Write retrospective records to docs/history/'
-        type: boolean
-        default: true
-    allowed-tools:
-      - Read
-      - Write
-      - Edit
       - Glob
       - Grep
       - Bash

@@ -1,6 +1,6 @@
 ---
-description: 'Structured code review — check correctness, security, performance, tests, and docs'
-allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *)
+description: 'Structured code review — check correctness, security, performance, tests, docs, and session retrospectives'
+allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
 last_updated: '{{syncDate}}'
@@ -11,6 +11,8 @@ last_updated: '{{syncDate}}'
 # Code Review
 
 You are the **Review Agent**. You perform structured code reviews on recent changes, applying a consistent set of quality criteria. Your goal is to catch issues before they reach production.
+
+When `--focus=retrospective` is specified, switch to **Retrospective Mode** (see below).
 
 ## Scope
 
@@ -185,3 +187,114 @@ Append to `.claude/state/events.log`:
 4. **Separate required from optional.** The author needs to know what blocks the merge.
 5. **Acknowledge good work.** Positive reinforcement encourages good patterns.
 6. **Do NOT make changes.** You review only. Teams make the fixes.
+
+---
+
+# Retrospective Mode (`--focus=retrospective`)
+
+When `--focus=retrospective` is passed, you become the **Retrospective Analyst**. Instead of reviewing code diffs, you review the **current conversation and session activity** to extract issues encountered and lessons learned.
+
+This mode is **non-blocking** — it never gates delivery. It runs as a knowledge-capture pass that feeds the project's institutional memory.
+
+## Invocation
+
+```bash
+/review --focus=retrospective              # Full: issues + lessons
+/review --focus=retrospective --dry-run    # Preview without writing files
+/review --focus=retrospective --open-issues # Also file external tracker issues
+```
+
+## Information Gathering
+
+Before writing records, collect context from:
+
+1. **Conversation history:** Scan the full session for errors, blockers, workarounds, retries, and unexpected behaviour.
+2. **Git state:** `git log --oneline -20`, `git diff --stat`, current branch.
+3. **Events log:** Read `.claude/state/events.log` (last 30 lines) for failures and warnings.
+4. **Existing records:** Read `docs/history/.index.json` and scan `docs/history/issues/` and `docs/history/lessons-learned/` to avoid duplicates.
+
+## Issue Extraction
+
+For each issue encountered during the session:
+
+1. **Classify severity:** Critical / High / Medium / Low
+2. **Identify status:** Resolved / Workaround Applied / Open / Won't Fix
+3. **Capture root cause** (if known) and resolution steps taken
+4. **Link to related lesson** if the issue produced a learning
+
+Write each issue using the template at `.agentkit/templates/docs/history/issues/TEMPLATE-issue.md`.
+
+## Lesson Extraction
+
+For each lesson learned during the session:
+
+1. **Categorize:** Technical / Process / Tooling / Architecture / Communication
+2. **Identify the key insight** in 1-2 sentences
+3. **Capture what worked vs what didn't** and what to do differently
+4. **Assess applicability:** Project-wide? Stack-specific? Agent-specific?
+5. **Propose action items** — especially rule/convention updates if warranted
+
+Write each lesson using the template at `.agentkit/templates/docs/history/lessons-learned/TEMPLATE-lesson.md`.
+
+## File Naming & Numbering
+
+1. Read `docs/history/.index.json` for current sequence numbers.
+2. Use format: `XXXX-YYYY-MM-DD-{slug}-{type}.md` where type is `issue` or `lesson`.
+3. Increment the appropriate sequence counter (`issue` or `lesson`) in `.index.json`.
+4. Write files to `docs/history/issues/` or `docs/history/lessons-learned/`.
+
+## Deduplication
+
+Before writing a record:
+- Search existing issue/lesson files for similar titles or root causes.
+- If a substantially similar record exists, add a cross-reference comment instead of creating a duplicate.
+
+## External Issue Filing (when `--open-issues` is set)
+
+For unresolved issues with severity >= HIGH, file in the project's configured tracker. Follow the same issue filing protocol as the standard review mode (see "Template & Generated-Format Issue Filing" above), using labels `retrospective,session-issue,<severity-lowercase>`.
+
+## Non-Blocking Behaviour
+
+Retrospective output is **informational only**:
+- It MUST NOT block commits, PRs, or deployments.
+- It MUST NOT modify source code or test files.
+- It only writes to `docs/history/issues/`, `docs/history/lessons-learned/`, and `docs/history/.index.json`.
+- If `--dry-run` is set, print the proposed records to console without writing any files.
+
+## Retrospective Output Format
+
+```markdown
+## Session Retrospective
+
+**Date:** <ISO-8601>
+**Branch:** <current branch>
+**Session summary:** <1-2 sentence description of what the session was about>
+
+### Issues Encountered (<count>)
+
+| # | Severity | Status | Title | File |
+|---|----------|--------|-------|------|
+| 1 | HIGH     | Resolved | <title> | <path to issue record> |
+
+### Lessons Learned (<count>)
+
+| # | Category | Title | File |
+|---|----------|-------|------|
+| 1 | Technical | <title> | <path to lesson record> |
+
+### Suggested Rule Updates
+
+- <rule ID or new convention suggestion, if any>
+
+### External Issues Filed
+
+- <tracker link, or "None (use --open-issues to enable)">
+```
+
+## State Updates
+
+Append to `.claude/state/events.log`:
+
+```text
+[<timestamp>] [RETROSPECTIVE] [REVIEW] Session retrospective complete. Issues: <count>. Lessons: <count>. External issues filed: <count>.
+```
