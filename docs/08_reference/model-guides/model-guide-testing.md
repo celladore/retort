@@ -113,11 +113,11 @@ agents:
   e2e-generator:
     team: testing
     model_override: gpt-5.3-codex-high
-    reason: "Complex scenario expansion"
+    reason: 'Complex scenario expansion'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

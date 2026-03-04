@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Domain-specific AI assistant instructions for IaC. -->
+
 # Instructions — Infrastructure as Code
 
 Apply these rules when editing `.tf`, `.tfvars`, `.hcl`, `terragrunt.hcl`, or
@@ -134,4 +135,3 @@ The following conventions are enforced in **agentkit-forge** and derived from
 - **[iac-fmt]** All Terraform code must pass 'terraform fmt -check'
 - **[iac-validate]** All Terraform configurations must pass 'terraform validate'
 - **[iac-drift-detection]** Infrastructure drift must be detected and corrected. Do not manually modify resources managed by Terraform. If manual changes are necessary, import them into state immediately and update the configuration.
-

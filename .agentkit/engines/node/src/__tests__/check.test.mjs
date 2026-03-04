@@ -11,23 +11,56 @@ import {
 } from '../check.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
+function createCheckFixture({ withBuild = true } = {}) {
+  const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-test-'));
+  const agentkitRoot = resolve(root, '.agentkit');
+  const projectRoot = resolve(root, 'project');
+
+  mkdirSync(resolve(agentkitRoot, 'spec'), { recursive: true });
+  mkdirSync(projectRoot, { recursive: true });
+
+  writeFileSync(resolve(projectRoot, 'package.json'), '{}\n', 'utf-8');
+
+  const buildLine = withBuild ? '    buildCommand: "node -e \\\"\\\""\n' : '';
+  const teamsYaml = `techStacks:
+  - name: test-stack
+    detect:
+      - package.json
+    typecheck: "node -e \\\"\\\""
+    testCommand: "node -e \\\"\\\""
+${buildLine}`;
+
+  writeFileSync(resolve(agentkitRoot, 'spec', 'teams.yaml'), teamsYaml, 'utf-8');
+  return { root, agentkitRoot, projectRoot };
+}
+
+function cleanupFixture(root) {
+  if (existsSync(root)) {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
 describe('runCheck()', () => {
-  afterEach(() => { vi.restoreAllMocks(); });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-  it(
-    'returns a structured result object',
-    async () => {
-      vi.spyOn(console, 'log').mockImplementation(() => {});
-      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  it('returns a structured result object', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
+    const fixture = createCheckFixture();
+    try {
       const result = await runCheck({
-        agentkitRoot: AGENTKIT_ROOT,
-        projectRoot: PROJECT_ROOT,
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
         flags: {},
       });
 
@@ -35,19 +68,21 @@ describe('runCheck()', () => {
       expect(result).toHaveProperty('overallStatus');
       expect(result).toHaveProperty('overallPassed');
       expect(Array.isArray(result.stacks)).toBe(true);
-    },
-    120_000
-  );
+      expect(result.stacks.length).toBe(1);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 
-  it(
-    'respects --fast flag structure',
-    async () => {
-      vi.spyOn(console, 'log').mockImplementation(() => {});
-      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  it('respects --fast flag structure', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
+    const fixture = createCheckFixture({ withBuild: true });
+    try {
       const result = await runCheck({
-        agentkitRoot: AGENTKIT_ROOT,
-        projectRoot: PROJECT_ROOT,
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
         flags: { fast: true },
       });
 
@@ -55,28 +90,31 @@ describe('runCheck()', () => {
         const buildStep = stackResult.steps.find((s) => s.step === 'build');
         expect(buildStep).toBeUndefined();
       }
-    },
-    120_000
-  );
+      expect(result.stacks[0].steps.some((s) => s.step === 'test')).toBe(true);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 
-  it(
-    'handles --stack filter for unknown stacks gracefully',
-    async () => {
-      vi.spyOn(console, 'log').mockImplementation(() => {});
-      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  it('handles --stack filter for unknown stacks gracefully', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
+    const fixture = createCheckFixture();
+    try {
       const result = await runCheck({
-        agentkitRoot: AGENTKIT_ROOT,
-        projectRoot: PROJECT_ROOT,
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
         flags: { stack: 'nonexistent-stack' },
       });
 
       expect(result.stacks).toEqual([]);
       expect(result.overallStatus).toBe('SKIP');
       expect(result.overallPassed).toBe(true);
-    },
-    120_000
-  );
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 });
 
 describe('resolveFormatter()', () => {
@@ -124,20 +162,32 @@ describe('resolveLinter()', () => {
 
 describe('isAllowedFormatter()', () => {
   it('allows known formatter bases', () => {
-    expect(isAllowedFormatter({ cmd: 'black', check: 'black --check .', fix: 'black .' })).toBe(true);
+    expect(isAllowedFormatter({ cmd: 'black', check: 'black --check .', fix: 'black .' })).toBe(
+      true
+    );
     expect(isAllowedFormatter({ cmd: 'gofmt', check: 'gofmt -l .', fix: 'gofmt -w .' })).toBe(true);
   });
 
   it('allows npx with an allowed package', () => {
-    expect(isAllowedFormatter({ cmd: 'npx prettier', check: 'npx prettier --check .', fix: 'npx prettier --write .' })).toBe(true);
+    expect(
+      isAllowedFormatter({
+        cmd: 'npx prettier',
+        check: 'npx prettier --check .',
+        fix: 'npx prettier --write .',
+      })
+    ).toBe(true);
   });
 
   it('blocks npx with an unknown package', () => {
-    expect(isAllowedFormatter({ cmd: 'npx malicious-pkg', check: 'npx malicious-pkg .', fix: null })).toBe(false);
+    expect(
+      isAllowedFormatter({ cmd: 'npx malicious-pkg', check: 'npx malicious-pkg .', fix: null })
+    ).toBe(false);
   });
 
   it('blocks unknown formatter bases', () => {
-    expect(isAllowedFormatter({ cmd: 'arbitrary-bin', check: 'arbitrary-bin .', fix: null })).toBe(false);
+    expect(isAllowedFormatter({ cmd: 'arbitrary-bin', check: 'arbitrary-bin .', fix: null })).toBe(
+      false
+    );
   });
 
   it('exports ALLOWED_FORMATTER_BASES and ALLOWED_NPX_PACKAGES sets', () => {
@@ -154,8 +204,12 @@ describe('isAllowedLinter()', () => {
   });
 
   it('blocks unknown linter bases', () => {
-    expect(isAllowedLinter({ cmd: 'arbitrary-linter', check: 'arbitrary-linter .', fix: null })).toBe(false);
-    expect(isAllowedLinter({ cmd: 'npx malicious-linter', check: 'npx malicious-linter .', fix: null })).toBe(false);
+    expect(
+      isAllowedLinter({ cmd: 'arbitrary-linter', check: 'arbitrary-linter .', fix: null })
+    ).toBe(false);
+    expect(
+      isAllowedLinter({ cmd: 'npx malicious-linter', check: 'npx malicious-linter .', fix: null })
+    ).toBe(false);
   });
 
   it('exports ALLOWED_LINTER_BASES set', () => {

@@ -2,13 +2,13 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI App Builder (prompt-to-app + URL cloning) |
-| **Categories** | Vibe Coding / App Builder |
-| **Access** | Web app — [same.new](https://same.new/) — browser-based, no install required |
-| **Documentation** | [docs.same.new](https://docs.same.new/) |
-| **Performance Rating** | ⭐⭐⭐½ — **66/100** |
+|                        |                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| **Type**               | AI App Builder (prompt-to-app + URL cloning)                                 |
+| **Categories**         | Vibe Coding / App Builder                                                    |
+| **Access**             | Web app — [same.new](https://same.new/) — browser-based, no install required |
+| **Documentation**      | [docs.same.new](https://docs.same.new/)                                      |
+| **Performance Rating** | ⭐⭐⭐½ — **66/100**                                                         |
 
 ---
 
@@ -32,23 +32,23 @@ for rapid prototyping.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                                       |
+| --------- | ----------- | --------------------------------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions (if repo is connected) |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 66/100 ⭐⭐⭐½ | Good Next.js generation; URL cloning is unique |
-| Developer Experience | 80/100 ⭐⭐⭐⭐ | Instant browser-based experience; URL cloning is magic |
-| Cost & Value | 75/100 ⭐⭐⭐½ | Free 500K tokens/mo; paid from $10/mo |
-| Customization | 25/100 ⭐ | Prompt-driven; minimal file-based config |
-| Privacy & Security | 45/100 ⭐⭐ | Cloud-only; code processed on Same servers |
-| Team & Enterprise | 30/100 ⭐½ | Limited team features |
-| **Weighted Total** | **59/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                       |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 66/100 ⭐⭐⭐½    | Good Next.js generation; URL cloning is unique                                |
+| Developer Experience | 80/100 ⭐⭐⭐⭐   | Instant browser-based experience; URL cloning is magic                        |
+| Cost & Value         | 75/100 ⭐⭐⭐½    | Free 500K tokens/mo; paid from $10/mo                                         |
+| Customization        | 25/100 ⭐         | Prompt-driven; minimal file-based config                                      |
+| Privacy & Security   | 45/100 ⭐⭐       | Cloud-only; code processed on Same servers                                    |
+| Team & Enterprise    | 30/100 ⭐½        | Limited team features                                                         |
+| **Weighted Total**   | **59/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

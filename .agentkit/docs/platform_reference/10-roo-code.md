@@ -2,13 +2,13 @@
 
 **Render target:** `roo`
 
-| | |
-|---|---|
-| **Type** | AI Coding Assistant (VS Code extension) |
-| **Categories** | IDE Extension |
-| **Access** | VS Code extension — install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=RooVetGit.roo-cline) |
-| **Documentation** | [docs.roocode.com](https://docs.roocode.com/) |
-| **Performance Rating** | ⭐⭐⭐½ — **73/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)) |
+|                        |                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**               | AI Coding Assistant (VS Code extension)                                                                                         |
+| **Categories**         | IDE Extension                                                                                                                   |
+| **Access**             | VS Code extension — install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=RooVetGit.roo-cline) |
+| **Documentation**      | [docs.roocode.com](https://docs.roocode.com/)                                                                                   |
+| **Performance Rating** | ⭐⭐⭐½ — **73/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions))                              |
 
 ---
 
@@ -22,12 +22,12 @@ multiple AI providers, mode-specific rules, and Cursor rule imports.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Project rules | `.roo/rules/*.md` | Markdown, plain text, or `.mdc` |
-| Mode-specific rules | `.roo/rules-{mode}/*.md` | Markdown |
-| Legacy rules | `.roorules`, `.roorules-{mode}` | Plain text |
-| Cross-tool rules | Cursor `.mdc` files | Auto-detected |
+| Feature             | Location                        | Format                          |
+| ------------------- | ------------------------------- | ------------------------------- |
+| Project rules       | `.roo/rules/*.md`               | Markdown, plain text, or `.mdc` |
+| Mode-specific rules | `.roo/rules-{mode}/*.md`        | Markdown                        |
+| Legacy rules        | `.roorules`, `.roorules-{mode}` | Plain text                      |
+| Cross-tool rules    | Cursor `.mdc` files             | Auto-detected                   |
 
 ### Key Capabilities
 
@@ -68,8 +68,8 @@ multiple AI providers, mode-specific rules, and Cursor rule imports.
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output           | Path              | Source                             |
+| ---------------- | ----------------- | ---------------------------------- |
 | Domain rules (7) | `.roo/rules/*.md` | `rules.yaml` (one file per domain) |
 
 Generated domains: TypeScript, .NET, Python, Rust, security, blockchain, IaC.
@@ -79,18 +79,18 @@ Roo Code also reads `AGENTS.md` (always generated) after mode-specific rules.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| Project rules (.roo/rules/) | ✅ Markdown files | ✅ 7 domain rules generated | None |
-| Mode-specific rules | ✅ `.roo/rules-{mode}/` | ❌ Not generated | Generate mode-specific rules (architect, code, debug) |
-| Custom modes | ✅ Custom mode definitions | ❌ Not generated | Could map team roles to Roo modes |
-| Configuration profiles | ✅ Per-project AI settings | ❌ Not generated | Could generate profile presets |
-| Permission management | ✅ Fine-grained access control | ❌ Not generated | Could generate permission config |
-| Legacy .roorules | ⚠️ Backward compatible | ❌ Not generated | Correct — legacy format |
-| Cursor rule import | ✅ .mdc auto-detection | N/A | Works with Cursor rules if present |
-| MCP integration | ✅ Tool connections | ❌ Not generated | Add MCP config |
-| AGENTS.md support | ✅ Loads after mode rules | ✅ Always generated | None |
-| Task automation | ✅ Boomerang tasks, checkpoints | ❌ Not generated | Could generate task templates |
+| Feature                     | Platform Supports               | AgentKit Forge Status       | Gap                                                   |
+| --------------------------- | ------------------------------- | --------------------------- | ----------------------------------------------------- |
+| Project rules (.roo/rules/) | ✅ Markdown files               | ✅ 7 domain rules generated | None                                                  |
+| Mode-specific rules         | ✅ `.roo/rules-{mode}/`         | ❌ Not generated            | Generate mode-specific rules (architect, code, debug) |
+| Custom modes                | ✅ Custom mode definitions      | ❌ Not generated            | Could map team roles to Roo modes                     |
+| Configuration profiles      | ✅ Per-project AI settings      | ❌ Not generated            | Could generate profile presets                        |
+| Permission management       | ✅ Fine-grained access control  | ❌ Not generated            | Could generate permission config                      |
+| Legacy .roorules            | ⚠️ Backward compatible          | ❌ Not generated            | Correct — legacy format                               |
+| Cursor rule import          | ✅ .mdc auto-detection          | N/A                         | Works with Cursor rules if present                    |
+| MCP integration             | ✅ Tool connections             | ❌ Not generated            | Add MCP config                                        |
+| AGENTS.md support           | ✅ Loads after mode rules       | ✅ Always generated         | None                                                  |
+| Task automation             | ✅ Boomerang tasks, checkpoints | ❌ Not generated            | Could generate task templates                         |
 
 **Summary:** Core domain rules are generated. Primary gap is mode-specific
 rule generation — Roo Code's biggest differentiator. Mapping team roles
@@ -100,15 +100,15 @@ to Roo modes would significantly enhance integration.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 73/100 ⭐⭐⭐½ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions) |
-| Developer Experience | 72/100 ⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
-| Cost & Value | 80/100 ⭐⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions) |
-| Customization | 75/100 ⭐⭐⭐½ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions) |
-| Privacy & Security | 62/100 ⭐⭐⭐ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions) |
-| Team & Enterprise | 34/100 ⭐⭐ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions) |
-| **Weighted Total** | **70/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 73/100 ⭐⭐⭐½     | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)   |
+| Developer Experience | 72/100 ⭐⭐⭐½     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
+| Cost & Value         | 80/100 ⭐⭐⭐⭐    | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions)        |
+| Customization        | 75/100 ⭐⭐⭐½     | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions)        |
+| Privacy & Security   | 62/100 ⭐⭐⭐      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions)     |
+| Team & Enterprise    | 34/100 ⭐⭐        | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions)      |
+| **Weighted Total**   | **70/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

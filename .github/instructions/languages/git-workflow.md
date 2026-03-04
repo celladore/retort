@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+
 # Instructions — git-workflow
 
 Conventions for branching, committing, pull requests, and merge strategy. Ensures a consistent, auditable change history.
@@ -21,7 +22,7 @@ Conventions for branching, committing, pull requests, and merge strategy. Ensure
 
 - **[gw-atomic-commits]** Each commit must be a single logical change. Do not combine unrelated changes in one commit. Do not commit generated files alongside source changes — commit spec changes first, then regenerated output in a separate commit.
 
-- **[gw-no-force-push]** Never force-push to shared branches (main, develop, release/*). Force-push to feature branches only when necessary for rebase cleanup before review. The guard-destructive-commands hook enforces this at runtime.
+- **[gw-no-force-push]** Never force-push to shared branches (main, develop, release/\*). Force-push to feature branches only when necessary for rebase cleanup before review. The guard-destructive-commands hook enforces this at runtime.
 
 - **[gw-pr-required]** All changes to the default branch must go through a pull request. PRs must have a descriptive title following Conventional Commits, a summary of changes, and a test plan. PRs modifying .agentkit/ require CODEOWNERS approval.
 

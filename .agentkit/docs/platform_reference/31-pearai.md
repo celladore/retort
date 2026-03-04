@@ -2,13 +2,13 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | Open-Source AI Code Editor (VS Code fork) |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — [trypear.ai](https://www.trypear.ai/) (macOS, Windows, Linux) |
-| **Documentation** | [trypear.ai/docs](https://www.trypear.ai/docs) |
-| **Performance Rating** | ⭐⭐⭐½ — **68/100** |
+|                        |                                                                             |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Type**               | Open-Source AI Code Editor (VS Code fork)                                   |
+| **Categories**         | AI-Native IDE                                                               |
+| **Access**             | Desktop app — [trypear.ai](https://www.trypear.ai/) (macOS, Windows, Linux) |
+| **Documentation**      | [trypear.ai/docs](https://www.trypear.ai/docs)                              |
+| **Performance Rating** | ⭐⭐⭐½ — **68/100**                                                        |
 
 ---
 
@@ -32,23 +32,23 @@ the best model for each task.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                |
+| --------- | ----------- | ---------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 68/100 ⭐⭐⭐½ | Strong via bundled tools; depends on model selection |
-| Developer Experience | 76/100 ⭐⭐⭐⭐ | VS Code familiarity; all-in-one AI bundle |
-| Cost & Value | 85/100 ⭐⭐⭐⭐ | Free open-source + BYOK; Maker $15/mo |
-| Customization | 60/100 ⭐⭐⭐ | AI Router + multi-model; limited rule system |
-| Privacy & Security | 80/100 ⭐⭐⭐⭐ | Zero data retention; local-first indexing |
-| Team & Enterprise | 35/100 ⭐⭐ | Enterprise plan exists but limited features |
-| **Weighted Total** | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 68/100 ⭐⭐⭐½     | Strong via bundled tools; depends on model selection                          |
+| Developer Experience | 76/100 ⭐⭐⭐⭐    | VS Code familiarity; all-in-one AI bundle                                     |
+| Cost & Value         | 85/100 ⭐⭐⭐⭐    | Free open-source + BYOK; Maker $15/mo                                         |
+| Customization        | 60/100 ⭐⭐⭐      | AI Router + multi-model; limited rule system                                  |
+| Privacy & Security   | 80/100 ⭐⭐⭐⭐    | Zero data retention; local-first indexing                                     |
+| Team & Enterprise    | 35/100 ⭐⭐        | Enterprise plan exists but limited features                                   |
+| **Weighted Total**   | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

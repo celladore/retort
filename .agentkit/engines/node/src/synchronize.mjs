@@ -7,17 +7,7 @@
  */
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
-import {
-  chmod,
-  cp,
-  mkdir,
-  mkdtemp,
-  readFile,
-  readdir,
-  rm,
-  unlink,
-  writeFile,
-} from 'fs/promises';
+import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
@@ -32,7 +22,7 @@ import {
   printSyncSummary,
   renderTemplate,
   resolveRenderTargets,
-  simpleDiff
+  simpleDiff,
 } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -98,6 +88,57 @@ export async function* walkDir(dir) {
   }
 }
 
+function inferOverlayFromProjectRoot(agentkitRoot, projectRoot) {
+  const inferredName = basename(resolve(projectRoot));
+  if (!inferredName) return null;
+  const settingsPath = resolve(agentkitRoot, 'overlays', inferredName, 'settings.yaml');
+  return existsSync(settingsPath) ? inferredName : null;
+}
+
+function resolveOverlaySelection(agentkitRoot, projectRoot, flags) {
+  if (flags?.overlay) {
+    return {
+      repoName: flags.overlay,
+      reason: '--overlay flag',
+    };
+  }
+
+  const markerPath = resolve(projectRoot, '.agentkit-repo');
+  if (existsSync(markerPath)) {
+    return {
+      repoName: readText(markerPath).trim(),
+      reason: '.agentkit-repo marker',
+    };
+  }
+
+  const inferredOverlay = inferOverlayFromProjectRoot(agentkitRoot, projectRoot);
+  if (inferredOverlay) {
+    return {
+      repoName: inferredOverlay,
+      reason: `inferred from project root name "${basename(resolve(projectRoot))}"`,
+    };
+  }
+
+  return {
+    repoName: '__TEMPLATE__',
+    reason: 'fallback to __TEMPLATE__ (no --overlay, no .agentkit-repo, no inferred overlay)',
+  };
+}
+
+async function collectTemplateFiles(baseDir, overlayDir = null) {
+  const filesByRelativePath = new Map();
+
+  for (const dir of [baseDir, overlayDir]) {
+    if (!dir || !existsSync(dir)) continue;
+    for await (const srcFile of walkDir(dir)) {
+      const relPath = relative(dir, srcFile);
+      filesByRelativePath.set(relPath, srcFile);
+    }
+  }
+
+  return filesByRelativePath;
+}
+
 // ---------------------------------------------------------------------------
 // Sync helper — generic directory copy with template rendering
 // ---------------------------------------------------------------------------
@@ -109,6 +150,7 @@ export async function* walkDir(dir) {
  */
 export async function syncDirectCopy(
   templatesDir,
+  overlayTemplatesDir,
   sourceSubdir,
   tmpDir,
   destSubdir,
@@ -117,18 +159,12 @@ export async function syncDirectCopy(
   repoName
 ) {
   const sourceDir = join(templatesDir, sourceSubdir);
-  if (!existsSync(sourceDir)) return;
-  const sourceFiles = [];
-  for await (const srcFile of walkDir(sourceDir)) {
-    sourceFiles.push(srcFile);
-  }
+  const overlaySourceDir = overlayTemplatesDir ? join(overlayTemplatesDir, sourceSubdir) : null;
+  const sourceFiles = await collectTemplateFiles(sourceDir, overlaySourceDir);
+  if (sourceFiles.size === 0) return;
 
-  await runConcurrent(sourceFiles, async (srcFile) => {
-    const relPath = relative(sourceDir, srcFile);
-    const destFile =
-      destSubdir === '.'
-        ? join(tmpDir, relPath)
-        : join(tmpDir, destSubdir, relPath);
+  await runConcurrent([...sourceFiles.entries()], async ([relPath, srcFile]) => {
+    const destFile = destSubdir === '.' ? join(tmpDir, relPath) : join(tmpDir, destSubdir, relPath);
     const ext = extname(srcFile).toLowerCase();
     let content;
     try {
@@ -157,7 +193,16 @@ export async function syncDirectCopy(
  * Copies templates/root to tmpDir root — AGENTS.md and other always-on files.
  */
 async function syncAgentsMd(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(templatesDir, 'root', tmpDir, '.', vars, version, repoName);
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'root',
+    tmpDir,
+    '.',
+    vars,
+    version,
+    repoName
+  );
 }
 
 /**
@@ -174,14 +219,32 @@ async function syncRootDocs(_templatesDir, _tmpDir, _vars, _version, _repoName) 
  * Copies templates/github to tmpDir/.github.
  */
 async function syncGitHub(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(templatesDir, 'github', tmpDir, '.github', vars, version, repoName);
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'github',
+    tmpDir,
+    '.github',
+    vars,
+    version,
+    repoName
+  );
 }
 
 /**
  * Copies templates/renovate to tmpDir root.
  */
 async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(templatesDir, 'renovate', tmpDir, '.', vars, version, repoName);
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'renovate',
+    tmpDir,
+    '.',
+    vars,
+    version,
+    repoName
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -251,7 +314,7 @@ async function syncClaudeCommands(
       teamName: team.name || team.id,
       teamId: team.id,
       teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
+      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
     };
     const rendered = renderTemplate(teamTemplate, teamVars, teamTemplatePath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -300,14 +363,7 @@ async function syncClaudeMd(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .claude/skills/<name>/SKILL.md for each non-team command.
  */
-async function syncClaudeSkills(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'claude', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -356,7 +412,7 @@ Scope all operations to the team's owned paths.
       teamName: team.name || team.id,
       teamId: team.id,
       teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
+      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
     };
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.mdc', version, repoName);
@@ -367,14 +423,7 @@ Scope all operations to the team's owned paths.
 /**
  * Generates .cursor/commands/<name>.md for each non-team command.
  */
-async function syncCursorCommands(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'cursor', 'commands', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -414,7 +463,7 @@ Scope all operations to the team's owned paths.
       teamName: team.name || team.id,
       teamId: team.id,
       teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
+      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
     };
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -425,14 +474,7 @@ Scope all operations to the team's owned paths.
 /**
  * Generates .windsurf/commands/<name>.md for each non-team command.
  */
-async function syncWindsurfCommands(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'windsurf', 'templates', 'command.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -465,6 +507,7 @@ async function syncCopilot(templatesDir, tmpDir, vars, version, repoName) {
   // instructions/ → .github/instructions/
   await syncDirectCopy(
     templatesDir,
+    vars.overlayTemplatesDir,
     'copilot/instructions',
     tmpDir,
     '.github/instructions',
@@ -477,14 +520,7 @@ async function syncCopilot(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .github/prompts/<name>.prompt.md for each non-team command.
  */
-async function syncCopilotPrompts(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'copilot', 'prompts', 'TEMPLATE.prompt.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -494,10 +530,7 @@ async function syncCopilotPrompts(
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(
-      join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`),
-      withHeader
-    );
+    await writeOutput(join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`), withHeader);
   }
 }
 
@@ -530,14 +563,7 @@ async function syncCopilotAgents(
 /**
  * Generates .github/chatmodes/team-<id>.chatmode.md for each team.
  */
-async function syncCopilotChatModes(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  teamsSpec
-) {
+async function syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
   const tplPath = join(templatesDir, 'copilot', 'chatmodes', 'TEMPLATE.chatmode.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -548,7 +574,7 @@ async function syncCopilotChatModes(
       teamName: team.name || team.id,
       teamId: team.id,
       teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
+      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
     };
     const rendered = renderTemplate(template, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -684,14 +710,7 @@ async function syncGemini(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .agents/skills/<name>/SKILL.md for each non-team command.
  */
-async function syncCodexSkills(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'codex', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -728,14 +747,7 @@ async function syncWarp(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .clinerules/<domain>.md for each rule domain.
  */
-async function syncClineRules(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  rulesSpec
-) {
+async function syncClineRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec) {
   const tplPath = join(templatesDir, 'cline', 'clinerules', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -755,14 +767,7 @@ async function syncClineRules(
 /**
  * Generates .roo/rules/<domain>.md for each rule domain.
  */
-async function syncRooRules(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  rulesSpec
-) {
+async function syncRooRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec) {
   const tplPath = join(templatesDir, 'roo', 'rules', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -783,7 +788,15 @@ async function syncRooRules(
  * Copies templates/mcp/ → tmpDir/.mcp/
  * agentsSpec and teamsSpec are accepted for API symmetry and future use.
  */
-async function syncA2aConfig(tmpDir, vars, version, repoName, _agentsSpec, _teamsSpec, templatesDir) {
+async function syncA2aConfig(
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  _agentsSpec,
+  _teamsSpec,
+  templatesDir
+) {
   const mcpDir = join(templatesDir, 'mcp');
   if (!existsSync(mcpDir)) return;
   for await (const srcFile of walkDir(mcpDir)) {
@@ -813,7 +826,7 @@ function buildCommandVars(cmd, vars) {
     ...vars,
     commandName: cmd.name,
     commandDescription:
-      typeof cmd.description === 'string' ? cmd.description.trim() : (cmd.description || ''),
+      typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
   };
 }
@@ -831,7 +844,7 @@ function buildAgentVars(agent, category, vars) {
     agentName: agent.name,
     agentId: agent.id,
     agentCategory: category,
-    agentRole: typeof agent.role === 'string' ? agent.role.trim() : (agent.role || ''),
+    agentRole: typeof agent.role === 'string' ? agent.role.trim() : agent.role || '',
     agentFocusList: focus.map((f) => `- ${f}`).join('\n'),
     agentResponsibilitiesList: responsibilities.map((r) => `- ${r}`).join('\n'),
     agentToolsList: tools.map((t) => `- ${t}`).join('\n'),
@@ -839,14 +852,10 @@ function buildAgentVars(agent, category, vars) {
     agentExamples:
       examples.length > 0
         ? examples
-            .map(
-              (e) =>
-                `### ${e.title || 'Example'}\n\`\`\`\n${(e.code || '').trim()}\n\`\`\``
-            )
+            .map((e) => `### ${e.title || 'Example'}\n\`\`\`\n${(e.code || '').trim()}\n\`\`\``)
             .join('\n\n')
         : '',
-    agentAntiPatterns:
-      antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
+    agentAntiPatterns: antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
     agentDomainRules: '',
   };
 }
@@ -858,7 +867,7 @@ function buildRuleVars(rule, vars) {
     ...vars,
     ruleDomain: rule.domain,
     ruleDescription:
-      typeof rule.description === 'string' ? rule.description.trim() : (rule.description || ''),
+      typeof rule.description === 'string' ? rule.description.trim() : rule.description || '',
     ruleAppliesTo: appliesTo.join('\n'),
     ruleConventions: conventions
       .map((c) => (typeof c === 'string' ? `- ${c}` : `- **[${c.id || ''}]** ${c.rule || ''}`))
@@ -910,17 +919,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const projectSpec = readYaml(resolve(agentkitRoot, 'spec', 'project.yaml'));
 
   // 2. Detect overlay
-  let repoName = flags?.overlay;
-  if (!repoName) {
-    const markerPath = resolve(projectRoot, '.agentkit-repo');
-    if (existsSync(markerPath)) {
-      repoName = readText(markerPath).trim();
-    }
-  }
-  if (!repoName) {
-    repoName = '__TEMPLATE__';
-    log('[agentkit:sync] No overlay detected, using __TEMPLATE__');
-  }
+  const overlaySelection = resolveOverlaySelection(agentkitRoot, projectRoot, flags);
+  const repoName = overlaySelection.repoName;
+  log(`[agentkit:sync] Using overlay: ${repoName} (${overlaySelection.reason})`);
 
   // 3. Load overlay
   const overlayDir = resolve(agentkitRoot, 'overlays', repoName);
@@ -937,7 +938,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const vars = {
     ...projectVars,
     version,
-    repoName: (overlaySettings.repoName === '__TEMPLATE__' && projectSpec?.name) || overlaySettings.repoName || repoName,
+    overlayTemplatesDir: resolve(overlayDir, 'templates'),
+    repoName:
+      (overlaySettings.repoName === '__TEMPLATE__' && projectSpec?.name) ||
+      overlaySettings.repoName ||
+      repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     syncDate: new Date().toISOString().slice(0, 10),
@@ -959,297 +964,456 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const templatesDir = resolve(agentkitRoot, 'templates');
 
   try {
+    // Use vars.repoName for file headers (resolved project name, e.g. "agentkit-forge")
+    // rather than the raw overlay dir name which may be "__TEMPLATE__".
+    const headerRepoName = vars.repoName;
 
-  // Use vars.repoName for file headers (resolved project name, e.g. "agentkit-forge")
-  // rather than the raw overlay dir name which may be "__TEMPLATE__".
-  const headerRepoName = vars.repoName;
-
-  // --- Always-on outputs (not gated by renderTargets) ---
-  await Promise.all([
-    syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName),
-    syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, headerRepoName),
-    syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
-  ]);
-
-  // --- Gated by renderTargets ---
-  const gatedTasks = [];
-
-  if (targets.has('claude')) {
-    gatedTasks.push(
-      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, headerRepoName),
-      syncClaudeSettings(templatesDir, tmpDir, vars, version, mergedPermissionsResult, settingsSpec),
-      syncClaudeCommands(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, commandsSpec),
-      syncClaudeAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
-      syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, headerRepoName),
-      syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
-      syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.claude/rules/languages', 'claude')
-    );
-  }
-
-  if (targets.has('cursor')) {
-    gatedTasks.push(
-      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
-      syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.cursor/rules/languages', 'cursor')
-    );
-  }
-
-  if (targets.has('windsurf')) {
-    gatedTasks.push(
+    // --- Always-on outputs (not gated by renderTargets) ---
+    await Promise.all([
+      syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
       syncDirectCopy(
         templatesDir,
-        'windsurf/rules',
+        vars.overlayTemplatesDir,
+        'docs',
         tmpDir,
-        '.windsurf/rules',
+        'docs',
         vars,
         version,
         headerRepoName
       ),
-      syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
       syncDirectCopy(
         templatesDir,
-        'windsurf/workflows',
+        vars.overlayTemplatesDir,
+        'vscode',
         tmpDir,
-        '.windsurf/workflows',
+        '.vscode',
         vars,
         version,
         headerRepoName
       ),
-      syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.windsurf/rules/languages', 'windsurf')
-    );
-  }
+      syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName),
+    ]);
 
-  if (targets.has('ai')) {
-    gatedTasks.push(
-      syncDirectCopy(templatesDir, 'ai', tmpDir, '.ai', vars, version, headerRepoName)
-    );
-  }
+    // --- Gated by renderTargets ---
+    const gatedTasks = [];
 
-  if (targets.has('copilot')) {
-    gatedTasks.push(
-      syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
-      syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.github/instructions/languages', 'copilot')
-    );
-  }
-
-  if (targets.has('gemini')) {
-    gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
-  }
-
-  if (targets.has('codex')) {
-    gatedTasks.push(syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec));
-  }
-
-  if (targets.has('warp')) {
-    gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
-  }
-
-  if (targets.has('cline')) {
-    gatedTasks.push(
-      syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.clinerules/languages', 'cline')
-    );
-  }
-
-  if (targets.has('roo')) {
-    gatedTasks.push(
-      syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.roo/rules/languages', 'roo')
-    );
-  }
-
-  if (targets.has('mcp')) {
-    gatedTasks.push(syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir));
-  }
-
-  await Promise.all(gatedTasks);
-
-  // 5. Build file list from temp and compute summary
-  const newManifestFiles = {};
-  const fileSummary = {}; // category → count
-  const allTmpFiles = [];
-
-  for await (const srcFile of walkDir(tmpDir)) {
-    allTmpFiles.push(srcFile);
-  }
-
-  // Process files concurrently
-  await runConcurrent(allTmpFiles, async (srcFile) => {
-    if (!existsSync(srcFile)) return; // Should exist, but safety check
-    const relPath = relative(tmpDir, srcFile);
-    const manifestKey = relPath.replace(/\\/g, '/');
-    let fileContent;
-    try {
-      fileContent = await readFile(srcFile);
-    } catch (err) {
-      if (err?.code === 'ENOENT') return;
-      throw err;
+    if (targets.has('claude')) {
+      gatedTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'claude/hooks',
+          tmpDir,
+          '.claude/hooks',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncClaudeSettings(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          mergedPermissionsResult,
+          settingsSpec
+        ),
+        syncClaudeCommands(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          teamsSpec,
+          commandsSpec
+        ),
+        syncClaudeAgents(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          agentsSpec,
+          rulesSpec
+        ),
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'claude/rules',
+          tmpDir,
+          '.claude/rules',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'claude/state',
+          tmpDir,
+          '.claude/state',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
+        syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncLanguageInstructions(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          rulesSpec,
+          '.claude/rules/languages',
+          'claude'
+        )
+      );
     }
-    const hash = createHash('sha256').update(fileContent).digest('hex').slice(0, 12);
 
-    // JS object assignment is atomic enough for keys
-    newManifestFiles[manifestKey] = { hash };
-  });
+    if (targets.has('cursor')) {
+      gatedTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'cursor/rules',
+          tmpDir,
+          '.cursor/rules',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncLanguageInstructions(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          rulesSpec,
+          '.cursor/rules/languages',
+          'cursor'
+        )
+      );
+    }
 
-  // Re-compute summary sequentially to avoid race condition on counters
-  for (const manifestKey of Object.keys(newManifestFiles)) {
-     const cat = categorizeFile(manifestKey);
-     fileSummary[cat] = (fileSummary[cat] || 0) + 1;
-  }
+    if (targets.has('windsurf')) {
+      gatedTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'windsurf/rules',
+          tmpDir,
+          '.windsurf/rules',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'windsurf/workflows',
+          tmpDir,
+          '.windsurf/workflows',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncLanguageInstructions(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          rulesSpec,
+          '.windsurf/rules/languages',
+          'windsurf'
+        )
+      );
+    }
 
-  // --- Dry-run: print summary and exit without writing ---
-  if (dryRun) {
-    const total = Object.keys(newManifestFiles).length;
-    log(`[agentkit:sync] Dry-run: would generate ${total} file(s):`);
-    printSyncSummary(fileSummary, targets, { quiet });
-    return;
-  }
+    if (targets.has('ai')) {
+      gatedTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'ai',
+          tmpDir,
+          '.ai',
+          vars,
+          version,
+          headerRepoName
+        )
+      );
+    }
 
-  // --- Diff: show what would change and exit without writing ---
-  if (diff) {
-    const resolvedRoot = resolve(projectRoot) + sep;
-    const overwrite = flags?.overwrite || flags?.force;
-    let createCount = 0;
-    let updateCount = 0;
-    let skipCount = 0;
+    if (targets.has('copilot')) {
+      gatedTasks.push(
+        syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
+        syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncCopilotAgents(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          agentsSpec,
+          rulesSpec
+        ),
+        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncLanguageInstructions(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          rulesSpec,
+          '.github/instructions/languages',
+          'copilot'
+        )
+      );
+    }
 
-    // Sequential to avoid interleaved console output
-    for (const srcFile of allTmpFiles) {
-      if (!existsSync(srcFile)) continue;
+    if (targets.has('gemini')) {
+      gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+
+    if (targets.has('codex')) {
+      gatedTasks.push(
+        syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+      );
+    }
+
+    if (targets.has('warp')) {
+      gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+
+    if (targets.has('cline')) {
+      gatedTasks.push(
+        syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+        syncLanguageInstructions(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          rulesSpec,
+          '.clinerules/languages',
+          'cline'
+        )
+      );
+    }
+
+    if (targets.has('roo')) {
+      gatedTasks.push(
+        syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+        syncLanguageInstructions(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          rulesSpec,
+          '.roo/rules/languages',
+          'roo'
+        )
+      );
+    }
+
+    if (targets.has('mcp')) {
+      gatedTasks.push(
+        syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir)
+      );
+    }
+
+    await Promise.all(gatedTasks);
+
+    // 5. Build file list from temp and compute summary
+    const newManifestFiles = {};
+    const fileSummary = {}; // category → count
+    const allTmpFiles = [];
+
+    for await (const srcFile of walkDir(tmpDir)) {
+      allTmpFiles.push(srcFile);
+    }
+
+    // Process files concurrently
+    await runConcurrent(allTmpFiles, async (srcFile) => {
+      if (!existsSync(srcFile)) return; // Should exist, but safety check
       const relPath = relative(tmpDir, srcFile);
-      const destFile = resolve(projectRoot, relPath);
-      const normPath = relPath.replace(/\\/g, '/');
-      if (!resolve(destFile).startsWith(resolvedRoot) && resolve(destFile) !== resolve(projectRoot))
-        continue;
-      const wouldSkip = !overwrite && isScaffoldOnce(normPath) && existsSync(destFile);
-      if (wouldSkip) {
-        skipCount++;
-        logVerbose(`  skip ${normPath} (project-owned, exists)`);
-        continue;
-      }
-      let newContent;
+      const manifestKey = relPath.replace(/\\/g, '/');
+      let fileContent;
       try {
-        newContent = await readFile(srcFile, 'utf-8');
+        fileContent = await readFile(srcFile);
       } catch (err) {
-        if (err?.code === 'ENOENT') continue;
+        if (err?.code === 'ENOENT') return;
         throw err;
       }
-      if (!existsSync(destFile)) {
-        createCount++;
-        log(`  create ${normPath}`);
-      } else {
-        const oldContent = await readFile(destFile, 'utf-8');
-        if (oldContent !== newContent) {
-          updateCount++;
-          log(`  update ${normPath}`);
-          const diffOut = simpleDiff(oldContent, newContent);
-          if (diffOut)
-            log(
-              diffOut
-                .split('\n')
-                .map((l) => `    ${l}`)
-                .join('\n')
-            );
-        } else {
+      const hash = createHash('sha256').update(fileContent).digest('hex').slice(0, 12);
+
+      // JS object assignment is atomic enough for keys
+      newManifestFiles[manifestKey] = { hash };
+    });
+
+    // Re-compute summary sequentially to avoid race condition on counters
+    for (const manifestKey of Object.keys(newManifestFiles)) {
+      const cat = categorizeFile(manifestKey);
+      fileSummary[cat] = (fileSummary[cat] || 0) + 1;
+    }
+
+    // --- Dry-run: print summary and exit without writing ---
+    if (dryRun) {
+      const total = Object.keys(newManifestFiles).length;
+      log(`[agentkit:sync] Dry-run: would generate ${total} file(s):`);
+      printSyncSummary(fileSummary, targets, { quiet });
+      return;
+    }
+
+    // --- Diff: show what would change and exit without writing ---
+    if (diff) {
+      const resolvedRoot = resolve(projectRoot) + sep;
+      const overwrite = flags?.overwrite || flags?.force;
+      let createCount = 0;
+      let updateCount = 0;
+      let skipCount = 0;
+
+      // Sequential to avoid interleaved console output
+      for (const srcFile of allTmpFiles) {
+        if (!existsSync(srcFile)) continue;
+        const relPath = relative(tmpDir, srcFile);
+        const destFile = resolve(projectRoot, relPath);
+        const normPath = relPath.replace(/\\/g, '/');
+        if (
+          !resolve(destFile).startsWith(resolvedRoot) &&
+          resolve(destFile) !== resolve(projectRoot)
+        )
+          continue;
+        const wouldSkip = !overwrite && isScaffoldOnce(normPath) && existsSync(destFile);
+        if (wouldSkip) {
           skipCount++;
-          logVerbose(`  unchanged ${normPath}`);
+          logVerbose(`  skip ${normPath} (project-owned, exists)`);
+          continue;
         }
-      }
-    }
-    log(
-      `[agentkit:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
-    );
-    return;
-  }
-
-  // 6. Load previous manifest for stale file cleanup
-  const manifestPath = resolve(agentkitRoot, '.manifest.json');
-  let previousManifest = null;
-  try {
-    if (existsSync(manifestPath)) {
-      previousManifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
-    }
-  } catch {
-    /* ignore corrupt manifest */
-  }
-
-  // 7. Atomic swap: move temp outputs to project root & build new manifest
-  log('[agentkit:sync] Writing outputs...');
-  const resolvedRoot = resolve(projectRoot) + sep;
-
-  // Use a shared counter and error list
-  let count = 0;
-  let skippedScaffold = 0;
-  const failedFiles = [];
-
-  await runConcurrent(allTmpFiles, async (srcFile) => {
-    if (!existsSync(srcFile)) return;
-    const relPath = relative(tmpDir, srcFile);
-    const destFile = resolve(projectRoot, relPath);
-
-    // Path traversal protection: ensure all output stays within project root
-    if (!resolve(destFile).startsWith(resolvedRoot) && resolve(destFile) !== resolve(projectRoot)) {
-      console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${relPath}`);
-      failedFiles.push({ file: relPath, error: 'path traversal blocked' });
-      return;
-    }
-
-    // Scaffold-once: skip project-owned files that already exist (unless --overwrite)
-    const overwrite = flags?.overwrite || flags?.force;
-    if (!overwrite && isScaffoldOnce(relPath) && existsSync(destFile)) {
-      skippedScaffold++;
-      return;
-    }
-
-    try {
-      await ensureDir(dirname(destFile));
-      await cp(srcFile, destFile, { force: true, recursive: false });
-
-      // Make .sh files executable
-      if (extname(srcFile) === '.sh') {
+        let newContent;
         try {
-          await chmod(destFile, 0o755);
-        } catch {
-          /* ignore on Windows */
+          newContent = await readFile(srcFile, 'utf-8');
+        } catch (err) {
+          if (err?.code === 'ENOENT') continue;
+          throw err;
+        }
+        if (!existsSync(destFile)) {
+          createCount++;
+          log(`  create ${normPath}`);
+        } else {
+          const oldContent = await readFile(destFile, 'utf-8');
+          if (oldContent !== newContent) {
+            updateCount++;
+            log(`  update ${normPath}`);
+            const diffOut = simpleDiff(oldContent, newContent);
+            if (diffOut)
+              log(
+                diffOut
+                  .split('\n')
+                  .map((l) => `    ${l}`)
+                  .join('\n')
+              );
+          } else {
+            skipCount++;
+            logVerbose(`  unchanged ${normPath}`);
+          }
         }
       }
-      count++;
-      logVerbose(`  wrote ${relPath.replace(/\\/g, '/')}`);
-    } catch (err) {
-      failedFiles.push({ file: relPath, error: err.message });
-      console.error(`[agentkit:sync] Failed to write: ${relPath} — ${err.message}`);
+      log(
+        `[agentkit:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
+      );
+      return;
     }
-  });
 
-  if (failedFiles.length > 0) {
-    console.error(`[agentkit:sync] Error: ${failedFiles.length} file(s) failed to write:`);
-    for (const f of failedFiles) {
-      console.error(`  - ${f.file}: ${f.error}`);
-    }
-    throw new Error(`Sync completed with ${failedFiles.length} write failure(s)`);
-  }
-
-  // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
-  let cleanedCount = 0;
-  if (!noClean && previousManifest?.files) {
-    const staleFiles = [];
-    for (const prevFile of Object.keys(previousManifest.files)) {
-      if (!newManifestFiles[prevFile]) {
-        staleFiles.push(prevFile);
+    // 6. Load previous manifest for stale file cleanup
+    const manifestPath = resolve(agentkitRoot, '.manifest.json');
+    let previousManifest = null;
+    try {
+      if (existsSync(manifestPath)) {
+        previousManifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
       }
+    } catch {
+      /* ignore corrupt manifest */
     }
 
-    await runConcurrent(staleFiles, async (prevFile) => {
+    // 7. Atomic swap: move temp outputs to project root & build new manifest
+    log('[agentkit:sync] Writing outputs...');
+    const resolvedRoot = resolve(projectRoot) + sep;
+
+    // Use a shared counter and error list
+    let count = 0;
+    let skippedScaffold = 0;
+    const failedFiles = [];
+
+    await runConcurrent(allTmpFiles, async (srcFile) => {
+      if (!existsSync(srcFile)) return;
+      const relPath = relative(tmpDir, srcFile);
+      const destFile = resolve(projectRoot, relPath);
+
+      // Path traversal protection: ensure all output stays within project root
+      if (
+        !resolve(destFile).startsWith(resolvedRoot) &&
+        resolve(destFile) !== resolve(projectRoot)
+      ) {
+        console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${relPath}`);
+        failedFiles.push({ file: relPath, error: 'path traversal blocked' });
+        return;
+      }
+
+      // Scaffold-once: skip project-owned files that already exist (unless --overwrite)
+      const overwrite = flags?.overwrite || flags?.force;
+      if (!overwrite && isScaffoldOnce(relPath) && existsSync(destFile)) {
+        skippedScaffold++;
+        return;
+      }
+
+      try {
+        await ensureDir(dirname(destFile));
+        await cp(srcFile, destFile, { force: true, recursive: false });
+
+        // Make .sh files executable
+        if (extname(srcFile) === '.sh') {
+          try {
+            await chmod(destFile, 0o755);
+          } catch {
+            /* ignore on Windows */
+          }
+        }
+        count++;
+        logVerbose(`  wrote ${relPath.replace(/\\/g, '/')}`);
+      } catch (err) {
+        failedFiles.push({ file: relPath, error: err.message });
+        console.error(`[agentkit:sync] Failed to write: ${relPath} — ${err.message}`);
+      }
+    });
+
+    if (failedFiles.length > 0) {
+      console.error(`[agentkit:sync] Error: ${failedFiles.length} file(s) failed to write:`);
+      for (const f of failedFiles) {
+        console.error(`  - ${f.file}: ${f.error}`);
+      }
+      throw new Error(`Sync completed with ${failedFiles.length} write failure(s)`);
+    }
+
+    // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
+    let cleanedCount = 0;
+    if (!noClean && previousManifest?.files) {
+      const staleFiles = [];
+      for (const prevFile of Object.keys(previousManifest.files)) {
+        if (!newManifestFiles[prevFile]) {
+          staleFiles.push(prevFile);
+        }
+      }
+
+      await runConcurrent(staleFiles, async (prevFile) => {
         const orphanPath = resolve(projectRoot, prevFile);
         // Path traversal protection: ensure orphan path stays within project root
         if (!orphanPath.startsWith(resolvedRoot) && orphanPath !== resolve(projectRoot)) {
@@ -1267,51 +1431,51 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
             );
           }
         }
-    });
-  }
-
-  // 9. Write new manifest
-  const newManifest = {
-    generatedAt: new Date().toISOString(),
-    version,
-    repoName: vars.repoName,
-    files: newManifestFiles,
-  };
-  try {
-    await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
-  } catch (err) {
-    console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
-  }
-
-  if (skippedScaffold > 0) {
-    log(`[agentkit:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
-  }
-  if (cleanedCount > 0) {
-    log(`[agentkit:sync] Cleaned ${cleanedCount} stale file(s) from previous sync.`);
-  }
-
-  // 11. Post-sync summary
-  printSyncSummary(fileSummary, targets, { quiet });
-  const completeness = computeProjectCompleteness(projectSpec);
-  if (completeness.total > 0) {
-    log(
-      `[agentkit:sync] project.yaml completeness: ${completeness.percent}% (${completeness.present}/${completeness.total} fields populated)`
-    );
-    if (completeness.missing.length > 0) {
-      log(`[agentkit:sync] Top missing fields: ${completeness.missing.slice(0, 5).join(', ')}`);
+      });
     }
-  }
-  log(`[agentkit:sync] Done! Generated ${count} files.`);
 
-  // 12. First-sync hint (when not called from init)
-  if (!flags?.overlay) {
-    const markerPath = resolve(projectRoot, '.agentkit-repo');
-    if (!existsSync(markerPath)) {
-      log('');
-      log('  Tip: Run "agentkit init" to customize which AI tools you generate configs for.');
-      log('       Run "agentkit add <tool>" to add tools incrementally.');
+    // 9. Write new manifest
+    const newManifest = {
+      generatedAt: new Date().toISOString(),
+      version,
+      repoName: vars.repoName,
+      files: newManifestFiles,
+    };
+    try {
+      await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
+    } catch (err) {
+      console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
     }
-  }
+
+    if (skippedScaffold > 0) {
+      log(`[agentkit:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
+    }
+    if (cleanedCount > 0) {
+      log(`[agentkit:sync] Cleaned ${cleanedCount} stale file(s) from previous sync.`);
+    }
+
+    // 11. Post-sync summary
+    printSyncSummary(fileSummary, targets, { quiet });
+    const completeness = computeProjectCompleteness(projectSpec);
+    if (completeness.total > 0) {
+      log(
+        `[agentkit:sync] project.yaml completeness: ${completeness.percent}% (${completeness.present}/${completeness.total} fields populated)`
+      );
+      if (completeness.missing.length > 0) {
+        log(`[agentkit:sync] Top missing fields: ${completeness.missing.slice(0, 5).join(', ')}`);
+      }
+    }
+    log(`[agentkit:sync] Done! Generated ${count} files.`);
+
+    // 12. First-sync hint (when not called from init)
+    if (!flags?.overlay) {
+      const markerPath = resolve(projectRoot, '.agentkit-repo');
+      if (!existsSync(markerPath)) {
+        log('');
+        log('  Tip: Run "agentkit init" to customize which AI tools you generate configs for.');
+        log('       Run "agentkit add <tool>" to add tools incrementally.');
+      }
+    }
   } finally {
     await rm(tmpDir, { recursive: true, force: true });
   }

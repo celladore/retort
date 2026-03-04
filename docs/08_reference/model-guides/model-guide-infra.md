@@ -114,11 +114,11 @@ agents:
   iac-planner:
     team: infra
     model_override: gemini-2.5-pro
-    reason: "Large Terraform graph analysis"
+    reason: 'Large Terraform graph analysis'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh
@@ -140,7 +140,7 @@ remain the source of truth.
 These models are now included in intake analysis but are excluded from weighted
 ranking tables until benchmark metrics are validated.
 
-*1x = baseline reference cost per token (e.g., Gemini 3.1 Pro High Thinking or config-specified reference).
+\*1x = baseline reference cost per token (e.g., Gemini 3.1 Pro High Thinking or config-specified reference).
 
 | Model                        | Cost Multiplier | Status                                     |
 | ---------------------------- | --------------- | ------------------------------------------ |

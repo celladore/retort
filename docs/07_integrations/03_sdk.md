@@ -10,10 +10,10 @@
 
 ## Available SDKs
 
-| Language | Package | Version | Repository |
-|----------|---------|---------|------------|
+| Language                 | Package                | Version             | Repository   |
+| ------------------------ | ---------------------- | ------------------- | ------------ |
 | <!-- e.g. TypeScript --> | <!-- e.g. @org/sdk --> | <!-- e.g. 1.0.0 --> | <!-- URL --> |
-| <!-- e.g. Python --> | <!-- e.g. org-sdk --> | <!-- e.g. 1.0.0 --> | <!-- URL --> |
+| <!-- e.g. Python -->     | <!-- e.g. org-sdk -->  | <!-- e.g. 1.0.0 --> | <!-- URL --> |
 
 ## Installation
 
@@ -48,11 +48,11 @@ const resources = await client.resources.list({ limit: 10 });
 
 ## Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `apiKey` | `string` | — | Your API key |
-| `baseUrl` | `string` | `https://api.example.com/v1` | API base URL |
-| `timeout` | `number` | `30000` | Request timeout in ms |
+| Option    | Type     | Default                      | Description           |
+| --------- | -------- | ---------------------------- | --------------------- |
+| `apiKey`  | `string` | —                            | Your API key          |
+| `baseUrl` | `string` | `https://api.example.com/v1` | API base URL          |
+| `timeout` | `number` | `30000`                      | Request timeout in ms |
 
 ## Error Handling
 

@@ -10,6 +10,7 @@
 Standards for Terraform, Terragrunt, and all infrastructure configuration.
 
 {{#if infraNamingConvention}}
+
 ## Naming Convention
 
 All cloud resources **must** follow this naming pattern:
@@ -31,6 +32,7 @@ PR to fail review. Use a shared `locals` block, Terragrunt `inputs`, or a defaul
 block to enforce consistency.
 
 {{#if infraMandatoryTags}}
+
 ### Mandatory Tags
 
 The following tags are **required** on every taggable resource:
@@ -63,13 +65,16 @@ inputs = {
 {{/each}}  }
 }
 ```
+
 {{/if}}
 {{#unless infraMandatoryTags}}
+
 > **No mandatory tags are configured.** Define them in `.agentkit/spec/project.yaml`
 > under `infrastructure.tagging.mandatory` (e.g., `[environment, project, owner, cost-center]`).
-{{/unless}}
+> {{/unless}}
 
 {{#if infraOptionalTags}}
+
 ### Optional Tags
 
 These tags are recommended but not enforced:
@@ -82,13 +87,14 @@ and resource lifecycle management.
 {{/if}}
 
 {{#if infraIacToolchain}}
+
 ## Toolchain
 
 - **IaC tools**: {{infraIacToolchain}}
-{{#if infraStateBackend}}- **State backend**: {{infraStateBackend}} (remote, with locking){{/if}}
-{{#if infraLockProvider}}- **Lock provider**: {{infraLockProvider}}{{/if}}
-{{#if infraModulesRepo}}- **Modules repo**: {{infraModulesRepo}}{{/if}}
-{{/if}}
+  {{#if infraStateBackend}}- **State backend**: {{infraStateBackend}} (remote, with locking){{/if}}
+  {{#if infraLockProvider}}- **Lock provider**: {{infraLockProvider}}{{/if}}
+  {{#if infraModulesRepo}}- **Modules repo**: {{infraModulesRepo}}{{/if}}
+  {{/if}}
 
 ## Key Rules
 

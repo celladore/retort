@@ -10,7 +10,7 @@ This document outlines the planned timeline and milestones for `{{repoName}}`.
 
 ## Timeline
 
-### Phase 1 — Foundation (Q_ 20XX)
+### Phase 1 — Foundation (Q\_ 20XX)
 
 <!-- Core infrastructure and initial feature set. -->
 
@@ -18,7 +18,7 @@ This document outlines the planned timeline and milestones for `{{repoName}}`.
 - [ ] <!-- Milestone 2 -->
 - [ ] <!-- Milestone 3 -->
 
-### Phase 2 — Growth (Q_ 20XX)
+### Phase 2 — Growth (Q\_ 20XX)
 
 <!-- Expand capabilities, integrations, and user base. -->
 
@@ -26,7 +26,7 @@ This document outlines the planned timeline and milestones for `{{repoName}}`.
 - [ ] <!-- Milestone 2 -->
 - [ ] <!-- Milestone 3 -->
 
-### Phase 3 — Scale (Q_ 20XX)
+### Phase 3 — Scale (Q\_ 20XX)
 
 <!-- Performance, reliability, and advanced features. -->
 
@@ -40,12 +40,12 @@ This document outlines the planned timeline and milestones for `{{repoName}}`.
 
 ## Prioritisation Framework
 
-| Priority | Label | Description |
-|----------|-------|-------------|
-| P0 | Critical | Must ship in current phase |
-| P1 | High | Should ship in current phase |
-| P2 | Medium | Nice to have for current phase |
-| P3 | Low | Future consideration |
+| Priority | Label    | Description                    |
+| -------- | -------- | ------------------------------ |
+| P0       | Critical | Must ship in current phase     |
+| P1       | High     | Should ship in current phase   |
+| P2       | Medium   | Nice to have for current phase |
+| P3       | Low      | Future consideration           |
 
 ## References
 

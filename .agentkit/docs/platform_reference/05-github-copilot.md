@@ -2,12 +2,12 @@
 
 **Render target:** `copilot`
 
-| | |
-|---|---|
-| **Type** | AI Coding Assistant (IDE extension + cloud agent) |
-| **Categories** | IDE Extension, Cloud / Autonomous Agent |
-| **Access** | VS Code / Visual Studio / JetBrains extension + GitHub.com — requires GitHub Copilot subscription |
-| **Documentation** | [docs.github.com/en/copilot](https://docs.github.com/en/copilot) |
+|                        |                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| **Type**               | AI Coding Assistant (IDE extension + cloud agent)                                                   |
+| **Categories**         | IDE Extension, Cloud / Autonomous Agent                                                             |
+| **Access**             | VS Code / Visual Studio / JetBrains extension + GitHub.com — requires GitHub Copilot subscription   |
+| **Documentation**      | [docs.github.com/en/copilot](https://docs.github.com/en/copilot)                                    |
 | **Performance Rating** | ⭐⭐⭐⭐ — **78/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)) |
 
 ---
@@ -23,15 +23,15 @@ JetBrains, and GitHub.com.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Repo-wide instructions | `.github/copilot-instructions.md` | Plain Markdown |
-| Path-specific instructions | `.github/instructions/*.instructions.md` | Markdown with YAML frontmatter |
-| Prompt files (slash commands) | `.github/prompts/*.prompt.md` | YAML frontmatter + Markdown |
-| Custom agents | `.github/agents/*.agent.md` | YAML frontmatter + Markdown |
-| Chat modes | `.github/chatmodes/*.chatmode.md` | YAML frontmatter + Markdown |
-| Agent instructions | `AGENTS.md` | Plain Markdown |
-| Personal instructions | `$HOME/.copilot/copilot-instructions.md` | Plain Markdown |
+| Feature                       | Location                                 | Format                         |
+| ----------------------------- | ---------------------------------------- | ------------------------------ |
+| Repo-wide instructions        | `.github/copilot-instructions.md`        | Plain Markdown                 |
+| Path-specific instructions    | `.github/instructions/*.instructions.md` | Markdown with YAML frontmatter |
+| Prompt files (slash commands) | `.github/prompts/*.prompt.md`            | YAML frontmatter + Markdown    |
+| Custom agents                 | `.github/agents/*.agent.md`              | YAML frontmatter + Markdown    |
+| Chat modes                    | `.github/chatmodes/*.chatmode.md`        | YAML frontmatter + Markdown    |
+| Agent instructions            | `AGENTS.md`                              | Plain Markdown                 |
+| Personal instructions         | `$HOME/.copilot/copilot-instructions.md` | Plain Markdown                 |
 
 ### Key Capabilities
 
@@ -73,30 +73,30 @@ JetBrains, and GitHub.com.
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
-| Main instructions | `.github/copilot-instructions.md` | `templates/copilot/copilot-instructions.md` |
-| Path instructions (4) | `.github/instructions/*.md` | `templates/copilot/instructions/` |
-| Prompt files (19) | `.github/prompts/*.prompt.md` | `commands.yaml` (non-team commands) |
-| Custom agents (19) | `.github/agents/*.agent.md` | `agents.yaml` |
-| Chat modes (10) | `.github/chatmodes/*.chatmode.md` | `teams.yaml` |
+| Output                | Path                              | Source                                      |
+| --------------------- | --------------------------------- | ------------------------------------------- |
+| Main instructions     | `.github/copilot-instructions.md` | `templates/copilot/copilot-instructions.md` |
+| Path instructions (4) | `.github/instructions/*.md`       | `templates/copilot/instructions/`           |
+| Prompt files (19)     | `.github/prompts/*.prompt.md`     | `commands.yaml` (non-team commands)         |
+| Custom agents (19)    | `.github/agents/*.agent.md`       | `agents.yaml`                               |
+| Chat modes (10)       | `.github/chatmodes/*.chatmode.md` | `teams.yaml`                                |
 
 ---
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| Repo-wide instructions | ✅ Auto-applied to all sessions | ✅ Generated | None |
-| Path-specific instructions | ✅ Glob-targeted | ✅ 4 generated | Could add more per language/framework |
-| Prompt files | ✅ Slash commands with YAML frontmatter | ✅ 19 generated | None |
-| Custom agents | ✅ Specialist personas with tools | ✅ 19 generated | None |
-| Chat modes | ✅ Interaction style customization | ✅ 10 generated | None |
-| AGENTS.md support | ✅ Auto-detected | ✅ Always generated | None |
-| Personal instructions | ✅ `$HOME/.copilot/` | ❌ Not generated | User-level, not project-scoped |
-| Organization-wide instructions | ✅ Org-level emerging | ❌ Not generated | Requires GitHub org admin setup |
-| Copilot Coding Agent config | ✅ Autonomous multi-file edits | ⚠️ Via AGENTS.md only | Could add coding agent-specific prompts |
-| Code Review integration | ✅ Custom review instructions | ⚠️ Not explicitly targeted | Could add review-specific prompt files |
+| Feature                        | Platform Supports                       | AgentKit Forge Status      | Gap                                     |
+| ------------------------------ | --------------------------------------- | -------------------------- | --------------------------------------- |
+| Repo-wide instructions         | ✅ Auto-applied to all sessions         | ✅ Generated               | None                                    |
+| Path-specific instructions     | ✅ Glob-targeted                        | ✅ 4 generated             | Could add more per language/framework   |
+| Prompt files                   | ✅ Slash commands with YAML frontmatter | ✅ 19 generated            | None                                    |
+| Custom agents                  | ✅ Specialist personas with tools       | ✅ 19 generated            | None                                    |
+| Chat modes                     | ✅ Interaction style customization      | ✅ 10 generated            | None                                    |
+| AGENTS.md support              | ✅ Auto-detected                        | ✅ Always generated        | None                                    |
+| Personal instructions          | ✅ `$HOME/.copilot/`                    | ❌ Not generated           | User-level, not project-scoped          |
+| Organization-wide instructions | ✅ Org-level emerging                   | ❌ Not generated           | Requires GitHub org admin setup         |
+| Copilot Coding Agent config    | ✅ Autonomous multi-file edits          | ⚠️ Via AGENTS.md only      | Could add coding agent-specific prompts |
+| Code Review integration        | ✅ Custom review instructions           | ⚠️ Not explicitly targeted | Could add review-specific prompt files  |
 
 **Summary:** GitHub Copilot is comprehensively supported. Minor gaps in
 organization-wide instructions and specialized coding agent / code review prompts.
@@ -105,15 +105,15 @@ organization-wide instructions and specialized coding agent / code review prompt
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 78/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions) |
-| Developer Experience | 86/100 ⭐⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
-| Cost & Value | 72/100 ⭐⭐⭐½ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions) |
-| Customization | 76/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions) |
-| Privacy & Security | 74/100 ⭐⭐⭐½ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions) |
-| Team & Enterprise | 88/100 ⭐⭐⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions) |
-| **Weighted Total** | **79/100 ⭐⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score               | Details                                                                       |
+| -------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 78/100 ⭐⭐⭐⭐     | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)   |
+| Developer Experience | 86/100 ⭐⭐⭐⭐½    | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
+| Cost & Value         | 72/100 ⭐⭐⭐½      | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions)        |
+| Customization        | 76/100 ⭐⭐⭐⭐     | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions)        |
+| Privacy & Security   | 74/100 ⭐⭐⭐½      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions)     |
+| Team & Enterprise    | 88/100 ⭐⭐⭐⭐½    | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions)      |
+| **Weighted Total**   | **79/100 ⭐⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

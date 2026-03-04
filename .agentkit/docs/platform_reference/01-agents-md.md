@@ -2,13 +2,13 @@
 
 **Always generated** — not gated by `renderTargets`.
 
-| | |
-|---|---|
-| **Type** | Universal Instruction Standard |
-| **Categories** | Universal Standard |
-| **Access** | File-based — any tool that reads `AGENTS.md` from the repository |
-| **Documentation** | [agents.md](https://agents.md/) |
-| **Performance Rating** | N/A — AGENTS.md is a standard, not a coding platform |
+|                        |                                                                  |
+| ---------------------- | ---------------------------------------------------------------- |
+| **Type**               | Universal Instruction Standard                                   |
+| **Categories**         | Universal Standard                                               |
+| **Access**             | File-based — any tool that reads `AGENTS.md` from the repository |
+| **Documentation**      | [agents.md](https://agents.md/)                                  |
+| **Performance Rating** | N/A — AGENTS.md is a standard, not a coding platform             |
 
 ---
 
@@ -23,26 +23,26 @@ workflows to any AI coding agent.
 
 ## Native Support
 
-| Tool | How It Reads AGENTS.md |
-|------|----------------------|
-| OpenAI Codex | Reads `AGENTS.md` + `AGENTS.override.md` at every directory level |
-| Google Jules | Reads from repo root before every task |
-| GitHub Copilot | Auto-detects and applies to all chat requests |
-| Roo Code | Loads after mode-specific rules, before generic rules |
-| Cline | Loads alongside `.clinerules/` |
-| Cursor | Recognized as part of the AGENTS.md initiative |
-| Warp | Reads `AGENTS.md` (preferred) or `WARP.md` from repo root |
-| Amp, Factory, OpenCode | Native support |
-| Amazon Q Developer | Native support |
-| Sourcegraph Cody | Reads AGENTS.md |
-| Aider | Reads AGENTS.md + conventions file |
+| Tool                   | How It Reads AGENTS.md                                            |
+| ---------------------- | ----------------------------------------------------------------- |
+| OpenAI Codex           | Reads `AGENTS.md` + `AGENTS.override.md` at every directory level |
+| Google Jules           | Reads from repo root before every task                            |
+| GitHub Copilot         | Auto-detects and applies to all chat requests                     |
+| Roo Code               | Loads after mode-specific rules, before generic rules             |
+| Cline                  | Loads alongside `.clinerules/`                                    |
+| Cursor                 | Recognized as part of the AGENTS.md initiative                    |
+| Warp                   | Reads `AGENTS.md` (preferred) or `WARP.md` from repo root         |
+| Amp, Factory, OpenCode | Native support                                                    |
+| Amazon Q Developer     | Native support                                                    |
+| Sourcegraph Cody       | Reads AGENTS.md                                                   |
+| Aider                  | Reads AGENTS.md + conventions file                                |
 
 ---
 
 ## What AgentKit Forge Generates
 
-| Output | Path |
-|--------|------|
+| Output             | Path        |
+| ------------------ | ----------- |
 | Agent instructions | `AGENTS.md` |
 
 Content is generated from `project.yaml` (tech stack, architecture, conventions,
@@ -52,12 +52,12 @@ testing, integrations, documentation pointers) and the core spec files.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| Root `AGENTS.md` | ✅ All platforms | ✅ Generated | None |
-| `AGENTS.override.md` | ✅ Codex, some others | ❌ Not generated | Generate override file for local/env-specific instructions |
-| Subdirectory `AGENTS.md` | ✅ Codex, Warp | ❌ Not generated | Generate per-package AGENTS.md in monorepos |
-| Global `~/.codex/AGENTS.md` | ✅ Codex | ❌ Not applicable | User-level, not project-scoped |
+| Feature                     | Platform Supports     | AgentKit Forge Status | Gap                                                        |
+| --------------------------- | --------------------- | --------------------- | ---------------------------------------------------------- |
+| Root `AGENTS.md`            | ✅ All platforms      | ✅ Generated          | None                                                       |
+| `AGENTS.override.md`        | ✅ Codex, some others | ❌ Not generated      | Generate override file for local/env-specific instructions |
+| Subdirectory `AGENTS.md`    | ✅ Codex, Warp        | ❌ Not generated      | Generate per-package AGENTS.md in monorepos                |
+| Global `~/.codex/AGENTS.md` | ✅ Codex              | ❌ Not applicable     | User-level, not project-scoped                             |
 
 ---
 

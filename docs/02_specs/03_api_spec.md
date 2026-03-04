@@ -18,32 +18,32 @@
 
 ## Conventions
 
-| Convention | Value |
-|-----------|-------|
-| Date format | ISO 8601 |
-| Pagination | Cursor-based |
-| Error format | RFC 7807 Problem Details |
+| Convention    | Value                     |
+| ------------- | ------------------------- |
+| Date format   | ISO 8601                  |
+| Pagination    | Cursor-based              |
+| Error format  | RFC 7807 Problem Details  |
 | Rate limiting | <!-- e.g. 100 req/min --> |
 
 ## Endpoints Summary
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/resource` | List resources |
-| `POST` | `/resource` | Create a resource |
-| `GET` | `/resource/:id` | Retrieve a resource |
-| `PUT` | `/resource/:id` | Update a resource |
-| `DELETE` | `/resource/:id` | Delete a resource |
+| Method   | Path            | Description         |
+| -------- | --------------- | ------------------- |
+| `GET`    | `/resource`     | List resources      |
+| `POST`   | `/resource`     | Create a resource   |
+| `GET`    | `/resource/:id` | Retrieve a resource |
+| `PUT`    | `/resource/:id` | Update a resource   |
+| `DELETE` | `/resource/:id` | Delete a resource   |
 
 ## Error Codes
 
-| Code | Meaning | Resolution |
-|------|---------|------------|
-| 400 | Bad Request | Check request body against schema |
-| 401 | Unauthorised | Provide valid credentials |
-| 404 | Not Found | Verify resource ID |
-| 429 | Rate Limited | Back off and retry |
-| 500 | Internal Error | Contact support |
+| Code | Meaning        | Resolution                        |
+| ---- | -------------- | --------------------------------- |
+| 400  | Bad Request    | Check request body against schema |
+| 401  | Unauthorised   | Provide valid credentials         |
+| 404  | Not Found      | Verify resource ID                |
+| 429  | Rate Limited   | Back off and retry                |
+| 500  | Internal Error | Contact support                   |
 
 ## References
 

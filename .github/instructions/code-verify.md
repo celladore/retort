@@ -4,6 +4,7 @@
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Code Verification
 
 Apply these rules when reviewing, verifying, or running automated checks
@@ -13,12 +14,12 @@ on code in **agentkit-forge**.
 
 Code verification covers four dimensions:
 
-| Dimension | What to check |
-|-----------|--------------|
-| **Correctness** | Logic matches the specification; edge cases handled |
-| **Safety** | No injection vectors, no secrets, no unsafe operations |
-| **Quality** | Naming clarity, single responsibility, no dead code |
-| **Test coverage** | New paths exercised by tests; no coverage regression |
+| Dimension         | What to check                                          |
+| ----------------- | ------------------------------------------------------ |
+| **Correctness**   | Logic matches the specification; edge cases handled    |
+| **Safety**        | No injection vectors, no secrets, no unsafe operations |
+| **Quality**       | Naming clarity, single responsibility, no dead code    |
+| **Test coverage** | New paths exercised by tests; no coverage regression   |
 
 ## Correctness Checks
 

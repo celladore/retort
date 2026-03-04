@@ -1,9 +1,9 @@
 ---
-description: "Universal quality gate — format, lint, typecheck, test, build in one pass"
+description: 'Universal quality gate — format, lint, typecheck, test, build in one pass'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(pytest *), Bash(go *), Bash(rustfmt *), Bash(prettier *), Bash(eslint *), Bash(ruff *), Bash(black *), Bash(mypy *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -15,6 +15,7 @@ You are the **Check Agent**. You run every available quality check for this repo
 ## Arguments
 
 `$ARGUMENTS` may contain:
+
 - A scope (e.g., `frontend`, `backend`, `packages/api`) to limit checks to a subdirectory.
 - `--fix` to enable auto-fix mode where supported (formatter writes, lint auto-fix).
 - `--fast` to skip the build step and only run format + lint + typecheck.
@@ -27,13 +28,13 @@ Always run checks in this order. Each step depends on the previous being meaning
 
 Auto-detect and run the appropriate formatter:
 
-| Stack | Detection | Check Command | Fix Command |
-|-------|-----------|---------------|-------------|
-| JS/TS | `package.json` with prettier | `npx prettier --check .` | `npx prettier --write .` |
-| Rust | `Cargo.toml` | `cargo fmt --check` | `cargo fmt` |
+| Stack  | Detection                        | Check Command                                | Fix Command                  |
+| ------ | -------------------------------- | -------------------------------------------- | ---------------------------- |
+| JS/TS  | `package.json` with prettier     | `npx prettier --check .`                     | `npx prettier --write .`     |
+| Rust   | `Cargo.toml`                     | `cargo fmt --check`                          | `cargo fmt`                  |
 | Python | `pyproject.toml` with black/ruff | `ruff format --check .` or `black --check .` | `ruff format .` or `black .` |
-| .NET | `*.sln` or `*.csproj` | `dotnet format --verify-no-changes` | `dotnet format` |
-| Go | `go.mod` | `gofmt -l .` | `gofmt -w .` |
+| .NET   | `*.sln` or `*.csproj`            | `dotnet format --verify-no-changes`          | `dotnet format`              |
+| Go     | `go.mod`                         | `gofmt -l .`                                 | `gofmt -w .`                 |
 
 If `--fix` is passed, use the fix command. Otherwise, use the check command.
 
@@ -41,13 +42,13 @@ Record: pass/fail, files that would change (in check mode) or files changed (in 
 
 ### Step 2: Lint
 
-| Stack | Detection | Command |
-|-------|-----------|---------|
-| JS/TS | `.eslintrc*` or `eslint.config.*` | `npx eslint . --max-warnings 0` |
-| Rust | `Cargo.toml` | `cargo clippy -- -D warnings` |
-| Python | ruff in deps/config | `ruff check .` |
-| .NET | analyzers enabled | `dotnet build /warnaserror` |
-| Go | golangci-lint installed | `golangci-lint run` |
+| Stack  | Detection                         | Command                         |
+| ------ | --------------------------------- | ------------------------------- |
+| JS/TS  | `.eslintrc*` or `eslint.config.*` | `npx eslint . --max-warnings 0` |
+| Rust   | `Cargo.toml`                      | `cargo clippy -- -D warnings`   |
+| Python | ruff in deps/config               | `ruff check .`                  |
+| .NET   | analyzers enabled                 | `dotnet build /warnaserror`     |
+| Go     | golangci-lint installed           | `golangci-lint run`             |
 
 If `--fix` is passed and the tool supports auto-fix, add the fix flag (e.g., `--fix` for ESLint, `--fix` for Ruff).
 
@@ -55,26 +56,26 @@ Record: pass/fail, error count, warning count, first 20 issues.
 
 ### Step 3: Typecheck
 
-| Stack | Detection | Command |
-|-------|-----------|---------|
-| TypeScript | `tsconfig.json` | `npx tsc --noEmit` |
-| Python | mypy/pyright config | `mypy .` or `pyright` |
-| Rust | (included in clippy) | — |
-| .NET | (included in build) | — |
-| Go | (included in build) | — |
+| Stack      | Detection            | Command               |
+| ---------- | -------------------- | --------------------- |
+| TypeScript | `tsconfig.json`      | `npx tsc --noEmit`    |
+| Python     | mypy/pyright config  | `mypy .` or `pyright` |
+| Rust       | (included in clippy) | —                     |
+| .NET       | (included in build)  | —                     |
+| Go         | (included in build)  | —                     |
 
 Record: pass/fail, error count, first 20 errors.
 
 ### Step 4: Unit Tests
 
-| Stack | Detection | Command |
-|-------|-----------|---------|
+| Stack          | Detection      | Command          |
+| -------------- | -------------- | ---------------- |
 | JS/TS (Vitest) | vitest in deps | `npx vitest run` |
-| JS/TS (Jest) | jest in deps | `npx jest` |
-| Rust | `Cargo.toml` | `cargo test` |
-| .NET | test projects | `dotnet test` |
-| Python | pytest | `pytest` |
-| Go | `go.mod` | `go test ./...` |
+| JS/TS (Jest)   | jest in deps   | `npx jest`       |
+| Rust           | `Cargo.toml`   | `cargo test`     |
+| .NET           | test projects  | `dotnet test`    |
+| Python         | pytest         | `pytest`         |
+| Go             | `go.mod`       | `go test ./...`  |
 
 If scope is provided, pass it as a filter to the test runner where supported.
 
@@ -84,13 +85,13 @@ Record: pass/fail, total tests, passed, failed, skipped, duration.
 
 Skip if `--fast` is passed.
 
-| Stack | Detection | Command |
-|-------|-----------|---------|
-| JS/TS | `build` script in `package.json` | `pnpm build` / `npm run build` |
-| Rust | `Cargo.toml` | `cargo build` |
-| .NET | `*.sln` | `dotnet build` |
-| Python | build config | `python -m build` |
-| Go | `go.mod` | `go build ./...` |
+| Stack  | Detection                        | Command                        |
+| ------ | -------------------------------- | ------------------------------ |
+| JS/TS  | `build` script in `package.json` | `pnpm build` / `npm run build` |
+| Rust   | `Cargo.toml`                     | `cargo build`                  |
+| .NET   | `*.sln`                          | `dotnet build`                 |
+| Python | build config                     | `python -m build`              |
+| Go     | `go.mod`                         | `go build ./...`               |
 
 Record: pass/fail, duration, output size.
 
@@ -99,6 +100,7 @@ Record: pass/fail, duration, output size.
 If the repository contains multiple stacks (e.g., a TypeScript frontend and a Rust backend), run checks for **all detected stacks** unless a scope is specified.
 
 For monorepos with workspace configuration, respect workspace boundaries:
+
 - `pnpm -r run build` for pnpm workspaces
 - `cargo build --workspace` for Cargo workspaces
 - `dotnet build <solution>.sln` for .NET solutions

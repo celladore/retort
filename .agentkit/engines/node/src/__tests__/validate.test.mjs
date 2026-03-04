@@ -1,15 +1,19 @@
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { runValidate } from '../validate.mjs';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { spawnSync } from 'child_process';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { runValidate } from '../validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
+const PRETTIER_BIN = resolve(AGENTKIT_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
 
 describe('runValidate()', () => {
-  afterEach(() => { vi.restoreAllMocks(); });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('runs all validation phases against the real project', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -25,7 +29,7 @@ describe('runValidate()', () => {
     });
 
     // Should produce output for each phase
-    const allOutput = logSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const allOutput = logSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(allOutput).toContain('Spec Validation');
     expect(allOutput).toContain('Output Directories');
     expect(allOutput).toContain('JSON Files');
@@ -34,6 +38,26 @@ describe('runValidate()', () => {
     expect(allOutput).toContain('Generated Headers');
     expect(allOutput).toContain('Settings');
     expect(allOutput).toContain('Secret Scan');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Prettier formatting — verify project files pass prettier check
+// ---------------------------------------------------------------------------
+describe('prettier check', () => {
+  it('all project files pass prettier formatting', { timeout: 90_000 }, () => {
+    const prettierResult = spawnSync(process.execPath, [PRETTIER_BIN, '--check', '.'], {
+      cwd: PROJECT_ROOT,
+      encoding: 'utf-8',
+    });
+    const unformatted = (prettierResult.stdout + prettierResult.stderr)
+      .split('\n')
+      .filter((l) => l.includes('[warn]'))
+      .join('\n');
+    expect(
+      prettierResult.status,
+      `Prettier check failed. Files needing formatting:\n${unformatted}`
+    ).toBe(0);
   });
 });
 
@@ -62,7 +86,7 @@ describe('validate - edge cases', () => {
       flags: {},
     });
 
-    const errors = errorSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const errors = errorSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(errors).toContain('Missing directory');
     // process.exit(1) should have been called due to errors
     expect(exitSpy).toHaveBeenCalledWith(1);
@@ -84,7 +108,7 @@ describe('validate - edge cases', () => {
       flags: {},
     });
 
-    const errors = errorSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const errors = errorSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(errors).toContain('invalid JSON');
   });
 });

@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CLI_PATH = resolve(__dirname, '..', 'cli.mjs');
-const PKG_VERSION = JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', '..', 'package.json'), 'utf-8')).version;
+const PKG_VERSION = JSON.parse(
+  readFileSync(resolve(__dirname, '..', '..', '..', '..', 'package.json'), 'utf-8')
+).version;
 
 function run(...args) {
   try {

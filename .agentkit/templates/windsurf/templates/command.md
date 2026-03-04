@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Windsurf command template. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
+
 # /{{commandName}} — {{commandDescription}}
 
 ## When to Use

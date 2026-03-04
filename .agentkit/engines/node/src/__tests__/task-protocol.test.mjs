@@ -238,8 +238,18 @@ describe('listTasks', () => {
   });
 
   it('sorts by priority then date', async () => {
-    await createTask(tmpRoot, { title: 'Low', delegator: 'test', assignees: ['x'], priority: 'P3' });
-    await createTask(tmpRoot, { title: 'High', delegator: 'test', assignees: ['x'], priority: 'P0' });
+    await createTask(tmpRoot, {
+      title: 'Low',
+      delegator: 'test',
+      assignees: ['x'],
+      priority: 'P3',
+    });
+    await createTask(tmpRoot, {
+      title: 'High',
+      delegator: 'test',
+      assignees: ['x'],
+      priority: 'P0',
+    });
     const { tasks } = await listTasks(tmpRoot);
     expect(tasks[0].title).toBe('High');
     expect(tasks[1].title).toBe('Low');
@@ -658,4 +668,3 @@ describe('formatTaskList', () => {
     expect(table).toContain('submitted');
   });
 });
-

@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI Pair Programming Tool (CLI, open-source) |
-| **Categories** | CLI Agent |
-| **Access** | CLI tool — `pip install aider-chat` or `brew install aider` |
-| **Documentation** | [aider.chat](https://aider.chat/) |
+|                        |                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| **Type**               | AI Pair Programming Tool (CLI, open-source)                                                     |
+| **Categories**         | CLI Agent                                                                                       |
+| **Access**             | CLI tool — `pip install aider-chat` or `brew install aider`                                     |
+| **Documentation**      | [aider.chat](https://aider.chat/)                                                               |
 | **Performance Rating** | ⭐⭐⭐⭐ — **76/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents)) |
 
 ---
@@ -23,14 +23,14 @@ conventions file for coding standards. Aider works with multiple LLM providers
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Project instructions | `AGENTS.md` (repo root) | Plain Markdown |
-| Conventions file | `.aider.conventions.md` | Plain Markdown |
-| Config file | `.aider.conf.yml` | YAML |
-| Model config | `.aider.model.settings.yml` | YAML |
-| Environment | `.env` | Key-value pairs |
-| Ignore patterns | `.aiderignore` | Gitignore-style patterns |
+| Feature              | Location                    | Format                   |
+| -------------------- | --------------------------- | ------------------------ |
+| Project instructions | `AGENTS.md` (repo root)     | Plain Markdown           |
+| Conventions file     | `.aider.conventions.md`     | Plain Markdown           |
+| Config file          | `.aider.conf.yml`           | YAML                     |
+| Model config         | `.aider.model.settings.yml` | YAML                     |
+| Environment          | `.env`                      | Key-value pairs          |
+| Ignore patterns      | `.aiderignore`              | Gitignore-style patterns |
 
 ### Key Capabilities
 
@@ -74,8 +74,8 @@ lint-cmd: npm run lint
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output             | Path        | Source                               |
+| ------------------ | ----------- | ------------------------------------ |
 | Agent instructions | `AGENTS.md` | Always generated from `project.yaml` |
 
 Aider reads the universal `AGENTS.md`. No platform-specific files are
@@ -85,15 +85,15 @@ currently generated.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| AGENTS.md | ✅ Native support | ✅ Always generated | None |
-| .aider.conventions.md | ✅ Coding standards file | ❌ Not generated | Generate conventions from project.yaml |
-| .aider.conf.yml | ✅ Tool configuration | ❌ Not generated | Generate config with build/test commands |
-| .aiderignore | ✅ File exclusion | ❌ Not generated | Generate from project.yaml patterns |
-| .aider.model.settings.yml | ✅ Model preferences | ❌ Not generated | Could generate model presets |
-| Architect mode config | ✅ Plan-then-implement | ❌ Not configured | Could configure architect mode defaults |
-| Git integration | ✅ Auto-commits, diffs | N/A | Platform feature |
+| Feature                   | Platform Supports        | AgentKit Forge Status | Gap                                      |
+| ------------------------- | ------------------------ | --------------------- | ---------------------------------------- |
+| AGENTS.md                 | ✅ Native support        | ✅ Always generated   | None                                     |
+| .aider.conventions.md     | ✅ Coding standards file | ❌ Not generated      | Generate conventions from project.yaml   |
+| .aider.conf.yml           | ✅ Tool configuration    | ❌ Not generated      | Generate config with build/test commands |
+| .aiderignore              | ✅ File exclusion        | ❌ Not generated      | Generate from project.yaml patterns      |
+| .aider.model.settings.yml | ✅ Model preferences     | ❌ Not generated      | Could generate model presets             |
+| Architect mode config     | ✅ Plan-then-implement   | ❌ Not configured     | Could configure architect mode defaults  |
+| Git integration           | ✅ Auto-commits, diffs   | N/A                   | Platform feature                         |
 
 **Summary:** Aider is served by `AGENTS.md` but has significant configuration
 surface that could be generated. The `.aider.conventions.md` file is the
@@ -114,15 +114,15 @@ integration.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 76/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents) |
-| Developer Experience | 74/100 ⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cli-agents) |
-| Cost & Value | 80/100 ⭐⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cli-agents) |
-| Customization | 62/100 ⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cli-agents) |
-| Privacy & Security | 62/100 ⭐⭐⭐ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cli-agents) |
-| Team & Enterprise | 30/100 ⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cli-agents) |
-| **Weighted Total** | **70/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 76/100 ⭐⭐⭐⭐    | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents)       |
+| Developer Experience | 74/100 ⭐⭐⭐½     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cli-agents)     |
+| Cost & Value         | 80/100 ⭐⭐⭐⭐    | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cli-agents)            |
+| Customization        | 62/100 ⭐⭐⭐      | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cli-agents)            |
+| Privacy & Security   | 62/100 ⭐⭐⭐      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cli-agents)         |
+| Team & Enterprise    | 30/100 ⭐½         | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cli-agents)          |
+| **Weighted Total**   | **70/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 
