@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-plan');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'plan');
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 
 function setupTestProject(phase = 1, extras = {}) {
