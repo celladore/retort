@@ -278,6 +278,56 @@ Each task is a JSON file with a lifecycle: `submitted → accepted → working �
 
 See `.claude/state/tasks/` for active task files. See `UNIFIED_AGENT_TEAMS.md` for team coordination protocol.
 
+## Git & PR Conventions
+
+### Commit Messages — Conventional Commits (MANDATORY)
+
+All commit messages **and PR titles** MUST follow Conventional Commits format:
+
+```
+type(scope): description
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`, `build`, `revert`
+
+**Examples:**
+
+- `feat(auth): add OAuth2 login flow`
+- `fix(api): handle null response from payment gateway`
+- `docs(readme): update setup instructions`
+- `chore(deps): update vitest to v2.1`
+- `ci(workflows): add coverage enforcement`
+- `refactor(sync): extract template rendering helpers`
+
+**Common mistakes to avoid:**
+
+- `Plan: Brand-Driven Editor Theme` — NOT valid, use `feat(editor): add brand-driven theme generation`
+- `Update files` — NOT valid, use `chore: update generated files`
+- `WIP` — NOT valid, use `chore(wip): partial implementation of X`
+
+The CI `branch-protection` workflow **rejects PRs** with non-conforming titles. Fix the title before pushing.
+
+### Generated File Sync (MANDATORY)
+
+When you modify any file in `.agentkit/spec/`, you **MUST** run sync before committing:
+
+```bash
+pnpm -C .agentkit agentkit:sync
+```
+
+Then commit the regenerated output. The CI drift check **will fail** if generated files are out of sync. This is the #1 cause of CI failures across branches.
+
+**Workflow:**
+
+1. Edit spec files in `.agentkit/spec/`
+2. Run `pnpm -C .agentkit agentkit:sync`
+3. Commit spec changes and generated output together (or in two atomic commits)
+4. Verify with `git diff --quiet` — if there's output, you missed something
+
+### Branch Naming
+
+Feature branches: `type/short-description` (e.g., `feat/add-user-auth`, `fix/token-refresh`)
+
 ## Safety Rules
 
 1. **Never** commit secrets, API keys, or credentials

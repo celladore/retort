@@ -44,6 +44,46 @@ run_check() {
 
 FAILURE_REASON=""
 
+# -- Check for generated file drift ----------------------------------------
+if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.mjs" ]] && command -v node &>/dev/null; then
+    # Run sync to see if anything is out of date
+    (cd "${CWD}/.agentkit" && node engines/node/src/cli.mjs sync 2>/dev/null) || true
+
+    if ! git -C "$CWD" diff --quiet 2>/dev/null; then
+        drift_files=$(git -C "$CWD" diff --name-only 2>/dev/null | head -10)
+        FAILURE_REASON="Generated files are out of sync with spec. Run 'pnpm -C .agentkit agentkit:sync' and commit the changes.\nDrifted files:\n${drift_files}"
+        # Restore working tree
+        git -C "$CWD" checkout -- $drift_files 2>/dev/null || true
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+fi
+
+# -- Check for non-conventional commit messages on current branch ----------
+if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
+    DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+
+    if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
+        CC_PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?!?:.+'
+        BAD_COMMITS=""
+        if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+            while IFS= read -r line; do
+                MSG=$(echo "$line" | cut -d' ' -f2-)
+                if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
+                    BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
+                fi
+            done < <(git -C "$CWD" log --oneline "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null || true)
+        fi
+
+        if [[ -n "$BAD_COMMITS" ]]; then
+            FAILURE_REASON="Commits with non-conventional messages detected. PR titles must follow 'type(scope): description'.\nBad commits:\n${BAD_COMMITS}\nFix with: git rebase -i and reword, or ensure the PR title follows the format."
+            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            exit 0
+        fi
+    fi
+fi
+
 # -- Auto-detect stack and run checks --------------------------------------
 ran_check=false
 
@@ -60,6 +100,15 @@ if [[ -f "${CWD}/package.json" ]]; then
     fi
 
     # Try lint, then test, then build -- stop at first failure.
+    # pnpm uses -C <dir> before the subcommand; npm/yarn use --prefix after.
+    pm_run() {
+        local script="$1"
+        if [[ "$pm" == "pnpm" ]]; then
+            "$pm" -C "$CWD" run "$script"
+        else
+            "$pm" run "$script" --prefix "$CWD"
+        fi
+    }
     has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
 
     if has_script "lint"; then

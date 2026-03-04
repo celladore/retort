@@ -28,9 +28,10 @@ AgentKit Forge framework for multi-tool AI agent team orchestration, sync genera
 - Never commit secrets, API keys, or credentials. Use environment variables.
 - Prefer explicit error handling over silent failures.
 - Use the strongest type safety available for the language.
-  - Follow conventional commit convention.
+  - **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" — CI will reject them.
   - Branch strategy: github-flow.
   - Code review: required-pr.
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, you MUST run `pnpm -C .agentkit agentkit:sync` and commit the regenerated output before pushing. CI drift checks will fail otherwise.
 
 ## Authentication & Authorization
 

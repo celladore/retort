@@ -97,6 +97,16 @@ if (Test-Path $packageJsonPath) {
         $scripts = $pkgJson.scripts.PSObject.Properties.Name
     }
 
+    # pnpm uses -C <dir> before the subcommand; npm/yarn use --prefix after.
+    function Invoke-PmRun {
+        param([string]$Script)
+        if ($pm -eq "pnpm") {
+            return Invoke-Check -Label "$pm $Script" -Command $pm -Arguments @("-C", $cwd, "run", $Script)
+        } else {
+            return Invoke-Check -Label "$pm $Script" -Command $pm -Arguments @("run", $Script, "--prefix", $cwd)
+        }
+    }
+
     if ($scripts -contains "lint") {
         $result = Invoke-Check -Label "$pm lint" -Command $pm -Arguments @("run", "lint") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
