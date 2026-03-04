@@ -45,7 +45,7 @@ agents:
         - Review and approve changes to API contracts
         - Maintain API documentation (OpenAPI/Swagger)
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow security domain rules [sec-no-secrets, sec-input-validation, sec-least-privilege] — sanitize inputs, guard endpoints, never hardcode secrets
         - Follow testing domain rules [qa-coverage-threshold, qa-aaa-pattern, qa-no-skipped-tests] — maintain coverage thresholds, test error paths
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
@@ -101,7 +101,7 @@ agents:
         - Maintain component documentation and Storybook stories
         - Review and approve changes to shared component libraries
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow typescript domain rules [ts-strict-null, ts-no-any, ts-wcag-aa, ts-lint] — strict null checks, no any, WCAG AA compliance
         - Follow security domain rules [sec-input-validation, sec-no-secrets, sec-deny-by-default] — sanitize user inputs, prevent XSS, validate at boundaries
         - Follow testing domain rules [qa-coverage-threshold, qa-aaa-pattern, qa-no-skipped-tests] — maintain coverage thresholds, test accessibility
@@ -161,7 +161,7 @@ agents:
         - Ensure data integrity constraints and referential integrity
         - Plan and execute data migration strategies for breaking changes
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow security domain rules [sec-no-secrets, sec-input-validation] — never expose sensitive data in migrations, validate inputs
         - Follow testing domain rules [qa-coverage-threshold, qa-integration-isolation] — test migrations forward and backward
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
@@ -217,7 +217,7 @@ agents:
         - Manage environment variables and secrets in CI/CD
         - Enforce branch protection and merge requirements
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow ci-cd domain rules [ci-quality-gates, ci-no-skip-hooks, ci-pin-actions] — workflows must be non-blocking where appropriate, use continue-on-error for advisory checks
         - Follow security domain rules [sec-no-secrets, ci-no-secrets-in-workflows] — never expose secrets in logs or workflow outputs
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
@@ -277,7 +277,7 @@ agents:
         - Enforce mandatory resource tagging (environment, project, owner, cost-center)
         - Manage Terraform state backend and locking configuration
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow iac domain rules [iac-naming-convention, iac-tagging, iac-no-hardcoded-secrets, iac-plan-before-apply] — use naming conventions, tag resources, no hardcoded secrets
         - Follow security domain rules [sec-least-privilege, sec-encryption, sec-no-secrets] — enforce least-privilege IAM, encrypt at rest and in transit
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
@@ -346,7 +346,7 @@ agents:
         - Review editor-theme.yaml color mappings for correctness and contrast compliance
         - Ensure generated editor themes (.vscode, .cursor, .windsurf) match brand intent
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
         - .agentkit/spec/brand.yaml is the single source of truth for all brand colors, typography, and design tokens — never define colors outside this file
         - Editor themes are derived from brand.yaml via editor-theme.yaml mappings — the sync engine generates hex values in settings.json (this is expected), but never manually edit those generated hex values; always update brand.yaml or editor-theme.yaml and re-run sync
@@ -424,7 +424,7 @@ agents:
         - Champion accessibility in component design
         - Document component APIs and usage guidelines
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow typescript domain rules [ts-wcag-aa, ts-strict-null, ts-no-any] — WCAG AA compliance for all interactive components
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -464,7 +464,7 @@ agents:
         - Ensure SEO best practices in content structure
         - Create and manage editorial calendars and content roadmaps
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow documentation domain rules [doc-8-category-structure, doc-changelog, doc-api-spec] — keep docs current with code, use consistent structure
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -500,7 +500,7 @@ agents:
         - Produce growth reports and recommendations
         - Identify and prioritize conversion optimization opportunities
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
         - Read
@@ -547,7 +547,7 @@ agents:
         - Track dependency freshness and staleness metrics
         - Coordinate cross-stack dependency alignment
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow dependency-management domain rules [dep-pin-versions, dep-lockfile-committed, dep-audit-before-adopt, dep-no-duplicate] — audit before adding, verify licenses, pin versions
         - Follow security domain rules [sec-dependency-audit, sec-no-secrets] — check for known vulnerabilities before approving updates
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
@@ -588,7 +588,7 @@ agents:
         - Maintain local development setup scripts and documentation
         - Coordinate environment provisioning with infrastructure team
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow security domain rules [sec-no-secrets, sec-encryption, sec-least-privilege] — never commit secrets, rotate credentials, use secret managers
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -629,7 +629,7 @@ agents:
         - Produce security assessment reports with severity ratings
         - Track and verify remediation of identified vulnerabilities
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow security domain rules [sec-input-validation, sec-no-secrets, sec-least-privilege, sec-deny-by-default, sec-encryption] — enforce all OWASP Top 10 protections, validate secrets hygiene
         - Follow dependency-management domain rules [dep-audit-before-adopt, dep-regular-audit, dep-pin-versions] — audit supply chain, check for known CVEs
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
@@ -673,7 +673,7 @@ agents:
         - Optionally open external issues (GitHub/Linear/Jira) for unresolved problems
         - Suggest updates to rules.yaml or conventions when lessons warrant them
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow documentation domain rules [doc-8-category-structure, doc-changelog] — use consistent structure, keep records current
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       conventions:
@@ -724,7 +724,7 @@ agents:
         - Gather and synthesize user feedback and research findings
         - Align engineering work with business objectives
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow documentation domain rules [doc-8-category-structure, doc-changelog, doc-generated-files] — keep docs current with code changes
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -761,7 +761,7 @@ agents:
         - Identify dependencies between workstreams and flag blockers
         - Maintain changelog and release notes
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow documentation domain rules [doc-changelog, doc-8-category-structure] — keep roadmap and changelog accurate
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -808,7 +808,7 @@ agents:
         - Define quality gates for CI/CD pipelines
         - Coordinate test planning for major features and releases
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow testing domain rules [qa-coverage-threshold, qa-no-sleep, qa-no-skipped-tests, qa-aaa-pattern] — maintain coverage thresholds, deterministic tests, test error paths
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -847,7 +847,7 @@ agents:
         - Recommend test priorities based on risk and coverage gaps
         - Configure and maintain coverage tooling and reporting
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow testing domain rules [qa-coverage-threshold, qa-performance-regression, qa-no-skipped-tests] — maintain coverage thresholds, track regression
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -887,7 +887,7 @@ agents:
         - Debug and resolve flaky tests and timing issues
         - Manage test data and fixtures for integration scenarios
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow testing domain rules [qa-no-sleep, qa-aaa-pattern, qa-no-skipped-tests, qa-integration-isolation] — deterministic tests, no flaky timing, test error paths
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -929,7 +929,7 @@ agents:
         - Produce delivery status reports and burndown tracking
         - Enforce work-in-progress limits and flow efficiency
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow documentation domain rules [doc-8-category-structure, doc-changelog, doc-adr-format] — handoff docs must be current and complete
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
       preferred-tools:
@@ -975,7 +975,7 @@ agents:
         - Communicate release notes to stakeholders
         - Maintain release automation scripts and workflows
       domain-rules:
-        - Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format (type(scope): description), all PRs must have conventional titles
+        - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - Follow ci-cd domain rules [ci-quality-gates, ci-no-skip-hooks, ci-pin-actions, ci-fail-fast] — release workflows must follow non-blocking advisory pattern
         - Follow documentation domain rules [doc-changelog, doc-generated-files] — changelogs and release notes must be current
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
