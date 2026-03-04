@@ -20,7 +20,8 @@ const TEST_AGENTKIT = resolve(
   '..',
   '..',
   '..',
-  '.test-cost-tracker',
+  '.test-tmp',
+  'cost-tracker',
   'agentkit'
 );
 const TEST_PROJECT = resolve(TEST_AGENTKIT, '..');

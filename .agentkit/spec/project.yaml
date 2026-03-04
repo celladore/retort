@@ -174,6 +174,22 @@ automation:
 #     purpose: payments
 integrations: []
 
+# Evaluation — opt-in infrastructure & codebase fitness evaluation
+# Enable this to add the /infra-eval command for adopting repos.
+# Weights must sum to 100. Custom gates extend the default hard gate set.
+evaluation:
+  infraEval: false # set to true to enable /infra-eval command
+  weights:
+    reliability: 18
+    cost: 16
+    security: 14
+    infra: 12
+    scalability: 12
+    architecture: 10
+    code: 10
+    ops: 8
+  customGates: null # free-text markdown block for project-specific hard gates
+
 # Cross-cutting concerns (project-specific decisions agents must follow)
 crosscutting:
   logging:

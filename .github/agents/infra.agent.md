@@ -59,6 +59,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Implement disaster recovery and backup strategies
 - Enforce mandatory resource tagging (environment, project, owner, cost-center)
 - Manage Terraform state backend and locking configuration
+- Execute /infra-eval assessments when evaluation.infraEval is enabled
 
 ## Tools
 
