@@ -75,6 +75,12 @@ pnpm -C .agentkit agentkit:init           # equivalent to: cli.mjs init
 pnpm -C .agentkit agentkit:validate       # equivalent to: cli.mjs validate
 pnpm -C .agentkit agentkit:discover       # equivalent to: cli.mjs discover
 pnpm -C .agentkit agentkit:spec-validate  # equivalent to: cli.mjs spec-validate
+pnpm -C .agentkit agentkit:add            # equivalent to: cli.mjs add
+pnpm -C .agentkit agentkit:remove         # equivalent to: cli.mjs remove
+pnpm -C .agentkit agentkit:list           # equivalent to: cli.mjs list
+pnpm -C .agentkit agentkit:healthcheck    # equivalent to: cli.mjs healthcheck
+pnpm -C .agentkit agentkit:check          # equivalent to: cli.mjs check
+pnpm -C .agentkit agentkit:cost           # equivalent to: cli.mjs cost
 ```
 
 ### Flag syntax
