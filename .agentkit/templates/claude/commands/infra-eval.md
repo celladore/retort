@@ -1,9 +1,9 @@
 ---
-description: "Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale"
+description: 'Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale'
 allowed-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -11,6 +11,7 @@ last_updated: "{{syncDate}}"
 # /infra-eval — Infrastructure & Codebase Fitness Evaluation
 
 {{#unless hasInfraEval}}
+
 > **This command is not enabled.** To enable infrastructure evaluation, set `evaluation.infraEval: true` in your project's `.agentkit/spec/project.yaml`, then run `pnpm -C .agentkit agentkit:sync` to regenerate.
 
 Stop here. Do not proceed with the evaluation.
@@ -31,13 +32,13 @@ Provide a repeatable, risk-aware evaluation of the project's infrastructure and 
 
 Parse `$ARGUMENTS` for the following flags:
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--scope <path>` | *(entire repo)* | Limit evaluation to specific paths or modules |
-| `--focus <area>` | `all` | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops |
-| `--output <fmt>` | `markdown` | Output format: markdown, json, or yaml |
-| `--save` / `--no-save` | `true` | Save evaluation report to `docs/evaluations/` |
-| `--gates-only` | `false` | Run hard gate checks only — skip dimensional scoring (sections 3–5) |
+| Flag                   | Default         | Description                                                                               |
+| ---------------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `--scope <path>`       | _(entire repo)_ | Limit evaluation to specific paths or modules                                             |
+| `--focus <area>`       | `all`           | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops |
+| `--output <fmt>`       | `markdown`      | Output format: markdown, json, or yaml                                                    |
+| `--save` / `--no-save` | `true`          | Save evaluation report to `docs/evaluations/`                                             |
+| `--gates-only`         | `false`         | Run hard gate checks only — skip dimensional scoring (sections 3–5)                       |
 
 ---
 
@@ -50,14 +51,14 @@ Parse `$ARGUMENTS` for the following flags:
 
 ### Scoring Scale
 
-| Score | Meaning |
-|-------|---------|
-| 0 | Missing / dangerous |
-| 1 | Exists but fragile or ad-hoc |
-| 2 | Basic, manual, partially reliable |
-| 3 | Solid, standardized, mostly reliable |
-| 4 | Strong, automated, routinely validated |
-| 5 | Proven, boring, battle-tested |
+| Score | Meaning                                |
+| ----- | -------------------------------------- |
+| 0     | Missing / dangerous                    |
+| 1     | Exists but fragile or ad-hoc           |
+| 2     | Basic, manual, partially reliable      |
+| 3     | Solid, standardized, mostly reliable   |
+| 4     | Strong, automated, routinely validated |
+| 5     | Proven, boring, battle-tested          |
 
 ---
 
@@ -65,15 +66,16 @@ Parse `$ARGUMENTS` for the following flags:
 
 If **any** gate fails → Overall Status = **FAIL**, regardless of score.
 
-| Gate | Condition |
-|------|-----------|
-| G1 | No tested backup restore for critical data |
-| G2 | No cost attribution or explanation for last billing cycle |
-| G3 | No content moderation audit trail (if AI or user-generated content is present) |
-| G4 | No rollback strategy for production deployments |
-| G5 | Identity/role boundaries not technically enforced (if multi-role system) |
+| Gate | Condition                                                                      |
+| ---- | ------------------------------------------------------------------------------ |
+| G1   | No tested backup restore for critical data                                     |
+| G2   | No cost attribution or explanation for last billing cycle                      |
+| G3   | No content moderation audit trail (if AI or user-generated content is present) |
+| G4   | No rollback strategy for production deployments                                |
+| G5   | Identity/role boundaries not technically enforced (if multi-role system)       |
 
 {{#if evalCustomGates}}
+
 ### Project-Specific Custom Gates
 
 The following additional hard gates are configured for this project:
@@ -95,13 +97,13 @@ The following additional hard gates are configured for this project:
 
 Focus: critical user journeys, fault tolerance, backup discipline.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| Defined critical user journeys | |
-| Graceful degradation modes | |
-| Multi-AZ / fault tolerance | |
-| Backup + restore testing | |
-| Dependency failure handling (AI, storage, auth) | |
+| Criteria                                        | Notes / Evidence |
+| ----------------------------------------------- | ---------------- |
+| Defined critical user journeys                  |                  |
+| Graceful degradation modes                      |                  |
+| Multi-AZ / fault tolerance                      |                  |
+| Backup + restore testing                        |                  |
+| Dependency failure handling (AI, storage, auth) |                  |
 
 {{#if hasMonitoring}}
 **Known monitoring:** {{monitoringProvider}}
@@ -114,13 +116,13 @@ Focus: critical user journeys, fault tolerance, backup discipline.
 
 Focus: survival under growth.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| Cost attribution (per service / namespace / env) | |
-| Unit cost visibility (per core operation) | |
-| Autoscaling & right-sizing discipline | |
-| AI usage controls & caching | |
-| Cost alerts / budgets / kill-switches | |
+| Criteria                                         | Notes / Evidence |
+| ------------------------------------------------ | ---------------- |
+| Cost attribution (per service / namespace / env) |                  |
+| Unit cost visibility (per core operation)        |                  |
+| Autoscaling & right-sizing discipline            |                  |
+| AI usage controls & caching                      |                  |
+| Cost alerts / budgets / kill-switches            |                  |
 
 {{#if cloudProvider}}
 **Cloud provider:** {{cloudProvider}}
@@ -130,13 +132,13 @@ Focus: survival under growth.
 
 Focus: trust, compliance readiness, reputational risk.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| Identity separation (role boundaries) | |
-| Consent & data minimization | |
-| Secrets management | |
-| Content moderation pipeline (if applicable) | |
-| Auditability of content & decisions | |
+| Criteria                                    | Notes / Evidence |
+| ------------------------------------------- | ---------------- |
+| Identity separation (role boundaries)       |                  |
+| Consent & data minimization                 |                  |
+| Secrets management                          |                  |
+| Content moderation pipeline (if applicable) |                  |
+| Auditability of content & decisions         |                  |
 
 {{#if hasAuth}}
 **Auth:** {{authProvider}} ({{authStrategy}}){{#if hasRbac}}, RBAC enabled{{/if}}
@@ -147,13 +149,13 @@ Focus: trust, compliance readiness, reputational risk.
 
 ### D. Infrastructure & Delivery Safety — {{#if evalWeightInfra}}{{evalWeightInfra}}{{else}}12{{/if}}%
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| IaC state isolation & hygiene | |
-| Environment parity | |
-| Deployment strategy (blue/green, canary, rollback) | |
-| Database migration safety | |
-| IaC review & plan discipline | |
+| Criteria                                           | Notes / Evidence |
+| -------------------------------------------------- | ---------------- |
+| IaC state isolation & hygiene                      |                  |
+| Environment parity                                 |                  |
+| Deployment strategy (blue/green, canary, rollback) |                  |
+| Database migration safety                          |                  |
+| IaC review & plan discipline                       |                  |
 
 {{#if hasAnyInfraConfig}}
 **IaC toolchain:** {{infraIacToolchain}}
@@ -167,13 +169,13 @@ Focus: trust, compliance readiness, reputational risk.
 
 Focus: ceilings, not benchmarks.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| Identified first bottlenecks | |
-| Async vs sync boundaries | |
-| Stateless scaling where possible | |
-| CDN & asset delivery strategy | |
-| AI throughput constraints understood | |
+| Criteria                             | Notes / Evidence |
+| ------------------------------------ | ---------------- |
+| Identified first bottlenecks         |                  |
+| Async vs sync boundaries             |                  |
+| Stateless scaling where possible     |                  |
+| CDN & asset delivery strategy        |                  |
+| AI throughput constraints understood |                  |
 
 {{#if architecturePattern}}
 **Architecture:** {{architecturePattern}}
@@ -186,23 +188,23 @@ Focus: ceilings, not benchmarks.
 
 Focus: ability to evolve without rewrites.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| Clear domain boundaries | |
-| Dependency direction discipline | |
-| Replaceability of major components | |
-| Avoidance of premature over-abstraction | |
+| Criteria                                | Notes / Evidence |
+| --------------------------------------- | ---------------- |
+| Clear domain boundaries                 |                  |
+| Dependency direction discipline         |                  |
+| Replaceability of major components      |                  |
+| Avoidance of premature over-abstraction |                  |
 
 ### G. Code Quality — {{#if evalWeightCode}}{{evalWeightCode}}{{else}}10{{/if}}%
 
 Focus: refactorability, not perfection.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| Readability & consistency | |
-| Complexity hotspots identified | |
-| Meaningful test coverage | |
-| Tech debt visibility | |
+| Criteria                       | Notes / Evidence |
+| ------------------------------ | ---------------- |
+| Readability & consistency      |                  |
+| Complexity hotspots identified |                  |
+| Meaningful test coverage       |                  |
+| Tech debt visibility           |                  |
 
 {{#if testingCoverage}}
 **Coverage target:** {{testingCoverage}}%
@@ -215,12 +217,12 @@ Focus: refactorability, not perfection.
 
 Focus: small-team survivability.
 
-| Criteria | Notes / Evidence |
-|----------|-----------------|
-| End-to-end tracing (frontend → API → worker) | |
-| Pipeline-level visibility | |
-| Alert quality (signal > noise) | |
-| Incident readiness (runbooks) | |
+| Criteria                                     | Notes / Evidence |
+| -------------------------------------------- | ---------------- |
+| End-to-end tracing (frontend → API → worker) |                  |
+| Pipeline-level visibility                    |                  |
+| Alert quality (signal > noise)               |                  |
+| Incident readiness (runbooks)                |                  |
 
 {{#if hasAnyMonitoring}}
 **Monitoring:** {{monitoringProvider}}{{#if hasAlerting}}, Alerting: {{alertingProvider}}{{/if}}{{#if hasTracing}}, Tracing: {{tracingProvider}}{{/if}}
@@ -232,17 +234,17 @@ Focus: small-team survivability.
 
 Fill this table after completing all dimension assessments:
 
-| Dimension | Weight | Score | Weighted |
-|-----------|--------|-------|----------|
-| Reliability & Resilience | {{#if evalWeightReliability}}{{evalWeightReliability}}{{else}}18{{/if}}% | | |
-| Cost Efficiency | {{#if evalWeightCost}}{{evalWeightCost}}{{else}}16{{/if}}% | | |
-| Security & Compliance | {{#if evalWeightSecurity}}{{evalWeightSecurity}}{{else}}14{{/if}}% | | |
-| Infra & Delivery Safety | {{#if evalWeightInfra}}{{evalWeightInfra}}{{else}}12{{/if}}% | | |
-| Scalability Path | {{#if evalWeightScale}}{{evalWeightScale}}{{else}}12{{/if}}% | | |
-| Architecture Quality | {{#if evalWeightArch}}{{evalWeightArch}}{{else}}10{{/if}}% | | |
-| Code Quality | {{#if evalWeightCode}}{{evalWeightCode}}{{else}}10{{/if}}% | | |
-| Operational Maturity | {{#if evalWeightOps}}{{evalWeightOps}}{{else}}8{{/if}}% | | |
-| **TOTAL** | **100%** | | **/100** |
+| Dimension                | Weight                                                                   | Score | Weighted |
+| ------------------------ | ------------------------------------------------------------------------ | ----- | -------- |
+| Reliability & Resilience | {{#if evalWeightReliability}}{{evalWeightReliability}}{{else}}18{{/if}}% |       |          |
+| Cost Efficiency          | {{#if evalWeightCost}}{{evalWeightCost}}{{else}}16{{/if}}%               |       |          |
+| Security & Compliance    | {{#if evalWeightSecurity}}{{evalWeightSecurity}}{{else}}14{{/if}}%       |       |          |
+| Infra & Delivery Safety  | {{#if evalWeightInfra}}{{evalWeightInfra}}{{else}}12{{/if}}%             |       |          |
+| Scalability Path         | {{#if evalWeightScale}}{{evalWeightScale}}{{else}}12{{/if}}%             |       |          |
+| Architecture Quality     | {{#if evalWeightArch}}{{evalWeightArch}}{{else}}10{{/if}}%               |       |          |
+| Code Quality             | {{#if evalWeightCode}}{{evalWeightCode}}{{else}}10{{/if}}%               |       |          |
+| Operational Maturity     | {{#if evalWeightOps}}{{evalWeightOps}}{{else}}8{{/if}}%                  |       |          |
+| **TOTAL**                | **100%**                                                                 |       | **/100** |
 
 ---
 
@@ -264,13 +266,13 @@ Effort vs risk reduction. Each fix should map to one or more evaluation dimensio
 
 ## 6. Interpretation Guide
 
-| Score | Meaning |
-|-------|---------|
-| <50 | Unsafe, fragile |
-| 50–65 | High risk, needs focus |
-| 65–75 | Healthy startup platform |
-| 75–85 | Strong, approaching scale readiness |
-| >85 | Likely over-engineered (verify honesty) |
+| Score | Meaning                                 |
+| ----- | --------------------------------------- |
+| <50   | Unsafe, fragile                         |
+| 50–65 | High risk, needs focus                  |
+| 65–75 | Healthy startup platform                |
+| 75–85 | Strong, approaching scale readiness     |
+| >85   | Likely over-engineered (verify honesty) |
 
 ---
 
@@ -307,9 +309,25 @@ Effort vs risk reduction. Each fix should map to one or more evaluation dimensio
 Emit two required outputs:
 
 1. **stdout (minimal):** Single-line JSON:
+
 ```json
-{"eventType":"INFRA_EVAL_COMPLETED","phase":"evaluation","overall_score":72,"hard_gates_passed":true,"dimension_scores":{"reliability":3,"cost":4,"security":3,"infra":3,"scalability":3,"architecture":4,"code":4,"ops":3}}
+{
+  "eventType": "INFRA_EVAL_COMPLETED",
+  "phase": "evaluation",
+  "overall_score": 72,
+  "hard_gates_passed": true,
+  "dimension_scores": {
+    "reliability": 3,
+    "cost": 4,
+    "security": 3,
+    "infra": 3,
+    "scalability": 3,
+    "architecture": 4,
+    "code": 4,
+    "ops": 3
+  }
+}
 ```
 
 2. **events.log (envelope):** Append full JSON envelope with metadata per standard schema.
-{{/if}}
+   {{/if}}

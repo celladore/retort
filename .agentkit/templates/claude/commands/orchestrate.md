@@ -126,21 +126,21 @@ Required fields for DESCOPED events: `eventType` (must be "DESCOPED"), `taskId`,
 
 **Required and optional fields by eventType:**
 
-| eventType                       | Required fields                                                               | Optional fields     |
-| ------------------------------- | ----------------------------------------------------------------------------- | ------------------- |
-| `COMPLETED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `FAILED`                        | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `REJECTED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED` (dependency-cycle)   | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp` | `actor`, `metadata` |
-| `DESCOPED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `STARTED`                       | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `BLOCKED`                       | `taskId`, `blockedBy`, `timestamp`                                            | `actor`, `metadata` |
-| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                | `actor`, `metadata` |
-| `UNBLOCKED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                            | `actor`, `metadata` |
-| `ACCEPTED`                      | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                          | `actor`, `metadata` |
+| eventType                       | Required fields                                                                      | Optional fields     |
+| ------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
+| `COMPLETED`                     | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `FAILED`                        | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `REJECTED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `CANCELED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `CANCELED` (dependency-cycle)   | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp`        | `actor`, `metadata` |
+| `DESCOPED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `STARTED`                       | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `BLOCKED`                       | `taskId`, `blockedBy`, `timestamp`                                                   | `actor`, `metadata` |
+| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                       | `actor`, `metadata` |
+| `UNBLOCKED`                     | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                                   | `actor`, `metadata` |
+| `ACCEPTED`                      | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                                 | `actor`, `metadata` |
 | `INFRA_EVAL_COMPLETED`          | `timestamp`, `data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores` | `actor`, `metadata` |
 
 Example with all optional fields:
@@ -259,11 +259,11 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
 1. Verify all delegated tasks have reached a terminal state (`completed`, `failed`, `rejected`, or `canceled`).
 2. Invoke `/check` to run the full quality gate (format, lint, typecheck, tests, build).
 3. Invoke `/review` on all changed files since the orchestration began.
-{{#if hasInfraEval}}
+   {{#if hasInfraEval}}
 4. Invoke `/infra-eval` to assess infrastructure fitness. Delegate to `team-infra` as an `investigate` task. Log the evaluation score and hard-gate status to `events.log`. A hard-gate FAIL should be surfaced as a risk but does not block Phase 5 unless the user explicitly requires it.
-{{/if}}
-{{#if hasInfraEval}}5{{else}}4{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
-{{#if hasInfraEval}}6{{else}}5{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
+   {{/if}}
+   {{#if hasInfraEval}}5{{else}}4{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+   {{#if hasInfraEval}}6{{else}}5{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
    **Retry key convention:**
    - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
