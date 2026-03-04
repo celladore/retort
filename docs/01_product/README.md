@@ -10,3 +10,7 @@
 - [02_user_stories.md](./02_user_stories.md)
 - [03_roadmap.md](./03_roadmap.md)
 - [04_personas.md](./04_personas.md)
+- [PRD-001: LLM Decision Engine](./PRD-001-llm-decision-engine.md)
+- [PRD-002: LLM Selection Scorecard Guide](./PRD-002-llm-selection-scorecard-guide.md)
+- [PRD-003: Agent-to-LLM Weighted Matrix Config Guide](./PRD-003-agent-to-llm-weighted-matrix-config-guide.md)
+- [PRD-005: Mesh-Native Distribution](./PRD-005-mesh-native-distribution.md)
