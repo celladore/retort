@@ -277,6 +277,39 @@ Each task is a JSON file with a lifecycle: `submitted → accepted → working �
 
 See `.claude/state/tasks/` for active task files. See `UNIFIED_AGENT_TEAMS.md` for team coordination protocol.
 
+## Merge Conflict Resolution Policy
+
+When a branch has merge conflicts with `{{defaultBranch}}` or another target branch, follow this resolution matrix:
+
+### Auto-resolved by git merge drivers (`.gitattributes`)
+
+These files use the `agentkit-generated` merge driver and resolve automatically:
+
+| File pattern                      | Strategy        | Rationale                                 |
+| --------------------------------- | --------------- | ----------------------------------------- |
+| `.agents/skills/**/SKILL.md`      | Accept upstream | Generated skill packs — framework-managed |
+| `.github/agents/*.agent.md`       | Accept upstream | Generated Copilot agent metadata          |
+| `.github/chatmodes/*.chatmode.md` | Accept upstream | Generated chat mode configs               |
+| `.github/prompts/*.prompt.md`     | Accept upstream | Generated prompt definitions              |
+| `docs/*/README.md`                | Accept upstream | Generated doc index files                 |
+| `pnpm-lock.yaml`                  | Accept upstream | Lockfiles — regenerate after merge        |
+
+### Manual resolution required
+
+| File pattern            | Strategy              | Rationale                                   |
+| ----------------------- | --------------------- | ------------------------------------------- |
+| `.agentkit/engines/**`  | Semantic merge        | Runtime logic — never blindly pick a side   |
+| `.agentkit/spec/*.yaml` | Preserve both intents | Spec files may have concurrent policy edits |
+| Source code files       | Semantic merge        | Requires understanding change intent        |
+
+### Resolution steps
+
+1. Merge the target branch into the feature branch: `git merge origin/{{defaultBranch}}`
+2. Auto-resolved files are handled by git merge drivers (no action needed)
+3. For remaining conflicts, use `scripts/resolve-merge.sh {{defaultBranch}}` to apply standard resolutions
+4. Manually resolve any files listed as "manual merge required" by the script
+5. Run `/check` to verify the merge result
+
 ## Safety Rules
 
 1. **Never** commit secrets, API keys, or credentials
