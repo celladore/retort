@@ -181,6 +181,7 @@ Always run the full test suite before creating a PR.
 {{#if hasAdr}}- **ADRs**: `{{adrPath}}`{{/if}}
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 
 All project documentation follows the unified 8-category structure in `docs/`:
 

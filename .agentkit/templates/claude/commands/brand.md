@@ -1,0 +1,181 @@
+---
+description: 'Manage the project brand spec — validate, preview palette, audit contrast, scaffold, or regenerate editor theme'
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(npx agentkit *)
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
+---
+
+# /brand — Brand Spec & Editor Theme Management
+
+You are the **Brand Agent**. You manage the project's brand specification
+(`brand.yaml`), editor theme mappings, and accessibility compliance.
+
+## Arguments
+
+`$ARGUMENTS` may contain one or more of these flags:
+
+{{commandFlags}}
+
+**Default behaviour**: When no flags are given, run `--validate` only.
+When `--all` is given, run `--validate` + `--palette` + `--theme` + `--contrast`.
+
+## Brand Spec Location
+
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}`
+
+- **Brand Name**: {{brandName}}
+- **Primary Color**: `{{brandPrimaryColor}}`
+  {{else}}- No brand guide found. Use `--init` to scaffold a `brand.yaml`.
+  {{/if}}
+  {{#if editorThemeEnabled}}- **Editor Theme**: `.agentkit/spec/editor-theme.yaml` (enabled, source: {{editorThemeSource}}){{/if}}
+
+---
+
+## Mode: `--init` — Scaffold brand.yaml
+
+Only run this mode if `--init` is in `$ARGUMENTS`.
+
+1. Check if `.agentkit/spec/brand.yaml` already exists. If it does, warn the
+   user and ask for confirmation before overwriting.
+2. Ask the user for:
+   - Brand / project name
+   - Primary brand color (hex)
+   - Whether they want a dark-mode palette auto-generated
+3. Create `.agentkit/spec/brand.yaml` with the collected values and sensible
+   defaults for secondary, semantic, and neutral colors. Use the structure:
+
+   ```yaml
+   identity:
+     name: '<name>'
+   colors:
+     primary:
+       brand: '#XXXXXX'
+       light: '#YYYYYY' # Compute: increase HSL lightness of brand by ~15%
+       dark: '#ZZZZZZ' # Compute: decrease HSL lightness of brand by ~15%
+     semantic:
+       success: '#2E7D32'
+       warning: '#F57F17'
+       error: '#C62828'
+       info: '#0277BD'
+     neutral:
+       white: '#FFFFFF'
+       gray100: '#F5F5F5'
+       gray800: '#424242'
+       black: '#212121'
+     darkMode:
+       background: '#1E1E1E'
+       surface: '#252526'
+       textPrimary: '#D4D4D4'
+       textSecondary: '#808080'
+   typography:
+     primary: 'Inter, system-ui, sans-serif'
+     mono: 'Fira Code, Consolas, monospace'
+   accessibility:
+     standard: 'WCAG AA'
+     bodyContrast: 4.5
+     largeTextContrast: 3.0
+   ```
+
+4. If `.agentkit/spec/editor-theme.yaml` does not exist, scaffold a minimal
+   version that maps `titleBar`, `statusBar`, `activityBar`, and `sideBar`
+   to the brand palette.
+5. Print a summary of what was created and suggest running `/brand --all` to
+   validate.
+
+---
+
+## Mode: `--generate` — Regenerate editor theme
+
+Only run this mode if `--generate` is in `$ARGUMENTS`.
+
+1. Verify `.agentkit/spec/brand.yaml` and `.agentkit/spec/editor-theme.yaml`
+   both exist. If either is missing, error with guidance.
+2. Run `npx agentkit sync --overwrite` to regenerate editor theme settings
+   from the current brand + theme specs. This bypasses the scaffold-once gate
+   and writes to all configured output targets (vscode, cursor, windsurf).
+3. Report which files were written and show a before/after diff if the file
+   already existed.
+
+---
+
+## Mode: `--validate` — Validate brand.yaml
+
+Run this mode when `--validate` is in `$ARGUMENTS` or when no flags are given.
+
+Read `.agentkit/spec/brand.yaml` and check:
+
+- [ ] `identity.name` is present and non-empty
+- [ ] `colors.primary.brand` is a valid hex color (`#RGB`, `#RRGGBB`, or `#RRGGBBAA`)
+- [ ] All four semantic colors are defined (`success`, `warning`, `error`, `info`)
+- [ ] `colors.darkMode` section exists with `background`, `surface`, `textPrimary`, `textSecondary`
+- [ ] All color values (simple strings and `.hex` fields in objects) are valid hex
+- [ ] `typography.primary` and `typography.mono` are defined
+- [ ] `accessibility.standard` is declared (e.g., WCAG AA)
+
+Report **errors** (blockers) and **warnings** (recommendations) separately.
+
+---
+
+## Mode: `--palette` — Show resolved palette
+
+Only run this mode if `--palette` or `--all` is in `$ARGUMENTS`.
+
+Read brand.yaml and display a table of all resolved colors:
+
+| Section | Key   | Hex     | Role             |
+| ------- | ----- | ------- | ---------------- |
+| primary | brand | #1976D2 | Core brand color |
+| ...     | ...   | ...     | ...              |
+
+For each color entry, resolve both simple hex strings and `{ hex, role, rationale }` objects.
+Group by section: primary, secondary, semantic, neutral, darkMode.
+
+---
+
+## Mode: `--theme` — Show editor theme mapping
+
+Only run this mode if `--theme` or `--all` is in `$ARGUMENTS`.
+
+Read `.agentkit/spec/editor-theme.yaml` and resolve each mapping against brand.yaml.
+Display a table per mode (light/dark):
+
+| VS Code Slot              | Brand Path          | Resolved Hex |
+| ------------------------- | ------------------- | ------------ |
+| titleBar.activeBackground | colors.primary.dark | #184A6C      |
+| ...                       | ...                 | ...          |
+
+Flag any unresolvable paths as warnings.
+Show which output targets are configured (vscode, cursor, windsurf).
+
+---
+
+## Mode: `--contrast` — Check contrast ratios
+
+Only run this mode if `--contrast` or `--all` is in `$ARGUMENTS`.
+
+For key foreground/background pairs in the editor theme, compute relative luminance
+and contrast ratio:
+
+- `titleBar.activeForeground` vs `titleBar.activeBackground`
+- `statusBar.foreground` vs `statusBar.background`
+- `activityBar.foreground` vs `activityBar.background`
+- `sideBar.foreground` vs `sideBar.background`
+- `editor.foreground` vs `editor.background`
+
+Compare against the declared `accessibility.bodyContrast` threshold (default 4.5:1).
+Flag pairs that fail as warnings with the computed ratio.
+
+---
+
+## Summary
+
+After all requested modes have run, output a concise report:
+
+- **Status**: PASS / WARN / FAIL
+- **Errors**: count and list
+- **Warnings**: count and list
+- **Palette coverage**: X primary, Y secondary, Z semantic, N neutral colors defined
+- **Theme coverage**: X of Y VS Code slots resolved successfully
