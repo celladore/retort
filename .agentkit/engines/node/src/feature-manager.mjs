@@ -5,11 +5,43 @@
  * Features are defined in spec/features.yaml and controlled per-repo via overlay settings.yaml.
  * Core features (alwaysOn: true) cannot be disabled.
  * Dependencies are automatically resolved — enabling a feature enables its dependencies.
+ *
+ * ## Overlay Precedence (resolution order)
+ *
+ * 1. `enabledFeatures` (explicit list)  — wins if present in overlay settings.yaml
+ * 2. `featurePreset`   (named preset)   — used if no explicit list
+ * 3. `default: true`   (per-feature)    — fallback when neither is set
+ *
+ * After the base set:
+ * 4. `disabledFeatures` are subtracted (cannot subtract alwaysOn)
+ * 5. alwaysOn features are force-added
+ * 6. Transitive dependencies are auto-enabled
+ *
+ * ## Conflict Resolution
+ *
+ * - enabledFeatures + featurePreset both set → enabledFeatures wins
+ * - Feature in both enabledFeatures and disabledFeatures → disabledFeatures wins
+ * - `features enable <id>` auto-removes from disabledFeatures
+ * - `features disable <id>` auto-removes from enabledFeatures
+ * - Disabling a feature that others depend on → blocked with error listing dependents
+ * - Disabling a core feature → blocked unconditionally
+ *
+ * ## Schema Versioning
+ *
+ * features.yaml includes a `schemaVersion` field. The engine checks this at load time.
+ * If the schema version is higher than SUPPORTED_SCHEMA_VERSION, a warning is emitted
+ * (but loading continues for forward-compatibility).
  */
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { REPO_NAME_PATTERN } from './repo-name.mjs';
+
+/**
+ * Maximum schema version this engine knows how to process.
+ * Bump this when the engine is updated to handle new feature entry fields.
+ */
+export const SUPPORTED_SCHEMA_VERSION = 1;
 
 // ---------------------------------------------------------------------------
 // Load feature definitions
@@ -17,8 +49,10 @@ import { REPO_NAME_PATTERN } from './repo-name.mjs';
 
 /**
  * Loads and parses the features.yaml spec.
+ * Checks schemaVersion for forward-compatibility warnings.
+ *
  * @param {string} agentkitRoot - Path to the .agentkit/ directory
- * @returns {{ features: object[], presets: object }}
+ * @returns {{ features: object[], presets: object, schemaVersion: number }}
  */
 export function loadFeatureSpec(agentkitRoot) {
   const featuresPath = resolve(agentkitRoot, 'spec', 'features.yaml');
@@ -29,9 +63,21 @@ export function loadFeatureSpec(agentkitRoot) {
   if (!spec || !Array.isArray(spec.features)) {
     throw new Error('features.yaml: missing or invalid "features" array');
   }
+
+  const schemaVersion = spec.schemaVersion || 1;
+  if (schemaVersion > SUPPORTED_SCHEMA_VERSION) {
+    console.warn(
+      `[agentkit:features] Warning: features.yaml schemaVersion ${schemaVersion} ` +
+        `is newer than supported version ${SUPPORTED_SCHEMA_VERSION}. ` +
+        `Some feature fields may not be processed correctly. ` +
+        `Update the engine to support the latest schema.`
+    );
+  }
+
   return {
     features: spec.features,
     presets: spec.presets || {},
+    schemaVersion,
   };
 }
 
@@ -56,11 +102,17 @@ export function buildFeatureIndex(features) {
  *
  * Resolution order:
  * 1. Start with features marked alwaysOn: true (cannot be disabled)
- * 2. If overlay specifies enabledFeatures → use that list
- * 3. If overlay specifies a featurePreset → expand the preset
+ * 2. If overlay specifies enabledFeatures → use that list (wins over featurePreset)
+ * 3. Else if overlay specifies a featurePreset → expand the preset
  * 4. Otherwise → use features with default: true
- * 5. Apply disabledFeatures exclusions (cannot exclude alwaysOn)
- * 6. Resolve dependencies (enabling a feature auto-enables its deps)
+ * 5. Apply disabledFeatures exclusions (cannot exclude alwaysOn; wins over enabledFeatures)
+ * 6. alwaysOn features are force-added (survives disabledFeatures)
+ * 7. Resolve dependencies transitively (auto-enable deps of enabled features)
+ *
+ * Conflict rules:
+ * - enabledFeatures + featurePreset both set → enabledFeatures wins
+ * - Feature in both enabledFeatures and disabledFeatures → disabledFeatures wins
+ * - alwaysOn features survive all exclusions
  *
  * @param {object[]} features - Feature definitions from features.yaml
  * @param {object} overlaySettings - Overlay settings.yaml content
@@ -70,32 +122,36 @@ export function buildFeatureIndex(features) {
 export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
   const index = buildFeatureIndex(features);
 
-  // 1. Always-on features
+  // 1. Identify always-on features (survive all exclusions)
   const alwaysOn = new Set(
     features.filter((f) => f.alwaysOn).map((f) => f.id)
   );
 
-  // 2-4. Determine base enabled set
+  // 2-4. Determine base enabled set (strict precedence)
   let enabled;
+  let resolutionMode;
 
   if (Array.isArray(overlaySettings.enabledFeatures)) {
-    // Explicit list from overlay
+    // Precedence 1: Explicit list — wins even if featurePreset is also set
     enabled = new Set(overlaySettings.enabledFeatures.filter((id) => index.has(id)));
+    resolutionMode = 'explicit';
   } else if (
     typeof overlaySettings.featurePreset === 'string' &&
     presets[overlaySettings.featurePreset]
   ) {
-    // Preset expansion
+    // Precedence 2: Preset expansion
     const preset = presets[overlaySettings.featurePreset];
     enabled = new Set((preset.features || []).filter((id) => index.has(id)));
+    resolutionMode = 'preset';
   } else {
-    // Default: features with default: true
+    // Precedence 3: Default — features with default: true
     enabled = new Set(
       features.filter((f) => f.default === true).map((f) => f.id)
     );
+    resolutionMode = 'default';
   }
 
-  // 5. Apply disabled exclusions (overlay can explicitly disable features)
+  // 5. Apply disabled exclusions (disabledFeatures wins over enabledFeatures)
   if (Array.isArray(overlaySettings.disabledFeatures)) {
     for (const id of overlaySettings.disabledFeatures) {
       if (!alwaysOn.has(id)) {
@@ -104,12 +160,14 @@ export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
     }
   }
 
-  // Always include alwaysOn
+  // 6. Force-add alwaysOn (survives everything)
   for (const id of alwaysOn) {
     enabled.add(id);
   }
 
-  // 6. Resolve dependencies (transitive)
+  // 7. Resolve dependencies transitively
+  //    If feature A is enabled and depends on B, B is auto-enabled.
+  //    If B also depends on C, C is auto-enabled too.
   const resolved = new Set(enabled);
   const visited = new Set();
 
@@ -249,13 +307,27 @@ export async function runFeatures({ agentkitRoot, projectRoot, flags }) {
     console.log();
   }
 
-  // Show available presets
+  // Show available presets with feature lists
   if (flags?.verbose) {
     console.log('  AVAILABLE PRESETS');
     for (const [name, preset] of Object.entries(presets)) {
-      console.log(`    ${name.padEnd(12)} ${preset.label}`);
+      const featureCount = (preset.features || []).length + features.filter((f) => f.alwaysOn).length;
+      console.log(`    ${name.padEnd(12)} ${preset.label} (${featureCount} features)`);
       console.log(`    ${' '.repeat(12)} ${preset.description}`);
+      const featureIds = (preset.features || []).join(', ');
+      console.log(`    ${' '.repeat(12)} Features: ${featureIds}`);
+      console.log();
     }
+
+    // Show dependency graph
+    console.log('  DEPENDENCY GRAPH');
+    for (const f of features) {
+      if ((f.dependencies || []).length > 0) {
+        console.log(`    ${f.id} → depends on: ${f.dependencies.join(', ')}`);
+      }
+    }
+    const standalone = features.filter((f) => !f.alwaysOn && (f.dependencies || []).length === 0);
+    console.log(`    (${standalone.length} features are standalone / dependency-free)`);
   }
 }
 
@@ -443,6 +515,19 @@ export async function runFeaturePreset({ agentkitRoot, projectRoot, flags }) {
 
 /**
  * Validates features.yaml structure and cross-references.
+ *
+ * Checks performed:
+ * - Feature entry schema: id, name, category, description, templateVars
+ * - Duplicate feature IDs
+ * - Dependencies reference existing features (no dangling refs)
+ * - No self-dependencies
+ * - No dependency cycles (topological sort validation)
+ * - Preset feature lists reference existing features
+ * - Presets don't redundantly include alwaysOn features
+ * - Presets include transitive dependencies (warn if missing)
+ * - Valid categories
+ * - templateVar naming conventions
+ *
  * @param {object[]} features - Feature definitions
  * @param {object} presets - Preset definitions
  * @returns {{ errors: string[], warnings: string[] }}
@@ -452,6 +537,7 @@ export function validateFeatureSpec(features, presets) {
   const warnings = [];
   const index = buildFeatureIndex(features);
   const seenIds = new Set();
+  const validCategories = new Set(['core', 'workflow', 'quality', 'docs', 'security', 'infra', 'advanced']);
 
   for (let i = 0; i < features.length; i++) {
     const f = features[i];
@@ -472,15 +558,23 @@ export function validateFeatureSpec(features, presets) {
     }
     if (!f.category || typeof f.category !== 'string') {
       errors.push(`${path}: missing or invalid "category"`);
+    } else if (!validCategories.has(f.category)) {
+      warnings.push(`${path}: feature "${f.id}" uses non-standard category "${f.category}"`);
     }
     if (!f.description || typeof f.description !== 'string') {
       errors.push(`${path}: missing or invalid "description"`);
     }
     if (!Array.isArray(f.templateVars) || f.templateVars.length === 0) {
       warnings.push(`${path}: feature "${f.id}" has no templateVars defined`);
+    } else {
+      for (const varName of f.templateVars) {
+        if (typeof varName !== 'string' || !/^[a-zA-Z][a-zA-Z0-9]*$/.test(varName)) {
+          errors.push(`${path}: invalid templateVar name "${varName}" — must be camelCase alphanumeric`);
+        }
+      }
     }
 
-    // Validate dependencies exist
+    // Validate dependencies exist and aren't self-referencing
     for (const dep of f.dependencies || []) {
       if (!index.has(dep)) {
         errors.push(`${path}: dependency "${dep}" does not exist`);
@@ -489,22 +583,54 @@ export function validateFeatureSpec(features, presets) {
         errors.push(`${path}: feature cannot depend on itself`);
       }
     }
+
+    // Warn if a non-core feature depends on another non-core feature that has alwaysOn
+    // (redundant but not an error)
   }
 
-  // Validate presets reference valid feature IDs
+  // Validate presets reference valid feature IDs + check dependency completeness
   for (const [name, preset] of Object.entries(presets || {})) {
+    const presetPath = `features.yaml.presets.${name}`;
+
     if (!preset.features || !Array.isArray(preset.features)) {
-      errors.push(`features.yaml.presets.${name}: missing or invalid "features" array`);
+      errors.push(`${presetPath}: missing or invalid "features" array`);
       continue;
     }
+
+    if (!preset.label || typeof preset.label !== 'string') {
+      warnings.push(`${presetPath}: missing "label"`);
+    }
+    if (!preset.description || typeof preset.description !== 'string') {
+      warnings.push(`${presetPath}: missing "description"`);
+    }
+
+    const presetFeatureSet = new Set(preset.features);
+
     for (const id of preset.features) {
       if (!index.has(id)) {
-        errors.push(`features.yaml.presets.${name}: references unknown feature "${id}"`);
+        errors.push(`${presetPath}: references unknown feature "${id}"`);
+        continue;
+      }
+
+      // Warn if preset includes alwaysOn features (redundant)
+      const feature = index.get(id);
+      if (feature?.alwaysOn) {
+        warnings.push(`${presetPath}: includes always-on feature "${id}" (redundant — always-on features are auto-included)`);
+      }
+
+      // Warn if a feature's dependencies are missing from the preset
+      for (const dep of feature?.dependencies || []) {
+        if (!presetFeatureSet.has(dep) && !index.get(dep)?.alwaysOn) {
+          warnings.push(
+            `${presetPath}: feature "${id}" depends on "${dep}" which is not in this preset ` +
+              `(it will be auto-enabled at resolution time, but consider adding it explicitly)`
+          );
+        }
       }
     }
   }
 
-  // Detect dependency cycles
+  // Detect dependency cycles (DFS with visiting/visited sets)
   const visiting = new Set();
   const visited = new Set();
 
@@ -538,11 +664,37 @@ export function validateFeatureSpec(features, presets) {
 
 /**
  * Validates overlay feature settings against the spec.
+ *
+ * Checks performed:
+ * - featurePreset references a valid preset name
+ * - enabledFeatures entries reference valid feature IDs
+ * - disabledFeatures entries reference valid feature IDs
+ * - disabledFeatures does not include alwaysOn features
+ * - Warns if both enabledFeatures and featurePreset are set (enabledFeatures wins)
+ * - Warns if a feature appears in both enabledFeatures and disabledFeatures
+ * - Warns if disabling a feature would break dependencies of other enabled features
+ *
+ * @param {object} overlaySettings - Overlay settings.yaml content
+ * @param {object[]} features - Feature definitions from features.yaml
+ * @param {object} presets - Preset definitions from features.yaml
+ * @returns {{ errors: string[], warnings: string[] }}
  */
 export function validateOverlayFeatures(overlaySettings, features, presets) {
   const errors = [];
   const warnings = [];
   const index = buildFeatureIndex(features);
+
+  // Check for conflicting configuration modes
+  if (
+    Array.isArray(overlaySettings.enabledFeatures) &&
+    typeof overlaySettings.featurePreset === 'string'
+  ) {
+    warnings.push(
+      `overlay settings.yaml: both "enabledFeatures" and "featurePreset" are set. ` +
+        `"enabledFeatures" takes precedence — "featurePreset" will be ignored. ` +
+        `Remove one to avoid confusion.`
+    );
+  }
 
   if (overlaySettings.featurePreset) {
     if (!presets[overlaySettings.featurePreset]) {
@@ -553,10 +705,20 @@ export function validateOverlayFeatures(overlaySettings, features, presets) {
     }
   }
 
+  const enabledSet = new Set(overlaySettings.enabledFeatures || []);
+  const disabledSet = new Set(overlaySettings.disabledFeatures || []);
+
   if (Array.isArray(overlaySettings.enabledFeatures)) {
     for (const id of overlaySettings.enabledFeatures) {
       if (!index.has(id)) {
         warnings.push(`overlay settings.yaml: enabledFeatures references unknown feature "${id}"`);
+      }
+      // Check for feature in both lists
+      if (disabledSet.has(id)) {
+        warnings.push(
+          `overlay settings.yaml: feature "${id}" appears in both enabledFeatures and disabledFeatures. ` +
+            `disabledFeatures wins — "${id}" will be disabled.`
+        );
       }
     }
   }
@@ -569,6 +731,21 @@ export function validateOverlayFeatures(overlaySettings, features, presets) {
       const feature = index.get(id);
       if (feature?.alwaysOn) {
         errors.push(`overlay settings.yaml: cannot disable core feature "${id}"`);
+      }
+    }
+
+    // Warn about dependency breakage from disabled features
+    const resolvedEnabled = resolveFeatures(features, overlaySettings, presets);
+    for (const id of resolvedEnabled) {
+      const feature = index.get(id);
+      if (!feature) continue;
+      for (const dep of feature.dependencies || []) {
+        if (disabledSet.has(dep) && !index.get(dep)?.alwaysOn) {
+          warnings.push(
+            `overlay settings.yaml: disabling "${dep}" may break "${id}" which depends on it. ` +
+              `The dependency will be auto-enabled at resolution time, effectively overriding the disable.`
+          );
+        }
       }
     }
   }
