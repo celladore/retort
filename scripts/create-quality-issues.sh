@@ -65,10 +65,13 @@ gh() {
 issue_result() {
   local description="$1"
   if [[ "${GH_LAST_ACTION:-}" == "skipped" ]]; then
+    ISSUES_SKIPPED=$((ISSUES_SKIPPED + 1))
     echo "  Skipped: $description"
   else
+    ISSUES_CREATED=$((ISSUES_CREATED + 1))
     echo "  Created: $description"
   fi
+  ISSUES_PROCESSED=$((ISSUES_PROCESSED + 1))
 }
 
 REPO="JustAGhosT/agentkit-forge"
@@ -76,6 +79,9 @@ LABEL_QUALITY="quality"
 LABEL_DOCS="documentation"
 LABEL_CI="ci"
 LABEL_ENHANCEMENT="enhancement"
+ISSUES_CREATED=0
+ISSUES_SKIPPED=0
+ISSUES_PROCESSED=0
 
 # Ensure labels exist (idempotent)
 ensure_label() {
@@ -83,10 +89,10 @@ ensure_label() {
 }
 
 echo "=== Ensuring labels exist ==="
-ensure_label "quality"       "Code quality and static analysis"  "0e8a16"
-ensure_label "documentation" "Documentation updates"              "0075ca"
-ensure_label "ci"            "Continuous integration"             "5319e7"
-ensure_label "enhancement"   "New feature or request"             "a2eeef"
+ensure_label "$LABEL_QUALITY"     "Code quality and static analysis"  "0e8a16"
+ensure_label "$LABEL_DOCS"        "Documentation updates"              "0075ca"
+ensure_label "$LABEL_CI"          "Continuous integration"             "5319e7"
+ensure_label "$LABEL_ENHANCEMENT" "New feature or request"             "a2eeef"
 ensure_label "shell"         "Bash/PowerShell scripting"         "c5def5"
 ensure_label "css"           "CSS/SCSS/styling"                  "d876e3"
 ensure_label "typescript"    "TypeScript-specific"               "3178c6"
@@ -959,7 +965,7 @@ ISSUE_EOF
 issue_result "Epic tracking issue"
 
 echo ""
-echo "=== All 19 issues created successfully ==="
+echo "=== Issues processed: ${ISSUES_CREATED} created, ${ISSUES_SKIPPED} skipped (Total: ${ISSUES_PROCESSED}) ==="
 echo ""
 echo "Issues processed:"
 echo "  Phase 1 (6): Shell rules, ShellCheck CI, PowerShell rules, check.mjs update, TS rules, Section 7 docs"
