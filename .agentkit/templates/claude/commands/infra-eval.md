@@ -27,6 +27,18 @@ You are an expert infrastructure architect and reliability engineer performing a
 
 Provide a repeatable, risk-aware evaluation of the project's infrastructure and codebase against reliability, cost, and scale — in context of the project's phase (`{{projectPhase}}`), stack, and operational maturity.
 
+## Flags
+
+Parse `$ARGUMENTS` for the following flags:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--scope <path>` | *(entire repo)* | Limit evaluation to specific paths or modules |
+| `--focus <area>` | `all` | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops |
+| `--output <fmt>` | `markdown` | Output format: markdown, json, or yaml |
+| `--save` / `--no-save` | `true` | Save evaluation report to `docs/evaluations/` |
+| `--gates-only` | `false` | Run hard gate checks only — skip dimensional scoring (sections 3–5) |
+
 ---
 
 ## 1. Evaluation Rules (Read This First)
@@ -73,7 +85,11 @@ The following additional hard gates are configured for this project:
 
 ---
 
+> **`--gates-only` mode:** If `--gates-only` was passed, stop here after evaluating hard gates. Skip sections 3–5 entirely. Produce a gates-only report with PASS/FAIL per gate and an overall status, then jump to the Evaluation Process and Output Format sections.
+
 ## 3. Weighted Evaluation Dimensions
+
+> **Weight validation:** Before scoring, verify that the eight dimension weights below sum to exactly 100. If they do not, stop and report the misconfiguration to the user. Do not proceed with scoring until the weights are corrected in `project.yaml`.
 
 ### A. Reliability & Resilience (User Journeys) — {{#if evalWeightReliability}}{{evalWeightReliability}}{{else}}18{{/if}}%
 
@@ -276,7 +292,7 @@ Effort vs risk reduction. Each fix should map to one or more evaluation dimensio
 5. **Evaluate hard gates first** — if any fail, report FAIL immediately with remediation guidance
 6. **Score each dimension** with evidence citations (file paths, line numbers)
 7. **Produce the summary table** and narrative sections
-8. **Output the completed evaluation** to `docs/evaluations/infra-eval-<date>.md`
+8. **Save the evaluation** (unless `--no-save` was passed): write to `docs/evaluations/infra-eval-<date>.md`. Create the `docs/evaluations/` directory if it does not exist. Respect `--output` format (markdown, json, or yaml) for the saved file extension
 
 ---
 
@@ -284,7 +300,7 @@ Effort vs risk reduction. Each fix should map to one or more evaluation dimensio
 
 - **Read:** `AGENT_BACKLOG.md`, `.claude/state/orchestrator.json`
 - **Append to:** `.claude/state/events.log` — atomic, newline-terminated JSON entries only.
-  - **Schema:** `{"timestamp":"<RFC3339>","event_type":"infra_eval_completed","data":{"overall_score":<number>,"hard_gates_passed":<boolean>,"dimension_scores":{...}}}`
+  - **Schema:** `{"eventType":"INFRA_EVAL_COMPLETED","timestamp":"<RFC3339>","data":{"overall_score":<number>,"hard_gates_passed":<boolean>,"dimension_scores":{...}}}`
 
 ## Output Format
 
@@ -292,7 +308,7 @@ Emit two required outputs:
 
 1. **stdout (minimal):** Single-line JSON:
 ```json
-{"action":"infra_eval_completed","phase":"evaluation","overall_score":72,"hard_gates_passed":true,"dimension_scores":{"reliability":3,"cost":4,"security":3,"infra":3,"scalability":3,"architecture":4,"code":4,"ops":3}}
+{"eventType":"INFRA_EVAL_COMPLETED","phase":"evaluation","overall_score":72,"hard_gates_passed":true,"dimension_scores":{"reliability":3,"cost":4,"security":3,"infra":3,"scalability":3,"architecture":4,"code":4,"ops":3}}
 ```
 
 2. **events.log (envelope):** Append full JSON envelope with metadata per standard schema.
