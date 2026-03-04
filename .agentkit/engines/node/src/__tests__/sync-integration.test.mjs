@@ -427,8 +427,7 @@ describe('syncClaudeSkills (via runSync --only claude)', () => {
       resolve(projectRoot, '.claude', 'skills', 'build', 'SKILL.md'),
       'utf-8'
     );
-    // build has a prompt field too, check a command that might not — but all 19 commands
-    // have prompts now, so just verify the skill renders correctly
+    // All commands currently have prompts, so just verify the skill renders correctly
     expect(content).toContain('build');
   });
 });
@@ -468,6 +467,30 @@ describe('syncCursorCommands (via runSync --only cursor)', () => {
       'utf-8'
     );
     expect(content).toContain('.cursor/state/orchestrator.json');
+    expect(content).not.toContain('{{stateDir}}');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: Sync Integration — Windsurf Commands
+// ---------------------------------------------------------------------------
+describe('syncWindsurfCommands (via runSync --only windsurf)', () => {
+  let projectRoot;
+
+  beforeAll(async () => {
+    projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'windsurf' } });
+  });
+  afterAll(() => {
+    rmSync(projectRoot, { recursive: true, force: true });
+  });
+
+  it('windsurf commands resolve {{stateDir}} to .windsurf/state', { timeout: 15000 }, async () => {
+    const content = readFileSync(
+      resolve(projectRoot, '.windsurf', 'commands', 'orchestrate.md'),
+      'utf-8'
+    );
+    expect(content).toContain('.windsurf/state/orchestrator.json');
     expect(content).not.toContain('{{stateDir}}');
   });
 });

@@ -875,6 +875,10 @@ commands:
       - After updating templates in `.agentkit/templates/`
       - After upgrading AgentKit Forge to a new version
       - When CI reports "generated outputs are out of sync with sources"
+
+      ## Platform Note
+
+      This command requires shell access (Bash tool). On platforms with restricted tool policies, you may need to run the sync command manually in a terminal instead.
     flags:
       - name: --only
         description: 'Sync only one platform target (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp)'
