@@ -291,10 +291,13 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
      3. Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
 
-   **Reset behavior:** Implement `shouldResetRetryState` and `isTimestampNewer` as exported utilities in the orchestrator's validation module (e.g., `orchestrator/validation.ts`). Use them to enforce the exact rules:
-   - **`isTimestampNewer(newTs?: string | null, oldTs?: string | null): boolean`** — Validate non-null ISO-8601 strings; normalize both to UTC; return false for null, undefined, malformed inputs.
-   - **`shouldResetRetryState(retryPolicy, retryEscalated): Promise<{allowed: boolean, reason?: string}>`** — Require `retryPolicy.allowReset === true`. If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison needed). If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be non-null and a valid ISO-8601 timestamp; call `isTimestampNewer(retryPolicy.lastResetAt, retryEscalated.at)` and only allow clearing `retryPolicy.roundRetries` when it returns true. When `isTimestampNewer` returns false: do NOT clear `roundRetries`; return `{allowed: false, reason: "reset prevented: lastResetAt not newer than retryEscalated.at"}` and ensure calling code logs/surfaces this reason.
-   - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where isTimestampNewer returns false (roundRetries remains unchanged).
+  **Reset behavior:** Enforce these exact rules in the orchestration validation path:
+  - Require `retryPolicy.allowReset === true` before allowing any reset.
+  - If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
+  - If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
+  - Treat null/undefined/malformed timestamps as non-newer and deny reset.
+  - When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
+  - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
 
 {{#if hasInfraEval}}7{{else}}6{{/if}}. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 
