@@ -118,7 +118,7 @@ For machine-identifiable events, use JSON lines format:
 {"eventType": "CANCELED", "taskId": "<task-id>", "reason": "dependency-cycle", "cycleId": "<cycle-id>", "cycleMembers": ["<task-id-1>", "<task-id-2>"], "actor": "orchestrator", "timestamp": "<ISO-8601>"}
 ```
 
-**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`
+**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`, `INFRA_EVAL_COMPLETED`
 
 **cycleId format:** Generate a deterministic identifier per detected cycle. Hash the sorted list of member task IDs with SHA-256 and truncate to 12 chars. Reuse the same cycleId for all events from that cycle.
 
@@ -141,6 +141,7 @@ Required fields for DESCOPED events: `eventType` (must be "DESCOPED"), `taskId`,
 | `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                            | `actor`, `metadata` |
 | `ACCEPTED`                      | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
 | `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                          | `actor`, `metadata` |
+| `INFRA_EVAL_COMPLETED`          | `timestamp`, `data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores` | `actor`, `metadata` |
 
 Example with all optional fields:
 
@@ -295,7 +296,7 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
    - **`shouldResetRetryState(retryPolicy, retryEscalated): Promise<{allowed: boolean, reason?: string}>`** — Require `retryPolicy.allowReset === true`. If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison needed). If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be non-null and a valid ISO-8601 timestamp; call `isTimestampNewer(retryPolicy.lastResetAt, retryEscalated.at)` and only allow clearing `retryPolicy.roundRetries` when it returns true. When `isTimestampNewer` returns false: do NOT clear `roundRetries`; return `{allowed: false, reason: "reset prevented: lastResetAt not newer than retryEscalated.at"}` and ensure calling code logs/surfaces this reason.
    - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where isTimestampNewer returns false (roundRetries remains unchanged).
 
-6. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
+{{#if hasInfraEval}}7{{else}}6{{/if}}. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 
 ### Phase 5 — Ship
 
