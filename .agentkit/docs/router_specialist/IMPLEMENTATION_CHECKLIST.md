@@ -14,9 +14,14 @@
 
 ## References
 
-- Upstream issue: `TBD`
-- Upstream PR(s): `TBD`
-- Canonical roadmap/checklist location: `TBD (agentkit-forge path)`
+- Upstream issue: `https://github.com/JustAGhosT/agentkit-forge/issues/159`
+- Upstream PR(s): `none-yet (tracked via milestone "Router Integration Governance Rollout"; implementation planning issues: #160 #161 #162 #163 #164 #165 #166)`
+- Canonical roadmap/checklist location: `https://github.com/JustAGhosT/agentkit-forge/blob/main/.agentkit/docs/router_specialist/IMPLEMENTATION_CHECKLIST.md`
+
+## Active tracking
+
+- Milestone: `Router Integration Governance Rollout` (`#1`) in `JustAGhosT/agentkit-forge`.
+- Issue map: see `docs/08_reference/router_integration_governance_rollout.md`.
 
 ## Local notes
 
