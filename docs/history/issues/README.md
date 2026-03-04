@@ -5,7 +5,38 @@
 
 Historical records of issues encountered during development sessions.
 
-Issues are logged automatically by `/review --focus=retrospective` at the end of
-a session, or manually via `scripts/create-doc.sh issue "Issue Title"`.
+## Creating Issue Records
+
+### Preferred: GitHub Issues via `gh`
+
+When the GitHub CLI is available and authenticated, create issues directly:
+
+```bash
+gh issue create --title "Issue Title" --body "Description"
+```
+
+### Fallback: Local Issue Docs
+
+When `gh` is unavailable (no CLI installed, proxy/auth failures, air-gapped
+environments), record issues locally as structured markdown:
+
+```bash
+./scripts/create-doc.sh issue "Issue Title"
+```
+
+Issues are also logged automatically by `/review --focus=retrospective` at the
+end of a session.
+
+### Syncing Local Issues to GitHub
+
+Once `gh` access is restored, sync local issue docs to GitHub Issues:
+
+```bash
+./scripts/sync-issues.sh                  # Dry-run by default
+./scripts/sync-issues.sh --apply          # Create GitHub Issues and mark synced
+```
+
+See [ADR-08](../../03_architecture/02_decisions/08-issue-sync-strategy.md) for
+the sync strategy and automation decisions.
 
 See [docs/history/README.md](../README.md) for naming conventions and usage.
