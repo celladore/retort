@@ -819,6 +819,40 @@ describe('validateProjectYaml', () => {
     const { errors } = validateProjectYaml({ process: { intake: { cadence: 'hourly' } } });
     expect(errors.some((e) => e.includes('process.intake.cadence'))).toBe(true);
   });
+
+  it('validates automation.languageProfile.mode enum values', () => {
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { mode: 'configured' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { mode: 'hybrid' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { mode: 'heuristic' } } }).errors
+    ).toEqual([]);
+
+    const { errors } = validateProjectYaml({
+      automation: { languageProfile: { mode: 'invalid-mode' } },
+    });
+    expect(errors.some((e) => e.includes('automation.languageProfile.mode'))).toBe(true);
+  });
+
+  it('validates automation.languageProfile.diagnostics enum values', () => {
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { diagnostics: 'off' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { diagnostics: 'minimal' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { diagnostics: 'verbose' } } }).errors
+    ).toEqual([]);
+
+    const { errors } = validateProjectYaml({
+      automation: { languageProfile: { diagnostics: 'full' } },
+    });
+    expect(errors.some((e) => e.includes('automation.languageProfile.diagnostics'))).toBe(true);
+  });
 });
 
 describe('teams intake cross-references', () => {

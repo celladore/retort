@@ -213,7 +213,13 @@ Enhancement findings are always classified as **low** severity and appear in the
 <Exact commands to verify the changes work correctly>
 
 ### Verdict: APPROVE / REQUEST_CHANGES / NEEDS_DISCUSSION
+
+### History Documentation
+
+- <"Created: docs/history/<path>" OR "Recommended: run `/document-history` or `./scripts/create-doc.sh <type> \"<title>\"`" OR "Not needed — changes are trivial">
 ```
+
+If the reviewed changes are non-trivial (touch 3+ source files, involve architecture decisions, fix complex bugs, or add new features) and no history document exists for this work, include a **[DOCS]** finding recommending history doc creation.
 
 ## Severity Classification
 
@@ -357,7 +363,7 @@ For each issue encountered during the session:
 3. **Capture root cause** (if known) and resolution steps taken
 4. **Link to related lesson** if the issue produced a learning
 
-Write each issue using the template at `.agentkit/templates/docs/history/issues/TEMPLATE-issue.md`.
+Use `./scripts/create-doc.sh issue "<title>"` to generate the file from the template. This handles sequential numbering and index updates automatically. Then fill in all sections with concrete details.
 
 ## Lesson Extraction
 
@@ -369,9 +375,11 @@ For each lesson learned during the session:
 4. **Assess applicability:** Project-wide? Stack-specific? Agent-specific?
 5. **Propose action items** — especially rule/convention updates if warranted
 
-Write each lesson using the template at `.agentkit/templates/docs/history/lessons-learned/TEMPLATE-lesson.md`.
+Use `./scripts/create-doc.sh lesson "<title>"` to generate the file from the template. This handles sequential numbering and index updates automatically. Then fill in all sections with concrete details.
 
 ## File Naming & Numbering
+
+The `create-doc.sh` script handles naming and numbering automatically. If you must create files manually:
 
 1. Read `docs/history/.index.json` for current sequence numbers.
 2. Use format: `XXXX-YYYY-MM-DD-{slug}-{type}.md` where type is `issue` or `lesson`.

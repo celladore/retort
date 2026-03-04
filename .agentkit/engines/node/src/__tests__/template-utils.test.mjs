@@ -318,9 +318,12 @@ describe('isScaffoldOnce', () => {
 
   it('identifies GitHub scaffold-once files', () => {
     expect(isScaffoldOnce('.github/PULL_REQUEST_TEMPLATE.md')).toBe(true);
-    expect(isScaffoldOnce('.github/copilot-instructions.md')).toBe(true);
     expect(isScaffoldOnce('.github/ISSUE_TEMPLATE/bug_report.md')).toBe(true);
     expect(isScaffoldOnce('.github/instructions/docs.md')).toBe(true);
+  });
+
+  it('treats .github/copilot-instructions.md as always-regenerated', () => {
+    expect(isScaffoldOnce('.github/copilot-instructions.md')).toBe(false);
   });
 
   it('returns false for always-regenerate AI tool configs', () => {
@@ -334,6 +337,16 @@ describe('isScaffoldOnce', () => {
     expect(isScaffoldOnce('.claude/settings.json')).toBe(false);
     expect(isScaffoldOnce('.cursor/rules/team-backend.mdc')).toBe(false);
     expect(isScaffoldOnce('.windsurf/rules/team-backend.md')).toBe(false);
+  });
+
+  it('supports scaffold override lists from vars', () => {
+    const vars = {
+      languageProfileScaffoldAlwaysRegenerateList: ['docs/README.md'],
+      languageProfileScaffoldOnceList: ['CLAUDE.md'],
+    };
+
+    expect(isScaffoldOnce('docs/README.md', vars)).toBe(false);
+    expect(isScaffoldOnce('CLAUDE.md', vars)).toBe(true);
   });
 });
 
@@ -655,7 +668,130 @@ describe('flattenProjectYaml', () => {
     const vars = flattenProjectYaml({ stack: { languages: ['Rust', 'TypeScript'] } });
     expect(vars.hasLanguageRust).toBe(true);
     expect(vars.hasLanguageTypeScript).toBe(true);
+    expect(vars.hasLanguageJsLike).toBe(true);
     expect(vars.hasLanguagePython).toBe(false);
+  });
+
+  it('derives hasLanguageJsLike for javascript variants', () => {
+    const vars = flattenProjectYaml({ stack: { languages: ['javascript'] } });
+    expect(vars.hasLanguageJavaScript).toBe(true);
+    expect(vars.hasLanguageJsLike).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('configured');
+    expect(vars.languageInferenceConfidence).toBe('high');
+  });
+
+  it('infers js-like language from node framework when configured languages are missing', () => {
+    const vars = flattenProjectYaml({
+      stack: { languages: [], frameworks: { backend: ['node.js'] } },
+      testing: { unit: [] },
+    });
+    expect(vars.hasConfiguredLanguages).toBe(false);
+    expect(vars.hasLanguageJsLikeInferred).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('heuristic');
+    expect(vars.languageInferenceConfidence).toBe('medium');
+    expect(vars.hasLanguageInferenceUsed).toBe(true);
+    expect(vars.hasLanguageInferenceMismatch).toBe(false);
+  });
+
+  it('prefers configured languages over inferred signals for effective flags', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      testing: { unit: [] },
+    });
+    expect(vars.hasConfiguredLanguages).toBe(true);
+    expect(vars.hasLanguageJsLikeInferred).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(false);
+    expect(vars.hasLanguagePythonEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('mixed');
+    expect(vars.languageInferenceConfidence).toBe('high');
+    expect(vars.hasLanguageInferenceMismatch).toBe(true);
+    expect(vars.hasLanguageInferenceUsed).toBe(false);
+  });
+
+  it('supports configured mode language profile', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      automation: {
+        languageProfile: {
+          mode: 'configured',
+        },
+      },
+    });
+
+    expect(vars.languageProfileMode).toBe('configured');
+    expect(vars.hasLanguagePythonEffective).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(false);
+    expect(vars.languageInferenceSource).toBe('configured');
+    expect(vars.hasLanguageInferenceUsedRaw).toBe(false);
+  });
+
+  it('supports heuristic mode language profile', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      automation: {
+        languageProfile: {
+          mode: 'heuristic',
+        },
+      },
+    });
+
+    expect(vars.languageProfileMode).toBe('heuristic');
+    expect(vars.hasLanguagePythonEffective).toBe(false);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('heuristic');
+    expect(vars.hasLanguageInferenceUsedRaw).toBe(true);
+  });
+
+  it('respects inferFrom signal toggles', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: [],
+        frameworks: { backend: ['node.js'] },
+      },
+      testing: { unit: ['vitest'] },
+      automation: {
+        languageProfile: {
+          inferFrom: {
+            frameworks: false,
+            tests: true,
+          },
+        },
+      },
+    });
+
+    expect(vars.languageInferenceFromFrameworks).toBe(false);
+    expect(vars.languageInferenceFromTests).toBe(true);
+    expect(vars.hasLanguageJsLikeInferred).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+  });
+
+  it('disables language diagnostics output vars when diagnostics is off', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      automation: {
+        languageProfile: {
+          diagnostics: 'off',
+        },
+      },
+    });
+
+    expect(vars.showLanguageProfileDiagnostics).toBe(false);
+    expect(vars.hasLanguageInferenceMismatchRaw).toBe(true);
+    expect(vars.hasLanguageInferenceMismatch).toBe(false);
   });
 
   it('derives hasLanguageDotnet for csharp variant', () => {
@@ -673,8 +809,14 @@ describe('flattenProjectYaml', () => {
     expect(vars.hasLanguageRust).toBe(false);
     expect(vars.hasLanguagePython).toBe(false);
     expect(vars.hasLanguageTypeScript).toBe(false);
+    expect(vars.hasLanguageJsLike).toBe(false);
+    expect(vars.hasLanguageJsLikeEffective).toBe(false);
     expect(vars.hasLanguageDotnet).toBe(false);
     expect(vars.hasLanguageBlockchain).toBe(false);
+    expect(vars.languageInferenceSource).toBe('none');
+    expect(vars.languageInferenceConfidence).toBe('low');
+    expect(vars.hasLanguageInferenceUsed).toBe(false);
+    expect(vars.hasLanguageInferenceMismatch).toBe(false);
   });
 
   it('keeps integrations as array and sets hasIntegrations true', () => {

@@ -7,6 +7,7 @@ import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { resolve } from 'path';
 import { validateSpec } from './spec-validator.mjs';
 import { computeProjectCompleteness } from './project-completeness.mjs';
+import { flattenProjectYaml } from './template-utils.mjs';
 
 function resolveSpecRoot(agentkitRoot, projectRoot) {
   const projectAgentkitRoot = resolve(projectRoot, '.agentkit');
@@ -145,6 +146,43 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
         findings.push({
           severity: 'warning',
           message: `Top missing high-impact fields: ${c.missing.slice(0, 5).join(', ')}`,
+        });
+      }
+
+      const vars = flattenProjectYaml(project);
+      if (vars.languageProfileMode === 'configured' && !vars.hasConfiguredLanguages) {
+        findings.push({
+          severity: 'warning',
+          message:
+            'Language profile mode is configured-only but stack.languages is empty. Effective language flags will remain false until languages are explicitly configured.',
+        });
+      }
+      if (vars.languageProfileMode === 'heuristic' && !vars.hasLanguageInferenceSignalsEnabled) {
+        findings.push({
+          severity: 'warning',
+          message:
+            'Language profile mode is heuristic, but all inference signals are disabled (inferFrom.frameworks/tests). Effective language flags may remain false.',
+        });
+      }
+
+      if (!vars.showLanguageProfileDiagnostics) {
+        findings.push({
+          severity: 'info',
+          message:
+            'Language profile diagnostics are disabled via automation.languageProfile.diagnostics=off.',
+        });
+      } else if (vars.hasLanguageInferenceUsedRaw) {
+        findings.push({
+          severity: 'warning',
+          message:
+            'Language profile is being inferred heuristically because stack.languages is empty. Add explicit stack.languages in project.yaml for deterministic generation.',
+        });
+      }
+      if (vars.showLanguageProfileDiagnostics && vars.hasLanguageInferenceMismatchRaw) {
+        findings.push({
+          severity: 'warning',
+          message:
+            'Configured stack.languages diverges from inferred language signals (frameworks/tests). Generation uses configured values. Review stack.languages for alignment.',
         });
       }
     } catch (err) {

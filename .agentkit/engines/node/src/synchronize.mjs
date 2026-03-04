@@ -1564,7 +1564,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           resolve(destFile) !== resolve(projectRoot)
         )
           continue;
-        const wouldSkip = !overwrite && isScaffoldOnce(normPath) && existsSync(destFile);
+        const wouldSkip = !overwrite && isScaffoldOnce(normPath, vars) && existsSync(destFile);
         if (wouldSkip) {
           skipCount++;
           logVerbose(`  skip ${normPath} (project-owned, exists)`);
@@ -1642,7 +1642,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
       // Scaffold-once: skip project-owned files that already exist (unless --overwrite)
       const overwrite = flags?.overwrite || flags?.force;
-      if (!overwrite && isScaffoldOnce(relPath) && existsSync(destFile)) {
+      if (!overwrite && isScaffoldOnce(relPath, vars) && existsSync(destFile)) {
         skippedScaffold++;
         return;
       }

@@ -288,14 +288,187 @@ export function flattenProjectYaml(project, docsSpec = null) {
         .filter((l) => typeof l === 'string')
         .map((l) => l.trim().toLowerCase())
     : [];
+  const frontendFrameworks = Array.isArray(project?.stack?.frameworks?.frontend)
+    ? project.stack.frameworks.frontend
+        .filter((f) => typeof f === 'string')
+        .map((f) => f.trim().toLowerCase())
+    : [];
+  const backendFrameworks = Array.isArray(project?.stack?.frameworks?.backend)
+    ? project.stack.frameworks.backend
+        .filter((f) => typeof f === 'string')
+        .map((f) => f.trim().toLowerCase())
+    : [];
+  const unitTestTools = Array.isArray(project?.testing?.unit)
+    ? project.testing.unit
+        .filter((t) => typeof t === 'string')
+        .map((t) => t.trim().toLowerCase())
+    : [];
+
   vars.hasLanguageTypeScript = langs.some((l) => l === 'typescript' || l === 'ts');
   vars.hasLanguageJavaScript = langs.some((l) => l === 'javascript' || l === 'js');
+  vars.hasLanguageJsLike = vars.hasLanguageTypeScript || vars.hasLanguageJavaScript;
   vars.hasLanguageRust = langs.includes('rust');
   vars.hasLanguagePython = langs.includes('python');
   vars.hasLanguageDotnet = langs.some((l) => ['csharp', 'c#', 'dotnet', '.net'].includes(l));
   vars.hasLanguageBlockchain = langs.some((l) => ['solidity', 'blockchain'].includes(l));
   vars.hasLanguageGo = langs.some((l) => l === 'go' || l === 'golang');
   vars.hasLanguageJava = langs.includes('java');
+
+  const languageProfileMode = (project?.automation?.languageProfile?.mode || 'hybrid')
+    .trim()
+    .toLowerCase();
+  vars.languageProfileMode = ['configured', 'hybrid', 'heuristic'].includes(languageProfileMode)
+    ? languageProfileMode
+    : 'hybrid';
+
+  const languageProfileDiagnostics = (project?.automation?.languageProfile?.diagnostics || 'verbose')
+    .trim()
+    .toLowerCase();
+  vars.languageProfileDiagnostics = ['off', 'minimal', 'verbose'].includes(
+    languageProfileDiagnostics
+  )
+    ? languageProfileDiagnostics
+    : 'verbose';
+  vars.showLanguageProfileDiagnostics = vars.languageProfileDiagnostics !== 'off';
+  vars.showLanguageProfileDiagnosticsVerbose = vars.languageProfileDiagnostics === 'verbose';
+
+  vars.languageInferenceFromFrameworks =
+    project?.automation?.languageProfile?.inferFrom?.frameworks !== false;
+  vars.languageInferenceFromTests = project?.automation?.languageProfile?.inferFrom?.tests !== false;
+  vars.hasLanguageInferenceSignalsEnabled =
+    vars.languageInferenceFromFrameworks || vars.languageInferenceFromTests;
+
+  const normalizeRelativePathList = (value) => {
+    if (!Array.isArray(value)) return [];
+    return [
+      ...new Set(
+        value
+          .filter((item) => typeof item === 'string')
+          .map((item) => item.trim().replace(/\\/g, '/'))
+          .filter(Boolean)
+      ),
+    ];
+  };
+
+  vars.languageProfileScaffoldAlwaysRegenerateList = normalizeRelativePathList(
+    project?.automation?.languageProfile?.scaffoldOverrides?.alwaysRegenerate
+  );
+  vars.languageProfileScaffoldOnceList = normalizeRelativePathList(
+    project?.automation?.languageProfile?.scaffoldOverrides?.scaffoldOnce
+  );
+
+  const hasConfiguredLanguages = langs.length > 0;
+  vars.hasConfiguredLanguages = hasConfiguredLanguages;
+
+  const hasNodeFrameworkSignalRaw = [...frontendFrameworks, ...backendFrameworks].some((f) =>
+    ['node.js', 'express', 'next.js', 'next', 'react', 'nestjs'].includes(f)
+  );
+  const hasPythonFrameworkSignalRaw = [...frontendFrameworks, ...backendFrameworks].some((f) =>
+    ['fastapi', 'flask', 'django'].includes(f)
+  );
+  const hasDotnetFrameworkSignalRaw = [...frontendFrameworks, ...backendFrameworks].some((f) =>
+    ['asp.net-core', '.net', 'dotnet'].includes(f)
+  );
+  const hasRustFrameworkSignalRaw = [...frontendFrameworks, ...backendFrameworks].some((f) =>
+    ['actix', 'rocket', 'axum'].includes(f)
+  );
+
+  const hasJsTestSignalRaw = unitTestTools.some((t) => ['vitest', 'jest', 'mocha'].includes(t));
+  const hasPythonTestSignalRaw = unitTestTools.some((t) => ['pytest'].includes(t));
+  const hasDotnetTestSignalRaw = unitTestTools.some((t) =>
+    ['xunit', 'nunit', 'mstest'].includes(t)
+  );
+  const hasRustTestSignalRaw = unitTestTools.some((t) => ['cargo-test'].includes(t));
+
+  const hasNodeFrameworkSignal =
+    vars.languageInferenceFromFrameworks && hasNodeFrameworkSignalRaw;
+  const hasPythonFrameworkSignal =
+    vars.languageInferenceFromFrameworks && hasPythonFrameworkSignalRaw;
+  const hasDotnetFrameworkSignal =
+    vars.languageInferenceFromFrameworks && hasDotnetFrameworkSignalRaw;
+  const hasRustFrameworkSignal =
+    vars.languageInferenceFromFrameworks && hasRustFrameworkSignalRaw;
+
+  const hasJsTestSignal = vars.languageInferenceFromTests && hasJsTestSignalRaw;
+  const hasPythonTestSignal = vars.languageInferenceFromTests && hasPythonTestSignalRaw;
+  const hasDotnetTestSignal = vars.languageInferenceFromTests && hasDotnetTestSignalRaw;
+  const hasRustTestSignal = vars.languageInferenceFromTests && hasRustTestSignalRaw;
+
+  vars.hasLanguageJsLikeInferred = hasNodeFrameworkSignal || hasJsTestSignal;
+  vars.hasLanguagePythonInferred = hasPythonFrameworkSignal || hasPythonTestSignal;
+  vars.hasLanguageDotnetInferred = hasDotnetFrameworkSignal || hasDotnetTestSignal;
+  vars.hasLanguageRustInferred = hasRustFrameworkSignal || hasRustTestSignal;
+
+  if (vars.languageProfileMode === 'configured') {
+    vars.hasLanguageJsLikeEffective = hasConfiguredLanguages && vars.hasLanguageJsLike;
+    vars.hasLanguagePythonEffective = hasConfiguredLanguages && vars.hasLanguagePython;
+    vars.hasLanguageDotnetEffective = hasConfiguredLanguages && vars.hasLanguageDotnet;
+    vars.hasLanguageRustEffective = hasConfiguredLanguages && vars.hasLanguageRust;
+  } else if (vars.languageProfileMode === 'heuristic') {
+    vars.hasLanguageJsLikeEffective = vars.hasLanguageJsLikeInferred;
+    vars.hasLanguagePythonEffective = vars.hasLanguagePythonInferred;
+    vars.hasLanguageDotnetEffective = vars.hasLanguageDotnetInferred;
+    vars.hasLanguageRustEffective = vars.hasLanguageRustInferred;
+  } else {
+    vars.hasLanguageJsLikeEffective = hasConfiguredLanguages
+      ? vars.hasLanguageJsLike
+      : vars.hasLanguageJsLikeInferred;
+    vars.hasLanguagePythonEffective = hasConfiguredLanguages
+      ? vars.hasLanguagePython
+      : vars.hasLanguagePythonInferred;
+    vars.hasLanguageDotnetEffective = hasConfiguredLanguages
+      ? vars.hasLanguageDotnet
+      : vars.hasLanguageDotnetInferred;
+    vars.hasLanguageRustEffective = hasConfiguredLanguages
+      ? vars.hasLanguageRust
+      : vars.hasLanguageRustInferred;
+  }
+
+  const hasAnyInferredLanguage =
+    vars.hasLanguageJsLikeInferred ||
+    vars.hasLanguagePythonInferred ||
+    vars.hasLanguageDotnetInferred ||
+    vars.hasLanguageRustInferred;
+
+  const hasInferenceMismatch =
+    vars.hasLanguageJsLikeInferred !== vars.hasLanguageJsLike ||
+    vars.hasLanguagePythonInferred !== vars.hasLanguagePython ||
+    vars.hasLanguageDotnetInferred !== vars.hasLanguageDotnet ||
+    vars.hasLanguageRustInferred !== vars.hasLanguageRust;
+
+  const hasLanguageInferenceMismatchRaw = hasConfiguredLanguages && hasInferenceMismatch;
+  const hasLanguageInferenceUsedRaw =
+    vars.languageProfileMode === 'configured'
+      ? false
+      : vars.languageProfileMode === 'heuristic'
+        ? hasAnyInferredLanguage
+        : !hasConfiguredLanguages && hasAnyInferredLanguage;
+
+  vars.hasLanguageInferenceMismatchRaw = hasLanguageInferenceMismatchRaw;
+  vars.hasLanguageInferenceUsedRaw = hasLanguageInferenceUsedRaw;
+  vars.hasLanguageInferenceMismatch = vars.showLanguageProfileDiagnostics
+    ? hasLanguageInferenceMismatchRaw
+    : false;
+  vars.hasLanguageInferenceUsed = vars.showLanguageProfileDiagnostics
+    ? hasLanguageInferenceUsedRaw
+    : false;
+
+  if (vars.languageProfileMode === 'configured') {
+    vars.languageInferenceSource = hasConfiguredLanguages ? 'configured' : 'none';
+    vars.languageInferenceConfidence = hasConfiguredLanguages ? 'high' : 'low';
+  } else if (vars.languageProfileMode === 'heuristic') {
+    vars.languageInferenceSource = hasAnyInferredLanguage ? 'heuristic' : 'none';
+    vars.languageInferenceConfidence = hasAnyInferredLanguage ? 'medium' : 'low';
+  } else if (hasConfiguredLanguages) {
+    vars.languageInferenceSource = hasAnyInferredLanguage ? 'mixed' : 'configured';
+    vars.languageInferenceConfidence = 'high';
+  } else if (hasAnyInferredLanguage) {
+    vars.languageInferenceSource = 'heuristic';
+    vars.languageInferenceConfidence = 'medium';
+  } else {
+    vars.languageInferenceSource = 'none';
+    vars.languageInferenceConfidence = 'low';
+  }
 
   return vars;
 }
@@ -458,16 +631,22 @@ const SCAFFOLD_ONCE_DIRS = [
 // GitHub root files that are scaffold-once (matched by full relative path)
 const SCAFFOLD_ONCE_GITHUB_FILES = new Set([
   '.github/PULL_REQUEST_TEMPLATE.md',
-  '.github/copilot-instructions.md',
 ]);
 
 /**
  * Check if a relative path is a scaffold-once file (project-owned content).
  * These are only written on first sync; subsequent syncs skip them if they exist.
  */
-export function isScaffoldOnce(relPath) {
+export function isScaffoldOnce(relPath, vars = {}) {
   // Normalize Windows backslashes to forward slashes for consistent matching
   const normalized = relPath.replace(/\\/g, '/');
+
+  const alwaysRegenerate = new Set(vars.languageProfileScaffoldAlwaysRegenerateList || []);
+  const forceScaffoldOnce = new Set(vars.languageProfileScaffoldOnceList || []);
+
+  if (alwaysRegenerate.has(normalized)) return false;
+  if (forceScaffoldOnce.has(normalized)) return true;
+
   if (SCAFFOLD_ONCE_ROOT_FILES.has(normalized)) return true;
   if (SCAFFOLD_ONCE_GITHUB_FILES.has(normalized)) return true;
   for (const dir of SCAFFOLD_ONCE_DIRS) {
