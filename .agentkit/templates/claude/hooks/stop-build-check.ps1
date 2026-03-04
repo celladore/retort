@@ -38,15 +38,22 @@ function Invoke-Check {
     param(
         [string]$Label,
         [string]$Command,
-        [string[]]$Arguments
+        [string[]]$Arguments,
+        [string]$WorkingDirectory
     )
 
     try {
-        $output = & $Command @Arguments 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) {
-            return @{ Success = $false; Output = "$Label failed:`n$output" }
+        $prevDir = $PWD.Path
+        if ($WorkingDirectory) { Set-Location $WorkingDirectory }
+        try {
+            $output = & $Command @Arguments 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) {
+                return @{ Success = $false; Output = "$Label failed:`n$output" }
+            }
+            return @{ Success = $true; Output = "" }
+        } finally {
+            Set-Location $prevDir
         }
-        return @{ Success = $true; Output = "" }
     } catch {
         return @{ Success = $false; Output = "$Label failed:`n$($_.Exception.Message)" }
     }
@@ -91,17 +98,17 @@ if (Test-Path $packageJsonPath) {
     }
 
     if ($scripts -contains "lint") {
-        $result = Invoke-Check -Label "$pm lint" -Command $pm -Arguments @("run", "lint", "--prefix", $cwd)
+        $result = Invoke-Check -Label "$pm lint" -Command $pm -Arguments @("run", "lint") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 
     if ($scripts -contains "test") {
-        $result = Invoke-Check -Label "$pm test" -Command $pm -Arguments @("run", "test", "--prefix", $cwd)
+        $result = Invoke-Check -Label "$pm test" -Command $pm -Arguments @("run", "test") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 
     if ($scripts -contains "build") {
-        $result = Invoke-Check -Label "$pm build" -Command $pm -Arguments @("run", "build", "--prefix", $cwd)
+        $result = Invoke-Check -Label "$pm build" -Command $pm -Arguments @("run", "build") -WorkingDirectory $cwd
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 }

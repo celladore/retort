@@ -34,7 +34,7 @@ run_check() {
     local label="$1"
     shift
     local output
-    if output=$("$@" 2>&1); then
+    if output=$(cd "$CWD" && "$@" 2>&1); then
         return 0
     else
         FAILURE_REASON="${label} failed:\n${output}"
@@ -63,21 +63,21 @@ if [[ -f "${CWD}/package.json" ]]; then
     has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
 
     if has_script "lint"; then
-        if ! run_check "${pm} lint" "$pm" run lint --prefix "$CWD"; then
+        if ! run_check "${pm} lint" "$pm" run lint; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
     fi
 
     if has_script "test"; then
-        if ! run_check "${pm} test" "$pm" run test --prefix "$CWD"; then
+        if ! run_check "${pm} test" "$pm" run test; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
     fi
 
     if has_script "build"; then
-        if ! run_check "${pm} build" "$pm" run build --prefix "$CWD"; then
+        if ! run_check "${pm} build" "$pm" run build; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
