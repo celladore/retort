@@ -285,7 +285,9 @@ agents:
       role: >
         Brand consistency specialist ensuring all visual and written
         outputs align with the established brand identity, design tokens,
-        and style guidelines across all touchpoints.
+        and style guidelines across all touchpoints. The canonical brand
+        source of truth is .agentkit/spec/brand.yaml; editor theming is
+        configured in .agentkit/spec/editor-theme.yaml.
       accepts:
         - review
       depends-on: []
@@ -297,6 +299,9 @@ agents:
         - 'apps/marketing/**'
         - 'public/assets/**'
         - 'docs/brand/**'
+        - '.agentkit/spec/brand.yaml'
+        - '.agentkit/spec/editor-theme.yaml'
+        - '.vscode/settings.json'
       responsibilities:
         - Enforce brand guidelines across all UI components and marketing pages
         - Maintain design token definitions (colors, typography, spacing)
@@ -304,6 +309,15 @@ agents:
         - Ensure logo usage, color palette, and typography follow brand standards
         - Validate marketing materials and landing pages
         - Maintain brand documentation and style guides
+        - Validate brand.yaml spec on changes (identity, colors, accessibility)
+        - Review editor-theme.yaml color mappings for correctness and contrast
+        - Ensure generated editor themes (.vscode, .cursor, .windsurf) match brand intent
+      conventions:
+        - .agentkit/spec/brand.yaml is the single source of truth for all brand colors, typography, and design tokens
+        - Editor themes are derived from brand.yaml via editor-theme.yaml mappings — never hardcode hex values in settings.json
+        - All color entries in brand.yaml support simple hex strings or detailed { hex, role, rationale, usage } objects
+        - Brand colors must meet WCAG AA contrast ratios (4.5:1 body, 3:1 large text) per the accessibility spec
+        - When reviewing PRs that touch styles or tokens, cross-reference against brand.yaml for consistency
       preferred-tools:
         - Read
         - Write

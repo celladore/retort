@@ -410,6 +410,34 @@ commands:
       - Grep
       - Bash
 
+  - name: brand
+    type: utility
+    description: >
+      Validates the brand spec (brand.yaml), shows the resolved editor theme
+      palette, and checks color contrast ratios against the declared accessibility
+      requirements. Use to audit brand consistency before syncing.
+    flags:
+      - name: --validate
+        description: 'Validate brand.yaml and report errors/warnings'
+        type: boolean
+        default: true
+      - name: --palette
+        description: 'Show the resolved color palette with hex values'
+        type: boolean
+        default: false
+      - name: --theme
+        description: 'Show the resolved editor theme mapping (VS Code color slots → hex values)'
+        type: boolean
+        default: false
+      - name: --contrast
+        description: 'Check foreground/background contrast ratios against WCAG thresholds'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+
   # ===========================================================================
   # Framework Commands — AgentKit Forge internal tooling
   # ===========================================================================

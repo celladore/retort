@@ -40,7 +40,9 @@ If no README exists, infer from code patterns and state your confidence level.
 
 ## Phase 0.5: Design & Visual Identity
 
-Search for design assets, style guides, theme files, and UI libraries. If missing, reverse-engineer a basic design system from the UI code: color palette, typography, spacing, and component patterns.
+{{#if hasBrandGuide}}Read the canonical brand spec at `{{brandGuidePath}}` and validate it: check that identity.name exists, colors.primary.brand is a valid hex, semantic colors are complete, and dark mode colors are present. Summarise the brand identity (name, primary color, attributes) and flag any validation warnings.
+
+Then search for design assets, style guides, theme files, and UI libraries. Cross-reference discovered design tokens against brand.yaml for consistency — flag any hardcoded hex values that diverge from the brand palette.{{else}}Search for design assets, style guides, theme files, and UI libraries. If missing, reverse-engineer a basic design system from the UI code: color palette, typography, spacing, and component patterns.{{/if}}
 
 ## Phase 1a: Technology Assessment
 
@@ -72,7 +74,7 @@ Propose **5-7** context-specific analysis or hardening tasks (TASK-*): security 
 
 1. **Executive Summary** (3-7 bullets: health, risks, opportunities)
 2. **Project Context Recap** (from Phase 0)
-3. **Design System Summary** (from Phase 0.5)
+3. **Design System Summary** (from Phase 0.5){{#if hasBrandGuide}} — include brand.yaml validation status and palette overview{{/if}}
 4. **Tech Stack Overview** (from Phase 1a/1b)
 5. **Findings by Category** (from Phase 1c, ordered by severity)
 6. **Additional Tasks** (from Phase 1d)

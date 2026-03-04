@@ -36,6 +36,7 @@ import {
 } from './template-utils.mjs';
 import {
   mergeThemeIntoSettings,
+  resolveColor,
   resolveThemeMapping,
   validateBrandSpec,
 } from './brand-resolver.mjs';
@@ -1121,6 +1122,16 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'agentkit-forge',
   };
+
+  // Inject brand identity into template vars when brand guide exists
+  if (vars.hasBrandGuide) {
+    const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
+    if (brandSpec) {
+      vars.brandName = brandSpec.identity?.name || '';
+      vars.brandPrimaryColor = resolveColor(brandSpec.colors?.primary?.brand) || '';
+      vars.brandMono = brandSpec.typography?.mono || '';
+    }
+  }
 
   // Resolve render targets — determines which tool outputs to generate
   let targets = resolveRenderTargets(overlaySettings.renderTargets, flags);
