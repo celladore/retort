@@ -90,13 +90,15 @@ if (Test-Path $packageJsonPath) {
         $scripts = $pkgJson.scripts.PSObject.Properties.Name
     }
 
-    # pnpm uses -C <dir> before the subcommand; npm/yarn use --prefix after.
+    # Each package manager uses a different flag to set the working directory.
     function Invoke-PmRun {
         param([string]$Script)
         if ($pm -eq "pnpm") {
             return Invoke-Check -Label "$pm $Script" -Command $pm -Arguments @("-C", $cwd, "run", $Script)
+        } elseif ($pm -eq "yarn") {
+            return Invoke-Check -Label "$pm $Script" -Command $pm -Arguments @("--cwd", $cwd, "run", $Script)
         } else {
-            return Invoke-Check -Label "$pm $Script" -Command $pm -Arguments @("run", $Script, "--prefix", $cwd)
+            return Invoke-Check -Label "$pm $Script" -Command $pm -Arguments @("--prefix", $cwd, "run", $Script)
         }
     }
 
