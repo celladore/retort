@@ -23,6 +23,7 @@ Senior data engineer responsible for database design, migrations, data models, a
 - **Primary context docs:** `CLAUDE.md`, `UNIFIED_AGENT_TEAMS.md`, `AGENT_TEAMS.md`, `AGENT_BACKLOG.md`, `docs/`
   - **Tech stack:** javascript, yaml, markdown
   - **Architecture:** monolith
+  - **Brand:** AgentKit Forge (primary: `#1976D2`) — spec at `.agentkit/spec/brand.yaml`
 
 Scan the codebase within your focus area before making changes. Read `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md` first for ownership/escalation, then `AGENT_BACKLOG.md` and `CLAUDE.md` for current project context.
 

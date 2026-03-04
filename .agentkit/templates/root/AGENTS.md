@@ -105,6 +105,7 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 {{#if hasStorybook}}- **Storybook** available for component preview{{/if}}
 
 - **Quality Gates**: `QUALITY_GATES.md`

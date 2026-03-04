@@ -41,6 +41,13 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.designSystemPath', dest: 'designSystemPath' },
   { src: 'documentation.storybook', dest: 'hasStorybook', type: 'boolean' },
   { src: 'documentation.designTokensPath', dest: 'designTokensPath' },
+  { src: 'documentation.hasBrandGuide', dest: 'hasBrandGuide', type: 'boolean' },
+  { src: 'documentation.brandGuidePath', dest: 'brandGuidePath' },
+
+  // Editor Theme
+  { src: 'editorTheme.enabled', dest: 'editorThemeEnabled', type: 'boolean' },
+  { src: 'editorTheme.source', dest: 'editorThemeSource', check: 'not-none' },
+  { src: 'editorTheme.source', dest: 'hasEditorThemeSource', type: 'boolean', check: 'not-none' },
 
   // External Knowledge Integration
   { src: 'externalKnowledge.enabled', dest: 'hasExternalKnowledge', type: 'boolean' },
@@ -149,6 +156,10 @@ export const PROJECT_MAPPING = [
   { src: 'process.commitConvention', dest: 'commitConvention' },
   { src: 'process.codeReview', dest: 'codeReview' },
   { src: 'process.teamSize', dest: 'teamSize' },
+  { src: 'process.issueTracker', dest: 'issueTracker', check: 'not-none' },
+  { src: 'process.intake.ownerTeam', dest: 'intakeOwnerTeam', check: 'not-none' },
+  { src: 'process.intake.operationsTeam', dest: 'intakeOperationsTeam', check: 'not-none' },
+  { src: 'process.intake.cadence', dest: 'intakeCadence', check: 'not-none' },
 
   // Testing
   { src: 'testing.unit', dest: 'testingUnit', type: 'array-join' },
