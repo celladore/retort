@@ -18,7 +18,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
-function createCheckFixture({ withBuild = true } = {}) {
+function createCheckFixture({ withBuild = true, formatter = null, withPrettierBin = false } = {}) {
   const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-test-'));
   const agentkitRoot = resolve(root, '.agentkit');
   const projectRoot = resolve(root, 'project');
@@ -28,11 +28,19 @@ function createCheckFixture({ withBuild = true } = {}) {
 
   writeFileSync(resolve(projectRoot, 'package.json'), '{}\n', 'utf-8');
 
+  if (withPrettierBin) {
+    const prettierBin = resolve(agentkitRoot, 'node_modules', 'prettier', 'bin');
+    mkdirSync(prettierBin, { recursive: true });
+    writeFileSync(resolve(prettierBin, 'prettier.cjs'), 'process.exit(0);\n', 'utf-8');
+  }
+
   const buildLine = withBuild ? '    buildCommand: "node -e \\\"\\\""\n' : '';
+  const formatterLine = formatter ? `    formatter: "${formatter}"\n` : '';
   const teamsYaml = `techStacks:
   - name: test-stack
     detect:
       - package.json
+${formatterLine}    
     typecheck: "node -e \\\"\\\""
     testCommand: "node -e \\\"\\\""
 ${buildLine}`;
@@ -115,14 +123,57 @@ describe('runCheck()', () => {
       cleanupFixture(fixture.root);
     }
   }, 20_000);
+
+  it('resolves prettier path from agentkitRoot when roots are split', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture({
+      withBuild: false,
+      formatter: 'prettier',
+      withPrettierBin: true,
+    });
+    try {
+      const expectedPrettierBin = resolve(
+        fixture.agentkitRoot,
+        'node_modules',
+        'prettier',
+        'bin',
+        'prettier.cjs'
+      ).replace(/\\/g, '/');
+
+      const formatter = resolveFormatter('prettier', fixture.agentkitRoot);
+      expect(formatter.cmd).toBe('prettier');
+      expect(formatter.check).toBe(`node "${expectedPrettierBin}" --check .`);
+      expect(formatter.fix).toBe(`node "${expectedPrettierBin}" --write .`);
+
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+
+      const formatStep = result.stacks[0]?.steps.find((step) => step.step === 'format');
+      expect(formatStep?.status).toBe('PASS');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 });
 
 describe('resolveFormatter()', () => {
   it('maps known formatters to check/fix commands', () => {
-    const r = resolveFormatter('prettier');
-    expect(r.check).toBe('npx prettier --check .');
-    expect(r.fix).toBe('npx prettier --write .');
-    expect(r.cmd).toBe('npx prettier');
+    const expectedPrettierBin = resolve(
+      AGENTKIT_ROOT,
+      'node_modules',
+      'prettier',
+      'bin',
+      'prettier.cjs'
+    ).replace(/\\/g, '/');
+    const r = resolveFormatter('prettier', AGENTKIT_ROOT);
+    expect(r.check).toBe(`node "${expectedPrettierBin}" --check .`);
+    expect(r.fix).toBe(`node "${expectedPrettierBin}" --write .`);
+    expect(r.cmd).toBe('prettier');
   });
 
   it('maps black formatter correctly', () => {

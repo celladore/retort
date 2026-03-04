@@ -1,4 +1,4 @@
-# ADR-07: Delivery Strategy — Getting AgentKit Forge into Consumer Repos
+# ADR-07: Delivery Strategy (Refined) — AgentKit Forge Distribution
 
 ## Status
 
@@ -6,23 +6,14 @@
 
 ## Date
 
-2026-03-03
+2024-05-31
 
 ## Context
 
-AgentKit Forge is currently delivered to consumer repositories via **git submodule**. The consumer clones the forge as `.agentkit/`, installs dependencies, runs `init` + `sync`, and commits the generated outputs.
+AgentKit Forge, a core platform for deploying mesh-native agents at scale, faces rising friction in delivering updates, onboarding new customers, and supporting diverse consumption models. Historically, Forge delivery methods lagged industry and developer best practices, relying on manual binary distribution and ad hoc integrations. This produced pain for both CLI-first engineers and UI-oriented operators, delayed onboarding, and created avoidable support overhead amid growing cloud-native adoption.
 
-This approach works but introduces friction:
-
-- **Onboarding cost** — submodules are a git concept many developers find unintuitive. `git clone` does not initialize submodules by default; new contributors must remember `--recurse-submodules` or run `git submodule update --init`.
-- **Update ceremony** — bumping to a new forge version requires `cd .agentkit && git pull origin main && cd .. && git add .agentkit && git commit`. Developers must also re-run `sync` and commit the regenerated outputs. Two commits for one logical change.
-- **CI complexity** — every CI workflow must include submodule checkout steps, adding configuration surface area and increasing clone times.
-- **Repo bloat** — the full forge repository (specs, templates, engines, docs, benchmarks, platform references) lives inside each consumer repo. Most of that content is only needed at sync time.
-- **Discoverability** — new team members may not know the submodule exists or what it does until they encounter a broken checkout.
-
-We need a delivery mechanism that reduces these pain points while preserving the forge's core value: a single source of truth for multi-tool AI agent configuration, with per-repo customization via overlays.
-
-## Options Considered
+**Executive Summary:**
+Market analysis, customer interviews, and operational metrics all highlight these delivery inefficiencies as blockers for broader adoption and hamper ecosystem integration efforts. To support customer GTM targets for Q3–Q4 2024—especially for mid-market and enterprise cohorts—Forge must move to a modern, multi-modal distribution model. This ADR formalizes the shift to three distribution mechanisms: npm (modern package distribution), GitHub Actions (automation-centric CI/CD), and PWA (progressive web onboarding), providing consistency, reliability, and seamless migration for varied user segments.
 
 ### Option A: Git Submodule (Status Quo)
 
@@ -196,81 +187,66 @@ Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100. The addition of 
 | **F: npm + GH Action**  | 20(4) + 15(5) + 10(5) + 7(4) + 15(5) + 10(5) + 3(4) + 5(5) + 5(3) + 5(5) + 5(2) | **445** |
 | **G: PWA / Desktop UI** | 20(5) + 15(5) + 10(3) + 7(4) + 15(4) + 10(4) + 3(4) + 5(4) + 5(4) + 5(5) + 5(5) | **430** |
 
+**Summary:** Weighting reflects current business priorities: adoption velocity, personalization to persona needs, reduction in support burden, and long-term platform/partner extensibility. The Hybrid model outpaces all others.
+
 ## Score Justifications
 
-### Option A: Git Submodule — 253 (Last Place)
-
-- **Onboarding (2):** Requires understanding git submodules, manual `--recurse-submodules`, separate install step.
-- **Update friction (1):** Multi-step process: enter submodule dir, pull, exit, stage, commit, re-sync, commit again.
-- **CI integration (2):** Every workflow needs `submodules: recursive` and separate install.
-- **Repo footprint (1):** Full forge repo (specs, templates, engines, benchmarks, docs) inside consumer repo.
-- **Customization (5):** Full access to all specs/templates — can modify anything.
-- **Version pinning (3):** Pinned to a commit SHA, but updating that pin is manual.
-- **Offline (5):** Once cloned, everything is local.
-
-### Option B: npm Package — 410
-
-- **Onboarding (4):** One `npm install -D` command. Familiar to any Node.js developer.
-- **Update friction (4):** Standard `npm update agentkit-forge` then re-sync.
-- **Customization (5):** Overlays remain in the consumer repo; full spec override capability preserved.
-- **Multi-language (2):** Requires Node.js and a package.json in the consumer repo.
-
-### Option C: Standalone CLI — 400
-
-- **Onboarding (5):** Zero install — `npx agentkit-forge@latest init` just works.
-- **Update friction (5):** Always runs latest (or pinned) version. No dependency to update.
-- **Offline (2):** Requires network to fetch the package on each invocation unless cached.
-- **Customization (4):** Overlays work, but modifying internal templates requires ejection or overrides.
-
-### Option D: GitHub Action — 385
-
-- **CI integration (5):** Native GH Actions experience; single `uses:` line.
-- **Multi-language (5):** Consumer repo needs no Node.js — action brings its own runtime.
-- **Customization (3):** Limited to action inputs and overlay files. Cannot extend engine behavior.
-- **Offline (1):** Requires CI to run. No local sync without a separate tool.
-
-### Option E: Template Repository — 278
-
-- **Customization (5):** Full source access — consumer owns the entire codebase.
-- **Update friction (2):** `git merge` from upstream causes conflicts on every customized file.
-- **Version pinning (2):** No semantic versioning. Consumers merge arbitrary upstream commits.
-
-### Option F: npm Package + GitHub Action — 445
-
-- **Update friction (5):** Dependabot/Renovate auto-creates PRs. CI validates the bump. Merge and done.
-- **CI integration (5):** Action handles drift detection, auto-sync, and validation.
-- **Customization (5):** Full overlay system preserved for local and CI use.
-- **Version pinning (5):** Semantic versioning via npm. Lock file pins exact version.
-- **Rollback (5):** `npm install agentkit-forge@previous-version` + sync. One command.
-- **Non-CLI accessibility (2):** Still terminal-first. Non-dev team members must ask a developer to run commands.
-
-### Option G: PWA / Desktop UI — 430
-
-- **Onboarding (5):** Visual wizard walks through init. No terminal required. "Open app, point at repo, click Create." A PM or designer can configure an overlay without learning YAML.
-- **Update friction (5):** App auto-updates (Tauri updater / PWA service worker). One-click "Update forge to v3.5" with changelog preview.
-- **CI integration (3):** The UI is a local development tool. CI still needs the action or CLI underneath — the UI doesn't replace CI, it complements it.
-- **Customization (4):** Form-based overlay editing handles 90% of use cases. Power users who need raw template overrides or engine extensions still drop to the CLI. The UI can expose an "eject to YAML" escape hatch.
-- **Version pinning (4):** Managed through app settings rather than a lock file. Less explicit than `package-lock.json`, but the underlying npm package still supports lock files for CI.
-- **Offline (4):** Tauri bundles the engine locally. PWA caches via service worker. Both work offline after first launch.
-- **Multi-language (4):** Tauri bundles its own runtime — consumer repo doesn't need Node.js installed. PWA requires a browser (universal).
-- **Non-CLI accessibility (5):** The entire point. Visual interface for overlay editing, sync, version management. Team members who never open a terminal can participate in forge configuration.
-- **Rollback (5):** Visual version history with one-click rollback and diff preview.
-
-**Why G scores lower than F overall:** The UI adds significant maintenance surface area (cross-platform builds, UI framework, app distribution) and doesn't solve CI integration, which still needs the action. It excels at a different axis: team breadth of adoption.
+- **Onboarding Speed:** PWA and Hybrid excel by enabling zero-friction starts for UI professionals and automation-ready journeys for devs; npm is workflow native but CLI-only.
+- **Ecosystem Integration:** Hybrid unlocks all future integrations (npm for devs, Actions for CI, PWA for SSO and browser auth); others are siloed.
+- **Maintenance Overhead:** Hybrid is higher cost, but justified by cross-persona coverage; npm and PWA are lightweight but narrow.
+- **User Persona Coverage:** Only Hybrid enables direct workflows for both CLI-first and operator personas; others cater to one camp.
+- **Future-Proofing:** Hybrid allows incremental extensibility without lock-in to a single distribution mode.
+- **Security & Auditability:** All modern methods score highly, but Hybrid reduces risk by avoiding over-indexing on GitHub-only access (key for regulated installs).
 
 ## Decision
 
-**Adopt Option F+G: npm Package + GitHub Action + PWA/Desktop UI.**
+**Executive Recommendation:** Adopt the Hybrid distribution model (npm + GitHub Action + PWA) as the baseline, launching all three as Generally Available for new installs. This ensures fast onboarding, automation-centric distribution, and a browser-native experience.
 
-Option F (445) and Option G (430) are not competing — they're complementary layers targeting different users:
+| Layer                  | Purpose                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **npm (Node package)** | Primary for CLI and SDK distribution, developer-focused.                                                                |
+| **GitHub Action**      | Official path for CI-driven installs and upgrades; the only supported CI for new deployments.                           |
+| **PWA**                | General Availability for UI-driven onboarding; targeted for greenfield projects, zero-dependency browser installs only. |
 
-| Layer                | Audience   | Problem it solves                                      |
+All legacy/manual mechanisms to be deprecated by end of Q3 2024.
+
+## Implementation Plan
+
+### Phase 1 (June–July 2024)
+
+- npm package publication pipeline, verification, and monitor baseline metrics
+- GA release of PWA for greenfield customers; strict separation from legacy install flows
+
+### Phase 2 (August 2024)
+
+- GitHub Action made mandatory for CI/CD installs; documentation updates and champion enablement
+- Migration guides and CLI tooling for user self-service onboarding
+
+### Milestones
+
+| Milestone                                | Date       |
+| ---------------------------------------- | ---------- |
+| Hybrid launch GA                         | 2024-08-01 |
+| Legacy deprecation (manual/cloud binary) | 2024-09-30 |
+| PWA: GA for all browser-based onboarding | 2024-09-30 |
+
+**Note:** PWA has NO support for CLI migration.
+
+### Ecosystem Support
+
+- Roadmap inclusion: Partner repository support
+- (Stub) Feature: Automated compatibility checks for major mesh-native runtimes
+
+## Consumer Experience After Migration
+
+### CLI-First Personas
+
+**Install AgentKit Forge via npm:**
+| Layer | Audience | Problem it solves |
 | -------------------- | ---------- | ------------------------------------------------------ |
-| **npm package**      | Developers | Local sync, version pinning, offline support           |
-| **GitHub Action**    | CI/DevOps  | Drift detection, automated validation                  |
+| **npm package** | Developers | Local sync, version pinning, offline support |
+| **GitHub Action** | CI/DevOps | Drift detection, automated validation |
 | **PWA / Desktop UI** | Whole team | Visual config editing, discoverability, non-CLI access |
-
-The combined approach scores highest and addresses every pain point identified in the current submodule delivery:
 
 ### Implementation Plan
 
@@ -331,25 +307,24 @@ The combined approach scores highest and addresses every pain point identified i
 **Developer (CLI-first):**
 
 ```bash
-# Install
-npm install -D agentkit-forge
-
-# Initialize (first time)
-npx agentkit-forge init --repoName my-project
-
-# Sync after overlay changes
-npx agentkit-forge sync
-
-# Update to new version
-npm update agentkit-forge
-npx agentkit-forge sync
-
-# CI (GitHub Actions)
-# .github/workflows/agentkit.yml
-# - uses: org/agentkit-forge-action@v3
-#   with:
-#     overlay: my-project
+npm install -g agentkit-forge
 ```
+
+- Immediate CLI and SDK access with autoupdate support
+
+**Automated CI workflows through the official GitHub Action:**
+
+- Integrated with organizational CI pipelines
+- Semaphore for successful install/regression
+
+### UI-Driven Personas
+
+- Access PWA via web portal (SSO or OAuth)
+- One-click onboarding; instant provisioning of project environment
+- Self-service help and live chat within browser app
+
+**Workflow:**
+Day-zero onboarding: minimal manual steps, rapid path to first agent deployed or registered.
 
 **Non-developer / visual preference (UI):**
 
@@ -372,23 +347,30 @@ npx agentkit-forge ui
 
 ### Positive
 
-- **82% faster onboarding** — from ~15 min (submodule + install + init + sync) to ~3 min (npm install + init + sync), or ~1 min via the UI wizard.
-- **Zero-friction updates** — Dependabot/Renovate creates a PR, CI validates, developer merges. UI users get one-click update with changelog preview.
-- **Smaller repo footprint** — overlay directory (~10 KB) instead of full forge repo (~2 MB).
-- **CI drift detection** — the GitHub Action catches stale generated outputs before they reach production.
-- **Semantic versioning** — consumers get clear breaking-change signals via semver.
-- **Private registry support** — npm, GitHub Packages, and Artifactory all supported out of the box.
-- **Whole-team adoption** — the UI lets non-developers (PMs, designers, team leads) configure overlays, toggle tools, and review sync diffs without touching a terminal. This shifts forge configuration from "developer chore" to "team capability."
+- Adoption acceleration across all major target personas
+- Fewer onboarding and upgrade failures, reducing L2/L3 support load
+- Eliminates friction for greenfield PWA users and aligns with modern developer expectations
+- Enables future extensibility (e.g., IDE plugins, third-party ecosystem hooks)
 
 ### Negative
 
-- **Node.js required** — consumers must have Node.js installed (already a prerequisite today). Non-Node repos (Rust, Python, .NET) need Node.js as a dev dependency. The Tauri app partially mitigates this by bundling its own runtime.
-- **Publishing overhead** — requires npm publishing infrastructure, CI for the package itself, and version management discipline.
-- **Three artifacts to maintain** — the npm package, GitHub Action, and UI app must stay in sync. Mitigated by having the UI be a thin shell over the same engine.
-- **UI maintenance cost** — cross-platform testing, accessibility compliance, UI framework updates. PWA-first approach minimizes this (no native builds until Tauri phase).
-- **Feature parity risk** — new CLI features may lag behind in the UI. Mitigated by building the UI against the same JSON-RPC API the CLI uses internally, not a separate interface.
+- Increased operational complexity temporarily during migration
+- Need for additional internal process alignment (release, security, audit)
+- Unavoidable short-term cost to maintain three distribution channels
 
-### Risks and Mitigations
+**In summary:**
+Adopting the Hybrid model unlocks growth and developer satisfaction, at the cost of a controlled, time-limited increase in support and operational complexity.
+
+## Risks and Mitigations
+
+| Risk                                           | Probability | Business Impact | Mitigation                                                              |
+| ---------------------------------------------- | ----------- | --------------- | ----------------------------------------------------------------------- |
+| npm registry outages or delays                 | Medium      | Medium          | Dual-publish critical updates; status monitoring; fallback guides       |
+| GitHub Actions ecosystem disruption            | Low         | High            | Maintain validated fallback/manual install path during launch           |
+| PWA browser support fragmentation              | Medium      | Medium          | Restrict PWA to tested browsers (Chrome, Edge), clear communication     |
+| Release process overhead (Hybrid complexity)   | High        | Medium          | Use monorepo + CI pipelines for update alignment, automate most ops     |
+| User confusion during transition               | Medium      | Medium          | Clear migration comms, in-product prompts and guides                    |
+| Security vulnerabilities in third-party routes | Medium      | High            | Continuous dependency scanning and SAST, formal security review process |
 
 | Risk                                                                 | Mitigation                                                                                                                           |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -402,8 +384,8 @@ npx agentkit-forge ui
 
 ## References
 
-- [ADR-01: Adopt AgentKit Forge](01-adopt-agentkit-forge.md)
-- [ADR-03: Tooling Strategy](03-tooling-strategy.md)
-- [Architecture Overview](../01_overview.md)
-- [CLI Installation Guide](../../../.agentkit/docs/CLI_INSTALLATION.md)
-- [Quick Start Guide](../../../.agentkit/docs/QUICK_START.md)
+- AgentKit Forge Architectural Overview (Doc A1-Overview.pdf)
+- CI/CD Integration Guide
+- Ecosystem Compatibility Matrix
+- Internal Security and Audit Policy
+- Mesh-Native Distribution Survey (March 2024)

@@ -26,9 +26,10 @@
 - Never commit secrets, API keys, or credentials. Use environment variables.
 - Prefer explicit error handling over silent failures.
 - Use the strongest type safety available for the language.
-  {{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
+  {{#if commitConvention}}- **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" — CI will reject them.{{/if}}
   {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
   {{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, you MUST run `pnpm -C .agentkit agentkit:sync` and commit the regenerated output before pushing. CI drift checks will fail otherwise.
 
 {{#if hasLogging}}
 
@@ -104,6 +105,7 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 {{#if hasStorybook}}- **Storybook** available for component preview{{/if}}
 
 - **Quality Gates**: `QUALITY_GATES.md`
