@@ -175,7 +175,7 @@ When each branch merges, the following documentation actions are needed:
 - [ ] Move command entries from "Incoming Commands" to main COMMAND_REFERENCE sections
 - [ ] Move agent entries from "Incoming Agents" to main AGENTS_REFERENCE sections
 - [ ] Update agent count in AGENTS_VS_TEAMS.md heading (19 → 21 when both agent branches merge)
-- [ ] Update command count in QUICK_START.md (29 → 35 when all command branches merge)
+- [ ] Update command count in QUICK_START.md (30 → 35 when all command branches merge)
 - [ ] Remove "Coming Soon" entries from QUICK_START.md as branches merge
 - [ ] Move workflow scenarios from "(Incoming)" suffix to regular numbered scenarios
 - [ ] Update this audit document to mark preemptive items as finalized

@@ -1647,6 +1647,17 @@ agentkit sync                              # Regenerate configs with new feature
 | `standard` | 12       | Small-to-medium teams (default)       |
 | `full`     | 20       | Enterprise, full orchestration        |
 
+### Command Sequence Summary
+
+```
+/feature-review                       Audit current feature state
+/feature-configure --preset standard  Apply a preset
+/feature-configure --toggle <name>    Enable/disable individual features
+agentkit sync                         Regenerate configs with new feature set
+/feature-review --audit               Verify post-sync consistency
+/feature-flow <feature>               Trace a feature from spec to output
+```
+
 ---
 
 ## Scenario 10: Session Retrospective (Incoming)
@@ -1705,6 +1716,14 @@ This files unresolved issues to your external tracker (GitHub Issues or Linear) 
 ```
 
 Shows what would be captured without writing any files.
+
+### Command Sequence Summary
+
+```
+/review --focus=retrospective              Full retrospective capture
+/review --focus=retrospective --dry-run    Preview without writing files
+/review --focus=retrospective --open-issues File unresolved issues to tracker
+```
 
 ---
 
@@ -1784,4 +1803,15 @@ For repository-specific theme tweaks, create:
 mode: dark
 cursor:
   statusBar.background: colors.secondary.lilac
+```
+
+### Command Sequence Summary
+
+```
+/brand --init                    Scaffold brand.yaml with interactive prompts
+/brand --validate                Validate required fields and color format
+/brand --preview                 Preview resolved color palette
+/brand --contrast                Audit WCAG compliance of color combinations
+/brand --theme                   Generate editor themes from brand spec
+agentkit sync                    Full sync including brand-resolved themes
 ```

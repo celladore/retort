@@ -260,7 +260,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ## Command Quick Reference
 
-AgentKit Forge provides 29 slash commands, organized into five categories. The tables below list 27 commands; the remaining 2 (`/scaffold` and `/preflight`) are slash-command-only and documented in [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md). See that reference for full details, flags, and examples.
+AgentKit Forge provides 30 slash commands, organized into five categories. The tables below list 28 commands; the remaining 2 (`/scaffold` and `/preflight`) are slash-command-only and documented in [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md). See that reference for full details, flags, and examples.
 
 ### Workflow Commands
 
@@ -289,6 +289,7 @@ These commands validate and improve code quality.
 | `/format`   | Run code formatters (auto-detects tools)                       |
 | `/security` | Security audit -- OWASP top 10, dependencies, secrets scan     |
 | `/deploy`   | Deployment automation with safety checks and rollback          |
+| `/cost`     | Token usage summaries, session costs, and budget status        |
 
 ### Team Commands
 
