@@ -1093,9 +1093,7 @@ export function validateMappingCoverage(project, projectMapping) {
       current = current[part];
     }
 
-    // If the spec field doesn't exist at all (not even as null), it's
-    // likely a mapping pointing at a non-existent spec path
-    if (!resolved && current === undefined) {
+    if (!resolved || current === undefined) {
       warnings.push(
         `project-mapping: src "${mapping.src}" (→ {{${mapping.dest}}}) has no corresponding field in project.yaml`
       );
@@ -1106,10 +1104,4 @@ export function validateMappingCoverage(project, projectMapping) {
 }
 
 // Export validate for testing
-export {
-  PROJECT_ENUMS,
-  validate,
-  validateCrossReferences,
-  validateProjectYaml,
-  // validateMappingCoverage is already exported via the function declaration
-};
+export { PROJECT_ENUMS, validate, validateCrossReferences, validateProjectYaml };

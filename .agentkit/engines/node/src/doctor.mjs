@@ -4,11 +4,10 @@
  */
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
-import { resolve, relative } from 'path';
+import { resolve } from 'path';
 import { validateSpec, validateMappingCoverage } from './spec-validator.mjs';
 import { computeProjectCompleteness } from './project-completeness.mjs';
 import { PROJECT_MAPPING } from './project-mapping.mjs';
-import { flattenProjectYaml } from './template-utils.mjs';
 
 function resolveSpecRoot(agentkitRoot, projectRoot) {
   const projectAgentkitRoot = resolve(projectRoot, '.agentkit');

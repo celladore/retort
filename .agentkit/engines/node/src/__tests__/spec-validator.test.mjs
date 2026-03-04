@@ -898,6 +898,15 @@ describe('validateMappingCoverage', () => {
     expect(warnings).toHaveLength(0);
   });
 
+  it('should warn about leaf-level missing fields', () => {
+    const project = { stack: { languages: ['js'] } };
+    const mapping = [{ src: 'stack.missing', dest: 'x' }];
+
+    const warnings = validateMappingCoverage(project, mapping);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('stack.missing');
+  });
+
   it('should handle empty project gracefully', () => {
     const warnings = validateMappingCoverage(null, [{ src: 'a.b', dest: 'x' }]);
     expect(warnings).toHaveLength(0);
