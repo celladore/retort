@@ -1,0 +1,115 @@
+# =============================================================================
+# editor-theme.yaml — Maps brand colors to editor workspace color customizations
+# Version: 1.0.0
+# =============================================================================
+# This file defines how brand.yaml colors are applied to editor UI surfaces.
+# The sync engine resolves dot-notation references (e.g. colors.primary.brand)
+# against brand.yaml and generates workbench.colorCustomizations.
+#
+# Supports light, dark, or both modes. Each mode maps VS Code color keys
+# to brand.yaml color paths. Cursor and Windsurf consume the same format.
+#
+# Repo-specific overlays can override any field for context-specific branding.
+# =============================================================================
+
+enabled: true # Master toggle — set false to skip theme generation
+mode: both # light | dark | both — generate both for broad compatibility
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Output targets — which editor config files to generate
+# ─────────────────────────────────────────────────────────────────────────────
+# Each output gets the resolved colorCustomizations merged in.
+# Set a path to null to skip that target.
+outputs:
+  vscode: '.vscode/settings.json'
+  cursor: '.cursor/settings.json'
+  windsurf: '.windsurf/settings.json'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Light mode mapping — brand token → VS Code color slot
+# ─────────────────────────────────────────────────────────────────────────────
+light:
+  # Title bar
+  titleBar.activeBackground: colors.primary.brand
+  titleBar.activeForeground: colors.darkMode.textPrimary
+  titleBar.inactiveBackground: colors.primary.surface
+  # Activity bar
+  activityBar.background: colors.primary.brand
+  activityBar.foreground: colors.darkMode.textPrimary
+  # Status bar
+  statusBar.background: colors.primary.teal
+  statusBar.foreground: colors.darkMode.textPrimary
+  statusBar.debuggingBackground: colors.semantic.warning
+  statusBar.noFolderBackground: colors.neutral.700
+  # Sidebar
+  sideBar.background: colors.primary.surface
+  sideBar.foreground: colors.neutral.700
+  # Editor
+  editor.background: colors.primary.surface
+  editor.foreground: colors.neutral.900
+  editorLineNumber.foreground: colors.neutral.400
+  # Tabs
+  tab.activeBackground: colors.primary.surface
+  tab.inactiveBackground: colors.neutral.100
+  tab.activeForeground: colors.primary.brand
+  tab.inactiveForeground: colors.neutral.700
+  # Badges
+  badge.background: colors.primary.coral
+  badge.foreground: colors.darkMode.textPrimary
+  # Lists
+  list.activeSelectionBackground: colors.primary.teal
+  list.inactiveSelectionBackground: colors.neutral.100
+  # Buttons
+  button.background: colors.primary.brand
+  button.foreground: colors.darkMode.textPrimary
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dark mode mapping — brand token → VS Code color slot
+# ─────────────────────────────────────────────────────────────────────────────
+dark:
+  # Title bar
+  titleBar.activeBackground: colors.primary.dark
+  titleBar.activeForeground: colors.darkMode.textPrimary
+  titleBar.inactiveBackground: colors.darkMode.surface
+  # Activity bar
+  activityBar.background: colors.primary.dark
+  activityBar.foreground: colors.primary.teal
+  activityBar.activeBorder: colors.primary.brand
+  # Status bar
+  statusBar.background: colors.primary.brand
+  statusBar.foreground: colors.darkMode.textPrimary
+  statusBar.debuggingBackground: colors.semantic.warning
+  statusBar.noFolderBackground: colors.neutral.900
+  # Sidebar
+  sideBar.background: colors.darkMode.surface
+  sideBar.foreground: colors.darkMode.textSecondary
+  # Editor
+  editor.background: colors.darkMode.background
+  editor.foreground: colors.darkMode.textPrimary
+  editorLineNumber.foreground: colors.darkMode.textSecondary
+  # Tabs
+  tab.activeBackground: colors.darkMode.surface
+  tab.inactiveBackground: colors.darkMode.background
+  tab.activeForeground: colors.primary.brand
+  tab.inactiveForeground: colors.darkMode.textSecondary
+  # Badges
+  badge.background: colors.primary.teal
+  badge.foreground: colors.darkMode.textPrimary
+  # Lists
+  list.activeSelectionBackground: colors.primary.coral
+  list.inactiveSelectionBackground: colors.darkMode.surface
+  # Buttons
+  button.background: colors.primary.coral
+  button.foreground: colors.darkMode.textPrimary
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Base themes — set VS Code color theme per workspace per mode
+# ─────────────────────────────────────────────────────────────────────────────
+baseTheme:
+  light: 'Default Light Modern'
+  dark: 'Default Dark Modern'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Optional: inject editor font from brand typography
+# ─────────────────────────────────────────────────────────────────────────────
+# fontFromBrand: true  # If true, sets editor.fontFamily from brand.typography.mono

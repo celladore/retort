@@ -58,6 +58,13 @@ documentation:
   designSystemPath: null # e.g. packages/ui/
   storybook: false
   designTokensPath: null # e.g. styles/tokens/
+  hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
+  brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
+
+# Editor theme — generates workbench.colorCustomizations in .vscode/settings.json
+editorTheme:
+  enabled: true # master toggle for VS Code theme generation
+  source: brand # brand | custom | none
 
 # External knowledge/doc sources used to seed template metadata + overlays
 # (no raw bulk copy by default).
