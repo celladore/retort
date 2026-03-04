@@ -713,6 +713,58 @@ agents:
         - Bash
 
   # ===========================================================================
+  # RETROSPECTIVE — Session analysis and knowledge capture agents
+  # ===========================================================================
+  retrospective:
+    - id: retrospective-analyst
+      category: retrospective
+      name: Retrospective Analyst
+      role: >
+        Session retrospective specialist responsible for reviewing conversation
+        history and session activity to extract issues encountered and lessons
+        learned. Produces structured records in docs/history/issues/ and
+        docs/history/lessons-learned/ using project templates and sequential
+        numbering. Cross-references findings with existing rules, ADRs, and
+        history records to avoid duplication and surface patterns.
+      accepts:
+        - investigate
+        - review
+      depends-on: []
+      notifies:
+        - project-shipper
+        - product-manager
+      focus:
+        - 'docs/history/issues/**'
+        - 'docs/history/lessons-learned/**'
+        - 'docs/history/.index.json'
+        - 'docs/ai_handoffs/**'
+      responsibilities:
+        - Review conversation history for errors, blockers, and unexpected behaviour
+        - Classify issues by severity (critical, high, medium, low) and status
+        - Extract actionable lessons from workarounds, discoveries, and process gaps
+        - Categorize lessons (technical, process, tooling, architecture, communication)
+        - Write structured issue records using TEMPLATE-issue.md
+        - Write structured lesson records using TEMPLATE-lesson.md
+        - Maintain sequential numbering via docs/history/.index.json
+        - Cross-reference with existing history records to detect recurring patterns
+        - Optionally open external issues (GitHub/Linear/Jira) for unresolved problems
+        - Suggest updates to rules.yaml or conventions when lessons warrant them
+      conventions:
+        - Always read the full conversation context before extracting findings
+        - Deduplicate against existing issue and lesson records before writing
+        - Link issues to related lessons and vice versa when both are generated
+      anti-patterns:
+        - Logging vague or non-actionable observations as issues
+        - Creating duplicate records for problems already documented
+      preferred-tools:
+        - Read
+        - Write
+        - Edit
+        - Glob
+        - Grep
+        - Bash
+
+  # ===========================================================================
   # PROJECT MANAGEMENT — Delivery and release agents
   # ===========================================================================
   project-management:

@@ -83,6 +83,13 @@ teams:
     accepts: [review, investigate]
     handoff-chain: []
 
+  - id: retrospective
+    name: RETROSPECTIVE
+    focus: 'Session issues, lessons learned, knowledge capture'
+    scope: ['docs/history/issues/**', 'docs/history/lessons-learned/**', 'docs/history/.index.json']
+    accepts: [investigate, review]
+    handoff-chain: [product, quality]
+
 # =============================================================================
 # Tech Stack Definitions
 # Each stack declares build/test/lint/format commands and file detection patterns

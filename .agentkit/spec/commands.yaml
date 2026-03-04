@@ -268,6 +268,49 @@ commands:
       - Grep
       - Bash
 
+  - name: retrospective
+    type: workflow
+    description: >
+      End-of-session retrospective. Reviews the current conversation and session
+      activity to identify issues encountered and lessons learned. Logs issues
+      to docs/history/issues/ and lessons to docs/history/lessons-learned/ using
+      the configured templates and sequential numbering from .index.json.
+      Optionally opens GitHub issues for unresolved problems when the project
+      issue tracker is configured.
+    flags:
+      - name: --issues-only
+        description: 'Only identify and log issues, skip lessons learned'
+        type: boolean
+        default: false
+      - name: --lessons-only
+        description: 'Only identify and log lessons learned, skip issues'
+        type: boolean
+        default: false
+      - name: --dry-run
+        description: 'Show what would be logged without writing files'
+        type: boolean
+        default: false
+      - name: --open-issues
+        description: 'Also create GitHub/Linear/Jira issues for unresolved problems (uses project.yaml issueTracker setting)'
+        type: boolean
+        default: false
+      - name: --severity
+        description: 'Minimum severity to log: low, medium, high, critical'
+        type: string
+        default: 'low'
+        enum: [low, medium, high, critical]
+      - name: --save
+        description: 'Write retrospective records to docs/history/'
+        type: boolean
+        default: true
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash
+
   - name: project-review
     type: workflow
     description: >
