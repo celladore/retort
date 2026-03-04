@@ -127,9 +127,9 @@ The Product Manager agent and Product team **already exist** in the spec:
 - **Notifies**: `backend`, `frontend`
 - **Responsibilities**: Write PRDs, define acceptance criteria, prioritize backlog, coordinate planning, maintain roadmap
 
-### What's Missing: PRD → Backlog Pipeline
+### What's Missing: Document → Backlog Pipeline
 
-**Critical gap: There is no documented mechanism to tell the Product Manager "read PRD-005 and generate backlog items from it."**
+**Critical gap: There is no documented mechanism to tell any agent "read PRD-005 and generate backlog items from it" — or any other specification document for that matter.**
 
 Current flow:
 ```
@@ -139,7 +139,7 @@ Current flow:
                                      (manually populated — by whom?)
 ```
 
-The Product Manager agent's responsibilities include "Prioritize backlog items" and "Write PRDs", but there's no command or workflow that says "take PRD-005, extract deliverables, and write them into AGENT_BACKLOG.md with team assignments."
+The Product Manager agent's responsibilities include "Prioritize backlog items" and "Write PRDs", but there's no command or workflow that says "take this document, extract deliverables, and write them into AGENT_BACKLOG.md with team assignments."
 
 ### Additional Bug: PRD Detector Doesn't Find PRDs
 
@@ -152,63 +152,190 @@ But actual PRDs live in `docs/01_product/`. The detector will **never find them*
 
 ---
 
-## Part 4: Recommended New Documents & Artifacts
+## Part 4: Intake Agent — Multi-Document-Type Specification Intake
+
+### Design Principle
+
+By the time this branch merges, a dedicated **Intake Agent** will exist. Rather than building a narrow `/prd-intake` command, all document-to-backlog intake — PRDs, functional specs, UI design specs, user stories, tech specs, process flows — should flow through this single agent. This keeps the intake pipeline unified, auditable, and extensible.
+
+### Supported Document Types
+
+| Document Type | Short ID | Typical Location | What Gets Extracted |
+|--------------|----------|-------------------|---------------------|
+| **Product Requirements Document (PRD)** | `prd` | `docs/01_product/PRD-*.md` | Phases, milestones, deliverables, acceptance criteria, personas, success metrics |
+| **Functional Specification** | `func-spec` | `docs/02_specs/FUNC-*.md` | Feature descriptions, business rules, input/output contracts, edge cases, validation rules |
+| **UI/UX Design Specification** | `ui-spec` | `docs/05_design/UI-*.md` | Screens/flows, component hierarchy, interaction patterns, responsive breakpoints, accessibility requirements |
+| **User Stories** | `stories` | `docs/01_product/stories/` or inline in PRDs | As-a/I-want/So-that, acceptance criteria, story points, dependencies |
+| **Technical Specification** | `tech-spec` | `docs/02_specs/TECH-*.md` | Architecture decisions, API contracts, data models, sequence diagrams, performance budgets |
+| **Process Flow** | `process` | `docs/06_processes/FLOW-*.md` | Swimlane steps, decision points, error paths, SLAs, integration touchpoints |
+
+### `/intake` Command Design
+
+```
+Usage: /intake <doc-type> <ID-or-path> [flags]
+
+Examples:
+  /intake prd PRD-005
+  /intake func-spec FUNC-012
+  /intake tech-spec docs/02_specs/TECH-003-json-rpc-api.md
+  /intake ui-spec UI-001 --phase 2
+  /intake stories docs/01_product/stories/sprint-14.md
+  /intake process FLOW-007 --team backend
+
+Behavior:
+1. Resolve document from type + ID or path
+   - prd PRD-005 → docs/01_product/PRD-005-*.md (glob match)
+   - func-spec FUNC-012 → docs/02_specs/FUNC-012-*.md
+   - Fallback: treat argument as literal file path
+2. Detect document structure (headings, tables, lists)
+3. Extract deliverables using type-specific extractors:
+   - PRD: phases → deliverables → acceptance criteria
+   - Func spec: features → business rules → validation rules
+   - UI spec: screens → components → interaction flows
+   - User stories: epics → stories → acceptance criteria
+   - Tech spec: modules → API contracts → data models
+   - Process flow: steps → decision points → integration touchpoints
+4. Map extracted items to teams using teams.yaml scope patterns
+5. Generate AGENT_BACKLOG.md entries:
+   - Priority: derived from document structure (phases, priority fields, story points)
+   - Team: from scope pattern matching against deliverable content
+   - Source reference: doc type + ID (e.g., "PRD-005 Phase 1", "FUNC-012 §3.2")
+   - Cross-team dependencies populated from dependency sections
+   - Acceptance criteria carried forward verbatim
+6. Output summary of proposed/written backlog items
+
+Flags:
+  --dry-run        Show proposed items without writing
+  --phase N        Only intake from a specific phase/section
+  --team <id>      Only intake items relevant to a specific team
+  --append         Add to existing backlog (default)
+  --replace        Replace existing items sourced from this document
+  --priority-map   Override default priority mapping (e.g., "phase1=P0,phase2=P1")
+```
+
+### Intake Agent Definition for `agents.yaml`
+
+```yaml
+- id: intake-analyst
+  category: product
+  name: Intake Analyst
+  role: >
+    Reads specification documents (PRDs, functional specs, UI design specs,
+    user stories, technical specs, process flows) and extracts actionable
+    work items. Maps deliverables to teams, generates AGENT_BACKLOG.md
+    entries with priorities and dependencies, and maintains traceability
+    from source documents to backlog items.
+  accepts:
+    - intake
+    - plan
+    - review
+  depends-on: []
+  notifies:
+    - product-manager
+    - roadmap-tracker
+  focus:
+    - 'docs/01_product/**'
+    - 'docs/02_specs/**'
+    - 'docs/05_design/**'
+    - 'docs/06_processes/**'
+    - 'docs/prd/**'
+    - 'AGENT_BACKLOG.md'
+  responsibilities:
+    - Parse PRDs and extract phases, deliverables, acceptance criteria
+    - Parse functional specs and extract features, business rules, contracts
+    - Parse UI/UX specs and extract screens, components, interaction flows
+    - Parse user stories and extract epics, stories, acceptance criteria
+    - Parse technical specs and extract modules, API contracts, data models
+    - Parse process flows and extract steps, decision points, touchpoints
+    - Map extracted items to teams using scope pattern matching
+    - Generate AGENT_BACKLOG.md entries with priorities and dependencies
+    - Maintain source-document-to-backlog traceability
+    - Detect conflicts between overlapping specifications
+    - Flag gaps where specs reference undefined components or teams
+  preferred-tools:
+    - Read
+    - Write
+    - Edit
+    - Glob
+    - Grep
+```
+
+### Intake Agent Gap Analysis Checklist
+
+When the intake agent is built, it should be analyzed for these potential issues:
+
+#### Functional Gaps
+
+| # | Gap | Risk | Mitigation |
+|---|-----|------|------------|
+| 1 | **No document format validation** — what if a PRD doesn't follow the standard template? | Extraction silently produces incomplete/wrong items | Validate document structure before extraction; warn on missing required sections (e.g., "No Phases/Milestones section found in PRD-005") |
+| 2 | **No idempotency** — running intake twice on the same doc creates duplicates | Backlog pollution, duplicate work assignments | Track intake provenance via source tags (e.g., `[PRD-005:Phase1:D3]`) and deduplicate on re-intake |
+| 3 | **No cross-document dependency detection** — PRD-005 deliverables may depend on PRD-001 deliverables | Missing dependency edges in backlog | Cross-reference `dependsOn` fields against all previously intaken documents |
+| 4 | **No partial re-intake** — if a PRD is updated, can you re-intake just the changed sections? | Full re-intake overwrites manual edits to backlog items | Diff-based re-intake: compare current doc against last-intaken snapshot |
+| 5 | **No story point / effort estimation** — items land in backlog without sizing | Teams can't plan capacity | Optional `--estimate` flag that adds T-shirt size estimates based on deliverable complexity |
+| 6 | **No validation of team assignments** — scope pattern matching may assign to wrong team | Misrouted work items | Include confidence score per assignment; flag low-confidence mappings for human review |
+
+#### Bugs to Watch For
+
+| # | Bug | Where to Check |
+|---|-----|----------------|
+| 1 | **PRD detector paths wrong** | `discover.mjs:215` — must include `docs/01_product` |
+| 2 | **Glob resolution failures** | `prd PRD-005` must resolve `PRD-005-mesh-native-distribution.md`, not fail on partial match |
+| 3 | **Markdown table parsing edge cases** | PRD phase tables with merged cells, empty columns, or multi-line cells |
+| 4 | **Priority mapping off-by-one** | Phase 1 → P0, Phase 2 → P1, Phase 3 → P2 — verify boundary when PRD has 5+ phases (P3 is lowest, phases 4+ should all map to P3) |
+| 5 | **Acceptance criteria with nested lists** | Nested bullet points in PRD acceptance criteria may be flattened or lost |
+| 6 | **Unicode / special characters in doc IDs** | Doc paths with spaces, parens, or non-ASCII chars |
+
+#### Missed Opportunities
+
+| # | Opportunity | Value |
+|---|-------------|-------|
+| 1 | **Auto-generate dependency graph visualization** | Output a Mermaid diagram showing cross-team, cross-document dependencies |
+| 2 | **Conflict detection across doc types** | Flag when a tech spec contradicts a PRD (e.g., PRD says "REST API" but tech spec says "GraphQL") |
+| 3 | **Intake history / changelog** | Log every intake run to `events.log` with document hash, items created, teams affected |
+| 4 | **Reverse traceability** — from backlog item back to source doc section | Enable "why does this task exist?" queries |
+| 5 | **Auto-detect document type** | If user just says `/intake docs/02_specs/TECH-003.md`, infer `tech-spec` from path/content |
+| 6 | **Batch intake** | `/intake prd --all` to intake all PRDs at once for initial backlog population |
+| 7 | **Staleness detection** | Flag backlog items whose source document has been modified since last intake |
+| 8 | **Integration with roadmap-tracker** | After intake, auto-update the roadmap-tracker agent with new milestones |
+
+### How Intake Fits the Existing Flow
+
+```
+UPDATED FLOW:
+  /intake prd PRD-005           ← intake agent: any doc type → backlog items
+  /intake tech-spec TECH-003    ← same agent, different extractor
+  /intake ui-spec UI-001        ← same agent, different extractor
+       ↓
+  AGENT_BACKLOG.md              ← now populated with spec-sourced items
+       ↓
+  /orchestrate                  ← existing: orchestrate from backlog (unchanged)
+       ↓
+  Phase 1-5 lifecycle           ← unchanged
+```
+
+The orchestrator remains untouched. The intake agent is a **pre-orchestration input stage** that converts any specification document into structured backlog items.
+
+### Relationship to Existing Agents
+
+| Agent | Relationship to Intake Agent |
+|-------|------------------------------|
+| **Product Manager** | Writes PRDs and specs that the intake agent consumes. Reviews intake output for accuracy. Does NOT perform intake itself — separation of concerns between authoring and processing. |
+| **Roadmap Tracker** | Receives milestone updates after intake. Tracks phase-level progress across intaken documents. |
+| **Orchestrator** | Reads `AGENT_BACKLOG.md` that intake populates. No direct interaction — decoupled via the backlog file. |
+| **All team agents** | Receive tasks that originate from intaken documents. Source traceability tags let them trace back to the originating spec section. |
 
 ### Documents That Should Exist
 
 | # | Document | Proposed Location | Purpose | Priority |
 |---|----------|------------------|---------|----------|
-| 1 | **`/prd-intake` command** | `.agentkit/templates/claude/commands/prd-intake.md` | New slash command: reads a PRD, extracts deliverables, maps to teams, writes `AGENT_BACKLOG.md` entries | **P0** — this is the missing link |
-| 2 | **PRD Index** | `docs/01_product/INDEX.md` | Lists all PRDs with status (Draft/Approved/In Progress/Shipped), affected teams, and links | **P1** — useful for both humans and agents |
-| 3 | **PRD-to-Team Matrix** | Section added to `UNIFIED_AGENT_TEAMS.md` or standalone `docs/01_product/PRD_TEAM_MATRIX.md` | Which teams are affected by which PRDs and their role (implementor, reviewer, dependency) | **P1** |
-| 4 | **Roadmap Tracker agent enhancement** | `.agentkit/spec/agents.yaml` (roadmap-tracker section) | The `roadmap-tracker` agent already exists but may need PRD-phase tracking capabilities | **P2** — evaluate existing agent |
-
-### `/prd-intake` Command Design
-
-```
-Usage: /prd-intake <PRD-ID or path>
-
-Example: /prd-intake PRD-005
-         /prd-intake docs/01_product/PRD-005-mesh-native-distribution.md
-
-Behavior:
-1. Resolve PRD file from ID or path
-   - PRD-005 → docs/01_product/PRD-005-*.md (glob match)
-2. Read the PRD and extract:
-   - Phases and milestones
-   - Deliverables per phase
-   - Dependencies between deliverables
-   - Acceptance criteria
-3. Map deliverables to teams using teams.yaml scope patterns
-4. Generate AGENT_BACKLOG.md entries:
-   - Priority derived from phase order (Phase 1 → P0, Phase 2 → P1, etc.)
-   - Team assignment from scope mapping
-   - Cross-team dependencies populated
-   - Notes include PRD reference and acceptance criteria
-5. Output summary of proposed/written backlog items
-
-Flags:
-  --dry-run     Show proposed items without writing
-  --phase N     Only intake from a specific PRD phase
-  --team <id>   Only intake items for a specific team
-  --append      Add to existing backlog (default)
-  --replace     Replace existing items sourced from this PRD
-```
-
-### How It Fits the Existing Flow
-
-```
-NEW FLOW:
-  /prd-intake PRD-005          ← new: PRD → backlog items (Product Manager scope)
-       ↓
-  AGENT_BACKLOG.md             ← now populated with PRD-sourced items
-       ↓
-  /orchestrate                 ← existing: orchestrate from backlog
-       ↓
-  Phase 1-5 lifecycle          ← unchanged
-```
-
-The orchestrator doesn't need changes — it already reads `AGENT_BACKLOG.md`. The missing piece is the **input stage**.
+| 1 | **`/intake` command** | `.agentkit/templates/claude/commands/intake.md` | Slash command definition for multi-doc-type intake | **P0** — this is the missing input stage |
+| 2 | **Intake agent definition** | `.agentkit/spec/agents.yaml` (new `intake-analyst` entry) | Agent spec for the intake analyst | **P0** |
+| 3 | **Document type extractors** | `.agentkit/engines/node/src/extractors/` | Per-doc-type parsing logic (prd.mjs, func-spec.mjs, etc.) | **P0** |
+| 4 | **PRD Index** | `docs/01_product/INDEX.md` | Lists all PRDs with status, affected teams, last intake date | **P1** |
+| 5 | **PRD-to-Team Matrix** | Section in `UNIFIED_AGENT_TEAMS.md` or `docs/01_product/PRD_TEAM_MATRIX.md` | Which teams are affected by which PRDs | **P1** |
+| 6 | **Spec directory conventions** | `docs/README.md` or `docs/CONVENTIONS.md` | Documents expected directory layout, naming, and template for each doc type | **P1** |
+| 7 | **Roadmap Tracker enhancement** | `.agentkit/spec/agents.yaml` (roadmap-tracker section) | Add intake-triggered milestone updates | **P2** |
 
 ---
 
@@ -243,7 +370,7 @@ The orchestrator doesn't need changes — it already reads `AGENT_BACKLOG.md`. T
 
 ## Part 6: Implementation Steps
 
-### Must-do (P0)
+### Must-do (P0) — CLI & Packaging Agent
 
 1. **Fix PRD detector bug** — add `docs/01_product` to `DOC_ARTIFACT_DETECTORS` dirs in `discover.mjs:215`
 2. **Add `cli` team to `teams.yaml`** — new entry after `quality`
@@ -255,15 +382,26 @@ The orchestrator doesn't need changes — it already reads `AGENT_BACKLOG.md`. T
 8. **Update `orchestrator.mjs`** — add `team-cli` to team registry
 9. **Add T11-CLI items to `AGENT_BACKLOG.md`** — PRD-005 Phase 1 tasks
 
-### Should-do (P1)
+### Must-do (P0) — Intake Agent
 
-10. **Create `/prd-intake` command** — the missing PRD → backlog pipeline
-11. **Add `prd-intake` to `commands.yaml`** — command spec entry
-12. **Create `docs/01_product/INDEX.md`** — PRD index with statuses
-13. **Generate `/team-product` command file** — currently missing despite spec existing
+10. **Add `intake-analyst` agent to `agents.yaml`** — new entry under `product` category
+11. **Create `/intake` command** — `.agentkit/templates/claude/commands/intake.md`
+12. **Add `intake` to `commands.yaml`** — command spec entry with doc-type argument
+13. **Create extractor scaffolds** — `.agentkit/engines/node/src/extractors/{prd,func-spec,tech-spec,ui-spec,stories,process}.mjs`
+14. **Generate `intake-analyst.agent.md`** — in `.github/agents/`
 
-### Nice-to-have (P2)
+### Should-do (P1) — Supporting Artifacts
 
-14. **Create PRD-to-Team matrix** — either in UNIFIED_AGENT_TEAMS.md or standalone
-15. **Evaluate `roadmap-tracker` agent** — may need PRD phase tracking
-16. **Add scope overlap resolution rules** — document T11 overlaps with T8/T4/T9
+15. **Create `docs/01_product/INDEX.md`** — PRD index with status, affected teams, last intake date
+16. **Create `docs/CONVENTIONS.md`** — directory layout and naming conventions for each doc type
+17. **Generate `/team-product` command file** — currently missing despite spec existing
+18. **Create PRD-to-Team matrix** — either in `UNIFIED_AGENT_TEAMS.md` or standalone
+19. **Analyze intake agent for gaps** — run the gap analysis checklist from Part 4 against the built agent
+
+### Nice-to-have (P2) — Enhancements
+
+20. **Enhance `roadmap-tracker` agent** — add intake-triggered milestone updates
+21. **Add scope overlap resolution rules** — document T11 overlaps with T8/T4/T9
+22. **Implement batch intake** — `/intake prd --all` for initial backlog population
+23. **Add staleness detection** — flag backlog items whose source doc changed since last intake
+24. **Add dependency graph visualization** — Mermaid diagram output from intake
