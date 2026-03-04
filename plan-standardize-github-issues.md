@@ -45,7 +45,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 | Gap | Evidence | Resolution |
 |-----|----------|------------|
-| No runtime handler for `sync-backlog` | CLI lists it in `VALID_COMMANDS` but no `case 'sync-backlog':` in `cli.mjs` | Add runtime handler that calls the new sync engine |
+| No runtime handler for `sync-backlog` | `sync-backlog` exists in `commands.yaml` and spec validation but has no entry in `VALID_COMMANDS` and no handler in `cli.mjs` | Add CLI route and runtime handler that calls the new sync engine |
 | No GitHub issue fetcher | `gh issue list` is in allowed-tools but no code calls it | Implement `github-adapter.mjs` that shells out to `gh` |
 | No field normalization layer | Sync-backlog template describes it as prose, not code | Implement `issue-normalizer.mjs` with canonical schema |
 | No consolidated view command | Backlog is only `AGENT_BACKLOG.md` (markdown table) | Add `backlog` CLI command with `--format` (table/json/yaml) output |
@@ -100,7 +100,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 ┌─────────────────────────────────────────────────────────┐
 │              agentkit backlog                            │
 │  Consolidated view: external + local sources             │
-│  --format table|json|yaml                                │
+│  --format table|json|yaml|csv                             │
 │  --team <filter>                                         │
 │  --priority <filter>                                     │
 │  --source <filter> (github|linear|discovery|todo|review) │
@@ -187,13 +187,16 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 2. **`.agentkit/spec/commands.yaml`** — Add `import-issues` command and `backlog` command:
    ```yaml
+   commands:
    - name: import-issues
      type: workflow
      description: >
        Imports issues from the configured external tracker (GitHub or Linear),
        normalizes fields to the canonical backlog schema, deduplicates against
        existing items, assigns teams via intake routing rules, and writes to
-       AGENT_BACKLOG.md. Gated behind the process.intake.autoImport flag.
+       AGENT_BACKLOG.md. Always available; when process.intake.autoImport is
+       true, it also runs automatically during intake/init, otherwise it must
+       be invoked explicitly.
      flags:
        - name: --tracker
          description: 'Override tracker (github, linear)'
@@ -397,7 +400,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 15. **`.agentkit/engines/node/src/sync-backlog-runner.mjs`** — Orchestrated sync:
     - Combines all sources (calls individual collectors):
       1. External tracker (via `import-issues` logic)
-      2. Discovery findings (parse `AGENT_TEAMS.md`)
+      2. Discovery findings (via `agentkit discover` results)
       3. Healthcheck results (parse `orchestrator.json`)
       4. Code TODOs (grep codebase)
       5. Review findings (parse `events.log`)
@@ -548,7 +551,7 @@ Estimated file count: ~15 new files, ~6 modified files.
       to `AGENT_BACKLOG.md` and `.claude/state/backlog.json`
 - [ ] `agentkit backlog --format json` outputs all items from all sources with
       the full field set documented above
-- [ ] `agentkit backlog --team backend --priority P0,P1` filters correctly
+- [ ] `agentkit backlog --team backend --priority P0` filters correctly
 - [ ] `agentkit init` with `autoImport: true` triggers import during adoption
 - [ ] `/sync-backlog` runtime handler combines external + local sources
 - [ ] All existing tests continue to pass
