@@ -156,6 +156,10 @@ export const PROJECT_MAPPING = [
   { src: 'process.commitConvention', dest: 'commitConvention' },
   { src: 'process.codeReview', dest: 'codeReview' },
   { src: 'process.teamSize', dest: 'teamSize' },
+  { src: 'process.issueTracker', dest: 'issueTracker', check: 'not-none' },
+  { src: 'process.intake.ownerTeam', dest: 'intakeOwnerTeam', check: 'not-none' },
+  { src: 'process.intake.operationsTeam', dest: 'intakeOperationsTeam', check: 'not-none' },
+  { src: 'process.intake.cadence', dest: 'intakeCadence', check: 'not-none' },
 
   // Testing
   { src: 'testing.unit', dest: 'testingUnit', type: 'array-join' },

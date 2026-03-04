@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Synchronizes the local backlog with GitHub Issues and project boards. Pulls open issues, maps them to teams, updates local tracking documents, and identifies stale or unassigned work items.'
+description: 'Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-04'
@@ -14,7 +14,7 @@ last_updated: '2026-03-04'
 
 # sync-backlog
 
-Synchronizes the local backlog with GitHub Issues and project boards. Pulls open issues, maps them to teams, updates local tracking documents, and identifies stale or unassigned work items.
+Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.
 
 ## Instructions
 
@@ -48,3 +48,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+
+## Intake Semantics
+
+- Tracker: `github`
+- Intake owner team: `product`
+- Operations team: `quality`
+- Cadence: `daily`
+- Security-critical escalation: `security, devops`
+- Blocked cross-team escalation: `product`
+
+Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
+

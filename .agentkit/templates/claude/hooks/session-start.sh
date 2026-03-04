@@ -102,9 +102,16 @@ if [[ -n "$AGENTKIT_ROOT" ]] && command -v node &>/dev/null; then
     fi
 fi
 
+# ── Convention reminders ────────────────────────────────────────────────
+conventions_reminder="REMINDERS:
+- Commits & PR titles MUST use Conventional Commits: type(scope): description
+  Types: feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert
+- After editing .agentkit/spec/, run: pnpm -C .agentkit agentkit:sync
+- Run /check before creating a PR"
+
 # ── Compose the environment summary ─────────────────────────────────────
-env_summary=$(printf 'Session: %s\nWorking directory: %s\n\nToolchains:\n%s\n\nGit:\n%s' \
-    "$SESSION_ID" "$CWD" "$tools_summary" "$git_summary")
+env_summary=$(printf 'Session: %s\nWorking directory: %s\n\nToolchains:\n%s\n\nGit:\n%s\n\n%s' \
+    "$SESSION_ID" "$CWD" "$tools_summary" "$git_summary" "$conventions_reminder")
 
 # ── Return structured output ────────────────────────────────────────────
 if command -v jq &>/dev/null; then

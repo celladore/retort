@@ -1097,6 +1097,7 @@ function buildCommandVars(cmd, vars) {
   return {
     ...vars,
     commandName: cmd.name,
+    isSyncBacklog: cmd.name === 'sync-backlog',
     commandDescription:
       typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
@@ -1226,6 +1227,27 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const vars = {
     ...projectVars,
     ...featureVars,
+  const teamsIntake = teamsSpec?.intake || {};
+  const processIntake = projectSpec?.process?.intake || {};
+  const intakeEscalation = processIntake.escalation || teamsIntake.escalation || {};
+  const securityEscalationTeams = Array.isArray(intakeEscalation.securityCritical)
+    ? intakeEscalation.securityCritical.join(', ')
+    : '';
+  const blockedEscalationTeams = Array.isArray(intakeEscalation.blockedCrossTeam)
+    ? intakeEscalation.blockedCrossTeam.join(', ')
+    : '';
+  const vars = {
+    ...projectVars,
+    issueTracker: projectVars.issueTracker || 'github',
+    intakeOwnerTeam: projectVars.intakeOwnerTeam || processIntake.ownerTeam || teamsIntake.ownerTeam || 'product',
+    intakeOperationsTeam:
+      projectVars.intakeOperationsTeam ||
+      processIntake.operationsTeam ||
+      teamsIntake.operationsTeam ||
+      'quality',
+    intakeCadence: projectVars.intakeCadence || processIntake.cadence || 'daily',
+    intakeSecurityEscalationTeams: securityEscalationTeams,
+    intakeBlockedEscalationTeams: blockedEscalationTeams,
     version,
     overlayTemplatesDir: resolve(overlayDir, 'templates'),
     repoName:
