@@ -184,6 +184,25 @@ This guide helps you choose the right command for your situation. Most workflow 
 
 ---
 
+### `/brand` — Brand spec management and auditing
+
+**Use when:**
+
+- You need to validate `brand.yaml` after editing colors, typography, or accessibility settings
+- You want to preview the full resolved color palette (`--palette`) or editor theme mapping (`--theme`)
+- You need to audit foreground/background contrast ratios for WCAG compliance (`--contrast`)
+- You're setting up a new project and need a brand spec scaffolded (`--init`)
+- You've changed brand.yaml and need to regenerate editor theme files (`--generate`)
+- You want a full brand audit in one pass (`--all`)
+
+**Not for:** Code review (use `/review`), general quality gates (use `/check`), project-wide audit (use `/project-review`).
+
+**Flags:** `--validate` (default), `--palette`, `--theme`, `--contrast`, `--init`, `--generate`, `--all`
+
+**Shared assets:** Reads `.agentkit/spec/brand.yaml`, `.agentkit/spec/editor-theme.yaml`. May write `.vscode/settings.json` (with `--generate`) or `.agentkit/spec/brand.yaml` (with `--init`).
+
+---
+
 ## Quick Decision Tree
 
 | Situation                       | Command                                        |
@@ -198,6 +217,7 @@ This guide helps you choose the right command for your situation. Most workflow 
 | Delegate work to a team         | `/delegate`                                    |
 | Generate scaffolded skeletons   | `/scaffold`                                    |
 | Run release readiness checks    | `/preflight`                                   |
+| Validate or audit brand spec    | `/brand` or `/brand --all`                     |
 | Review a PR or commit range     | `/review`                                      |
 | Update backlog from findings    | `/sync-backlog`                                |
 | End of session, hand off        | `/handoff`                                     |

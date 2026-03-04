@@ -250,6 +250,16 @@ const DESIGN_SYSTEM_DETECTORS = [
     label: 'Component Library',
     dirs: ['packages/ui', 'packages/components'],
   },
+  {
+    name: 'brand-guide',
+    label: 'Brand Guide',
+    files: ['.agentkit/spec/brand.yaml', '.agentkit/spec/brand.json', 'brand.yaml', 'brand.json'],
+  },
+  {
+    name: 'editor-theme',
+    label: 'Editor Theme',
+    files: ['.agentkit/spec/editor-theme.yaml', '.agentkit/spec/editor-theme.json'],
+  },
 ];
 
 // ---------------------------------------------------------------------------

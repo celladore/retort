@@ -756,6 +756,49 @@ commands:
       - Grep
       - Bash
 
+  - name: brand
+    type: utility
+    description: >
+      Manage the project brand spec (brand.yaml) and editor theme. Supports
+      validation, palette preview, theme mapping, contrast auditing,
+      scaffolding, and regeneration of editor theme files.
+    flags:
+      - name: --validate
+        description: 'Validate brand.yaml and report errors/warnings (runs implicitly when no other flags are given)'
+        type: boolean
+        default: false
+      - name: --palette
+        description: 'Show the resolved color palette with hex values'
+        type: boolean
+        default: false
+      - name: --theme
+        description: 'Show the resolved editor theme mapping (VS Code color slots → hex values)'
+        type: boolean
+        default: false
+      - name: --contrast
+        description: 'Check foreground/background contrast ratios against WCAG thresholds'
+        type: boolean
+        default: false
+      - name: --init
+        description: 'Scaffold a brand.yaml with sensible defaults (interactive prompts for name, colors)'
+        type: boolean
+        default: false
+      - name: --generate
+        description: 'Regenerate editor theme settings from brand.yaml + editor-theme.yaml (re-runs syncEditorTheme)'
+        type: boolean
+        default: false
+      - name: --all
+        description: 'Run all audit steps: validate + palette + theme + contrast'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+      - Write
+      - Edit
+      - Bash
+
   # ===========================================================================
   # Framework Commands — AgentKit Forge internal tooling
   # ===========================================================================
