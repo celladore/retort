@@ -100,6 +100,103 @@ export function ensureTeamIds(agentkitRoot) {
   }
 }
 
+/**
+ * Default area→team routing map. Used when teams.yaml intake.routing is unavailable.
+ * Matches the canonical issue template area values.
+ */
+const DEFAULT_AREA_ROUTING = {
+  backend: 'team-backend',
+  frontend: 'team-frontend',
+  data: 'team-data',
+  infra: 'team-infra',
+  devops: 'team-devops',
+  testing: 'team-testing',
+  security: 'team-security',
+  docs: 'team-docs',
+  product: 'team-product',
+  quality: 'team-quality',
+  cli: 'team-backend',
+  'sync-engine': 'team-devops',
+};
+
+/**
+ * Resolve an issue area to the assigned team ID.
+ * Reads intake.routing from teams.yaml if available, falls back to defaults.
+ * @param {string} area - One of the canonical issue area values
+ * @param {string} [agentkitRoot] - Path to .agentkit directory for reading teams.yaml
+ * @returns {string} Team ID (e.g. 'team-backend')
+ */
+export function resolveTeamByArea(area, agentkitRoot) {
+  if (agentkitRoot) {
+    try {
+      const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
+      if (existsSync(teamsPath)) {
+        const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+        const routing = spec?.intake?.routing;
+        if (routing && routing[area]) {
+          return routing[area];
+        }
+      }
+    } catch {
+      /* fall through to defaults */
+    }
+  }
+  return DEFAULT_AREA_ROUTING[area] || 'team-quality';
+}
+
+/**
+ * Compute escalation teams based on issue metadata.
+ * Returns additional team IDs that should be cc'd/notified.
+ * @param {object} params
+ * @param {string} params.area - Issue area
+ * @param {string} params.priority - Priority level (P0-P4)
+ * @param {string} [params.severity] - Severity level (critical/high/medium/low)
+ * @param {string} [params.impact] - Impact scope
+ * @param {string} [agentkitRoot] - Path to .agentkit directory
+ * @returns {string[]} Additional team IDs to escalate to
+ */
+export function computeEscalation({ area, priority, severity, impact }, agentkitRoot) {
+  const escalateTeams = new Set();
+
+  let securityTeams = ['team-security', 'team-devops'];
+  let blockedTeams = ['team-product'];
+
+  if (agentkitRoot) {
+    try {
+      const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
+      if (existsSync(teamsPath)) {
+        const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+        const esc = spec?.intake?.escalation;
+        if (esc?.securityCritical) {
+          securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+        }
+        if (esc?.blockedCrossTeam) {
+          blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+        }
+      }
+    } catch {
+      /* use defaults */
+    }
+  }
+
+  // Rule 1: Critical severity in security-sensitive areas → security escalation
+  if (severity === 'critical' && ['security', 'infra', 'backend'].includes(area)) {
+    securityTeams.forEach((t) => escalateTeams.add(t));
+  }
+
+  // Rule 2: All-users impact + P0 priority → blocked escalation
+  if (impact === 'all users' && priority === 'P0') {
+    blockedTeams.forEach((t) => escalateTeams.add(t));
+  }
+
+  // Rule 3: Any P0 → notify operations team
+  if (priority === 'P0') {
+    escalateTeams.add('team-quality');
+  }
+
+  return [...escalateTeams];
+}
+
 // ---------------------------------------------------------------------------
 // Path helpers
 // ---------------------------------------------------------------------------

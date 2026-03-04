@@ -60,3 +60,36 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
 
+## Issue Field Routing
+
+When syncing issues from the tracker, use the issue's **area** field to route to the correct team:
+
+| Area | Team |
+|------|------|
+| backend | team-backend |
+| frontend | team-frontend |
+| data | team-data |
+| infra | team-infra |
+| devops | team-devops |
+| testing | team-testing |
+| security | team-security |
+| docs | team-docs |
+| product | team-product |
+| quality | team-quality |
+| cli | team-backend |
+| sync-engine | team-devops |
+
+### Escalation Rules
+
+- **Severity = critical** AND **area in [security, infra, backend]** → escalate to security, devops
+- **Impact = all users** AND **priority = P0** → escalate to product
+- **Any P0 unresolved > 24 hours** → escalate to product (intake owner)
+
+### Priority Levels
+
+P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
+
+### Severity Levels (bugs only)
+
+critical · high · medium · low
+

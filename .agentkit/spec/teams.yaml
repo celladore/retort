@@ -97,6 +97,8 @@ intake:
     docs: docs
     product: product
     quality: quality
+    cli: backend          # CLI issues route to backend team
+    sync-engine: devops   # Sync engine issues route to devops team
   escalation:
     securityCritical: [security, devops]
     blockedCrossTeam: [product]

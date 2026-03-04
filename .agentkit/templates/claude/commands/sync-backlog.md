@@ -63,18 +63,63 @@ Every backlog item must follow this format:
 - [ ] **[PRIORITY] AREA: Title** (team-<assigned>)
   - _What:_ <1-2 sentence description of the work>
   - _Why:_ <impact or motivation>
+  - _Severity:_ <critical|high|medium|low> (bugs/incidents only, omit for features)
   - _Acceptance:_ <checkable criteria that define "done">
   - _Files:_ <likely files to touch, or "TBD">
+  - _Source:_ <issue #N | discovery | healthcheck | TODO | review | manual>
 ```
 
 ### Priority Levels
 
 | Priority | Meaning                             | Examples                                                     |
 | -------- | ----------------------------------- | ------------------------------------------------------------ |
-| **P0**   | Blocking — nothing else can proceed | Build broken, critical security vuln, data loss risk         |
+| **P0**   | Critical — nothing else can proceed | Build broken, critical security vuln, data loss risk         |
 | **P1**   | High — should be done this session  | Failing tests, type errors, lint errors, missing auth checks |
 | **P2**   | Medium — important but not urgent   | Performance improvements, test coverage gaps, code cleanup   |
 | **P3**   | Low — nice to have                  | Documentation, style consistency, minor refactors            |
+| **P4**   | Trivial — cosmetic, polish          | Typos, formatting, minor UI tweaks                           |
+
+### Area Labels
+
+Use **exactly** one of the canonical area labels in the `AREA:` field of each backlog item. These match the issue template dropdowns and the task-protocol:
+
+`backend` · `frontend` · `data` · `infra` · `devops` · `testing` · `security` · `docs` · `product` · `quality` · `cli` · `sync-engine`
+
+The area determines which team the item is routed to via `teams.yaml` intake routing:
+
+| Area          | Routed to team |
+| ------------- | -------------- |
+| `backend`     | team-backend   |
+| `frontend`    | team-frontend  |
+| `data`        | team-data      |
+| `infra`       | team-infra     |
+| `devops`      | team-devops    |
+| `testing`     | team-testing   |
+| `security`    | team-security  |
+| `docs`        | team-docs      |
+| `product`     | team-product   |
+| `quality`     | team-quality   |
+| `cli`         | team-backend   |
+| `sync-engine` | team-devops    |
+
+### Severity Levels (for bugs / incidents)
+
+When a backlog item originates from a bug report or incident, include a severity tag:
+
+| Severity     | Meaning                                              |
+| ------------ | ---------------------------------------------------- |
+| **critical** | Complete failure, data loss, or security vulnerability |
+| **high**     | Major functionality broken                            |
+| **medium**   | Partial functionality impaired                        |
+| **low**      | Minor issue, cosmetic or edge-case                    |
+
+### Escalation Rules
+
+Escalate automatically when **all** of these conditions are met:
+
+1. **Severity is `critical`** AND **area is `security`, `infra`, or `backend`** → cc `{{intakeSecurityEscalationTeams}}`
+2. **Impact is `all users`** AND **priority is `P0`** → cc `{{intakeBlockedEscalationTeams}}`
+3. **Any P0 item unresolved for > 24 hours** → escalate to `{{intakeOwnerTeam}}`
 
 ### Acceptance Criteria Rules
 
