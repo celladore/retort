@@ -118,6 +118,21 @@ describe('replacePlaceholders', () => {
     expect(replacePlaceholders('no vars', {})).toBe('no vars');
   });
 
+  it('resolves {{var|default}} pipe syntax with fallback when var is missing', () => {
+    const result = replacePlaceholders('coverage: {{testingCoverage|80}}%', {});
+    expect(result).toBe('coverage: 80%');
+  });
+
+  it('resolves {{var|default}} pipe syntax with var value when present', () => {
+    const result = replacePlaceholders('coverage: {{testingCoverage|80}}%', { testingCoverage: '95' });
+    expect(result).toBe('coverage: 95%');
+  });
+
+  it('supports empty default in {{var|}} pipe syntax', () => {
+    const result = replacePlaceholders('val: {{missing|}}!', {});
+    expect(result).toBe('val: !');
+  });
+
   it('warns on unresolved placeholders when DEBUG is set', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     process.env.DEBUG = '1';

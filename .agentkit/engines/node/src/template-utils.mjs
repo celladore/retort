@@ -77,6 +77,12 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
     result = result.split(placeholder).join(safeValue);
   }
 
+  // Resolve {{var|default}} pipe syntax — uses the default value when var is unresolved
+  result = result.replace(
+    /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\|([^}]*)\}\}/g,
+    (_match, key, fallback) => (vars[key] !== undefined && vars[key] !== null ? String(vars[key]) : fallback)
+  );
+
   // Warn about unresolved placeholders (ignore block syntax remnants, including {{else}})
   const unresolved = result.match(/\{\{(?!#|\/|else\}\})([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g);
   if (unresolved && process.env.DEBUG) {

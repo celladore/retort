@@ -92,6 +92,7 @@ export const PROJECT_MAPPING = [
   { src: 'deployment.cloudProvider', dest: 'cloudProvider' },
   { src: 'deployment.containerized', dest: 'containerized', type: 'boolean' },
   { src: 'deployment.containerized', dest: 'hasContainerized', type: 'boolean' },
+  { src: 'deployment.containerRuntime', dest: 'containerRuntime', check: 'not-none' },
   { src: 'deployment.environments', dest: 'environments', type: 'array-join' },
   { src: 'deployment.iacTool', dest: 'iacTool' },
 
@@ -135,12 +136,14 @@ export const PROJECT_MAPPING = [
   { src: 'observability.tracing.samplingRate', dest: 'tracingSamplingRate', type: 'string' },
   { src: 'observability.logging.centralised', dest: 'hasCentralisedLogging', type: 'boolean' },
   { src: 'observability.logging.retentionDays', dest: 'logRetentionDays', type: 'string' },
+  { src: 'observability.logging.retentionDays', dest: 'loggingRetentionDays', type: 'string' },
 
   // Compliance
   { src: 'compliance.framework', dest: 'complianceFramework', check: 'not-none' },
   { src: 'compliance.framework', dest: 'hasCompliance', type: 'boolean', check: 'not-none' },
   { src: 'compliance.disasterRecovery.rpoHours', dest: 'drRpoHours', type: 'string' },
   { src: 'compliance.disasterRecovery.rtoHours', dest: 'drRtoHours', type: 'string' },
+  { src: 'compliance.disasterRecovery.testSchedule', dest: 'drTestSchedule', check: 'not-none' },
   {
     src: 'compliance.disasterRecovery.backupSchedule',
     dest: 'drBackupSchedule',
