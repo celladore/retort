@@ -1,0 +1,372 @@
+# =============================================================================
+# features.yaml — Kit Feature Definitions for AgentKit Forge
+# Canonical registry of opt-in/opt-out features available to adopting repos.
+# Version: 0.1.0
+# =============================================================================
+# Each feature represents a discrete capability that agentkit-forge provides.
+# Repos can enable/disable features via their overlay settings.yaml to control
+# which aspects of the kit they adopt.
+#
+# Feature categories:
+#   core       — Foundational capabilities (always enabled, cannot be disabled)
+#   workflow   — Team orchestration and workflow automation
+#   quality    — Code quality, testing, and review gates
+#   docs       — Documentation generation and management
+#   security   — Security scanning, permissions, and guardrails
+#   infra      — Infrastructure, deployment, and observability
+#   advanced   — Power-user features for complex workflows
+# =============================================================================
+
+features:
+
+  # ---------------------------------------------------------------------------
+  # Core — Always enabled, cannot be disabled
+  # ---------------------------------------------------------------------------
+  - id: spec-sync
+    name: Spec Sync
+    category: core
+    description: >-
+      Render AI tool configs from YAML specs and overlays. This is the
+      foundational sync engine that all other features build on.
+    alwaysOn: true
+    dependencies: []
+    templateVars:
+      - hasSpecSync
+
+  - id: project-context
+    name: Project Context
+    category: core
+    description: >-
+      Project identity, tech stack detection, and architecture metadata
+      that feeds into every generated config.
+    alwaysOn: true
+    dependencies: []
+    templateVars:
+      - hasProjectContext
+
+  # ---------------------------------------------------------------------------
+  # Workflow — Team orchestration and workflow automation
+  # ---------------------------------------------------------------------------
+  - id: team-orchestration
+    name: Team Orchestration
+    category: workflow
+    description: >-
+      Multi-team coordination with team definitions, handoff chains,
+      and delegated task management across agent personas.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasTeamOrchestration
+    affectsTemplates:
+      - claude/commands/team-TEMPLATE.md
+      - cursor/rules/team-*.mdc
+      - windsurf/teams/
+
+  - id: agent-personas
+    name: Agent Personas
+    category: workflow
+    description: >-
+      Specialized agent definitions with roles, responsibilities,
+      conventions, and anti-patterns for focused task delegation.
+    alwaysOn: false
+    default: true
+    dependencies: [team-orchestration]
+    templateVars:
+      - hasAgentPersonas
+    affectsTemplates:
+      - claude/agents/
+      - copilot/agents/
+
+  - id: slash-commands
+    name: Slash Commands
+    category: workflow
+    description: >-
+      Custom AI tool commands (e.g., /orchestrate, /plan, /check)
+      with typed flags, allowed tools, and workflow routing.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasSlashCommands
+    affectsTemplates:
+      - claude/commands/
+      - claude/skills/
+
+  - id: task-delegation
+    name: Task Delegation
+    category: workflow
+    description: >-
+      Create, track, and manage delegated tasks across teams
+      with priority, dependencies, and handoff chains.
+    alwaysOn: false
+    default: false
+    dependencies: [team-orchestration]
+    templateVars:
+      - hasTaskDelegation
+
+  # ---------------------------------------------------------------------------
+  # Quality — Code quality, testing, and review gates
+  # ---------------------------------------------------------------------------
+  - id: quality-gates
+    name: Quality Gates
+    category: quality
+    description: >-
+      Automated quality checks including linting, formatting,
+      type checking, testing, and build verification.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasQualityGates
+    affectsTemplates:
+      - claude/hooks/stop-build-check.sh
+
+  - id: code-review
+    name: Code Review
+    category: quality
+    description: >-
+      Automated review checks for secrets, large files, TODOs,
+      and code quality with configurable severity levels.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasCodeReview
+
+  - id: coding-rules
+    name: Coding Rules
+    category: quality
+    description: >-
+      Convention enforcement via rules.yaml — naming patterns,
+      error handling, performance budgets, and security guardrails.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasCodingRules
+    affectsTemplates:
+      - claude/rules/
+      - cursor/rules/
+
+  # ---------------------------------------------------------------------------
+  # Docs — Documentation generation and management
+  # ---------------------------------------------------------------------------
+  - id: doc-scaffolding
+    name: Doc Scaffolding
+    category: docs
+    description: >-
+      Generate documentation structure (PRD, ADR, API docs, tech specs)
+      with convention-aligned templates and paths.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasDocScaffolding
+    affectsTemplates:
+      - docs/
+
+  - id: session-handoff
+    name: Session Handoff
+    category: docs
+    description: >-
+      Generate session handoff documents capturing context, decisions,
+      and next steps for async collaboration.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasSessionHandoff
+
+  - id: external-knowledge
+    name: External Knowledge
+    category: docs
+    description: >-
+      Integrate external documentation sources (Windsurf guides,
+      markdown files, git repos) into template metadata overlays.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasExternalKnowledgeFeature
+    affectsTemplates:
+      - copilot/instructions/
+      - windsurf/templates/
+
+  # ---------------------------------------------------------------------------
+  # Security — Security scanning, permissions, and guardrails
+  # ---------------------------------------------------------------------------
+  - id: permission-guards
+    name: Permission Guards
+    category: security
+    description: >-
+      Allow/deny permission model for tool commands with
+      pre-tool-use hooks that block destructive operations.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasPermissionGuards
+    affectsTemplates:
+      - claude/settings.json
+      - claude/hooks/
+
+  - id: sensitive-file-protection
+    name: Sensitive File Protection
+    category: security
+    description: >-
+      Pre-tool-use hooks that prevent AI agents from modifying
+      sensitive files (.env, credentials, CI configs).
+    alwaysOn: false
+    default: true
+    dependencies: [permission-guards]
+    templateVars:
+      - hasSensitiveFileProtection
+    affectsTemplates:
+      - claude/hooks/protect-sensitive.sh
+
+  # ---------------------------------------------------------------------------
+  # Infra — Infrastructure, deployment, and observability
+  # ---------------------------------------------------------------------------
+  - id: cost-tracking
+    name: Cost Tracking
+    category: infra
+    description: >-
+      Session-level usage and cost tracking with aggregated
+      reports, CSV/JSON export, and configurable retention.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasCostTracking
+
+  - id: ci-automation
+    name: CI Automation
+    category: infra
+    description: >-
+      GitHub Actions workflows, issue templates, PR templates,
+      and CI profile configurations.
+    alwaysOn: false
+    default: true
+    dependencies: []
+    templateVars:
+      - hasCiAutomation
+    affectsTemplates:
+      - github/workflows/
+      - github/ISSUE_TEMPLATE/
+
+  - id: dependency-management
+    name: Dependency Management
+    category: infra
+    description: >-
+      Automated dependency updates via Renovate or Dependabot
+      with configurable schedules and automerge strategies.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasDependencyManagement
+    affectsTemplates:
+      - renovate/renovate.json
+
+  # ---------------------------------------------------------------------------
+  # Advanced — Power-user features
+  # ---------------------------------------------------------------------------
+  - id: mcp-integration
+    name: MCP Integration
+    category: advanced
+    description: >-
+      Model Context Protocol server configurations and
+      Agent-to-Agent (A2A) config generation.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasMcpIntegration
+    affectsTemplates:
+      - mcp/
+
+  - id: healthcheck
+    name: Healthcheck
+    category: advanced
+    description: >-
+      Pre-flight validation of repo health including dependency
+      status, config integrity, and environment readiness.
+    alwaysOn: false
+    default: false
+    dependencies: [quality-gates]
+    templateVars:
+      - hasHealthcheck
+
+  - id: project-review
+    name: Project Review
+    category: advanced
+    description: >-
+      Comprehensive project audit covering architecture,
+      testing, documentation, and process compliance.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasProjectReview
+
+# =============================================================================
+# Feature presets — named bundles for common adoption patterns
+# =============================================================================
+presets:
+  minimal:
+    label: Minimal — sync + basic quality
+    description: Core sync engine with basic quality gates. No team orchestration or advanced features.
+    features:
+      - quality-gates
+      - coding-rules
+      - permission-guards
+
+  standard:
+    label: Standard — teams + quality + docs
+    description: Full team orchestration, quality gates, documentation, and security. Best for most projects.
+    features:
+      - team-orchestration
+      - agent-personas
+      - slash-commands
+      - quality-gates
+      - code-review
+      - coding-rules
+      - doc-scaffolding
+      - permission-guards
+      - sensitive-file-protection
+      - ci-automation
+
+  full:
+    label: Full — everything enabled
+    description: All features enabled including cost tracking, MCP, healthcheck, and advanced workflows.
+    features:
+      - team-orchestration
+      - agent-personas
+      - slash-commands
+      - task-delegation
+      - quality-gates
+      - code-review
+      - coding-rules
+      - doc-scaffolding
+      - session-handoff
+      - external-knowledge
+      - permission-guards
+      - sensitive-file-protection
+      - cost-tracking
+      - ci-automation
+      - dependency-management
+      - mcp-integration
+      - healthcheck
+      - project-review
+
+  lean:
+    label: Lean — no orchestration overhead
+    description: Quality and docs without team orchestration. Ideal for solo developers or small projects.
+    features:
+      - quality-gates
+      - code-review
+      - coding-rules
+      - doc-scaffolding
+      - permission-guards
+      - ci-automation

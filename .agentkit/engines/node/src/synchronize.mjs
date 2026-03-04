@@ -22,6 +22,11 @@ import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 import {
+  buildFeatureVars,
+  loadFeatureSpec,
+  resolveFeatures,
+} from './feature-manager.mjs';
+import {
   categorizeFile,
   computeProjectCompleteness,
   flattenProjectYaml,
@@ -934,8 +939,22 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // Template variables — start with project.yaml flat vars, then overlay with core vars
   const projectVars = projectSpec ? flattenProjectYaml(projectSpec, docsSpec) : {};
+
+  // Resolve enabled features from spec + overlay settings
+  let featureVars = {};
+  try {
+    const { features, presets } = loadFeatureSpec(agentkitRoot);
+    const enabledFeatures = resolveFeatures(features, overlaySettings, presets);
+    featureVars = buildFeatureVars(features, enabledFeatures);
+    log(`[agentkit:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
+  } catch {
+    // features.yaml may not exist yet in older repos — degrade gracefully
+    log('[agentkit:sync] Features: spec not found, all features assumed enabled');
+  }
+
   const vars = {
     ...projectVars,
+    ...featureVars,
     version,
     repoName: (overlaySettings.repoName === '__TEMPLATE__' && projectSpec?.name) || overlaySettings.repoName || repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',

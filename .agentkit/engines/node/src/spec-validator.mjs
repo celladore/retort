@@ -6,6 +6,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { validateFeatureSpec } from './feature-manager.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
@@ -793,6 +794,28 @@ export function validateSpec(agentkitRoot) {
   const settings = loadYaml('settings.yaml');
   const aliases = loadYaml('aliases.yaml');
   const docs = loadYaml('docs.yaml');
+
+  // Validate features.yaml if present
+  const featuresPath = resolve(specDir, 'features.yaml');
+  if (existsSync(featuresPath)) {
+    try {
+      const featuresData = yaml.load(readFileSync(featuresPath, 'utf-8'));
+      if (featuresData && typeof featuresData === 'object') {
+        if (!featuresData.features || !Array.isArray(featuresData.features)) {
+          errors.push('features.yaml: missing or invalid "features" array');
+        } else {
+          const featureResult = validateFeatureSpec(
+            featuresData.features,
+            featuresData.presets || {}
+          );
+          errors.push(...featureResult.errors);
+          warnings.push(...featureResult.warnings);
+        }
+      }
+    } catch (err) {
+      errors.push(`features.yaml: YAML parse error — ${err.message}`);
+    }
+  }
 
   // project.yaml is optional — only validate if present
   const projectPath = resolve(specDir, 'project.yaml');

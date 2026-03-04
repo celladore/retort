@@ -40,6 +40,7 @@ const VALID_COMMANDS = [
   'add',
   'remove',
   'list',
+  'features',
   'tasks',
   'delegate',
   'doctor',
@@ -119,6 +120,7 @@ const VALID_FLAGS = {
   add: ['help'],
   remove: ['clean', 'help'],
   list: ['help'],
+  features: ['verbose', 'help'],
 };
 
 // Global flags that apply to all commands
@@ -305,6 +307,13 @@ Tool Management:
   remove <tool...> Remove AI tool(s) from render targets
                   --clean             Also delete generated files
   list            Show enabled and available AI tools
+
+Feature Management:
+  features                 List all kit features and their status
+                  --verbose           Show available presets
+  features enable <f...>   Enable one or more kit features
+  features disable <f...>  Disable one or more kit features
+  features preset <name>   Apply a named feature preset (minimal, standard, full, lean)
 
 Workflow Commands:
   orchestrate     Multi-team coordination workflow (state machine)
@@ -544,6 +553,27 @@ async function main() {
       case 'list': {
         const { runList } = await import('./tool-manager.mjs');
         await runList({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        break;
+      }
+      case 'features': {
+        // Sub-actions: list (default), enable, disable, preset
+        const subAction = (flags._args || [])[0];
+        if (subAction === 'enable') {
+          flags._args = flags._args.slice(1);
+          const { runFeatureEnable } = await import('./feature-manager.mjs');
+          await runFeatureEnable({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else if (subAction === 'disable') {
+          flags._args = flags._args.slice(1);
+          const { runFeatureDisable } = await import('./feature-manager.mjs');
+          await runFeatureDisable({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else if (subAction === 'preset') {
+          flags._args = flags._args.slice(1);
+          const { runFeaturePreset } = await import('./feature-manager.mjs');
+          await runFeaturePreset({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else {
+          const { runFeatures } = await import('./feature-manager.mjs');
+          await runFeatures({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        }
         break;
       }
       default: {
