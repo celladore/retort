@@ -7,9 +7,10 @@
 
 ## Executive Summary
 
-AgentKit Forge has a well-structured CI/CD foundation with 8 GitHub Actions workflows, comprehensive branch governance, and a powerful spec-driven generation pipeline. However, there are **meaningful gaps between the CI/CD infrastructure and the agentic workforce it supports**. The workflows validate the *forge itself* but don't yet generate CI/CD that exercises the full agent team model, and several hardening opportunities exist in the existing pipelines.
+AgentKit Forge has a well-structured CI/CD foundation with 8 GitHub Actions workflows, comprehensive branch governance, and a powerful spec-driven generation pipeline. However, there are **meaningful gaps between the CI/CD infrastructure and the agentic workforce it supports**. The workflows validate the _forge itself_ but don't yet generate CI/CD that exercises the full agent team model, and several hardening opportunities exist in the existing pipelines.
 
 This review identifies **28 findings** organized into 4 categories:
+
 1. CI/CD Pipeline Gaps & Hardening (10 findings)
 2. Infrastructure Generation Gaps (8 findings)
 3. Agent Workforce Alignment Issues (6 findings)
@@ -25,14 +26,14 @@ This review identifies **28 findings** organized into 4 categories:
 
 The repository uses a mix of tag-based (`@v4`, `@v3`, `@v5`) and SHA-pinned (`@11bd71901bbe5b1630ceea73d27597364c9af683`) action references:
 
-| Workflow | Pinning Style |
-|----------|--------------|
-| `ci.yml` | Tag (`@v4`) |
-| `branch-protection.yml` | SHA-pinned |
-| `template-protection.yml` | SHA-pinned |
-| `codeql.yml` | Tag (`@v4`, `@v3`) |
-| `semgrep.yml` | Tag (`@v4`, `@v5`) |
-| `documentation-quality.yml` | Tag (`@v4`) — generated |
+| Workflow                       | Pinning Style           |
+| ------------------------------ | ----------------------- |
+| `ci.yml`                       | Tag (`@v4`)             |
+| `branch-protection.yml`        | SHA-pinned              |
+| `template-protection.yml`      | SHA-pinned              |
+| `codeql.yml`                   | Tag (`@v4`, `@v3`)      |
+| `semgrep.yml`                  | Tag (`@v4`, `@v5`)      |
+| `documentation-quality.yml`    | Tag (`@v4`) — generated |
 | `documentation-validation.yml` | Tag (`@v4`) — generated |
 
 **Risk:** Tag-based references are mutable. A compromised upstream action can silently change behavior. This was exploited in the `tj-actions/changed-files` incident.
@@ -48,6 +49,7 @@ The repository uses a mix of tag-based (`@v4`, `@v3`, `@v5`) and SHA-pinned (`@1
 Four jobs (`test`, `validate`, `yaml-lint`, `markdown-lint`) each independently install pnpm + Node.js + dependencies. This means 4x redundant `pnpm install --frozen-lockfile` runs per CI execution (6x when counting multi-platform test matrix).
 
 **Recommendation:**
+
 - Extract a reusable composite action (`.github/actions/setup-agentkit/action.yml`) that encapsulates pnpm/Node/install.
 - Consider using GitHub Actions artifacts to share the `node_modules` between jobs, or use a single "setup + cache" job that downstream jobs depend on.
 
@@ -58,12 +60,14 @@ Four jobs (`test`, `validate`, `yaml-lint`, `markdown-lint`) each independently 
 **Files:** `ci.yml`, `project.yaml` (line 140: `coverage: 80`)
 
 `project.yaml` declares an 80% coverage target, and the `test-lead`, `coverage-tracker` agents are responsible for enforcing it. However:
+
 - No `--coverage` flag is passed to vitest in CI
 - No coverage artifact is uploaded
 - No coverage threshold enforcement in the pipeline
 - No coverage diff/delta check on PRs
 
 **Recommendation:**
+
 - Add `pnpm test -- --coverage` to the CI test step
 - Upload coverage reports as artifacts
 - Add a coverage threshold check step (`vitest` supports `--coverage.thresholds.lines 80`)
@@ -78,6 +82,7 @@ Four jobs (`test`, `validate`, `yaml-lint`, `markdown-lint`) each independently 
 Semgrep only runs on PRs targeting `main`, but the branch strategy is `dev → main` promotion. Most PRs target `dev`, meaning **Semgrep never runs on normal development PRs**.
 
 **Recommendation:** Add `dev` to the trigger branches:
+
 ```yaml
 on:
   pull_request:
@@ -103,6 +108,7 @@ Same issue as Semgrep — CodeQL only triggers on `main` events. Since the promo
 `project.yaml` declares `dependencyAudit: true` but there is no `npm audit` / `pnpm audit` step in any workflow. The `dependency-watcher` agent lists this as a responsibility, but it has no CI counterpart.
 
 **Recommendation:** Add a dependency audit job to `ci.yml`:
+
 ```yaml
 dependency-audit:
   runs-on: ubuntu-latest
@@ -111,7 +117,7 @@ dependency-audit:
     - uses: pnpm/action-setup@...
     - run: pnpm audit --audit-level=high
       working-directory: .agentkit
-      continue-on-error: true  # advisory initially
+      continue-on-error: true # advisory initially
 ```
 
 ---
@@ -166,6 +172,7 @@ The templates should emit the same pinning style as hand-authored workflows.
 **File:** `ai-framework-ci.yml` (template)
 
 The `ai-framework-ci.yml` template generates a workflow that validates JSON, checks command files, scans for secrets, and validates structure — but it does **not**:
+
 - Run the downstream repo's test suite
 - Run linting for the repo's actual tech stack
 - Enforce coverage thresholds
@@ -174,6 +181,7 @@ The `ai-framework-ci.yml` template generates a workflow that validates JSON, che
 The template is a good start for framework validation but doesn't generate a full CI pipeline aligned with the `ciProfile` setting in `project.yaml`.
 
 **Recommendation:** Generate stack-aware CI workflows based on `project.yaml`:
+
 - `ciProfile: minimal` → lint + test
 - `ciProfile: medium` → lint + test + build + coverage + security scan
 - `ciProfile: strict` → all of above + mutation testing + performance checks
@@ -191,6 +199,7 @@ Use `techStacks` from `teams.yaml` to emit the correct build/test/lint commands.
 There's a `templates/renovate/` directory referenced in the exploration, but it's not producing output.
 
 **Recommendation:** Generate a `renovate.json` (or `.github/dependabot.yml`) from the `dependencyManagement` spec, including:
+
 - Schedule from spec
 - Automerge policy from spec
 - Action SHA update rules (to fix finding 1.1)
@@ -202,12 +211,14 @@ There's a `templates/renovate/` directory referenced in the exploration, but it'
 **Files:** `setup-agentkit-branch-governance.sh`, `templates/github/scripts/setup-branch-protection.sh`
 
 There are **two** branch protection scripts:
+
 1. `scripts/setup-agentkit-branch-governance.sh` — hand-authored, comprehensive
 2. `.github/scripts/setup-branch-protection.sh` — generated from template
 
 The generated version may drift from the hand-authored version. Required status checks are hardcoded in both rather than derived from `project.yaml` automation settings.
 
 **Recommendation:**
+
 - Derive required status checks from the generated workflow names
 - Single-source the protection rules in `project.yaml` or `settings.yaml`
 - Generate the script from spec, including check names that match the generated workflow job names
@@ -219,6 +230,7 @@ The generated version may drift from the hand-authored version. Required status 
 **File:** `project.yaml` (line 78: `containerized: false`)
 
 When `containerized: true`, the system should generate:
+
 - A `Dockerfile` following multi-stage build best practices
 - A `.dockerignore` aligned with `.gitignore`
 - Docker Compose for local development
@@ -233,6 +245,7 @@ Currently none of this is generated even when the flag changes.
 **File:** `project.yaml` (lines 79-89)
 
 When `iacTool` is set (terraform, bicep, etc.), the system should generate:
+
 - `terraform fmt/validate` CI checks
 - `terraform plan` on PR (with plan output as PR comment)
 - State drift detection workflows
@@ -247,6 +260,7 @@ The `infra` agent and `team-infra` team define these responsibilities, but there
 **File:** `commands.yaml` — `deploy` command (lines 516-543)
 
 The `deploy` command and `release-manager` agent exist in spec, but no release workflow template is generated. Downstream repos get no:
+
 - Automated versioning (semantic-release)
 - Changelog generation from conventional commits
 - GitHub Release creation
@@ -283,12 +297,14 @@ MCP servers (git, puppeteer, memory, fetch) are configured but never validated i
 **Files:** `teams.yaml`, `ci.yml`
 
 The workforce defines explicit handoff chains:
+
 - `infra → devops → security`
 - `backend → testing → quality`
 - `data → backend → testing`
 - `frontend → testing → docs`
 
 But CI is a flat set of independent jobs. There's no pipeline structure that mirrors the team dependency graph. For example:
+
 - `infra` changes should trigger IaC validation → DevOps pipeline checks → security scan
 - `backend` changes should trigger API tests → integration tests → quality review
 
@@ -303,6 +319,7 @@ But CI is a flat set of independent jobs. There's no pipeline structure that mir
 The `security-auditor` agent has extensive responsibilities (OWASP, secret scanning, IAM auditing, encryption validation) but the Semgrep config only checks for `eval()` and `child_process.exec()`.
 
 **Recommendation:** Expand Semgrep rules to cover:
+
 - SQL injection patterns
 - Path traversal
 - Unsafe deserialization
@@ -317,11 +334,13 @@ The `security-auditor` agent has extensive responsibilities (OWASP, secret scann
 **File:** `agents.yaml` — devops agent (lines 173-209)
 
 The devops agent claims responsibility for:
+
 - "Optimize build times and caching strategies" — no build time tracking
 - "Configure monitoring, alerting, and observability" — no observability in CI
 - "Manage environment variables and secrets in CI/CD" — no secret rotation checks
 
 **Recommendation:** Add CI steps that validate what the devops agent is responsible for:
+
 - Build time tracking (store timestamps, compare against budget)
 - Workflow execution time alerts
 - Secret environment variable audit (ensure no plain-text secrets in workflow files)
@@ -333,6 +352,7 @@ The devops agent claims responsibility for:
 **File:** `.mcp/a2a-config.json`
 
 The A2A config gives all team agents the same capabilities: `["implement", "test", "review"]`. But `agents.yaml` and `teams.yaml` define different `accepts` per team:
+
 - `security` team only accepts `[review, investigate]` — but A2A says it can `implement`
 - `product` team only accepts `[plan, review]` — but A2A says it can `implement` and `test`
 - `docs` team accepts `[implement, review, document]` — but A2A says `test` instead of `document`
@@ -346,6 +366,7 @@ The A2A config gives all team agents the same capabilities: `["implement", "test
 **Files:** `agents.yaml`, `teams.yaml`
 
 Agents declare `focus` paths (e.g., `apps/api/**`, `services/**`) and teams declare `scope` paths. Nothing validates that:
+
 - Agent focus paths actually exist in the repo
 - Team scopes don't overlap in conflicting ways
 - Focus paths cover the entire codebase (no orphan files)
@@ -371,12 +392,14 @@ The test-lead agent is responsible for "Define quality gates for CI/CD pipelines
 **File:** `branch-protection.yml` (lines 120-140)
 
 The secret detection regex patterns only check for:
+
 - AWS Access Keys (`AKIA...`)
 - Private keys (`-----BEGIN...`)
 - GitHub tokens (`ghp_...`)
 - OpenAI keys (`sk-...`)
 
 Missing patterns:
+
 - Azure connection strings / SAS tokens
 - Google Cloud service account keys
 - Slack tokens (`xoxb-`, `xoxp-`)
@@ -403,6 +426,7 @@ The `security-auditor` and `dependency-watcher` agents exist but no Software Bil
 Semgrep is configured with `continue-on-error: true`, meaning security findings never block a merge. Combined with the limited ruleset (finding 3.2), the security scanning is essentially decorative.
 
 **Recommendation:** Once the ruleset is expanded:
+
 1. Keep advisory mode during the expansion period
 2. Move to blocking (`continue-on-error: false`) for `ERROR` severity rules
 3. Keep `continue-on-error: true` for `WARNING` rules
@@ -416,10 +440,12 @@ Semgrep is configured with `continue-on-error: true`, meaning security findings 
 Only `codeql.yml` and `template-protection.yml` declare explicit `permissions`. Other workflows inherit the default token permissions, which may be broader than needed.
 
 **Recommendation:** Add minimal `permissions` blocks to every workflow:
+
 ```yaml
 permissions:
   contents: read
 ```
+
 And expand only as needed per job.
 
 ---
@@ -427,76 +453,84 @@ And expand only as needed per job.
 ## Summary: Priority Roadmap
 
 ### Wave 1 — Quick Wins (1-2 days)
-| # | Finding | Effort |
-|---|---------|--------|
-| 1.1 | Pin all actions to SHA | Low |
-| 1.4 | Add `dev` to Semgrep triggers | Trivial |
-| 1.5 | Add `dev` to CodeQL triggers | Trivial |
-| 1.8 | Add `timeout-minutes` to all jobs | Low |
-| 4.4 | Add `permissions` blocks to all workflows | Low |
-| 3.4 | Generate A2A config from `teams.yaml` | Low |
+
+| #   | Finding                                   | Effort  |
+| --- | ----------------------------------------- | ------- |
+| 1.1 | Pin all actions to SHA                    | Low     |
+| 1.4 | Add `dev` to Semgrep triggers             | Trivial |
+| 1.5 | Add `dev` to CodeQL triggers              | Trivial |
+| 1.8 | Add `timeout-minutes` to all jobs         | Low     |
+| 4.4 | Add `permissions` blocks to all workflows | Low     |
+| 3.4 | Generate A2A config from `teams.yaml`     | Low     |
 
 ### Wave 2 — CI Hardening (3-5 days)
-| # | Finding | Effort |
-|---|---------|--------|
-| 1.2 | Composite action for setup | Medium |
-| 1.3 | Coverage reporting + enforcement | Medium |
-| 1.6 | Dependency audit step | Low |
-| 3.2 | Expand Semgrep rules | Medium |
+
+| #   | Finding                                        | Effort |
+| --- | ---------------------------------------------- | ------ |
+| 1.2 | Composite action for setup                     | Medium |
+| 1.3 | Coverage reporting + enforcement               | Medium |
+| 1.6 | Dependency audit step                          | Low    |
+| 3.2 | Expand Semgrep rules                           | Medium |
 | 4.1 | Replace regex secret detection with `gitleaks` | Medium |
-| 4.3 | Graduate Semgrep to blocking for ERROR rules | Low |
+| 4.3 | Graduate Semgrep to blocking for ERROR rules   | Low    |
 
 ### Wave 3 — Generation Pipeline (5-10 days)
-| # | Finding | Effort |
-|---|---------|--------|
-| 2.1 | Stack-aware CI generation for downstream | High |
-| 2.2 | Renovate config generation | Medium |
+
+| #   | Finding                                   | Effort |
+| --- | ----------------------------------------- | ------ |
+| 2.1 | Stack-aware CI generation for downstream  | High   |
+| 2.2 | Renovate config generation                | Medium |
 | 2.3 | Unify branch protection scripts from spec | Medium |
-| 2.5 | IaC CI generation | Medium |
-| 2.6 | Release workflow generation | Medium |
-| 3.1 | Team-handoff-aware CI structure | High |
+| 2.5 | IaC CI generation                         | Medium |
+| 2.6 | Release workflow generation               | Medium |
+| 3.1 | Team-handoff-aware CI structure           | High   |
 
 ### Wave 4 — Advanced Alignment (5-10 days)
-| # | Finding | Effort |
-|---|---------|--------|
-| 2.4 | Container generation | Medium |
-| 3.3 | DevOps agent CI backing | Medium |
+
+| #   | Finding                              | Effort |
+| --- | ------------------------------------ | ------ |
+| 2.4 | Container generation                 | Medium |
+| 3.3 | DevOps agent CI backing              | Medium |
 | 3.5 | Agent focus path coverage validation | Medium |
-| 3.6 | Structured quality gates spec | Medium |
-| 4.2 | SBOM generation | Low |
+| 3.6 | Structured quality gates spec        | Medium |
+| 4.2 | SBOM generation                      | Low    |
 
 ---
 
 ## Appendix: File Inventory
 
 ### Hand-Authored Workflows
-| File | Purpose |
-|------|---------|
-| `.github/workflows/ci.yml` | Main CI: test, validate, yaml-lint, markdown-lint |
-| `.github/workflows/branch-protection.yml` | PR rules: conventional commits, secrets, issue links |
-| `.github/workflows/template-protection.yml` | Forge source change gates |
-| `.github/workflows/block-agentkit-changes.yml` | Block `.agentkit/` changes in non-forge repos |
-| `.github/workflows/codeql.yml` | CodeQL SAST scanning |
-| `.github/workflows/semgrep.yml` | Semgrep advisory scanning |
+
+| File                                           | Purpose                                              |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| `.github/workflows/ci.yml`                     | Main CI: test, validate, yaml-lint, markdown-lint    |
+| `.github/workflows/branch-protection.yml`      | PR rules: conventional commits, secrets, issue links |
+| `.github/workflows/template-protection.yml`    | Forge source change gates                            |
+| `.github/workflows/block-agentkit-changes.yml` | Block `.agentkit/` changes in non-forge repos        |
+| `.github/workflows/codeql.yml`                 | CodeQL SAST scanning                                 |
+| `.github/workflows/semgrep.yml`                | Semgrep advisory scanning                            |
 
 ### Generated Workflows
-| File | Source Template |
-|------|---------------|
-| `.github/workflows/documentation-quality.yml` | `templates/github/workflows/documentation-quality.yml` |
+
+| File                                             | Source Template                                           |
+| ------------------------------------------------ | --------------------------------------------------------- |
+| `.github/workflows/documentation-quality.yml`    | `templates/github/workflows/documentation-quality.yml`    |
 | `.github/workflows/documentation-validation.yml` | `templates/github/workflows/documentation-validation.yml` |
 
 ### Generation Templates
-| File | Generates |
-|------|-----------|
-| `templates/github/ai-framework-ci.yml` | Framework validation CI for downstream repos |
-| `templates/github/scripts/setup-branch-protection.sh` | Branch protection setup |
-| `templates/github/PULL_REQUEST_TEMPLATE.md` | PR template |
-| `templates/github/ISSUE_TEMPLATE/bug_report.md` | Issue template |
+
+| File                                                  | Generates                                    |
+| ----------------------------------------------------- | -------------------------------------------- |
+| `templates/github/ai-framework-ci.yml`                | Framework validation CI for downstream repos |
+| `templates/github/scripts/setup-branch-protection.sh` | Branch protection setup                      |
+| `templates/github/PULL_REQUEST_TEMPLATE.md`           | PR template                                  |
+| `templates/github/ISSUE_TEMPLATE/bug_report.md`       | Issue template                               |
 
 ### Governance Scripts
-| File | Purpose |
-|------|---------|
+
+| File                                          | Purpose                      |
+| --------------------------------------------- | ---------------------------- |
 | `scripts/setup-agentkit-branch-governance.sh` | Full branch governance setup |
-| `scripts/validate-documentation.sh` | History doc validation |
-| `scripts/check-documentation-requirement.sh` | PR doc requirement check |
-| `scripts/validate-numbering.sh` | Sequential numbering check |
+| `scripts/validate-documentation.sh`           | History doc validation       |
+| `scripts/check-documentation-requirement.sh`  | PR doc requirement check     |
+| `scripts/validate-numbering.sh`               | Sequential numbering check   |

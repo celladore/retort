@@ -11,11 +11,13 @@
 ### Naming Standard
 
 Adopt the `[Category] Description` pattern for all workflow `name:` fields. This gives:
+
 - **Scannable grouping** in the GitHub Actions UI (all `[CI]` workflows cluster together)
 - **Clear category at a glance** even in status check badges and PR checks lists
 - **Consistent style** across hand-authored and generated workflows
 
 **Best practices applied:**
+
 - Prefix with bracketed category: `[CI]`, `[Security]`, `[Governance]`, `[Docs]`, `[Framework]`
 - Description uses Title Case, is concise, and starts with a noun or verb-noun
 - Job names use kebab-case and are verb-first where possible
@@ -23,17 +25,17 @@ Adopt the `[Category] Description` pattern for all workflow `name:` fields. This
 
 ### Naming Map
 
-| File | Current `name:` | New `name:` | Category |
-|------|----------------|-------------|----------|
-| `ci.yml` | `CI` | `[CI] Test & Validate` | CI |
-| `branch-protection.yml` | `Branch Protection` | `[Governance] Branch Rules` | Governance |
-| `block-agentkit-changes.yml` | `block-agentkit-changes` | `[Governance] Block AgentKit Changes` | Governance |
-| `template-protection.yml` | `Template Protection` | `[Framework] Template Protection` | Framework |
-| `codeql.yml` | `CodeQL` | `[Security] CodeQL Analysis` | Security |
-| `semgrep.yml` | `Semgrep (Advisory)` | `[Security] Semgrep Scan` | Security |
-| `documentation-quality.yml` | `Documentation Quality` | `[Docs] Quality Check` | Docs |
-| `documentation-validation.yml` | `Documentation Validation` | `[Docs] PR Validation` | Docs |
-| `ai-framework-ci.yml` (template) | `AI Framework Validation` | `[Framework] AI Config Validation` | Framework |
+| File                             | Current `name:`            | New `name:`                           | Category   |
+| -------------------------------- | -------------------------- | ------------------------------------- | ---------- |
+| `ci.yml`                         | `CI`                       | `[CI] Test & Validate`                | CI         |
+| `branch-protection.yml`          | `Branch Protection`        | `[Governance] Branch Rules`           | Governance |
+| `block-agentkit-changes.yml`     | `block-agentkit-changes`   | `[Governance] Block AgentKit Changes` | Governance |
+| `template-protection.yml`        | `Template Protection`      | `[Framework] Template Protection`     | Framework  |
+| `codeql.yml`                     | `CodeQL`                   | `[Security] CodeQL Analysis`          | Security   |
+| `semgrep.yml`                    | `Semgrep (Advisory)`       | `[Security] Semgrep Scan`             | Security   |
+| `documentation-quality.yml`      | `Documentation Quality`    | `[Docs] Quality Check`                | Docs       |
+| `documentation-validation.yml`   | `Documentation Validation` | `[Docs] PR Validation`                | Docs       |
+| `ai-framework-ci.yml` (template) | `AI Framework Validation`  | `[Framework] AI Config Validation`    | Framework  |
 
 ### Cascading Updates Required
 
@@ -53,13 +55,13 @@ Renaming workflows changes the status check names used by branch protection. All
 
 ### Job Name Standardization
 
-| Workflow | Current Job | New Job | Rationale |
-|----------|------------|---------|-----------|
-| `block-agentkit-changes.yml` | `check_agentkit_changes` | `check-agentkit-changes` | kebab-case |
-| `codeql.yml` | `analyze` (with `name: analyze-javascript`) | `analyze` (keep) | already good |
-| `semgrep.yml` | `semgrep` (with `name: semgrep-advisory`) | `semgrep` (keep) | already good |
-| `template-protection.yml` | `label-and-gate`, `validate-templates` | keep | already good |
-| `ci.yml` | `test`, `validate`, `yaml-lint`, `markdown-lint` | keep | already good |
+| Workflow                     | Current Job                                      | New Job                  | Rationale    |
+| ---------------------------- | ------------------------------------------------ | ------------------------ | ------------ |
+| `block-agentkit-changes.yml` | `check_agentkit_changes`                         | `check-agentkit-changes` | kebab-case   |
+| `codeql.yml`                 | `analyze` (with `name: analyze-javascript`)      | `analyze` (keep)         | already good |
+| `semgrep.yml`                | `semgrep` (with `name: semgrep-advisory`)        | `semgrep` (keep)         | already good |
+| `template-protection.yml`    | `label-and-gate`, `validate-templates`           | keep                     | already good |
+| `ci.yml`                     | `test`, `validate`, `yaml-lint`, `markdown-lint` | keep                     | already good |
 
 ---
 
@@ -69,28 +71,31 @@ Renaming workflows changes the status check names used by branch protection. All
 **Theme:** Naming, pinning, permissions, trigger fixes
 
 ### 1.1 Apply Naming Convention (all workflows)
+
 - Rename all 8 workflow `name:` fields per the naming map above
 - Standardize job names to kebab-case
 - Update both branch protection scripts with new status check names
 - Update generated template for branch protection
 
 ### 1.2 Pin All Actions to SHA
+
 **Files:** `ci.yml`, `codeql.yml`, `semgrep.yml`, `documentation-quality.yml`, `documentation-validation.yml`
 
 Pin every action reference to a full commit SHA. Current SHAs for latest stable:
 
-| Action | Tag | SHA to pin |
-|--------|-----|-----------|
-| `actions/checkout` | v4.2.2 | `11bd71901bbe5b1630ceea73d27597364c9af683` |
-| `actions/setup-node` | v4.4.0 | `49933ea5288caeca8642d1e84afbd3f7d6820020` |
-| `pnpm/action-setup` | v4.2.0 | `41ff72655975bd51cab0327fa583b6e92b6d3061` |
-| `actions/setup-python` | v5.6.0 | (look up current SHA) |
-| `github/codeql-action/*` | v3 | (look up current SHA) |
-| `actions/github-script` | v7.1.0 | `f28e40c7f34bde8b3046d885e986cb6290c5673b` |
+| Action                   | Tag    | SHA to pin                                 |
+| ------------------------ | ------ | ------------------------------------------ |
+| `actions/checkout`       | v4.2.2 | `11bd71901bbe5b1630ceea73d27597364c9af683` |
+| `actions/setup-node`     | v4.4.0 | `49933ea5288caeca8642d1e84afbd3f7d6820020` |
+| `pnpm/action-setup`      | v4.2.0 | `41ff72655975bd51cab0327fa583b6e92b6d3061` |
+| `actions/setup-python`   | v5.6.0 | (look up current SHA)                      |
+| `github/codeql-action/*` | v3     | (look up current SHA)                      |
+| `actions/github-script`  | v7.1.0 | `f28e40c7f34bde8b3046d885e986cb6290c5673b` |
 
 Also pin in the generated documentation workflow templates.
 
 ### 1.3 Add `dev` to Security Scanning Triggers
+
 **Files:** `semgrep.yml`, `codeql.yml`
 
 ```yaml
@@ -108,20 +113,22 @@ on:
 ```
 
 ### 1.4 Add Timeout to All Jobs
+
 **Files:** All 8 workflows
 
 Add `timeout-minutes` to every job:
 
-| Job type | Timeout |
-|----------|---------|
-| Test (multi-platform) | 15 min |
-| Validate / lint | 10 min |
-| Security scan (CodeQL) | 20 min |
-| Security scan (Semgrep) | 10 min |
-| Documentation checks | 5 min |
-| Branch protection checks | 5 min |
+| Job type                 | Timeout |
+| ------------------------ | ------- |
+| Test (multi-platform)    | 15 min  |
+| Validate / lint          | 10 min  |
+| Security scan (CodeQL)   | 20 min  |
+| Security scan (Semgrep)  | 10 min  |
+| Documentation checks     | 5 min   |
+| Branch protection checks | 5 min   |
 
 ### 1.5 Add Explicit `permissions` Blocks
+
 **Files:** `ci.yml`, `semgrep.yml`, `block-agentkit-changes.yml`
 
 Add minimal permissions to every workflow that doesn't already have them:
@@ -137,17 +144,21 @@ permissions:
 ```
 
 ### 1.6 Sync A2A Config from `teams.yaml`
+
 **File:** `.mcp/a2a-config.json` (or sync engine)
 
 Update the sync engine to generate `a2a-config.json` agent capabilities from `teams.yaml` `accepts` fields instead of hardcoding `["implement", "test", "review"]` for all.
 
 **Before:**
+
 ```json
-{"id": "team-security", "capabilities": ["implement", "test", "review"]}
+{ "id": "team-security", "capabilities": ["implement", "test", "review"] }
 ```
+
 **After (from teams.yaml):**
+
 ```json
-{"id": "team-security", "capabilities": ["review", "investigate"]}
+{ "id": "team-security", "capabilities": ["review", "investigate"] }
 ```
 
 ---
@@ -158,6 +169,7 @@ Update the sync engine to generate `a2a-config.json` agent capabilities from `te
 **Theme:** Coverage, auditing, security scanning depth
 
 ### 2.1 Create Composite Setup Action
+
 **New file:** `.github/actions/setup-agentkit/action.yml`
 
 Extract the repeated pnpm + Node + install pattern into a reusable composite action:
@@ -187,6 +199,7 @@ runs:
 Then replace 6+ occurrences across `ci.yml`, `documentation-quality.yml`, `template-protection.yml`.
 
 ### 2.2 Add Coverage Reporting & Enforcement
+
 **File:** `ci.yml` — `test` job
 
 ```yaml
@@ -205,6 +218,7 @@ Then replace 6+ occurrences across `ci.yml`, `documentation-quality.yml`, `templ
 Also add a coverage summary step that posts to PR comments (optional — can use a coverage action).
 
 ### 2.3 Add Dependency Audit Job
+
 **File:** `ci.yml` — new job
 
 ```yaml
@@ -219,10 +233,11 @@ dependency-audit:
     - name: Audit dependencies
       run: pnpm audit --audit-level=high
       working-directory: .agentkit
-      continue-on-error: true  # advisory in wave 2, blocking in wave 3
+      continue-on-error: true # advisory in wave 2, blocking in wave 3
 ```
 
 ### 2.4 Expand Semgrep Rules
+
 **File:** `.semgrep/semgrep.yml`
 
 Add rules for the `security-auditor` agent's responsibilities:
@@ -251,9 +266,9 @@ rules:
 
   - id: yaml.security.no-hardcoded-credentials
     patterns:
-      - pattern: "password: $VALUE"
-      - pattern: "secret: $VALUE"
-      - pattern: "api_key: $VALUE"
+      - pattern: 'password: $VALUE'
+      - pattern: 'secret: $VALUE'
+      - pattern: 'api_key: $VALUE'
     message: Do not hardcode credentials in YAML files
     severity: ERROR
 ```
@@ -261,6 +276,7 @@ rules:
 Also add `--config=p/javascript` or `--config=p/owasp-top-ten` from the Semgrep registry for broader coverage.
 
 ### 2.5 Replace Hand-Rolled Secret Detection with gitleaks
+
 **File:** `branch-protection.yml` — replace "Verify no secrets in diff" step
 
 ```yaml
@@ -273,6 +289,7 @@ Also add `--config=p/javascript` or `--config=p/owasp-top-ten` from the Semgrep 
 This covers all patterns the hand-rolled regex misses (Azure SAS, Slack, DB strings, JWTs, high-entropy strings).
 
 ### 2.6 Graduate Semgrep from Advisory to Blocking (ERROR rules only)
+
 **File:** `semgrep.yml`
 
 ```yaml
@@ -291,6 +308,7 @@ This covers all patterns the hand-rolled regex misses (Azure SAS, Slack, DB stri
 Keep the SARIF upload for WARNING-level findings.
 
 ### 2.7 Merge `yaml-lint` into `validate` Job
+
 **File:** `ci.yml`
 
 The separate `yaml-lint` job adds ~2 min of CI overhead for a check that `spec-validate` already covers. Merge it into the `validate` job as an early step, or remove it entirely since `spec-validate` validates both syntax and schema.
@@ -303,6 +321,7 @@ The separate `yaml-lint` job adds ~2 min of CI overhead for a check that `spec-v
 **Theme:** Generate downstream CI, Renovate, IaC, releases from spec
 
 ### 3.1 Stack-Aware CI Generation for Downstream Repos
+
 **New template:** `.agentkit/templates/github/workflows/ci-pipeline.yml`
 
 Generate a CI workflow that uses `project.yaml` settings:
@@ -333,11 +352,13 @@ jobs:
 ```
 
 Gate complexity on `ciProfile`:
+
 - `minimal` → lint + test
 - `medium` → lint + test + build + coverage
 - `strict` → all + security scan + mutation testing
 
 ### 3.2 Generate Renovate Config from Spec
+
 **New template:** `.agentkit/templates/renovate/renovate.json`
 
 ```json
@@ -362,6 +383,7 @@ Gate complexity on `ciProfile`:
 ```
 
 ### 3.3 Unify Branch Protection from Spec
+
 **Changes to:** `synchronize.mjs`, `templates/github/scripts/setup-branch-protection.sh`
 
 - Derive required status check names from the generated workflow names + job names
@@ -370,12 +392,13 @@ Gate complexity on `ciProfile`:
 - Deprecate the hand-authored `scripts/setup-agentkit-branch-governance.sh` in favor of the generated one
 
 ### 3.4 Generate IaC CI When `iacTool` Is Configured
+
 **New template:** `.agentkit/templates/github/workflows/iac-validation.yml`
 
 When `project.yaml` has `deployment.iacTool: terraform` (or similar):
 
 ```yaml
-name: "[Infra] Terraform Validation"
+name: '[Infra] Terraform Validation'
 
 on:
   pull_request:
@@ -396,12 +419,13 @@ jobs:
 For Terragrunt, add `terragrunt validate-inputs` and `terragrunt hclfmt --check`.
 
 ### 3.5 Generate Release Workflow
+
 **New template:** `.agentkit/templates/github/workflows/release.yml`
 
 When `deployment.environments` includes more than `[local, ci]`:
 
 ```yaml
-name: "[Release] Publish"
+name: '[Release] Publish'
 
 on:
   push:
@@ -428,6 +452,7 @@ jobs:
 ```
 
 ### 3.6 Team-Handoff-Aware CI Structure
+
 **Enhancement to:** `templates/github/workflows/ci-pipeline.yml`
 
 Generate path-filtered jobs that mirror team handoff chains:
@@ -461,7 +486,9 @@ This makes CI structurally match the `handoff-chain` defined in `teams.yaml`.
 **Theme:** Deep agent/CI alignment, SBOM, containers, quality gates
 
 ### 4.1 Container Generation When `containerized: true`
+
 **New templates:**
+
 - `templates/docker/Dockerfile`
 - `templates/docker/.dockerignore`
 - `templates/docker/docker-compose.yml`
@@ -487,6 +514,7 @@ CMD ["node", "dist/index.js"]
 ```
 
 Add Trivy container scanning in CI:
+
 ```yaml
 - name: Scan container
   uses: aquasecurity/trivy-action@<SHA>
@@ -496,21 +524,25 @@ Add Trivy container scanning in CI:
 ```
 
 ### 4.2 DevOps Agent CI Backing
+
 **Files:** `ci.yml`, new monitoring workflow
 
 Add metrics that back the devops agent's responsibilities:
+
 - **Build time tracking:** Record start/end timestamps, compare against a budget
 - **Workflow timing alerts:** Add a step that warns if total CI time exceeds a threshold
 - **Secret environment audit:** Validate that no `env:` blocks contain plain-text values matching secret patterns
 
 ### 4.3 Agent Focus Path Coverage Validation
+
 **Enhancement to:** `spec-validator.mjs` + `ci.yml`
 
 Add a new validation:
+
 ```javascript
 // In spec-validator.mjs
 function validateFocusPathCoverage(agents, teams, repoFiles) {
-  const allPaths = repoFiles.filter(f => !f.startsWith('.'));
+  const allPaths = repoFiles.filter((f) => !f.startsWith('.'));
   const coveredPaths = new Set();
   for (const team of teams) {
     for (const scope of team.scope) {
@@ -518,7 +550,7 @@ function validateFocusPathCoverage(agents, teams, repoFiles) {
       // Add matches to coveredPaths
     }
   }
-  const orphans = allPaths.filter(f => !coveredPaths.has(f));
+  const orphans = allPaths.filter((f) => !coveredPaths.has(f));
   if (orphans.length > 0) {
     warn(`${orphans.length} files not covered by any team scope`);
   }
@@ -528,6 +560,7 @@ function validateFocusPathCoverage(agents, teams, repoFiles) {
 Add this to the `validate` CI job so team scope gaps are caught.
 
 ### 4.4 Structured Quality Gates Spec
+
 **New file:** `.agentkit/spec/quality-gates.yaml`
 
 Define quality gates that the `test-lead` agent maintains and CI enforces:
@@ -537,22 +570,22 @@ qualityGates:
   phase3-implementation:
     required:
       - name: lint
-        command: "{{techStack.linter}}"
+        command: '{{techStack.linter}}'
         blocking: true
       - name: typecheck
-        command: "{{techStack.typecheck}}"
+        command: '{{techStack.typecheck}}'
         blocking: true
       - name: unit-tests
-        command: "{{techStack.testCommand}}"
+        command: '{{techStack.testCommand}}'
         blocking: true
       - name: coverage
-        threshold: "{{testing.coverage}}"
+        threshold: '{{testing.coverage}}'
         blocking: true
     advisory:
       - name: security-scan
         tool: semgrep
       - name: dependency-audit
-        tool: "pnpm audit"
+        tool: 'pnpm audit'
 
   phase4-validation:
     required:
@@ -568,6 +601,7 @@ qualityGates:
 Generate CI required checks from `qualityGates.*.required` entries.
 
 ### 4.5 SBOM Generation
+
 **New step in** release workflow or CI:
 
 ```yaml
@@ -628,20 +662,20 @@ Wave 4 (days 18-27) — depends on Wave 3
 
 ## Success Criteria
 
-| Wave | Metric | Target |
-|------|--------|--------|
-| 1 | All actions SHA-pinned | 100% |
-| 1 | Security scans run on `dev` PRs | Yes |
-| 1 | Workflow naming consistent | All `[Category] Description` |
-| 2 | Test coverage enforced in CI | >= 80% threshold |
-| 2 | Semgrep rule count | >= 10 rules |
-| 2 | Dependency audit in CI | Advisory mode |
-| 3 | Downstream repos get generated CI | 1 template per ciProfile level |
-| 3 | Renovate config generated from spec | Yes |
-| 3 | IaC validation generated when iacTool set | Yes |
-| 4 | A2A capabilities match teams.yaml | 100% |
-| 4 | Team scope covers codebase | >= 95% of files |
-| 4 | SBOM attached to releases | Yes |
+| Wave | Metric                                    | Target                         |
+| ---- | ----------------------------------------- | ------------------------------ |
+| 1    | All actions SHA-pinned                    | 100%                           |
+| 1    | Security scans run on `dev` PRs           | Yes                            |
+| 1    | Workflow naming consistent                | All `[Category] Description`   |
+| 2    | Test coverage enforced in CI              | >= 80% threshold               |
+| 2    | Semgrep rule count                        | >= 10 rules                    |
+| 2    | Dependency audit in CI                    | Advisory mode                  |
+| 3    | Downstream repos get generated CI         | 1 template per ciProfile level |
+| 3    | Renovate config generated from spec       | Yes                            |
+| 3    | IaC validation generated when iacTool set | Yes                            |
+| 4    | A2A capabilities match teams.yaml         | 100%                           |
+| 4    | Team scope covers codebase                | >= 95% of files                |
+| 4    | SBOM attached to releases                 | Yes                            |
 
 ---
 
