@@ -50,8 +50,9 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 | `/format`       | Format code (auto-detects stack)             |
 | `/deploy`       | Deployment automation                        |
 | `/security`     | Security audit                               |
-| `/sync-backlog` | Update AGENT_BACKLOG.md                      |
-| `/handoff`      | Session handoff summary                      |
+| `/sync-backlog`      | Update AGENT_BACKLOG.md                      |
+| `/document-history`  | Create history doc for completed work        |
+| `/handoff`           | Session handoff summary                      |
 
 ## Team Commands
 
@@ -86,6 +87,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 /team-<name>              → Execute with appropriate team
 /check                    → Verify quality gates
 /review                   → Code review
+/document-history         → Record what was done and why
 /handoff                  → Document session for continuity
 ```
 
@@ -182,6 +184,23 @@ Always run the full test suite before creating a PR.
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
 {{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
+
+### History Documentation (MANDATORY)
+
+After completing significant work (bug fixes, features, implementations, or migrations), **always** create a history document:
+
+```bash
+./scripts/create-doc.sh <type> "<title>" [pr-number]
+```
+
+| Work Type | Command | Trigger |
+| --- | --- | --- |
+| Bug fix (non-trivial) | `./scripts/create-doc.sh bugfix "Title"` | Any bug fix touching 2+ files or requiring root-cause analysis |
+| New feature | `./scripts/create-doc.sh feature "Title"` | Any user-facing feature or new capability |
+| Implementation | `./scripts/create-doc.sh implementation "Title"` | Architecture changes, refactors, new subsystems |
+| Migration | `./scripts/create-doc.sh migration "Title"` | Library upgrades, data migrations, infrastructure changes |
+
+Templates are in `docs/history/` — fill in all sections after generation. The `/review --focus=retrospective` command captures issues and lessons learned separately. See `docs/06_engineering/06_pr_documentation.md` for the full strategy.
 
 All project documentation follows the unified 8-category structure in `docs/`:
 

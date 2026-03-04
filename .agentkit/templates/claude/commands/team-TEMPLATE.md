@@ -119,6 +119,27 @@ If your changes affect **public behavior** (APIs, CLI flags, configuration optio
 
 Do NOT update docs for internal-only refactors.
 
+### Step 4b: Create History Document
+
+If this session involved **significant work** (not trivial one-line fixes), create a history document:
+
+1. **Determine the type:**
+   - `bugfix` — Non-trivial bug fix (2+ files, root-cause analysis, or regression risk)
+   - `feature` — New user-facing feature or capability
+   - `implementation` — Architecture change, new subsystem, or major refactor
+   - `migration` — Library upgrade, data migration, or infrastructure change
+
+2. **Generate from template:**
+   ```bash
+   ./scripts/create-doc.sh <type> "<descriptive title>" [pr-number]
+   ```
+
+3. **Fill in all sections** of the generated document. At minimum complete: Overview, Key Changes, Results, and Lessons Learned.
+
+4. **Skip this step only if** the work was purely cosmetic (formatting, typo fixes, comment updates) or a single-line config change.
+
+The history document ensures institutional memory persists across sessions. Templates are in `docs/history/`.
+
 ### Step 5: Run Quality Gate
 
 After completing your changes, run the equivalent of `/check`:
@@ -159,6 +180,10 @@ After completing your work, produce a summary:
 
 - <file path>: <what was updated>
 - "None — changes are internal only"
+
+### History Document
+
+- <path to created history doc, or "Skipped — trivial change" with brief justification>
 
 ### Validation Commands
 

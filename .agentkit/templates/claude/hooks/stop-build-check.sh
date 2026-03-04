@@ -180,6 +180,35 @@ if [[ -f "${CWD}/pyproject.toml" ]]; then
     fi
 fi
 
+# -- Check for missing history documentation --------------------------------
+if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
+    DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+
+    if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
+        # Count non-trivial changed files (source files, not config/docs)
+        changed_src_files=0
+        if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+            changed_src_files=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
+                | grep -cE '\.(ts|tsx|js|jsx|py|rs|go|cs|java|rb|swift|kt)$' || echo "0")
+        fi
+
+        # Check if any history doc was created in this branch
+        history_docs_created=0
+        if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+            history_docs_created=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
+                | grep -c '^docs/history/' || echo "0")
+        fi
+
+        # If significant source changes but no history doc, warn (non-blocking)
+        if [[ "$changed_src_files" -ge 3 ]] && [[ "$history_docs_created" -eq 0 ]]; then
+            echo "⚠️  This session changed ${changed_src_files} source files but no history document was created." >&2
+            echo "   Consider running: /document-history  (or ./scripts/create-doc.sh <type> \"<title>\")" >&2
+            echo "   History docs capture institutional memory for future sessions." >&2
+        fi
+    fi
+fi
+
 # -- Session cost tracking: log session end --------------------------------
 AGENTKIT_ROOT=""
 if [[ -d "${CWD}/.agentkit" ]]; then

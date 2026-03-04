@@ -487,6 +487,50 @@ commands:
       - Grep
       - Bash
 
+  - name: document-history
+    type: utility
+    description: >
+      Creates a structured history document from templates for significant work
+      completed in the current session. Supports bug fixes, features,
+      implementations, and migrations. Auto-detects type and title from git
+      history when invoked without arguments. Fills in all template sections
+      with concrete details from session context.
+    flags:
+      - name: --type
+        description: 'Document type: implementation, bugfix, feature, or migration'
+        type: string
+        default: null
+        required: false
+        enum: [implementation, bugfix, feature, migration]
+      - name: --title
+        description: 'Human-readable title for the document'
+        type: string
+        default: null
+        required: false
+      - name: --pr
+        description: 'PR number to reference in the document'
+        type: integer
+        default: null
+        required: false
+      - name: --auto
+        description: 'Auto-detect type and title from recent git history'
+        type: boolean
+        default: false
+      - name: --dry-run
+        description: 'Show what would be created without writing files'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - 'Bash(git *)'
+      - 'Bash(./scripts/create-doc*)'
+      - 'Bash(mkdir *)'
+      - 'Bash(cat *)'
+
   - name: brand
     type: utility
     description: >

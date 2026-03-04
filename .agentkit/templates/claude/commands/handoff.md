@@ -104,7 +104,20 @@ docs/ai_handoffs/<YYYY-MM-DD>-02.md
 
 Do NOT create the `docs/ai_handoffs/` directory if it does not exist. Only write there if it already exists.
 
-### 3. Console Output (always)
+### 3. History Documents (when significant work was done)
+
+Before finalizing the handoff, check whether this session produced significant work that warrants a history document. Evaluate the "What Was Done" list:
+
+- If the session involved **non-trivial changes** (bug fixes touching 2+ files, new features, architecture changes, migrations), create history docs:
+  ```bash
+  ./scripts/create-doc.sh <type> "<title>" [pr-number]
+  ```
+- Fill in the generated document with details from the session (use the information you already gathered for the handoff).
+- If no significant work was done (only planning, investigation, or trivial fixes), skip and note in the handoff: "History doc: not needed — <brief reason>".
+
+The handoff captures *what to do next*; the history doc captures *what was done and why* for institutional memory.
+
+### 4. Console Output (always)
 
 Always print the full handoff to the console so the user can see it.
 

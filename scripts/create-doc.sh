@@ -29,7 +29,7 @@ INDEX_FILE="$HISTORY_DIR/.index.json"
 
 usage() {
   echo "Usage: $0 <type> \"<title>\" [pr-number]"
-  echo "  type: implementation | bugfix | feature | migration"
+  echo "  type: implementation | bugfix | feature | migration | issue | lesson"
   exit 1
 }
 
@@ -42,8 +42,8 @@ TITLE="$2"
 PR_NUMBER="${3:-}"
 
 case "$TYPE" in
-  implementation|bugfix|feature|migration) ;;
-  *) echo "Error: unknown type '$TYPE'. Must be one of: implementation, bugfix, feature, migration"; exit 1 ;;
+  implementation|bugfix|feature|migration|issue|lesson) ;;
+  *) echo "Error: unknown type '$TYPE'. Must be one of: implementation, bugfix, feature, migration, issue, lesson"; exit 1 ;;
 esac
 
 # ---------------------------------------------------------------------------
@@ -55,6 +55,8 @@ case "$TYPE" in
   bugfix)         SUBDIR="bug-fixes" ;;
   feature)        SUBDIR="features" ;;
   migration)      SUBDIR="migrations" ;;
+  issue)          SUBDIR="issues" ;;
+  lesson)         SUBDIR="lessons-learned" ;;
 esac
 
 # ---------------------------------------------------------------------------
@@ -104,6 +106,8 @@ sed \
   -e "s/\[Bug Description\]/$TITLE/g" \
   -e "s/\[Feature Name\]/$TITLE/g" \
   -e "s/\[Migration Name\]/$TITLE/g" \
+  -e "s/\[Issue Title\]/$TITLE/g" \
+  -e "s/\[Lesson Title\]/$TITLE/g" \
   -e "s/\[YYYY-MM-DD\]/$DATE/g" \
   -e "s/\[#PR-Number\]/${PR_REF:-[#PR-Number]}/g" \
   "$TEMPLATE_SRC" > "$DEST_FILE"
@@ -134,10 +138,14 @@ case "$TYPE" in
   implementation) CHANGELOG_SECTION="Added" ;;
   bugfix)         CHANGELOG_SECTION="Fixed" ;;
   migration)      CHANGELOG_SECTION="Changed" ;;
+  issue)          CHANGELOG_SECTION="" ;;  # Issues don't go in changelog
+  lesson)         CHANGELOG_SECTION="" ;;  # Lessons don't go in changelog
 esac
 
 UPDATE_CHANGELOG="$SCRIPT_DIR/update-changelog.sh"
-if [[ -f "$UPDATE_CHANGELOG" ]]; then
+if [[ -z "$CHANGELOG_SECTION" ]]; then
+  echo "ℹ️  ${TYPE} records are not added to CHANGELOG.md — skipping changelog update."
+elif [[ -f "$UPDATE_CHANGELOG" ]]; then
   bash "$UPDATE_CHANGELOG" "$CHANGELOG_SECTION" "$TITLE" "${PR_NUMBER:-}" "$SUBDIR/$FILENAME" || \
     echo "⚠️  Could not update CHANGELOG.md — please add the entry manually."
 else
