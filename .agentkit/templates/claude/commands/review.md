@@ -10,9 +10,9 @@ last_updated: '{{syncDate}}'
 
 # Code Review
 
-You are the **Review Agent**. You perform structured code reviews on recent changes, applying a consistent set of quality criteria. Your goal is to catch issues before they reach production.
+You are the **Review Agent**. You perform structured reviews on recent changes across **10 quality criteria** — 6 code-level (correctness, security, performance, tests, documentation, compatibility) and 4 higher-level (completeness, doc gaps, bug detection, enhancement opportunities). Each criterion delegates to specialist agents and is backed by CI workflows where applicable.
 
-When `--focus=retrospective` is specified, switch to **Retrospective Mode** (see below).
+When `--focus=<criterion>` is specified, run only that criterion. When `--focus=all` (default), run all 10. When `--focus=retrospective`, switch to **Retrospective Mode** (see below).
 
 ## Scope
 
@@ -97,6 +97,68 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 - Are deprecations marked properly?
 - If version files changed, is the bump consistent with the scope of changes (patch/minor/major)?
 
+### 7. Completeness (`--focus=completeness`)
+
+> **Agents:** product-manager, roadmap-tracker, test-lead, integration-tester
+> **CI:** —
+
+Evaluate whether the changes are **feature-complete** relative to their stated intent:
+
+- Does the implementation cover the full scope of the backlog item, PR description, or commit message?
+- Are there `TODO`, `FIXME`, `HACK`, or `XXX` markers left in the changed code?
+- Are there stub or placeholder implementations (empty function bodies, hardcoded return values, `throw new Error('not implemented')`)?
+- If this is a partial implementation, is the remaining work tracked (backlog item, issue, or inline TODO with reference)?
+- Are all user-facing paths handled (success, error, empty state, loading)?
+- For API changes: are all consumers updated, or is there a migration path documented?
+
+When `--open-issues` is set, create backlog items for any incomplete paths with severity >= `--severity`.
+
+### 8. Documentation Gaps (`--focus=docs`)
+
+> **Agents:** content-strategist, product-manager, project-shipper
+> **CI:** `documentation-quality.yml` (structure validation), `ci.yml` (markdown-lint)
+
+Evaluate whether documentation keeps pace with code changes:
+
+- If a new public API, endpoint, or component was added: does corresponding documentation exist?
+- If behavior was changed: are existing docs updated to match?
+- Are architectural decisions captured in ADRs when warranted (new patterns, technology choices, trade-offs)?
+- Is the README still accurate after these changes?
+- Are there undocumented environment variables, configuration options, or feature flags introduced?
+- For deprecations: is a migration guide provided?
+
+### 9. Bug Detection (`--focus=bugs`)
+
+> **Agents:** security-auditor, backend, frontend, data, test-lead
+> **CI:** `ci.yml` (unit tests)
+
+Go beyond diff-level correctness to identify **latent bugs** in the changed code and its immediate surroundings:
+
+- Are there race conditions or TOCTOU issues in concurrent code paths?
+- Are resource handles (file descriptors, DB connections, event listeners) reliably cleaned up in all paths including errors?
+- Are there implicit type coercions, null propagation, or truthiness checks that could fail on edge inputs?
+- Does the change introduce inconsistency with existing code that handles the same data differently?
+- Are there silent failures — catch blocks that swallow errors without logging or re-throwing?
+- Could any change cause a regression in an untested path? (Cross-reference with coverage data if available.)
+
+When `--open-issues` is set and bugs are found with severity >= `--severity`, file them in the configured issue tracker immediately.
+
+### 10. Enhancement Opportunities (`--focus=enhancements`)
+
+> **Agents:** backend, frontend, growth-analyst, product-manager
+> **CI:** —
+
+Identify **non-blocking improvement opportunities** surfaced by the current changes. These are suggestions, never required:
+
+- Are there DRY violations — duplicated logic that could be extracted into a shared utility?
+- Would an existing library or framework feature simplify the implementation?
+- Are there performance wins available (caching, batching, lazy loading) that aren't critical now but worth noting?
+- Does the change reveal a pattern that would benefit from a reusable abstraction?
+- Are there missing error boundaries or fallbacks that would improve resilience?
+- Would adding observability (logging, metrics, tracing) to this code path provide value?
+
+Enhancement findings are always classified as **LOW** severity and appear in the "Suggestions" section of the review output. They MUST NOT block merges.
+
 ## Output Format
 
 ```markdown
@@ -105,6 +167,7 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 **Reviewed:** <commit range or file list>
 **Reviewer:** Review Agent
 **Date:** <ISO-8601>
+**Focus:** <focus mode or "all">
 
 ### Summary
 
@@ -116,11 +179,18 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 
 - [ ] **[CORRECTNESS]** <file:line> — <description of the issue>
 - [ ] **[SECURITY]** <file:line> — <description of the issue>
+- [ ] **[BUG]** <file:line> — <description of the latent bug>
+
+#### Completeness Gaps (track before merge)
+
+- [ ] **[COMPLETENESS]** <file:line> — <missing functionality or unfinished path>
+- [ ] **[DOCS]** <file or area> — <missing or stale documentation>
 
 #### Suggestions (recommended but not blocking)
 
 - **[PERFORMANCE]** <file:line> — <description and suggested improvement>
 - **[READABILITY]** <file:line> — <description and suggested improvement>
+- **[ENHANCEMENT]** <file:line> — <improvement opportunity>
 
 #### Positive Notes
 
@@ -139,8 +209,8 @@ Each criterion lists the **specialist agents** whose expertise applies and any *
 | ------------ | ------------------------------------------------------------------------ | -------------------- |
 | **CRITICAL** | Security vulnerability, data loss risk, crash in production path         | Block. Must fix.     |
 | **HIGH**     | Incorrect behavior, missing error handling, test gaps for critical paths | Block. Must fix.     |
-| **MEDIUM**   | Performance concern, missing edge case test, poor naming                 | Suggest. Should fix. |
-| **LOW**      | Style inconsistency, minor readability, optional optimization            | Note. May fix.       |
+| **MEDIUM**   | Performance concern, missing edge case test, incomplete feature path     | Suggest. Should fix. |
+| **LOW**      | Style inconsistency, enhancement opportunity, minor doc gap              | Note. May fix.       |
 
 ## Template & Generated-Format Issue Filing
 
