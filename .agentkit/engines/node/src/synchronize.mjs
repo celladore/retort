@@ -1104,6 +1104,7 @@ function buildAgentVars(agent, category, vars) {
   const conventions = agent.conventions || [];
   const examples = agent.examples || [];
   const antiPatterns = agent['anti-patterns'] || [];
+  const domainRules = agent['domain-rules'] || [];
 
   return {
     ...vars,
@@ -1122,7 +1123,7 @@ function buildAgentVars(agent, category, vars) {
             .join('\n\n')
         : '',
     agentAntiPatterns: antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
-    agentDomainRules: '',
+    agentDomainRules: domainRules.length > 0 ? domainRules.map((r) => `- ${r}`).join('\n') : '',
   };
 }
 
@@ -1245,6 +1246,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     const headerRepoName = vars.repoName;
 
     // --- Always-on outputs (not gated by renderTargets) ---
+    // These run even with --only because they're framework-level infrastructure:
+    // - AGENTS.md, root docs, .github/ — always needed regardless of tool target
+    // - .gitattributes merge drivers — repo-wide, not tool-specific
+    // - .vscode/settings.json, editor configs — workspace-level, not tool-specific
     await Promise.all([
       syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
       syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
