@@ -33,7 +33,7 @@ Agents and teams are complementary but serve different purposes:
 - **Agents** define _who_ does the work -- the expertise and behavioral constraints.
 - **Teams** define _what domain_ the work falls into -- the organizational unit for delegation.
 
-Agents are grouped into six categories (engineering, design, marketing, operations, product, testing). Teams cut across these categories to form action-oriented groups. A single team may draw on multiple agents. For example, the Testing team maps to three agents (test-lead, coverage-tracker, integration-tester), while the Backend team maps primarily to the backend engineer agent.
+Agents are grouped into seven categories (engineering, design, marketing, operations, product, testing, project-management). Teams cut across these categories to form action-oriented groups. A single team may draw on multiple agents. For example, the Testing team maps to three agents (test-lead, coverage-tracker, integration-tester), while the Backend team maps primarily to the backend engineer agent.
 
 The orchestrator tracks progress per team (not per agent) using statuses: `idle`, `in_progress`, `blocked`, and `done`.
 
@@ -54,7 +54,7 @@ The orchestrator tracks progress per team (not per agent) using statuses: `idle`
 | `product`  | PRODUCT       | Features, PRDs, roadmap               | `/team-product`  |
 | `quality`  | QUALITY       | Code review, refactoring, reliability | `/team-quality`  |
 
-## The 16 Agents by Category
+## The 19 Agents by Category
 
 ### Engineering (5 agents)
 
@@ -102,6 +102,13 @@ The orchestrator tracks progress per team (not per agent) using statuses: `idle`
 | `test-lead`          | Test Lead          | Test strategy, quality gate definitions, test architecture  |
 | `coverage-tracker`   | Coverage Tracker   | Coverage metrics, threshold enforcement, gap analysis       |
 | `integration-tester` | Integration Tester | E2E tests, cross-service testing, API contract verification |
+
+### Project Management (2 agents)
+
+| Agent ID          | Name            | Primary Responsibility                                       |
+| ----------------- | --------------- | ------------------------------------------------------------ |
+| `project-shipper` | Project Shipper | Task scoping, delivery tracking, handoff documentation       |
+| `release-manager` | Release Manager | Release coordination, versioning, changelogs, deployment     |
 
 ---
 

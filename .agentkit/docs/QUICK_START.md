@@ -260,7 +260,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ## Command Quick Reference
 
-AgentKit Forge provides 29 slash commands, organized into five categories. See [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) for full details, flags, and examples.
+AgentKit Forge provides 29 slash commands, organized into five categories. The tables below list 27 commands; the remaining 2 (`/scaffold` and `/preflight`) are slash-command-only and documented in [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md). See that reference for full details, flags, and examples.
 
 ### Workflow Commands
 
@@ -307,7 +307,7 @@ These commands activate specialized agent teams for focused work.
 | `/team-product`  | Product (T9)        | PRDs, feature specs, user stories, roadmap         |
 | `/team-quality`  | Quality (T10)       | Code review, refactoring, quality gate definitions |
 
-### Task Management Commands
+### Task Management & Diagnostics
 
 | Command     | Purpose                                           |
 | ----------- | ------------------------------------------------- |
