@@ -1,6 +1,7 @@
 # Issue #170 Maintainer Patch Blocks (.agentkit Source-of-Truth)
 
 > Pointer: For language-profile presets and verified Phase 2/3 GitHub tracking, see [analysis/language-aware-hooks-phase-plan.md](./analysis/language-aware-hooks-phase-plan.md).
+> Related architecture tracking: [Issue #243](https://github.com/JustAGhosT/agentkit-forge/issues/243) for cross-repo/person usage telemetry design.
 
 These patch blocks are for maintainers to apply in protected `.agentkit` source paths.
 They mirror the runtime implementation already validated in this branch.
