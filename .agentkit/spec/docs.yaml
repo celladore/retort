@@ -175,16 +175,20 @@ specialDirectories:
     name: PR History Documents
     path: 'docs/history/'
     description: >
-      Historical documentation for significant PRs and implementations.
-      Covers major implementations, complex bug resolutions, new feature
-      launches, and major migrations. Documents use sequential numbering
-      and are generated from standardized templates via scripts/create-doc.sh.
+      Historical documentation for significant PRs, implementations, issues,
+      and lessons learned. Covers major implementations, complex bug resolutions,
+      new feature launches, major migrations, session issues, and knowledge
+      captured from retrospectives. Documents use sequential numbering
+      and are generated from standardized templates via scripts/create-doc.sh
+      or the retrospective command.
     naming: 'XXXX-YYYY-MM-DD-{slug}-{type}.md'
     subdirectories:
       - 'implementations/ — Major implementations and architecture changes'
       - 'bug-fixes/ — Complex or critical bug resolutions'
       - 'features/ — New feature launches'
       - 'migrations/ — Major migrations and upgrades'
+      - 'issues/ — Issues encountered during development sessions'
+      - 'lessons-learned/ — Lessons learned from retrospectives and session analysis'
     template: |
       # [{type} Title] - Historical Summary
 

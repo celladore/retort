@@ -58,6 +58,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Grep
 - Bash
 
+## Domain Rules
+
+- Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles
+- Follow typescript domain rules [ts-strict-null, ts-no-any, ts-wcag-aa, ts-lint] — strict null checks, no any, WCAG AA compliance
+- Follow security domain rules [sec-input-validation, sec-no-secrets, sec-deny-by-default] — sanitize user inputs, prevent XSS, validate at boundaries
+- Follow testing domain rules [qa-coverage-threshold, qa-aaa-pattern, qa-no-skipped-tests] — maintain coverage thresholds, test accessibility
+- Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
+
 ## Agent Conventions
 
 - Prefer server components by default, client components only when interactive state is required
