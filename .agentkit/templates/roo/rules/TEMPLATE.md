@@ -10,6 +10,15 @@
 
 {{ruleAppliesTo}}
 
-## Conventions
+{{#if ruleHasEnforcement}}
+## Enforcement Rules
 
-{{ruleConventions}}
+{{ruleEnforcementConventions}}
+
+{{/if}}
+{{#if ruleHasAdvisory}}
+## Advisory Rules
+
+{{ruleAdvisoryConventions}}
+
+{{/if}}
