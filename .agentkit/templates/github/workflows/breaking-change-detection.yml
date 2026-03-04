@@ -90,6 +90,12 @@ jobs:
               echo "::warning::Breaking changes detected but CHANGELOG.md was not updated"
               DETAILS="${DETAILS}\n- ⚠ CHANGELOG.md not updated"
             fi
+
+            # 6. Check if version files were bumped alongside breaking changes
+            if [ "$version_changed" = "false" ]; then
+              echo "::warning::Breaking changes detected but no version file was bumped"
+              DETAILS="${DETAILS}\n- ⚠ No version bump detected"
+            fi
           fi
 
           # Summary table

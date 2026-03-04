@@ -355,7 +355,7 @@ Before writing a record:
 
 ## External Issue Filing (when `--open-issues` is set)
 
-For unresolved issues with severity >= HIGH, file in the project's configured tracker. Follow the same issue filing protocol as the standard review mode (see "Template & Generated-Format Issue Filing" above), using labels `retrospective,session-issue,<severity-lowercase>`.
+For unresolved issues with severity >= HIGH, file in the project's configured tracker. Follow the same issue-filing protocol as the standard review mode (see "Template & Generated-Format Issue Filing" above), using labels `retrospective,session-issue,<severity-lowercase>`.
 
 ## Non-Blocking Behaviour
 

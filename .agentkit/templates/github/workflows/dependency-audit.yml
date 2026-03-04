@@ -50,37 +50,44 @@ jobs:
         run: |
           echo "## Node.js Dependency Audit" >> $GITHUB_STEP_SUMMARY
 
+          # Write pnpm audit parser
+          cat > /tmp/parse_pnpm_audit.py <<'PY'
+          import json, sys
+          data = json.load(sys.stdin)
+          advisories = data.get('advisories', {})
+          if advisories:
+              print(f'::warning::Found {len(advisories)} vulnerability advisories')
+              for id, adv in list(advisories.items())[:10]:
+                  severity = adv.get('severity', 'unknown')
+                  title = adv.get('title', 'Unknown')
+                  module_name = adv.get('module_name', 'unknown')
+                  print(f'::warning::{severity.upper()}: {module_name} — {title}')
+          PY
+
+          # Write npm audit parser
+          cat > /tmp/parse_npm_audit.py <<'PY'
+          import json, sys
+          try:
+              data = json.load(sys.stdin)
+              vulns = data.get('vulnerabilities', {})
+              if vulns:
+                  print(f'::warning::Found {len(vulns)} vulnerabilities')
+                  for name, info in list(vulns.items())[:10]:
+                      severity = info.get('severity', 'unknown')
+                      print(f'::warning::{severity.upper()}: {name}')
+          except Exception:
+              pass
+          PY
+
           # Try pnpm audit first, fall back to npm audit
           if command -v pnpm &>/dev/null && [ -f pnpm-lock.yaml ]; then
-            if pnpm audit --json 2>/dev/null | tee /tmp/audit.json | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-advisories = data.get('advisories', {})
-if advisories:
-    print(f'::warning::Found {len(advisories)} vulnerability advisories')
-    for id, adv in list(advisories.items())[:10]:
-        severity = adv.get('severity', 'unknown')
-        title = adv.get('title', 'Unknown')
-        module_name = adv.get('module_name', 'unknown')
-        print(f'::warning::{severity.upper()}: {module_name} — {title}')
-" 2>/dev/null; then
+            if pnpm audit --json 2>/dev/null | tee /tmp/audit.json | python3 /tmp/parse_pnpm_audit.py 2>/dev/null; then
               echo "Audit complete — see annotations above" >> $GITHUB_STEP_SUMMARY
             else
               echo "No known vulnerabilities found" >> $GITHUB_STEP_SUMMARY
             fi
           elif [ -f package-lock.json ]; then
-            npm audit --json 2>/dev/null | python3 -c "
-import json, sys
-try:
-    data = json.load(sys.stdin)
-    vulns = data.get('vulnerabilities', {})
-    if vulns:
-        print(f'::warning::Found {len(vulns)} vulnerabilities')
-        for name, info in list(vulns.items())[:10]:
-            severity = info.get('severity', 'unknown')
-            print(f'::warning::{severity.upper()}: {name}')
-except Exception: pass
-" 2>/dev/null || echo "Audit parsing skipped" >> $GITHUB_STEP_SUMMARY
+            npm audit --json 2>/dev/null | python3 /tmp/parse_npm_audit.py 2>/dev/null || echo "Audit parsing skipped" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Check for new dependencies in diff

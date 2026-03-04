@@ -46,26 +46,33 @@ jobs:
           fi
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile 2>/dev/null || true
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile 2>/dev/null || true
+          elif [ -f yarn.lock ]; then
+            yarn install --frozen-lockfile 2>/dev/null || true
+          else
+            npm ci 2>/dev/null || npm install --no-audit --prefer-offline 2>/dev/null || true
+          fi
         working-directory: ${{ steps.detect.outputs.project_dir }}
 
       - name: Run tests with coverage
         run: |
-          # Detect package manager (working-directory already set by detect step)
+          # Detect package manager
           if [ -f pnpm-lock.yaml ]; then
             PM="pnpm"
           elif [ -f yarn.lock ]; then
             PM="yarn"
           else
-            PM="npx"
+            PM="npm"
           fi
 
           # Try coverage script first, fall back to test with coverage flag
           if $PM run coverage 2>/dev/null; then
             echo "Ran dedicated coverage script"
-          elif $PM vitest run --coverage 2>/dev/null; then
+          elif $PM run vitest -- run --coverage 2>/dev/null; then
             echo "Ran vitest with coverage"
-          elif $PM jest --coverage 2>/dev/null; then
+          elif $PM run jest -- --coverage 2>/dev/null; then
             echo "Ran jest with coverage"
           else
             echo "::notice::No coverage runner detected — running tests without coverage"

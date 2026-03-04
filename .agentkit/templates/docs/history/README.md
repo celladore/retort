@@ -36,9 +36,10 @@ Use the provided script to generate a new document from the correct template:
 ./scripts/create-doc.sh bugfix "Bug Description" <pr-number>
 ./scripts/create-doc.sh feature "Feature Name" <pr-number>
 ./scripts/create-doc.sh migration "Migration Name" <pr-number>
-./scripts/create-doc.sh issue "Issue Title"
-./scripts/create-doc.sh lesson "Lesson Title"
 ```
+
+> **Note:** Issue and lesson records are created automatically via
+> `/review --focus=retrospective`, not through the create-doc script.
 
 The `/review` command with `--focus=retrospective` automates issue and lesson
 creation at end-of-session (non-blocking — never gates delivery):
