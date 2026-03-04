@@ -45,7 +45,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 | Gap | Evidence | Resolution |
 |-----|----------|------------|
-| No runtime handler for `sync-backlog` | `sync-backlog` exists in `commands.yaml` and spec validation but has no entry in `VALID_COMMANDS` and no handler in `cli.mjs` | Add CLI route and runtime handler that calls the new sync engine |
+| Sync-backlog runtime coverage is partial | `cli.mjs` includes `sync-backlog` in `VALID_COMMANDS` and has `case 'sync-backlog':`, but source collection coverage still needs to match this plan | Expand source collectors and complete end-to-end tests for all documented sources |
 | No GitHub issue fetcher | `gh issue list` is in allowed-tools but no code calls it | Implement `github-adapter.mjs` that shells out to `gh` |
 | No field normalization layer | Sync-backlog template describes it as prose, not code | Implement `issue-normalizer.mjs` with canonical schema |
 | No consolidated view command | Backlog is only `AGENT_BACKLOG.md` (markdown table) | Add `backlog` CLI command with `--format` (table/json/yaml) output |
@@ -100,7 +100,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 ┌─────────────────────────────────────────────────────────┐
 │              agentkit backlog                            │
 │  Consolidated view: external + local sources             │
-│  --format table|json|yaml|csv                             │
+│  --format table|json|yaml|csv                            │
 │  --team <filter>                                         │
 │  --priority <filter>                                     │
 │  --source <filter> (github|linear|discovery|todo|review) │
@@ -185,90 +185,90 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
          docs: docs
    ```
 
-2. **`.agentkit/spec/commands.yaml`** — Add `import-issues` command and `backlog` command:
+2. **`.agentkit/spec/commands.yaml`** — Under `commands:`, add `import-issues` command and `backlog` command:
    ```yaml
    commands:
-   - name: import-issues
-     type: workflow
-     description: >
-       Imports issues from the configured external tracker (GitHub or Linear),
-       normalizes fields to the canonical backlog schema, deduplicates against
-       existing items, assigns teams via intake routing rules, and writes to
-       AGENT_BACKLOG.md. Always available; when process.intake.autoImport is
-       true, it also runs automatically during intake/init, otherwise it must
-       be invoked explicitly.
-     flags:
-       - name: --tracker
-         description: 'Override tracker (github, linear)'
-         type: string
-         default: null
-         enum: [github, linear]
-       - name: --state
-         description: 'Import issues in this state (open, closed, all)'
-         type: string
-         default: 'open'
-         enum: [open, closed, all]
-       - name: --labels
-         description: 'Filter by labels (comma-separated)'
-         type: string
-         default: null
-       - name: --since
-         description: 'Only import issues updated since (ISO date)'
-         type: string
-         default: null
-       - name: --dry-run
-         description: 'Show what would be imported without writing'
-         type: boolean
-         default: false
-       - name: --limit
-         description: 'Maximum number of issues to import'
-         type: integer
-         default: 100
-     allowed-tools:
-       - Read
-       - Write
-       - Edit
-       - Glob
-       - Grep
-       - Bash
+     - name: import-issues
+       type: workflow
+       description: >
+         Imports issues from the configured external tracker (GitHub or Linear),
+         normalizes fields to the canonical backlog schema, deduplicates against
+         existing items, assigns teams via intake routing rules, and writes to
+         AGENT_BACKLOG.md. Always available; when process.intake.autoImport is
+         true, it also runs automatically during intake/init, otherwise it must
+         be invoked explicitly.
+       flags:
+         - name: --tracker
+           description: 'Override tracker (github, linear)'
+           type: string
+           default: null
+           enum: [github, linear]
+         - name: --state
+           description: 'Import issues in this state (open, closed, all)'
+           type: string
+           default: 'open'
+           enum: [open, closed, all]
+         - name: --labels
+           description: 'Filter by labels (comma-separated)'
+           type: string
+           default: null
+         - name: --since
+           description: 'Only import issues updated since (ISO date)'
+           type: string
+           default: null
+         - name: --dry-run
+           description: 'Show what would be imported without writing'
+           type: boolean
+           default: false
+         - name: --limit
+           description: 'Maximum number of issues to import'
+           type: integer
+           default: 100
+       allowed-tools:
+         - Read
+         - Write
+         - Edit
+         - Glob
+         - Grep
+         - Bash
 
-   - name: backlog
-     type: utility
-     description: >
-       Displays a consolidated backlog view from all sources (external tracker,
-       discovery, healthcheck, code TODOs, review findings, manual entries).
-       Supports filtering and multiple output formats for CLI and future UI
-       consumption.
-     flags:
-       - name: --format
-         description: 'Output format: table, json, yaml, csv'
-         type: string
-         default: 'table'
-         enum: [table, json, yaml, csv]
-       - name: --team
-         description: 'Filter by team'
-         type: string
-         default: null
-       - name: --priority
-         description: 'Filter by priority (P0, P1, P2, P3)'
-         type: string
-         default: null
-       - name: --source
-         description: 'Filter by source (github, linear, discovery, todo, review, manual)'
-         type: string
-         default: null
-       - name: --status
-         description: 'Filter by status (open, in-progress, completed, blocked)'
-         type: string
-         default: null
-       - name: --sort
-         description: 'Sort by field (priority, team, source, updated)'
-         type: string
-         default: 'priority'
-     allowed-tools:
-       - Read
-       - Glob
-       - Grep
+     - name: backlog
+       type: utility
+       description: >
+         Displays a consolidated backlog view from all sources (external tracker,
+         discovery, healthcheck, code TODOs, review findings, manual entries).
+         Supports filtering and multiple output formats for CLI and future UI
+         consumption.
+       flags:
+         - name: --format
+           description: 'Output format: table, json, yaml, csv'
+           type: string
+           default: 'table'
+           enum: [table, json, yaml, csv]
+         - name: --team
+           description: 'Filter by team'
+           type: string
+           default: null
+         - name: --priority
+           description: 'Filter by priority (P0, P1, P2, P3)'
+           type: string
+           default: null
+         - name: --source
+           description: 'Filter by source (github, linear, discovery, todo, review, manual)'
+           type: string
+           default: null
+         - name: --status
+           description: 'Filter by status (open, in-progress, completed, blocked)'
+           type: string
+           default: null
+         - name: --sort
+           description: 'Sort by field (priority, team, source, updated)'
+           type: string
+           default: 'priority'
+       allowed-tools:
+         - Read
+         - Glob
+         - Grep
    ```
 
 3. **`.agentkit/spec/teams.yaml`** — No changes needed (intake config already
