@@ -412,6 +412,11 @@ describe('PROJECT_ENUMS', () => {
     expect(PROJECT_ENUMS.cloudProvider).toContain('azure');
     expect(PROJECT_ENUMS.cloudProvider).toContain('gcp');
   });
+
+  it('includes issue tracker and intake cadence enums', () => {
+    expect(PROJECT_ENUMS.issueTracker).toEqual(['github', 'linear', 'none']);
+    expect(PROJECT_ENUMS.intakeCadence).toEqual(['daily', 'on-demand', 'weekly']);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -581,5 +586,64 @@ describe('validateProjectYaml', () => {
 
     const { errors: neg } = validateProjectYaml({ testing: { coverage: -1 } });
     expect(neg.some((e) => e.includes('coverage'))).toBe(true);
+  });
+
+  it('validates process.issueTracker enum values', () => {
+    expect(validateProjectYaml({ process: { issueTracker: 'github' } }).errors).toEqual([]);
+    expect(validateProjectYaml({ process: { issueTracker: 'linear' } }).errors).toEqual([]);
+    expect(validateProjectYaml({ process: { issueTracker: 'none' } }).errors).toEqual([]);
+
+    const { errors } = validateProjectYaml({ process: { issueTracker: 'jira' } });
+    expect(errors.some((e) => e.includes('process.issueTracker'))).toBe(true);
+  });
+
+  it('validates process.intake.cadence enum values', () => {
+    expect(validateProjectYaml({ process: { intake: { cadence: 'daily' } } }).errors).toEqual([]);
+    expect(validateProjectYaml({ process: { intake: { cadence: 'on-demand' } } }).errors).toEqual(
+      []
+    );
+
+    const { errors } = validateProjectYaml({ process: { intake: { cadence: 'hourly' } } });
+    expect(errors.some((e) => e.includes('process.intake.cadence'))).toBe(true);
+  });
+});
+
+describe('teams intake cross-references', () => {
+  it('fails when intake owner/operations teams are unknown', () => {
+    const errors = validateCrossReferences({
+      teams: {
+        teams: [{ id: 'backend' }, { id: 'product' }, { id: 'quality' }],
+        intake: {
+          ownerTeam: 'ghost',
+          operationsTeam: 'unknown',
+          routing: { api: 'backend' },
+          escalation: { securityCritical: ['backend'] },
+        },
+      },
+      commands: { commands: [] },
+      agents: { agents: {} },
+      rules: { rules: [] },
+    });
+
+    expect(errors.some((e) => e.includes('intake.ownerTeam'))).toBe(true);
+    expect(errors.some((e) => e.includes('intake.operationsTeam'))).toBe(true);
+  });
+
+  it('fails when intake routing references unknown team', () => {
+    const errors = validateCrossReferences({
+      teams: {
+        teams: [{ id: 'backend' }, { id: 'product' }, { id: 'quality' }],
+        intake: {
+          ownerTeam: 'product',
+          operationsTeam: 'quality',
+          routing: { api: 'ghost' },
+        },
+      },
+      commands: { commands: [] },
+      agents: { agents: {} },
+      rules: { rules: [] },
+    });
+
+    expect(errors.some((e) => e.includes('intake.routing.api'))).toBe(true);
   });
 });
