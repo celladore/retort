@@ -14,3 +14,4 @@
 - [PRD-002: LLM Selection Scorecard Guide](./PRD-002-llm-selection-scorecard-guide.md)
 - [PRD-003: Agent-to-LLM Weighted Matrix Config Guide](./PRD-003-agent-to-llm-weighted-matrix-config-guide.md)
 - [PRD-005: Mesh-Native Distribution](./PRD-005-mesh-native-distribution.md)
+- [PRD-006: PWA/Desktop Visual Configuration](./PRD-006-pwa-desktop-visual-configuration.md)
