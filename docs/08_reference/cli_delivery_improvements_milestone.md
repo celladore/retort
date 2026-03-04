@@ -31,6 +31,27 @@ repositories that have integrated AgentKit Forge.
 
 The following updates were applied to GitHub issues after autoupdate issue
 #258 was assigned:
+=======
+- Suggested milestone number: `#2` (create as next milestone)
+
+## Issues in this Milestone
+
+| # | Title | Status | PRD / Spec |
+| --- | --- | --- | --- |
+| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain availability (gh, az, etc.) | Open | N/A |
+| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR (blocking) and post-commit (non-blocking) for adopters | Open | N/A |
+| TBD | feat(cli): implement autoupdate functionality for adopter repositories | Planned | [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md) |
+
+> **Note for maintainer:** The autoupdate issue must be created as a GitHub issue in
+> `JustAGhosT/agentkit-forge` and added to this milestone. Template content for the
+> issue body is provided in [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md).
+> Issues #196 and #194 should also be updated with a cross-reference comment pointing
+> to the new autoupdate issue.
+
+## Cross-References (Issue Updates Required)
+
+The following updates must be applied to GitHub issues once the autoupdate issue
+number is assigned:
 
 ### Issue #196 — adoption/startup-hooks: enforce required CLI toolchain
 
