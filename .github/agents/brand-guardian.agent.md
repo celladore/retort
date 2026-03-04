@@ -67,6 +67,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Domain Rules
 
+- Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles
+- Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 - .agentkit/spec/brand.yaml is the single source of truth for all brand colors, typography, and design tokens — never define colors outside this file
 - Editor themes are derived from brand.yaml via editor-theme.yaml mappings — the sync engine generates hex values in settings.json (this is expected), but never manually edit those generated hex values; always update brand.yaml or editor-theme.yaml and re-run sync
 - All color entries in brand.yaml support simple hex strings ("#RRGGBB") or detailed objects ({ hex, role, rationale, usage }) — the resolver handles both formats transparently

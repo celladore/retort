@@ -117,9 +117,12 @@ commands:
   - name: review
     type: workflow
     description: >
-      Performs a structured code review of staged changes, a specific PR, or a
-      range of commits. Evaluates code quality, adherence to domain rules,
-      security concerns, test coverage, and architectural alignment.
+      Performs a structured review of staged changes, a specific PR, or a
+      range of commits across 10 quality criteria: correctness, security,
+      performance, tests, documentation, compatibility, completeness, doc
+      gaps, bug detection, and enhancement opportunities. Delegates to
+      specialist agents for each criterion. When --focus=retrospective,
+      reviews the current session to extract issues and lessons learned.
     flags:
       - name: --pr
         description: 'GitHub PR number to review'
@@ -137,22 +140,40 @@ commands:
         default: null
         required: false
       - name: --focus
-        description: 'Focus area: security, performance, correctness, style, or all'
+        description: 'Focus area for the review. Code-level: security, performance, correctness, style, tests, compatibility. Higher-level: completeness, docs, bugs, enhancements. Special: retrospective. Default: all (runs criteria 1-10).'
         type: string
         default: 'all'
         required: false
-        enum: [security, performance, correctness, style, all]
+        enum: [security, performance, correctness, style, tests, compatibility, completeness, docs, bugs, enhancements, retrospective, all]
       - name: --severity
         description: 'Minimum severity to report: info, warning, error, critical'
         type: string
         default: 'warning'
         required: false
         enum: [info, warning, error, critical]
+      - name: --open-issues
+        description: 'Create external issues for findings above --severity threshold (uses project.yaml issueTracker setting). Applies to retrospective, bugs, completeness, and enhancements focus modes.'
+        type: boolean
+        default: false
+      - name: --dry-run
+        description: 'Show findings without writing files or creating issues'
+        type: boolean
+        default: false
+    # Runtime allowed-tools are defined in the command template frontmatter
+    # with restricted Bash globs (e.g., Bash(git *), Bash(gh issue create*)).
+    # This list is metadata for documentation and validation only.
     allowed-tools:
       - Read
+      - Write
+      - Edit
       - Glob
       - Grep
-      - Bash
+      - 'Bash(git *)'
+      - 'Bash(gh issue create*)'
+      - 'Bash(gh issue list*)'
+      - 'Bash(gh issue view*)'
+      - 'Bash(linear *)'
+      - 'Bash(mkdir *)'
 
   - name: sync-backlog
     type: workflow
@@ -465,6 +486,49 @@ commands:
       - Glob
       - Grep
       - Bash
+
+  - name: document-history
+    type: utility
+    description: >
+      Creates a structured history document from templates for significant work
+      completed in the current session. Supports bug fixes, features,
+      implementations, and migrations. Auto-detects type and title from git
+      history when invoked without arguments. Fills in all template sections
+      with concrete details from session context.
+    flags:
+      - name: --type
+        description: 'Document type. The four primary types are used directly; issue and lesson are typically created via /review --focus=retrospective but can also be created manually.'
+        type: string
+        default: null
+        required: false
+        enum: [implementation, bugfix, feature, migration, issue, lesson]
+      - name: --title
+        description: 'Human-readable title for the document'
+        type: string
+        default: null
+        required: false
+      - name: --pr
+        description: 'PR number to reference in the document'
+        type: integer
+        default: null
+        required: false
+      - name: --auto
+        description: 'Auto-detect type and title from recent git history'
+        type: boolean
+        default: false
+      - name: --dry-run
+        description: 'Show what would be created without writing files'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - 'Bash(git *)'
+      - 'Bash(./scripts/create-doc*)'
+      - 'Bash(mkdir *)'
 
   - name: brand
     type: utility

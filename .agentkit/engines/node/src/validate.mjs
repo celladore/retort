@@ -3,8 +3,8 @@
  * Validates generated outputs for correctness.
  * Now includes spec-aware validation via spec-validator.mjs.
  */
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { resolve, join, extname } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
+import { extname, join, resolve } from 'path';
 import { validateSpec } from './spec-validator.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {

@@ -176,6 +176,219 @@ describe('validateCrossReferences()', () => {
     expect(errors.some((e) => e.includes('unknown tool'))).toBe(true);
   });
 
+  it('accepts Bash with restricted glob pattern', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: {
+        commands: [
+          { name: 'review', type: 'utility', 'allowed-tools': ['Bash(git *)', 'Bash(gh issue create*)', 'Read'] },
+        ],
+      },
+      agents: { agents: {} },
+      rules: { rules: [] },
+    });
+    expect(errors.filter((e) => e.includes('unknown tool'))).toEqual([]);
+  });
+
+  it('rejects non-Bash decorated tool patterns', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: {
+        commands: [
+          { name: 'x', type: 'utility', 'allowed-tools': ['Foo(bar)'] },
+        ],
+      },
+      agents: { agents: {} },
+      rules: { rules: [] },
+    });
+    expect(errors.some((e) => e.includes('unknown tool "Foo(bar)"'))).toBe(true);
+  });
+
+  it('validates domain-rules entries are strings', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            {
+              id: 'be',
+              'domain-rules': [
+                'Follow git-workflow domain rules [gw-conventional-commits] — use conventional commits',
+                { 'bad key': 'not a string' },
+              ],
+            },
+          ],
+        },
+      },
+      rules: { rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }] }] },
+    });
+    expect(errors.some((e) => e.includes('must be a string'))).toBe(true);
+  });
+
+  it('catches unknown rule IDs in domain-rules brackets', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            {
+              id: 'be',
+              'domain-rules': [
+                'Follow git-workflow domain rules [gw-fake-rule, gw-conventional-commits] — test',
+              ],
+            },
+          ],
+        },
+      },
+      rules: { rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }] }] },
+    });
+    expect(errors.some((e) => e.includes('unknown rule id "gw-fake-rule"'))).toBe(true);
+    expect(errors.some((e) => e.includes('gw-conventional-commits'))).toBe(false);
+  });
+
+  it('handles domain-rules set to a non-array value', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            { id: 'be', 'domain-rules': 'not an array' },
+          ],
+        },
+      },
+      rules: { rules: [] },
+    });
+    expect(errors.some((e) => e.includes('must be an array'))).toBe(true);
+  });
+
+  it('handles domain-rules set to null or undefined gracefully', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            { id: 'be', 'domain-rules': null },
+            { id: 'fe', 'domain-rules': undefined },
+            { id: 'da' },
+          ],
+        },
+      },
+      rules: { rules: [] },
+    });
+    expect(errors.filter((e) => e.includes('domain-rules'))).toEqual([]);
+  });
+
+  it('handles empty domain-rules array without errors', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            { id: 'be', 'domain-rules': [] },
+          ],
+        },
+      },
+      rules: { rules: [] },
+    });
+    expect(errors.filter((e) => e.includes('domain-rules'))).toEqual([]);
+  });
+
+  it('handles empty or whitespace-only bracket IDs gracefully', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            {
+              id: 'be',
+              'domain-rules': [
+                'Follow rules [, ,] — test with empty IDs',
+                'Follow rules [  ] — test with whitespace only',
+              ],
+            },
+          ],
+        },
+      },
+      rules: { rules: [] },
+    });
+    // Empty/whitespace IDs should not produce "unknown rule id" errors
+    expect(errors.filter((e) => e.includes('unknown rule id'))).toEqual([]);
+  });
+
+  it('validates multiple bracketed groups in a single domain-rules entry', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            {
+              id: 'be',
+              'domain-rules': [
+                'Follow rules [gw-valid] and also [gw-missing] — two groups',
+              ],
+            },
+          ],
+        },
+      },
+      rules: { rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-valid' }] }] },
+    });
+    expect(errors.some((e) => e.includes('unknown rule id "gw-missing"'))).toBe(true);
+    expect(errors.some((e) => e.includes('gw-valid'))).toBe(false);
+  });
+
+  it('rejects empty Bash() pattern in allowed-tools', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: {
+        commands: [
+          {
+            name: 'bad-cmd',
+            type: 'team',
+            team: 'backend',
+            'allowed-tools': ['Bash()'],
+          },
+        ],
+      },
+      agents: { agents: {} },
+      rules: { rules: [] },
+    });
+    expect(errors.some((e) => e.includes('empty Bash() pattern'))).toBe(true);
+  });
+
+  it('passes domain-rules with all valid rule IDs', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: { commands: [] },
+      agents: {
+        agents: {
+          engineering: [
+            {
+              id: 'be',
+              'domain-rules': [
+                'Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits] — test',
+                'Follow security domain rules [sec-no-secrets] — test',
+              ],
+            },
+          ],
+        },
+      },
+      rules: {
+        rules: [
+          { domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }, { id: 'gw-atomic-commits' }] },
+          { domain: 'security', conventions: [{ id: 'sec-no-secrets' }] },
+        ],
+      },
+    });
+    expect(errors.filter((e) => e.includes('domain-rules'))).toEqual([]);
+  });
+
   it('passes for valid cross-references', () => {
     const errors = validateCrossReferences({
       teams: { teams: [{ id: 'backend' }] },

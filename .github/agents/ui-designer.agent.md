@@ -56,6 +56,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Glob
 - Grep
 
+## Domain Rules
+
+- Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles
+- Follow typescript domain rules [ts-wcag-aa, ts-strict-null, ts-no-any] — WCAG AA compliance for all interactive components
+- Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
+
 ## Conventions
 
 - Work only within your focus area unless explicitly asked to cross boundaries
