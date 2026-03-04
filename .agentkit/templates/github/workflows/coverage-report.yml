@@ -45,27 +45,31 @@ jobs:
             echo "project_dir=." >> $GITHUB_OUTPUT
           fi
 
-      - name: Install dependencies
+      - name: Detect package manager
+        id: pm
         run: |
           if [ -f pnpm-lock.yaml ]; then
-            pnpm install --frozen-lockfile 2>/dev/null || true
+            echo "cmd=pnpm" >> $GITHUB_OUTPUT
           elif [ -f yarn.lock ]; then
-            yarn install --frozen-lockfile 2>/dev/null || true
+            echo "cmd=yarn" >> $GITHUB_OUTPUT
           else
-            npm ci 2>/dev/null || npm install --no-audit --prefer-offline 2>/dev/null || true
+            echo "cmd=npm" >> $GITHUB_OUTPUT
           fi
+        working-directory: ${{ steps.detect.outputs.project_dir }}
+
+      - name: Install dependencies
+        run: |
+          PM="${{ steps.pm.outputs.cmd }}"
+          case "$PM" in
+            pnpm) pnpm install --frozen-lockfile 2>/dev/null || true ;;
+            yarn) yarn install --frozen-lockfile 2>/dev/null || true ;;
+            *)    npm ci 2>/dev/null || npm install --no-audit --prefer-offline 2>/dev/null || true ;;
+          esac
         working-directory: ${{ steps.detect.outputs.project_dir }}
 
       - name: Run tests with coverage
         run: |
-          # Detect package manager
-          if [ -f pnpm-lock.yaml ]; then
-            PM="pnpm"
-          elif [ -f yarn.lock ]; then
-            PM="yarn"
-          else
-            PM="npm"
-          fi
+          PM="${{ steps.pm.outputs.cmd }}"
 
           # Try coverage script first, fall back to test with coverage flag
           if $PM run coverage 2>/dev/null; then
@@ -95,9 +99,9 @@ jobs:
           done
 
           if [ -n "$COVERAGE_FILE" ]; then
-            python3 -c "
+            COVERAGE_FILE="$COVERAGE_FILE" python3 -c "
           import json, os
-          with open('$COVERAGE_FILE') as f:
+          with open(os.environ['COVERAGE_FILE']) as f:
               data = json.load(f)
           total = data.get('total', {})
           lines = total.get('lines', {}).get('pct', 0)
