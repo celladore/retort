@@ -5,7 +5,7 @@
 #   ./scripts/create-doc.ps1 <type> "<title>" [pr-number]
 #
 # Arguments:
-#   type        Document type: implementation | bugfix | feature | migration
+#   type        Document type: implementation | bugfix | feature | migration | issue | lesson
 #   title       Human-readable title for the document
 #   pr-number   Optional PR number to include in the document
 #
@@ -17,7 +17,7 @@
 
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('implementation', 'bugfix', 'feature', 'migration')]
+  [ValidateSet('implementation', 'bugfix', 'feature', 'migration', 'issue', 'lesson')]
   [string]$Type,
 
   [Parameter(Mandatory = $true)]
@@ -43,6 +43,8 @@ $SubdirMap = @{
   bugfix         = 'bug-fixes'
   feature        = 'features'
   migration      = 'migrations'
+  issue          = 'issues'
+  lesson         = 'lessons-learned'
 }
 $Subdir = $SubdirMap[$Type]
 
@@ -53,7 +55,7 @@ $Subdir = $SubdirMap[$Type]
 if (-not (Test-Path $IndexFile)) {
   $InitialIndex = @{
     nextNumber = 1
-    sequences  = @{ implementation = 1; bugfix = 1; feature = 1; migration = 1 }
+    sequences  = @{ implementation = 1; bugfix = 1; feature = 1; migration = 1; issue = 1; lesson = 1 }
     entries    = @()
   }
   $InitialIndex | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 $IndexFile
@@ -91,6 +93,8 @@ $PrRef = if ($PrNumber) { "#$PrNumber" } else { '[#PR-Number]' }
   -replace '\[Bug Description\]',      $Title `
   -replace '\[Feature Name\]',         $Title `
   -replace '\[Migration Name\]',       $Title `
+  -replace '\[Issue Title\]',          $Title `
+  -replace '\[Lesson Title\]',         $Title `
   -replace '\[YYYY-MM-DD\]',           $Date  `
   -replace '\[#PR-Number\]',           $PrRef |
   Set-Content -Encoding UTF8 $DestFile
@@ -133,11 +137,15 @@ $ChangelogSectionMap = @{
   implementation = 'Added'
   bugfix         = 'Fixed'
   migration      = 'Changed'
+  issue          = ''
+  lesson         = ''
 }
 $ChangelogSection = $ChangelogSectionMap[$Type]
 
 $UpdateChangelogScript = Join-Path $ScriptDir 'update-changelog.ps1'
-if (Test-Path $UpdateChangelogScript) {
+if (-not $ChangelogSection) {
+  Write-Host "ℹ️  ${Type} records are not added to CHANGELOG.md — skipping changelog update."
+} elseif (Test-Path $UpdateChangelogScript) {
   try {
     & $UpdateChangelogScript -Section $ChangelogSection -Description $Title `
       -PrNumber $PrNumber -HistoryDoc "$Subdir/$Filename"
