@@ -1070,5 +1070,46 @@ export function runSpecValidation(agentkitRoot) {
   return result;
 }
 
+/**
+ * Validates that every PROJECT_MAPPING src path resolves to a value in a
+ * given project.yaml object. This catches mapping entries that reference
+ * spec fields that don't exist (e.g. after a rename or typo).
+ * Returns warnings (not errors) since missing fields are optional.
+ */
+export function validateMappingCoverage(project, projectMapping) {
+  const warnings = [];
+  if (!project || typeof project !== 'object') return warnings;
+
+  for (const mapping of projectMapping) {
+    const parts = mapping.src.split('.');
+    let current = project;
+    let resolved = true;
+
+    for (const part of parts) {
+      if (current === undefined || current === null || typeof current !== 'object') {
+        resolved = false;
+        break;
+      }
+      current = current[part];
+    }
+
+    // If the spec field doesn't exist at all (not even as null), it's
+    // likely a mapping pointing at a non-existent spec path
+    if (!resolved && current === undefined) {
+      warnings.push(
+        `project-mapping: src "${mapping.src}" (→ {{${mapping.dest}}}) has no corresponding field in project.yaml`
+      );
+    }
+  }
+
+  return warnings;
+}
+
 // Export validate for testing
-export { PROJECT_ENUMS, validate, validateCrossReferences, validateProjectYaml };
+export {
+  PROJECT_ENUMS,
+  validate,
+  validateCrossReferences,
+  validateProjectYaml,
+  // validateMappingCoverage is already exported via the function declaration
+};

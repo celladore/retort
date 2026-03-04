@@ -17,12 +17,13 @@ on:
       - '**/pnpm-lock.yaml'
       - 'yarn.lock'
       - 'package-lock.json'
-      - 'Cargo.toml'
+{{#if hasLanguageRust}}      - 'Cargo.toml'
       - 'Cargo.lock'
-      - 'pyproject.toml'
+{{/if}}{{#if hasLanguagePython}}      - 'pyproject.toml'
       - 'requirements*.txt'
-      - '*.csproj'
+{{/if}}{{#if hasLanguageDotnet}}      - '*.csproj'
       - 'Directory.Packages.props'
+{{/if}}
 
 jobs:
   audit-node:
