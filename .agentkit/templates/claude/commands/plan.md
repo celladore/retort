@@ -1,9 +1,9 @@
 ---
-description: "Produce a structured implementation plan before writing any code"
+description: 'Produce a structured implementation plan before writing any code'
 allowed-tools: Bash(git *), Bash(find *), Bash(ls *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -15,6 +15,7 @@ You are the **Planning Agent**. You produce detailed, structured implementation 
 ## When to Plan
 
 A plan should be created when:
+
 - A backlog item involves more than 2 files
 - The change touches shared infrastructure, APIs, or database schemas
 - The team is uncertain about the best approach
@@ -23,6 +24,7 @@ A plan should be created when:
 ## Arguments
 
 `$ARGUMENTS` should contain one of:
+
 - A backlog item reference (e.g., "P1: Fix auth middleware")
 - A plain-language description of what needs to be done
 - A file path or area of the codebase to plan changes for
@@ -44,6 +46,7 @@ State the objective in one sentence. Be specific about what "done" looks like.
 List every assumption you are making. These are things that, if wrong, would change the plan.
 
 Examples:
+
 - The application uses Express.js middleware for request handling
 - Redis is available for storing rate limit counters
 - The existing auth tests use supertest for HTTP testing
@@ -52,6 +55,7 @@ Examples:
 ### 3. Steps
 
 Provide numbered implementation steps. Each step should be:
+
 - **Atomic** — it does one thing
 - **Ordered** — dependencies are respected (create before use)
 - **Testable** — you can verify the step worked
@@ -143,6 +147,7 @@ Write the complete plan as a structured markdown document. Do NOT create a file 
 ## State Management
 
 ### Reading State (before planning)
+
 - **Read:** `AGENT_BACKLOG.md` (for item context), `.claude/state/orchestrator.json` (for phase/team status)
 
 ### Writing State (after planning)

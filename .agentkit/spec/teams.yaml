@@ -57,7 +57,15 @@ teams:
   - id: docs
     name: DOCUMENTATION
     focus: 'Docs, ADRs, guides'
-    scope: ['docs/**', 'docs/03_architecture/02_decisions/**', '.github/**', 'README.md', 'CHANGELOG.md', 'CONTRIBUTING.md']
+    scope:
+      [
+        'docs/**',
+        'docs/03_architecture/02_decisions/**',
+        '.github/**',
+        'README.md',
+        'CHANGELOG.md',
+        'CONTRIBUTING.md',
+      ]
     accepts: [implement, review, document]
     handoff-chain: []
 

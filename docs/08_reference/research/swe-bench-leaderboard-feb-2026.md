@@ -19,7 +19,7 @@
 
 SWE-bench Verified is a curated subset of the original SWE-bench dataset
 (real GitHub issues with automated test suites). A model passes a problem
-if its generated patch causes all associated tests to pass. *Verified*
+if its generated patch causes all associated tests to pass. _Verified_
 means the test suite is confirmed to be correct and non-trivially
 solvable, removing noisy or under-specified issues from the original set.
 
@@ -35,21 +35,21 @@ code-repair capability because:
 
 ## Top 15 results (February 2026)
 
-| Rank | Model | Provider | Verified Score |
-| ---: | --- | --- | ---: |
-| 1 | Claude Opus 4.5 | Anthropic | 80.9 % |
-| 2 | Claude Opus 4.6 | Anthropic | 80.8 % |
-| 3 | MiniMax M2.5 | MiniMax | 80.2 % |
-| 4 | GPT-5.2 | OpenAI | 80.0 % |
-| 5 | Gemini 3 Flash | Google | 78.0 % |
-| 6 | GLM-5 | Zhipu AI | 77.8 % |
-| 7 | Claude Sonnet 4.5 | Anthropic | 77.2 % |
-| 8 | Kimi K2.5 | Moonshot AI | 76.8 % |
-| 9 | Gemini 3 Pro | Google | 76.2 % |
-| 10 | GPT-5.1 | OpenAI | 74.9 % |
-| 11–12 | Qwen3-Coder-Next, Grok 4 | Alibaba, xAI | ~74 % |
-| 13 | DeepSeek V3.2 | DeepSeek | 73.0 % |
-| 14–15 | GPT-OSS 120B, others | OpenAI OSS | ~71 % |
+|  Rank | Model                    | Provider     | Verified Score |
+| ----: | ------------------------ | ------------ | -------------: |
+|     1 | Claude Opus 4.5          | Anthropic    |         80.9 % |
+|     2 | Claude Opus 4.6          | Anthropic    |         80.8 % |
+|     3 | MiniMax M2.5             | MiniMax      |         80.2 % |
+|     4 | GPT-5.2                  | OpenAI       |         80.0 % |
+|     5 | Gemini 3 Flash           | Google       |         78.0 % |
+|     6 | GLM-5                    | Zhipu AI     |         77.8 % |
+|     7 | Claude Sonnet 4.5        | Anthropic    |         77.2 % |
+|     8 | Kimi K2.5                | Moonshot AI  |         76.8 % |
+|     9 | Gemini 3 Pro             | Google       |         76.2 % |
+|    10 | GPT-5.1                  | OpenAI       |         74.9 % |
+| 11–12 | Qwen3-Coder-Next, Grok 4 | Alibaba, xAI |          ~74 % |
+|    13 | DeepSeek V3.2            | DeepSeek     |         73.0 % |
+| 14–15 | GPT-OSS 120B, others     | OpenAI OSS   |          ~71 % |
 
 ---
 
@@ -85,7 +85,7 @@ internal AgentKit evaluations using a custom scaffold may differ.
 
 - The Tier 1 choices in the team guides (Claude Opus 4.6, GPT-5.3 Codex
   High) are consistent with this leaderboard.
-- MiniMax M2.5 warrants promotion from *intake* to a scored Tier 2 slot
+- MiniMax M2.5 warrants promotion from _intake_ to a scored Tier 2 slot
   in the Backend and Cost-Aware guide sections, pending tokens/problem
   data.
 - GLM-5 and Kimi K2.5 should be tracked in the model-families dossiers

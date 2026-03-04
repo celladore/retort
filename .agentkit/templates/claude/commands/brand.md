@@ -1,9 +1,9 @@
 ---
-description: "Manage the project brand spec — validate, preview palette, audit contrast, scaffold, or regenerate editor theme"
+description: 'Manage the project brand spec — validate, preview palette, audit contrast, scaffold, or regenerate editor theme'
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash(npx agentkit *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -25,11 +25,12 @@ When `--all` is given, run `--validate` + `--palette` + `--theme` + `--contrast`
 ## Brand Spec Location
 
 {{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}`
+
 - **Brand Name**: {{brandName}}
 - **Primary Color**: `{{brandPrimaryColor}}`
-{{else}}- No brand guide found. Use `--init` to scaffold a `brand.yaml`.
-{{/if}}
-{{#if editorThemeEnabled}}- **Editor Theme**: `.agentkit/spec/editor-theme.yaml` (enabled, source: {{editorThemeSource}}){{/if}}
+  {{else}}- No brand guide found. Use `--init` to scaffold a `brand.yaml`.
+  {{/if}}
+  {{#if editorThemeEnabled}}- **Editor Theme**: `.agentkit/spec/editor-theme.yaml` (enabled, source: {{editorThemeSource}}){{/if}}
 
 ---
 
@@ -48,32 +49,32 @@ Only run this mode if `--init` is in `$ARGUMENTS`.
 
    ```yaml
    identity:
-     name: "<name>"
+     name: '<name>'
    colors:
      primary:
-       brand: "#XXXXXX"
-       light: "#YYYYYY"   # Compute: increase HSL lightness of brand by ~15%
-       dark: "#ZZZZZZ"    # Compute: decrease HSL lightness of brand by ~15%
+       brand: '#XXXXXX'
+       light: '#YYYYYY' # Compute: increase HSL lightness of brand by ~15%
+       dark: '#ZZZZZZ' # Compute: decrease HSL lightness of brand by ~15%
      semantic:
-       success: "#2E7D32"
-       warning: "#F57F17"
-       error: "#C62828"
-       info: "#0277BD"
+       success: '#2E7D32'
+       warning: '#F57F17'
+       error: '#C62828'
+       info: '#0277BD'
      neutral:
-       white: "#FFFFFF"
-       gray100: "#F5F5F5"
-       gray800: "#424242"
-       black: "#212121"
+       white: '#FFFFFF'
+       gray100: '#F5F5F5'
+       gray800: '#424242'
+       black: '#212121'
      darkMode:
-       background: "#1E1E1E"
-       surface: "#252526"
-       textPrimary: "#D4D4D4"
-       textSecondary: "#808080"
+       background: '#1E1E1E'
+       surface: '#252526'
+       textPrimary: '#D4D4D4'
+       textSecondary: '#808080'
    typography:
-     primary: "Inter, system-ui, sans-serif"
-     mono: "Fira Code, Consolas, monospace"
+     primary: 'Inter, system-ui, sans-serif'
+     mono: 'Fira Code, Consolas, monospace'
    accessibility:
-     standard: "WCAG AA"
+     standard: 'WCAG AA'
      bodyContrast: 4.5
      largeTextContrast: 3.0
    ```
@@ -124,10 +125,10 @@ Only run this mode if `--palette` or `--all` is in `$ARGUMENTS`.
 
 Read brand.yaml and display a table of all resolved colors:
 
-| Section | Key | Hex | Role |
-|---------|-----|-----|------|
+| Section | Key   | Hex     | Role             |
+| ------- | ----- | ------- | ---------------- |
 | primary | brand | #1976D2 | Core brand color |
-| ... | ... | ... | ... |
+| ...     | ...   | ...     | ...              |
 
 For each color entry, resolve both simple hex strings and `{ hex, role, rationale }` objects.
 Group by section: primary, secondary, semantic, neutral, darkMode.
@@ -141,10 +142,10 @@ Only run this mode if `--theme` or `--all` is in `$ARGUMENTS`.
 Read `.agentkit/spec/editor-theme.yaml` and resolve each mapping against brand.yaml.
 Display a table per mode (light/dark):
 
-| VS Code Slot | Brand Path | Resolved Hex |
-|-------------|------------|--------------|
-| titleBar.activeBackground | colors.primary.dark | #184A6C |
-| ... | ... | ... |
+| VS Code Slot              | Brand Path          | Resolved Hex |
+| ------------------------- | ------------------- | ------------ |
+| titleBar.activeBackground | colors.primary.dark | #184A6C      |
+| ...                       | ...                 | ...          |
 
 Flag any unresolvable paths as warnings.
 Show which output targets are configured (vscode, cursor, windsurf).

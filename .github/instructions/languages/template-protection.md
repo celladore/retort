@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+
 # Instructions — template-protection
 
 Rules preventing AI agents from directly modifying AgentKit Forge source-of-truth files. Changes to templates, specs, engines, and overlays must go through a PR to the agentkit-forge repository.

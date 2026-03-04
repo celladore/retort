@@ -108,7 +108,12 @@ export function getCompletenessFields(profile = 'generation') {
   if (profile === 'generation') {
     return [...COMPLETENESS_PROFILES.core, ...COMPLETENESS_PROFILES.advanced];
   }
-  return COMPLETENESS_PROFILES[profile] || [...COMPLETENESS_PROFILES.core, ...COMPLETENESS_PROFILES.advanced];
+  return (
+    COMPLETENESS_PROFILES[profile] || [
+      ...COMPLETENESS_PROFILES.core,
+      ...COMPLETENESS_PROFILES.advanced,
+    ]
+  );
 }
 
 function computeGenerationCompleteness(projectSpec) {
@@ -135,7 +140,10 @@ function computeGenerationCompleteness(projectSpec) {
 
   const allFields = getCompletenessFields('generation');
   const present = allFields.length - weighted.missing.length;
-  const percent = weighted.totalWeight === 0 ? 0 : Math.round((weighted.presentWeight / weighted.totalWeight) * 100);
+  const percent =
+    weighted.totalWeight === 0
+      ? 0
+      : Math.round((weighted.presentWeight / weighted.totalWeight) * 100);
 
   return {
     total: allFields.length,
@@ -149,7 +157,13 @@ function computeGenerationCompleteness(projectSpec) {
 
 export function computeProjectCompleteness(projectSpec, options = {}) {
   if (!projectSpec || typeof projectSpec !== 'object') {
-    return { total: 0, present: 0, percent: 0, missing: [], profile: options.profile || 'generation' };
+    return {
+      total: 0,
+      present: 0,
+      percent: 0,
+      missing: [],
+      profile: options.profile || 'generation',
+    };
   }
 
   const profile = options.profile || 'generation';

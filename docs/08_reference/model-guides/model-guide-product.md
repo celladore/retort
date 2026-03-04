@@ -2,11 +2,11 @@
 
 ## Team Profile
 
-| Attribute     | Value                               |
-| ------------- | ----------------------------------- |
-| Focus         | Features, PRDs, roadmap             |
-| Scope         | `docs/01_product/**` |
-| Handoff Chain | backend, frontend                   |
+| Attribute     | Value                   |
+| ------------- | ----------------------- |
+| Focus         | Features, PRDs, roadmap |
+| Scope         | `docs/01_product/**`    |
+| Handoff Chain | backend, frontend       |
 
 ## Weighting Profile
 
@@ -52,7 +52,7 @@
 - Fallback policy (approved): if `tokens/problem` is missing, keep current Cost
   scores unchanged and mark cost evidence as `Not evaluated`.
 - **Edge case handling:**
-  - If `baseline_tokens_per_problem == 0`: if `cost_multiplier == 0`, set cost_score = 10; else use cost_multiplier alone (set to 10 * (1 / cost_multiplier), clamped to 0-10).
+  - If `baseline_tokens_per_problem == 0`: if `cost_multiplier == 0`, set cost_score = 10; else use cost_multiplier alone (set to 10 \* (1 / cost_multiplier), clamped to 0-10).
   - If `model_effective_cost == 0`: cost_score = 10 (best possible).
   - If `normalized_tokens_per_problem == 0`: cost_score = 10 (best possible, zero token usage).
 
@@ -120,11 +120,11 @@ agents:
   prd-author:
     team: product
     model_override: claude-opus-4-6
-    reason: "High-context synthesis required"
+    reason: 'High-context synthesis required'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

@@ -28,11 +28,13 @@ curl -s http://localhost:3000/health | jq .
 **Symptoms:** Process exits immediately or health check fails.
 
 **Possible Causes:**
+
 - Missing or invalid environment variables
 - Database connection failure
 - Port already in use
 
 **Resolution:**
+
 1. Verify all required environment variables are set.
 2. Test database connectivity independently.
 3. Check for port conflicts with `lsof -i :PORT`.
@@ -42,11 +44,13 @@ curl -s http://localhost:3000/health | jq .
 **Symptoms:** p95 latency exceeds acceptable threshold.
 
 **Possible Causes:**
+
 - Database query performance degradation
 - Insufficient resources (CPU/memory)
 - External dependency slowdown
 
 **Resolution:**
+
 1. Check database query logs for slow queries.
 2. Review resource utilisation dashboards.
 3. Verify external dependency response times.
@@ -56,11 +60,13 @@ curl -s http://localhost:3000/health | jq .
 **Symptoms:** Users receive `401 Unauthorised` errors.
 
 **Possible Causes:**
+
 - Expired tokens
 - Misconfigured auth provider
 - Clock skew between services
 
 **Resolution:**
+
 1. Verify token expiry and refresh flow.
 2. Check auth provider configuration.
 3. Ensure NTP synchronisation across services.

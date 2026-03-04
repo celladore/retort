@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown agent persona definition. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory -->
+
 # {{agentName}}
 
 ## Role
@@ -41,6 +42,7 @@ Shared files are accessed by multiple agents. To prevent race conditions:
 4. **Lock ownership**: orchestrator.lock remains solely owned by the orchestrator
 
 **Lock Acquisition Protocol:**
+
 - Attempt atomic creation of `.lock` file with a 30s total timeout. The 30s is
   a hard ceiling that includes all retries, exponential backoff delays (initial
   1s, then 2s, then 4s), and the time spent in each creation attempt. Up to 3
@@ -53,6 +55,7 @@ Shared files are accessed by multiple agents. To prevent race conditions:
 - On repeated failure, escalate to orchestrator via `/orchestrate` endpoint
 
 **Special Cases:**
+
 - `orchestrator.lock` remains exclusively owned by orchestrator
 - Append-only `events.log` writes:
   - Guarantee applies only to local POSIX filesystems; relies on O_APPEND and newline-terminated line-based writes.

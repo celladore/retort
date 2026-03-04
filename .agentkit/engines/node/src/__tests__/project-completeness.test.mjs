@@ -35,7 +35,11 @@ describe('project-completeness', () => {
       deployment: { cloudProvider: 'none', iacTool: 'none', environments: ['local'] },
       testing: { unit: ['vitest'], integration: ['vitest'], coverage: 80 },
       documentation: { hasPrd: true, hasAdr: true, hasApiSpec: true },
-      process: { branchStrategy: 'github-flow', commitConvention: 'conventional', codeReview: 'required-pr' },
+      process: {
+        branchStrategy: 'github-flow',
+        commitConvention: 'conventional',
+        codeReview: 'required-pr',
+      },
       infrastructure: {
         namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}',
         org: 'akf',
@@ -50,7 +54,12 @@ describe('project-completeness', () => {
       compliance: { audit: { enabled: false } },
       crosscutting: {
         authentication: { provider: 'custom-jwt', strategy: 'jwt-bearer', rbac: true },
-        api: { versioning: 'url-segment', pagination: 'cursor', responseFormat: 'envelope', rateLimiting: true },
+        api: {
+          versioning: 'url-segment',
+          pagination: 'cursor',
+          responseFormat: 'envelope',
+          rateLimiting: true,
+        },
       },
     };
 

@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. GitHub Copilot repository-wide instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # GitHub Copilot Instructions
 
 You are assisting with a project managed by the AgentKit Forge framework.
@@ -18,8 +19,9 @@ Follow these instructions for all code generation, suggestions, and chat respons
 {{#if architecturePattern}}- **Architecture**: {{architecturePattern}}{{/if}}
 {{#if architectureApiStyle}}- **API Style**: {{architectureApiStyle}}{{/if}}
 {{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
+
 - **Default Branch**: {{defaultBranch}}
-{{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
+  {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
 
 ## Core Workflow
 
@@ -51,10 +53,11 @@ understand team assignments, ownership boundaries, and escalation paths.
   leaking internal details.
 - **Type safety** — Use the strongest type guarantees available in the language
   (TypeScript strict mode, Rust's type system, Python type hints with mypy).
-{{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
-{{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
+  {{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
+  {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
 
 {{#if hasLogging}}
+
 ## Logging
 
 Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use structured logging — never use raw `console.log` or `Console.WriteLine`.{{/if}}{{#if hasCorrelationId}} Include correlation IDs in all log entries.{{/if}}
@@ -63,24 +66,28 @@ Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use struct
 {{/if}}
 
 {{#if hasErrorHandling}}
+
 ## Error Handling
 
 Strategy: {{errorStrategy}}.{{#if hasGlobalHandler}} A global error handler is configured — do not add catch-all handlers in individual endpoints.{{/if}}{{#if hasCustomExceptions}} Use the project's custom exception types.{{/if}}
 {{/if}}
 
 {{#if hasAuth}}
+
 ## Authentication & Authorization
 
 Provider: {{authProvider}}{{#if authStrategy}}, strategy: {{authStrategy}}{{/if}}.{{#if hasRbac}} RBAC is enforced.{{/if}}{{#if hasMultiTenant}} Multi-tenant — never leak data across tenants.{{/if}}
 {{/if}}
 
 {{#if hasCaching}}
+
 ## Caching
 
 Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPatterns}}.{{/if}}{{#if hasDistributedCache}} Distributed cache — consider invalidation across nodes.{{/if}}
 {{/if}}
 
 {{#if hasApiVersioning}}
+
 ## API Conventions
 
 {{#if hasApiVersioning}}- Versioning: {{apiVersioning}}{{/if}}
@@ -90,12 +97,13 @@ Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPattern
 {{/if}}
 
 {{#if hasDbMigrations}}
+
 ## Database
 
 - Migrations: {{dbMigrations}}{{#if hasDbSeeding}} with seeding{{/if}}
-{{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
-{{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
-{{/if}}
+  {{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
+  {{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
+  {{/if}}
 
 ## Testing
 
@@ -125,10 +133,12 @@ assumptions about project structure or conventions.
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
 {{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
+
 - See `AGENTS.md` for universal agent instructions.
 - See `QUALITY_GATES.md` for quality gate definitions.
 
 {{#if hasIntegrations}}
+
 ## External Integrations
 
 {{#each integrations}}- {{.name}} — {{.purpose}}
@@ -136,6 +146,7 @@ assumptions about project structure or conventions.
 {{/if}}
 
 {{#if hasFeatureFlags}}
+
 ## Feature Flags
 
 Provider: {{featureFlagProvider}}. Gate new features behind flags.

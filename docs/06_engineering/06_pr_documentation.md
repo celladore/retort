@@ -34,12 +34,12 @@ This ensures comprehensive historical context and effective knowledge transfer.
 
 Templates are provided in `docs/history/`:
 
-| Type | Template | Directory |
-|------|----------|-----------|
+| Type           | Template                     | Directory                       |
+| -------------- | ---------------------------- | ------------------------------- |
 | Implementation | `TEMPLATE-implementation.md` | `docs/history/implementations/` |
-| Bug Fix | `TEMPLATE-bugfix.md` | `docs/history/bug-fixes/` |
-| Feature | `TEMPLATE-feature.md` | `docs/history/features/` |
-| Migration | `TEMPLATE-migration.md` | `docs/history/migrations/` |
+| Bug Fix        | `TEMPLATE-bugfix.md`         | `docs/history/bug-fixes/`       |
+| Feature        | `TEMPLATE-feature.md`        | `docs/history/features/`        |
+| Migration      | `TEMPLATE-migration.md`      | `docs/history/migrations/`      |
 
 ## Creating Documentation
 
@@ -114,11 +114,11 @@ Creating a history document via `./scripts/create-doc.sh` automatically adds
 an entry to `CHANGELOG.md` under the `[Unreleased]` section:
 
 | History Doc Type | Changelog Section |
-|------------------|-------------------|
-| `feature` | `Added` |
-| `implementation` | `Added` |
-| `bugfix` | `Fixed` |
-| `migration` | `Changed` |
+| ---------------- | ----------------- |
+| `feature`        | `Added`           |
+| `implementation` | `Added`           |
+| `bugfix`         | `Fixed`           |
+| `migration`      | `Changed`         |
 
 To add a changelog entry independently:
 

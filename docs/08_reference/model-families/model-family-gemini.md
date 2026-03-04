@@ -8,16 +8,16 @@
 
 ## At a Glance
 
-| Attribute          | Value                                               |
-| ------------------ | --------------------------------------------------- |
-| **Provider**       | Google DeepMind (London/Mountain View)              |
-| **Founded**        | 2010 (DeepMind), 2023 (Gemini)                      |
-| **Architecture**   | Dense transformer + MoE                             |
-| **Latest announced** | Gemini 3 Pro/Flash (preview-only)                  |
-| **Latest production** | Gemini 2.0 Flash, Gemini 1.5 Pro (see table below) |
-| **Context window** | 1M tokens (2M experimental)                         |
-| **License**        | Proprietary (API) + limited open weights            |
-| **Notable**        | Native multimodal from ground up, 2M context leader |
+| Attribute             | Value                                               |
+| --------------------- | --------------------------------------------------- |
+| **Provider**          | Google DeepMind (London/Mountain View)              |
+| **Founded**           | 2010 (DeepMind), 2023 (Gemini)                      |
+| **Architecture**      | Dense transformer + MoE                             |
+| **Latest announced**  | Gemini 3 Pro/Flash (preview-only)                   |
+| **Latest production** | Gemini 2.0 Flash, Gemini 1.5 Pro (see table below)  |
+| **Context window**    | 1M tokens (2M experimental)                         |
+| **License**           | Proprietary (API) + limited open weights            |
+| **Notable**           | Native multimodal from ground up, 2M context leader |
 
 ## Google API Model Identifiers
 
@@ -25,7 +25,7 @@ These are Google API/Studio/Vertex model identifiers (access via Google AI Studi
 
 | Model            | API identifier                | Notes                      |
 | ---------------- | ----------------------------- | -------------------------- |
-| Gemini 1.5 Pro   | `google/gemini-1.5-pro`      | 1M context, API access     |
+| Gemini 1.5 Pro   | `google/gemini-1.5-pro`       | 1M context, API access     |
 | Gemini 1.5 Flash | `google/gemini-1.5-flash`     | Fast variant, 1M context   |
 | Gemini 2.0 Flash | `google/gemini-2.0-flash-exp` | Experimental Flash variant |
 | Gemini 2.0 Flash | `google/gemini-2.0-flash`     | Production Flash           |
@@ -42,13 +42,13 @@ These are Google API/Studio/Vertex model identifiers (access via Google AI Studi
 
 ## Models tracked from PRD-002 (base + profiles)
 
-*Cost multiplier range relative to GPT-4 baseline pricing.
+\*Cost multiplier range relative to GPT-4 baseline pricing.
 
-| Base model     | Environment     | Profile variants covered     | Cost tier | Cost multiplier range* | Tokens/problem | SWE-bench / Verified | HLE           | SWE-rebench                                                                 | Aider         | Coding ability summary                                       | Decision Readiness | When to use                                                  | Source quality                | Last verified |
-| -------------- | --------------- | ---------------------------- | --------- | --------------------: | -------------: | -------------------- | ------------- | --------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ | ----------------------------- | ------------- |
-| Gemini 3 Flash | Windsurf        | Gemini 3 Flash (Preview, High profile) | Paid      |                  1.75 |  Not evaluated | Not evaluated        | Not evaluated | 57.6% (Gemini 3 Flash Preview, High profile)                                                       | Not evaluated | Strong speed-oriented coding/agent profile in family signals | Medium             | Fast coding loops where turnaround time is priority          | Independent + vendor snippet  | 2026-02-26    |
-| Gemini 3 Pro   | Windsurf        | Gemini 3 Pro High Thinking   | Paid      |                   2.0 |  Not evaluated | Not evaluated        | Not evaluated | 56.5% (Pro preview)                                                         | Not evaluated | Higher-reasoning Gemini branch with strong context potential | Medium             | High-context coding and reasoning-heavy multi-file workflows | Independent + vendor snippet  | 2026-02-26    |
-| Gemini 3.1 Pro | Windsurf/Intake | Gemini 3.1 Pro High Thinking | Paid      |                   2.0 |  Not evaluated | Not evaluated        | Not evaluated | Improved performance on reasoning benchmarks (model card); independent verification pending | Not evaluated | Enhanced reasoning and multimodal capabilities over 3 Pro    | Medium             | Complex reasoning tasks requiring enhanced capabilities      | PRD-002 + DeepMind model card | 2026-02-26    |
+| Base model     | Environment     | Profile variants covered               | Cost tier | Cost multiplier range\* | Tokens/problem | SWE-bench / Verified | HLE           | SWE-rebench                                                                                 | Aider         | Coding ability summary                                       | Decision Readiness | When to use                                                  | Source quality                | Last verified |
+| -------------- | --------------- | -------------------------------------- | --------- | ----------------------: | -------------: | -------------------- | ------------- | ------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ | ----------------------------- | ------------- |
+| Gemini 3 Flash | Windsurf        | Gemini 3 Flash (Preview, High profile) | Paid      |                    1.75 |  Not evaluated | Not evaluated        | Not evaluated | 57.6% (Gemini 3 Flash Preview, High profile)                                                | Not evaluated | Strong speed-oriented coding/agent profile in family signals | Medium             | Fast coding loops where turnaround time is priority          | Independent + vendor snippet  | 2026-02-26    |
+| Gemini 3 Pro   | Windsurf        | Gemini 3 Pro High Thinking             | Paid      |                     2.0 |  Not evaluated | Not evaluated        | Not evaluated | 56.5% (Pro preview)                                                                         | Not evaluated | Higher-reasoning Gemini branch with strong context potential | Medium             | High-context coding and reasoning-heavy multi-file workflows | Independent + vendor snippet  | 2026-02-26    |
+| Gemini 3.1 Pro | Windsurf/Intake | Gemini 3.1 Pro High Thinking           | Paid      |                     2.0 |  Not evaluated | Not evaluated        | Not evaluated | Improved performance on reasoning benchmarks (model card); independent verification pending | Not evaluated | Enhanced reasoning and multimodal capabilities over 3 Pro    | Medium             | Complex reasoning tasks requiring enhanced capabilities      | PRD-002 + DeepMind model card | 2026-02-26    |
 
 ## Operational notes
 

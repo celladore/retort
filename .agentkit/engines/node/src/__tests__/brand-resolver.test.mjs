@@ -287,7 +287,7 @@ describe('validateBrandSpec', () => {
       colors: { primary: { brand: 'not-a-hex' } },
     };
     const { errors } = validateBrandSpec(brand);
-    expect(errors.some(e => e.includes('not a valid hex'))).toBe(true);
+    expect(errors.some((e) => e.includes('not a valid hex'))).toBe(true);
   });
 
   it('warns on missing semantic colors', () => {
@@ -305,9 +305,9 @@ describe('validateBrandSpec', () => {
       },
     };
     const { warnings } = validateBrandSpec(brand);
-    expect(warnings.some(w => w.includes('semantic.warning'))).toBe(true);
-    expect(warnings.some(w => w.includes('semantic.error'))).toBe(true);
-    expect(warnings.some(w => w.includes('semantic.info'))).toBe(true);
+    expect(warnings.some((w) => w.includes('semantic.warning'))).toBe(true);
+    expect(warnings.some((w) => w.includes('semantic.error'))).toBe(true);
+    expect(warnings.some((w) => w.includes('semantic.info'))).toBe(true);
   });
 
   it('warns on missing darkMode section', () => {
@@ -324,7 +324,7 @@ describe('validateBrandSpec', () => {
       },
     };
     const { warnings } = validateBrandSpec(brand);
-    expect(warnings.some(w => w.includes('darkMode'))).toBe(true);
+    expect(warnings.some((w) => w.includes('darkMode'))).toBe(true);
   });
 
   it('errors on null brand', () => {

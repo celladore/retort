@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI Coding Assistant with Code Intelligence |
-| **Categories** | IDE Extension |
-| **Access** | VS Code / JetBrains extension or web — requires Sourcegraph account (free tier available) |
-| **Documentation** | [sourcegraph.com/docs/cody](https://sourcegraph.com/docs/cody) |
+|                        |                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Type**               | AI Coding Assistant with Code Intelligence                                                         |
+| **Categories**         | IDE Extension                                                                                      |
+| **Access**             | VS Code / JetBrains extension or web — requires Sourcegraph account (free tier available)          |
+| **Documentation**      | [sourcegraph.com/docs/cody](https://sourcegraph.com/docs/cody)                                     |
 | **Performance Rating** | ⭐⭐⭐½ — **68/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)) |
 
 ---
@@ -25,11 +25,11 @@ Cody is available as a VS Code extension, JetBrains plugin, and web interface.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Project instructions | `AGENTS.md` (repo root) | Plain Markdown |
-| Cody config | `.cody/config.json` | JSON |
-| Context filters | `.cody/ignore` | Gitignore-style patterns |
+| Feature              | Location                | Format                   |
+| -------------------- | ----------------------- | ------------------------ |
+| Project instructions | `AGENTS.md` (repo root) | Plain Markdown           |
+| Cody config          | `.cody/config.json`     | JSON                     |
+| Context filters      | `.cody/ignore`          | Gitignore-style patterns |
 
 ### Key Capabilities
 
@@ -56,8 +56,8 @@ Cody is available as a VS Code extension, JetBrains plugin, and web interface.
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output             | Path        | Source                               |
+| ------------------ | ----------- | ------------------------------------ |
 | Agent instructions | `AGENTS.md` | Always generated from `project.yaml` |
 
 Cody reads the universal `AGENTS.md`. No platform-specific files are
@@ -67,14 +67,14 @@ currently generated.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| AGENTS.md | ✅ Native support | ✅ Always generated | None |
-| .cody/config.json | ✅ Project configuration | ❌ Not generated | Could generate Cody config |
-| .cody/ignore | ✅ Context file filtering | ❌ Not generated | Could generate ignore patterns |
-| Custom commands | ✅ Reusable prompts | ❌ Not generated | Could generate Cody commands |
-| Context filters | ✅ File/directory access control | ❌ Not generated | Could generate from project.yaml |
-| Multi-repo context | ✅ Cross-repo search | N/A | Platform feature, needs Sourcegraph instance |
+| Feature            | Platform Supports                | AgentKit Forge Status | Gap                                          |
+| ------------------ | -------------------------------- | --------------------- | -------------------------------------------- |
+| AGENTS.md          | ✅ Native support                | ✅ Always generated   | None                                         |
+| .cody/config.json  | ✅ Project configuration         | ❌ Not generated      | Could generate Cody config                   |
+| .cody/ignore       | ✅ Context file filtering        | ❌ Not generated      | Could generate ignore patterns               |
+| Custom commands    | ✅ Reusable prompts              | ❌ Not generated      | Could generate Cody commands                 |
+| Context filters    | ✅ File/directory access control | ❌ Not generated      | Could generate from project.yaml             |
+| Multi-repo context | ✅ Cross-repo search             | N/A                   | Platform feature, needs Sourcegraph instance |
 
 **Summary:** Cody is served by `AGENTS.md`. Gaps exist in `.cody/` directory
 generation — config, ignore patterns, and custom commands. Adding a `cody`
@@ -93,15 +93,15 @@ render target would enable richer integration.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 68/100 ⭐⭐⭐½ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions) |
-| Developer Experience | 74/100 ⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
-| Cost & Value | 80/100 ⭐⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions) |
-| Customization | 58/100 ⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions) |
-| Privacy & Security | 66/100 ⭐⭐⭐½ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions) |
-| Team & Enterprise | 72/100 ⭐⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions) |
-| **Weighted Total** | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 68/100 ⭐⭐⭐½     | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)   |
+| Developer Experience | 74/100 ⭐⭐⭐½     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
+| Cost & Value         | 80/100 ⭐⭐⭐⭐    | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions)        |
+| Customization        | 58/100 ⭐⭐⭐      | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions)        |
+| Privacy & Security   | 66/100 ⭐⭐⭐½     | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions)     |
+| Team & Enterprise    | 72/100 ⭐⭐⭐½     | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions)      |
+| **Weighted Total**   | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

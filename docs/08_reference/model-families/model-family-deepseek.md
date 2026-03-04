@@ -8,14 +8,14 @@
 
 ## At a Glance
 
-| Attribute          | Value                                                               |
-| ------------------ | ------------------------------------------------------------------- |
-| **Provider**       | DeepSeek AI (Hangzhou, China)                                       |
-| **Founded**        | 2023                                                                |
-| **Architecture**   | MoE (Mixture of Experts)                                            |
-| **Latest model**   | DeepSeek V3.2                                                       |
-| **Context window** | 64K-128K tokens                                                     |
-| **License**        | Open weights (MIT/Apache) + API                                     |
+| Attribute          | Value                                                                       |
+| ------------------ | --------------------------------------------------------------------------- |
+| **Provider**       | DeepSeek AI (Hangzhou, China)                                               |
+| **Founded**        | 2023                                                                        |
+| **Architecture**   | MoE (Mixture of Experts)                                                    |
+| **Latest model**   | DeepSeek V3.2                                                               |
+| **Context window** | 64K-128K tokens                                                             |
+| **License**        | Open weights (MIT/Apache) + API                                             |
 | **Notable**        | Open-source breakthrough, ~$6M training cost, strong reasoning capabilities |
 
 R1 corresponds to the tracked model ID `deepseek-reasoner` (DeepSeek reasoning-family). It is not a separate external project and is tracked as part of the broader DeepSeek model line.
@@ -35,13 +35,13 @@ R1 corresponds to the tracked model ID `deepseek-reasoner` (DeepSeek reasoning-f
 
 ## Latest benchmark signals
 
-| Signal            | Value                                                          | Source                                                                 | Quality               |
-| ----------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------- |
-| API model mapping | `deepseek-chat` = non-thinking mode of DeepSeek-V3.2           | [DeepSeek API quick start](https://api-docs.deepseek.com/)             | Fetched, vendor claim |
-| API model mapping | `deepseek-reasoner` = thinking mode of DeepSeek-V3.2           | [DeepSeek API quick start](https://api-docs.deepseek.com/)             | Fetched, vendor claim |
-| Context limit     | DeepSeek-V3.2 API modes listed with 128K context limit         | [DeepSeek API quick start](https://api-docs.deepseek.com/)             | Fetched, vendor claim |
+| Signal            | Value                                                                                                                      | Source                                                                 | Quality               |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------- |
+| API model mapping | `deepseek-chat` = non-thinking mode of DeepSeek-V3.2                                                                       | [DeepSeek API quick start](https://api-docs.deepseek.com/)             | Fetched, vendor claim |
+| API model mapping | `deepseek-reasoner` = thinking mode of DeepSeek-V3.2                                                                       | [DeepSeek API quick start](https://api-docs.deepseek.com/)             | Fetched, vendor claim |
+| Context limit     | DeepSeek-V3.2 API modes listed with 128K context limit                                                                     | [DeepSeek API quick start](https://api-docs.deepseek.com/)             | Fetched, vendor claim |
 | Tool-use behavior | Standard V3.2: supports tool use in thinking and non-thinking modes; DeepSeek-V3.2-Speciale: does not support tool-calling | [DeepSeek V3.2 release](https://api-docs.deepseek.com/news/news251201) | Fetched, vendor claim |
-| Release coverage  | V3.2 and V3.2-Speciale documented as current release line      | [DeepSeek V3.2 release](https://api-docs.deepseek.com/news/news251201) | Fetched, vendor claim |
+| Release coverage  | V3.2 and V3.2-Speciale documented as current release line                                                                  | [DeepSeek V3.2 release](https://api-docs.deepseek.com/news/news251201) | Fetched, vendor claim |
 
 ## Models tracked from PRD-002 (base + profiles)
 

@@ -13,13 +13,13 @@ profiles to guide feature prioritisation and UX decisions.
 
 ## Persona 1: <!-- Name -->
 
-| Attribute | Detail |
-|-----------|--------|
-| **Role** | <!-- e.g. Backend Developer --> |
-| **Experience** | <!-- e.g. 3-5 years --> |
-| **Goals** | <!-- What they want to achieve --> |
-| **Frustrations** | <!-- Current pain points --> |
-| **Tools** | <!-- Tools they use daily --> |
+| Attribute        | Detail                             |
+| ---------------- | ---------------------------------- |
+| **Role**         | <!-- e.g. Backend Developer -->    |
+| **Experience**   | <!-- e.g. 3-5 years -->            |
+| **Goals**        | <!-- What they want to achieve --> |
+| **Frustrations** | <!-- Current pain points -->       |
+| **Tools**        | <!-- Tools they use daily -->      |
 
 ### Scenario
 
@@ -29,13 +29,13 @@ profiles to guide feature prioritisation and UX decisions.
 
 ## Persona 2: <!-- Name -->
 
-| Attribute | Detail |
-|-----------|--------|
-| **Role** | <!-- e.g. Engineering Manager --> |
-| **Experience** | <!-- e.g. 8+ years --> |
-| **Goals** | <!-- What they want to achieve --> |
-| **Frustrations** | <!-- Current pain points --> |
-| **Tools** | <!-- Tools they use daily --> |
+| Attribute        | Detail                             |
+| ---------------- | ---------------------------------- |
+| **Role**         | <!-- e.g. Engineering Manager -->  |
+| **Experience**   | <!-- e.g. 8+ years -->             |
+| **Goals**        | <!-- What they want to achieve --> |
+| **Frustrations** | <!-- Current pain points -->       |
+| **Tools**        | <!-- Tools they use daily -->      |
 
 ### Scenario
 

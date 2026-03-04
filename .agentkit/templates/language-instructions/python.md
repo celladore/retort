@@ -1,5 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — Python
 
 Apply these rules when editing `.py` files or `pyproject.toml`.
@@ -29,11 +30,12 @@ Apply these rules when editing `.py` files or `pyproject.toml`.
 ## Testing
 
 {{#if testingUnit}}- Unit test framework: **{{testingUnit}}**.{{/if}}
+
 - Test files must mirror source structure: `tests/test_<module>.py`.
 - Use `pytest` fixtures for shared setup; use `@pytest.mark.parametrize` for
   variants.
 - Mock at IO boundaries using `pytest-mock` or `unittest.mock`.
-{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
+  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
 
 ```python
 def test_process_invoice_raises_on_invalid_amount():
@@ -57,6 +59,7 @@ def test_process_invoice_raises_on_invalid_amount():
 - Run `pip-audit` before merging new dependencies.
 
 {{#if ruleConventions}}
+
 ## Project Conventions
 
 The following conventions are enforced in **{{projectName}}** and derived from

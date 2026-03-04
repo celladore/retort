@@ -22,6 +22,7 @@ Add a new sync output that generates a static HTML brand guide page from `brand.
 ### Motivation
 
 The `brand.yaml` spec captures comprehensive brand data, but YAML is hard to visually evaluate. A generated HTML page would:
+
 - Let designers and developers instantly see the brand palette
 - Serve as onboarding documentation for new team members
 - Be auto-generated during `agentkit sync` and kept in sync with brand changes
@@ -64,6 +65,7 @@ Add a new sync output that generates CSS custom properties (`:root { --color-pri
 ### Motivation
 
 Frontend projects need design tokens in consumable formats (CSS variables, JSON tokens). Currently `brand.yaml` is a YAML-only artifact. Generating CSS variables and JSON tokens would:
+
 - Allow direct consumption in stylesheets without manual transcription
 - Feed into build tools like Style Dictionary, Tailwind, or PostCSS
 - Keep generated tokens always in sync with the canonical `brand.yaml`

@@ -180,13 +180,13 @@ Edit `overlays/<your-repo>/rules.yaml` to define repository-specific rules for A
 overrides:
   code-style:
     description: Always use single quotes for strings in TypeScript files
-    scope: "*.ts"
+    scope: '*.ts'
   testing:
     description: Every new function must have a corresponding unit test
-    scope: "src/**/*.ts"
+    scope: 'src/**/*.ts'
   security:
     description: Never log sensitive data such as tokens, passwords, or API keys
-    scope: "**/*"
+    scope: '**/*'
 ```
 
 ### Running Discovery

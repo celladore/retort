@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+
 # Instructions — agent-conduct
 
 Meta-rules governing how AI agents should behave when operating in this repository. Applies across all AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, etc.).

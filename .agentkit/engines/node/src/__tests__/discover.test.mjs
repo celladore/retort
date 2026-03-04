@@ -8,7 +8,9 @@ const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
 describe('runDiscover()', () => {
-  afterEach(() => { vi.restoreAllMocks(); });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('returns a discovery report for the current repo', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});

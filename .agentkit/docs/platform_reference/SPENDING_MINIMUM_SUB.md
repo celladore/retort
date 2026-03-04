@@ -22,19 +22,19 @@ tier usage.
 
 ## Subscription Options at This Tier
 
-| Platform | Plan | Price | What You Get |
-|----------|------|-------|-------------|
-| **Zed Pro** | Pro | $10/mo | Unlimited predictions, $5 AI credit, multi-model |
-| **Supermaven Pro** | Pro | $10/mo | Unlimited completions, 1M token context |
-| **Tabnine Pro** | Pro | $12/mo | Advanced completions, agent features |
-| **PearAI Maker** | Maker | $15/mo | Full AI Router, $15 model credits |
-| **Cursor Pro** | Pro | $20/mo | 500 fast requests, unlimited slow, 10 Agent uses/day |
-| **Claude Code** | Max (5x) | $20/mo | Claude 3.7 Sonnet, usage-capped |
-| **GitHub Copilot** | Individual | $10/mo | Unlimited completions + chat + agent |
-| **Windsurf Pro** | Pro | $15/mo | Cascade agent, unlimited completions |
-| **Replit Core** | Core | $20/mo | Enhanced AI + Ghostwriter + compute |
-| **Devin Core** | Core | $20/mo | 9 ACUs (~2.25 hours autonomous work) |
-| **Same.new Basic** | Basic | $10/mo | 2M tokens/month, project download |
+| Platform           | Plan       | Price  | What You Get                                         |
+| ------------------ | ---------- | ------ | ---------------------------------------------------- |
+| **Zed Pro**        | Pro        | $10/mo | Unlimited predictions, $5 AI credit, multi-model     |
+| **Supermaven Pro** | Pro        | $10/mo | Unlimited completions, 1M token context              |
+| **Tabnine Pro**    | Pro        | $12/mo | Advanced completions, agent features                 |
+| **PearAI Maker**   | Maker      | $15/mo | Full AI Router, $15 model credits                    |
+| **Cursor Pro**     | Pro        | $20/mo | 500 fast requests, unlimited slow, 10 Agent uses/day |
+| **Claude Code**    | Max (5x)   | $20/mo | Claude 3.7 Sonnet, usage-capped                      |
+| **GitHub Copilot** | Individual | $10/mo | Unlimited completions + chat + agent                 |
+| **Windsurf Pro**   | Pro        | $15/mo | Cascade agent, unlimited completions                 |
+| **Replit Core**    | Core       | $20/mo | Enhanced AI + Ghostwriter + compute                  |
+| **Devin Core**     | Core       | $20/mo | 9 ACUs (~2.25 hours autonomous work)                 |
+| **Same.new Basic** | Basic      | $10/mo | 2M tokens/month, project download                    |
 
 ---
 
@@ -148,15 +148,15 @@ IDE inspections and test frameworks. Copilot adds broad completions.
 
 ## What You Get vs Free Tier
 
-| Capability | Free Tier | $10–25/mo Subscription |
-|-----------|-----------|----------------------|
-| Code completions | Limited or BYOK | Unlimited, premium models |
-| Chat assistance | Limited messages | Unlimited conversations |
-| Agent/agentic mode | Via BYOK (variable quality) | Premium model-powered |
-| Model quality | DeepSeek/Gemini Flash | GPT-4o, Claude 3.7, Sonnet |
-| Response speed | Rate-limited or throttled | Fast/priority queue |
-| Support | Community only | Customer support |
-| Reliability | Variable (BYOK depends on provider) | SLA-backed uptime |
+| Capability         | Free Tier                           | $10–25/mo Subscription     |
+| ------------------ | ----------------------------------- | -------------------------- |
+| Code completions   | Limited or BYOK                     | Unlimited, premium models  |
+| Chat assistance    | Limited messages                    | Unlimited conversations    |
+| Agent/agentic mode | Via BYOK (variable quality)         | Premium model-powered      |
+| Model quality      | DeepSeek/Gemini Flash               | GPT-4o, Claude 3.7, Sonnet |
+| Response speed     | Rate-limited or throttled           | Fast/priority queue        |
+| Support            | Community only                      | Customer support           |
+| Reliability        | Variable (BYOK depends on provider) | SLA-backed uptime          |
 
 ---
 
@@ -164,12 +164,12 @@ IDE inspections and test frameworks. Copilot adds broad completions.
 
 If you have exactly $20/month, here's how to allocate:
 
-| Strategy | Allocation | Reasoning |
-|----------|-----------|-----------|
-| **Max quality** | $20 → Claude Code | Highest coding performance |
-| **Max coverage** | $10 Copilot + $10 Zed Pro | IDE completions + fast editor |
-| **Max flexibility** | $15 PearAI Maker + $5 API | Bundled tools + BYOK buffer |
-| **Prototype-heavy** | $10 Same.new + $10 Copilot | Prototyping + daily coding |
+| Strategy            | Allocation                 | Reasoning                     |
+| ------------------- | -------------------------- | ----------------------------- |
+| **Max quality**     | $20 → Claude Code          | Highest coding performance    |
+| **Max coverage**    | $10 Copilot + $10 Zed Pro  | IDE completions + fast editor |
+| **Max flexibility** | $15 PearAI Maker + $5 API  | Bundled tools + BYOK buffer   |
+| **Prototype-heavy** | $10 Same.new + $10 Copilot | Prototyping + daily coding    |
 
 ---
 

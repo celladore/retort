@@ -12,15 +12,16 @@ These rules apply to all test files and quality assurance activities in
 
 ## Test Pyramid
 
-| Layer | Tool | Location | Target |
-|-------|------|----------|--------|
-{{#if testingUnit}}| Unit | {{testingUnit}} | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |{{/if}}
-{{#if testingIntegration}}| Integration | {{testingIntegration}} | `tests/integration/` | Module interactions |{{/if}}
-{{#if testingE2e}}| E2E | {{testingE2e}} | `tests/e2e/` / `e2e/` | Full user workflows |{{/if}}
+| Layer                      | Tool        | Location               | Target                        |
+| -------------------------- | ----------- | ---------------------- | ----------------------------- | ---------------------- | ------- |
+| {{#if testingUnit}}        | Unit        | {{testingUnit}}        | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O | {{/if}} |
+| {{#if testingIntegration}} | Integration | {{testingIntegration}} | `tests/integration/`          | Module interactions    | {{/if}} |
+| {{#if testingE2e}}         | E2E         | {{testingE2e}}         | `tests/e2e/` / `e2e/`         | Full user workflows    | {{/if}} |
 
 ## Coverage
 
 {{#if testingCoverage}}- Minimum coverage target: **{{testingCoverage}}%** (line, branch, and function).{{/if}}
+
 - No pull request may decrease overall coverage from the current baseline.
 - Enforce the threshold in CI — fail the build when coverage drops below the minimum.
 - Use coverage reports to identify untested branches, not just lines.
@@ -79,6 +80,7 @@ describe('PaymentService', () => {
   them independently.
 
 {{#if testingE2e}}
+
 ## End-to-End Tests
 
 - Tag smoke tests (`@smoke`) so the critical path subset runs on every deploy.
@@ -86,14 +88,14 @@ describe('PaymentService', () => {
   two sprints.
 - Use explicit waits and retry strategies; never use arbitrary sleep.
 - Scope E2E tests to user-visible behaviour, not internal implementation.
-{{/if}}
+  {{/if}}
 
 ## Quality Gates
 
 Before merging any pull request:
 
 - [ ] All unit tests pass locally
-{{#if testingCoverage}}- [ ] Coverage meets or exceeds the {{testingCoverage}}% threshold{{/if}}{{#unless testingCoverage}}- [ ] Coverage target is met{{/unless}}
+      {{#if testingCoverage}}- [ ] Coverage meets or exceeds the {{testingCoverage}}% threshold{{/if}}{{#unless testingCoverage}}- [ ] Coverage target is met{{/unless}}
 - [ ] No permanently skipped tests added
 - [ ] No flaky tests introduced
 - [ ] CI passes (lint + type-check + tests)

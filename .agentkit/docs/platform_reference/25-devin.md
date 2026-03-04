@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | Autonomous AI Software Engineer |
-| **Categories** | Cloud / Autonomous Agent |
-| **Access** | Web interface — [devin.ai](https://devin.ai/) — requires account and repo access |
-| **Documentation** | [docs.devin.ai](https://docs.devin.ai/) |
+|                        |                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Type**               | Autonomous AI Software Engineer                                                                              |
+| **Categories**         | Cloud / Autonomous Agent                                                                                     |
+| **Access**             | Web interface — [devin.ai](https://devin.ai/) — requires account and repo access                             |
+| **Documentation**      | [docs.devin.ai](https://docs.devin.ai/)                                                                      |
 | **Performance Rating** | ⭐⭐⭐½ — **70/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents)) |
 
 ---
@@ -32,31 +32,31 @@ planning through implementation, testing, and PR submission.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                                        |
+| --------- | ----------- | ---------------------------------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions (Devin reads from repo) |
 
 ### Gap Analysis
 
-| Capability | Native Support | AgentKit Forge Coverage | Gap |
-|-----------|---------------|------------------------|-----|
-| AGENTS.md | ✅ Reads from repo | ✅ Generated | ✔ Covered |
-| Task instructions | ✅ Via chat/API | ❌ Not applicable | ✔ N/A |
-| Wiki generation | ✅ Built-in | ❌ Not applicable | ✔ N/A |
+| Capability        | Native Support     | AgentKit Forge Coverage | Gap       |
+| ----------------- | ------------------ | ----------------------- | --------- |
+| AGENTS.md         | ✅ Reads from repo | ✅ Generated            | ✔ Covered |
+| Task instructions | ✅ Via chat/API    | ❌ Not applicable       | ✔ N/A     |
+| Wiki generation   | ✅ Built-in        | ❌ Not applicable       | ✔ N/A     |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 70/100 ⭐⭐⭐½ | SWE-bench 13.86% (pioneering but still limited) |
-| Developer Experience | 65/100 ⭐⭐⭐ | Cloud-only; async; requires patience and oversight |
-| Cost & Value | 45/100 ⭐⭐ | $20/mo base but ACU costs scale quickly |
-| Customization | 40/100 ⭐⭐ | Minimal file-based config; primarily chat-driven |
-| Privacy & Security | 55/100 ⭐⭐⭐ | Cloud-only execution; enterprise security features |
-| Team & Enterprise | 60/100 ⭐⭐⭐ | Team plan with API; enterprise features growing |
-| **Weighted Total** | **58/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                       |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 70/100 ⭐⭐⭐½    | SWE-bench 13.86% (pioneering but still limited)                               |
+| Developer Experience | 65/100 ⭐⭐⭐     | Cloud-only; async; requires patience and oversight                            |
+| Cost & Value         | 45/100 ⭐⭐       | $20/mo base but ACU costs scale quickly                                       |
+| Customization        | 40/100 ⭐⭐       | Minimal file-based config; primarily chat-driven                              |
+| Privacy & Security   | 55/100 ⭐⭐⭐     | Cloud-only execution; enterprise security features                            |
+| Team & Enterprise    | 60/100 ⭐⭐⭐     | Team plan with API; enterprise features growing                               |
+| **Weighted Total**   | **58/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

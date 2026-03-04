@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { join, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, test } from 'vitest';
 import { runSync } from '../synchronize.mjs';
 
@@ -20,6 +20,82 @@ function makeTmpProject() {
   return dir;
 }
 
+function makeNamedTmpProject(repoName) {
+  const parent = makeTmpProject();
+  const dir = resolve(parent, repoName);
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function writeTestFile(filePath, content) {
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(filePath, content, 'utf-8');
+}
+
+function makeMinimalAgentkitRoot({ overlayName = 'test-repo', defaultBranch = 'dev' } = {}) {
+  const root = resolve(
+    tmpdir(),
+    `agentkit-minimal-root-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
+  mkdirSync(root, { recursive: true });
+
+  writeTestFile(
+    resolve(root, 'package.json'),
+    JSON.stringify({ name: 'agentkit-test-root', version: '0.0.1', type: 'module' }, null, 2)
+  );
+
+  writeTestFile(resolve(root, 'spec', 'teams.yaml'), 'teams: []\n');
+  writeTestFile(
+    resolve(root, 'spec', 'commands.yaml'),
+    'commands:\n  - name: build\n    description: Build the project\n'
+  );
+  writeTestFile(resolve(root, 'spec', 'rules.yaml'), 'rules: []\n');
+  writeTestFile(resolve(root, 'spec', 'settings.yaml'), 'permissions: {}\n');
+  writeTestFile(resolve(root, 'spec', 'agents.yaml'), 'agents: {}\n');
+  writeTestFile(resolve(root, 'spec', 'docs.yaml'), '{}\n');
+  writeTestFile(resolve(root, 'spec', 'project.yaml'), `name: ${overlayName}\n`);
+
+  writeTestFile(
+    resolve(root, 'overlays', '__TEMPLATE__', 'settings.yaml'),
+    'repoName: __TEMPLATE__\ndefaultBranch: main\nrenderTargets:\n  - claude\n  - copilot\n'
+  );
+  writeTestFile(
+    resolve(root, 'overlays', overlayName, 'settings.yaml'),
+    `repoName: ${overlayName}\ndefaultBranch: ${defaultBranch}\nrenderTargets:\n  - claude\n  - copilot\n`
+  );
+
+  writeTestFile(
+    resolve(root, 'templates', 'root', 'AGENTS.md'),
+    '# Agents\nDefault branch: {{defaultBranch}}\n'
+  );
+  writeTestFile(
+    resolve(root, 'templates', 'docs', 'README.md'),
+    '# Docs\nDefault branch: {{defaultBranch}}\n'
+  );
+  writeTestFile(
+    resolve(root, 'templates', 'claude', 'CLAUDE.md'),
+    '# Claude\nDefault branch: {{defaultBranch}}\n'
+  );
+  writeTestFile(
+    resolve(root, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
+    '# Skill {{commandName}}\nDefault branch: {{defaultBranch}}\n'
+  );
+  writeTestFile(
+    resolve(root, 'templates', 'copilot', 'copilot-instructions.md'),
+    '# Copilot\nDefault branch: {{defaultBranch}}\n'
+  );
+  writeTestFile(
+    resolve(root, 'templates', 'github', 'workflows', 'ci.yml'),
+    'name: Base CI\non:\n  push:\n    branches: [{{defaultBranch}}]\n'
+  );
+  writeTestFile(
+    resolve(root, 'overlays', overlayName, 'templates', 'github', 'workflows', 'ci.yml'),
+    'name: Overlay CI\non:\n  push:\n    branches: [{{defaultBranch}}]\n'
+  );
+
+  return root;
+}
+
 /** Collects all files under a directory recursively (relative paths, forward slashes). */
 function collectFiles(dir, base = dir) {
   const results = [];
@@ -34,6 +110,81 @@ function collectFiles(dir, base = dir) {
   }
   return results;
 }
+
+describe('overlay resolution and template precedence regressions', () => {
+  let agentkitRoot;
+  let projectRoot;
+
+  afterEach(() => {
+    if (projectRoot) {
+      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
+      projectRoot = null;
+    }
+    if (agentkitRoot) {
+      rmSync(agentkitRoot, { recursive: true, force: true });
+      agentkitRoot = null;
+    }
+  });
+
+  it('auto-detects the overlay from the project root when .agentkit-repo is missing', async () => {
+    agentkitRoot = makeMinimalAgentkitRoot({ overlayName: 'test-repo', defaultBranch: 'dev' });
+    projectRoot = makeNamedTmpProject('test-repo');
+
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.map(String).join(' '));
+    };
+
+    try {
+      await runSync({ agentkitRoot, projectRoot, flags: { quiet: false } });
+    } finally {
+      console.log = originalLog;
+    }
+
+    const agentsContent = readFileSync(resolve(projectRoot, 'AGENTS.md'), 'utf-8');
+    expect(agentsContent).toContain('Default branch: dev');
+    expect(logs.join('\n')).toContain('Using overlay: test-repo');
+    expect(logs.join('\n')).toContain('inferred from project root name "test-repo"');
+  });
+
+  it('prefers overlay templates for github workflows over base templates', async () => {
+    agentkitRoot = makeMinimalAgentkitRoot({ overlayName: 'test-repo', defaultBranch: 'dev' });
+    projectRoot = makeNamedTmpProject('test-repo');
+
+    await runSync({ agentkitRoot, projectRoot, flags: {} });
+
+    const ciContent = readFileSync(resolve(projectRoot, '.github', 'workflows', 'ci.yml'), 'utf-8');
+    expect(ciContent).toContain('name: Overlay CI');
+    expect(ciContent).not.toContain('name: Base CI');
+  });
+
+  it('renders the resolved defaultBranch consistently across generated outputs', async () => {
+    agentkitRoot = makeMinimalAgentkitRoot({ overlayName: 'test-repo', defaultBranch: 'dev' });
+    projectRoot = makeNamedTmpProject('test-repo');
+
+    await runSync({ agentkitRoot, projectRoot, flags: {} });
+
+    expect(readFileSync(resolve(projectRoot, 'AGENTS.md'), 'utf-8')).toContain(
+      'Default branch: dev'
+    );
+    expect(readFileSync(resolve(projectRoot, 'docs', 'README.md'), 'utf-8')).toContain(
+      'Default branch: dev'
+    );
+    expect(readFileSync(resolve(projectRoot, 'CLAUDE.md'), 'utf-8')).toContain(
+      'Default branch: dev'
+    );
+    expect(
+      readFileSync(resolve(projectRoot, '.github', 'copilot-instructions.md'), 'utf-8')
+    ).toContain('Default branch: dev');
+    expect(readFileSync(resolve(projectRoot, '.github', 'workflows', 'ci.yml'), 'utf-8')).toContain(
+      'branches: [dev]'
+    );
+    expect(
+      readFileSync(resolve(projectRoot, '.claude', 'skills', 'build', 'SKILL.md'), 'utf-8')
+    ).toContain('Default branch: dev');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Tests: Sync Integration — Copilot Prompts
@@ -77,7 +228,7 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
       resolve(projectRoot, '.github', 'prompts', 'build.prompt.md'),
       'utf-8'
     );
-    expect(content).toContain('mode: "agent"');
+    expect(content).toContain("mode: 'agent'");
   });
 });
 
@@ -454,49 +605,53 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     }
   });
 
-  test.sequential('--no-clean preserves orphaned files', async () => {
-    // Create isolated temp agentkit root to avoid mutating shared state
-    const tempAgentkitRoot = resolve(
-      tmpdir(),
-      `agentkit-sync-integration-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-    );
-    mkdirSync(tempAgentkitRoot, { recursive: true });
+  test.sequential(
+    '--no-clean preserves orphaned files',
+    async () => {
+      // Create isolated temp agentkit root to avoid mutating shared state
+      const tempAgentkitRoot = resolve(
+        tmpdir(),
+        `agentkit-sync-integration-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      );
+      mkdirSync(tempAgentkitRoot, { recursive: true });
 
-    // Copy essential files from AGENTKIT_ROOT to temp
-    const essentialFiles = ['.manifest.json', 'spec', 'templates', 'engines'];
-    for (const file of essentialFiles) {
-      const src = join(AGENTKIT_ROOT, file);
-      const dest = join(tempAgentkitRoot, file);
-      if (existsSync(src)) {
-        // Use simple copy for files, recursive for directories
-        if (file === '.manifest.json') {
-          if (existsSync(src)) {
-            writeFileSync(dest, readFileSync(src, 'utf-8'), 'utf-8');
+      // Copy essential files from AGENTKIT_ROOT to temp
+      const essentialFiles = ['.manifest.json', 'spec', 'templates', 'engines'];
+      for (const file of essentialFiles) {
+        const src = join(AGENTKIT_ROOT, file);
+        const dest = join(tempAgentkitRoot, file);
+        if (existsSync(src)) {
+          // Use simple copy for files, recursive for directories
+          if (file === '.manifest.json') {
+            if (existsSync(src)) {
+              writeFileSync(dest, readFileSync(src, 'utf-8'), 'utf-8');
+            }
+          } else {
+            const { cpSync } = await import('fs');
+            cpSync(src, dest, { recursive: true });
           }
-        } else {
-          const { cpSync } = await import('fs');
-          cpSync(src, dest, { recursive: true });
         }
       }
-    }
 
-    try {
-      await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: {} });
-      const manifestPath = join(tempAgentkitRoot, '.manifest.json');
-      const originalManifest = existsSync(manifestPath)
-        ? readFileSync(manifestPath, 'utf-8')
-        : null;
-      const manifest = originalManifest ? JSON.parse(originalManifest) : { files: {} };
-      manifest.files['__TEST_ORPHAN__.md'] = { hash: 'abc' };
-      writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
-      const orphanPath = join(projectRoot, '__TEST_ORPHAN__.md');
-      writeFileSync(orphanPath, 'orphan', 'utf-8');
-      await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: { 'no-clean': true } });
-      expect(existsSync(orphanPath)).toBe(true);
-    } finally {
-      rmSync(tempAgentkitRoot, { recursive: true, force: true });
-    }
-  }, 30000);
+      try {
+        await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: {} });
+        const manifestPath = join(tempAgentkitRoot, '.manifest.json');
+        const originalManifest = existsSync(manifestPath)
+          ? readFileSync(manifestPath, 'utf-8')
+          : null;
+        const manifest = originalManifest ? JSON.parse(originalManifest) : { files: {} };
+        manifest.files['__TEST_ORPHAN__.md'] = { hash: 'abc' };
+        writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+        const orphanPath = join(projectRoot, '__TEST_ORPHAN__.md');
+        writeFileSync(orphanPath, 'orphan', 'utf-8');
+        await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: { 'no-clean': true } });
+        expect(existsSync(orphanPath)).toBe(true);
+      } finally {
+        rmSync(tempAgentkitRoot, { recursive: true, force: true });
+      }
+    },
+    30000
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -586,9 +741,9 @@ describe('syncCopilotInstructions — testing & QA templates (via runSync --only
   });
 
   it('generates .github/instructions/code-verify.md', { timeout: 15000 }, () => {
-    expect(
-      existsSync(resolve(projectRoot, '.github', 'instructions', 'code-verify.md'))
-    ).toBe(true);
+    expect(existsSync(resolve(projectRoot, '.github', 'instructions', 'code-verify.md'))).toBe(
+      true
+    );
   });
 
   it('does NOT generate kluster-code-verify.md (renamed to code-verify.md)', () => {
@@ -715,9 +870,7 @@ describe('syncLanguageInstructions — generic, multi-platform dynamic generatio
   // --- Copilot output (.github/instructions/languages/) ---
 
   it('generates .github/instructions/languages/ for copilot target', { timeout: 15000 }, () => {
-    expect(
-      existsSync(resolve(projectRoot, '.github', 'instructions', 'languages'))
-    ).toBe(true);
+    expect(existsSync(resolve(projectRoot, '.github', 'instructions', 'languages'))).toBe(true);
   });
 
   it('generates one file per rules.yaml domain under copilot output', { timeout: 15000 }, () => {
@@ -800,9 +953,7 @@ describe('syncLanguageInstructions — claude target output (.claude/rules/langu
   });
 
   it('generates .claude/rules/languages/ for claude target', { timeout: 15000 }, () => {
-    expect(
-      existsSync(resolve(projectRoot, '.claude', 'rules', 'languages'))
-    ).toBe(true);
+    expect(existsSync(resolve(projectRoot, '.claude', 'rules', 'languages'))).toBe(true);
   });
 
   it('generates one file per rules.yaml domain under claude output', { timeout: 15000 }, () => {
@@ -844,16 +995,20 @@ describe('syncEditorTheme (brand-driven editor theme)', () => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('generates .vscode/settings.json with workbench.colorCustomizations', { timeout: 15000 }, () => {
-    const settingsPath = resolve(projectRoot, '.vscode', 'settings.json');
-    expect(existsSync(settingsPath)).toBe(true);
-    const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
-    expect(settings['workbench.colorCustomizations']).toBeDefined();
-    expect(typeof settings['workbench.colorCustomizations']).toBe('object');
-    // Should have at least a few brand-derived colors
-    const colors = settings['workbench.colorCustomizations'];
-    expect(Object.keys(colors).length).toBeGreaterThan(5);
-  });
+  it(
+    'generates .vscode/settings.json with workbench.colorCustomizations',
+    { timeout: 15000 },
+    () => {
+      const settingsPath = resolve(projectRoot, '.vscode', 'settings.json');
+      expect(existsSync(settingsPath)).toBe(true);
+      const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+      expect(settings['workbench.colorCustomizations']).toBeDefined();
+      expect(typeof settings['workbench.colorCustomizations']).toBe('object');
+      // Should have at least a few brand-derived colors
+      const colors = settings['workbench.colorCustomizations'];
+      expect(Object.keys(colors).length).toBeGreaterThan(5);
+    }
+  );
 
   it('includes _agentkit_theme sentinel with brand metadata', () => {
     const settings = JSON.parse(
@@ -915,15 +1070,23 @@ describe('syncEditorTheme — pre-existing settings.json merge', () => {
     mkdirSync(vscodeDir, { recursive: true });
     writeFileSync(
       resolve(vscodeDir, 'settings.json'),
-      JSON.stringify({
-        'editor.rulers': [80],
-        'files.exclude': { 'node_modules': true },
-        'editor.wordWrap': 'on',
-      }, null, 2),
+      JSON.stringify(
+        {
+          'editor.rulers': [80],
+          'files.exclude': { node_modules: true },
+          'editor.wordWrap': 'on',
+        },
+        null,
+        2
+      ),
       'utf-8'
     );
     // Use --overwrite to force theme generation over existing settings
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true, overwrite: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { quiet: true, overwrite: true },
+    });
   });
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });

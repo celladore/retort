@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — .NET / C#
 
 Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
@@ -68,4 +69,3 @@ The following conventions are enforced in **agentkit-forge** and derived from
 
 - **[dn-format]** All code must pass 'dotnet format' with the project editorconfig
 - **[dn-nullable]** Nullable reference types must be enabled. All reference type parameters and return values must be explicitly nullable or non-nullable.
-

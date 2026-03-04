@@ -98,20 +98,20 @@ Both models approach 80 % of closed-source SOTA performance.
 
 ## Model comparison table (reproduced from research)
 
-| Model | Best for | SWE-bench | Context | Cost / 1M in-tokens | Open? |
-| --- | --- | ---: | --- | --- | --- |
-| Claude Opus 4.6 | Backend, security, reasoning | ~81 % | 200K–1M | ~$15 | No |
-| GPT-5.3 Codex High | All-round coding, DevOps | ~80 % | 256K | ~$15+ | No |
-| Claude Sonnet 4.6 | Value alternative to Opus | ~80 % | 200K | ~$3 | No |
-| Gemini 2.5 Pro | Frontend, large context | ~76 % | 1M | ~$1.25–$10 | No |
-| DeepSeek V3.2 | Open-source, self-hosted | ~73 % | 128K | ~$0.27 | Yes |
-| GLM-5 | On-prem, multilingual | ~78 % | 200K | ~$1 | Yes |
-| Kimi K2.5 | Budget, agentic coding | ~77 % | 256K | ~$0.60 | Yes |
-| MiniMax M2.5 | Open-weight, APAC | ~80 % | 1M | ~$0.20 | Yes |
-| o3 | Low-cost reasoning fallback | — | 200K | ~$1–$3 | No |
-| Codestral 25.08 | Code-specific, open-weight | — | 256K | low | Yes |
+| Model              | Best for                     | SWE-bench | Context | Cost / 1M in-tokens | Open? |
+| ------------------ | ---------------------------- | --------: | ------- | ------------------- | ----- |
+| Claude Opus 4.6    | Backend, security, reasoning |     ~81 % | 200K–1M | ~$15                | No    |
+| GPT-5.3 Codex High | All-round coding, DevOps     |     ~80 % | 256K    | ~$15+               | No    |
+| Claude Sonnet 4.6  | Value alternative to Opus    |     ~80 % | 200K    | ~$3                 | No    |
+| Gemini 2.5 Pro     | Frontend, large context      |     ~76 % | 1M      | ~$1.25–$10          | No    |
+| DeepSeek V3.2      | Open-source, self-hosted     |     ~73 % | 128K    | ~$0.27              | Yes   |
+| GLM-5              | On-prem, multilingual        |     ~78 % | 200K    | ~$1                 | Yes   |
+| Kimi K2.5          | Budget, agentic coding       |     ~77 % | 256K    | ~$0.60              | Yes   |
+| MiniMax M2.5       | Open-weight, APAC            |     ~80 % | 1M      | ~$0.20              | Yes   |
+| o3                 | Low-cost reasoning fallback  |         — | 200K    | ~$1–$3              | No    |
+| Codestral 25.08    | Code-specific, open-weight   |         — | 256K    | low                 | Yes   |
 
-*Pricing is approximate and changes frequently. Verify at provider pricing pages.*
+_Pricing is approximate and changes frequently. Verify at provider pricing pages._
 
 ---
 

@@ -15,24 +15,24 @@
 # The sync engine resolves both identically (reads .hex or the string directly).
 # =============================================================================
 
-version: "1.0.0"
-specDate: "2024-06-12"
-author: "AgentKit Brand Systems"
+version: '1.0.0'
+specDate: '2024-06-12'
+author: 'AgentKit Brand Systems'
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Identity
 # ─────────────────────────────────────────────────────────────────────────────
 identity:
-  name: "AgentKit Forge"
-  mission: "Empowering teams to orchestrate, configure, and unify AI toolchains with simplicity and confidence."
+  name: 'AgentKit Forge'
+  mission: 'Empowering teams to orchestrate, configure, and unify AI toolchains with simplicity and confidence.'
   productPromise: >
     The fastest, most reliable, and transparent AI agent infrastructure—
     delivering power, trust, and clarity from prototype to production.
   attributes: [empowering, collaborative, inviting, flexible, approachable, modern]
   desiredPerception:
-    developers: "A platform I can trust at production scale."
-    operations: "Lets us move faster and with more clarity than legacy tools."
-    endUsers: "Thoughtful, modern, and just works."
+    developers: 'A platform I can trust at production scale.'
+    operations: 'Lets us move faster and with more clarity than legacy tools.'
+    endUsers: 'Thoughtful, modern, and just works.'
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Colors
@@ -40,73 +40,73 @@ identity:
 colors:
   primary:
     brand:
-      hex: "#1976D2"
-      role: "Core brand color"
-      rationale: "Vivid, uplifting blue conveying empowerment, reliability, and technical trust"
-      usage: "Primary CTAs, brand marks, key interactive states"
+      hex: '#1976D2'
+      role: 'Core brand color'
+      rationale: 'Vivid, uplifting blue conveying empowerment, reliability, and technical trust'
+      usage: 'Primary CTAs, brand marks, key interactive states'
     coral:
-      hex: "#FD8369"
-      role: "Collaboration warmth"
-      rationale: "Approachable warm coral to signal collaboration and human-centered flows"
-      usage: "Onboarding cues, collaborative affordances"
+      hex: '#FD8369'
+      role: 'Collaboration warmth'
+      rationale: 'Approachable warm coral to signal collaboration and human-centered flows'
+      usage: 'Onboarding cues, collaborative affordances'
     teal:
-      hex: "#23BFAA"
-      role: "Inviting accent"
-      rationale: "Friendly and flexible teal for success states"
-      usage: "Success states, badges, secondary CTAs"
+      hex: '#23BFAA'
+      role: 'Inviting accent'
+      rationale: 'Friendly and flexible teal for success states'
+      usage: 'Success states, badges, secondary CTAs'
     surface:
-      hex: "#F7F9FB"
-      role: "Light surface"
-      rationale: "Near-white surface reducing intimidation for onboarding"
-      usage: "Content backgrounds, form fields"
+      hex: '#F7F9FB'
+      role: 'Light surface'
+      rationale: 'Near-white surface reducing intimidation for onboarding'
+      usage: 'Content backgrounds, form fields'
     dark:
-      hex: "#184A6C"
-      role: "Dark mode brand"
-      rationale: "Deep professional blue preserving brand recognition in dark contexts"
-      usage: "Dark-mode surfaces, technical panels"
+      hex: '#184A6C'
+      role: 'Dark mode brand'
+      rationale: 'Deep professional blue preserving brand recognition in dark contexts'
+      usage: 'Dark-mode surfaces, technical panels'
     accent:
-      hex: "#FFD54F"
-      role: "Highlight"
-      rationale: "Optimistic yellow for highlights and interactive prompts"
-      usage: "Attention-drawing, non-alarmist highlights"
+      hex: '#FFD54F'
+      role: 'Highlight'
+      rationale: 'Optimistic yellow for highlights and interactive prompts'
+      usage: 'Attention-drawing, non-alarmist highlights'
 
   secondary:
     lilac:
-      hex: "#B39DDB"
-      role: "Modern accent"
-      rationale: "Professional but friendly edge for illustrations and empty states"
-      usage: "Feature highlights, empty states"
+      hex: '#B39DDB'
+      role: 'Modern accent'
+      rationale: 'Professional but friendly edge for illustrations and empty states'
+      usage: 'Feature highlights, empty states'
     mint:
-      hex: "#A7EDCE"
-      role: "Inclusive touch"
-      rationale: "Gentle tone for supportive UI elements and less technical flows"
-      usage: "Supportive elements, onboarding"
+      hex: '#A7EDCE'
+      role: 'Inclusive touch'
+      rationale: 'Gentle tone for supportive UI elements and less technical flows'
+      usage: 'Supportive elements, onboarding'
 
   semantic:
     success:
-      hex: "#1EDB90"
-      rationale: "Empowering success tone — positive and actionable"
+      hex: '#1EDB90'
+      rationale: 'Empowering success tone — positive and actionable'
     warning:
-      hex: "#FBC02D"
-      rationale: "Friendly warning for non-blocking cautions"
+      hex: '#FBC02D'
+      rationale: 'Friendly warning for non-blocking cautions'
     error:
-      hex: "#ED2F4B"
-      rationale: "Clear error hue — decisive but fits the expressive palette"
+      hex: '#ED2F4B'
+      rationale: 'Clear error hue — decisive but fits the expressive palette'
     info:
-      hex: "#1976D2"
-      rationale: "Aligns informational states with core brand color"
+      hex: '#1976D2'
+      rationale: 'Aligns informational states with core brand color'
 
   neutral:
-    900: { hex: "#222A30", role: "Deep neutral — headings, critical UI chrome" }
-    700: { hex: "#474E57", role: "Body text, secondary UI elements" }
-    400: { hex: "#B4BAC2", role: "Dividers, subtle borders, disabled states" }
-    100: { hex: "#F4F6F8", role: "Softest background — airy, reduces complexity" }
+    900: { hex: '#222A30', role: 'Deep neutral — headings, critical UI chrome' }
+    700: { hex: '#474E57', role: 'Body text, secondary UI elements' }
+    400: { hex: '#B4BAC2', role: 'Dividers, subtle borders, disabled states' }
+    100: { hex: '#F4F6F8', role: 'Softest background — airy, reduces complexity' }
 
   darkMode:
-    background: { hex: "#18232A", role: "Deep muted background for focus" }
-    surface: { hex: "#23303A", role: "Layered surface for cards/panels" }
-    textPrimary: { hex: "#F7F9FB", role: "High-contrast text aligned with light surfaces" }
-    textSecondary: { hex: "#B4BAC2", role: "Muted hints and meta information" }
+    background: { hex: '#18232A', role: 'Deep muted background for focus' }
+    surface: { hex: '#23303A', role: 'Layered surface for cards/panels' }
+    textPrimary: { hex: '#F7F9FB', role: 'High-contrast text aligned with light surfaces' }
+    textSecondary: { hex: '#B4BAC2', role: 'Muted hints and meta information' }
 
 # Palette guidance notes (free text — kept outside `colors` to avoid polluting the color tree)
 colorGuidance: >
@@ -117,9 +117,9 @@ colorGuidance: >
 # Typography
 # ─────────────────────────────────────────────────────────────────────────────
 typography:
-  primary: "Inter"
+  primary: 'Inter'
   fallback: '"Inter", "Segoe UI", "Roboto", Arial, sans-serif'
-  mono: "IBM Plex Mono"
+  mono: 'IBM Plex Mono'
   weights:
     regular: 400
     medium: 500
@@ -133,7 +133,7 @@ typography:
     bodyLarge: { size: 16, weight: 400, lineHeight: 1.5 }
     body: { size: 14, weight: 400, lineHeight: 1.5 }
     small: { size: 14, weight: 400, lineHeight: 1.4 }
-    codeInline: { size: 14, weight: null, lineHeight: 1.45, font: "mono" }
+    codeInline: { size: 14, weight: null, lineHeight: 1.45, font: 'mono' }
   intent: >
     Sans-serif clarity for technical content, with mono for configuration/UI outputs
     and live-editing states. Supports internationalization glyphs.
@@ -160,35 +160,35 @@ layout:
     l: 16
   card:
     padding: 16
-    radius: "radius.m"
+    radius: 'radius.m'
   button:
     paddingX: 16
     paddingY: 8
-    radius: "radius.s"
+    radius: 'radius.s'
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Motion
 # ─────────────────────────────────────────────────────────────────────────────
 motion:
-  micro: "80-120ms"
-  standard: "250ms"
-  easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+  micro: '80-120ms'
+  standard: '250ms'
+  easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
   principles:
-    - "Purposeful, minimal — clarify, not distract"
-    - "Honors OS/browser reduce-motion preferences"
+    - 'Purposeful, minimal — clarify, not distract'
+    - 'Honors OS/browser reduce-motion preferences'
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Accessibility
 # ─────────────────────────────────────────────────────────────────────────────
 accessibility:
-  standard: "WCAG AA"
-  bodyContrast: "4.5:1"
-  largeTextContrast: "3:1"
-  focusOutline: "2px"
-  minTouchTarget: "44px"
+  standard: 'WCAG AA'
+  bodyContrast: '4.5:1'
+  largeTextContrast: '3:1'
+  focusOutline: '2px'
+  minTouchTarget: '44px'
   reducedMotion: true
   principles:
-    - "No communicative information depends solely on color"
-    - "Keyboard navigation, skip links, error recovery baked in"
-    - "All icons, buttons, alerts have aria-labels/roles"
-    - "Screen reader support — status changes announced politely"
+    - 'No communicative information depends solely on color'
+    - 'Keyboard navigation, skip links, error recovery baked in'
+    - 'All icons, buttons, alerts have aria-labels/roles'
+    - 'Screen reader support — status changes announced politely'

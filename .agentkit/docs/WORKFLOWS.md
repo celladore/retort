@@ -40,6 +40,7 @@ Use this flow for medium-to-large features that touch multiple parts of the code
 ```
 
 **What the AI does:**
+
 - Scans the entire repository for languages, frameworks, build tools, and folder structure
 - Detects Node.js and Express (or whatever framework is present)
 - Identifies existing test frameworks (Vitest, Jest, etc.)
@@ -80,6 +81,7 @@ Use this flow for medium-to-large features that touch multiple parts of the code
 ```
 
 **What the AI does:**
+
 - Reads the codebase to understand existing patterns (routing style, middleware conventions, database layer)
 - Produces a structured plan with: goal, assumptions, ordered implementation steps, file touch list, validation commands, rollback plan, and risks
 - Does NOT write any code -- planning only
@@ -147,6 +149,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 ```
 
 **What the AI does:**
+
 - Reads the plan and the relevant source files
 - Creates the auth service with password hashing and token generation
 - Creates the API endpoints for login and registration
@@ -193,6 +196,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 ```
 
 **What the AI does:**
+
 - Reads the API endpoints created by the backend team
 - Creates React components for Login and Registration pages
 - Adds authentication state management (context or store)
@@ -235,6 +239,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 ```
 
 **What the AI does:**
+
 - Runs the full quality gate across the entire project (not just the files changed by one team)
 - Executes in order: format check, lint, typecheck, unit tests, build
 - Reports any issues, including cross-team integration problems that individual team checks might miss
@@ -266,6 +271,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 ```
 
 **What the AI does:**
+
 - Diffs all changes since the orchestration began
 - Reviews every changed file against six criteria: correctness, security, performance, tests and coverage, documentation and readability, compatibility and standards
 - Classifies findings by severity: CRITICAL, HIGH, MEDIUM, LOW
@@ -308,6 +314,7 @@ correct, passwords are properly hashed with bcrypt, and test coverage is thoroug
 ```
 
 **What the AI does:**
+
 - Collects the current state: git branch, last commit, orchestrator state, events log
 - Writes a structured handoff document with: what was done, current blockers, next 3 actions, validation commands, and open risks
 - Saves the handoff to `docs/ai_handoffs/` (if the directory exists)
@@ -381,6 +388,7 @@ Use this flow for focused bug fixes where you already know the symptom. The emph
 ```
 
 **What the AI does:**
+
 - Scans the repository for database-related files, connection configuration, and ORM setup
 - Identifies the database stack (PostgreSQL + Prisma, MySQL + Knex, etc.)
 - Maps out connection handling code
@@ -403,6 +411,7 @@ pool configuration, and any timeout settings.
 ```
 
 **What the AI does:**
+
 - Reads the database configuration files (Prisma schema, environment variables, connection string format)
 - Examines the connection pool settings
 - Checks for missing connection cleanup, unclosed transactions, or pool exhaustion patterns
@@ -443,6 +452,7 @@ Fix the database connection timeout issue:
 ```
 
 **What the AI does:**
+
 - Makes minimal, targeted changes to fix the specific issue
 - Updates the Prisma configuration with pool settings
 - Refactors the error-prone transaction handling with proper cleanup
@@ -457,6 +467,7 @@ Fix the database connection timeout issue:
 ```
 
 **What the AI does:**
+
 - Runs format, lint, and typecheck only (skips the full build to save time)
 - The `--fast` flag is designed for quick iterations during bug fixes
 - Confirms the fix compiles and passes static analysis
@@ -492,6 +503,7 @@ Then run the full check to make sure nothing else broke:
 ```
 
 **What the AI does:**
+
 - Diffs the changes you just made
 - Checks specifically for regressions: did the fix break any existing behavior?
 - Verifies the fix actually addresses the root cause (not just the symptom)
@@ -534,6 +546,7 @@ backwards-compatible. Transaction error handling now properly releases connectio
 Total time: 5-10 minutes for a focused bug fix.
 
 **Tips for fast bug fixes:**
+
 - Skip `/discover` if you already have a recent `AGENT_TEAMS.md`
 - Use `/check --fast` for quick iterations while developing the fix
 - Run the full `/check` once before considering the fix complete
@@ -563,18 +576,21 @@ Use this flow when you need a thorough understanding of a project's health, qual
 The `/project-review` command runs a comprehensive multi-phase analysis of the entire project. It combines several checks into a single, structured assessment:
 
 **Phase A -- Discovery and Inventory:**
+
 - Full codebase scan (same as `/discover`)
 - Technology stack identification
 - Dependency inventory with version currency
 - Folder structure mapping
 
 **Phase B -- Health Validation:**
+
 - Build status (same as `/healthcheck`)
 - Test suite status and coverage
 - Lint and typecheck status
 - Dependency vulnerability scan
 
 **Phase C -- Code Quality Assessment:**
+
 - Architecture pattern analysis
 - Code duplication detection
 - Complexity hotspots
@@ -582,6 +598,7 @@ The `/project-review` command runs a comprehensive multi-phase analysis of the e
 - Documentation coverage
 
 **Phase D -- Security Review:**
+
 - OWASP top 10 check (same as `/security`)
 - Hardcoded secrets scan
 - Dependency vulnerability audit
@@ -640,6 +657,7 @@ and the missing payment tests. Deprioritize the lint debt for now.
 ```
 
 **What the AI does:**
+
 - Acknowledges the priority adjustment
 - Focuses subsequent planning on the selected items
 - Notes the deferred items for future sessions
@@ -653,6 +671,7 @@ and the missing payment tests. Deprioritize the lint debt for now.
 ```
 
 **What the AI does:**
+
 - Creates a structured implementation plan for each finding
 - Orders the steps by dependency (security fixes first, then tests)
 - Identifies the specific files and lines to change
@@ -695,6 +714,7 @@ From here, you can either delegate to teams or fix manually:
 ```
 
 **What the AI does:**
+
 - Enters the 5-phase lifecycle starting from Implementation (since discovery and planning are done)
 - Delegates the security fixes to the relevant team
 - Delegates the test writing to the testing team
@@ -718,6 +738,7 @@ From here, you can either delegate to teams or fix manually:
 Total time: 20-40 minutes for the full assessment, plus implementation time for fixes.
 
 **Tips for project assessments:**
+
 - Run `/project-review` with a fresh eye -- do not assume you know what it will find
 - Share the findings table with your team. It is a useful conversation starter about technical debt
 - Do not try to fix everything at once. Fix the critical security issues, then schedule the rest
@@ -753,6 +774,7 @@ summarize where we left off.
 ```
 
 **What the AI does:**
+
 - Lists files in the `docs/ai_handoffs/` directory
 - Reads the most recent handoff (sorted by date)
 - Summarizes the key information: what was done, what is blocked, and what the next actions are
@@ -803,6 +825,7 @@ summarize where we left off.
 ```
 
 **What the AI does:**
+
 - Reads `.claude/state/orchestrator.json`
 - Reads the recent entries from `.claude/state/events.log`
 - Reports the current phase, active teams, completed work, and pending items
@@ -864,6 +887,7 @@ You can now pick up exactly where the previous session left off.
 ```
 
 **What the AI does:**
+
 - Reads the handoff and orchestrator state for full context
 - Reads the backend API endpoints to understand the contract
 - Creates the frontend components following existing patterns in the codebase
@@ -925,6 +949,7 @@ Review all changes made across both sessions (backend + frontend).
 ```
 
 **What the AI does with `--save`:**
+
 - Writes the handoff document to console AND to `docs/ai_handoffs/`
 - Updates the orchestrator state to Phase 5 (Ship)
 - Logs the session completion to events.log
@@ -965,6 +990,7 @@ AgentKit Forge uses three mechanisms to maintain continuity between sessions:
 **1. Orchestrator State (`.claude/state/orchestrator.json`)**
 
 This JSON file tracks:
+
 - Which lifecycle phase the project is in (1-5)
 - Which teams have completed their work
 - Metrics (files changed, tests added, issues found/resolved)
@@ -1005,6 +1031,7 @@ Human-readable markdown files with structured summaries. These serve as the "col
 Total time: 10-15 minutes for the continuation session.
 
 **Tips for multi-session work:**
+
 - Always run `/handoff` at the end of every session. Even if you plan to continue immediately, the handoff is your safety net
 - Read the handoff BEFORE checking orchestrator state. The handoff is written for humans and gives you context faster
 - Use `/orchestrate --status` to verify the technical state matches what the handoff describes

@@ -53,10 +53,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 3: Validate JSON files ──────────────────────────────────────
   console.log('\n  --- JSON Files ---');
-  const jsonFiles = [
-    '.claude/settings.json',
-    '.claude/state/schema.json',
-  ];
+  const jsonFiles = ['.claude/settings.json', '.claude/state/schema.json'];
 
   for (const file of jsonFiles) {
     const fullPath = resolve(projectRoot, file);
@@ -77,11 +74,30 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   // ─── Phase 4: Check command files match spec ───────────────────────────
   console.log('\n  --- Commands ---');
   const requiredCommands = [
-    'orchestrate', 'discover', 'healthcheck', 'review', 'sync-backlog',
-    'check', 'plan', 'handoff', 'build', 'test', 'format', 'deploy', 'security',
+    'orchestrate',
+    'discover',
+    'healthcheck',
+    'review',
+    'sync-backlog',
+    'check',
+    'plan',
+    'handoff',
+    'build',
+    'test',
+    'format',
+    'deploy',
+    'security',
     'project-review',
-    'team-backend', 'team-frontend', 'team-data', 'team-infra', 'team-devops',
-    'team-testing', 'team-security', 'team-docs', 'team-product', 'team-quality',
+    'team-backend',
+    'team-frontend',
+    'team-data',
+    'team-infra',
+    'team-devops',
+    'team-testing',
+    'team-security',
+    'team-docs',
+    'team-product',
+    'team-quality',
   ];
 
   let commandsOk = 0;
@@ -99,8 +115,12 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   // ─── Phase 5: Check hook files ─────────────────────────────────────────
   console.log('\n  --- Hooks ---');
   const requiredHooks = [
-    'session-start', 'protect-sensitive', 'protect-templates',
-    'guard-destructive-commands', 'warn-uncommitted', 'stop-build-check',
+    'session-start',
+    'protect-sensitive',
+    'protect-templates',
+    'guard-destructive-commands',
+    'warn-uncommitted',
+    'stop-build-check',
   ];
 
   for (const hook of requiredHooks) {
@@ -116,11 +136,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 6: Check generated headers ──────────────────────────────────
   console.log('\n  --- Generated Headers ---');
-  const sampleFiles = [
-    '.claude/commands/orchestrate.md',
-    'CLAUDE.md',
-    'UNIFIED_AGENT_TEAMS.md',
-  ];
+  const sampleFiles = ['.claude/commands/orchestrate.md', 'CLAUDE.md', 'UNIFIED_AGENT_TEAMS.md'];
 
   for (const file of sampleFiles) {
     const fullPath = resolve(projectRoot, file);
@@ -159,7 +175,9 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
       } else {
         console.log(`  OK: settings.json has ${settings.permissions.allow.length} allow rules`);
       }
-    } catch { /* already reported above */ }
+    } catch {
+      /* already reported above */
+    }
   }
 
   // ─── Phase 8: Scan for forbidden patterns ──────────────────────────────
@@ -168,7 +186,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
     /password\s*[:=]\s*["'][^"']+["']/i,
     /api[_-]?key\s*[:=]\s*["'][^"']+["']/i,
     /secret\s*[:=]\s*["'][A-Za-z0-9+/=]{20,}["']/i,
-    /AKIA[0-9A-Z]{16}/,  // AWS access key pattern
+    /AKIA[A-Z0-9]{16}/, // AWS access key pattern
     /ghp_[A-Za-z0-9]{36}/, // GitHub personal access token
     /sk-[A-Za-z0-9]{48}/, // OpenAI/Anthropic-style API key
   ];
@@ -178,10 +196,17 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   for (const dir of generatedDirs) {
     const fullDir = resolve(projectRoot, dir);
     if (!existsSync(fullDir)) continue;
-    scanForPatterns(fullDir, sensitivePatterns, (file, pattern) => {
-      console.error(`  FAIL: Forbidden pattern in ${file}: ${pattern}`);
-      errors++;
-    }, (count) => { scannedFiles += count; });
+    scanForPatterns(
+      fullDir,
+      sensitivePatterns,
+      (file, pattern) => {
+        console.error(`  FAIL: Forbidden pattern in ${file}: ${pattern}`);
+        errors++;
+      },
+      (count) => {
+        scannedFiles += count;
+      }
+    );
   }
   console.log(`  Scanned ${scannedFiles} files for secrets`);
 
@@ -216,7 +241,9 @@ function scanForPatterns(dir, patterns, onMatch, onCount) {
               onMatch(full, pattern.toString());
             }
           }
-        } catch { /* skip unreadable files */ }
+        } catch {
+          /* skip unreadable files */
+        }
       }
     }
   }

@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Code Verification
 
 Apply these rules when reviewing, verifying, or running automated checks
@@ -10,12 +11,12 @@ on code in **{{projectName}}**.
 
 Code verification covers four dimensions:
 
-| Dimension | What to check |
-|-----------|--------------|
-| **Correctness** | Logic matches the specification; edge cases handled |
-| **Safety** | No injection vectors, no secrets, no unsafe operations |
-| **Quality** | Naming clarity, single responsibility, no dead code |
-| **Test coverage** | New paths exercised by tests; no coverage regression |
+| Dimension         | What to check                                          |
+| ----------------- | ------------------------------------------------------ |
+| **Correctness**   | Logic matches the specification; edge cases handled    |
+| **Safety**        | No injection vectors, no secrets, no unsafe operations |
+| **Quality**       | Naming clarity, single responsibility, no dead code    |
+| **Test coverage** | New paths exercised by tests; no coverage regression   |
 
 ## Correctness Checks
 
@@ -49,6 +50,7 @@ Code verification covers four dimensions:
 ## Test Coverage Verification
 
 {{#if testingCoverage}}- Coverage must remain at or above **{{testingCoverage}}%**.{{/if}}
+
 - Every new public function or method must have at least one unit test.
 - Every new conditional branch must be exercised by at least one test.
 - New integration paths must be covered by an integration or E2E test.

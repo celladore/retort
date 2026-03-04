@@ -8,14 +8,14 @@
 
 ## At a Glance
 
-| Attribute          | Value                                                    |
-| ------------------ | -------------------------------------------------------- |
-| **Provider**       | Meta AI (Menlo Park, USA)                                |
-| **Founded**        | 2023 (Llama), 2013 (Meta AI)                             |
-| **Architecture**   | Dense transformer + MoE (Llama 4)                        |
-| **Latest model**   | Llama 4 Scout                                            |
-| **Context window** | 128K tokens                                              |
-| **License**        | Llama Community License (commercial ok)                  |
+| Attribute          | Value                                                                            |
+| ------------------ | -------------------------------------------------------------------------------- |
+| **Provider**       | Meta AI (Menlo Park, USA)                                                        |
+| **Founded**        | 2023 (Llama), 2013 (Meta AI)                                                     |
+| **Architecture**   | Dense transformer + MoE (Llama 4)                                                |
+| **Latest model**   | Llama 4 Scout                                                                    |
+| **Context window** | 128K tokens                                                                      |
+| **License**        | Llama Community License (commercial ok)                                          |
 | **Notable**        | One of the most downloaded models; contributed to growth of open-source adoption |
 
 ## Hugging Face Resources
@@ -38,8 +38,8 @@
 
 ## Models tracked from PRD-002 (base + profiles)
 
-| Base model    | Environment     | Profile variants covered | Cost tier | Cost multiplier range | Tokens/problem | SWE-bench / Verified | HLE           | SWE-rebench   | Aider         | Coding ability summary                                                                                                                                                    | Decision Readiness | When to use                                                   | Source quality                | Last verified |
-| ------------- | --------------- | ------------------------ | --------- | --------------------: | -------------: | -------------------- | ------------- | ------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------- | ----------------------------- | ------------- |
+| Base model    | Environment     | Profile variants covered | Cost tier | Cost multiplier range | Tokens/problem | SWE-bench / Verified | HLE           | SWE-rebench   | Aider         | Coding ability summary                                              | Decision Readiness                       | When to use                                                   | Source quality                | Last verified |
+| ------------- | --------------- | ------------------------ | --------- | --------------------: | -------------: | -------------------- | ------------- | ------------- | ------------- | ------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------- | ----------------------------- | ------------- |
 | Llama 4 Scout | Windsurf/Intake | Llama 4 Scout            | Paid      |                   1.0 |  Not evaluated | Not evaluated        | Not evaluated | Not evaluated | Not evaluated | Above-average intelligence; fast; very verbose; multimodal support. | Medium (vendor-claimed; not benchmarked) | Multimodal tasks requiring fast processing with large context | PRD-002 + Artificial Analysis | 2026-02-26    |
 
 ## Operational notes
