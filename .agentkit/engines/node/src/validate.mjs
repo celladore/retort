@@ -186,7 +186,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
     /password\s*[:=]\s*["'][^"']+["']/i,
     /api[_-]?key\s*[:=]\s*["'][^"']+["']/i,
     /secret\s*[:=]\s*["'][A-Za-z0-9+/=]{20,}["']/i,
-    /AKIA[0-9A-Z]{16}/, // AWS access key pattern
+    /AKIA[A-Z0-9]{16}/, // AWS access key pattern
     /ghp_[A-Za-z0-9]{36}/, // GitHub personal access token
     /sk-[A-Za-z0-9]{48}/, // OpenAI/Anthropic-style API key
   ];

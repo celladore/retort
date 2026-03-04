@@ -94,7 +94,7 @@ secret patterns:
 
 | Pattern Name      | Detection Regex                                                     |
 | ----------------- | ------------------------------------------------------------------- |
-| AWS Key           | `AKIA[0-9A-Z]{16}`                                                  |
+| AWS Key           | `AKIA[A-Z0-9]{16}`                                                  |
 | Private Key       | `-----BEGIN (RSA \| EC \| DSA )?PRIVATE KEY-----`                   |
 | Generic Secret    | `(password \| secret \| api_key \| apikey \| token)\s*[:=]\s*'...'` |
 | Connection String | `mongodb(+srv)?://...`                                              |

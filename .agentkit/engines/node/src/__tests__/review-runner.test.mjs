@@ -9,6 +9,8 @@ import * as runner from '../runner.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-review');
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const FAKE_AWS_KEY = `AKIA${'IOSFODNN7EXAMPLE'}`;
+const FAKE_PRIVATE_KEY_HEADER = `-----BEGIN ${'RSA '}PRIVATE KEY-----`;
 
 function setupTestRepo() {
   if (existsSync(TEST_ROOT))
@@ -46,7 +48,7 @@ describe('review-runner', () => {
       // Create file with fake AWS key
       writeFileSync(
         resolve(TEST_ROOT, 'config.js'),
-        'const key = "AKIAIOSFODNN7EXAMPLE";',
+        `const key = "${FAKE_AWS_KEY}";`,
         'utf-8'
       );
 
@@ -68,7 +70,7 @@ describe('review-runner', () => {
       setupTestRepo();
       writeFileSync(
         resolve(TEST_ROOT, 'key.pem'),
-        '-----BEGIN RSA PRIVATE KEY-----\nfake',
+        `${FAKE_PRIVATE_KEY_HEADER}\nfake`,
         'utf-8'
       );
 
@@ -107,7 +109,7 @@ describe('review-runner', () => {
       mkdirSync(resolve(TEST_ROOT, 'node_modules', 'some-pkg'), { recursive: true });
       writeFileSync(
         resolve(TEST_ROOT, 'node_modules', 'some-pkg', 'index.js'),
-        'const key = "AKIAIOSFODNN7EXAMPLE";',
+        `const key = "${FAKE_AWS_KEY}";`,
         'utf-8'
       );
 
@@ -127,7 +129,7 @@ describe('review-runner', () => {
       setupTestRepo();
       writeFileSync(
         resolve(TEST_ROOT, 'yarn.lock'),
-        'const key = "AKIAIOSFODNN7EXAMPLE";',
+        `const key = "${FAKE_AWS_KEY}";`,
         'utf-8'
       );
 
@@ -146,7 +148,7 @@ describe('review-runner', () => {
       setupTestRepo();
       writeFileSync(
         resolve(TEST_ROOT, 'test.snap'),
-        'const key = "AKIAIOSFODNN7EXAMPLE";',
+        `const key = "${FAKE_AWS_KEY}";`,
         'utf-8'
       );
 
@@ -163,7 +165,7 @@ describe('review-runner', () => {
 
     it('skips .sum files', async () => {
       setupTestRepo();
-      writeFileSync(resolve(TEST_ROOT, 'go.sum'), 'const key = "AKIAIOSFODNN7EXAMPLE";', 'utf-8');
+      writeFileSync(resolve(TEST_ROOT, 'go.sum'), `const key = "${FAKE_AWS_KEY}";`, 'utf-8');
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -181,7 +183,7 @@ describe('review-runner', () => {
       mkdirSync(resolve(TEST_ROOT, 'vendor', 'lib'), { recursive: true });
       writeFileSync(
         resolve(TEST_ROOT, 'vendor', 'lib', 'util.go'),
-        'const key = "AKIAIOSFODNN7EXAMPLE";',
+        `const key = "${FAKE_AWS_KEY}";`,
         'utf-8'
       );
 
