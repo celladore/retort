@@ -16,6 +16,7 @@
 {{#if stackDatabase}}- **Database:** {{stackDatabase}}{{/if}}
 {{#if architecturePattern}}- **Architecture:** {{architecturePattern}}{{/if}}
 {{#if defaultBranch}}- **Default branch:** {{defaultBranch}}{{/if}}
+{{#if hasBrandGuide}}- **Brand:** {{brandName}} (primary: `{{brandPrimaryColor}}`) — spec at `{{brandGuidePath}}`{{/if}}
 
 Always scan the codebase within your focus area (the repo folders and modules you're assigned or listed under 'Focus Areas') before making changes.
 

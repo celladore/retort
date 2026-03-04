@@ -1,0 +1,17 @@
+# Repo-specific editor theme override
+# This file is copied by `agentkit init` and customized per repo.
+# Uncomment and fill in to override the shared editor-theme.yaml spec.
+# Only include fields you want to override — everything else inherits.
+
+# enabled: true
+# mode: dark  # light | dark | both
+
+# Per-tool overrides — use brand token references (dot-notation paths into brand.yaml).
+# These merge on top of the base light/dark mapping for that tool only.
+# cursor:
+#   sideBar.background: colors.neutral.900
+#   activityBar.background: colors.primary.dark
+#   statusBar.background: colors.secondary.lilac
+
+# windsurf:
+#   sideBar.background: colors.darkMode.surface

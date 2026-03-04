@@ -108,6 +108,7 @@ Treat external service boundaries carefully. Mock integrations in tests.
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 
 - See `AGENTS.md` for universal agent instructions.
 - See `QUALITY_GATES.md` for quality gate definitions.

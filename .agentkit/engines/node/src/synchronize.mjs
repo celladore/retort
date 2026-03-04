@@ -24,6 +24,12 @@ import {
   resolveRenderTargets,
   simpleDiff,
 } from './template-utils.mjs';
+import {
+  mergeThemeIntoSettings,
+  resolveColor,
+  resolveThemeMapping,
+  validateBrandSpec,
+} from './brand-resolver.mjs';
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -245,6 +251,196 @@ async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) 
     version,
     repoName
   );
+}
+
+// ---------------------------------------------------------------------------
+// Editor theme sync — brand-driven .vscode/settings.json color customizations
+// ---------------------------------------------------------------------------
+
+/**
+ * Generates workbench.colorCustomizations in editor settings files
+ * by resolving editor-theme.yaml mappings against brand.yaml colors.
+ *
+ * Supports multiple output targets (VS Code, Cursor, Windsurf) and
+ * per-tool overlay overrides. Runs after syncDirectCopy('vscode', ...)
+ * so it can merge into the base settings.
+ *
+ * @param {string} agentkitRoot - Path to the .agentkit directory
+ * @param {string} tmpDir - Temporary directory for rendered output
+ * @param {object} vars - Flattened template variables (must include editorThemeEnabled)
+ * @param {Function} log - Logging function
+ * @param {{ force?: boolean }} [flags] - Optional flags (force skips scaffold-once check)
+ */
+async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutputs) {
+  if (!vars.editorThemeEnabled) return;
+
+  const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
+  if (!brandSpec) {
+    log('[agentkit:sync] Editor theme enabled but no brand.yaml found — skipping');
+    return;
+  }
+
+  // Validate brand spec
+  const validation = validateBrandSpec(brandSpec);
+  for (const err of validation.errors) {
+    log(`[agentkit:sync] Brand error: ${err}`);
+  }
+  for (const warn of validation.warnings) {
+    if (process.env.DEBUG) log(`[agentkit:sync] Brand warning: ${warn}`);
+  }
+  if (validation.errors.length > 0) {
+    log('[agentkit:sync] Brand validation failed — skipping editor theme');
+    return;
+  }
+
+  const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
+  if (!themeSpec || !themeSpec.enabled) {
+    log('[agentkit:sync] Editor theme spec not found or disabled — skipping');
+    return;
+  }
+
+  // Determine which mode mapping(s) to resolve
+  const mode = themeSpec.mode || 'dark';
+  let lightColors = {};
+  let darkColors = {};
+
+  if (mode === 'both' || mode === 'light') {
+    const lightMapping = themeSpec.light || {};
+    const { resolved, warnings } = resolveThemeMapping(lightMapping, brandSpec);
+    lightColors = resolved;
+    for (const warn of warnings) {
+      log(`[agentkit:sync] Theme warning (light): ${warn}`);
+    }
+  }
+  if (mode === 'both' || mode === 'dark') {
+    const darkMapping = themeSpec.dark || {};
+    const { resolved, warnings } = resolveThemeMapping(darkMapping, brandSpec);
+    darkColors = resolved;
+    for (const warn of warnings) {
+      log(`[agentkit:sync] Theme warning (dark): ${warn}`);
+    }
+  }
+
+  // Build final color customizations — for 'both', dark wins on conflict
+  let colorCustomizations;
+  if (mode === 'both') {
+    colorCustomizations = { ...lightColors, ...darkColors };
+  } else if (mode === 'light') {
+    colorCustomizations = lightColors;
+  } else {
+    colorCustomizations = darkColors;
+  }
+
+  if (Object.keys(colorCustomizations).length === 0) {
+    log('[agentkit:sync] No colors resolved from editor theme — skipping');
+    return;
+  }
+
+  // Build metadata sentinel
+  const meta = {
+    brand: brandSpec.identity?.name || 'unknown',
+    mode,
+    version: brandSpec.version || '1.0.0',
+  };
+
+  // Honor baseTheme — sets workbench.colorTheme per workspace
+  if (themeSpec.baseTheme) {
+    const baseThemeValue = mode === 'light' ? themeSpec.baseTheme.light : themeSpec.baseTheme.dark;
+    if (baseThemeValue) {
+      meta.baseTheme = baseThemeValue;
+    }
+  }
+
+  // Honor fontFromBrand — sets editor.fontFamily from brand typography
+  let fontFamily = null;
+  if (themeSpec.fontFromBrand && brandSpec.typography?.mono) {
+    fontFamily = `'${brandSpec.typography.mono}', monospace`;
+    meta.font = brandSpec.typography.mono;
+  }
+
+  // Determine output targets — default to vscode only
+  const defaultOutputs = { vscode: '.vscode/settings.json' };
+  const outputs = themeSpec.outputs || defaultOutputs;
+
+  // Reserved keys are top-level theme config — never treated as tool names
+  const RESERVED_THEME_KEYS = new Set([
+    'light',
+    'dark',
+    'enabled',
+    'mode',
+    'outputs',
+    'baseTheme',
+    'fontFromBrand',
+  ]);
+
+  // Write theme into each output target
+  const resolvedTmpDir = resolve(tmpDir);
+  const writePromises = [];
+  for (const [tool, outputPath] of Object.entries(outputs)) {
+    if (!outputPath) continue; // null = skip this target
+
+    // Scaffold-once: skip targets that already exist in projectRoot (unless --overwrite/--force)
+    if (skipOutputs && skipOutputs.has(outputPath)) {
+      log(`[agentkit:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
+      continue;
+    }
+
+    // Path traversal protection — resolve and verify the output stays inside tmpDir
+    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
+    const settingsPath = resolve(tmpDir, normalizedPath);
+    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
+      log(`[agentkit:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
+      continue;
+    }
+
+    writePromises.push(
+      (async () => {
+        // Read existing settings if already rendered by prior sync step
+        let existingSettings = {};
+        if (existsSync(settingsPath)) {
+          try {
+            const raw = await readFile(settingsPath, 'utf-8');
+            existingSettings = JSON.parse(raw);
+          } catch {
+            existingSettings = {};
+          }
+        }
+
+        // Check for per-tool overrides in themeSpec (e.g. themeSpec.cursor: { ... })
+        let toolColors = colorCustomizations;
+        if (
+          themeSpec[tool] &&
+          typeof themeSpec[tool] === 'object' &&
+          !RESERVED_THEME_KEYS.has(tool)
+        ) {
+          // Tool-specific overrides: resolve and merge on top of base colors
+          const { resolved: toolOverrides } = resolveThemeMapping(themeSpec[tool], brandSpec);
+          toolColors = { ...colorCustomizations, ...toolOverrides };
+        }
+
+        const mergedSettings = mergeThemeIntoSettings(existingSettings, toolColors, meta);
+
+        // Apply baseTheme if present
+        if (meta.baseTheme) {
+          mergedSettings['workbench.colorTheme'] = meta.baseTheme;
+        }
+
+        // Apply font from brand if present
+        if (fontFamily) {
+          mergedSettings['editor.fontFamily'] = fontFamily;
+        }
+
+        await ensureDir(dirname(settingsPath));
+        await writeFile(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n', 'utf-8');
+
+        log(
+          `[agentkit:sync] Editor theme → ${outputPath}: ${Object.keys(toolColors).length} color(s) from "${meta.brand}" (${mode} mode)`
+        );
+      })()
+    );
+  }
+
+  await Promise.all(writePromises);
 }
 
 // ---------------------------------------------------------------------------
@@ -838,6 +1034,7 @@ function buildAgentVars(agent, category, vars) {
   const conventions = agent.conventions || [];
   const examples = agent.examples || [];
   const antiPatterns = agent['anti-patterns'] || [];
+  const domainRules = agent['domain-rules'] || [];
 
   return {
     ...vars,
@@ -856,7 +1053,7 @@ function buildAgentVars(agent, category, vars) {
             .join('\n\n')
         : '',
     agentAntiPatterns: antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
-    agentDomainRules: '',
+    agentDomainRules: domainRules.length > 0 ? domainRules.map((r) => `- ${r}`).join('\n') : '',
   };
 }
 
@@ -950,6 +1147,16 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'agentkit-forge',
   };
 
+  // Inject brand identity into template vars when brand guide exists
+  if (vars.hasBrandGuide) {
+    const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
+    if (brandSpec) {
+      vars.brandName = brandSpec.identity?.name || '';
+      vars.brandPrimaryColor = resolveColor(brandSpec.colors?.primary?.brand) || '';
+      vars.brandMono = brandSpec.typography?.mono || '';
+    }
+  }
+
   // Resolve render targets — determines which tool outputs to generate
   let targets = resolveRenderTargets(overlaySettings.renderTargets, flags);
 
@@ -995,6 +1202,29 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       ),
       syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName),
     ]);
+
+    // --- Editor theme (must run after vscode template copy to merge into settings) ---
+    // Scaffold-once: per-output target — only skip targets that already exist in projectRoot
+    const forceTheme = flags?.overwrite || flags?.force;
+    if (forceTheme) {
+      await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags);
+    } else {
+      const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
+      const outputs = themeSpec?.outputs || { vscode: '.vscode/settings.json' };
+      const existingOutputs = new Set();
+      for (const [, outputPath] of Object.entries(outputs)) {
+        if (outputPath && existsSync(resolve(projectRoot, outputPath))) {
+          existingOutputs.add(outputPath);
+        }
+      }
+      if (existingOutputs.size < Object.keys(outputs).length) {
+        await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs);
+      } else {
+        log(
+          '[agentkit:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.'
+        );
+      }
+    }
 
     // --- Gated by renderTargets ---
     const gatedTasks = [];
