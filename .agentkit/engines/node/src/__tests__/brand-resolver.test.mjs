@@ -21,6 +21,14 @@ describe('resolveColor', () => {
     expect(resolveColor('#F00')).toBe('#F00');
   });
 
+  it('resolves an 8-char hex with alpha', () => {
+    expect(resolveColor('#1976D280')).toBe('#1976D280');
+  });
+
+  it('resolves a detailed object with alpha hex', () => {
+    expect(resolveColor({ hex: '#1976D280' })).toBe('#1976D280');
+  });
+
   it('resolves a detailed object with hex', () => {
     expect(resolveColor({ hex: '#1976D2', role: 'brand' })).toBe('#1976D2');
   });
@@ -62,10 +70,17 @@ describe('isValidHex', () => {
     expect(isValidHex('#abc')).toBe(true);
   });
 
+  it('accepts 8-char hex with alpha', () => {
+    expect(isValidHex('#1976D280')).toBe(true);
+    expect(isValidHex('#ffffff00')).toBe(true);
+    expect(isValidHex('#00000099')).toBe(true);
+  });
+
   it('rejects invalid values', () => {
     expect(isValidHex('#GGGGGG')).toBe(false);
     expect(isValidHex('1976D2')).toBe(false);
     expect(isValidHex('#1976D')).toBe(false);
+    expect(isValidHex('#1976D2F')).toBe(false); // 7 chars — not valid
     expect(isValidHex('')).toBe(false);
     expect(isValidHex(null)).toBe(false);
     expect(isValidHex(42)).toBe(false);
@@ -357,6 +372,28 @@ describe('mergeThemeIntoSettings', () => {
     const existing = { 'editor.formatOnSave': true };
     const result = mergeThemeIntoSettings(existing, {}, null);
     expect(result['workbench.colorCustomizations']).toBeUndefined();
+  });
+
+  it('preserves existing user-defined colorCustomizations', () => {
+    const existing = {
+      'editor.formatOnSave': true,
+      'workbench.colorCustomizations': {
+        'editorCursor.foreground': '#FF0000',
+        'titleBar.activeBackground': '#OLD_VALUE',
+      },
+    };
+    const colors = {
+      'titleBar.activeBackground': '#1976D2',
+      'statusBar.background': '#184A6C',
+    };
+    const result = mergeThemeIntoSettings(existing, colors, null);
+
+    // Brand colors win on conflict
+    expect(result['workbench.colorCustomizations']['titleBar.activeBackground']).toBe('#1976D2');
+    // User's custom cursor color is preserved
+    expect(result['workbench.colorCustomizations']['editorCursor.foreground']).toBe('#FF0000');
+    // Brand's new color is added
+    expect(result['workbench.colorCustomizations']['statusBar.background']).toBe('#184A6C');
   });
 
   it('does not mutate the original settings object', () => {

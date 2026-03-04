@@ -281,8 +281,12 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
       }
 
       // Check for per-tool overrides in themeSpec (e.g. themeSpec.cursor: { ... })
+      // Reserved keys are top-level theme config — never treated as tool names
+      const RESERVED_THEME_KEYS = new Set([
+        'light', 'dark', 'enabled', 'mode', 'outputs', 'baseTheme', 'fontFromBrand',
+      ]);
       let toolColors = colorCustomizations;
-      if (themeSpec[tool] && typeof themeSpec[tool] === 'object' && tool !== 'light' && tool !== 'dark') {
+      if (themeSpec[tool] && typeof themeSpec[tool] === 'object' && !RESERVED_THEME_KEYS.has(tool)) {
         // Tool-specific overrides: resolve and merge on top of base colors
         const { resolved: toolOverrides } = resolveThemeMapping(themeSpec[tool], brandSpec);
         toolColors = { ...colorCustomizations, ...toolOverrides };

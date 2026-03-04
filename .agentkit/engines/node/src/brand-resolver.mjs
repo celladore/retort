@@ -3,6 +3,7 @@
  * Resolves brand.yaml color references and validates brand specs.
  * Pure functions — no file I/O.
  */
+import { get } from './project-mapping.mjs';
 
 // ---------------------------------------------------------------------------
 // Color resolution
@@ -160,7 +161,9 @@ export function mergeThemeIntoSettings(existingSettings, colorCustomizations, me
   const settings = { ...existingSettings };
 
   if (Object.keys(colorCustomizations).length > 0) {
+    // Preserve any existing user-defined colorCustomizations, brand colors win on conflict
     settings['workbench.colorCustomizations'] = {
+      ...(existingSettings['workbench.colorCustomizations'] || {}),
       ...colorCustomizations,
     };
   }
@@ -182,20 +185,19 @@ export function mergeThemeIntoSettings(existingSettings, colorCustomizations, me
 
 /**
  * Safely accesses a nested property using dot-notation.
+ * Delegates to the canonical `get()` from project-mapping.mjs.
  */
 export function getNestedValue(obj, path) {
-  return path.split('.').reduce(
-    (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
-    obj
-  );
+  return get(obj, path);
 }
 
 /**
- * Validates a hex color string (#RGB or #RRGGBB).
+ * Validates a hex color string (#RGB, #RRGGBB, or #RRGGBBAA).
+ * VS Code supports 8-char hex with alpha channel (e.g. #1976D280).
  */
 export function isValidHex(value) {
   if (typeof value !== 'string') return false;
-  return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value);
+  return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(value);
 }
 
 /**

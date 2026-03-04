@@ -108,9 +108,10 @@ colors:
     textPrimary: { hex: "#F7F9FB", role: "High-contrast text aligned with light surfaces" }
     textSecondary: { hex: "#B4BAC2", role: "Muted hints and meta information" }
 
-  guidance: >
-    All colors AA-compliant minimum contrast ratios against adjacent type/background.
-    Surface colors reserved for backgrounds; brand blue never as text on light surface.
+# Palette guidance notes (free text — kept outside `colors` to avoid polluting the color tree)
+colorGuidance: >
+  All colors AA-compliant minimum contrast ratios against adjacent type/background.
+  Surface colors reserved for backgrounds; brand blue never as text on light surface.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Typography
