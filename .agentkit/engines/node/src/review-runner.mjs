@@ -9,7 +9,11 @@ import { extname, resolve, sep } from 'node:path';
 import yaml from 'js-yaml';
 import { appendEvent } from './events.mjs';
 import { execCommand, runInPool } from './runner.mjs';
-import { getIncrementalTestCommands, resolveCoverageCommand, parseCoveragePercentage } from './agent-integration.mjs';
+import {
+  getIncrementalTestCommands,
+  resolveCoverageCommand,
+  parseCoveragePercentage,
+} from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Secret patterns — compiled once at module level to avoid per-call overhead.
@@ -373,7 +377,8 @@ export async function runReview({
             if (covCmd.command) {
               const covResult = execCommand(covCmd.command, { cwd: projectRoot });
               const percentage = parseCoveragePercentage(
-                covResult.stdout + '\n' + covResult.stderr, covCmd.parser
+                covResult.stdout + '\n' + covResult.stderr,
+                covCmd.parser
               );
 
               if (percentage != null) {

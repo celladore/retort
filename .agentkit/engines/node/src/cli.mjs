@@ -567,7 +567,11 @@ async function main() {
         } else if (subAction === 'disable') {
           flags._args = flags._args.slice(1);
           const { runFeatureDisable } = await import('./feature-manager.mjs');
-          await runFeatureDisable({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+          await runFeatureDisable({
+            agentkitRoot: AGENTKIT_ROOT,
+            projectRoot: PROJECT_ROOT,
+            flags,
+          });
         } else if (subAction === 'preset') {
           flags._args = flags._args.slice(1);
           const { runFeaturePreset } = await import('./feature-manager.mjs');

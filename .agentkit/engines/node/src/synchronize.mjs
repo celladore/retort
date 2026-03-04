@@ -1106,7 +1106,6 @@ function isFeatureEnabled(featureId, vars) {
 // HOOK_FEATURE_MAP is derived at sync time from features.yaml affectsTemplates
 // via buildHookFeatureMap(). See syncClaudeHooks() for usage.
 
-
 function buildCommandVars(cmd, vars) {
   return {
     ...vars,
@@ -1316,9 +1315,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       );
     }
     if (isFeatureEnabled('dependency-management', vars)) {
-      alwaysOnTasks.push(
-        syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
-      );
+      alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
     }
 
     await Promise.all(alwaysOnTasks);
@@ -1398,7 +1395,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           headerRepoName
         ),
         syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
-        syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
       );
       if (isFeatureEnabled('coding-rules', vars)) {
         gatedTasks.push(
@@ -1429,7 +1426,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (targets.has('cursor')) {
       gatedTasks.push(
         syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-        syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
       );
       if (isFeatureEnabled('coding-rules', vars)) {
         gatedTasks.push(
@@ -1470,7 +1467,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           version,
           headerRepoName
         ),
-        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
       );
       if (isFeatureEnabled('coding-rules', vars)) {
         gatedTasks.push(
@@ -1526,7 +1523,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           agentsSpec,
           rulesSpec
         ),
-        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
       );
       if (isFeatureEnabled('coding-rules', vars)) {
         gatedTasks.push(

@@ -163,7 +163,8 @@ export async function processNotifications(projectRoot, completedTask, agentNoti
       delegator: 'orchestrator',
       assignees: [teamId],
       title: `[Notification] Review: ${completedTask.title}`,
-      description: `Task ${completedTask.id} completed by ${assignees.join(', ')}. ` +
+      description:
+        `Task ${completedTask.id} completed by ${assignees.join(', ')}. ` +
         `Review the changes and provide feedback.\n\n` +
         `Original task: ${completedTask.title}\n` +
         `Artifacts: ${(completedTask.artifacts || []).length} items`,
@@ -206,32 +207,43 @@ export async function autoCreateTestTask(projectRoot, completedTask, handoffChai
   const assignees = Array.isArray(completedTask.assignees) ? completedTask.assignees : [];
 
   // Only auto-create test tasks for engineering teams (not for testing/docs/security teams)
-  const engineeringTeams = ['team-backend', 'team-frontend', 'team-data', 'team-infra', 'team-devops',
-                            'backend', 'frontend', 'data', 'infra', 'devops'];
-  const isEngineeringTask = assignees.some(a => engineeringTeams.includes(a));
+  const engineeringTeams = [
+    'team-backend',
+    'team-frontend',
+    'team-data',
+    'team-infra',
+    'team-devops',
+    'backend',
+    'frontend',
+    'data',
+    'infra',
+    'devops',
+  ];
+  const isEngineeringTask = assignees.some((a) => engineeringTeams.includes(a));
   if (!isEngineeringTask) {
     return { created: null };
   }
 
   // Check if a test task already exists for this completed task
   const { tasks: existingTasks } = await listTasks(projectRoot);
-  const existingTestTask = existingTasks.find(t =>
-    t.context?.testFor === completedTask.id && t.type === 'test'
+  const existingTestTask = existingTasks.find(
+    (t) => t.context?.testFor === completedTask.id && t.type === 'test'
   );
   if (existingTestTask) {
     return { created: null };
   }
 
   // Also check if handoffTo already includes testing
-  if (Array.isArray(completedTask.handoffTo) && completedTask.handoffTo.some(
-    h => h === 'testing' || h === 'team-testing'
-  )) {
+  if (
+    Array.isArray(completedTask.handoffTo) &&
+    completedTask.handoffTo.some((h) => h === 'testing' || h === 'team-testing')
+  ) {
     return { created: null };
   }
 
   // Extract changed files from artifacts
   const changedFiles = [];
-  for (const artifact of (completedTask.artifacts || [])) {
+  for (const artifact of completedTask.artifacts || []) {
     if (artifact.type === 'files-changed' && Array.isArray(artifact.paths)) {
       changedFiles.push(...artifact.paths);
     }
@@ -242,7 +254,8 @@ export async function autoCreateTestTask(projectRoot, completedTask, handoffChai
     delegator: 'orchestrator',
     assignees: ['team-testing'],
     title: `[Auto-test] Verify: ${completedTask.title}`,
-    description: `Automatically created test task for completed engineering work.\n\n` +
+    description:
+      `Automatically created test task for completed engineering work.\n\n` +
       `Source task: ${completedTask.id} (${completedTask.title})\n` +
       `Completed by: ${assignees.join(', ')}\n` +
       `Changed files: ${changedFiles.length > 0 ? changedFiles.join(', ') : 'See artifacts'}\n\n` +
@@ -279,7 +292,7 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
   }
 
   const assignees = Array.isArray(completedTask.assignees) ? completedTask.assignees : [];
-  const isBackendOrFrontend = assignees.some(a =>
+  const isBackendOrFrontend = assignees.some((a) =>
     ['team-backend', 'backend', 'team-frontend', 'frontend'].includes(a)
   );
   if (!isBackendOrFrontend) {
@@ -288,14 +301,15 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
 
   // Find if there's a complementary task (backend ↔ frontend) that's also completed
   const { tasks } = await listTasks(projectRoot);
-  const isBackend = assignees.some(a => a === 'team-backend' || a === 'backend');
+  const isBackend = assignees.some((a) => a === 'team-backend' || a === 'backend');
   const complementTeam = isBackend ? 'team-frontend' : 'team-backend';
 
   // Look for a related completed task from the complement team
-  const complementTask = tasks.find(t =>
-    t.status === 'completed' &&
-    Array.isArray(t.assignees) &&
-    t.assignees.some(a => a === complementTeam || a === complementTeam.replace('team-', ''))
+  const complementTask = tasks.find(
+    (t) =>
+      t.status === 'completed' &&
+      Array.isArray(t.assignees) &&
+      t.assignees.some((a) => a === complementTeam || a === complementTeam.replace('team-', ''))
   );
 
   if (!complementTask) {
@@ -303,10 +317,11 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
   }
 
   // Check if integration test already exists
-  const existingIntegrationTest = tasks.find(t =>
-    t.context?.integrationTestFor &&
-    (t.context.integrationTestFor.includes(completedTask.id) ||
-     t.context.integrationTestFor.includes(complementTask.id))
+  const existingIntegrationTest = tasks.find(
+    (t) =>
+      t.context?.integrationTestFor &&
+      (t.context.integrationTestFor.includes(completedTask.id) ||
+        t.context.integrationTestFor.includes(complementTask.id))
   );
   if (existingIntegrationTest) {
     return { created: null };
@@ -317,7 +332,8 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
     delegator: 'orchestrator',
     assignees: ['team-testing'],
     title: `[Integration test] Cross-team verification`,
-    description: `Both backend and frontend tasks have completed. ` +
+    description:
+      `Both backend and frontend tasks have completed. ` +
       `Run integration tests to verify cross-service interaction.\n\n` +
       `Backend task: ${isBackend ? completedTask.id : complementTask.id}\n` +
       `Frontend task: ${isBackend ? complementTask.id : completedTask.id}\n\n` +
@@ -365,8 +381,8 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
 
   // Check for existing doc task
   const { tasks: existingTasks } = await listTasks(projectRoot);
-  const existingDocTask = existingTasks.find(t =>
-    t.context?.docFor === completedTask.id && t.type === 'document'
+  const existingDocTask = existingTasks.find(
+    (t) => t.context?.docFor === completedTask.id && t.type === 'document'
   );
   if (existingDocTask) {
     return { created: null };
@@ -374,7 +390,7 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
 
   // Check if the task's artifacts indicate public-facing changes
   const changedFiles = [];
-  for (const artifact of (completedTask.artifacts || [])) {
+  for (const artifact of completedTask.artifacts || []) {
     if (artifact.type === 'files-changed' && Array.isArray(artifact.paths)) {
       changedFiles.push(...artifact.paths);
     }
@@ -382,13 +398,19 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
 
   // Heuristic: only create doc tasks if changes touch API, public, or config files
   const publicPatterns = [
-    /\bapi\b/i, /\broutes?\b/i, /\bcontrollers?\b/i, /\bendpoints?\b/i,
-    /\bpublic\b/i, /\bconfig\b/i, /\bschema\b/i, /\.openapi\b/i,
-    /\bswagger\b/i, /README/i, /CHANGELOG/i,
+    /\bapi\b/i,
+    /\broutes?\b/i,
+    /\bcontrollers?\b/i,
+    /\bendpoints?\b/i,
+    /\bpublic\b/i,
+    /\bconfig\b/i,
+    /\bschema\b/i,
+    /\.openapi\b/i,
+    /\bswagger\b/i,
+    /README/i,
+    /CHANGELOG/i,
   ];
-  const hasPublicChanges = changedFiles.some(f =>
-    publicPatterns.some(p => p.test(f))
-  );
+  const hasPublicChanges = changedFiles.some((f) => publicPatterns.some((p) => p.test(f)));
 
   if (changedFiles.length === 0 || !hasPublicChanges) {
     return { created: null };
@@ -399,7 +421,8 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
     delegator: 'orchestrator',
     assignees: ['team-docs'],
     title: `[Auto-docs] Document: ${completedTask.title}`,
-    description: `Automatically created documentation task for public-facing changes.\n\n` +
+    description:
+      `Automatically created documentation task for public-facing changes.\n\n` +
       `Source task: ${completedTask.id} (${completedTask.title})\n` +
       `Completed by: ${assignees.join(', ')}\n\n` +
       `Requirements:\n` +
@@ -447,15 +470,15 @@ export async function autoCreateSecurityReviewTask(projectRoot, completedTask, h
 
   // Check for existing security task
   const { tasks: existingTasks } = await listTasks(projectRoot);
-  const existingSecTask = existingTasks.find(t =>
-    t.context?.securityReviewFor === completedTask.id && t.type === 'review'
+  const existingSecTask = existingTasks.find(
+    (t) => t.context?.securityReviewFor === completedTask.id && t.type === 'review'
   );
   if (existingSecTask) {
     return { created: null };
   }
 
   const changedFiles = [];
-  for (const artifact of (completedTask.artifacts || [])) {
+  for (const artifact of completedTask.artifacts || []) {
     if (artifact.type === 'files-changed' && Array.isArray(artifact.paths)) {
       changedFiles.push(...artifact.paths);
     }
@@ -466,7 +489,8 @@ export async function autoCreateSecurityReviewTask(projectRoot, completedTask, h
     delegator: 'orchestrator',
     assignees: ['team-security'],
     title: `[Security review] ${completedTask.title}`,
-    description: `Automatically created security review for infrastructure/auth changes.\n\n` +
+    description:
+      `Automatically created security review for infrastructure/auth changes.\n\n` +
       `Source task: ${completedTask.id} (${completedTask.title})\n` +
       `Completed by: ${assignees.join(', ')}\n\n` +
       `Requirements:\n` +
@@ -503,7 +527,7 @@ export async function autoCreateDependencyAuditTask(projectRoot, completedTask) 
   }
 
   const changedFiles = [];
-  for (const artifact of (completedTask.artifacts || [])) {
+  for (const artifact of completedTask.artifacts || []) {
     if (artifact.type === 'files-changed' && Array.isArray(artifact.paths)) {
       changedFiles.push(...artifact.paths);
     }
@@ -511,16 +535,22 @@ export async function autoCreateDependencyAuditTask(projectRoot, completedTask) 
 
   // Detect dependency file changes
   const depFilePatterns = [
-    /package\.json$/, /pnpm-lock\.yaml$/, /package-lock\.json$/, /yarn\.lock$/,
-    /Cargo\.toml$/, /Cargo\.lock$/,
-    /pyproject\.toml$/, /requirements.*\.txt$/, /Pipfile\.lock$/,
-    /\.csproj$/, /Directory\.Packages\.props$/,
-    /go\.mod$/, /go\.sum$/,
+    /package\.json$/,
+    /pnpm-lock\.yaml$/,
+    /package-lock\.json$/,
+    /yarn\.lock$/,
+    /Cargo\.toml$/,
+    /Cargo\.lock$/,
+    /pyproject\.toml$/,
+    /requirements.*\.txt$/,
+    /Pipfile\.lock$/,
+    /\.csproj$/,
+    /Directory\.Packages\.props$/,
+    /go\.mod$/,
+    /go\.sum$/,
   ];
 
-  const depFilesChanged = changedFiles.filter(f =>
-    depFilePatterns.some(p => p.test(f))
-  );
+  const depFilesChanged = changedFiles.filter((f) => depFilePatterns.some((p) => p.test(f)));
 
   if (depFilesChanged.length === 0) {
     return { created: null };
@@ -528,8 +558,8 @@ export async function autoCreateDependencyAuditTask(projectRoot, completedTask) 
 
   // Check for existing audit task
   const { tasks: existingTasks } = await listTasks(projectRoot);
-  const existingAudit = existingTasks.find(t =>
-    t.context?.dependencyAuditFor === completedTask.id
+  const existingAudit = existingTasks.find(
+    (t) => t.context?.dependencyAuditFor === completedTask.id
   );
   if (existingAudit) {
     return { created: null };
@@ -542,10 +572,11 @@ export async function autoCreateDependencyAuditTask(projectRoot, completedTask) 
     delegator: 'orchestrator',
     assignees: ['team-devops'],
     title: `[Dependency audit] Review dependency changes`,
-    description: `Dependency files were modified. Audit for security vulnerabilities and compatibility.\n\n` +
+    description:
+      `Dependency files were modified. Audit for security vulnerabilities and compatibility.\n\n` +
       `Source task: ${completedTask.id} (${completedTask.title})\n` +
       `Changed by: ${assignees.join(', ')}\n` +
-      `Dependency files changed:\n${depFilesChanged.map(f => `  - ${f}`).join('\n')}\n\n` +
+      `Dependency files changed:\n${depFilesChanged.map((f) => `  - ${f}`).join('\n')}\n\n` +
       `Requirements:\n` +
       `1. Run dependency vulnerability scan (npm audit, cargo audit, etc.)\n` +
       `2. Review new dependency additions for quality and license\n` +
@@ -591,8 +622,8 @@ export async function autoCreateQualityReviewTask(projectRoot, completedTask, ha
 
   // Check for existing quality task
   const { tasks: existingTasks } = await listTasks(projectRoot);
-  const existingQuality = existingTasks.find(t =>
-    t.context?.qualityReviewFor === completedTask.id
+  const existingQuality = existingTasks.find(
+    (t) => t.context?.qualityReviewFor === completedTask.id
   );
   if (existingQuality) {
     return { created: null };
@@ -603,7 +634,8 @@ export async function autoCreateQualityReviewTask(projectRoot, completedTask, ha
     delegator: 'orchestrator',
     assignees: ['team-quality'],
     title: `[Quality review] Post-test review: ${completedTask.title}`,
-    description: `Testing complete. Quality review of implementation and test coverage.\n\n` +
+    description:
+      `Testing complete. Quality review of implementation and test coverage.\n\n` +
       `Source task: ${completedTask.id} (${completedTask.title})\n` +
       `Completed by: ${assignees.join(', ')}\n\n` +
       `Requirements:\n` +
@@ -635,15 +667,19 @@ export async function autoCreateQualityReviewTask(projectRoot, completedTask, ha
  * @param {string[]} changedFileTeams - Team IDs responsible for the changes
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function routeTestFailureToTestingTeam(projectRoot, failedCheckResult, changedFileTeams) {
+export async function routeTestFailureToTestingTeam(
+  projectRoot,
+  failedCheckResult,
+  changedFileTeams
+) {
   if (!failedCheckResult || failedCheckResult.overallPassed) {
     return { created: null };
   }
 
   // Find which steps failed
   const failedSteps = [];
-  for (const stack of (failedCheckResult.stacks || [])) {
-    for (const step of (stack.steps || [])) {
+  for (const stack of failedCheckResult.stacks || []) {
+    for (const step of stack.steps || []) {
       if (step.status === 'FAIL') {
         failedSteps.push({ stack: stack.stack, step: step.step, stderr: step.stderr });
       }
@@ -651,7 +687,7 @@ export async function routeTestFailureToTestingTeam(projectRoot, failedCheckResu
   }
 
   // Only route to testing team if test or quality-related steps failed
-  const testRelatedFailures = failedSteps.filter(f =>
+  const testRelatedFailures = failedSteps.filter((f) =>
     ['test', 'lint', 'typecheck'].includes(f.step)
   );
 
@@ -661,24 +697,22 @@ export async function routeTestFailureToTestingTeam(projectRoot, failedCheckResu
 
   // Check for existing test failure task
   const { tasks: existingTasks } = await listTasks(projectRoot);
-  const existingFailureTask = existingTasks.find(t =>
-    t.context?.testFailureRouting === true &&
-    !TERMINAL_STATES.includes(t.status)
+  const existingFailureTask = existingTasks.find(
+    (t) => t.context?.testFailureRouting === true && !TERMINAL_STATES.includes(t.status)
   );
   if (existingFailureTask) {
     return { created: null };
   }
 
-  const failureSummary = testRelatedFailures
-    .map(f => `${f.stack}:${f.step} — FAIL`)
-    .join('\n');
+  const failureSummary = testRelatedFailures.map((f) => `${f.stack}:${f.step} — FAIL`).join('\n');
 
   const result = await createTask(projectRoot, {
     type: 'test',
     delegator: 'orchestrator',
     assignees: ['team-testing'],
     title: `[Test failure] Fix quality gate failures`,
-    description: `Quality gate failed during validation phase.\n\n` +
+    description:
+      `Quality gate failed during validation phase.\n\n` +
       `Failed steps:\n${failureSummary}\n\n` +
       `Responsible teams: ${changedFileTeams.join(', ')}\n\n` +
       `Requirements:\n` +
@@ -689,7 +723,7 @@ export async function routeTestFailureToTestingTeam(projectRoot, failedCheckResu
     priority: 'P1',
     context: {
       testFailureRouting: true,
-      failedSteps: testRelatedFailures.map(f => `${f.stack}:${f.step}`),
+      failedSteps: testRelatedFailures.map((f) => `${f.stack}:${f.step}`),
       responsibleTeams: changedFileTeams,
     },
   });
@@ -723,7 +757,7 @@ export function validateTestAcceptanceCriteria(task) {
   const artifacts = Array.isArray(task.artifacts) ? task.artifacts : [];
 
   // Check for test-results artifact
-  const testResultArtifact = artifacts.find(a => a.type === 'test-results');
+  const testResultArtifact = artifacts.find((a) => a.type === 'test-results');
   if (!testResultArtifact) {
     warnings.push(
       `Task ${task.id}: No test-results artifact. Implementation tasks should include test results.`
@@ -745,19 +779,19 @@ export function validateTestAcceptanceCriteria(task) {
   }
 
   // Check if files-changed artifact exists
-  const filesChangedArtifact = artifacts.find(a => a.type === 'files-changed');
+  const filesChangedArtifact = artifacts.find((a) => a.type === 'files-changed');
   if (filesChangedArtifact && Array.isArray(filesChangedArtifact.paths)) {
     const sourceFiles = filesChangedArtifact.paths.filter(
-      p => !p.includes('.test.') && !p.includes('.spec.') && !p.includes('__tests__')
+      (p) => !p.includes('.test.') && !p.includes('.spec.') && !p.includes('__tests__')
     );
     const testFiles = filesChangedArtifact.paths.filter(
-      p => p.includes('.test.') || p.includes('.spec.') || p.includes('__tests__')
+      (p) => p.includes('.test.') || p.includes('.spec.') || p.includes('__tests__')
     );
 
     if (sourceFiles.length > 0 && testFiles.length === 0) {
       warnings.push(
         `Task ${task.id}: ${sourceFiles.length} source file(s) changed but no test files modified. ` +
-        `Consider adding tests for changed behavior.`
+          `Consider adding tests for changed behavior.`
       );
     }
   }
@@ -958,8 +992,8 @@ export function getIncrementalTestCommands(changedFiles, techStacks) {
 
     // Check if any changed files match this stack's scope
     const scopes = Array.isArray(stack.scope) ? stack.scope : [];
-    const matchesStack = changedFiles.some(file =>
-      scopes.some(scope => matchGlob(file, scope))
+    const matchesStack = changedFiles.some((file) =>
+      scopes.some((scope) => matchGlob(file, scope))
     );
 
     if (matchesStack) {
@@ -1099,9 +1133,14 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Log the integration results as an event
   try {
-    const totalCreated = result.notifications.length + result.testTasks.length +
-      result.docTasks.length + result.securityTasks.length + result.integrationTests.length +
-      result.dependencyAudits.length + result.qualityReviews.length;
+    const totalCreated =
+      result.notifications.length +
+      result.testTasks.length +
+      result.docTasks.length +
+      result.securityTasks.length +
+      result.integrationTests.length +
+      result.dependencyAudits.length +
+      result.qualityReviews.length;
     if (totalCreated > 0 || result.warnings.length > 0) {
       appendEvent(projectRoot, 'task_completion_processed', {
         sourceTaskId: completedTask.id,

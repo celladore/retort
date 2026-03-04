@@ -40,11 +40,7 @@ function setupTaskDir(projectRoot) {
 
 function writeTask(projectRoot, task) {
   const dir = setupTaskDir(projectRoot);
-  writeFileSync(
-    resolve(dir, `${task.id}.json`),
-    JSON.stringify(task, null, 2),
-    'utf-8'
-  );
+  writeFileSync(resolve(dir, `${task.id}.json`), JSON.stringify(task, null, 2), 'utf-8');
   return task;
 }
 
@@ -137,8 +133,12 @@ describe('loadTeamHandoffChains', () => {
 describe('processNotifications', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates notification tasks for agents in the notifies list', async () => {
     setupTaskDir(tmpDir);
@@ -195,8 +195,12 @@ describe('processNotifications', () => {
 describe('autoCreateTestTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates a test task for completed engineering tasks', async () => {
     setupTaskDir(tmpDir);
@@ -257,15 +261,17 @@ describe('autoCreateTestTask', () => {
 describe('autoCreateDocTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates doc task when public-facing files change for teams with docs chain', async () => {
     setupTaskDir(tmpDir);
     const task = makeCompletedTask({
-      artifacts: [
-        { type: 'files-changed', paths: ['apps/api/routes/users.ts', 'README.md'] },
-      ],
+      artifacts: [{ type: 'files-changed', paths: ['apps/api/routes/users.ts', 'README.md'] }],
     });
     writeTask(tmpDir, task);
 
@@ -312,8 +318,12 @@ describe('autoCreateDocTask', () => {
 describe('autoCreateSecurityReviewTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates security review for teams with security in chain', async () => {
     setupTaskDir(tmpDir);
@@ -350,8 +360,12 @@ describe('autoCreateSecurityReviewTask', () => {
 describe('autoCreateDependencyAuditTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates audit task when dependency files change', async () => {
     setupTaskDir(tmpDir);
@@ -389,8 +403,12 @@ describe('autoCreateDependencyAuditTask', () => {
 describe('autoCreateQualityReviewTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates quality review for testing team completion', async () => {
     setupTaskDir(tmpDir);
@@ -426,25 +444,29 @@ describe('autoCreateQualityReviewTask', () => {
 describe('routeTestFailureToTestingTeam', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates test failure task when tests fail', async () => {
     setupTaskDir(tmpDir);
     const checkResult = {
       overallPassed: false,
-      stacks: [{
-        stack: 'node',
-        steps: [
-          { step: 'test', status: 'FAIL', stderr: 'FAIL tests/auth.test.ts' },
-          { step: 'format', status: 'PASS', stderr: '' },
-        ],
-      }],
+      stacks: [
+        {
+          stack: 'node',
+          steps: [
+            { step: 'test', status: 'FAIL', stderr: 'FAIL tests/auth.test.ts' },
+            { step: 'format', status: 'PASS', stderr: '' },
+          ],
+        },
+      ],
     };
 
-    const { created } = await routeTestFailureToTestingTeam(
-      tmpDir, checkResult, ['team-backend']
-    );
+    const { created } = await routeTestFailureToTestingTeam(tmpDir, checkResult, ['team-backend']);
 
     expect(created).not.toBeNull();
     expect(created.assignees).toEqual(['team-testing']);
@@ -459,9 +481,7 @@ describe('routeTestFailureToTestingTeam', () => {
       stacks: [{ stack: 'node', steps: [{ step: 'test', status: 'PASS' }] }],
     };
 
-    const { created } = await routeTestFailureToTestingTeam(
-      tmpDir, checkResult, ['team-backend']
-    );
+    const { created } = await routeTestFailureToTestingTeam(tmpDir, checkResult, ['team-backend']);
     expect(created).toBeNull();
   });
 
@@ -469,18 +489,18 @@ describe('routeTestFailureToTestingTeam', () => {
     setupTaskDir(tmpDir);
     const checkResult = {
       overallPassed: false,
-      stacks: [{
-        stack: 'node',
-        steps: [
-          { step: 'build', status: 'FAIL', stderr: 'Build failed' },
-          { step: 'test', status: 'PASS', stderr: '' },
-        ],
-      }],
+      stacks: [
+        {
+          stack: 'node',
+          steps: [
+            { step: 'build', status: 'FAIL', stderr: 'Build failed' },
+            { step: 'test', status: 'PASS', stderr: '' },
+          ],
+        },
+      ],
     };
 
-    const { created } = await routeTestFailureToTestingTeam(
-      tmpDir, checkResult, ['team-backend']
-    );
+    const { created } = await routeTestFailureToTestingTeam(tmpDir, checkResult, ['team-backend']);
     expect(created).toBeNull();
   });
 });
@@ -520,9 +540,7 @@ describe('validateTestAcceptanceCriteria', () => {
 
   it('warns when tests are failing', () => {
     const task = makeCompletedTask({
-      artifacts: [
-        { type: 'test-results', passed: 8, failed: 2, testsAdded: 3 },
-      ],
+      artifacts: [{ type: 'test-results', passed: 8, failed: 2, testsAdded: 3 }],
     });
     const { passed, warnings } = validateTestAcceptanceCriteria(task);
     expect(passed).toBe(false);
@@ -690,14 +708,21 @@ describe('getIncrementalTestCommands', () => {
 describe('processTaskCompletion', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('processes a backend task completion end-to-end', async () => {
     setupTaskDir(tmpDir);
     const task = makeCompletedTask({
       artifacts: [
-        { type: 'files-changed', paths: ['apps/api/routes/users.ts', 'apps/api/routes/users.test.ts'] },
+        {
+          type: 'files-changed',
+          paths: ['apps/api/routes/users.ts', 'apps/api/routes/users.test.ts'],
+        },
         { type: 'test-results', passed: 10, failed: 0, testsAdded: 3 },
       ],
     });
@@ -802,8 +827,12 @@ describe('processTaskCompletion', () => {
 describe('autoCreateIntegrationTestTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('creates integration test when both backend and frontend tasks are completed', async () => {
     setupTaskDir(tmpDir);
@@ -892,8 +921,12 @@ describe('autoCreateIntegrationTestTask', () => {
 describe('autoCreateDocTask', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('skips when changedFiles is empty (no files-changed artifact)', async () => {
     setupTaskDir(tmpDir);
@@ -919,8 +952,12 @@ describe('autoCreateDocTask', () => {
 describe('resolveCoverageCommand with projectRoot', () => {
   let tmpDir;
 
-  beforeEach(() => { tmpDir = makeTmpDir(); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it('detects vitest from package.json devDependencies for pnpm test', () => {
     writeFileSync(

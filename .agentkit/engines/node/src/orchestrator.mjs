@@ -25,10 +25,7 @@ import {
   processHandoffs,
   TERMINAL_STATES,
 } from './task-protocol.mjs';
-import {
-  processTaskCompletion,
-  routeTestFailureToTestingTeam,
-} from './agent-integration.mjs';
+import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -783,7 +780,9 @@ export async function processCompletedTask(projectRoot, agentkitRoot, state, com
  */
 export async function routePhase4TestFailure(projectRoot, state, checkResult, changedFileTeams) {
   const routeResult = await routeTestFailureToTestingTeam(
-    projectRoot, checkResult, changedFileTeams
+    projectRoot,
+    checkResult,
+    changedFileTeams
   );
 
   if (!routeResult.created) {

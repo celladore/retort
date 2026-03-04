@@ -359,7 +359,8 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
         process.stdout.write(`  ${'coverage'.padEnd(12)} `);
         const covResult = execCommand(covCmd.command, { cwd: projectRoot });
         const percentage = parseCoveragePercentage(
-          covResult.stdout + '\n' + covResult.stderr, covCmd.parser
+          covResult.stdout + '\n' + covResult.stderr,
+          covCmd.parser
         );
 
         let covStatus = 'SKIP';
@@ -369,7 +370,9 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
             console.log(`FAIL  (${percentage.toFixed(1)}% < ${coverageThreshold}% threshold)`);
           } else {
             covStatus = 'PASS';
-            console.log(`PASS  (${percentage.toFixed(1)}%${coverageThreshold != null ? ` >= ${coverageThreshold}%` : ''})`);
+            console.log(
+              `PASS  (${percentage.toFixed(1)}%${coverageThreshold != null ? ` >= ${coverageThreshold}%` : ''})`
+            );
           }
         } else {
           console.log(`SKIP (could not parse coverage)`);
@@ -451,7 +454,12 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
         })),
       })),
       coverage: coverageResults.length > 0 ? coverageResults : undefined,
-      flags: { fix: !!flags.fix, fast: !!flags.fast, coverage: !!flags.coverage, stack: flags.stack || null },
+      flags: {
+        fix: !!flags.fix,
+        fast: !!flags.fast,
+        coverage: !!flags.coverage,
+        stack: flags.stack || null,
+      },
     });
   } catch (err) {
     console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`);
