@@ -20,87 +20,191 @@ When a repo has a brand guide with color definitions, the sync engine should **o
 
 ### 1. Brand Spec File: `.agentkit/spec/brand.yaml`
 
-A new spec file (peer to `project.yaml`, `agents.yaml`, etc.) that captures the brand guide in a structured, reusable format.
+A new spec file (peer to `project.yaml`, `agents.yaml`, etc.) that captures the brand guide in a structured, reusable format. The schema must be **product-agnostic** — it should represent any brand (ChaufHER, AgentKit Forge, or a future product) with equal fidelity.
 
 ```yaml
-# .agentkit/spec/brand.yaml
-version: 1
+# .agentkit/spec/brand.yaml — Full Schema Definition
+version: "1.0.0"
+specDate: "2024-06-12"          # When this spec was last authored
+author: "Brand Systems Team"    # Who maintains this spec
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Identity — Who is this brand?
+# ─────────────────────────────────────────────────────────────────────────────
 identity:
-  name: ChaufHER
-  mission: "Empower women with safe, reliable, and dignified mobility"
-  attributes: [confident, protective, empowering, modern, clear, professional]
+  name: ""                      # Formal product/brand name
+  mission: ""                   # One-sentence mission statement
+  productPromise: ""            # Extended value proposition (optional)
+  attributes: []                # Core brand personality traits (3-8 keywords)
+  # attributes drive palette rationale — each color should map to an attribute
+  desiredPerception:            # How different audiences should perceive the brand
+    developers: ""
+    operations: ""
+    endUsers: ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Colors — Full palette with rationale
+# ─────────────────────────────────────────────────────────────────────────────
+# Each color entry can be:
+#   Simple:   key: "#HEXVAL"
+#   Detailed: key: { hex: "#HEXVAL", role: "...", rationale: "...", usage: "..." }
+#
+# The detailed form is recommended for primary/secondary colors to capture
+# design intent. The sync engine resolves both forms identically for
+# theme generation (reads .hex or the string directly).
+# ─────────────────────────────────────────────────────────────────────────────
 
 colors:
   primary:
-    brand: "#E0007F"
-    gradientEnd: "#8C1D6F"
-    deep: "#5C0F49"
-    charcoal: "#2B2B2B"
-    white: "#FFFFFF"
-    surface: "#F7F2F5"
+    brand: { hex: "", role: "", rationale: "", usage: "" }
+    # Additional primary slots — names are brand-specific:
+    # coral, teal, deep, dark, accent, gradientEnd, charcoal, white, surface, etc.
+
+  secondary:
+    # Named secondary colors with rationale
+    # lilac, mint, etc.
+
   semantic:
-    success: "#1F9D55"
-    warning: "#F59E0B"
-    error: "#DC2626"
-    info: "#2563EB"
+    success: { hex: "", rationale: "" }
+    warning: { hex: "", rationale: "" }
+    error:   { hex: "", rationale: "" }
+    info:    { hex: "", rationale: "" }
+
   neutral:
-    900: "#111111"
-    800: "#1F1F1F"
-    700: "#2B2B2B"
-    600: "#4B4B4B"
-    500: "#6B6B6B"
-    400: "#9CA3AF"
-    300: "#D1D5DB"
-    200: "#E5E7EB"
-    100: "#F3F4F6"
-    50: "#FAFAFA"
+    # Named scale: 900, 800, 700, ... 50
+    # Each entry: "#HEXVAL" or { hex: "#HEXVAL", role: "..." }
+    900: ""
+    700: ""
+    400: ""
+    100: ""
+
   darkMode:
-    background: "#111111"
-    surface: "#1F1F1F"
-    textPrimary: "#FFFFFF"
-    textSecondary: "#D1D5DB"
+    background: ""
+    surface: ""
+    textPrimary: ""
+    textSecondary: ""
+
+  # Optional: gradient definitions
+  gradients:
+    primary: { from: "colors.primary.brand", to: "colors.primary.gradientEnd" }
+
+  # Palette guidance notes (free text, for documentation generation)
+  guidance: ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Typography
+# ─────────────────────────────────────────────────────────────────────────────
 
 typography:
-  primary: "Inter"         # or Sora, etc.
-  fallback: "sans-serif"
-  display: { weight: 700, letterSpacing: "-0.02em" }
-  h1: { weight: 700, scale: "48-56px" }
-  h2: { weight: 600, scale: "32-40px" }
-  h3: { weight: 600, scale: "24-28px" }
-  bodyLarge: { weight: 500, scale: "18px" }
-  body: { weight: 400, scale: "16px" }
-  small: { weight: 400, scale: "14px" }
-  lineHeight: "1.4-1.6"
+  primary: ""                   # Primary font family name
+  fallback: ""                  # Full fallback stack (CSS format)
+  mono: ""                      # Monospace font for code/config
+  weights:
+    regular: 400
+    medium: 500
+    semiBold: 600
+    bold: 700
+  scale:                        # Type scale with named entries
+    displayXl: { size: 48, weight: 600, lineHeight: 1.15 }
+    sectionTitle: { size: 32, weight: 600, lineHeight: 1.2 }
+    h1: { size: 24, weight: 600, lineHeight: 1.3 }
+    h2: { size: 20, weight: 500, lineHeight: 1.3 }
+    subtitle: { size: 17, weight: 500, lineHeight: 1.4 }
+    bodyLarge: { size: 16, weight: 400, lineHeight: 1.5 }
+    body: { size: 14, weight: 400, lineHeight: 1.5 }
+    small: { size: 14, weight: 400, lineHeight: 1.4 }
+    codeInline: { size: 14, weight: null, lineHeight: 1.45, font: "mono" }
+  intent: ""                    # Design intent note for typography choices
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Spacing & Layout
+# ─────────────────────────────────────────────────────────────────────────────
 
 spacing:
-  base: 4
-  scale: [4, 8, 12, 16, 24, 32, 48, 64, 96]
+  base: 8                      # Base grid unit (px)
+  scale:                        # Named spacing tokens
+    xs: 4
+    s: 8
+    m: 16
+    l: 24
+    xl: 32
 
 layout:
-  maxWidth: 1280
+  maxWidth: 1200
   contentWidth: 1140
   gridColumns: 12
-  cardRadius: "20-24px"
-  buttonRadius: "16-20px"
+  radius:
+    s: 4                        # Input/button
+    m: 8                        # Card/block
+    l: 16                       # Modal/dialog
+  card:
+    padding: 16
+    radius: "radius.m"          # Reference to radius scale
+  button:
+    paddingX: 16
+    paddingY: 8
+    radius: "radius.s"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Motion
+# ─────────────────────────────────────────────────────────────────────────────
 
 motion:
-  fast: "150ms"
-  standard: "250ms"
-  emphasis: "350ms"
+  micro: "80-120ms"             # Button press, toggle
+  standard: "250ms"             # Modal, fade, slide
+  emphasis: "350ms"             # Hero transitions (optional)
   easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+  principles:
+    - "Purposeful, minimal — only where they clarify, not distract"
+    - "Honors OS/browser reduce-motion preferences"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Accessibility
+# ─────────────────────────────────────────────────────────────────────────────
 
 accessibility:
   standard: "WCAG AA"
   bodyContrast: "4.5:1"
   largeTextContrast: "3:1"
+  focusOutline: "2px"           # Minimum focus ring thickness
   minTouchTarget: "44px"
+  reducedMotion: true           # Honors prefers-reduced-motion
+  principles:
+    - "No communicative information depends solely on color"
+    - "Keyboard navigation, skip links, error recovery baked in"
+    - "All icons, buttons, alerts have aria-labels/roles"
+    - "Accessible forms with clear labels and error messaging"
 ```
 
 **Why a separate file?**
 - Brand data is reusable across many outputs (VS Code theme, Tailwind config, CSS vars, Storybook, etc.)
 - Not every repo has a brand — keeping it separate avoids bloating `project.yaml`
 - It can be versioned and validated independently
+- The `rationale` fields serve as living documentation for design decisions
+
+### Color Resolution Rules
+
+The sync engine must handle two formats for color values:
+
+```yaml
+# Simple string — resolve directly
+brand: "#1976D2"
+
+# Detailed object — extract .hex
+brand:
+  hex: "#1976D2"
+  role: "Core brand color"
+  rationale: "Vivid blue conveying empowerment and trust"
+  usage: "Primary CTAs, brand marks, key interactive states"
+```
+
+Resolution function:
+```
+resolveColor(value) → if typeof value === 'string' → value
+                      if typeof value === 'object' → value.hex
+```
+
+---
 
 ### 2. Editor Theme Mapping: `.agentkit/spec/editor-theme.yaml`
 
@@ -115,28 +219,27 @@ mode: dark             # light | dark | both
 
 # Mapping: brand color paths → VS Code colorCustomization keys
 # Uses dot-notation refs into brand.yaml colors
+# The resolver calls resolveColor() on each referenced value
 light:
   titleBar.activeBackground: colors.primary.brand
-  titleBar.activeForeground: colors.primary.white
-  titleBar.inactiveBackground: colors.primary.deep
-  activityBar.background: colors.primary.deep
-  activityBar.foreground: colors.primary.white
+  titleBar.activeForeground: colors.neutral.100
+  titleBar.inactiveBackground: colors.primary.dark
+  activityBar.background: colors.primary.dark
+  activityBar.foreground: colors.neutral.100
   statusBar.background: colors.primary.brand
-  statusBar.foreground: colors.primary.white
+  statusBar.foreground: colors.neutral.100
   statusBar.debuggingBackground: colors.semantic.warning
   sideBar.background: colors.primary.surface
-  # Optional: deeper customization
-  # editor.background: colors.primary.white
   # tab.activeBackground: colors.primary.surface
 
 dark:
-  titleBar.activeBackground: colors.primary.deep
-  titleBar.activeForeground: colors.primary.white
+  titleBar.activeBackground: colors.primary.dark
+  titleBar.activeForeground: colors.darkMode.textPrimary
   activityBar.background: colors.darkMode.background
   activityBar.foreground: colors.primary.brand
   activityBar.activeBorder: colors.primary.brand
   statusBar.background: colors.primary.brand
-  statusBar.foreground: colors.primary.white
+  statusBar.foreground: colors.darkMode.textPrimary
   sideBar.background: colors.darkMode.surface
   # editor.background: colors.darkMode.background
 
@@ -151,6 +254,300 @@ dark:
 - The editor theme defines *where* to apply them in the editor
 - Users can customize the mapping without touching the brand spec
 - Different repos sharing the same brand can have different editor intensity
+
+---
+
+## Concrete Examples: Two Brands
+
+### AgentKit Forge Brand (`brand.yaml`)
+
+```yaml
+version: "1.0.0"
+specDate: "2024-06-12"
+author: "AgentKit Brand Systems"
+
+identity:
+  name: "AgentKit Forge"
+  mission: "Empowering teams to orchestrate, configure, and unify AI toolchains with simplicity and confidence."
+  productPromise: >
+    The fastest, most reliable, and transparent AI agent infrastructure—
+    delivering power, trust, and clarity from prototype to production.
+  attributes: [empowering, collaborative, inviting, flexible, approachable, modern]
+  desiredPerception:
+    developers: "A platform I can trust at production scale."
+    operations: "Lets us move faster and with more clarity than legacy tools."
+    endUsers: "Thoughtful, modern, and just works."
+
+colors:
+  primary:
+    brand:
+      hex: "#1976D2"
+      role: "Core brand color"
+      rationale: "Vivid, uplifting blue conveying empowerment, reliability, and technical trust"
+      usage: "Primary CTAs, brand marks, key interactive states"
+    coral:
+      hex: "#FD8369"
+      role: "Collaboration warmth"
+      rationale: "Approachable warm coral to signal collaboration and human-centered flows"
+      usage: "Onboarding cues, collaborative affordances"
+    teal:
+      hex: "#23BFAA"
+      role: "Inviting accent"
+      rationale: "Friendly and flexible teal for success states"
+      usage: "Success states, badges, secondary CTAs"
+    surface:
+      hex: "#F7F9FB"
+      role: "Light surface"
+      rationale: "Near-white surface reducing intimidation for onboarding"
+      usage: "Content backgrounds, form fields"
+    dark:
+      hex: "#184A6C"
+      role: "Dark mode brand"
+      rationale: "Deep professional blue preserving brand recognition in dark contexts"
+      usage: "Dark-mode surfaces, technical panels"
+    accent:
+      hex: "#FFD54F"
+      role: "Highlight"
+      rationale: "Optimistic yellow for highlights and interactive prompts"
+      usage: "Attention-drawing, non-alarmist highlights"
+
+  secondary:
+    lilac:
+      hex: "#B39DDB"
+      role: "Modern accent"
+      rationale: "Professional but friendly edge for illustrations and empty states"
+      usage: "Feature highlights, empty states"
+    mint:
+      hex: "#A7EDCE"
+      role: "Inclusive touch"
+      rationale: "Gentle tone for supportive UI elements and less technical flows"
+      usage: "Supportive elements, onboarding"
+
+  semantic:
+    success:
+      hex: "#1EDB90"
+      rationale: "Empowering success tone — positive and actionable"
+    warning:
+      hex: "#FBC02D"
+      rationale: "Friendly warning for non-blocking cautions"
+    error:
+      hex: "#ED2F4B"
+      rationale: "Clear error hue — decisive but fits the expressive palette"
+    info:
+      hex: "#1976D2"
+      rationale: "Aligns informational states with core brand color"
+
+  neutral:
+    900: { hex: "#222A30", role: "Deep neutral — headings, critical UI chrome" }
+    700: { hex: "#474E57", role: "Body text, secondary UI elements" }
+    400: { hex: "#B4BAC2", role: "Dividers, subtle borders, disabled states" }
+    100: { hex: "#F4F6F8", role: "Softest background — airy, reduces complexity" }
+
+  darkMode:
+    background: { hex: "#18232A", role: "Deep muted background for focus" }
+    surface: { hex: "#23303A", role: "Layered surface for cards/panels" }
+    textPrimary: { hex: "#F7F9FB", role: "High-contrast text aligned with light surfaces" }
+    textSecondary: { hex: "#B4BAC2", role: "Muted hints and meta information" }
+
+  guidance: >
+    All colors AA-compliant minimum contrast ratios against adjacent type/background.
+    Surface colors reserved for backgrounds; brand blue never as text on light surface for legibility.
+
+typography:
+  primary: "Inter"
+  fallback: '"Inter", "Segoe UI", "Roboto", Arial, sans-serif'
+  mono: "IBM Plex Mono"
+  weights:
+    regular: 400
+    medium: 500
+    semiBold: 600
+  scale:
+    displayXl: { size: 48, weight: 600, lineHeight: 1.15 }
+    sectionTitle: { size: 32, weight: 600, lineHeight: 1.2 }
+    h1: { size: 24, weight: 600, lineHeight: 1.3 }
+    h2: { size: 20, weight: 500, lineHeight: 1.3 }
+    subtitle: { size: 17, weight: 500, lineHeight: 1.4 }
+    bodyLarge: { size: 16, weight: 400, lineHeight: 1.5 }
+    body: { size: 14, weight: 400, lineHeight: 1.5 }
+    small: { size: 14, weight: 400, lineHeight: 1.4 }
+    codeInline: { size: 14, weight: null, lineHeight: 1.45, font: "mono" }
+  intent: >
+    Sans-serif clarity for technical content, with mono for configuration/UI outputs
+    and live-editing states. Supports internationalization glyphs.
+
+spacing:
+  base: 8
+  scale:
+    xs: 4
+    s: 8
+    m: 16
+    l: 24
+    xl: 32
+
+layout:
+  maxWidth: 1200
+  contentWidth: 1140
+  gridColumns: 12
+  radius:
+    s: 4
+    m: 8
+    l: 16
+  card:
+    padding: 16
+    radius: "radius.m"
+  button:
+    paddingX: 16
+    paddingY: 8
+    radius: "radius.s"
+
+motion:
+  micro: "80-120ms"
+  standard: "250ms"
+  easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+  principles:
+    - "Purposeful, minimal — clarify, not distract"
+    - "Honors OS/browser reduce-motion preferences"
+
+accessibility:
+  standard: "WCAG AA"
+  bodyContrast: "4.5:1"
+  largeTextContrast: "3:1"
+  focusOutline: "2px"
+  minTouchTarget: "44px"
+  reducedMotion: true
+  principles:
+    - "No communicative information depends solely on color"
+    - "Keyboard navigation, skip links, error recovery baked in"
+    - "All icons, buttons, alerts have aria-labels/roles"
+    - "Screen reader support — status changes announced politely"
+```
+
+### ChaufHER Brand (`brand.yaml`)
+
+```yaml
+version: "1.0.0"
+specDate: "2024-06-12"
+author: "ChaufHER Design"
+
+identity:
+  name: "ChaufHER"
+  mission: "Empower women with safe, reliable, and dignified mobility."
+  productPromise: "A mobility ecosystem built by women, for women — trusted, secure, and modern."
+  attributes: [confident, protective, empowering, modern, clear, professional]
+  desiredPerception:
+    developers: "A codebase with safety-first engineering and clear architecture."
+    operations: "Reliable, auditable, and security-hardened platform."
+    endUsers: "Trusted, safe, and modern ride experience."
+
+colors:
+  primary:
+    brand:
+      hex: "#E0007F"
+      role: "Primary Pink"
+      rationale: "Bold, confident pink representing empowerment and femininity"
+      usage: "Primary CTAs, brand marks, feature badges"
+    gradientEnd:
+      hex: "#8C1D6F"
+      role: "Gradient terminus"
+      usage: "Primary gradient overlays"
+    deep:
+      hex: "#5C0F49"
+      role: "Deep Plum"
+      rationale: "Authority and depth — protective but sophisticated"
+      usage: "Dark-mode brand surfaces, emphasis areas"
+    charcoal: "#2B2B2B"
+    white: "#FFFFFF"
+    surface:
+      hex: "#F7F2F5"
+      role: "Soft surface"
+      rationale: "Warm-tinted white creating an inviting, safe feel"
+      usage: "Card backgrounds, content surfaces"
+
+  semantic:
+    success: { hex: "#1F9D55", rationale: "Clear confirmation — safe completion" }
+    warning: { hex: "#F59E0B", rationale: "Cautionary but not alarming" }
+    error: { hex: "#DC2626", rationale: "Urgent — safety-critical alerts" }
+    info: { hex: "#2563EB", rationale: "Informational — neutral trust blue" }
+
+  neutral:
+    900: "#111111"
+    800: "#1F1F1F"
+    700: "#2B2B2B"
+    600: "#4B4B4B"
+    500: "#6B6B6B"
+    400: "#9CA3AF"
+    300: "#D1D5DB"
+    200: "#E5E7EB"
+    100: "#F3F4F6"
+    50: "#FAFAFA"
+
+  darkMode:
+    background: "#111111"
+    surface: "#1F1F1F"
+    textPrimary: "#FFFFFF"
+    textSecondary: "#D1D5DB"
+
+  gradients:
+    primary: { from: "colors.primary.brand", to: "colors.primary.gradientEnd" }
+
+typography:
+  primary: "Inter"
+  fallback: "sans-serif"
+  mono: null
+  weights:
+    regular: 400
+    medium: 500
+    semiBold: 600
+    bold: 700
+  scale:
+    display: { size: 48, weight: 700, lineHeight: 1.15, letterSpacing: "-0.02em" }
+    h1: { size: 52, weight: 700, lineHeight: 1.2 }
+    h2: { size: 36, weight: 600, lineHeight: 1.25 }
+    h3: { size: 26, weight: 600, lineHeight: 1.3 }
+    bodyLarge: { size: 18, weight: 500, lineHeight: 1.5 }
+    body: { size: 16, weight: 400, lineHeight: 1.5 }
+    small: { size: 14, weight: 400, lineHeight: 1.5 }
+
+spacing:
+  base: 4
+  scale: { xs: 4, s: 8, m: 16, l: 24, xl: 32, xxl: 48, xxxl: 64 }
+
+layout:
+  maxWidth: 1280
+  contentWidth: 1140
+  gridColumns: 12
+  radius:
+    s: 4
+    m: 16
+    l: 24
+  card:
+    padding: 24
+    radius: "radius.l"
+  button:
+    paddingX: 20
+    paddingY: 12
+    radius: "radius.m"
+
+motion:
+  micro: "150ms"
+  standard: "250ms"
+  emphasis: "350ms"
+  easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+  principles:
+    - "Subtle, never distracting"
+    - "Reinforces safety and confidence"
+
+accessibility:
+  standard: "WCAG AA"
+  bodyContrast: "4.5:1"
+  largeTextContrast: "3:1"
+  focusOutline: "2px"
+  minTouchTarget: "44px"
+  reducedMotion: true
+  principles:
+    - "Safety information never depends solely on color"
+    - "Clear focus states on all interactive elements"
+```
 
 ---
 
@@ -201,10 +598,15 @@ Logic:
 1. Check `vars.editorThemeEnabled` — bail if false
 2. Read `.agentkit/spec/brand.yaml`
 3. Read `.agentkit/spec/editor-theme.yaml` (or use sensible defaults)
-4. Resolve color references: walk the mapping, dereference `colors.primary.brand` → `#E0007F`
+4. Resolve color references: walk the mapping, call `resolveColor()` on each value
+   - String → use directly
+   - Object with `.hex` → extract hex value
+   - Dot-notation path (`colors.primary.brand`) → traverse brand.yaml, then resolve
 5. Build `workbench.colorCustomizations` JSON object
-6. **Merge** into the existing `.vscode/settings.json` template output (not replace)
-7. Write to `tmpDir/.vscode/settings.json`
+6. Optionally add `workbench.colorTheme` if `baseTheme` is specified
+7. Optionally add `editor.fontFamily` / `editor.fontLigatures` from brand typography
+8. **Merge** into the existing `.vscode/settings.json` template output (not replace)
+9. Write to `tmpDir/.vscode/settings.json`
 
 This function runs **after** the existing `syncDirectCopy('vscode', ...)` so it can merge into the base settings.
 
@@ -216,15 +618,15 @@ The existing template stays as-is (editor prefs). The theme generator **merges**
 
 ---
 
-## Generated Output Example
+## Generated Output Examples
 
-For a repo with ChaufHER brand + dark mode editor theme:
+### AgentKit Forge (dark mode)
 
 ```json
-// .vscode/settings.json (generated)
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.fontFamily": "'IBM Plex Mono', 'Fira Code', monospace",
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
@@ -236,6 +638,32 @@ For a repo with ChaufHER brand + dark mode editor theme:
     ".ai/": true
   },
   "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#184A6C",
+    "titleBar.activeForeground": "#F7F9FB",
+    "activityBar.background": "#18232A",
+    "activityBar.foreground": "#1976D2",
+    "activityBar.activeBorder": "#1976D2",
+    "statusBar.background": "#1976D2",
+    "statusBar.foreground": "#F7F9FB",
+    "statusBar.debuggingBackground": "#FBC02D",
+    "sideBar.background": "#23303A"
+  },
+  "_agentkit_theme": {
+    "brand": "AgentKit Forge",
+    "mode": "dark",
+    "version": "1.0.0"
+  }
+}
+```
+
+### ChaufHER (dark mode)
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.eol": "\n",
+  "workbench.colorCustomizations": {
     "titleBar.activeBackground": "#5C0F49",
     "titleBar.activeForeground": "#FFFFFF",
     "activityBar.background": "#111111",
@@ -244,6 +672,11 @@ For a repo with ChaufHER brand + dark mode editor theme:
     "statusBar.background": "#E0007F",
     "statusBar.foreground": "#FFFFFF",
     "sideBar.background": "#1F1F1F"
+  },
+  "_agentkit_theme": {
+    "brand": "ChaufHER",
+    "mode": "dark",
+    "version": "1.0.0"
   }
 }
 ```
@@ -254,7 +687,7 @@ For a repo with ChaufHER brand + dark mode editor theme:
 
 `.vscode/settings.json` is currently **scaffold-once** (line 449 of `template-utils.mjs`). Two options:
 
-**Option A: Split the file** (Recommended)
+**Option A: Split the file**
 - Keep `.vscode/settings.json` as scaffold-once (user editor prefs)
 - Generate a new `.vscode/agentkit-theme.json` that gets referenced or merged
 - Problem: VS Code doesn't support split settings files natively
@@ -263,7 +696,7 @@ For a repo with ChaufHER brand + dark mode editor theme:
 - `.vscode/settings.json` remains scaffold-once for editor prefs
 - The theme generator **reads the existing `.vscode/settings.json`** from the target repo, merges `workbench.colorCustomizations` into it, and writes back
 - This respects user customizations while injecting/updating only the theme block
-- A sentinel comment or JSON key `"_agentkit_theme_version"` marks the managed section
+- A sentinel key `"_agentkit_theme"` marks the managed section with brand name, mode, and version
 
 **Option C: Make theme a separate sync target**
 - Generate `.vscode/settings.json` as a two-phase operation:
@@ -272,14 +705,31 @@ For a repo with ChaufHER brand + dark mode editor theme:
 
 ---
 
+## Brand Spec Validation
+
+The sync engine should validate `brand.yaml` at sync time:
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| `identity.name` required | error | Brand must have a name |
+| `colors.primary.brand` required | error | At minimum, a primary brand color is needed |
+| `colors.semantic` complete | warning | All four semantic colors recommended |
+| Hex format valid | error | All color values must be valid `#RRGGBB` or `#RGB` |
+| Dark mode colors present if `editor-theme.mode` includes dark | warning | Missing dark mode colors will cause fallback |
+| Contrast ratios meet accessibility spec | warning | Check brand+white, brand+dark against `accessibility.bodyContrast` |
+
+---
+
 ## Future Extensibility
 
 This architecture naturally supports generating:
 - **Tailwind config** (`tailwind.config.ts`) from `brand.yaml` colors/spacing/typography
-- **CSS custom properties** (`:root { --color-primary: #E0007F; }`)
+- **CSS custom properties** (`:root { --color-primary: #1976D2; }`)
 - **Design token JSON** (Style Dictionary format) from `brand.yaml`
 - **Storybook theme** from `brand.yaml`
 - **Cursor/Windsurf themes** (same VS Code settings format, different output paths)
+- **Brand documentation page** (auto-generated `docs/brand/README.md` with color swatches)
+- **Editor font configuration** from `typography.mono` → `editor.fontFamily`
 
 All share the same `brand.yaml` source, different mapping/output targets.
 
@@ -294,12 +744,14 @@ All share the same `brand.yaml` source, different mapping/output targets.
 | `.agentkit/spec/project.yaml` | **Modify** | Add `hasBrandGuide`, `editorTheme` section |
 | `.agentkit/engines/node/src/project-mapping.mjs` | **Modify** | Add new field mappings |
 | `.agentkit/engines/node/src/discover.mjs` | **Modify** | Detect brand/theme files |
-| `.agentkit/engines/node/src/synchronize.mjs` | **Modify** | Add `syncEditorTheme()` |
-| `.agentkit/engines/node/src/template-utils.mjs` | **Modify** | Add JSON merge utility |
-| `.agentkit/engines/node/src/__tests__/` | **Create** | Tests for brand resolution + theme merge |
+| `.agentkit/engines/node/src/synchronize.mjs` | **Modify** | Add `syncEditorTheme()` + `resolveColor()` |
+| `.agentkit/engines/node/src/template-utils.mjs` | **Modify** | Add JSON deep-merge utility |
+| `.agentkit/engines/node/src/brand-resolver.mjs` | **Create** | Color resolution + brand validation logic |
+| `.agentkit/engines/node/src/__tests__/brand-resolver.test.mjs` | **Create** | Tests for color resolution + validation |
+| `.agentkit/engines/node/src/__tests__/editor-theme.test.mjs` | **Create** | Tests for theme merge into settings.json |
 | `.agentkit/overlays/__TEMPLATE__/brand.yaml` | **Create** | Overlay template for brand |
 | `.agentkit/overlays/__TEMPLATE__/editor-theme.yaml` | **Create** | Overlay template for editor theme |
-| `.agentkit/docs/BRAND_YAML_REFERENCE.md` | **Create** | Reference docs for brand spec |
+| `.agentkit/docs/BRAND_YAML_REFERENCE.md` | **Create** | Reference docs for brand spec schema |
 
 ---
 
@@ -308,3 +760,5 @@ All share the same `brand.yaml` source, different mapping/output targets.
 1. **Cursor/Windsurf output paths** — Should we also generate `.cursor/settings.json` and `.windsurf/settings.json` with the same color customizations? (They support the same VS Code format.)
 2. **Theme inheritance** — If an org has a shared brand across repos, should `brand.yaml` support `extends: @org/brand`?
 3. **Preview command** — Should `agentkit theme:preview` generate a temporary VS Code settings override for testing before committing?
+4. **Font injection** — Should `typography.mono` automatically set `editor.fontFamily` in VS Code settings?
+5. **Rationale export** — Should the brand documentation generator produce a visual palette page with rationale text for each color?
