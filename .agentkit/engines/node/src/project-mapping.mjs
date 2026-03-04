@@ -47,6 +47,7 @@ export const PROJECT_MAPPING = [
   // Editor Theme
   { src: 'editorTheme.enabled', dest: 'editorThemeEnabled', type: 'boolean' },
   { src: 'editorTheme.source', dest: 'editorThemeSource', check: 'not-none' },
+  { src: 'editorTheme.source', dest: 'hasEditorThemeSource', type: 'boolean', check: 'not-none' },
 
   // External Knowledge Integration
   { src: 'externalKnowledge.enabled', dest: 'hasExternalKnowledge', type: 'boolean' },

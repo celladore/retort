@@ -589,9 +589,7 @@ Add detection for:
 ### 6. `synchronize.mjs` — New `syncEditorTheme()` function
 
 ```
-async function syncEditorTheme(
-  agentkitRoot, templatesDir, tmpDir, vars, version, repoName
-)
+async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags)
 ```
 
 Logic:
@@ -714,7 +712,7 @@ The sync engine should validate `brand.yaml` at sync time:
 | `identity.name` required | error | Brand must have a name |
 | `colors.primary.brand` required | error | At minimum, a primary brand color is needed |
 | `colors.semantic` complete | warning | All four semantic colors recommended |
-| Hex format valid | error | All color values must be valid `#RRGGBB` or `#RGB` |
+| Hex format valid | error | All color values must be valid `#RGB`, `#RRGGBB`, or `#RRGGBBAA` (8-digit alpha supported for VS Code transparency) |
 | Dark mode colors present if `editor-theme.mode` includes dark | warning | Missing dark mode colors will cause fallback |
 | Contrast ratios meet accessibility spec | warning | Check brand+white, brand+dark against `accessibility.bodyContrast` |
 

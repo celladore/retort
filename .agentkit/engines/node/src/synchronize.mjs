@@ -200,8 +200,14 @@ async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) 
  * Supports multiple output targets (VS Code, Cursor, Windsurf) and
  * per-tool overlay overrides. Runs after syncDirectCopy('vscode', ...)
  * so it can merge into the base settings.
+ *
+ * @param {string} agentkitRoot - Path to the .agentkit directory
+ * @param {string} tmpDir - Temporary directory for rendered output
+ * @param {object} vars - Flattened template variables (must include editorThemeEnabled)
+ * @param {Function} log - Logging function
+ * @param {{ force?: boolean }} [flags] - Optional flags (force skips scaffold-once check)
  */
-async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
+async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags) {
   if (!vars.editorThemeEnabled) return;
 
   const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
@@ -231,18 +237,34 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
 
   // Determine which mode mapping(s) to resolve
   const mode = themeSpec.mode || 'dark';
-  let mapping;
-  if (mode === 'both') {
-    // Merge light and dark, dark takes precedence
-    mapping = { ...(themeSpec.light || {}), ...(themeSpec.dark || {}) };
-  } else {
-    mapping = themeSpec[mode] || {};
+  let lightColors = {};
+  let darkColors = {};
+
+  if (mode === 'both' || mode === 'light') {
+    const lightMapping = themeSpec.light || {};
+    const { resolved, warnings } = resolveThemeMapping(lightMapping, brandSpec);
+    lightColors = resolved;
+    for (const warn of warnings) {
+      log(`[agentkit:sync] Theme warning (light): ${warn}`);
+    }
+  }
+  if (mode === 'both' || mode === 'dark') {
+    const darkMapping = themeSpec.dark || {};
+    const { resolved, warnings } = resolveThemeMapping(darkMapping, brandSpec);
+    darkColors = resolved;
+    for (const warn of warnings) {
+      log(`[agentkit:sync] Theme warning (dark): ${warn}`);
+    }
   }
 
-  // Resolve brand color references
-  const { resolved: colorCustomizations, warnings } = resolveThemeMapping(mapping, brandSpec);
-  for (const warn of warnings) {
-    log(`[agentkit:sync] Theme warning: ${warn}`);
+  // Build final color customizations — for 'both', dark wins on conflict
+  let colorCustomizations;
+  if (mode === 'both') {
+    colorCustomizations = { ...lightColors, ...darkColors };
+  } else if (mode === 'light') {
+    colorCustomizations = lightColors;
+  } else {
+    colorCustomizations = darkColors;
   }
 
   if (Object.keys(colorCustomizations).length === 0) {
@@ -257,16 +279,45 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
     version: brandSpec.version || '1.0.0',
   };
 
+  // Honor baseTheme — sets workbench.colorTheme per workspace
+  if (themeSpec.baseTheme) {
+    const baseThemeValue = (mode === 'light')
+      ? themeSpec.baseTheme.light
+      : themeSpec.baseTheme.dark;
+    if (baseThemeValue) {
+      meta.baseTheme = baseThemeValue;
+    }
+  }
+
+  // Honor fontFromBrand — sets editor.fontFamily from brand typography
+  let fontFamily = null;
+  if (themeSpec.fontFromBrand && brandSpec.typography?.mono) {
+    fontFamily = `'${brandSpec.typography.mono}', monospace`;
+    meta.font = brandSpec.typography.mono;
+  }
+
   // Determine output targets — default to vscode only
   const defaultOutputs = { vscode: '.vscode/settings.json' };
   const outputs = themeSpec.outputs || defaultOutputs;
 
+  // Reserved keys are top-level theme config — never treated as tool names
+  const RESERVED_THEME_KEYS = new Set([
+    'light', 'dark', 'enabled', 'mode', 'outputs', 'baseTheme', 'fontFromBrand',
+  ]);
+
   // Write theme into each output target
+  const resolvedTmpDir = resolve(tmpDir);
   const writePromises = [];
   for (const [tool, outputPath] of Object.entries(outputs)) {
     if (!outputPath) continue; // null = skip this target
 
-    const settingsPath = join(tmpDir, outputPath);
+    // Path traversal protection — resolve and verify the output stays inside tmpDir
+    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
+    const settingsPath = resolve(tmpDir, normalizedPath);
+    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
+      log(`[agentkit:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
+      continue;
+    }
 
     writePromises.push((async () => {
       // Read existing settings if already rendered by prior sync step
@@ -281,10 +332,6 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
       }
 
       // Check for per-tool overrides in themeSpec (e.g. themeSpec.cursor: { ... })
-      // Reserved keys are top-level theme config — never treated as tool names
-      const RESERVED_THEME_KEYS = new Set([
-        'light', 'dark', 'enabled', 'mode', 'outputs', 'baseTheme', 'fontFromBrand',
-      ]);
       let toolColors = colorCustomizations;
       if (themeSpec[tool] && typeof themeSpec[tool] === 'object' && !RESERVED_THEME_KEYS.has(tool)) {
         // Tool-specific overrides: resolve and merge on top of base colors
@@ -293,6 +340,16 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log) {
       }
 
       const mergedSettings = mergeThemeIntoSettings(existingSettings, toolColors, meta);
+
+      // Apply baseTheme if present
+      if (meta.baseTheme) {
+        mergedSettings['workbench.colorTheme'] = meta.baseTheme;
+      }
+
+      // Apply font from brand if present
+      if (fontFamily) {
+        mergedSettings['editor.fontFamily'] = fontFamily;
+      }
 
       await ensureDir(dirname(settingsPath));
       await writeFile(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n', 'utf-8');
@@ -1095,7 +1152,14 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   ]);
 
   // --- Editor theme (must run after vscode template copy to merge into settings) ---
-  await syncEditorTheme(agentkitRoot, tmpDir, vars, log);
+  // Scaffold-once: skip if .vscode/settings.json already exists in projectRoot (unless --overwrite/--force)
+  const forceTheme = flags?.overwrite || flags?.force;
+  const vscodeSettingsExists = existsSync(resolve(projectRoot, '.vscode', 'settings.json'));
+  if (!vscodeSettingsExists || forceTheme) {
+    await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags);
+  } else {
+    log('[agentkit:sync] Editor theme: .vscode/settings.json exists (scaffold-once) — skipping. Use --overwrite to regenerate.');
+  }
 
   // --- Gated by renderTargets ---
   const gatedTasks = [];
