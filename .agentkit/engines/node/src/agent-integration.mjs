@@ -15,7 +15,7 @@ import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { createTask, listTasks, TERMINAL_STATES } from './task-protocol.mjs';
-import { appendEvent } from './orchestrator.mjs';
+import { appendEvent } from './events.mjs';
 
 // ---------------------------------------------------------------------------
 // Agent notification map
@@ -295,8 +295,7 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
   const complementTask = tasks.find(t =>
     t.status === 'completed' &&
     Array.isArray(t.assignees) &&
-    t.assignees.some(a => a === complementTeam || a === complementTeam.replace('team-', '')) &&
-    !TERMINAL_STATES.includes(t.status) === false
+    t.assignees.some(a => a === complementTeam || a === complementTeam.replace('team-', ''))
   );
 
   if (!complementTask) {
@@ -391,7 +390,7 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
     publicPatterns.some(p => p.test(f))
   );
 
-  if (!hasPublicChanges && changedFiles.length > 0) {
+  if (changedFiles.length === 0 || !hasPublicChanges) {
     return { created: null };
   }
 
@@ -776,17 +775,18 @@ export function validateTestAcceptanceCriteria(task) {
 /**
  * Resolve the coverage command for a tech stack.
  * @param {object} stack - Stack config from teams.yaml techStacks
+ * @param {string} [projectRoot] - Optional project root to inspect package.json for runner detection
  * @returns {{ command: string|null, parser: string }}
  */
-export function resolveCoverageCommand(stack) {
+export function resolveCoverageCommand(stack, projectRoot) {
   if (!stack?.testCommand) return { command: null, parser: 'unknown' };
 
   const testCmd = stack.testCommand;
 
-  // Detect framework from test command
-  if (testCmd.includes('vitest') || testCmd.includes('pnpm test') || testCmd.includes('npm test')) {
+  // Detect framework from explicit test command
+  if (testCmd.includes('vitest')) {
     return {
-      command: testCmd.replace(/vitest\s+run/, 'vitest run --coverage').replace(/pnpm test/, 'pnpm test -- --coverage'),
+      command: testCmd.replace(/vitest\s+run/, 'vitest run --coverage'),
       parser: 'vitest',
     };
   }
@@ -806,7 +806,48 @@ export function resolveCoverageCommand(stack) {
     return { command: `${testCmd} -coverprofile=coverage.out`, parser: 'go' };
   }
 
+  // For generic commands like `pnpm test` or `npm test`, try to detect the
+  // underlying runner from package.json devDependencies.
+  if (testCmd.includes('pnpm test') || testCmd.includes('npm test')) {
+    const runner = _detectTestRunner(projectRoot);
+    if (runner === 'vitest') {
+      return { command: `${testCmd} -- --coverage`, parser: 'vitest' };
+    }
+    if (runner === 'jest') {
+      return { command: `${testCmd} -- --coverage`, parser: 'jest' };
+    }
+    // Unknown runner behind pnpm/npm test — skip rather than guessing
+    return { command: null, parser: 'unknown' };
+  }
+
   return { command: null, parser: 'unknown' };
+}
+
+/**
+ * Detect the test runner from package.json devDependencies.
+ * @param {string} [projectRoot]
+ * @returns {'vitest'|'jest'|null}
+ */
+function _detectTestRunner(projectRoot) {
+  if (!projectRoot) return null;
+  try {
+    const pkgPath = resolve(projectRoot, 'package.json');
+    if (!existsSync(pkgPath)) return null;
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const allDeps = {
+      ...(pkg.devDependencies || {}),
+      ...(pkg.dependencies || {}),
+    };
+    if (allDeps.vitest) return 'vitest';
+    if (allDeps.jest) return 'jest';
+    // Also check scripts.test for runner hints
+    const testScript = pkg.scripts?.test || '';
+    if (testScript.includes('vitest')) return 'vitest';
+    if (testScript.includes('jest')) return 'jest';
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -851,6 +892,55 @@ export function parseCoveragePercentage(stdout, parser) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Match a file path against a simple glob pattern.
+ * Supports double-star (any directory depth), single-star (any name segment),
+ * and literal matches. E.g. "src/STAR-STAR/STAR.ts", "STAR.json", "Cargo.toml".
+ *
+ * @param {string} file
+ * @param {string} pattern
+ * @returns {boolean}
+ */
+function matchGlob(file, pattern) {
+  // Exact match
+  if (file === pattern) return true;
+
+  // Convert glob pattern to regex
+  // Escape regex-special characters except * and ?
+  let regex = '';
+  let i = 0;
+  while (i < pattern.length) {
+    const ch = pattern[i];
+    if (ch === '*' && pattern[i + 1] === '*') {
+      // ** — match any path segment(s), including nested directories
+      // Skip the optional trailing slash after **
+      i += 2;
+      if (pattern[i] === '/') i++;
+      regex += '(?:.+/)?';
+    } else if (ch === '*') {
+      // * — match within a single path segment (no slashes)
+      regex += '[^/]*';
+      i++;
+    } else if (ch === '?') {
+      regex += '[^/]';
+      i++;
+    } else if ('.+^${}()|[]\\'.includes(ch)) {
+      regex += '\\' + ch;
+      i++;
+    } else {
+      regex += ch;
+      i++;
+    }
+  }
+
+  // If pattern ends with /, match any file under that directory
+  if (pattern.endsWith('/')) {
+    return new RegExp('^' + regex).test(file);
+  }
+
+  return new RegExp('^' + regex + '$').test(file);
+}
+
+/**
  * Determine which test commands to run for a set of changed files.
  * Used for inter-round testing in Phase 3.
  *
@@ -868,19 +958,9 @@ export function getIncrementalTestCommands(changedFiles, techStacks) {
 
     // Check if any changed files match this stack's scope
     const scopes = Array.isArray(stack.scope) ? stack.scope : [];
-    const matchesStack = changedFiles.some(file => {
-      return scopes.some(scope => {
-        if (scope.includes('**')) {
-          const prefix = scope.split('**')[0];
-          return file.startsWith(prefix);
-        }
-        if (scope.includes('*')) {
-          const ext = scope.replace('*', '');
-          return file.endsWith(ext);
-        }
-        return file === scope || file.startsWith(scope);
-      });
-    });
+    const matchesStack = changedFiles.some(file =>
+      scopes.some(scope => matchGlob(file, scope))
+    );
 
     if (matchesStack) {
       commands.push({ stack: stack.name, command: stack.testCommand });

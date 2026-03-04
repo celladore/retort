@@ -7,7 +7,7 @@
 import { existsSync, readFileSync, promises as fsPromises, realpathSync, statSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
 import yaml from 'js-yaml';
-import { appendEvent } from './orchestrator.mjs';
+import { appendEvent } from './events.mjs';
 import { execCommand, runInPool } from './runner.mjs';
 import { getIncrementalTestCommands, resolveCoverageCommand, parseCoveragePercentage } from './agent-integration.mjs';
 
@@ -332,7 +332,7 @@ export async function runReview({ agentkitRoot /* kept for interface compatibili
 
   // --- Test Coverage Delta ---
   let coverageDelta = null;
-  if (flags.coverage !== false) {
+  if (flags.coverage === true) {
     console.log('--- Test Coverage Check ---');
     try {
       const teamsPath = resolve(projectRoot, '.agentkit', 'spec', 'teams.yaml');

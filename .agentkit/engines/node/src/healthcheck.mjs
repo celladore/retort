@@ -7,7 +7,8 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 import yaml from 'js-yaml';
 import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
-import { appendEvent, loadState, saveState } from './orchestrator.mjs';
+import { appendEvent } from './events.mjs';
+import { loadState, saveState } from './orchestrator.mjs';
 
 // ---------------------------------------------------------------------------
 // Tooling checks

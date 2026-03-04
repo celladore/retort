@@ -8,7 +8,7 @@ import { readdir } from 'fs/promises';
 import { resolve } from 'path';
 import yaml from 'js-yaml';
 import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
-import { appendEvent } from './orchestrator.mjs';
+import { appendEvent } from './events.mjs';
 import { resolveCoverageCommand, parseCoveragePercentage } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
@@ -274,6 +274,7 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 
   const allResults = [];
   const coverageResults = [];
+  const coverageThreshold = loadCoverageThreshold(agentkitRoot);
 
   for (const stack of detectedStacks) {
     console.log(`--- Stack: ${stack.name} ---`);
@@ -319,7 +320,6 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
     }
 
     // Coverage check: run after test step if --coverage flag or threshold is configured
-    const coverageThreshold = loadCoverageThreshold(agentkitRoot);
     if (flags.coverage || coverageThreshold != null) {
       const covCmd = resolveCoverageCommand(stack);
       if (covCmd.command && isValidCommand(covCmd.command)) {

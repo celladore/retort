@@ -5,7 +5,6 @@
  */
 import { execFileSync } from 'child_process';
 import {
-  appendFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -16,6 +15,7 @@ import {
 } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { appendEvent, readEvents } from './events.mjs';
 import { formatTimestamp } from './runner.mjs';
 import {
   checkDependencies,
@@ -114,10 +114,6 @@ function stateDir(projectRoot) {
 
 function statePath(projectRoot) {
   return resolve(stateDir(projectRoot), 'orchestrator.json');
-}
-
-function eventsPath(projectRoot) {
-  return resolve(stateDir(projectRoot), 'events.log');
 }
 
 function lockPath(projectRoot) {
@@ -345,49 +341,11 @@ export function checkLock(projectRoot) {
 }
 
 // ---------------------------------------------------------------------------
-// Event Logging
+// Event Logging — delegated to events.mjs to avoid circular imports.
+// Re-exported here for backward compatibility.
 // ---------------------------------------------------------------------------
 
-/**
- * Append an event to the events log.
- * @param {string} projectRoot
- * @param {string} action - What happened (e.g. 'phase_advanced', 'check_completed')
- * @param {object} data - Event data
- */
-export function appendEvent(projectRoot, action, data = {}) {
-  const dir = stateDir(projectRoot);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  const event = {
-    timestamp: new Date().toISOString(),
-    action,
-    ...data,
-  };
-  appendFileSync(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
-}
-
-/**
- * Read recent events from the log.
- * @param {string} projectRoot
- * @param {number} limit - Max events to return (default 20)
- * @returns {object[]}
- */
-export function readEvents(projectRoot, limit = 20) {
-  const path = eventsPath(projectRoot);
-  if (!existsSync(path)) return [];
-  const lines = readFileSync(path, 'utf-8').trim().split('\n').filter(Boolean);
-  const events = lines
-    .map((line) => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-  return events.slice(-limit);
-}
+export { appendEvent, readEvents };
 
 // ---------------------------------------------------------------------------
 // Phase Transitions
@@ -721,6 +679,57 @@ export async function orchestratorProcessHandoffs(projectRoot, state) {
 }
 
 /**
+ * Deep-clone state and register a task in active_tasks + team_progress.
+ * Shared helper for processCompletedTask and routePhase4TestFailure.
+ *
+ * @param {object} state - Current orchestrator state (not mutated)
+ * @param {object} task - Task with id and assignees
+ * @returns {object} New state with the task tracked
+ */
+function trackTaskInState(state, task) {
+  if (!task?.id || !Array.isArray(task.assignees)) return state;
+
+  if (!state.active_tasks) state.active_tasks = {};
+  for (const assignee of task.assignees) {
+    if (!state.active_tasks[assignee]) {
+      state.active_tasks[assignee] = [];
+    }
+    state.active_tasks[assignee].push(task.id);
+
+    if (!state.team_progress[assignee]) {
+      state.team_progress[assignee] = {
+        status: 'in_progress',
+        tasks: {},
+        last_updated: new Date().toISOString(),
+      };
+    }
+    if (!state.team_progress[assignee].tasks) {
+      state.team_progress[assignee].tasks = {};
+    }
+    state.team_progress[assignee].tasks[task.id] = {
+      status: 'in_progress',
+      present: true,
+    };
+    state.team_progress[assignee].status = 'in_progress';
+    state.team_progress[assignee].last_updated = new Date().toISOString();
+  }
+  return state;
+}
+
+/**
+ * Deep-clone orchestrator state for immutable updates.
+ * @param {object} state
+ * @returns {object}
+ */
+function cloneState(state) {
+  return {
+    ...state,
+    active_tasks: state.active_tasks ? JSON.parse(JSON.stringify(state.active_tasks)) : {},
+    team_progress: state.team_progress ? JSON.parse(JSON.stringify(state.team_progress)) : {},
+  };
+}
+
+/**
  * Process a completed task through the agent integration pipeline.
  * Handles notifications, auto-test delegation, doc/security tasks,
  * and acceptance criteria validation.
@@ -734,12 +743,7 @@ export async function orchestratorProcessHandoffs(projectRoot, state) {
 export async function processCompletedTask(projectRoot, agentkitRoot, state, completedTask) {
   const integrationResult = await processTaskCompletion(projectRoot, agentkitRoot, completedTask);
 
-  // Deep clone state for immutability
-  const newState = {
-    ...state,
-    active_tasks: state.active_tasks ? JSON.parse(JSON.stringify(state.active_tasks)) : {},
-    team_progress: state.team_progress ? JSON.parse(JSON.stringify(state.team_progress)) : {},
-  };
+  const newState = cloneState(state);
 
   // Track newly created tasks in orchestrator state
   const allNewTasks = [
@@ -753,32 +757,7 @@ export async function processCompletedTask(projectRoot, agentkitRoot, state, com
   ];
 
   for (const task of allNewTasks) {
-    if (!task?.id || !Array.isArray(task.assignees)) continue;
-
-    if (!newState.active_tasks) newState.active_tasks = {};
-    for (const assignee of task.assignees) {
-      if (!newState.active_tasks[assignee]) {
-        newState.active_tasks[assignee] = [];
-      }
-      newState.active_tasks[assignee].push(task.id);
-
-      if (!newState.team_progress[assignee]) {
-        newState.team_progress[assignee] = {
-          status: 'in_progress',
-          tasks: {},
-          last_updated: new Date().toISOString(),
-        };
-      }
-      if (!newState.team_progress[assignee].tasks) {
-        newState.team_progress[assignee].tasks = {};
-      }
-      newState.team_progress[assignee].tasks[task.id] = {
-        status: 'in_progress',
-        present: true,
-      };
-      newState.team_progress[assignee].status = 'in_progress';
-      newState.team_progress[assignee].last_updated = new Date().toISOString();
-    }
+    trackTaskInState(newState, task);
   }
 
   // Log warnings
@@ -808,38 +787,10 @@ export async function routePhase4TestFailure(projectRoot, state, checkResult, ch
     return { state, task: null };
   }
 
-  const newState = {
-    ...state,
-    active_tasks: state.active_tasks ? JSON.parse(JSON.stringify(state.active_tasks)) : {},
-    team_progress: state.team_progress ? JSON.parse(JSON.stringify(state.team_progress)) : {},
-  };
+  const newState = cloneState(state);
+  trackTaskInState(newState, routeResult.created);
 
-  const task = routeResult.created;
-  for (const assignee of task.assignees || []) {
-    if (!newState.active_tasks[assignee]) {
-      newState.active_tasks[assignee] = [];
-    }
-    newState.active_tasks[assignee].push(task.id);
-
-    if (!newState.team_progress[assignee]) {
-      newState.team_progress[assignee] = {
-        status: 'in_progress',
-        tasks: {},
-        last_updated: new Date().toISOString(),
-      };
-    }
-    if (!newState.team_progress[assignee].tasks) {
-      newState.team_progress[assignee].tasks = {};
-    }
-    newState.team_progress[assignee].tasks[task.id] = {
-      status: 'in_progress',
-      present: true,
-    };
-    newState.team_progress[assignee].status = 'in_progress';
-    newState.team_progress[assignee].last_updated = new Date().toISOString();
-  }
-
-  return { state: newState, task };
+  return { state: newState, task: routeResult.created };
 }
 
 /**

@@ -96,8 +96,8 @@ const VALID_FLAGS = {
     'help',
   ],
   plan: ['issue', 'output', 'depth', 'help'],
-  check: ['fix', 'fast', 'stack', 'bail', 'help'],
-  review: ['pr', 'range', 'file', 'focus', 'severity', 'help'],
+  check: ['fix', 'fast', 'stack', 'bail', 'coverage', 'help'],
+  review: ['pr', 'range', 'file', 'focus', 'severity', 'coverage', 'help'],
   handoff: ['format', 'include-diff', 'tag', 'save', 'help'],
   healthcheck: ['stack', 'fix', 'verbose', 'help'],
   cost: ['summary', 'sessions', 'report', 'month', 'format', 'last', 'help'],
@@ -188,6 +188,7 @@ const FLAG_TYPES = {
   fix: 'boolean',
   fast: 'boolean',
   bail: 'boolean',
+  coverage: 'boolean',
   'include-diff': 'boolean',
   save: 'boolean',
   summary: 'boolean',
@@ -360,6 +361,7 @@ Options:
     --fast              Skip build step
     --stack <name>      Limit to specific tech stack
     --bail              Stop on first failure
+    --coverage          Run coverage checks and enforce thresholds
 
   review:
     --range <range>     Git commit range (e.g. HEAD~3..HEAD)

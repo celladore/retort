@@ -6,7 +6,8 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import { execCommand, formatTimestamp } from './runner.mjs';
-import { loadState, appendEvent, readEvents } from './orchestrator.mjs';
+import { appendEvent, readEvents } from './events.mjs';
+import { loadState } from './orchestrator.mjs';
 
 // ---------------------------------------------------------------------------
 // Git state gathering

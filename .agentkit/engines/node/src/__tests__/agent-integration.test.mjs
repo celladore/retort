@@ -761,4 +761,249 @@ describe('processTaskCompletion', () => {
     expect(result.docTasks).toHaveLength(0);
     expect(result.securityTasks).toHaveLength(0);
   });
+
+  it('creates dependency audit task when lock files change', async () => {
+    setupTaskDir(tmpDir);
+    const task = makeCompletedTask({
+      assignees: ['team-backend'],
+      artifacts: [
+        { type: 'files-changed', paths: ['package.json', 'pnpm-lock.yaml', 'src/app.ts'] },
+        { type: 'test-results', passed: 5, failed: 0, testsAdded: 1 },
+      ],
+    });
+    writeTask(tmpDir, task);
+
+    const result = await processTaskCompletion(tmpDir, AGENTKIT_ROOT, task);
+    expect(result.dependencyAudits).toHaveLength(1);
+    expect(result.dependencyAudits[0].assignees).toEqual(['team-devops']);
+    expect(result.dependencyAudits[0].context.depFilesChanged).toContain('pnpm-lock.yaml');
+  });
+
+  it('does not create dependency audit when no lock files change', async () => {
+    setupTaskDir(tmpDir);
+    const task = makeCompletedTask({
+      assignees: ['team-backend'],
+      artifacts: [
+        { type: 'files-changed', paths: ['src/app.ts', 'src/app.test.ts'] },
+        { type: 'test-results', passed: 5, failed: 0, testsAdded: 1 },
+      ],
+    });
+    writeTask(tmpDir, task);
+
+    const result = await processTaskCompletion(tmpDir, AGENTKIT_ROOT, task);
+    expect(result.dependencyAudits).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// autoCreateIntegrationTestTask (cross-team trigger)
+// ---------------------------------------------------------------------------
+
+describe('autoCreateIntegrationTestTask', () => {
+  let tmpDir;
+
+  beforeEach(() => { tmpDir = makeTmpDir(); });
+  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+
+  it('creates integration test when both backend and frontend tasks are completed', async () => {
+    setupTaskDir(tmpDir);
+
+    // Write a completed frontend task first
+    const frontendTask = makeCompletedTask({
+      id: 'task-20260304-002-def456',
+      assignees: ['team-frontend'],
+      title: 'Add user profile UI',
+    });
+    writeTask(tmpDir, frontendTask);
+
+    // Now complete a backend task
+    const backendTask = makeCompletedTask({
+      id: 'task-20260304-003-ghi789',
+      assignees: ['team-backend'],
+      title: 'Add user API endpoint',
+    });
+    writeTask(tmpDir, backendTask);
+
+    const result = await autoCreateIntegrationTestTask(tmpDir, backendTask);
+    expect(result.created).not.toBeNull();
+    expect(result.created.assignees).toEqual(['team-testing']);
+    expect(result.created.context.integrationTestType).toBe('backend-frontend');
+    expect(result.created.context.integrationTestFor).toContain(backendTask.id);
+    expect(result.created.context.integrationTestFor).toContain(frontendTask.id);
+  });
+
+  it('skips when no complement team task exists', async () => {
+    setupTaskDir(tmpDir);
+
+    const backendTask = makeCompletedTask({
+      assignees: ['team-backend'],
+    });
+    writeTask(tmpDir, backendTask);
+
+    const result = await autoCreateIntegrationTestTask(tmpDir, backendTask);
+    expect(result.created).toBeNull();
+  });
+
+  it('skips for non-backend/frontend teams', async () => {
+    setupTaskDir(tmpDir);
+
+    const infraTask = makeCompletedTask({
+      assignees: ['team-infra'],
+    });
+    writeTask(tmpDir, infraTask);
+
+    const result = await autoCreateIntegrationTestTask(tmpDir, infraTask);
+    expect(result.created).toBeNull();
+  });
+
+  it('skips when integration test already exists', async () => {
+    setupTaskDir(tmpDir);
+
+    const frontendTask = makeCompletedTask({
+      id: 'task-20260304-002-def456',
+      assignees: ['team-frontend'],
+    });
+    writeTask(tmpDir, frontendTask);
+
+    const backendTask = makeCompletedTask({
+      id: 'task-20260304-003-ghi789',
+      assignees: ['team-backend'],
+    });
+    writeTask(tmpDir, backendTask);
+
+    // Write an existing integration test task
+    writeTask(tmpDir, {
+      id: 'task-20260304-004-jkl012',
+      type: 'test',
+      status: 'working',
+      assignees: ['team-testing'],
+      context: { integrationTestFor: [backendTask.id, frontendTask.id] },
+    });
+
+    const result = await autoCreateIntegrationTestTask(tmpDir, backendTask);
+    expect(result.created).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// autoCreateDocTask — empty changedFiles edge case
+// ---------------------------------------------------------------------------
+
+describe('autoCreateDocTask', () => {
+  let tmpDir;
+
+  beforeEach(() => { tmpDir = makeTmpDir(); });
+  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+
+  it('skips when changedFiles is empty (no files-changed artifact)', async () => {
+    setupTaskDir(tmpDir);
+    const task = makeCompletedTask({
+      assignees: ['team-backend'],
+      artifacts: [
+        // No files-changed artifact at all
+        { type: 'test-results', passed: 5, failed: 0, testsAdded: 1 },
+      ],
+    });
+    writeTask(tmpDir, task);
+
+    const chains = { backend: ['testing', 'docs'] };
+    const result = await autoCreateDocTask(tmpDir, task, chains);
+    expect(result.created).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveCoverageCommand — pnpm/npm test with projectRoot detection
+// ---------------------------------------------------------------------------
+
+describe('resolveCoverageCommand with projectRoot', () => {
+  let tmpDir;
+
+  beforeEach(() => { tmpDir = makeTmpDir(); });
+  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+
+  it('detects vitest from package.json devDependencies for pnpm test', () => {
+    writeFileSync(
+      resolve(tmpDir, 'package.json'),
+      JSON.stringify({ devDependencies: { vitest: '^4.0.0' } }),
+      'utf-8'
+    );
+    const result = resolveCoverageCommand({ testCommand: 'pnpm test' }, tmpDir);
+    expect(result.command).toBe('pnpm test -- --coverage');
+    expect(result.parser).toBe('vitest');
+  });
+
+  it('detects jest from package.json devDependencies for npm test', () => {
+    writeFileSync(
+      resolve(tmpDir, 'package.json'),
+      JSON.stringify({ devDependencies: { jest: '^29.0.0' } }),
+      'utf-8'
+    );
+    const result = resolveCoverageCommand({ testCommand: 'npm test' }, tmpDir);
+    expect(result.command).toBe('npm test -- --coverage');
+    expect(result.parser).toBe('jest');
+  });
+
+  it('returns null for pnpm test when no recognized runner in deps', () => {
+    writeFileSync(
+      resolve(tmpDir, 'package.json'),
+      JSON.stringify({ devDependencies: { mocha: '^10.0.0' } }),
+      'utf-8'
+    );
+    const result = resolveCoverageCommand({ testCommand: 'pnpm test' }, tmpDir);
+    expect(result.command).toBeNull();
+    expect(result.parser).toBe('unknown');
+  });
+
+  it('returns null for pnpm test without projectRoot', () => {
+    const result = resolveCoverageCommand({ testCommand: 'pnpm test' });
+    expect(result.command).toBeNull();
+    expect(result.parser).toBe('unknown');
+  });
+
+  it('detects runner from scripts.test when no devDependency', () => {
+    writeFileSync(
+      resolve(tmpDir, 'package.json'),
+      JSON.stringify({ scripts: { test: 'vitest run' } }),
+      'utf-8'
+    );
+    const result = resolveCoverageCommand({ testCommand: 'pnpm test' }, tmpDir);
+    expect(result.command).toBe('pnpm test -- --coverage');
+    expect(result.parser).toBe('vitest');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getIncrementalTestCommands — glob matching correctness
+// ---------------------------------------------------------------------------
+
+describe('getIncrementalTestCommands glob matching', () => {
+  const stacks = [
+    { name: 'node', testCommand: 'pnpm test', scope: ['src/**/*.ts'] },
+    { name: 'rust', testCommand: 'cargo test', scope: ['src/**/*.rs', 'Cargo.toml'] },
+  ];
+
+  it('does not match src/app.rs against src/**/*.ts', () => {
+    const commands = getIncrementalTestCommands(['src/app.rs'], stacks);
+    // Should only match rust, not node
+    expect(commands).toHaveLength(1);
+    expect(commands[0].stack).toBe('rust');
+  });
+
+  it('matches deeply nested files with **', () => {
+    const commands = getIncrementalTestCommands(['src/lib/utils/deep/file.ts'], stacks);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].stack).toBe('node');
+  });
+
+  it('matches exact filenames', () => {
+    const commands = getIncrementalTestCommands(['Cargo.toml'], stacks);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].stack).toBe('rust');
+  });
+
+  it('does not match files outside scope prefix', () => {
+    const commands = getIncrementalTestCommands(['lib/app.ts'], stacks);
+    expect(commands).toHaveLength(0);
+  });
 });
