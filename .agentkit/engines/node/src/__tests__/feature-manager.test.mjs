@@ -12,7 +12,7 @@ import {
 } from '../feature-manager.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -39,21 +39,68 @@ function makeFeature(overrides = {}) {
 
 function coreFeatures() {
   return [
-    makeFeature({ id: 'spec-sync', name: 'Spec Sync', category: 'core', alwaysOn: true, templateVars: ['hasSpecSync'] }),
-    makeFeature({ id: 'project-context', name: 'Project Context', category: 'core', alwaysOn: true, templateVars: ['hasProjectContext'] }),
+    makeFeature({
+      id: 'spec-sync',
+      name: 'Spec Sync',
+      category: 'core',
+      alwaysOn: true,
+      templateVars: ['hasSpecSync'],
+    }),
+    makeFeature({
+      id: 'project-context',
+      name: 'Project Context',
+      category: 'core',
+      alwaysOn: true,
+      templateVars: ['hasProjectContext'],
+    }),
   ];
 }
 
 function standardFeatures() {
   return [
     ...coreFeatures(),
-    makeFeature({ id: 'team-orchestration', default: true, templateVars: ['hasTeamOrchestration'] }),
-    makeFeature({ id: 'agent-personas', default: true, dependencies: ['team-orchestration'], templateVars: ['hasAgentPersonas'] }),
-    makeFeature({ id: 'quality-gates', default: true, category: 'quality', templateVars: ['hasQualityGates'] }),
-    makeFeature({ id: 'coding-rules', default: true, category: 'quality', templateVars: ['hasCodingRules'] }),
-    makeFeature({ id: 'doc-scaffolding', default: true, category: 'docs', templateVars: ['hasDocScaffolding'] }),
-    makeFeature({ id: 'mcp-integration', default: false, category: 'advanced', templateVars: ['hasMcpIntegration'] }),
-    makeFeature({ id: 'healthcheck', default: false, category: 'advanced', dependencies: ['quality-gates'], templateVars: ['hasHealthcheck'] }),
+    makeFeature({
+      id: 'team-orchestration',
+      default: true,
+      templateVars: ['hasTeamOrchestration'],
+    }),
+    makeFeature({
+      id: 'agent-personas',
+      default: true,
+      dependencies: ['team-orchestration'],
+      templateVars: ['hasAgentPersonas'],
+    }),
+    makeFeature({
+      id: 'quality-gates',
+      default: true,
+      category: 'quality',
+      templateVars: ['hasQualityGates'],
+    }),
+    makeFeature({
+      id: 'coding-rules',
+      default: true,
+      category: 'quality',
+      templateVars: ['hasCodingRules'],
+    }),
+    makeFeature({
+      id: 'doc-scaffolding',
+      default: true,
+      category: 'docs',
+      templateVars: ['hasDocScaffolding'],
+    }),
+    makeFeature({
+      id: 'mcp-integration',
+      default: false,
+      category: 'advanced',
+      templateVars: ['hasMcpIntegration'],
+    }),
+    makeFeature({
+      id: 'healthcheck',
+      default: false,
+      category: 'advanced',
+      dependencies: ['quality-gates'],
+      templateVars: ['hasHealthcheck'],
+    }),
   ];
 }
 
@@ -67,14 +114,25 @@ function standardPresets() {
     standard: {
       label: 'Standard',
       description: 'Teams + quality + docs',
-      features: ['team-orchestration', 'agent-personas', 'quality-gates', 'coding-rules', 'doc-scaffolding'],
+      features: [
+        'team-orchestration',
+        'agent-personas',
+        'quality-gates',
+        'coding-rules',
+        'doc-scaffolding',
+      ],
     },
     full: {
       label: 'Full',
       description: 'Everything',
       features: [
-        'team-orchestration', 'agent-personas', 'quality-gates', 'coding-rules',
-        'doc-scaffolding', 'mcp-integration', 'healthcheck',
+        'team-orchestration',
+        'agent-personas',
+        'quality-gates',
+        'coding-rules',
+        'doc-scaffolding',
+        'mcp-integration',
+        'healthcheck',
       ],
     },
   };
@@ -115,9 +173,13 @@ describe('resolveFeatures()', () => {
     });
 
     it('core features survive disabledFeatures', () => {
-      const result = resolveFeatures(features, {
-        disabledFeatures: ['spec-sync', 'project-context'],
-      }, presets);
+      const result = resolveFeatures(
+        features,
+        {
+          disabledFeatures: ['spec-sync', 'project-context'],
+        },
+        presets
+      );
       expect(result.has('spec-sync')).toBe(true);
       expect(result.has('project-context')).toBe(true);
     });
@@ -125,10 +187,14 @@ describe('resolveFeatures()', () => {
 
   describe('precedence: enabledFeatures > featurePreset > default', () => {
     it('uses enabledFeatures when present (precedence 1)', () => {
-      const result = resolveFeatures(features, {
-        enabledFeatures: ['mcp-integration'],
-        featurePreset: 'standard',
-      }, presets);
+      const result = resolveFeatures(
+        features,
+        {
+          enabledFeatures: ['mcp-integration'],
+          featurePreset: 'standard',
+        },
+        presets
+      );
       // enabledFeatures wins — only mcp-integration + core
       expect(result.has('mcp-integration')).toBe(true);
       expect(result.has('team-orchestration')).toBe(false);
@@ -153,27 +219,39 @@ describe('resolveFeatures()', () => {
     it('subtracts features from the enabled set', () => {
       // Disable both team-orchestration and its dependent agent-personas
       // to prevent transitive re-enable via dependency resolution
-      const result = resolveFeatures(features, {
-        disabledFeatures: ['team-orchestration', 'agent-personas'],
-      }, presets);
+      const result = resolveFeatures(
+        features,
+        {
+          disabledFeatures: ['team-orchestration', 'agent-personas'],
+        },
+        presets
+      );
       expect(result.has('team-orchestration')).toBe(false);
       expect(result.has('agent-personas')).toBe(false);
     });
 
     it('disabledFeatures wins over enabledFeatures', () => {
-      const result = resolveFeatures(features, {
-        enabledFeatures: ['mcp-integration'],
-        disabledFeatures: ['mcp-integration'],
-      }, presets);
+      const result = resolveFeatures(
+        features,
+        {
+          enabledFeatures: ['mcp-integration'],
+          disabledFeatures: ['mcp-integration'],
+        },
+        presets
+      );
       expect(result.has('mcp-integration')).toBe(false);
     });
   });
 
   describe('transitive dependency resolution', () => {
     it('auto-enables dependencies of enabled features', () => {
-      const result = resolveFeatures(features, {
-        enabledFeatures: ['agent-personas'],
-      }, presets);
+      const result = resolveFeatures(
+        features,
+        {
+          enabledFeatures: ['agent-personas'],
+        },
+        presets
+      );
       // agent-personas depends on team-orchestration
       expect(result.has('agent-personas')).toBe(true);
       expect(result.has('team-orchestration')).toBe(true);
@@ -181,9 +259,13 @@ describe('resolveFeatures()', () => {
 
     it('resolves multi-level dependencies', () => {
       // healthcheck → quality-gates (1 level)
-      const result = resolveFeatures(features, {
-        enabledFeatures: ['healthcheck'],
-      }, presets);
+      const result = resolveFeatures(
+        features,
+        {
+          enabledFeatures: ['healthcheck'],
+        },
+        presets
+      );
       expect(result.has('healthcheck')).toBe(true);
       expect(result.has('quality-gates')).toBe(true);
     });
@@ -256,7 +338,10 @@ describe('buildHookFeatureMap()', () => {
   it('maps specific hook files to features', () => {
     const features = [
       makeFeature({ id: 'quality-gates', affectsTemplates: ['claude/hooks/stop-build-check.sh'] }),
-      makeFeature({ id: 'sensitive-file-protection', affectsTemplates: ['claude/hooks/protect-sensitive.sh'] }),
+      makeFeature({
+        id: 'sensitive-file-protection',
+        affectsTemplates: ['claude/hooks/protect-sensitive.sh'],
+      }),
     ];
     const { specific, defaultFeature } = buildHookFeatureMap(features);
     expect(specific['stop-build-check']).toBe('quality-gates');
@@ -266,7 +351,10 @@ describe('buildHookFeatureMap()', () => {
 
   it('maps directory-level claim to defaultFeature', () => {
     const features = [
-      makeFeature({ id: 'permission-guards', affectsTemplates: ['claude/settings.json', 'claude/hooks/'] }),
+      makeFeature({
+        id: 'permission-guards',
+        affectsTemplates: ['claude/settings.json', 'claude/hooks/'],
+      }),
     ];
     const { defaultFeature } = buildHookFeatureMap(features);
     expect(defaultFeature).toBe('permission-guards');
@@ -392,10 +480,7 @@ describe('validateFeatureSpec()', () => {
     });
 
     it('warns about missing preset dependencies', () => {
-      const features = [
-        makeFeature({ id: 'a' }),
-        makeFeature({ id: 'b', dependencies: ['a'] }),
-      ];
+      const features = [makeFeature({ id: 'a' }), makeFeature({ id: 'b', dependencies: ['a'] })];
       const presets = { test: { label: 'T', description: 'D', features: ['b'] } };
       const { warnings } = validateFeatureSpec(features, presets);
       expect(warnings.some((w) => w.includes('depends on "a"'))).toBe(true);
@@ -430,7 +515,9 @@ describe('validateOverlayFeatures()', () => {
       features,
       presets
     );
-    expect(warnings.some((w) => w.includes('both "enabledFeatures" and "featurePreset"'))).toBe(true);
+    expect(warnings.some((w) => w.includes('both "enabledFeatures" and "featurePreset"'))).toBe(
+      true
+    );
   });
 
   it('errors for unknown featurePreset', () => {
@@ -500,7 +587,9 @@ describe('loadFeatureSpec()', () => {
       resolve(specDir, 'features.yaml'),
       JSON.stringify({
         schemaVersion: 999,
-        features: [{ id: 'test', name: 'Test', category: 'core', description: 'x', templateVars: ['t'] }],
+        features: [
+          { id: 'test', name: 'Test', category: 'core', description: 'x', templateVars: ['t'] },
+        ],
       })
     );
 
@@ -599,5 +688,281 @@ describe('validateAffectsTemplates()', () => {
     const features = [makeFeature({ id: 'x', affectsTemplates: ['nonexistent/rules/*.mdc'] })];
     const { warnings } = validateAffectsTemplates(features, TEMPLATES_DIR);
     expect(warnings.some((w) => w.includes('base directory does not exist'))).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CLI handler integration tests
+// ---------------------------------------------------------------------------
+
+import {
+  runFeatures,
+  runFeatureEnable,
+  runFeatureDisable,
+  runFeaturePreset,
+} from '../feature-manager.mjs';
+import yaml from 'js-yaml';
+
+describe('CLI handlers', () => {
+  let tmpDir;
+  let agentkitRoot;
+  let projectRoot;
+  const origLog = console.log;
+
+  function setupCliFixture(overlaySettings = {}) {
+    tmpDir = mkdtempSync(resolve(tmpdir(), 'fm-cli-'));
+    agentkitRoot = resolve(tmpDir, '.agentkit');
+    projectRoot = tmpDir;
+
+    // Create features.yaml
+    mkdirSync(resolve(agentkitRoot, 'spec'), { recursive: true });
+    writeFileSync(
+      resolve(agentkitRoot, 'spec', 'features.yaml'),
+      yaml.dump({
+        schemaVersion: 1,
+        features: [
+          {
+            id: 'core-engine',
+            name: 'Core Engine',
+            category: 'core',
+            description: 'Core',
+            alwaysOn: true,
+            default: true,
+            dependencies: [],
+            templateVars: [],
+          },
+          {
+            id: 'test-feature',
+            name: 'Test Feature',
+            category: 'workflow',
+            description: 'Testable',
+            alwaysOn: false,
+            default: true,
+            dependencies: [],
+            templateVars: ['hasTestFeature'],
+          },
+          {
+            id: 'optional-feature',
+            name: 'Optional Feature',
+            category: 'quality',
+            description: 'Optional',
+            alwaysOn: false,
+            default: false,
+            dependencies: [],
+            templateVars: ['hasOptionalFeature'],
+          },
+          {
+            id: 'dep-feature',
+            name: 'Dep Feature',
+            category: 'quality',
+            description: 'Has deps',
+            alwaysOn: false,
+            default: false,
+            dependencies: ['test-feature'],
+            templateVars: ['hasDepFeature'],
+          },
+        ],
+        presets: {
+          minimal: {
+            label: 'Minimal',
+            description: 'Just the basics',
+            features: ['test-feature'],
+          },
+          full: {
+            label: 'Full',
+            description: 'Everything',
+            features: ['test-feature', 'optional-feature', 'dep-feature'],
+          },
+        },
+      }),
+      'utf-8'
+    );
+
+    // Create overlay settings
+    const overlayName = 'test-repo';
+    mkdirSync(resolve(agentkitRoot, 'overlays', overlayName), { recursive: true });
+    writeFileSync(
+      resolve(agentkitRoot, 'overlays', overlayName, 'settings.yaml'),
+      yaml.dump({ repoName: overlayName, ...overlaySettings }),
+      'utf-8'
+    );
+
+    // Create .agentkit-repo marker
+    writeFileSync(resolve(projectRoot, '.agentkit-repo'), overlayName, 'utf-8');
+  }
+
+  afterEach(() => {
+    console.log = origLog;
+    if (tmpDir) {
+      rmSync(tmpDir, { recursive: true, force: true });
+      tmpDir = null;
+    }
+  });
+
+  describe('runFeatures', () => {
+    it('lists features without error', async () => {
+      setupCliFixture();
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+
+      await runFeatures({ agentkitRoot, projectRoot, flags: {} });
+
+      const output = logs.join('\n');
+      expect(output).toContain('core-engine');
+      expect(output).toContain('test-feature');
+      expect(output).toContain('optional-feature');
+    });
+
+    it('shows preset mode when featurePreset is set', async () => {
+      setupCliFixture({ featurePreset: 'minimal' });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+
+      await runFeatures({ agentkitRoot, projectRoot, flags: {} });
+
+      expect(logs.join('\n')).toContain('Feature preset: minimal');
+    });
+  });
+
+  describe('runFeatureEnable', () => {
+    it('enables a disabled feature', async () => {
+      setupCliFixture();
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+
+      // Mock the sync import to avoid running full sync
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: vi.fn(),
+      }));
+
+      await runFeatureEnable({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['optional-feature'] },
+      });
+
+      // Verify settings were updated
+      const settings = yaml.load(
+        readFileSync(resolve(agentkitRoot, 'overlays', 'test-repo', 'settings.yaml'), 'utf-8')
+      );
+      expect(settings.enabledFeatures).toContain('optional-feature');
+    });
+
+    it('throws for unknown feature', async () => {
+      setupCliFixture();
+      await expect(
+        runFeatureEnable({
+          agentkitRoot,
+          projectRoot,
+          flags: { _args: ['nonexistent'] },
+        })
+      ).rejects.toThrow('Unknown feature');
+    });
+
+    it('throws without arguments', async () => {
+      setupCliFixture();
+      await expect(
+        runFeatureEnable({ agentkitRoot, projectRoot, flags: { _args: [] } })
+      ).rejects.toThrow('Usage');
+    });
+  });
+
+  describe('runFeatureDisable', () => {
+    it('disables a non-core feature', async () => {
+      setupCliFixture({ enabledFeatures: ['test-feature', 'optional-feature'] });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: vi.fn(),
+      }));
+
+      await runFeatureDisable({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['optional-feature'] },
+      });
+
+      const settings = yaml.load(
+        readFileSync(resolve(agentkitRoot, 'overlays', 'test-repo', 'settings.yaml'), 'utf-8')
+      );
+      expect(settings.disabledFeatures).toContain('optional-feature');
+    });
+
+    it('blocks disabling alwaysOn features', async () => {
+      setupCliFixture();
+      await expect(
+        runFeatureDisable({
+          agentkitRoot,
+          projectRoot,
+          flags: { _args: ['core-engine'] },
+        })
+      ).rejects.toThrow(/cannot disable core|always enabled/i);
+    });
+  });
+
+  describe('runFeaturePreset', () => {
+    it('applies a valid preset', async () => {
+      setupCliFixture();
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: vi.fn(),
+      }));
+
+      await runFeaturePreset({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['minimal'] },
+      });
+
+      const settings = yaml.load(
+        readFileSync(resolve(agentkitRoot, 'overlays', 'test-repo', 'settings.yaml'), 'utf-8')
+      );
+      expect(settings.featurePreset).toBe('minimal');
+    });
+
+    it('throws for unknown preset', async () => {
+      setupCliFixture();
+      await expect(
+        runFeaturePreset({
+          agentkitRoot,
+          projectRoot,
+          flags: { _args: ['nonexistent'] },
+        })
+      ).rejects.toThrow(/unknown preset|not found/i);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveFeatures: dependency resurrection warning
+// ---------------------------------------------------------------------------
+
+describe('resolveFeatures() dependency resurrection', () => {
+  it('warns when a disabled feature is resurrected by dependency', () => {
+    const features = [
+      makeFeature({ id: 'a', dependencies: ['b'], default: true }),
+      makeFeature({ id: 'b', default: false }),
+    ];
+    const overlay = { disabledFeatures: ['b'] };
+    const logs = [];
+    const result = resolveFeatures(features, overlay, {}, { log: (msg) => logs.push(msg) });
+
+    expect(result.has('b')).toBe(true);
+    expect(logs.some((m) => m.includes('re-enabled'))).toBe(true);
+  });
+
+  it('does not warn when disabled feature has no dependents', () => {
+    const features = [
+      makeFeature({ id: 'a', default: true }),
+      makeFeature({ id: 'b', default: true }),
+    ];
+    const overlay = { disabledFeatures: ['b'] };
+    const logs = [];
+    resolveFeatures(features, overlay, {}, { log: (msg) => logs.push(msg) });
+
+    expect(logs).toHaveLength(0);
   });
 });

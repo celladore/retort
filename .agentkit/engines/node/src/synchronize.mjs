@@ -244,21 +244,8 @@ async function syncGitHub(templatesDir, tmpDir, vars, version, repoName) {
 }
 
 /**
- * Copies templates/renovate to tmpDir root (renovate.json).
+ * Copies templates/renovate to tmpDir root (renovate.json) and other editor configs.
  */
-async function syncRenovateConfig(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(
-    templatesDir,
-    vars.overlayTemplatesDir,
-    'renovate',
-    tmpDir,
-    '.',
-    vars,
-    version,
-    repoName
-  );
-}
-
 async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) {
   await syncDirectCopy(
     templatesDir,
@@ -1226,8 +1213,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   let featureVars = {};
   let hookFeatureMap = { specific: {}, defaultFeature: null };
   try {
-    const { features, presets } = loadFeatureSpec(agentkitRoot);
-    const enabledFeatures = resolveFeatures(features, overlaySettings, presets);
+    const { features, presets } = loadFeatureSpec(agentkitRoot, { log });
+    const enabledFeatures = resolveFeatures(features, overlaySettings, presets, { log });
     featureVars = buildFeatureVars(features, enabledFeatures);
     hookFeatureMap = buildHookFeatureMap(features);
     log(`[agentkit:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
@@ -1348,16 +1335,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     if (targets.has('claude')) {
       gatedTasks.push(
-        syncDirectCopy(
-          templatesDir,
-          vars.overlayTemplatesDir,
-          'claude/hooks',
-          tmpDir,
-          '.claude/hooks',
-          vars,
-          version,
-          headerRepoName
-        ),
+        syncClaudeHooks(templatesDir, tmpDir, vars, version, headerRepoName, hookFeatureMap),
         syncClaudeSettings(
           templatesDir,
           tmpDir,

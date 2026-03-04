@@ -3,7 +3,8 @@
  * Extracted from orchestrator.mjs to break circular imports.
  * (orchestrator.mjs ↔ agent-integration.mjs both need appendEvent)
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
+import { appendFile, mkdir } from 'fs/promises';
 import { resolve } from 'path';
 
 function stateDir(projectRoot) {
@@ -20,17 +21,17 @@ function eventsPath(projectRoot) {
  * @param {string} action - What happened (e.g. 'phase_advanced', 'check_completed')
  * @param {object} data - Event data
  */
-export function appendEvent(projectRoot, action, data = {}) {
+export async function appendEvent(projectRoot, action, data = {}) {
   const dir = stateDir(projectRoot);
   if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
+    await mkdir(dir, { recursive: true });
   }
   const event = {
     timestamp: new Date().toISOString(),
     action,
     ...data,
   };
-  appendFileSync(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
+  await appendFile(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
 }
 
 /**

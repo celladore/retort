@@ -52,9 +52,11 @@ export const SUPPORTED_SCHEMA_VERSION = 1;
  * Checks schemaVersion for forward-compatibility warnings.
  *
  * @param {string} agentkitRoot - Path to the .agentkit/ directory
+ * @param {{ log?: Function }} [options] - Optional logger
  * @returns {{ features: object[], presets: object, schemaVersion: number }}
  */
-export function loadFeatureSpec(agentkitRoot) {
+export function loadFeatureSpec(agentkitRoot, options = {}) {
+  const log = options.log || console.warn;
   const featuresPath = resolve(agentkitRoot, 'spec', 'features.yaml');
   if (!existsSync(featuresPath)) {
     throw new Error(`features.yaml not found at ${featuresPath}`);
@@ -66,7 +68,7 @@ export function loadFeatureSpec(agentkitRoot) {
 
   const schemaVersion = spec.schemaVersion || 1;
   if (schemaVersion > SUPPORTED_SCHEMA_VERSION) {
-    console.warn(
+    log(
       `[agentkit:features] Warning: features.yaml schemaVersion ${schemaVersion} ` +
         `is newer than supported version ${SUPPORTED_SCHEMA_VERSION}. ` +
         `Some feature fields may not be processed correctly. ` +
@@ -117,15 +119,15 @@ export function buildFeatureIndex(features) {
  * @param {object[]} features - Feature definitions from features.yaml
  * @param {object} overlaySettings - Overlay settings.yaml content
  * @param {object} presets - Preset definitions from features.yaml
+ * @param {{ log?: Function }} [options] - Optional logger
  * @returns {Set<string>} Set of enabled feature IDs
  */
-export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
+export function resolveFeatures(features, overlaySettings = {}, presets = {}, options = {}) {
+  const log = options.log;
   const index = buildFeatureIndex(features);
 
   // 1. Identify always-on features (survive all exclusions)
-  const alwaysOn = new Set(
-    features.filter((f) => f.alwaysOn).map((f) => f.id)
-  );
+  const alwaysOn = new Set(features.filter((f) => f.alwaysOn).map((f) => f.id));
 
   // 2-4. Determine base enabled set (strict precedence)
   let enabled;
@@ -145,9 +147,7 @@ export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
     resolutionMode = 'preset';
   } else {
     // Precedence 3: Default — features with default: true
-    enabled = new Set(
-      features.filter((f) => f.default === true).map((f) => f.id)
-    );
+    enabled = new Set(features.filter((f) => f.default === true).map((f) => f.id));
     resolutionMode = 'default';
   }
 
@@ -170,6 +170,8 @@ export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
   //    If B also depends on C, C is auto-enabled too.
   const resolved = new Set(enabled);
   const visited = new Set();
+  const disabledSet = new Set(overlaySettings.disabledFeatures || []);
+  const resurrected = [];
 
   function resolveDeps(featureId) {
     if (visited.has(featureId)) return;
@@ -178,6 +180,9 @@ export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
     if (!feature) return;
     for (const dep of feature.dependencies || []) {
       if (index.has(dep)) {
+        if (!resolved.has(dep) && disabledSet.has(dep)) {
+          resurrected.push({ dep, requiredBy: featureId });
+        }
         resolved.add(dep);
         resolveDeps(dep);
       }
@@ -186,6 +191,19 @@ export function resolveFeatures(features, overlaySettings = {}, presets = {}) {
 
   for (const id of enabled) {
     resolveDeps(id);
+  }
+
+  // Warn when dependency resolution overrides explicit disables
+  for (const { dep, requiredBy } of resurrected) {
+    const msg =
+      `[agentkit:features] Warning: "${dep}" is in disabledFeatures but was ` +
+      `re-enabled because "${requiredBy}" depends on it. ` +
+      `Remove "${dep}" from disabledFeatures or disable "${requiredBy}" instead.`;
+    if (typeof log === 'function') {
+      log(msg);
+    } else {
+      console.warn(msg);
+    }
   }
 
   return resolved;
@@ -389,7 +407,8 @@ export async function runFeatures({ agentkitRoot, projectRoot, flags }) {
   if (flags?.verbose) {
     console.log('  AVAILABLE PRESETS');
     for (const [name, preset] of Object.entries(presets)) {
-      const featureCount = (preset.features || []).length + features.filter((f) => f.alwaysOn).length;
+      const featureCount =
+        (preset.features || []).length + features.filter((f) => f.alwaysOn).length;
       console.log(`    ${name.padEnd(12)} ${preset.label} (${featureCount} features)`);
       console.log(`    ${' '.repeat(12)} ${preset.description}`);
       const featureIds = (preset.features || []).join(', ');
@@ -442,7 +461,9 @@ export async function runFeatureEnable({ agentkitRoot, projectRoot, flags }) {
   if (!Array.isArray(settings.enabledFeatures)) {
     settings.enabledFeatures = [...currentEnabled];
     if (settings.featurePreset) {
-      console.log(`[agentkit:features] Switching from preset "${settings.featurePreset}" to explicit mode.`);
+      console.log(
+        `[agentkit:features] Switching from preset "${settings.featurePreset}" to explicit mode.`
+      );
       delete settings.featurePreset;
     }
   }
@@ -455,9 +476,7 @@ export async function runFeatureEnable({ agentkitRoot, projectRoot, flags }) {
 
   // Remove from disabledFeatures if present
   if (Array.isArray(settings.disabledFeatures)) {
-    settings.disabledFeatures = settings.disabledFeatures.filter(
-      (id) => !toEnable.includes(id)
-    );
+    settings.disabledFeatures = settings.disabledFeatures.filter((id) => !toEnable.includes(id));
     if (settings.disabledFeatures.length === 0) {
       delete settings.disabledFeatures;
     }
@@ -535,7 +554,9 @@ export async function runFeatureDisable({ agentkitRoot, projectRoot, flags }) {
   if (!Array.isArray(settings.enabledFeatures)) {
     settings.enabledFeatures = [...currentEnabled];
     if (settings.featurePreset) {
-      console.log(`[agentkit:features] Switching from preset "${settings.featurePreset}" to explicit mode.`);
+      console.log(
+        `[agentkit:features] Switching from preset "${settings.featurePreset}" to explicit mode.`
+      );
       delete settings.featurePreset;
     }
   }
@@ -623,7 +644,15 @@ export function validateFeatureSpec(features, presets) {
   const warnings = [];
   const index = buildFeatureIndex(features);
   const seenIds = new Set();
-  const validCategories = new Set(['core', 'workflow', 'quality', 'docs', 'security', 'infra', 'advanced']);
+  const validCategories = new Set([
+    'core',
+    'workflow',
+    'quality',
+    'docs',
+    'security',
+    'infra',
+    'advanced',
+  ]);
 
   for (let i = 0; i < features.length; i++) {
     const f = features[i];
@@ -655,7 +684,9 @@ export function validateFeatureSpec(features, presets) {
     } else {
       for (const varName of f.templateVars) {
         if (typeof varName !== 'string' || !/^[a-zA-Z][a-zA-Z0-9]*$/.test(varName)) {
-          errors.push(`${path}: invalid templateVar name "${varName}" — must be camelCase alphanumeric`);
+          errors.push(
+            `${path}: invalid templateVar name "${varName}" — must be camelCase alphanumeric`
+          );
         }
       }
     }
@@ -701,7 +732,9 @@ export function validateFeatureSpec(features, presets) {
       // Warn if preset includes alwaysOn features (redundant)
       const feature = index.get(id);
       if (feature?.alwaysOn) {
-        warnings.push(`${presetPath}: includes always-on feature "${id}" (redundant — always-on features are auto-included)`);
+        warnings.push(
+          `${presetPath}: includes always-on feature "${id}" (redundant — always-on features are auto-included)`
+        );
       }
 
       // Warn if a feature's dependencies are missing from the preset

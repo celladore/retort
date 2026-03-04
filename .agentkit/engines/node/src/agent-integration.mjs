@@ -111,7 +111,12 @@ export function loadTeamHandoffChains(agentkitRoot) {
  * @param {Record<string, string[]>} agentNotifies - Agent-id → notifies map
  * @returns {Promise<{ created: object[], errors: string[] }>}
  */
-export async function processNotifications(projectRoot, completedTask, agentNotifies) {
+export async function processNotifications(
+  projectRoot,
+  completedTask,
+  agentNotifies,
+  _cachedTasks
+) {
   const created = [];
   const errors = [];
 
@@ -138,7 +143,7 @@ export async function processNotifications(projectRoot, completedTask, agentNoti
   }
 
   // Check for existing notification tasks to avoid duplicates
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingNotifTargets = new Set();
   for (const t of existingTasks) {
     if (t.context?.notificationFrom === completedTask.id) {
@@ -199,7 +204,7 @@ export async function processNotifications(projectRoot, completedTask, agentNoti
  * @param {Record<string, string[]>} handoffChains - Team handoff chain map
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function autoCreateTestTask(projectRoot, completedTask, handoffChains) {
+export async function autoCreateTestTask(projectRoot, completedTask, handoffChains, _cachedTasks) {
   if (!completedTask || completedTask.status !== 'completed') {
     return { created: null };
   }
@@ -225,7 +230,7 @@ export async function autoCreateTestTask(projectRoot, completedTask, handoffChai
   }
 
   // Check if a test task already exists for this completed task
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingTestTask = existingTasks.find(
     (t) => t.context?.testFor === completedTask.id && t.type === 'test'
   );
@@ -286,7 +291,7 @@ export async function autoCreateTestTask(projectRoot, completedTask, handoffChai
  * @param {object} completedTask - The task that just completed
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function autoCreateIntegrationTestTask(projectRoot, completedTask) {
+export async function autoCreateIntegrationTestTask(projectRoot, completedTask, _cachedTasks) {
   if (!completedTask || completedTask.status !== 'completed') {
     return { created: null };
   }
@@ -300,7 +305,7 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
   }
 
   // Find if there's a complementary task (backend ↔ frontend) that's also completed
-  const { tasks } = await listTasks(projectRoot);
+  const tasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const isBackend = assignees.some((a) => a === 'team-backend' || a === 'backend');
   const complementTeam = isBackend ? 'team-frontend' : 'team-backend';
 
@@ -365,7 +370,7 @@ export async function autoCreateIntegrationTestTask(projectRoot, completedTask) 
  * @param {Record<string, string[]>} handoffChains - Team handoff chain map
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function autoCreateDocTask(projectRoot, completedTask, handoffChains) {
+export async function autoCreateDocTask(projectRoot, completedTask, handoffChains, _cachedTasks) {
   if (!completedTask || completedTask.status !== 'completed') {
     return { created: null };
   }
@@ -380,7 +385,7 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
   }
 
   // Check for existing doc task
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingDocTask = existingTasks.find(
     (t) => t.context?.docFor === completedTask.id && t.type === 'document'
   );
@@ -454,7 +459,12 @@ export async function autoCreateDocTask(projectRoot, completedTask, handoffChain
  * @param {Record<string, string[]>} handoffChains - Team handoff chain map
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function autoCreateSecurityReviewTask(projectRoot, completedTask, handoffChains) {
+export async function autoCreateSecurityReviewTask(
+  projectRoot,
+  completedTask,
+  handoffChains,
+  _cachedTasks
+) {
   if (!completedTask || completedTask.status !== 'completed') {
     return { created: null };
   }
@@ -469,7 +479,7 @@ export async function autoCreateSecurityReviewTask(projectRoot, completedTask, h
   }
 
   // Check for existing security task
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingSecTask = existingTasks.find(
     (t) => t.context?.securityReviewFor === completedTask.id && t.type === 'review'
   );
@@ -521,7 +531,7 @@ export async function autoCreateSecurityReviewTask(projectRoot, completedTask, h
  * @param {object} completedTask - The task that just completed
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function autoCreateDependencyAuditTask(projectRoot, completedTask) {
+export async function autoCreateDependencyAuditTask(projectRoot, completedTask, _cachedTasks) {
   if (!completedTask || completedTask.status !== 'completed') {
     return { created: null };
   }
@@ -557,7 +567,7 @@ export async function autoCreateDependencyAuditTask(projectRoot, completedTask) 
   }
 
   // Check for existing audit task
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingAudit = existingTasks.find(
     (t) => t.context?.dependencyAuditFor === completedTask.id
   );
@@ -606,7 +616,12 @@ export async function autoCreateDependencyAuditTask(projectRoot, completedTask) 
  * @param {Record<string, string[]>} handoffChains - Team handoff chain map
  * @returns {Promise<{ created: object|null, error?: string }>}
  */
-export async function autoCreateQualityReviewTask(projectRoot, completedTask, handoffChains) {
+export async function autoCreateQualityReviewTask(
+  projectRoot,
+  completedTask,
+  handoffChains,
+  _cachedTasks
+) {
   if (!completedTask || completedTask.status !== 'completed') {
     return { created: null };
   }
@@ -621,7 +636,7 @@ export async function autoCreateQualityReviewTask(projectRoot, completedTask, ha
   }
 
   // Check for existing quality task
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingQuality = existingTasks.find(
     (t) => t.context?.qualityReviewFor === completedTask.id
   );
@@ -670,7 +685,8 @@ export async function autoCreateQualityReviewTask(projectRoot, completedTask, ha
 export async function routeTestFailureToTestingTeam(
   projectRoot,
   failedCheckResult,
-  changedFileTeams
+  changedFileTeams,
+  _cachedTasks
 ) {
   if (!failedCheckResult || failedCheckResult.overallPassed) {
     return { created: null };
@@ -696,7 +712,7 @@ export async function routeTestFailureToTestingTeam(
   }
 
   // Check for existing test failure task
-  const { tasks: existingTasks } = await listTasks(projectRoot);
+  const existingTasks = _cachedTasks || (await listTasks(projectRoot)).tasks;
   const existingFailureTask = existingTasks.find(
     (t) => t.context?.testFailureRouting === true && !TERMINAL_STATES.includes(t.status)
   );
@@ -819,10 +835,11 @@ export function resolveCoverageCommand(stack, projectRoot) {
 
   // Detect framework from explicit test command
   if (testCmd.includes('vitest')) {
-    return {
-      command: testCmd.replace(/vitest\s+run/, 'vitest run --coverage'),
-      parser: 'vitest',
-    };
+    // Handle both `vitest run` and bare `vitest`
+    const cmd = /vitest\s+run/.test(testCmd)
+      ? testCmd.replace(/vitest\s+run/, 'vitest run --coverage')
+      : testCmd.replace(/vitest/, 'vitest --coverage');
+    return { command: cmd, parser: 'vitest' };
   }
   if (testCmd.includes('jest')) {
     return { command: `${testCmd} --coverage`, parser: 'jest' };
@@ -926,32 +943,28 @@ export function parseCoveragePercentage(stdout, parser) {
 // ---------------------------------------------------------------------------
 
 /**
- * Match a file path against a simple glob pattern.
- * Supports double-star (any directory depth), single-star (any name segment),
- * and literal matches. E.g. "src/STAR-STAR/STAR.ts", "STAR.json", "Cargo.toml".
- *
- * @param {string} file
- * @param {string} pattern
- * @returns {boolean}
+ * Cache for compiled glob regex patterns — avoids recompilation per file.
+ * @type {Map<string, RegExp>}
  */
-function matchGlob(file, pattern) {
-  // Exact match
-  if (file === pattern) return true;
+const _globCache = new Map();
 
-  // Convert glob pattern to regex
-  // Escape regex-special characters except * and ?
+/**
+ * Compile a glob pattern to a RegExp (cached).
+ * @param {string} pattern
+ * @returns {RegExp}
+ */
+function compileGlob(pattern) {
+  if (_globCache.has(pattern)) return _globCache.get(pattern);
+
   let regex = '';
   let i = 0;
   while (i < pattern.length) {
     const ch = pattern[i];
     if (ch === '*' && pattern[i + 1] === '*') {
-      // ** — match any path segment(s), including nested directories
-      // Skip the optional trailing slash after **
       i += 2;
       if (pattern[i] === '/') i++;
       regex += '(?:.+/)?';
     } else if (ch === '*') {
-      // * — match within a single path segment (no slashes)
       regex += '[^/]*';
       i++;
     } else if (ch === '?') {
@@ -966,12 +979,23 @@ function matchGlob(file, pattern) {
     }
   }
 
-  // If pattern ends with /, match any file under that directory
-  if (pattern.endsWith('/')) {
-    return new RegExp('^' + regex).test(file);
-  }
+  const compiled = pattern.endsWith('/') ? new RegExp('^' + regex) : new RegExp('^' + regex + '$');
+  _globCache.set(pattern, compiled);
+  return compiled;
+}
 
-  return new RegExp('^' + regex + '$').test(file);
+/**
+ * Match a file path against a simple glob pattern.
+ * Supports double-star (any directory depth), single-star (any name segment),
+ * and literal matches. E.g. "src/STAR-STAR/STAR.ts", "STAR.json", "Cargo.toml".
+ *
+ * @param {string} file
+ * @param {string} pattern
+ * @returns {boolean}
+ */
+function matchGlob(file, pattern) {
+  if (file === pattern) return true;
+  return compileGlob(pattern).test(file);
 }
 
 /**
@@ -1038,6 +1062,9 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
   const { agentNotifies } = loadAgentNotifies(agentkitRoot);
   const handoffChains = loadTeamHandoffChains(agentkitRoot);
 
+  // Pre-load tasks once to avoid repeated disk I/O across sub-functions
+  const { tasks: cachedTasks } = await listTasks(projectRoot);
+
   // Gap 8: Validate test acceptance criteria
   const validation = validateTestAcceptanceCriteria(completedTask);
   if (!validation.passed) {
@@ -1046,7 +1073,12 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Gap 1: Process notifications
   try {
-    const notifResult = await processNotifications(projectRoot, completedTask, agentNotifies);
+    const notifResult = await processNotifications(
+      projectRoot,
+      completedTask,
+      agentNotifies,
+      cachedTasks
+    );
     result.notifications.push(...notifResult.created);
     result.errors.push(...notifResult.errors);
   } catch (err) {
@@ -1055,7 +1087,12 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Gap 2: Auto-create test tasks
   try {
-    const testResult = await autoCreateTestTask(projectRoot, completedTask, handoffChains);
+    const testResult = await autoCreateTestTask(
+      projectRoot,
+      completedTask,
+      handoffChains,
+      cachedTasks
+    );
     if (testResult.created) {
       result.testTasks.push(testResult.created);
     }
@@ -1068,7 +1105,7 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Gap 4: Auto-create integration test tasks
   try {
-    const intResult = await autoCreateIntegrationTestTask(projectRoot, completedTask);
+    const intResult = await autoCreateIntegrationTestTask(projectRoot, completedTask, cachedTasks);
     if (intResult.created) {
       result.integrationTests.push(intResult.created);
     }
@@ -1081,7 +1118,12 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Auto-create documentation tasks (docs agent gap)
   try {
-    const docResult = await autoCreateDocTask(projectRoot, completedTask, handoffChains);
+    const docResult = await autoCreateDocTask(
+      projectRoot,
+      completedTask,
+      handoffChains,
+      cachedTasks
+    );
     if (docResult.created) {
       result.docTasks.push(docResult.created);
     }
@@ -1094,7 +1136,12 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Auto-create security review tasks (security agent gap)
   try {
-    const secResult = await autoCreateSecurityReviewTask(projectRoot, completedTask, handoffChains);
+    const secResult = await autoCreateSecurityReviewTask(
+      projectRoot,
+      completedTask,
+      handoffChains,
+      cachedTasks
+    );
     if (secResult.created) {
       result.securityTasks.push(secResult.created);
     }
@@ -1107,7 +1154,7 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Auto-create dependency audit tasks
   try {
-    const depResult = await autoCreateDependencyAuditTask(projectRoot, completedTask);
+    const depResult = await autoCreateDependencyAuditTask(projectRoot, completedTask, cachedTasks);
     if (depResult.created) {
       result.dependencyAudits.push(depResult.created);
     }
@@ -1120,7 +1167,12 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
 
   // Auto-create quality review tasks (testing→quality chain)
   try {
-    const qualResult = await autoCreateQualityReviewTask(projectRoot, completedTask, handoffChains);
+    const qualResult = await autoCreateQualityReviewTask(
+      projectRoot,
+      completedTask,
+      handoffChains,
+      cachedTasks
+    );
     if (qualResult.created) {
       result.qualityReviews.push(qualResult.created);
     }
