@@ -91,6 +91,15 @@ jobs:
               return;
             }
 
+            const isAgentkitForgeRepo =
+              context.repo.owner.toLowerCase() === 'justaghost' &&
+              context.repo.repo.toLowerCase() === 'agentkit-forge';
+
+            if (isAgentkitForgeRepo) {
+              core.info('Running in agentkit-forge source repo; upstream issue link check skipped.');
+              return;
+            }
+
             const body = pr.body || '';
             const hasUpstreamIssueLink = /https:\/\/github\.com\/JustAGhosT\/agentkit-forge\/issues\/\d+/i.test(body);
 
