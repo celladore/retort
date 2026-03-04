@@ -292,9 +292,9 @@ Effort vs risk reduction. Each fix should map to one or more evaluation dimensio
 3. **Review deployment configs** — rollback strategies, environment separation, secrets management
 4. **Assess observability** — logging, monitoring, alerting, tracing setup
 5. **Evaluate hard gates first** — if any fail, report FAIL immediately with remediation guidance
-6. **Score each dimension** with evidence citations (file paths, line numbers)
-7. **Produce the summary table** and narrative sections
-8. **Save the evaluation** (unless `--no-save` was passed): write to `docs/evaluations/infra-eval-<date>.md`. Create the `docs/evaluations/` directory if it does not exist. Respect `--output` format (markdown, json, or yaml) for the saved file extension
+6. If `--gates-only` is set, produce only gate PASS/FAIL findings with overall status and remediation guidance.
+7. If `--gates-only` is not set, **score each dimension** with evidence citations (file paths, line numbers), then **produce the summary table** and narrative sections.
+8. **Save the evaluation** (unless `--no-save` was passed): write to `docs/evaluations/infra-eval-<date>.<ext>`, where `<ext>` is derived from `--output` (`md`, `json`, or `yaml`). Create the `docs/evaluations/` directory if it does not exist.
 
 ---
 
@@ -314,17 +314,20 @@ Emit two required outputs:
 {
   "eventType": "INFRA_EVAL_COMPLETED",
   "phase": "evaluation",
-  "overall_score": 72,
-  "hard_gates_passed": true,
-  "dimension_scores": {
-    "reliability": 3,
-    "cost": 4,
-    "security": 3,
-    "infra": 3,
-    "scalability": 3,
-    "architecture": 4,
-    "code": 4,
-    "ops": 3
+  "timestamp": "<RFC3339>",
+  "data": {
+    "overall_score": 72,
+    "hard_gates_passed": true,
+    "dimension_scores": {
+      "reliability": 3,
+      "cost": 4,
+      "security": 3,
+      "infra": 3,
+      "scalability": 3,
+      "architecture": 4,
+      "code": 4,
+      "ops": 3
+    }
   }
 }
 ```
