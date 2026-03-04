@@ -1,6 +1,6 @@
 ---
 description: 'Create a history document from templates for significant work (bug fixes, features, implementations, migrations)'
-allowed-tools: Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *), Bash(cat *)
+allowed-tools: Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
 last_updated: '{{syncDate}}'
@@ -31,7 +31,8 @@ When `--auto` is specified or no arguments are given:
 1. **Scan recent git history:**
    ```bash
    git log --oneline -20
-   git diff --stat HEAD~10..HEAD
+   # Use merge-base if available (handles shallow clones and short branches)
+   git diff --stat $(git merge-base origin/main HEAD 2>/dev/null || echo HEAD~5)..HEAD
    ```
 
 2. **Determine document type from commit messages and changed files:**

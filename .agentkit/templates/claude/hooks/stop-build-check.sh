@@ -59,28 +59,31 @@ if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.m
     fi
 fi
 
-# -- Check for non-conventional commit messages on current branch ----------
+# -- Resolve branch names (shared by commit-check and history-doc-check) ----
+BRANCH=""
+DEFAULT_BRANCH=""
 if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
     BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
     DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+fi
 
-    if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
-        CC_PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?!?:.+'
-        BAD_COMMITS=""
-        if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
-            while IFS= read -r line; do
-                MSG=$(echo "$line" | cut -d' ' -f2-)
-                if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
-                    BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
-                fi
-            done < <(git -C "$CWD" log --oneline "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null || true)
-        fi
+# -- Check for non-conventional commit messages on current branch ----------
+if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
+    CC_PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?!?:.+'
+    BAD_COMMITS=""
+    if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        while IFS= read -r line; do
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
+                BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
+            fi
+        done < <(git -C "$CWD" log --oneline "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null || true)
+    fi
 
-        if [[ -n "$BAD_COMMITS" ]]; then
-            FAILURE_REASON="Commits with non-conventional messages detected. PR titles must follow 'type(scope): description'.\nBad commits:\n${BAD_COMMITS}\nFix with: git rebase -i and reword, or ensure the PR title follows the format."
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
+    if [[ -n "$BAD_COMMITS" ]]; then
+        FAILURE_REASON="Commits with non-conventional messages detected. PR titles must follow 'type(scope): description'.\nBad commits:\n${BAD_COMMITS}\nFix with: git rebase -i and reword, or ensure the PR title follows the format."
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
     fi
 fi
 
@@ -181,31 +184,26 @@ if [[ -f "${CWD}/pyproject.toml" ]]; then
 fi
 
 # -- Check for missing history documentation --------------------------------
-if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
-    BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
-    DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
+    # Count non-trivial changed files (source files, not config/docs)
+    changed_src_files=0
+    if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        changed_src_files=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
+            | { grep -cE '\.(ts|tsx|js|jsx|py|rs|go|cs|java|rb|swift|kt)$' || true; })
+    fi
 
-    if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
-        # Count non-trivial changed files (source files, not config/docs)
-        changed_src_files=0
-        if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
-            changed_src_files=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
-                | { grep -cE '\.(ts|tsx|js|jsx|py|rs|go|cs|java|rb|swift|kt)$' || true; })
-        fi
+    # Check if any history doc was created in this branch
+    history_docs_created=0
+    if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        history_docs_created=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
+            | { grep -c '^docs/history/' || true; })
+    fi
 
-        # Check if any history doc was created in this branch
-        history_docs_created=0
-        if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
-            history_docs_created=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
-                | { grep -c '^docs/history/' || true; })
-        fi
-
-        # If significant source changes but no history doc, warn (non-blocking)
-        if [[ "$changed_src_files" -ge 3 ]] && [[ "$history_docs_created" -eq 0 ]]; then
-            echo "⚠️  This session changed ${changed_src_files} source files but no history document was created." >&2
-            echo "   Consider running: /document-history  (or ./scripts/create-doc.sh <type> \"<title>\")" >&2
-            echo "   History docs capture institutional memory for future sessions." >&2
-        fi
+    # If significant source changes but no history doc, warn (non-blocking)
+    if [[ "$changed_src_files" -ge 3 ]] && [[ "$history_docs_created" -eq 0 ]]; then
+        echo "⚠️  This session changed ${changed_src_files} source files but no history document was created." >&2
+        echo "   Consider running: /document-history  (or ./scripts/create-doc.sh <type> \"<title>\")" >&2
+        echo "   History docs capture institutional memory for future sessions." >&2
     fi
 fi
 

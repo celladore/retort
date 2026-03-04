@@ -497,11 +497,11 @@ commands:
       with concrete details from session context.
     flags:
       - name: --type
-        description: 'Document type: implementation, bugfix, feature, or migration'
+        description: 'Document type. The four primary types are used directly; issue and lesson are typically created via /review --focus=retrospective but can also be created manually.'
         type: string
         default: null
         required: false
-        enum: [implementation, bugfix, feature, migration]
+        enum: [implementation, bugfix, feature, migration, issue, lesson]
       - name: --title
         description: 'Human-readable title for the document'
         type: string
@@ -529,7 +529,6 @@ commands:
       - 'Bash(git *)'
       - 'Bash(./scripts/create-doc*)'
       - 'Bash(mkdir *)'
-      - 'Bash(cat *)'
 
   - name: brand
     type: utility
