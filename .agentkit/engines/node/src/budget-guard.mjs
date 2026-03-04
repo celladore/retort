@@ -7,7 +7,8 @@
  * Designed to prevent runaway agent sessions by acting as a circuit breaker.
  * Integrates as a PreToolUse hook and via CLI checks.
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { createRequire } from 'module';
 import { resolve } from 'path';
 
 // ---------------------------------------------------------------------------
@@ -63,9 +64,7 @@ export function loadPolicy(agentkitRoot) {
  */
 function parseYamlBudgetPolicy(yamlContent) {
   try {
-    // Dynamic import avoidance: try require-style for sync context
-    // eslint-disable-next-line no-eval
-    const yaml = await_import_yaml();
+    const yaml = tryLoadYaml();
     if (yaml) {
       const doc = yaml.load(yamlContent);
       return doc?.budgetPolicy || null;
@@ -78,10 +77,9 @@ function parseYamlBudgetPolicy(yamlContent) {
   return extractBudgetPolicyRegex(yamlContent);
 }
 
-function await_import_yaml() {
+/** @returns {object|null} js-yaml module or null */
+function tryLoadYaml() {
   try {
-    // Use createRequire for sync import in ESM context
-    const { createRequire } = await import('module');
     const require = createRequire(import.meta.url);
     return require('js-yaml');
   } catch {
@@ -515,7 +513,6 @@ function logBudgetEvent(agentkitRoot, data) {
   const logPath = resolve(dir, `usage-${dateStr}.jsonl`);
 
   try {
-    const { appendFileSync } = await import('fs');
     appendFileSync(logPath, JSON.stringify(entry) + '\n', 'utf-8');
   } catch {
     /* logging is best-effort */
@@ -526,4 +523,4 @@ function logBudgetEvent(agentkitRoot, data) {
 // Exports for testing
 // ---------------------------------------------------------------------------
 
-export { DEFAULT_POLICY, deepMerge };
+export { DEFAULT_POLICY, deepMerge, extractBudgetPolicyRegex };
