@@ -4,6 +4,7 @@
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Performance Testing
 
 Apply these rules when writing performance tests, benchmarks, or load tests

@@ -14,8 +14,9 @@
 {{#if architecturePattern}}- **Architecture**: {{architecturePattern}}{{/if}}
 {{#if architectureApiStyle}}- **API Style**: {{architectureApiStyle}}{{/if}}
 {{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
+
 - **Default Branch**: {{defaultBranch}}
-{{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
+  {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
 
 ## Coding Standards
 
@@ -25,11 +26,12 @@
 - Never commit secrets, API keys, or credentials. Use environment variables.
 - Prefer explicit error handling over silent failures.
 - Use the strongest type safety available for the language.
-{{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
-{{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
-{{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
+  {{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
+  {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
+  {{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
 
 {{#if hasLogging}}
+
 ## Logging
 
 Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use structured logging — never use raw `console.log` or `Console.WriteLine`.{{/if}}{{#if hasCorrelationId}} Include correlation IDs in all log entries for distributed tracing.{{/if}}
@@ -38,24 +40,28 @@ Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use struct
 {{/if}}
 
 {{#if hasErrorHandling}}
+
 ## Error Handling
 
 Strategy: {{errorStrategy}}.{{#if hasGlobalHandler}} A global error handler is configured — do not add catch-all handlers in individual endpoints.{{/if}}{{#if hasCustomExceptions}} Use the project's custom exception types rather than generic exceptions.{{/if}}
 {{/if}}
 
 {{#if hasAuth}}
+
 ## Authentication & Authorization
 
 Provider: {{authProvider}}{{#if authStrategy}}, strategy: {{authStrategy}}{{/if}}.{{#if hasRbac}} Role-based access control (RBAC) is enforced — always check permissions before granting access to resources.{{/if}}{{#if hasMultiTenant}} This is a multi-tenant application — never leak data across tenants.{{/if}}
 {{/if}}
 
 {{#if hasCaching}}
+
 ## Caching
 
 Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPatterns}}.{{/if}}{{#if hasDistributedCache}} Uses distributed cache — always consider cache invalidation across nodes.{{/if}}
 {{/if}}
 
 {{#if hasApiVersioning}}
+
 ## API Conventions
 
 {{#if hasApiVersioning}}- Versioning: {{apiVersioning}}{{/if}}
@@ -65,12 +71,13 @@ Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPattern
 {{/if}}
 
 {{#if hasDbMigrations}}
+
 ## Database
 
 - Migrations: {{dbMigrations}}{{#if hasDbSeeding}} with seeding{{/if}}
-{{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
-{{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
-{{/if}}
+  {{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
+  {{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
+  {{/if}}
 
 ## Testing
 
@@ -82,6 +89,7 @@ Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPattern
 Always run the full test suite before creating a pull request. Never disable or skip existing tests without explicit justification.
 
 {{#if hasIntegrations}}
+
 ## External Integrations
 
 {{#each integrations}}- {{.name}} — {{.purpose}}
@@ -97,6 +105,7 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 {{#if hasStorybook}}- **Storybook** available for component preview{{/if}}
 {{#if hasQualityGates}}- **Quality Gates**: `QUALITY_GATES.md`{{/if}}
 - **Runbook**: `RUNBOOK_AI.md`
@@ -117,12 +126,14 @@ See `COMMAND_GUIDE.md` for when to choose `/orchestrate`, `/plan`, `/project-rev
 {{/if}}
 
 {{#if hasFeatureFlags}}
+
 ## Feature Flags
 
 Provider: {{featureFlagProvider}}. Gate new features behind flags. Never remove a flag without verifying it is fully rolled out.
 {{/if}}
 
 {{#if envConfigStrategy}}
+
 ## Environment Configuration
 
 Strategy: {{envConfigStrategy}}.
@@ -131,10 +142,12 @@ Strategy: {{envConfigStrategy}}.
 {{/if}}
 
 {{#if containerized}}
+
 ## Infrastructure
 
 {{#if cloudProvider}}- **Cloud**: {{cloudProvider}}{{/if}}
 {{#if iacTool}}- **IaC**: {{iacTool}}{{/if}}
+
 - **Containerized**: Docker
-{{#if environments}}- **Environments**: {{environments}}{{/if}}
-{{/if}}
+  {{#if environments}}- **Environments**: {{environments}}{{/if}}
+  {{/if}}

@@ -58,6 +58,13 @@ documentation:
   designSystemPath: null # e.g. packages/ui/
   storybook: false
   designTokensPath: null # e.g. styles/tokens/
+  hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
+  brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
+
+# Editor theme — generates workbench.colorCustomizations in .vscode/settings.json
+editorTheme:
+  enabled: true # master toggle for VS Code theme generation
+  source: brand # brand | custom | none
 
 # External knowledge/doc sources used to seed template metadata + overlays
 # (no raw bulk copy by default).
@@ -80,7 +87,7 @@ deployment:
 
 # Infrastructure — IaC conventions, naming, and resource management
 infrastructure:
-  namingConvention: "{org}-{env}-{project}-{resourcetype}-{region}" # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
+  namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}' # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
   defaultRegion: global # e.g. southafricanorth, eastus, westeurope
   org: akf # e.g. nl, contoso — the org prefix used in resource names
   iacToolchain: [none] # e.g. [terraform, terragrunt]
@@ -125,6 +132,12 @@ process:
   commitConvention: conventional # conventional | semantic | none
   codeReview: required-pr # required-pr | optional | none
   teamSize: solo # solo | small | medium | large
+  # Issue tracker used by review/project-review agents to file template or generated-format findings.
+  # github   → gh issue create (requires gh CLI authenticated)
+  # linear   → Linear MCP or linear CLI
+  # jira     → jira CLI or REST API via Bash
+  # none     → log finding to events.log only, do not open external issue
+  issueTracker: github # github | linear | jira | none
 
 # Testing strategy
 testing:

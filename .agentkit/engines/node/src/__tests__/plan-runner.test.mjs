@@ -29,11 +29,7 @@ function setupTestProject(phase = 1, extras = {}) {
     ...extras,
   };
 
-  writeFileSync(
-    resolve(STATE_DIR, 'orchestrator.json'),
-    JSON.stringify(state, null, 2),
-    'utf-8'
-  );
+  writeFileSync(resolve(STATE_DIR, 'orchestrator.json'), JSON.stringify(state, null, 2), 'utf-8');
 }
 
 describe('runPlan()', () => {
@@ -91,7 +87,7 @@ describe('runPlan()', () => {
     const result = await runPlan({ projectRoot: TEST_ROOT, flags: {} });
     expect(result.activeTeams).toBe(1); // only backend is non-idle
 
-    const output = logSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const output = logSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(output).toContain('team-backend');
   });
 
@@ -145,7 +141,11 @@ Nothing here.
 
     it('handles empty backlog table', async () => {
       setupTestProject(2);
-      writeFileSync(resolve(TEST_ROOT, 'AGENT_BACKLOG.md'), '# Empty backlog\n\nNothing here.\n', 'utf-8');
+      writeFileSync(
+        resolve(TEST_ROOT, 'AGENT_BACKLOG.md'),
+        '# Empty backlog\n\nNothing here.\n',
+        'utf-8'
+      );
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 

@@ -117,11 +117,11 @@ agents:
   ci-failure-triage:
     team: devops
     model_override: gemini-2-5-pro
-    reason: "Need faster iterative diagnostics"
+    reason: 'Need faster iterative diagnostics'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

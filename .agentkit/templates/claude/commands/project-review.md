@@ -1,9 +1,9 @@
 ---
-description: "Comprehensive production-grade project review and assessment"
-allowed-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+description: 'Comprehensive production-grade project review and assessment'
+allowed-tools: Read, Glob, Grep, Bash, Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), WebSearch, WebFetch
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -31,6 +31,7 @@ List the directories and key files in scope. If the project is large (>50 files)
 ## Phase 0: Project Context Discovery
 
 Extract or infer:
+
 - Project purpose and primary business goals
 - Target users and primary use cases
 - Core value proposition
@@ -40,7 +41,9 @@ If no README exists, infer from code patterns and state your confidence level.
 
 ## Phase 0.5: Design & Visual Identity
 
-Search for design assets, style guides, theme files, and UI libraries. If missing, reverse-engineer a basic design system from the UI code: color palette, typography, spacing, and component patterns.
+{{#if hasBrandGuide}}Read the canonical brand spec at `{{brandGuidePath}}` and validate it: check that identity.name exists, colors.primary.brand is a valid hex (either a plain string like `"#1976D2"` or an object with a `.hex` field), semantic colors are complete, and dark mode colors are present. Summarise the brand identity (name, primary color, attributes) and flag any validation warnings.
+
+Then search for design assets, style guides, theme files, and UI libraries. Cross-reference discovered design tokens against `{{brandGuidePath}}` for consistency — flag any hardcoded hex values that diverge from the brand palette.{{else}}Search for design assets, style guides, theme files, and UI libraries. If missing, reverse-engineer a basic design system from the UI code: color palette, typography, spacing, and component patterns.{{/if}}
 
 ## Phase 1a: Technology Assessment
 
@@ -58,13 +61,13 @@ For each category below, find **1-10 high-impact items** with: ID, title, severi
 2. **UI/UX** — Usability issues, accessibility gaps, design inconsistencies
 3. **Performance/Structural** — N+1 queries, tight coupling, scalability risks
 4. **Refactoring** — Complex/duplicated code, poor naming, missing abstractions
-5. **Incomplete Features (FEAT-INC-*)** — Partially implemented features, missing edge paths
-6. **New Features (FEAT-NEW-*, aim 2-3)** — Only after documenting FEAT-INC items
-7. **Missing Documentation (DOC-*)** — Technical, user-facing, PRDs, and operational docs
+5. **Incomplete Features (FEAT-INC-\*)** — Partially implemented features, missing edge paths
+6. **New Features (FEAT-NEW-\*, aim 2-3)** — Only after documenting FEAT-INC items
+7. **Missing Documentation (DOC-\*)** — Technical, user-facing, PRDs, and operational docs
 
 ## Phase 1d: Additional Tasks
 
-Propose **5-7** context-specific analysis or hardening tasks (TASK-*): security audit, test coverage analysis, dependency audit, accessibility review, etc.
+Propose **5-7** context-specific analysis or hardening tasks (TASK-\*): security audit, test coverage analysis, dependency audit, accessibility review, etc.
 
 ## Phase 2: Summary & Plan
 
@@ -72,7 +75,7 @@ Propose **5-7** context-specific analysis or hardening tasks (TASK-*): security 
 
 1. **Executive Summary** (3-7 bullets: health, risks, opportunities)
 2. **Project Context Recap** (from Phase 0)
-3. **Design System Summary** (from Phase 0.5)
+3. **Design System Summary** (from Phase 0.5){{#if hasBrandGuide}} — include brand.yaml validation status and palette overview{{/if}}
 4. **Tech Stack Overview** (from Phase 1a/1b)
 5. **Findings by Category** (from Phase 1c, ordered by severity)
 6. **Additional Tasks** (from Phase 1d)
@@ -89,6 +92,7 @@ Propose **5-7** context-specific analysis or hardening tasks (TASK-*): security 
 ### Confirmation
 
 Ask the user:
+
 - Whether to modify priorities or add constraints
 - Which items to implement in Phase 3
 - Whether FEAT-INC should be prioritized over FEAT-NEW
@@ -98,6 +102,7 @@ Ask the user:
 ## Phase 3: Implementation
 
 After user confirms:
+
 1. Implement POC-level changes for highest-impact approved items (up to 5-7)
 2. Provide concrete code snippets or diffs
 3. Include TODO comments where production handling is needed
@@ -107,11 +112,61 @@ After user confirms:
 ## Phase 4: Documentation Enhancement
 
 Propose updates to:
+
 1. **README** — Purpose, features, tech stack, quick links
 2. **Master PRD** — Vision, personas, feature map, success metrics
 3. **Feature PRDs** — For key FEAT-INC and FEAT-NEW items
 4. **Technical docs** — Architecture, best practices, API docs
 5. **Operational docs** — Runbooks, deployment, troubleshooting
+
+---
+
+## Template & Generated-Format Issue Filing
+
+During Phase 1c analysis, any finding that targets a **generated file** (contains `<!-- GENERATED by AgentKit Forge`) or an **AgentKit template** (`.agentkit/templates/**`) must be filed as an external issue if its severity is **Critical** or **High**. File the issue immediately when you identify it — do not defer to Phase 3.
+
+Read `process.issueTracker` from `.agentkit/spec/project.yaml`:
+
+### GitHub Issues (`issueTracker: github`)
+
+```bash
+gh issue create \
+  --title "[agentkit][<SEVERITY>] <ID>: <finding title>" \
+  --body "$(cat <<'BODY'
+**Finding ID:** <ID>
+**File:** <path:line>
+**Severity:** <Critical|High>
+**Effort:** <S|M|L>
+
+**Description:**
+<exact description from Phase 1c>
+
+**Impact:**
+<impact statement>
+
+**Recommendation:**
+<concrete fix>
+
+**Discovered by:** /project-review on <ISO-8601 date>
+BODY
+)" \
+  --label "agentkit,generated-output,<severity-lowercase>"
+```
+
+Deduplicate: run `gh issue list --label agentkit --search "<finding title>"` first; skip if an open issue already covers this finding.
+
+### Linear (`issueTracker: linear`)
+
+```sh
+linear issue create \
+  --title "[agentkit][<SEVERITY>] <ID>: <finding title>" \
+  --description "<same body as above>" \
+  --priority <1 for Critical, 2 for High>
+```
+
+### None (`issueTracker: none` or field absent)
+
+Skip external filing. Finding is included in the report and appended to `events.log` only.
 
 ---
 
@@ -135,12 +190,48 @@ Emit two required outputs:
 2. **events.log (envelope):** Append a full JSON envelope with metadata. Required metadata fields: `timestamp`, `event_type`, `command_id`, `user`, `execution_time` (integer, milliseconds), `data`. The minimal stdout payload maps into the `data` field.
 
 **Example 1 — stdout (one-line minimal):**
+
 ```json
-{"action":"project_review_completed","phase":"review","findings":{"bugs":0,"ux":0,"performance":0,"refactoring":0,"incomplete_features":0,"new_features":0,"documentation":0,"tasks":0}}
+{
+  "action": "project_review_completed",
+  "phase": "review",
+  "findings": {
+    "bugs": 0,
+    "ux": 0,
+    "performance": 0,
+    "refactoring": 0,
+    "incomplete_features": 0,
+    "new_features": 0,
+    "documentation": 0,
+    "tasks": 0
+  }
+}
 ```
 
 **Example 2 — events.log envelope:**
+
 ```json
-{"timestamp":"2026-02-26T15:04:05.123Z","event_type":"project_review_completed","command_id":"review-abc123","user":"project-review","execution_time":45000,"data":{"action":"project_review_completed","phase":"review","findings":{"bugs":0,"ux":0,"performance":0,"refactoring":0,"incomplete_features":0,"new_features":0,"documentation":0,"tasks":0}}}
+{
+  "timestamp": "2026-02-26T15:04:05.123Z",
+  "event_type": "project_review_completed",
+  "command_id": "review-abc123",
+  "user": "project-review",
+  "execution_time": 45000,
+  "data": {
+    "action": "project_review_completed",
+    "phase": "review",
+    "findings": {
+      "bugs": 0,
+      "ux": 0,
+      "performance": 0,
+      "refactoring": 0,
+      "incomplete_features": 0,
+      "new_features": 0,
+      "documentation": 0,
+      "tasks": 0
+    }
+  }
+}
 ```
+
 (Note: `execution_time` is in milliseconds; 45000 = 45 seconds.)

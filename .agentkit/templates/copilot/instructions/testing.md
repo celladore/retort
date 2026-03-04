@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Testing & Quality Assurance
 
 Apply these rules when editing test files (`*.test.*`, `*.spec.*`) or test
@@ -22,8 +23,12 @@ configuration (`vitest.config.*`, `jest.config.*`, `playwright.config.*`).
 
 ```typescript
 describe('UserService', () => {
-  it('should return a user when the ID exists', async () => { /* ... */ });
-  it('should throw NotFoundError when the ID is missing', async () => { /* ... */ });
+  it('should return a user when the ID exists', async () => {
+    /* ... */
+  });
+  it('should throw NotFoundError when the ID is missing', async () => {
+    /* ... */
+  });
 });
 ```
 
@@ -57,6 +62,7 @@ it('should deduct balance on successful payment', async () => {
 ## Coverage
 
 {{#if testingCoverage}}- Target: **{{testingCoverage}}% line, branch, and function coverage**.{{/if}}
+
 - New code must include tests that exercise the new behaviour.
 - Do not remove or weaken existing assertions to make tests pass.
 - Focus on branches and edge cases, not line counts.
@@ -70,13 +76,13 @@ it('should deduct balance on successful payment', async () => {
 
 ## Forbidden Patterns
 
-| Pattern | Replacement |
-|---------|-------------|
-| `setTimeout(fn, n)` in tests | `waitFor(fn)` or polling helpers |
-| `it.skip` / `xit` left permanently | Fix or delete the test |
-| `expect(true).toBe(true)` (tautology) | Assert meaningful values |
-| Shared mutable state between tests | Reset in `beforeEach` |
-| `console.log` in test output | Remove or use a structured logger |
+| Pattern                               | Replacement                       |
+| ------------------------------------- | --------------------------------- |
+| `setTimeout(fn, n)` in tests          | `waitFor(fn)` or polling helpers  |
+| `it.skip` / `xit` left permanently    | Fix or delete the test            |
+| `expect(true).toBe(true)` (tautology) | Assert meaningful values          |
+| Shared mutable state between tests    | Reset in `beforeEach`             |
+| `console.log` in test output          | Remove or use a structured logger |
 
 ## Quality Gates
 

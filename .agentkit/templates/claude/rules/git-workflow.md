@@ -10,22 +10,26 @@
 These rules govern branching, committing, pull requests, and merge strategy.
 
 ## Branching
+
 - Follow github-flow: work on feature branches, merge to main via PR
 - Branch naming: `type/short-description` (e.g., `feat/add-auth`, `fix/token-refresh`)
 - Never commit directly to the default branch
 
 ## Commits
+
 - Follow Conventional Commits: `type(scope): description`
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`, `build`, `revert`
 - Keep commits atomic — one logical change per commit
 - Description: lowercase, imperative mood, under 72 characters
 
 ## Pull Requests
+
 - All changes to main require a PR with descriptive title and test plan
 - PRs modifying `.agentkit/` require CODEOWNERS (maintainer) approval
 - Use squash-merge to keep history clean
 
 ## Prohibited Actions
-- **Never** force-push to shared branches (main, develop, release/*)
+
+- **Never** force-push to shared branches (main, develop, release/\*)
 - **Never** commit secrets to git history — rotate immediately if discovered
 - **Never** use `--no-verify` to skip pre-commit hooks

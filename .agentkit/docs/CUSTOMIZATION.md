@@ -54,17 +54,17 @@ are defined in your overlay's `settings.yaml`:
 
 ```yaml
 renderTargets:
-  - claude      # Claude Code — CLAUDE.md, .claude/
-  - cursor      # Cursor IDE — .cursor/
-  - windsurf    # Windsurf IDE — .windsurf/
-  - copilot     # GitHub Copilot — .github/ (prompts, agents, chatmodes)
-  - gemini      # Gemini CLI — GEMINI.md, .gemini/
-  - codex       # OpenAI Codex — .agents/skills/
-  - warp        # Warp terminal — WARP.md
-  - cline       # Cline — .clinerules/
-  - roo         # Roo Code — .roo/rules/
-  - ai          # Continue — .ai/
-  - mcp         # MCP/A2A — mcp/
+  - claude # Claude Code — CLAUDE.md, .claude/
+  - cursor # Cursor IDE — .cursor/
+  - windsurf # Windsurf IDE — .windsurf/
+  - copilot # GitHub Copilot — .github/ (prompts, agents, chatmodes)
+  - gemini # Gemini CLI — GEMINI.md, .gemini/
+  - codex # OpenAI Codex — .agents/skills/
+  - warp # Warp terminal — WARP.md
+  - cline # Cline — .clinerules/
+  - roo # Roo Code — .roo/rules/
+  - ai # Continue — .ai/
+  - mcp # MCP/A2A — mcp/
 ```
 
 `AGENTS.md` and root docs are always generated regardless of render targets.
@@ -122,7 +122,7 @@ Add command definitions to your overlay's `commands.yaml`:
 # .agentkit/overlays/<repoName>/commands.yaml
 commands:
   - name: my-command
-    description: "My custom command"
+    description: 'My custom command'
 ```
 
 Or create a template `.md` file in the templates directory. When you run `agentkit sync`, the command will be generated into `.claude/commands/`.
@@ -135,12 +135,12 @@ Add rules to `rules.yaml` in your overlay directory:
 # .agentkit/overlays/<repoName>/rules.yaml
 rules:
   - id: use-repository-pattern
-    description: "All data access must go through repository classes"
-    scope: "src/data/**"
+    description: 'All data access must go through repository classes'
+    scope: 'src/data/**'
 
   - id: no-direct-sql
-    description: "Never write raw SQL; use the ORM query builder"
-    scope: "src/**"
+    description: 'Never write raw SQL; use the ORM query builder'
+    scope: 'src/**'
 ```
 
 These rules are injected into the AI agent context and guide code generation and review.
@@ -153,10 +153,10 @@ Add commands to the deny list in your overlay's `settings.yaml`:
 # .agentkit/overlays/<repoName>/settings.yaml
 permissions:
   deny:
-    - "rm -rf /"
-    - "docker system prune"
-    - "git push --force"
-    - "DROP DATABASE"
+    - 'rm -rf /'
+    - 'docker system prune'
+    - 'git push --force'
+    - 'DROP DATABASE'
 ```
 
 Because deny wins during merge, these restrictions cannot be overridden by the base spec's allow list.
@@ -167,7 +167,7 @@ Set `primaryStack` in your overlay settings to influence how agents generate cod
 
 ```yaml
 # .agentkit/overlays/<repoName>/settings.yaml
-primaryStack: "dotnet"
+primaryStack: 'dotnet'
 ```
 
 This affects template selection, default linting rules, and which build/test commands the agents prefer.
@@ -179,12 +179,12 @@ This affects template selection, default linting rules, and which build/test com
 ```yaml
 permissions:
   allow:
-    - "npm test"
-    - "npm run build"
-    - "dotnet test"
+    - 'npm test'
+    - 'npm run build'
+    - 'dotnet test'
   deny:
-    - "rm -rf"
-    - "git push --force"
+    - 'rm -rf'
+    - 'git push --force'
 ```
 
 - `permissions.allow` -- List of bash commands and patterns that agents are permitted to run.
@@ -194,10 +194,10 @@ permissions:
 
 ```yaml
 hooks:
-  sessionStart: ".claude/hooks/session-start.sh"
-  preToolUse: ".claude/hooks/pre-tool-use.sh"
-  postToolUse: ".claude/hooks/post-tool-use.sh"
-  stop: ".claude/hooks/stop.sh"
+  sessionStart: '.claude/hooks/session-start.sh'
+  preToolUse: '.claude/hooks/pre-tool-use.sh'
+  postToolUse: '.claude/hooks/post-tool-use.sh'
+  stop: '.claude/hooks/stop.sh'
 ```
 
 - `hooks.sessionStart` -- Runs when a new Claude Code session begins.
@@ -210,7 +210,7 @@ hooks:
 ```yaml
 costTracking:
   enabled: true
-  logDir: ".claude/costs/"
+  logDir: '.claude/costs/'
   retentionDays: 30
 ```
 
@@ -224,23 +224,23 @@ costTracking:
 
 ```yaml
 # .agentkit/overlays/my-web-app/settings.yaml
-primaryStack: "node"
+primaryStack: 'node'
 
 permissions:
   allow:
-    - "npm test"
-    - "npm run build"
-    - "npm run lint"
-    - "npx next build"
+    - 'npm test'
+    - 'npm run build'
+    - 'npm run lint'
+    - 'npx next build'
   deny:
-    - "npm publish"
+    - 'npm publish'
 
 hooks:
-  postToolUse: ".claude/hooks/post-tool-use.sh"
+  postToolUse: '.claude/hooks/post-tool-use.sh'
 
 costTracking:
   enabled: true
-  logDir: ".claude/costs/"
+  logDir: '.claude/costs/'
   retentionDays: 14
 ```
 
@@ -248,25 +248,25 @@ costTracking:
 
 ```yaml
 # .agentkit/overlays/my-api-service/settings.yaml
-primaryStack: "dotnet"
+primaryStack: 'dotnet'
 
 permissions:
   allow:
-    - "dotnet test"
-    - "dotnet build"
-    - "dotnet run"
-    - "dotnet ef migrations"
+    - 'dotnet test'
+    - 'dotnet build'
+    - 'dotnet run'
+    - 'dotnet ef migrations'
   deny:
-    - "dotnet ef database drop"
-    - "rm -rf bin/"
+    - 'dotnet ef database drop'
+    - 'rm -rf bin/'
 
 hooks:
-  preToolUse: ".claude/hooks/pre-tool-use.sh"
-  stop: ".claude/hooks/stop.sh"
+  preToolUse: '.claude/hooks/pre-tool-use.sh'
+  stop: '.claude/hooks/stop.sh'
 
 costTracking:
   enabled: true
-  logDir: ".claude/costs/"
+  logDir: '.claude/costs/'
   retentionDays: 30
 ```
 
@@ -274,28 +274,28 @@ costTracking:
 
 ```yaml
 # .agentkit/overlays/my-monorepo/settings.yaml
-primaryStack: "node"
+primaryStack: 'node'
 
 permissions:
   allow:
-    - "pnpm test"
-    - "pnpm build"
-    - "pnpm lint"
-    - "pnpm --filter"
-    - "turbo run build"
-    - "turbo run test"
+    - 'pnpm test'
+    - 'pnpm build'
+    - 'pnpm lint'
+    - 'pnpm --filter'
+    - 'turbo run build'
+    - 'turbo run test'
   deny:
-    - "pnpm publish"
-    - "npm publish"
+    - 'pnpm publish'
+    - 'npm publish'
 
 hooks:
-  sessionStart: ".claude/hooks/session-start.sh"
-  preToolUse: ".claude/hooks/pre-tool-use.sh"
-  postToolUse: ".claude/hooks/post-tool-use.sh"
-  stop: ".claude/hooks/stop.sh"
+  sessionStart: '.claude/hooks/session-start.sh'
+  preToolUse: '.claude/hooks/pre-tool-use.sh'
+  postToolUse: '.claude/hooks/post-tool-use.sh'
+  stop: '.claude/hooks/stop.sh'
 
 costTracking:
   enabled: true
-  logDir: ".claude/costs/"
+  logDir: '.claude/costs/'
   retentionDays: 7
 ```

@@ -22,7 +22,10 @@ import { getIncrementalTestCommands, resolveCoverageCommand, parseCoveragePercen
 const SECRET_PATTERNS = [
   { name: 'AWS Key', pattern: /AKIA[0-9A-Z]{16}/g },
   { name: 'Private Key', pattern: /-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----/g },
-  { name: 'Generic Secret', pattern: /(password|secret|api_key|apikey|token)\s*[:=]\s*['"][^'"]{8,}['"]/gi },
+  {
+    name: 'Generic Secret',
+    pattern: /(password|secret|api_key|apikey|token)\s*[:=]\s*['"][^'"]{8,}['"]/gi,
+  },
   { name: 'Connection String', pattern: /mongodb(\+srv)?:\/\/[^\s'"]+/g },
   { name: 'JWT', pattern: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g },
 ];
@@ -43,9 +46,9 @@ const SKIP_SECRET_SCAN_PATHS = [
 ];
 
 const SKIP_SECRET_SCAN_EXTENSIONS = [
-  '.lock',    // package-lock.json, yarn.lock, etc.
-  '.sum',     // go.sum
-  '.snap',    // jest snapshots
+  '.lock', // package-lock.json, yarn.lock, etc.
+  '.sum', // go.sum
+  '.snap', // jest snapshots
 ];
 
 // ---------------------------------------------------------------------------
@@ -70,7 +73,9 @@ function validateChangedFilesForSymlinkTraversal(projectRoot, files) {
     try {
       const realPath = realpathSync(abs);
       if (!realPath.startsWith(realProjectRoot + sep) && realPath !== realProjectRoot) {
-        throw new Error(`File must be within the project root (symlinks traversing outside are not allowed): ${file}`);
+        throw new Error(
+          `File must be within the project root (symlinks traversing outside are not allowed): ${file}`
+        );
       }
     } catch (err) {
       if (err.code !== 'ENOENT') throw err;
@@ -113,7 +118,9 @@ function getChangedFiles(projectRoot, flags) {
       const realPath = realpathSync(abs);
       const realProjectRoot = realpathSync(projectRoot);
       if (!realPath.startsWith(realProjectRoot + sep) && realPath !== realProjectRoot) {
-        throw new Error(`File must be within the project root (symlinks traversing outside are not allowed): ${flags.file}`);
+        throw new Error(
+          `File must be within the project root (symlinks traversing outside are not allowed): ${flags.file}`
+        );
       }
     } catch (err) {
       if (err.code !== 'ENOENT') throw err; // re-throw our traversal error and unexpected OS errors
@@ -138,11 +145,11 @@ function getChangedFiles(projectRoot, flags) {
 
 async function scanSecrets(projectRoot, files) {
   // Use a concurrency pool of 50 to avoid EMFILE on large scans
-  const tasks = files.map(file => async () => {
+  const tasks = files.map((file) => async () => {
     // Skip paths known to produce false positives (lockfiles, vendored code, etc.)
     const normalised = '/' + file.replace(/\\/g, '/');
-    if (SKIP_SECRET_SCAN_PATHS.some(p => normalised.includes(p))) return [];
-    if (SKIP_SECRET_SCAN_EXTENSIONS.some(ext => normalised.endsWith(ext))) return [];
+    if (SKIP_SECRET_SCAN_PATHS.some((p) => normalised.includes(p))) return [];
+    if (SKIP_SECRET_SCAN_EXTENSIONS.some((ext) => normalised.endsWith(ext))) return [];
 
     const fullPath = resolve(projectRoot, file);
 
@@ -151,10 +158,15 @@ async function scanSecrets(projectRoot, files) {
     try {
       const stat = await fsPromises.stat(fullPath);
       if (stat.size > 1_000_000) return []; // Skip files > 1MB
-    } catch { return []; }
+    } catch {
+      return [];
+    }
 
     const ext = extname(file).toLowerCase();
-    if (['.png', '.jpg', '.gif', '.ico', '.woff', '.ttf', '.eot', '.zip', '.tar', '.gz'].includes(ext)) return [];
+    if (
+      ['.png', '.jpg', '.gif', '.ico', '.woff', '.ttf', '.eot', '.zip', '.tar', '.gz'].includes(ext)
+    )
+      return [];
 
     const fileFindings = [];
     try {
@@ -171,7 +183,9 @@ async function scanSecrets(projectRoot, files) {
           });
         }
       }
-    } catch { /* skip unreadable files */ }
+    } catch {
+      /* skip unreadable files */
+    }
 
     return fileFindings;
   });
@@ -195,32 +209,33 @@ function scanLargeFiles(projectRoot, files, threshold = 500_000) {
           sizeMB: (stat.size / 1_000_000).toFixed(1),
         });
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
   return findings;
 }
 
 // Paths to skip during TODO scanning — agentkit framework internals should not
 // appear as tech debt in consuming repos.
-const SKIP_TODO_SCAN_PATHS = [
-  '/.agentkit/engines/',
-  '/.agentkit/templates/',
-];
+const SKIP_TODO_SCAN_PATHS = ['/.agentkit/engines/', '/.agentkit/templates/'];
 
 async function scanTodos(projectRoot, files) {
   const todoPattern = /\b(TODO|FIXME|HACK|XXX|TEMP)\b.*$/gm;
 
   // Use a concurrency pool of 50 to avoid EMFILE on large scans
-  const tasks = files.map(file => async () => {
+  const tasks = files.map((file) => async () => {
     const normalised = '/' + file.replace(/\\/g, '/');
-    if (SKIP_TODO_SCAN_PATHS.some(p => normalised.includes(p))) return [];
+    if (SKIP_TODO_SCAN_PATHS.some((p) => normalised.includes(p))) return [];
 
     const fullPath = resolve(projectRoot, file);
 
     try {
       const stat = await fsPromises.stat(fullPath);
       if (stat.size > 1_000_000) return [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
 
     const ext = extname(file).toLowerCase();
     if (['.png', '.jpg', '.gif', '.ico', '.woff', '.ttf'].includes(ext)) return [];
@@ -237,11 +252,16 @@ async function scanTodos(projectRoot, files) {
             severity: 'LOW',
             file,
             line: i + 1,
-            text: matches[0].trim().length > 100 ? matches[0].trim().slice(0, 97) + '...' : matches[0].trim(),
+            text:
+              matches[0].trim().length > 100
+                ? matches[0].trim().slice(0, 97) + '...'
+                : matches[0].trim(),
           });
         }
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
 
     return fileFindings;
   });
@@ -262,7 +282,11 @@ async function scanTodos(projectRoot, files) {
  * @param {object} opts.flags - --range, --file
  * @returns {object}
  */
-export async function runReview({ agentkitRoot /* kept for interface compatibility with other runner functions */, projectRoot, flags = {} }) {
+export async function runReview({
+  agentkitRoot /* kept for interface compatibility with other runner functions */,
+  projectRoot,
+  flags = {},
+}) {
   console.log('[agentkit:review] Running automated review checks...');
   console.log('');
 
@@ -293,7 +317,9 @@ export async function runReview({ agentkitRoot /* kept for interface compatibili
   allFindings.push(...secrets);
   if (secrets.length > 0) {
     for (const f of secrets) {
-      console.log(`  ⚠ ${f.severity} ${f.pattern} in ${f.file} (${f.count} match${f.count > 1 ? 'es' : ''})`);
+      console.log(
+        `  ⚠ ${f.severity} ${f.pattern} in ${f.file} (${f.count} match${f.count > 1 ? 'es' : ''})`
+      );
     }
   } else {
     console.log('  ✓ No secrets detected');
@@ -378,11 +404,13 @@ export async function runReview({ agentkitRoot /* kept for interface compatibili
   }
 
   // Summary
-  const hasHighSeverity = allFindings.some(f => f.severity === 'HIGH');
+  const hasHighSeverity = allFindings.some((f) => f.severity === 'HIGH');
   const status = hasHighSeverity ? 'FAIL' : 'PASS';
 
   console.log(`=== Review: ${status} ===`);
-  console.log(`Files: ${changedFiles.length} | Findings: ${allFindings.length} (${secrets.length} secrets, ${largeFiles.length} large files, ${todos.length} TODOs${coverageDelta ? `, coverage: ${coverageDelta.percentage.toFixed(1)}%` : ''})`);
+  console.log(
+    `Files: ${changedFiles.length} | Findings: ${allFindings.length} (${secrets.length} secrets, ${largeFiles.length} large files, ${todos.length} TODOs${coverageDelta ? `, coverage: ${coverageDelta.percentage.toFixed(1)}%` : ''})`
+  );
 
   // Log event
   try {
@@ -393,7 +421,9 @@ export async function runReview({ agentkitRoot /* kept for interface compatibili
       coverage: coverageDelta,
       status,
     });
-  } catch (err) { console.warn(`[agentkit:review] Event logging failed: ${err?.message ?? String(err)}`); }
+  } catch (err) {
+    console.warn(`[agentkit:review] Event logging failed: ${err?.message ?? String(err)}`);
+  }
 
   return {
     files: changedFiles.length,

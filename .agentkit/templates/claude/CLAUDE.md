@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
+
 # {{repoName}} — Claude Code Instructions
 
 ## Project Overview
@@ -12,7 +13,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 - **Repository**: {{repoName}}
 - **Default Branch**: {{defaultBranch}}
 - **Framework Version**: {{version}}
-{{#if projectPhase}}
+  {{#if projectPhase}}
 
 - **Phase**: {{projectPhase}}
 
@@ -23,16 +24,16 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 ## Tech Stack
 
 - **Languages**: {{stackLanguages}}
-{{#if stackFrontendFrameworks}}- **Frontend**: {{stackFrontendFrameworks}}{{/if}}
-{{#if stackBackendFrameworks}}- **Backend**: {{stackBackendFrameworks}}{{/if}}
-{{#if stackCssFrameworks}}- **CSS**: {{stackCssFrameworks}}{{/if}}
-{{#if stackOrm}}- **ORM**: {{stackOrm}}{{/if}}
-{{#if stackDatabase}}- **Database**: {{stackDatabase}}{{/if}}
-{{#if stackMessaging}}- **Messaging**: {{stackMessaging}}{{/if}}
-{{#if architecturePattern}}- **Architecture**: {{architecturePattern}}{{/if}}
-{{#if architectureApiStyle}}- **API Style**: {{architectureApiStyle}}{{/if}}
-{{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
-{{/if}}
+  {{#if stackFrontendFrameworks}}- **Frontend**: {{stackFrontendFrameworks}}{{/if}}
+  {{#if stackBackendFrameworks}}- **Backend**: {{stackBackendFrameworks}}{{/if}}
+  {{#if stackCssFrameworks}}- **CSS**: {{stackCssFrameworks}}{{/if}}
+  {{#if stackOrm}}- **ORM**: {{stackOrm}}{{/if}}
+  {{#if stackDatabase}}- **Database**: {{stackDatabase}}{{/if}}
+  {{#if stackMessaging}}- **Messaging**: {{stackMessaging}}{{/if}}
+  {{#if architecturePattern}}- **Architecture**: {{architecturePattern}}{{/if}}
+  {{#if architectureApiStyle}}- **API Style**: {{architectureApiStyle}}{{/if}}
+  {{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
+  {{/if}}
 
 {{#if hasSlashCommands}}
 ## Quick Reference
@@ -138,8 +139,8 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 ### API
 
 - Versioning: {{apiVersioning}}
-{{#if hasApiPagination}}- Pagination: {{apiPagination}}{{/if}}
-{{#if apiResponseFormat}}- Response format: {{apiResponseFormat}}{{/if}}
+  {{#if hasApiPagination}}- Pagination: {{apiPagination}}{{/if}}
+  {{#if apiResponseFormat}}- Response format: {{apiResponseFormat}}{{/if}}
 
 {{/if}}
 {{#if hasDbMigrations}}
@@ -147,7 +148,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 ### Database
 
 - Migrations: {{dbMigrations}}
-{{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
+  {{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
 
 {{/if}}
 
@@ -185,19 +186,20 @@ Always run the full test suite before creating a PR.
 {{#if hasAdr}}- **ADRs**: `{{adrPath}}`{{/if}}
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 
 All project documentation follows the unified 8-category structure in `docs/`:
 
-| Category             | Purpose                                        |
-| -------------------- | ---------------------------------------------- |
-| `01_product/`        | Product vision, strategy, personas, metrics    |
-| `02_specs/`          | Architecture specs, system design              |
-| `03_architecture/`   | Diagrams, ADRs, tech stack decisions           |
-| `04_api/`            | API reference, authentication, versioning      |
-| `05_operations/`     | Deployment, monitoring, SLAs                   |
-| `06_engineering/`    | Setup, coding standards, testing, contributing |
-| `07_integrations/`   | External services, third-party connections     |
-| `08_reference/`      | Glossary, acronyms, FAQ, tool config           |
+| Category           | Purpose                                        |
+| ------------------ | ---------------------------------------------- |
+| `01_product/`      | Product vision, strategy, personas, metrics    |
+| `02_specs/`        | Architecture specs, system design              |
+| `03_architecture/` | Diagrams, ADRs, tech stack decisions           |
+| `04_api/`          | API reference, authentication, versioning      |
+| `05_operations/`   | Deployment, monitoring, SLAs                   |
+| `06_engineering/`  | Setup, coding standards, testing, contributing |
+| `07_integrations/` | External services, third-party connections     |
+| `08_reference/`    | Glossary, acronyms, FAQ, tool config           |
 
 {{#if hasIntegrations}}
 
@@ -224,34 +226,35 @@ All project documentation follows the unified 8-category structure in `docs/`:
 ## Infrastructure Conventions
 
 - **Naming convention**: `{{infraNamingConvention}}`
-{{#if infraDefaultRegion}}- **Default region**: {{infraDefaultRegion}}{{/if}}
-{{#if infraOrg}}- **Organisation prefix**: {{infraOrg}}{{/if}}
-{{#if infraIacToolchain}}- **Preferred IaC toolchain**: {{infraIacToolchain}}{{/if}}
-{{#if infraStateBackend}}- **State backend**: {{infraStateBackend}}{{/if}}
-{{#if infraLockProvider}}- **State lock provider**: {{infraLockProvider}}{{/if}}
-{{#if infraMandatoryTags}}- **Mandatory tags** (required on every taggable resource): `{{infraMandatoryTags}}`{{/if}}
-{{#if infraOptionalTags}}- **Optional tags** (recommended): `{{infraOptionalTags}}`{{/if}}
+  {{#if infraDefaultRegion}}- **Default region**: {{infraDefaultRegion}}{{/if}}
+  {{#if infraOrg}}- **Organisation prefix**: {{infraOrg}}{{/if}}
+  {{#if infraIacToolchain}}- **Preferred IaC toolchain**: {{infraIacToolchain}}{{/if}}
+  {{#if infraStateBackend}}- **State backend**: {{infraStateBackend}}{{/if}}
+  {{#if infraLockProvider}}- **State lock provider**: {{infraLockProvider}}{{/if}}
+  {{#if infraMandatoryTags}}- **Mandatory tags** (required on every taggable resource): `{{infraMandatoryTags}}`{{/if}}
+  {{#if infraOptionalTags}}- **Optional tags** (recommended): `{{infraOptionalTags}}`{{/if}}
 
 {{#if hasInfraTags}}
+
 > **Tagging is enforced.** When creating or modifying IaC resources, always include
 > the mandatory tags listed above. Use a shared `locals` block or Terragrunt `inputs`
 > for consistency. See `.claude/rules/iac.md` for examples.
-{{/if}}
-{{/if}}
+> {{/if}}
+> {{/if}}
 
 {{#if hasMonitoring}}
 
 ## Observability
 
 - **Monitoring provider**: {{monitoringProvider}}
-{{#if hasMonitoringDashboards}}- **Dashboards**: required{{/if}}
-{{#if hasAlerting}}- **Alerting provider**: {{alertingProvider}}{{/if}}
-{{#if alertingChannels}}- **Alert channels**: {{alertingChannels}}{{/if}}
-{{#if hasTracing}}- **Tracing provider**: {{tracingProvider}}{{/if}}
-{{#if tracingSamplingRate}}- **Trace sampling rate**: {{tracingSamplingRate}}{{/if}}
-{{#if hasCentralisedLogging}}- **Centralised logging**: enabled{{/if}}
-{{#if loggingRetentionDays}}- **Log retention (days)**: {{loggingRetentionDays}}{{/if}}
-{{/if}}
+  {{#if hasMonitoringDashboards}}- **Dashboards**: required{{/if}}
+  {{#if hasAlerting}}- **Alerting provider**: {{alertingProvider}}{{/if}}
+  {{#if alertingChannels}}- **Alert channels**: {{alertingChannels}}{{/if}}
+  {{#if hasTracing}}- **Tracing provider**: {{tracingProvider}}{{/if}}
+  {{#if tracingSamplingRate}}- **Trace sampling rate**: {{tracingSamplingRate}}{{/if}}
+  {{#if hasCentralisedLogging}}- **Centralised logging**: enabled{{/if}}
+  {{#if loggingRetentionDays}}- **Log retention (days)**: {{loggingRetentionDays}}{{/if}}
+  {{/if}}
 
 {{#if hasCompliance}}
 

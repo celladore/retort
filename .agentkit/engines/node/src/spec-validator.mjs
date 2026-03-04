@@ -146,7 +146,8 @@ function isValidFlagDefault(defaultValue, flagType) {
   if (defaultValue === null || defaultValue === undefined) return true;
   if (flagType === 'string') return typeof defaultValue === 'string';
   if (flagType === 'boolean') return typeof defaultValue === 'boolean';
-  if (flagType === 'number') return typeof defaultValue === 'number' && Number.isFinite(defaultValue);
+  if (flagType === 'number')
+    return typeof defaultValue === 'number' && Number.isFinite(defaultValue);
   if (flagType === 'integer') return Number.isInteger(defaultValue);
   return true;
 }
@@ -165,19 +166,16 @@ function validateCommandFlagSemantics(command, commandPath) {
     }
 
     if (!isValidFlagDefault(flag.default, flag.type)) {
-      errors.push(
-        `${flagPath}.default: invalid default for type "${flag.type}"`
-      );
+      errors.push(`${flagPath}.default: invalid default for type "${flag.type}"`);
     }
 
     if (flag.required === true && (flag.default === null || flag.default === undefined)) {
-      errors.push(
-        `${flagPath}: required flag cannot have null/undefined default`
-      );
+      errors.push(`${flagPath}: required flag cannot have null/undefined default`);
     }
 
     if (Array.isArray(flag.enum)) {
-      const expectedPrimitive = flag.type === 'integer' || flag.type === 'number' ? 'number' : flag.type;
+      const expectedPrimitive =
+        flag.type === 'integer' || flag.type === 'number' ? 'number' : flag.type;
       for (let enumIndex = 0; enumIndex < flag.enum.length; enumIndex++) {
         const enumValue = flag.enum[enumIndex];
         if (typeof enumValue !== expectedPrimitive) {
@@ -187,10 +185,12 @@ function validateCommandFlagSemantics(command, commandPath) {
         }
       }
 
-      if (flag.default !== null && flag.default !== undefined && !flag.enum.includes(flag.default)) {
-        errors.push(
-          `${flagPath}.default: must be one of enum values`
-        );
+      if (
+        flag.default !== null &&
+        flag.default !== undefined &&
+        !flag.enum.includes(flag.default)
+      ) {
+        errors.push(`${flagPath}.default: must be one of enum values`);
       }
     }
 
@@ -199,9 +199,7 @@ function validateCommandFlagSemantics(command, commandPath) {
       (flag.name === '--team' || flag.name === '--phase') &&
       (!Array.isArray(flag.enum) || flag.enum.length === 0)
     ) {
-      errors.push(
-        `${flagPath}.enum: required for workflow routing flag "${flag.name}"`
-      );
+      errors.push(`${flagPath}.enum: required for workflow routing flag "${flag.name}"`);
     }
   }
 

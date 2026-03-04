@@ -46,11 +46,11 @@ These conventions are enforced by the `security` rule domain
 
 AgentKit Forge installs hook scripts that guard against common risks:
 
-| Hook | Trigger | Protection |
-|------|---------|------------|
-| `protect-sensitive.sh` | Write/Edit operations | Blocks writes to `.env`, credentials, CI secrets |
-| `guard-destructive-commands.sh` | Bash execution | Blocks `rm -rf /`, `git push --force`, etc. |
-| `warn-uncommitted.sh` | Write/Edit operations | Warns when uncommitted changes accumulate |
+| Hook                            | Trigger               | Protection                                       |
+| ------------------------------- | --------------------- | ------------------------------------------------ |
+| `protect-sensitive.sh`          | Write/Edit operations | Blocks writes to `.env`, credentials, CI secrets |
+| `guard-destructive-commands.sh` | Bash execution        | Blocks `rm -rf /`, `git push --force`, etc.      |
+| `warn-uncommitted.sh`           | Write/Edit operations | Warns when uncommitted changes accumulate        |
 
 ### Deny-wins Permission Model
 
@@ -115,4 +115,4 @@ The `validate` command scans for common secret patterns:
 
 ---
 
-*This policy is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate.*
+_This policy is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate._

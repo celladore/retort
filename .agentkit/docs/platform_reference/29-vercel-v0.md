@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI UI Component Generator (prompt/image to React) |
-| **Categories** | Vibe Coding / App Builder |
-| **Access** | Web app — [v0.dev](https://v0.dev/) — browser-based |
-| **Documentation** | [v0.dev/docs](https://v0.dev/docs) |
+|                        |                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Type**               | AI UI Component Generator (prompt/image to React)                                                            |
+| **Categories**         | Vibe Coding / App Builder                                                                                    |
+| **Access**             | Web app — [v0.dev](https://v0.dev/) — browser-based                                                          |
+| **Documentation**      | [v0.dev/docs](https://v0.dev/docs)                                                                           |
 | **Performance Rating** | ⭐⭐⭐ — **62/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--vibe-coding--app-builders)) |
 
 ---
@@ -38,15 +38,15 @@ may be useful when integrating generated components into a larger project.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 62/100 ⭐⭐⭐ | Best-in-class React UI generation; no backend |
-| Developer Experience | 78/100 ⭐⭐⭐⭐ | Clean interface; intuitive prompt-to-component |
-| Cost & Value | 68/100 ⭐⭐⭐½ | Free basic; $20/mo premium; $30/user team |
-| Customization | 20/100 ⭐ | Prompt-only; no file-based configuration |
-| Privacy & Security | 55/100 ⭐⭐⭐ | SOC 2 Type 2 compliant; cloud-processed |
-| Team & Enterprise | 40/100 ⭐⭐ | Team plan exists; limited enterprise features |
-| **Weighted Total** | **58/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                       |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 62/100 ⭐⭐⭐     | Best-in-class React UI generation; no backend                                 |
+| Developer Experience | 78/100 ⭐⭐⭐⭐   | Clean interface; intuitive prompt-to-component                                |
+| Cost & Value         | 68/100 ⭐⭐⭐½    | Free basic; $20/mo premium; $30/user team                                     |
+| Customization        | 20/100 ⭐         | Prompt-only; no file-based configuration                                      |
+| Privacy & Security   | 55/100 ⭐⭐⭐     | SOC 2 Type 2 compliant; cloud-processed                                       |
+| Team & Enterprise    | 40/100 ⭐⭐       | Team plan exists; limited enterprise features                                 |
+| **Weighted Total**   | **58/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

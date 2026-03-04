@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — Python
 
 Apply these rules when editing `.py` files or `pyproject.toml`.
@@ -72,4 +73,3 @@ The following conventions are enforced in **agentkit-forge** and derived from
 - **[py-type-hints]** All public functions and methods must have type hints. Use typing.Protocol for structural subtyping. Run mypy in strict mode for new modules.
 
 - **[py-docstrings]** All public modules, classes, and functions must have docstrings following Google style. Include Args, Returns, and Raises sections where applicable.
-

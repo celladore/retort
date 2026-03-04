@@ -5,10 +5,10 @@ can use a shared evidence base.
 
 ## Source Quality Tags
 
-- *Fetched*: Data was retrieved directly from a source URL.
-- *Search snippet*: Data comes from search result summaries only.
-- *Vendor claim*: Data is from a model provider page, not independent.
-- *Independent benchmark*: Data is from benchmark operators/research sites.
+- _Fetched_: Data was retrieved directly from a source URL.
+- _Search snippet_: Data comes from search result summaries only.
+- _Vendor claim_: Data is from a model provider page, not independent.
+- _Independent benchmark_: Data is from benchmark operators/research sites.
 
 ## Dossiers
 
@@ -32,8 +32,8 @@ can use a shared evidence base.
 ## How to Use With Team Model Guides
 
 1. Pull benchmark facts from these dossiers into each team guide's
-   *Data Provenance and Refresh* section.
+   _Data Provenance and Refresh_ section.
 2. Only promote a model into ranked tiers after at least one
-   *Independent benchmark* point plus one runtime metric.
-3. Keep uncertain entries in *Newly Tracked Models* until validated.
+   _Independent benchmark_ point plus one runtime metric.
+3. Keep uncertain entries in _Newly Tracked Models_ until validated.
 4. Re-run weighting calculations when cost or benchmark deltas are material.

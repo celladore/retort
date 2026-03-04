@@ -1,9 +1,9 @@
 ---
-description: "Write a session handoff summary for continuity between sessions"
+description: 'Write a session handoff summary for continuity between sessions'
 allowed-tools: Bash(git *), Bash(mkdir *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -24,7 +24,7 @@ Before writing the handoff, collect information from:
 
 ## Handoff Format
 
-```markdown
+````markdown
 # Session Handoff
 
 **Date:** <ISO-8601>
@@ -34,36 +34,43 @@ Before writing the handoff, collect information from:
 **Overall Status:** <HEALTHY | DEGRADED | BROKEN>
 
 ## What Was Done
+
 - <bulleted list of concrete accomplishments>
 - <include file paths for any significant changes>
 - <reference commit SHAs for key changes>
 
 ## Current Blockers
+
 - <anything that is preventing forward progress>
 - <include error messages or failing commands>
 - "None" if no blockers exist
 
 ## Next 3 Actions
+
 1. <most important next step, with enough detail to execute immediately>
 2. <second priority>
 3. <third priority>
 
 ## How to Validate
+
 <Exact commands to verify the current state of the project>
 ```bash
 <command 1>
 <command 2>
-```
+````
 
 ## Open Risks
+
 - <anything the next session should be aware of>
 - <things that might break, external dependencies, time-sensitive items>
 
 ## State Files
+
 - Orchestrator: `.claude/state/orchestrator.json` — <brief status>
 - Events: `.claude/state/events.log` — <line count> entries
 - Backlog: `AGENT_BACKLOG.md` — <item count> items (<P0 count> blocking)
 - Teams: `AGENT_TEAMS.md` — <team count> teams defined
+
 ```
 
 ## Output Destinations
@@ -73,7 +80,9 @@ Before writing the handoff, collect information from:
 Append to `.claude/state/events.log`:
 
 ```
+
 [<timestamp>] [HANDOFF] [ORCHESTRATOR] Session complete. Done: <count> items. Blockers: <count>. Next: "<first next action>".
+
 ```
 
 ### 2. Handoff Archive (optional)
@@ -81,12 +90,16 @@ Append to `.claude/state/events.log`:
 If the directory `docs/ai_handoffs/` exists, or if the orchestrator state indicates handoff archiving is enabled, also write the full handoff to:
 
 ```
+
 docs/ai_handoffs/<YYYY-MM-DD>.md
+
 ```
 
 If multiple handoffs happen on the same day, append a counter:
 ```
+
 docs/ai_handoffs/<YYYY-MM-DD>-02.md
+
 ```
 
 Do NOT create the `docs/ai_handoffs/` directory if it does not exist. Only write there if it already exists.
@@ -119,3 +132,4 @@ A good handoff passes the "cold start" test: someone with zero context about thi
 3. **Be honest about status.** If the build is broken, say so. Do not sugarcoat.
 4. **Include exact commands.** Every "how to validate" entry must be copy-paste ready.
 5. **Keep it short.** Aim for under 40 lines of content (excluding code blocks).
+```

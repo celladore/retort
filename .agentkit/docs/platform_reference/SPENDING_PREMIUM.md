@@ -22,20 +22,20 @@ productivity, autonomy, and the best AI coding experience money can buy.
 
 ## Premium Subscription Options
 
-| Platform | Plan | Price | What You Get |
-|----------|------|-------|-------------|
-| **Cursor** | Business | $40/seat/mo | Admin dashboard, SAML SSO, enforced privacy, unlimited |
-| **Claude Code** | Max (20x) | $100/mo | 5x more usage than base, all features |
-| **Claude Code** | Max (Unlimited) | $200/mo | Unlimited Claude usage |
-| **GitHub Copilot** | Business | $19/seat/mo | Org management, audit, policy enforcement |
-| **GitHub Copilot** | Enterprise | $39/seat/mo | Full governance, custom models, IP protection |
-| **OpenAI Codex** | ChatGPT Pro | $200/mo | Full autonomous cloud agent |
-| **Augment Code** | Max | $200/mo | 450K credits, enterprise security |
-| **Devin** | Team | $500/mo | 250 ACUs, API access, parallel agents |
-| **Windsurf** | Business | TBD | Team features, admin controls |
-| **Tabnine** | Enterprise | Custom | On-prem, air-gapped, VPC, SSO |
-| **Amazon Q** | Professional | $19/user/mo | Admin controls, compliance, org policies |
-| **Factory** | Enterprise | Custom | Full SDLC automation |
+| Platform           | Plan            | Price       | What You Get                                           |
+| ------------------ | --------------- | ----------- | ------------------------------------------------------ |
+| **Cursor**         | Business        | $40/seat/mo | Admin dashboard, SAML SSO, enforced privacy, unlimited |
+| **Claude Code**    | Max (20x)       | $100/mo     | 5x more usage than base, all features                  |
+| **Claude Code**    | Max (Unlimited) | $200/mo     | Unlimited Claude usage                                 |
+| **GitHub Copilot** | Business        | $19/seat/mo | Org management, audit, policy enforcement              |
+| **GitHub Copilot** | Enterprise      | $39/seat/mo | Full governance, custom models, IP protection          |
+| **OpenAI Codex**   | ChatGPT Pro     | $200/mo     | Full autonomous cloud agent                            |
+| **Augment Code**   | Max             | $200/mo     | 450K credits, enterprise security                      |
+| **Devin**          | Team            | $500/mo     | 250 ACUs, API access, parallel agents                  |
+| **Windsurf**       | Business        | TBD         | Team features, admin controls                          |
+| **Tabnine**        | Enterprise      | Custom      | On-prem, air-gapped, VPC, SSO                          |
+| **Amazon Q**       | Professional    | $19/user/mo | Admin controls, compliance, org policies               |
+| **Factory**        | Enterprise      | Custom      | Full SDLC automation                                   |
 
 ---
 
@@ -126,28 +126,28 @@ for lead + AI-native IDE for the team. AGENTS.md ensures consistency.
 
 ### GitHub-Centric Enterprise (per developer)
 
-| Tool | Per-Seat Cost | Purpose |
-|------|-------------|---------|
-| Copilot Enterprise | $39/mo | IDE + agent + code review + governance |
-| Cursor Business | $40/mo | AI-native IDE (for developers who prefer it) |
-| Claude Code Max | $100/mo (power users only) | Complex agentic tasks |
-| **Total per dev** | **$39–79/mo** (most), **$139/mo** (power users) | |
+| Tool               | Per-Seat Cost                                   | Purpose                                      |
+| ------------------ | ----------------------------------------------- | -------------------------------------------- |
+| Copilot Enterprise | $39/mo                                          | IDE + agent + code review + governance       |
+| Cursor Business    | $40/mo                                          | AI-native IDE (for developers who prefer it) |
+| Claude Code Max    | $100/mo (power users only)                      | Complex agentic tasks                        |
+| **Total per dev**  | **$39–79/mo** (most), **$139/mo** (power users) |                                              |
 
 ### AWS-Centric Enterprise (per developer)
 
-| Tool | Per-Seat Cost | Purpose |
-|------|-------------|---------|
-| Amazon Q Professional | $19/mo | AWS integration + compliance |
-| Copilot Business | $19/mo | General IDE coding |
-| **Total per dev** | **$38/mo** | Best value for AWS teams |
+| Tool                  | Per-Seat Cost | Purpose                      |
+| --------------------- | ------------- | ---------------------------- |
+| Amazon Q Professional | $19/mo        | AWS integration + compliance |
+| Copilot Business      | $19/mo        | General IDE coding           |
+| **Total per dev**     | **$38/mo**    | Best value for AWS teams     |
 
 ### Privacy-First Enterprise (per developer)
 
-| Tool | Per-Seat Cost | Purpose |
-|------|-------------|---------|
-| Tabnine Enterprise | Custom (est. $30–50/mo) | On-prem, air-gapped |
-| JetBrains AI Pro | $16.67/mo | Junie agent in JetBrains |
-| **Total per dev** | **~$47–67/mo** | All processing on your infrastructure |
+| Tool               | Per-Seat Cost           | Purpose                               |
+| ------------------ | ----------------------- | ------------------------------------- |
+| Tabnine Enterprise | Custom (est. $30–50/mo) | On-prem, air-gapped                   |
+| JetBrains AI Pro   | $16.67/mo               | Junie agent in JetBrains              |
+| **Total per dev**  | **~$47–67/mo**          | All processing on your infrastructure |
 
 ---
 
@@ -155,23 +155,23 @@ for lead + AI-native IDE for the team. AGENTS.md ensures consistency.
 
 ### Developer Time Savings
 
-| Without AI Tools | With Premium AI Stack | Time Saved |
-|-----------------|---------------------|-----------|
-| 8 hours coding | 5–6 hours for same output | 25–37% |
-| 2 hours code review | 0.5 hours with AI review | 75% |
-| 1 hour debugging | 0.3 hours with AI debug | 70% |
-| 1 hour writing tests | 0.25 hours with AI tests | 75% |
+| Without AI Tools     | With Premium AI Stack     | Time Saved |
+| -------------------- | ------------------------- | ---------- |
+| 8 hours coding       | 5–6 hours for same output | 25–37%     |
+| 2 hours code review  | 0.5 hours with AI review  | 75%        |
+| 1 hour debugging     | 0.3 hours with AI debug   | 70%        |
+| 1 hour writing tests | 0.25 hours with AI tests  | 75%        |
 
 ### Cost Justification
 
 For a developer earning $100K/year ($48/hour):
 
-| Monthly Tool Cost | Hours Saved/Month | Value of Saved Hours | **Net ROI** |
-|------------------|------------------|---------------------|------------|
-| $50 | ~20 hours | $960 | **+$910** (1,820% ROI) |
-| $100 | ~25 hours | $1,200 | **+$1,100** (1,100% ROI) |
-| $200 | ~30 hours | $1,440 | **+$1,240** (620% ROI) |
-| $500 (team of 5) | ~100 hours | $4,800 | **+$4,300** (860% ROI) |
+| Monthly Tool Cost | Hours Saved/Month | Value of Saved Hours | **Net ROI**              |
+| ----------------- | ----------------- | -------------------- | ------------------------ |
+| $50               | ~20 hours         | $960                 | **+$910** (1,820% ROI)   |
+| $100              | ~25 hours         | $1,200               | **+$1,100** (1,100% ROI) |
+| $200              | ~30 hours         | $1,440               | **+$1,240** (620% ROI)   |
+| $500 (team of 5)  | ~100 hours        | $4,800               | **+$4,300** (860% ROI)   |
 
 **Conclusion:** Even the most expensive stack pays for itself many times
 over in developer time savings. The question is not whether to invest in
@@ -181,16 +181,16 @@ AI tools, but which combination maximizes your specific workflow.
 
 ## What Premium Gets You
 
-| Capability | Free/Basic | Premium |
-|-----------|-----------|---------|
-| Model quality | DeepSeek, Gemini Flash | Claude 3.7 Opus, GPT-4o, Gemini Ultra |
-| Usage limits | Tight caps, rate limits | Generous or unlimited |
-| Agent autonomy | Basic, requires oversight | Advanced, multi-step, parallel |
-| Code review | Manual | AI-powered with policy enforcement |
-| Compliance | None | SOC 2, ISO 27001, HIPAA, FedRAMP |
-| Admin controls | None | SSO, audit logs, org policies |
-| Support | Community | Priority, SLA-backed |
-| Speed | Throttled, queued | Priority processing |
+| Capability     | Free/Basic                | Premium                               |
+| -------------- | ------------------------- | ------------------------------------- |
+| Model quality  | DeepSeek, Gemini Flash    | Claude 3.7 Opus, GPT-4o, Gemini Ultra |
+| Usage limits   | Tight caps, rate limits   | Generous or unlimited                 |
+| Agent autonomy | Basic, requires oversight | Advanced, multi-step, parallel        |
+| Code review    | Manual                    | AI-powered with policy enforcement    |
+| Compliance     | None                      | SOC 2, ISO 27001, HIPAA, FedRAMP      |
+| Admin controls | None                      | SSO, audit logs, org policies         |
+| Support        | Community                 | Priority, SLA-backed                  |
+| Speed          | Throttled, queued         | Priority processing                   |
 
 ---
 
@@ -198,13 +198,13 @@ AI tools, but which combination maximizes your specific workflow.
 
 At some point, more spending doesn't proportionally improve output:
 
-| Spend Level | Productivity Gain | Notes |
-|------------|------------------|-------|
-| $0 → $20/mo | **Massive** (3–5x) | Single biggest jump |
-| $20 → $50/mo | **Significant** (1.5–2x) | Removes most friction |
-| $50 → $100/mo | **Moderate** (1.2–1.5x) | Quality and autonomy improve |
-| $100 → $200/mo | **Incremental** (1.1–1.2x) | Caps removed; convenience |
-| $200+ | **Marginal** | Mostly for team/enterprise features |
+| Spend Level    | Productivity Gain          | Notes                               |
+| -------------- | -------------------------- | ----------------------------------- |
+| $0 → $20/mo    | **Massive** (3–5x)         | Single biggest jump                 |
+| $20 → $50/mo   | **Significant** (1.5–2x)   | Removes most friction               |
+| $50 → $100/mo  | **Moderate** (1.2–1.5x)    | Quality and autonomy improve        |
+| $100 → $200/mo | **Incremental** (1.1–1.2x) | Caps removed; convenience           |
+| $200+          | **Marginal**               | Mostly for team/enterprise features |
 
 **Recommendation:** Most individual developers see the best ROI at
 **$20–50/month**. Go higher only if you're hitting usage caps daily,

@@ -290,7 +290,10 @@ export function acquireLock(projectRoot, holder = {}) {
 
 function getHostname() {
   try {
-    return execFileSync('hostname', [], { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return execFileSync('hostname', [], {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
   } catch {
     return 'unknown';
   }
@@ -953,15 +956,15 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
 export { PHASES, VALID_TEAM_IDS, VALID_TEAM_STATUSES };
 
 // Re-export task protocol for convenience
-  export {
-    addTaskArtifact,
-    createTask,
-    formatTaskList,
-    formatTaskSummary,
-    getTask as getTaskById,
-    listTasks,
-    updateTaskStatus as updateTaskState
-  } from './task-protocol.mjs';
+export {
+  addTaskArtifact,
+  createTask,
+  formatTaskList,
+  formatTaskSummary,
+  getTask as getTaskById,
+  listTasks,
+  updateTaskStatus as updateTaskState,
+} from './task-protocol.mjs';
 
 // Re-export agent integration for convenience
 export {
@@ -976,4 +979,3 @@ export {
   autoCreateDependencyAuditTask,
   autoCreateQualityReviewTask,
 } from './agent-integration.mjs';
-

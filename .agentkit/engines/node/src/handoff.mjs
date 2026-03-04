@@ -31,16 +31,15 @@ function getGitState(projectRoot) {
 
   // Recent commits (last 5)
   const recentResult = execCommand('git log -5 --format="%h %s" --no-merges', { cwd: projectRoot });
-  git.recentCommits = recentResult.exitCode === 0
-    ? recentResult.stdout.trim().split('\n').filter(Boolean)
-    : [];
+  git.recentCommits =
+    recentResult.exitCode === 0 ? recentResult.stdout.trim().split('\n').filter(Boolean) : [];
 
   // Uncommitted changes count
   const statusResult = execCommand('git status --porcelain', { cwd: projectRoot });
   if (statusResult.exitCode === 0) {
     const lines = statusResult.stdout.trim().split('\n').filter(Boolean);
     git.uncommittedCount = lines.length;
-    git.uncommittedFiles = lines.slice(0, 10).map(l => l.trim());
+    git.uncommittedFiles = lines.slice(0, 10).map((l) => l.trim());
     if (lines.length > 10) {
       git.uncommittedFiles.push(`... and ${lines.length - 10} more`);
     }
@@ -102,8 +101,9 @@ function generateHandoffDoc(git, state, events, timestamp) {
   }
 
   // Team progress
-  const activeTeams = Object.entries(state.team_progress ?? {})
-    .filter(([_, t]) => t.status !== 'idle');
+  const activeTeams = Object.entries(state.team_progress ?? {}).filter(
+    ([_, t]) => t.status !== 'idle'
+  );
 
   if (activeTeams.length > 0) {
     lines.push(`## Team Progress`);
@@ -118,7 +118,7 @@ function generateHandoffDoc(git, state, events, timestamp) {
   }
 
   // Todo items
-  const openTodos = (state.todo_items || []).filter(t => t.status !== 'done');
+  const openTodos = (state.todo_items || []).filter((t) => t.status !== 'done');
   if (openTodos.length > 0) {
     lines.push(`## Open Items`);
     lines.push(``);
@@ -200,7 +200,9 @@ export async function runHandoff({ agentkitRoot, projectRoot, flags = {} }) {
       phase: state.current_phase,
       saved: !!flags.save,
     });
-  } catch (err) { console.warn(`[agentkit:handoff] Event logging failed: ${err?.message ?? String(err)}`); }
+  } catch (err) {
+    console.warn(`[agentkit:handoff] Event logging failed: ${err?.message ?? String(err)}`);
+  }
 
   return {
     timestamp,

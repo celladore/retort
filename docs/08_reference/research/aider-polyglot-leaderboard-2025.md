@@ -39,15 +39,15 @@ maintaining gradation among advanced models.
 
 ## Top results (2025)
 
-| Rank | Model | Provider | Pass Rate |
-| ---: | --- | --- | ---: |
-| 1 | GPT-5 (high reasoning) | OpenAI | 88.0 % |
-| 2 | GPT-5 (medium) | OpenAI | 86.7 % |
-| 3 | o3-pro (high) | OpenAI | 84.9 % |
-| 4 | Gemini 2.5 Pro | Google | 83.1 % |
-| 5 | Claude 3.7 Sonnet (32k thinking) | Anthropic | 64.9 % |
-| 6 | Claude 3.7 Sonnet (plain) | Anthropic | 60.4 % |
-| — | DeepSeek-R1 | DeepSeek | ~71 % |
+| Rank | Model                            | Provider  | Pass Rate |
+| ---: | -------------------------------- | --------- | --------: |
+|    1 | GPT-5 (high reasoning)           | OpenAI    |    88.0 % |
+|    2 | GPT-5 (medium)                   | OpenAI    |    86.7 % |
+|    3 | o3-pro (high)                    | OpenAI    |    84.9 % |
+|    4 | Gemini 2.5 Pro                   | Google    |    83.1 % |
+|    5 | Claude 3.7 Sonnet (32k thinking) | Anthropic |    64.9 % |
+|    6 | Claude 3.7 Sonnet (plain)        | Anthropic |    60.4 % |
+|    — | DeepSeek-R1                      | DeepSeek  |     ~71 % |
 
 > **Note on Refact.ai:** Refact.ai Agent reported 93.3 % on the Aider
 > polyglot benchmark using a fully autonomous IDE-integrated workflow
@@ -81,7 +81,7 @@ plain (60.4 %) and 32k thinking-token mode (64.9 %) is ~4.5 pp —
 a meaningful uplift, but Claude still trails GPT-5 on this benchmark.
 
 **Agentic scaffolding inflates scores.** The Refact.ai 93.3 % result
-highlights that the *workflow* (plan, code, test, iterate) is often more
+highlights that the _workflow_ (plan, code, test, iterate) is often more
 important than the underlying model. This is consistent with the
 AgentKit Forge design principle of optimising the agent harness alongside
 model selection.

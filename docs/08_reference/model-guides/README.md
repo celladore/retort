@@ -7,18 +7,18 @@ ranked model tiers, and rationale. These guides are generated from
 
 ## Guides
 
-| Team | File | Focus |
-| --- | --- | --- |
-| Backend | [model-guide-backend.md](./model-guide-backend.md) | API, services, core logic |
-| Frontend | [model-guide-frontend.md](./model-guide-frontend.md) | UI, components, PWA |
-| Data | [model-guide-data.md](./model-guide-data.md) | Database, models, migrations |
-| Infra | [model-guide-infra.md](./model-guide-infra.md) | IaC, cloud, Terraform/Bicep |
-| DevOps | [model-guide-devops.md](./model-guide-devops.md) | CI/CD, pipelines, automation |
-| Testing | [model-guide-testing.md](./model-guide-testing.md) | Unit, E2E, integration tests |
-| Security | [model-guide-security.md](./model-guide-security.md) | Auth, compliance, audit |
-| Docs | [model-guide-docs.md](./model-guide-docs.md) | Documentation, ADRs, guides |
-| Product | [model-guide-product.md](./model-guide-product.md) | Features, PRDs, roadmap |
-| Quality | [model-guide-quality.md](./model-guide-quality.md) | Code review, refactoring |
+| Team     | File                                                 | Focus                        |
+| -------- | ---------------------------------------------------- | ---------------------------- |
+| Backend  | [model-guide-backend.md](./model-guide-backend.md)   | API, services, core logic    |
+| Frontend | [model-guide-frontend.md](./model-guide-frontend.md) | UI, components, PWA          |
+| Data     | [model-guide-data.md](./model-guide-data.md)         | Database, models, migrations |
+| Infra    | [model-guide-infra.md](./model-guide-infra.md)       | IaC, cloud, Terraform/Bicep  |
+| DevOps   | [model-guide-devops.md](./model-guide-devops.md)     | CI/CD, pipelines, automation |
+| Testing  | [model-guide-testing.md](./model-guide-testing.md)   | Unit, E2E, integration tests |
+| Security | [model-guide-security.md](./model-guide-security.md) | Auth, compliance, audit      |
+| Docs     | [model-guide-docs.md](./model-guide-docs.md)         | Documentation, ADRs, guides  |
+| Product  | [model-guide-product.md](./model-guide-product.md)   | Features, PRDs, roadmap      |
+| Quality  | [model-guide-quality.md](./model-guide-quality.md)   | Code review, refactoring     |
 
 ## Related
 

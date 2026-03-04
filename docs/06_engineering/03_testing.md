@@ -10,11 +10,11 @@ Testing strategy and conventions for agentkit-forge.
 
 ## Test Pyramid
 
-| Level | Tool | Location | Purpose |
-|-------|------|----------|---------|
-| Unit | <!-- e.g. Vitest --> | `src/**/*.test.ts` | Test individual functions and classes |
-| Integration | <!-- e.g. Vitest + Testcontainers --> | `tests/integration/` | Test module interactions |
-| E2E | <!-- e.g. Playwright --> | `tests/e2e/` | Test full user workflows |
+| Level       | Tool                                  | Location             | Purpose                               |
+| ----------- | ------------------------------------- | -------------------- | ------------------------------------- |
+| Unit        | <!-- e.g. Vitest -->                  | `src/**/*.test.ts`   | Test individual functions and classes |
+| Integration | <!-- e.g. Vitest + Testcontainers --> | `tests/integration/` | Test module interactions              |
+| E2E         | <!-- e.g. Playwright -->              | `tests/e2e/`         | Test full user workflows              |
 
 ## Running Tests
 
@@ -54,10 +54,10 @@ describe('UserService', () => {
 
 ## Coverage Targets
 
-| Metric | Minimum |
-|--------|---------|
-| Line coverage | <!-- e.g. 80% --> |
-| Branch coverage | <!-- e.g. 75% --> |
+| Metric            | Minimum           |
+| ----------------- | ----------------- |
+| Line coverage     | <!-- e.g. 80% --> |
+| Branch coverage   | <!-- e.g. 75% --> |
 | Function coverage | <!-- e.g. 80% --> |
 
 ## CI Integration

@@ -420,8 +420,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Phase 3.5: External Knowledge Integration ---
   const ekFromFlags =
     flags['external-knowledge'] === true ||
-    (typeof flags['external-mode'] === 'string' &&
-      flags['external-mode'].trim().length > 0) ||
+    (typeof flags['external-mode'] === 'string' && flags['external-mode'].trim().length > 0) ||
     (typeof flags['windsurf-guides-path'] === 'string' &&
       flags['windsurf-guides-path'].trim().length > 0) ||
     (typeof flags['mystira-docs-path'] === 'string' &&
@@ -783,6 +782,12 @@ function buildProjectDefaults(report, repoName) {
       designSystemPath: null,
       storybook: false,
       designTokensPath: null,
+      hasBrandGuide: false,
+      brandGuidePath: null,
+    },
+    editorTheme: {
+      enabled: false,
+      source: 'none',
     },
     externalKnowledge: {
       enabled: false,
@@ -863,6 +868,14 @@ function buildProjectDefaults(report, repoName) {
       project.documentation.designSystemPath = 'packages/ui/';
     }
     if (ds === 'design-tokens') project.documentation.designTokensPath = 'styles/tokens/';
+    if (ds === 'brand-guide') {
+      project.documentation.hasBrandGuide = true;
+      project.documentation.brandGuidePath = '.agentkit/spec/brand.yaml';
+    }
+    if (ds === 'editor-theme') {
+      project.editorTheme.enabled = true;
+      project.editorTheme.source = 'brand';
+    }
   }
 
   // Populate testing from discovery

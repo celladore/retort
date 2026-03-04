@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { validate, validateCrossReferences, validateSpec, validateProjectYaml, PROJECT_ENUMS } from '../spec-validator.mjs';
+import {
+  validate,
+  validateCrossReferences,
+  validateSpec,
+  validateProjectYaml,
+  PROJECT_ENUMS,
+} from '../spec-validator.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
@@ -15,7 +21,14 @@ function writeTempSpecRoot(commandsObj) {
 
   const teams = {
     teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }],
-    techStacks: [{ name: 'node', buildCommand: 'pnpm build', testCommand: 'pnpm test', detect: ['package.json'] }],
+    techStacks: [
+      {
+        name: 'node',
+        buildCommand: 'pnpm build',
+        testCommand: 'pnpm test',
+        detect: ['package.json'],
+      },
+    ],
   };
   const agents = {
     agents: {
@@ -125,7 +138,7 @@ describe('validateCrossReferences()', () => {
       agents: { agents: {} },
       rules: { rules: [] },
     });
-    expect(errors.some(e => e.includes('ghost'))).toBe(true);
+    expect(errors.some((e) => e.includes('ghost'))).toBe(true);
   });
 
   it('catches duplicate team IDs', () => {
@@ -135,17 +148,22 @@ describe('validateCrossReferences()', () => {
       agents: { agents: {} },
       rules: { rules: [] },
     });
-    expect(errors.some(e => e.includes('duplicate team id'))).toBe(true);
+    expect(errors.some((e) => e.includes('duplicate team id'))).toBe(true);
   });
 
   it('catches duplicate command names', () => {
     const errors = validateCrossReferences({
       teams: { teams: [] },
-      commands: { commands: [{ name: 'build', type: 'utility' }, { name: 'build', type: 'utility' }] },
+      commands: {
+        commands: [
+          { name: 'build', type: 'utility' },
+          { name: 'build', type: 'utility' },
+        ],
+      },
       agents: { agents: {} },
       rules: { rules: [] },
     });
-    expect(errors.some(e => e.includes('duplicate command name'))).toBe(true);
+    expect(errors.some((e) => e.includes('duplicate command name'))).toBe(true);
   });
 
   it('catches unknown tools in allowed-tools', () => {
@@ -155,13 +173,22 @@ describe('validateCrossReferences()', () => {
       agents: { agents: {} },
       rules: { rules: [] },
     });
-    expect(errors.some(e => e.includes('unknown tool'))).toBe(true);
+    expect(errors.some((e) => e.includes('unknown tool'))).toBe(true);
   });
 
   it('passes for valid cross-references', () => {
     const errors = validateCrossReferences({
       teams: { teams: [{ id: 'backend' }] },
-      commands: { commands: [{ name: 'team-backend', type: 'team', team: 'backend', 'allowed-tools': ['Read', 'Bash'] }] },
+      commands: {
+        commands: [
+          {
+            name: 'team-backend',
+            type: 'team',
+            team: 'backend',
+            'allowed-tools': ['Read', 'Bash'],
+          },
+        ],
+      },
       agents: { agents: { engineering: [{ id: 'be' }] } },
       rules: { rules: [{ domain: 'ts', conventions: [{ id: 'ts-lint' }] }] },
     });
@@ -224,7 +251,9 @@ describe('commands flag metadata validation', () => {
 
     try {
       const result = validateSpec(root);
-      expect(result.errors.some((e) => e.includes('required flag cannot have null/undefined default'))).toBe(true);
+      expect(
+        result.errors.some((e) => e.includes('required flag cannot have null/undefined default'))
+      ).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -254,7 +283,9 @@ describe('commands flag metadata validation', () => {
 
     try {
       const result = validateSpec(root);
-      expect(result.errors.some((e) => e.includes('.default: must be one of enum values'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('.default: must be one of enum values'))).toBe(
+        true
+      );
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -292,7 +323,9 @@ describe('commands flag metadata validation', () => {
       const result = validateSpec(root);
       expect(result.errors.some((e) => e.includes('--team'))).toBe(true);
       expect(result.errors.some((e) => e.includes('--phase'))).toBe(true);
-      expect(result.errors.some((e) => e.includes('required for workflow routing flag'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('required for workflow routing flag'))).toBe(
+        true
+      );
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -523,7 +556,7 @@ describe('validateProjectYaml', () => {
 
   it('rejects empty string for enum fields', () => {
     const { errors } = validateProjectYaml({ phase: '' });
-    expect(errors.some(e => e.includes('phase'))).toBe(true);
+    expect(errors.some((e) => e.includes('phase'))).toBe(true);
   });
 
   it('validates architecture.monorepoTool enum', () => {
@@ -531,7 +564,7 @@ describe('validateProjectYaml', () => {
     expect(ok).toEqual([]);
 
     const { errors: bad } = validateProjectYaml({ architecture: { monorepoTool: 'invalid' } });
-    expect(bad.some(e => e.includes('monorepoTool'))).toBe(true);
+    expect(bad.some((e) => e.includes('monorepoTool'))).toBe(true);
   });
 
   it('validates architecture.apiStyle enum', () => {
@@ -539,7 +572,7 @@ describe('validateProjectYaml', () => {
     expect(ok).toEqual([]);
 
     const { errors: bad } = validateProjectYaml({ architecture: { apiStyle: 'soap' } });
-    expect(bad.some(e => e.includes('apiStyle'))).toBe(true);
+    expect(bad.some((e) => e.includes('apiStyle'))).toBe(true);
   });
 
   it('validates testing.coverage boundary values', () => {
@@ -547,6 +580,6 @@ describe('validateProjectYaml', () => {
     expect(validateProjectYaml({ testing: { coverage: 100 } }).errors).toEqual([]);
 
     const { errors: neg } = validateProjectYaml({ testing: { coverage: -1 } });
-    expect(neg.some(e => e.includes('coverage'))).toBe(true);
+    expect(neg.some((e) => e.includes('coverage'))).toBe(true);
   });
 });

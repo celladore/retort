@@ -1,9 +1,9 @@
 ---
-description: "Update AGENT_BACKLOG.md with current findings, state, and code TODOs"
+description: 'Update AGENT_BACKLOG.md with current findings, state, and code TODOs'
 allowed-tools: Bash(git *), Bash(grep *), Bash(find *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -17,25 +17,30 @@ You are the **Backlog Sync Agent**. Your job is to maintain `AGENT_BACKLOG.md` �
 Gather work items from all of the following sources:
 
 ### 1. Discovery Findings
+
 - Read `AGENT_TEAMS.md` for detected issues from the last `/discover` run.
 - Check for any "Detected Issues" section and convert each into a backlog item.
 
 ### 2. Healthcheck Results
+
 - Read `.claude/state/orchestrator.json` for `healthDetails`.
 - Any failing check (build, lint, typecheck, tests) becomes a backlog item.
 - Read `.claude/state/events.log` for recent healthcheck entries.
 
 ### 3. Orchestrator State
+
 - Check `.claude/state/orchestrator.json` for any `risks` entries.
 - Check for incomplete items from previous orchestration runs.
 - Review team entries for unfinished or blocked work.
 
 ### 4. Code TODOs
+
 - Search the codebase for `TODO`, `FIXME`, `HACK`, `XXX`, and `TEMP` comments.
 - Group by file and area. Do not create one backlog item per TODO — group related TODOs into logical work items.
 - Exclude TODOs in `node_modules/`, `target/`, `bin/`, `obj/`, `.git/`, and other build output directories.
 
 ### 5. Review Findings
+
 - Check `.claude/state/events.log` for recent review entries with `REQUEST_CHANGES` verdict.
 - Convert required changes into backlog items.
 
@@ -53,27 +58,30 @@ Every backlog item must follow this format:
 
 ### Priority Levels
 
-| Priority | Meaning | Examples |
-|----------|---------|---------|
-| **P0** | Blocking — nothing else can proceed | Build broken, critical security vuln, data loss risk |
-| **P1** | High — should be done this session | Failing tests, type errors, lint errors, missing auth checks |
-| **P2** | Medium — important but not urgent | Performance improvements, test coverage gaps, code cleanup |
-| **P3** | Low — nice to have | Documentation, style consistency, minor refactors |
+| Priority | Meaning                             | Examples                                                     |
+| -------- | ----------------------------------- | ------------------------------------------------------------ |
+| **P0**   | Blocking — nothing else can proceed | Build broken, critical security vuln, data loss risk         |
+| **P1**   | High — should be done this session  | Failing tests, type errors, lint errors, missing auth checks |
+| **P2**   | Medium — important but not urgent   | Performance improvements, test coverage gaps, code cleanup   |
+| **P3**   | Low — nice to have                  | Documentation, style consistency, minor refactors            |
 
 ### Acceptance Criteria Rules
 
 Every item **must** have at least one acceptance criterion that is:
+
 - **Verifiable** — can be checked by running a command or inspecting a file
 - **Specific** — not vague like "code is better"
 - **Small** — achievable in a single focused session
 
 Good examples:
+
 - `pnpm build` exits with code 0
 - All tests in `src/auth/` pass
 - No `any` types remain in `src/api/handlers.ts`
 - `cargo clippy` produces zero warnings
 
 Bad examples:
+
 - "Code quality improves"
 - "Performance is better"
 - "Tests are good"
@@ -88,6 +96,7 @@ Create or replace `AGENT_BACKLOG.md` in the repository root:
 > Auto-synced by /sync-backlog on <date>. Do not edit manually during an active orchestration session.
 
 ## Summary
+
 - **Total items:** <count>
 - **P0 (blocking):** <count>
 - **P1 (high):** <count>
@@ -96,21 +105,27 @@ Create or replace `AGENT_BACKLOG.md` in the repository root:
 - **Source:** discovery (<count>), healthcheck (<count>), TODOs (<count>), review (<count>), manual (<count>)
 
 ## P0 — Blocking
+
 <items or "None">
 
 ## P1 — High Priority
+
 <items>
 
 ## P2 — Medium Priority
+
 <items>
 
 ## P3 — Low Priority
+
 <items>
 
 ## Completed (This Session)
+
 <checked-off items that were resolved during the current orchestration>
 
 ## Deferred
+
 <items explicitly postponed with a reason>
 ```
 

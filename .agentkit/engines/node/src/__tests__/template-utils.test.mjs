@@ -81,7 +81,10 @@ describe('replacePlaceholders', () => {
 
   it('replaces longest keys first to prevent partial collisions', () => {
     expect(
-      replacePlaceholders('{{version}} {{versionInfo}}', { version: '1.0', versionInfo: 'v1.0-beta' })
+      replacePlaceholders('{{version}} {{versionInfo}}', {
+        version: '1.0',
+        versionInfo: 'v1.0-beta',
+      })
     ).toBe('1.0 v1.0-beta');
   });
 
@@ -158,7 +161,9 @@ describe('sanitizeTemplateValue', () => {
   });
 
   it('preserves spaces, slashes, and @ symbols', () => {
-    expect(sanitizeTemplateValue('user@example.com /home/user')).toBe('user@example.com /home/user');
+    expect(sanitizeTemplateValue('user@example.com /home/user')).toBe(
+      'user@example.com /home/user'
+    );
   });
 });
 
@@ -217,18 +222,12 @@ describe('getGeneratedHeader', () => {
 // ---------------------------------------------------------------------------
 describe('mergePermissions', () => {
   it('merges allow lists with deduplication', () => {
-    const result = mergePermissions(
-      { allow: ['Read', 'Write'] },
-      { allow: ['Write', 'Bash'] }
-    );
+    const result = mergePermissions({ allow: ['Read', 'Write'] }, { allow: ['Write', 'Bash'] });
     expect(result.allow).toEqual(['Read', 'Write', 'Bash']);
   });
 
   it('merges deny lists with deduplication', () => {
-    const result = mergePermissions(
-      { deny: ['Bash'] },
-      { deny: ['Bash', 'Write'] }
-    );
+    const result = mergePermissions({ deny: ['Bash'] }, { deny: ['Bash', 'Write'] });
     expect(result.deny).toEqual(['Bash', 'Write']);
   });
 
@@ -531,26 +530,26 @@ describe('resolveEachBlocks', () => {
   });
 
   it('iterates over object array using {{.prop}}', () => {
-    const result = resolveEachBlocks(
-      '{{#each items}}{{.name}}:{{.purpose}} {{/each}}',
-      { items: [{ name: 'A', purpose: 'auth' }, { name: 'B', purpose: 'pay' }] }
-    );
+    const result = resolveEachBlocks('{{#each items}}{{.name}}:{{.purpose}} {{/each}}', {
+      items: [
+        { name: 'A', purpose: 'auth' },
+        { name: 'B', purpose: 'pay' },
+      ],
+    });
     expect(result).toBe('A:auth B:pay ');
   });
 
   it('replaces missing object props with empty string', () => {
-    const result = resolveEachBlocks(
-      '{{#each items}}{{.name}}{{.missing}}{{/each}}',
-      { items: [{ name: 'X' }] }
-    );
+    const result = resolveEachBlocks('{{#each items}}{{.name}}{{.missing}}{{/each}}', {
+      items: [{ name: 'X' }],
+    });
     expect(result).toBe('X');
   });
 
   it('exposes {{@index}} for current position', () => {
-    const result = resolveEachBlocks(
-      '{{#each items}}{{@index}}:{{.}} {{/each}}',
-      { items: ['x', 'y'] }
-    );
+    const result = resolveEachBlocks('{{#each items}}{{@index}}:{{.}} {{/each}}', {
+      items: ['x', 'y'],
+    });
     expect(result).toBe('0:x 1:y ');
   });
 });
@@ -600,7 +599,12 @@ describe('flattenProjectYaml', () => {
 
   it('maps deployment fields', () => {
     const vars = flattenProjectYaml({
-      deployment: { cloudProvider: 'azure', containerized: true, environments: ['dev', 'prod'], iacTool: 'bicep' },
+      deployment: {
+        cloudProvider: 'azure',
+        containerized: true,
+        environments: ['dev', 'prod'],
+        iacTool: 'bicep',
+      },
     });
     expect(vars.cloudProvider).toBe('azure');
     expect(vars.hasContainerized).toBe(true);
@@ -753,9 +757,18 @@ describe('flattenProjectYaml', () => {
 describe('flattenCrosscutting', () => {
   it('maps logging fields', () => {
     const vars = {};
-    flattenCrosscutting({
-      logging: { framework: 'serilog', structured: true, correlationId: true, level: 'information', sink: ['console'] },
-    }, vars);
+    flattenCrosscutting(
+      {
+        logging: {
+          framework: 'serilog',
+          structured: true,
+          correlationId: true,
+          level: 'information',
+          sink: ['console'],
+        },
+      },
+      vars
+    );
     expect(vars.loggingFramework).toBe('serilog');
     expect(vars.hasLogging).toBe(true);
     expect(vars.hasStructuredLogging).toBe(true);
@@ -772,9 +785,17 @@ describe('flattenCrosscutting', () => {
 
   it('maps authentication fields', () => {
     const vars = {};
-    flattenCrosscutting({
-      authentication: { provider: 'auth0', strategy: 'jwt-bearer', rbac: true, multiTenant: false },
-    }, vars);
+    flattenCrosscutting(
+      {
+        authentication: {
+          provider: 'auth0',
+          strategy: 'jwt-bearer',
+          rbac: true,
+          multiTenant: false,
+        },
+      },
+      vars
+    );
     expect(vars.authProvider).toBe('auth0');
     expect(vars.hasAuth).toBe(true);
     expect(vars.authStrategy).toBe('jwt-bearer');
@@ -784,9 +805,12 @@ describe('flattenCrosscutting', () => {
 
   it('maps caching fields', () => {
     const vars = {};
-    flattenCrosscutting({
-      caching: { provider: 'redis', patterns: ['cache-aside'], distributedCache: true },
-    }, vars);
+    flattenCrosscutting(
+      {
+        caching: { provider: 'redis', patterns: ['cache-aside'], distributedCache: true },
+      },
+      vars
+    );
     expect(vars.cachingProvider).toBe('redis');
     expect(vars.hasCaching).toBe(true);
     expect(vars.cachingPatterns).toBe('cache-aside');
@@ -848,7 +872,9 @@ describe('resolveRenderTargets', () => {
   });
 
   it('--only flag overrides overlay targets', () => {
-    const result = resolveRenderTargets(['claude', 'cursor', 'windsurf'], { only: 'claude,cursor' });
+    const result = resolveRenderTargets(['claude', 'cursor', 'windsurf'], {
+      only: 'claude,cursor',
+    });
     expect(result).toEqual(new Set(['claude', 'cursor']));
   });
 

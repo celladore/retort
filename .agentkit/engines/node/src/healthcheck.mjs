@@ -91,10 +91,13 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
     const stacks = spec.techStacks || [];
 
     for (const stack of stacks) {
-      const detected = (stack.detect || []).some(marker => {
+      const detected = (stack.detect || []).some((marker) => {
         if (marker.startsWith('*')) {
-          try { return readdirSync(projectRoot).some(f => f.endsWith(marker.replace('*', ''))); }
-          catch { return false; }
+          try {
+            return readdirSync(projectRoot).some((f) => f.endsWith(marker.replace('*', '')));
+          } catch {
+            return false;
+          }
         }
         return existsSync(resolve(projectRoot, marker));
       });
@@ -115,7 +118,13 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
         if (!check.cmd) continue;
         if (!isValidCommand(check.cmd)) {
           console.warn(`  ${check.name.padEnd(12)} SKIP (invalid command rejected)`);
-          stackResult.checks.push({ name: check.name, command: check.cmd, status: 'SKIP', exitCode: -1, durationMs: 0 });
+          stackResult.checks.push({
+            name: check.name,
+            command: check.cmd,
+            status: 'SKIP',
+            exitCode: -1,
+            durationMs: 0,
+          });
           continue;
         }
         process.stdout.write(`  ${check.name.padEnd(12)} `);
@@ -150,10 +159,12 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
     await saveState(projectRoot, state);
     await appendEvent(projectRoot, 'healthcheck_completed', {
       overallHealth: results.overallHealth,
-      toolsFound: results.tools.filter(t => t.found).length,
+      toolsFound: results.tools.filter((t) => t.found).length,
       stacksChecked: results.stacks.length,
     });
-  } catch (err) { console.warn(`[agentkit:healthcheck] State update failed: ${err?.message ?? String(err)}`); }
+  } catch (err) {
+    console.warn(`[agentkit:healthcheck] State update failed: ${err?.message ?? String(err)}`);
+  }
 
   return results;
 }

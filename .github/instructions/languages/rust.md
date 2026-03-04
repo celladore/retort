@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — Rust
 
 Apply these rules when editing `.rs` files or `Cargo.toml`.
@@ -79,4 +80,3 @@ The following conventions are enforced in **agentkit-forge** and derived from
 - **[rs-unsafe]** Minimize use of unsafe blocks. Every unsafe block must have a SAFETY comment explaining why the invariants are upheld. Prefer safe abstractions. New unsafe code requires review by a second contributor.
 
 - **[rs-documentation]** All public items must have documentation comments (///). Include examples in doc comments for complex APIs. Run 'cargo doc' with no warnings.
-

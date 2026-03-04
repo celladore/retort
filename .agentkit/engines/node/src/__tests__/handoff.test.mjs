@@ -48,9 +48,12 @@ describe('runHandoff()', () => {
 
     // Mock git commands to avoid spawning real processes (slow on Windows with shell:true)
     vi.spyOn(runner, 'execCommand').mockImplementation((cmd) => {
-      if (cmd.includes('rev-parse --abbrev-ref')) return { exitCode: 0, stdout: 'main\n', stderr: '', durationMs: 5 };
-      if (cmd.includes('git log')) return { exitCode: 0, stdout: 'abc1234 Initial commit\n', stderr: '', durationMs: 5 };
-      if (cmd.includes('git status --porcelain')) return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
+      if (cmd.includes('rev-parse --abbrev-ref'))
+        return { exitCode: 0, stdout: 'main\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git log'))
+        return { exitCode: 0, stdout: 'abc1234 Initial commit\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git status --porcelain'))
+        return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
       if (cmd.includes('git diff')) return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
       return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
     });

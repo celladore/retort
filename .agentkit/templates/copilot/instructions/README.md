@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Path-Specific Copilot Instructions
 
 This directory contains instruction files that GitHub Copilot applies based on
@@ -15,14 +16,14 @@ files referenced in VS Code settings or the Copilot configuration.
 
 Files in this directory are organized by domain:
 
-| File                       | Scope                                         |
-| -------------------------- | --------------------------------------------- |
-| `code-verify.md`           | Code verification, static analysis sign-off   |
-| `docs.md`                  | Documentation, Markdown, ADRs                 |
-| `marketing.md`             | Marketing site, Next.js, React, CSS           |
-| `performance.md`           | Performance testing, benchmarks, load testing |
-| `quality.md`               | Quality gates, PR standards, CI enforcement   |
-| `testing.md`               | Test authoring, coverage, mocking patterns    |
+| File             | Scope                                         |
+| ---------------- | --------------------------------------------- |
+| `code-verify.md` | Code verification, static analysis sign-off   |
+| `docs.md`        | Documentation, Markdown, ADRs                 |
+| `marketing.md`   | Marketing site, Next.js, React, CSS           |
+| `performance.md` | Performance testing, benchmarks, load testing |
+| `quality.md`     | Quality gates, PR standards, CI enforcement   |
+| `testing.md`     | Test authoring, coverage, mocking patterns    |
 
 ## Language-Specific Instructions
 
@@ -30,15 +31,15 @@ Language-specific rules live in the [`languages/`](./languages/) subdirectory.
 One file is generated per domain defined in `.agentkit/spec/rules.yaml`, using
 domain-specific templates enriched with per-project YAML configuration:
 
-| File                           | Domain                           |
-| ------------------------------ | -------------------------------- |
-| `languages/typescript.md`      | TypeScript / JavaScript          |
-| `languages/python.md`          | Python                           |
-| `languages/rust.md`            | Rust                             |
-| `languages/dotnet.md`          | .NET / C#                        |
-| `languages/blockchain.md`      | Blockchain / Smart Contracts     |
-| `languages/security.md`        | Cross-cutting security rules     |
-| `languages/testing.md`         | Testing & QA conventions         |
+| File                      | Domain                       |
+| ------------------------- | ---------------------------- |
+| `languages/typescript.md` | TypeScript / JavaScript      |
+| `languages/python.md`     | Python                       |
+| `languages/rust.md`       | Rust                         |
+| `languages/dotnet.md`     | .NET / C#                    |
+| `languages/blockchain.md` | Blockchain / Smart Contracts |
+| `languages/security.md`   | Cross-cutting security rules |
+| `languages/testing.md`    | Testing & QA conventions     |
 
 (Entries marked above are generated for every domain in `rules.yaml`.
 Languages not present in your project may still have a file — use
