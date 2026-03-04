@@ -322,6 +322,49 @@ commands:
       - WebSearch
       - WebFetch
 
+  - name: infra-eval
+    type: workflow
+    description: >
+      Risk-aware infrastructure and codebase evaluation against reliability,
+      cost, and scale fitness. Scores eight weighted dimensions (0–5 each),
+      enforces hard gates for critical safety properties, and produces a
+      scored summary with narrative risk analysis. Designed for quarterly
+      reassessment, pre-funding due diligence, and architectural decision
+      support. Gated behind the evaluation.infraEval project.yaml flag.
+    flags:
+      - name: --scope
+        description: 'Limit evaluation to specific paths or modules'
+        type: string
+        default: null
+        required: false
+      - name: --focus
+        description: 'Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops'
+        type: string
+        default: 'all'
+        required: false
+        enum: [all, reliability, cost, security, infra, scalability, architecture, code, ops]
+      - name: --output
+        description: 'Output format: markdown, json, or yaml'
+        type: string
+        default: 'markdown'
+        required: false
+        enum: [markdown, json, yaml]
+      - name: --save
+        description: 'Save evaluation report to docs/evaluations/'
+        type: boolean
+        default: true
+      - name: --gates-only
+        description: 'Run hard gate checks only without full dimensional scoring'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+      - WebSearch
+      - WebFetch
+
   - name: scaffold
     type: workflow
     requiredFeature: doc-scaffolding

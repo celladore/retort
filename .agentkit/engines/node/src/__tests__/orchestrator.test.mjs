@@ -21,7 +21,7 @@ import {
 
 // Use a temporary directory for tests
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-orchestrator');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'orchestrator');
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 
 describe('orchestrator', () => {

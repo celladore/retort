@@ -7,7 +7,7 @@ import { runReview } from '../review-runner.mjs';
 import * as runner from '../runner.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-review');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'review');
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 const FAKE_AWS_KEY = `AKIA${'IOSFODNN7EXAMPLE'}`;
 const FAKE_PRIVATE_KEY_HEADER = `-----BEGIN ${'RSA '}PRIVATE KEY-----`;
