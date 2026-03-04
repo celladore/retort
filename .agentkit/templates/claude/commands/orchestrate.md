@@ -238,14 +238,30 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
    - Ignore tasks whose state is one of: `completed`, `failed`, `rejected`, `canceled`, `BLOCKED_ON_CANCELED` (terminal states).
    - Update `blockedBy` arrays and unblock tasks whose dependencies are satisfied (completed only; never unblock when blocked only by canceled deps).
 8. Process handoffs: for completed tasks with `handoffTo`, create follow-up tasks for the downstream team with the `handoffContext` carried forward.
-9. Monitor progress via task status and log team outputs to `events.log`.
+9. **Cross-agent integration** — when an engineering task completes, the agent-integration engine automatically:
+   - **Processes notifications:** Creates lightweight review tasks for agents listed in the completing agent's `notifies` field (e.g., `test-lead` gets notified when `backend` completes).
+   - **Auto-creates test tasks:** For each completed engineering task (backend, frontend, data, infra, devops), creates a `test` task assigned to `team-testing` to verify test coverage.
+   - **Auto-creates integration tests:** When both backend AND frontend tasks complete, creates a cross-team integration test task.
+   - **Auto-creates documentation tasks:** For teams with `docs` in their `handoff-chain` (backend, frontend), creates `document` tasks for `team-docs` when changes touch public-facing files (APIs, config, schemas).
+   - **Auto-creates security reviews:** For teams with `security` in their `handoff-chain` (infra, devops), creates `review` tasks for `team-security`.
+   - **Validates test acceptance criteria:** Warns if `implement` tasks complete without `test-results` artifacts or with zero `testsAdded`.
+10. **Incremental test validation** — between delegation rounds:
+    - After each round of task completions, run the test suite on the affected tech stacks before starting the next round.
+    - If tests fail between rounds, create a fix task for the responsible team immediately rather than waiting for Phase 4.
+    - Log inter-round test results to `events.log` with `eventType: "INTER_ROUND_TEST"`.
+11. Monitor progress via task status and log team outputs to `events.log`.
 
 ### Phase 4 — Validation
 
 1. Verify all delegated tasks have reached a terminal state (`completed`, `failed`, `rejected`, or `canceled`).
-2. Invoke `/check` to run the full quality gate (format, lint, typecheck, tests, build).
-3. Invoke `/review` on all changed files since the orchestration began.
-4. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+2. Verify all auto-created cross-agent tasks (test, docs, security) from Phase 3 step 9 have also reached terminal state. If not, wait or process them before proceeding.
+3. Invoke `/check --coverage` to run the full quality gate **including coverage threshold enforcement** (format, lint, typecheck, tests, coverage, build).
+4. Invoke `/review` on all changed files since the orchestration began. This now includes automated coverage delta checking.
+5. **Test failure routing:** If `/check` reports test, lint, or typecheck failures:
+   - Create a `test` task assigned to `team-testing` (not just the engineering team) to diagnose and fix the failures.
+   - Include the failure details, responsible teams, and affected files in the task description.
+   - The testing team coordinates with the responsible engineering team to resolve issues.
+6. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
 5. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
    **Retry key convention:**

@@ -25,6 +25,10 @@ import {
   processHandoffs,
   TERMINAL_STATES,
 } from './task-protocol.mjs';
+import {
+  processTaskCompletion,
+  routeTestFailureToTestingTeam,
+} from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -717,6 +721,128 @@ export async function orchestratorProcessHandoffs(projectRoot, state) {
 }
 
 /**
+ * Process a completed task through the agent integration pipeline.
+ * Handles notifications, auto-test delegation, doc/security tasks,
+ * and acceptance criteria validation.
+ *
+ * @param {string} projectRoot
+ * @param {string} agentkitRoot
+ * @param {object} state - Current orchestrator state
+ * @param {object} completedTask - The task that just completed
+ * @returns {Promise<{ state: object, result: object }>}
+ */
+export async function processCompletedTask(projectRoot, agentkitRoot, state, completedTask) {
+  const integrationResult = await processTaskCompletion(projectRoot, agentkitRoot, completedTask);
+
+  // Deep clone state for immutability
+  const newState = {
+    ...state,
+    active_tasks: state.active_tasks ? JSON.parse(JSON.stringify(state.active_tasks)) : {},
+    team_progress: state.team_progress ? JSON.parse(JSON.stringify(state.team_progress)) : {},
+  };
+
+  // Track newly created tasks in orchestrator state
+  const allNewTasks = [
+    ...integrationResult.notifications,
+    ...integrationResult.testTasks,
+    ...integrationResult.docTasks,
+    ...integrationResult.securityTasks,
+    ...integrationResult.integrationTests,
+    ...integrationResult.dependencyAudits,
+    ...integrationResult.qualityReviews,
+  ];
+
+  for (const task of allNewTasks) {
+    if (!task?.id || !Array.isArray(task.assignees)) continue;
+
+    if (!newState.active_tasks) newState.active_tasks = {};
+    for (const assignee of task.assignees) {
+      if (!newState.active_tasks[assignee]) {
+        newState.active_tasks[assignee] = [];
+      }
+      newState.active_tasks[assignee].push(task.id);
+
+      if (!newState.team_progress[assignee]) {
+        newState.team_progress[assignee] = {
+          status: 'in_progress',
+          tasks: {},
+          last_updated: new Date().toISOString(),
+        };
+      }
+      if (!newState.team_progress[assignee].tasks) {
+        newState.team_progress[assignee].tasks = {};
+      }
+      newState.team_progress[assignee].tasks[task.id] = {
+        status: 'in_progress',
+        present: true,
+      };
+      newState.team_progress[assignee].status = 'in_progress';
+      newState.team_progress[assignee].last_updated = new Date().toISOString();
+    }
+  }
+
+  // Log warnings
+  for (const warning of integrationResult.warnings) {
+    console.warn(`[agentkit:orchestrate] ${warning}`);
+  }
+
+  return { state: newState, result: integrationResult };
+}
+
+/**
+ * Route quality gate failures to the testing team.
+ * Called during Phase 4 when /check fails.
+ *
+ * @param {string} projectRoot
+ * @param {object} state - Current orchestrator state
+ * @param {object} checkResult - Result from runCheck
+ * @param {string[]} changedFileTeams - Team IDs responsible for the changes
+ * @returns {Promise<{ state: object, task: object|null }>}
+ */
+export async function routePhase4TestFailure(projectRoot, state, checkResult, changedFileTeams) {
+  const routeResult = await routeTestFailureToTestingTeam(
+    projectRoot, checkResult, changedFileTeams
+  );
+
+  if (!routeResult.created) {
+    return { state, task: null };
+  }
+
+  const newState = {
+    ...state,
+    active_tasks: state.active_tasks ? JSON.parse(JSON.stringify(state.active_tasks)) : {},
+    team_progress: state.team_progress ? JSON.parse(JSON.stringify(state.team_progress)) : {},
+  };
+
+  const task = routeResult.created;
+  for (const assignee of task.assignees || []) {
+    if (!newState.active_tasks[assignee]) {
+      newState.active_tasks[assignee] = [];
+    }
+    newState.active_tasks[assignee].push(task.id);
+
+    if (!newState.team_progress[assignee]) {
+      newState.team_progress[assignee] = {
+        status: 'in_progress',
+        tasks: {},
+        last_updated: new Date().toISOString(),
+      };
+    }
+    if (!newState.team_progress[assignee].tasks) {
+      newState.team_progress[assignee].tasks = {};
+    }
+    newState.team_progress[assignee].tasks[task.id] = {
+      status: 'in_progress',
+      present: true,
+    };
+    newState.team_progress[assignee].status = 'in_progress';
+    newState.team_progress[assignee].last_updated = new Date().toISOString();
+  }
+
+  return { state: newState, task };
+}
+
+/**
  * Get a summary of all active tasks for display.
  * @param {string} projectRoot
  * @returns {string}
@@ -885,4 +1011,18 @@ export { PHASES, VALID_TEAM_IDS, VALID_TEAM_STATUSES };
     listTasks,
     updateTaskStatus as updateTaskState
   } from './task-protocol.mjs';
+
+// Re-export agent integration for convenience
+export {
+  processTaskCompletion,
+  routeTestFailureToTestingTeam,
+  loadAgentNotifies,
+  loadTeamHandoffChains,
+  validateTestAcceptanceCriteria,
+  getIncrementalTestCommands,
+  resolveCoverageCommand,
+  parseCoveragePercentage,
+  autoCreateDependencyAuditTask,
+  autoCreateQualityReviewTask,
+} from './agent-integration.mjs';
 
