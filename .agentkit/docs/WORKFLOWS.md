@@ -12,6 +12,9 @@
 2. [Scenario 2: Bug Fix](#scenario-2-bug-fix)
 3. [Scenario 3: Full Project Assessment](#scenario-3-full-project-assessment)
 4. [Scenario 4: Multi-Session Continuity](#scenario-4-multi-session-continuity)
+5. [Scenario 5: Code Refactoring](#scenario-5-code-refactoring)
+6. [Scenario 6: Security Hardening](#scenario-6-security-hardening)
+7. [Scenario 7: Dependency Upgrade](#scenario-7-dependency-upgrade)
 
 ---
 
@@ -1038,3 +1041,425 @@ Total time: 10-15 minutes for the continuation session.
 - If the orchestrator lock is stale (left over from a crashed session), use `/orchestrate --force-unlock` to clear it
 - Handoff documents accumulate in `docs/ai_handoffs/`. Periodically review and archive old ones
 - The events log is append-only and grows over time. It is a useful audit trail but does not need to be read end-to-end -- the last 10-20 entries are usually sufficient
+
+---
+
+## Scenario 5: Code Refactoring
+
+### Goal
+
+Refactor a monolithic service file (`src/services/orderService.ts`, 800+ lines) into smaller, focused modules. The file handles order creation, payment processing, inventory checks, and email notifications — all in one file with tightly coupled logic.
+
+### When to Use This Flow
+
+Use this flow for refactoring tasks that improve code quality without changing behavior. The emphasis is on preserving existing tests and behavior while restructuring code for maintainability.
+
+### Step-by-Step
+
+#### Step 1: Assess the Current State
+
+```
+/discover
+```
+
+Run discovery to understand the project structure and identify dependencies on the file being refactored.
+
+```
+/check
+```
+
+Run a full quality gate to establish a passing baseline. Refactoring should start and end with green tests.
+
+---
+
+#### Step 2: Plan the Refactoring
+
+```
+/plan Refactor src/services/orderService.ts into smaller modules: extract payment processing, inventory management, and notification logic into separate service files. Maintain all existing behavior and test coverage.
+```
+
+**What the AI does:**
+
+- Analyzes the existing file to identify logical boundaries
+- Maps all imports and dependents that reference `orderService`
+- Produces a plan with extraction steps, new file locations, and updated imports
+- Includes a validation strategy to confirm no behavior changes
+
+**Expected plan highlights:**
+
+```
+## Steps
+1. Extract payment logic into src/services/paymentService.ts
+2. Extract inventory logic into src/services/inventoryService.ts
+3. Extract notification logic into src/services/notificationService.ts
+4. Update orderService.ts to import and delegate to new services
+5. Update all import paths in dependent files
+6. Run existing tests -- all must pass without changes to test code
+
+## Risks
+- Circular dependencies if services reference each other
+- Subtle behavior changes if execution order matters
+```
+
+---
+
+#### Step 3: Execute the Refactoring
+
+```
+/team-backend Refactor orderService.ts per the plan: extract paymentService, inventoryService, and notificationService. Update all imports. Do NOT change any test files -- all existing tests must pass as-is.
+```
+
+**What the AI does:**
+
+- Extracts each module one at a time, running tests after each extraction
+- Updates import paths in all dependent files
+- Keeps the original function signatures on `orderService.ts` to maintain the public API
+- Verifies that no test files were modified
+
+---
+
+#### Step 4: Verify Behavior Preservation
+
+```
+/check
+```
+
+Run the full quality gate. The key check: **all existing tests pass without modification**. If any test needed changes, the refactoring may have altered behavior.
+
+```
+/review --focus correctness
+```
+
+Review the changes specifically for correctness — are the extracted modules functionally identical to the original? Are there any subtle changes in error handling, execution order, or side effects?
+
+---
+
+#### Step 5: Hand Off
+
+```
+/handoff --save --tag refactoring
+```
+
+**Expected output:**
+
+```
+## What Was Done
+- Extracted paymentService.ts (120 lines) from orderService.ts
+- Extracted inventoryService.ts (95 lines) from orderService.ts
+- Extracted notificationService.ts (80 lines) from orderService.ts
+- orderService.ts reduced from 847 lines to 210 lines
+- All 142 existing tests pass without modification
+
+## Next 3 Actions
+1. Add unit tests for the new individual service modules
+2. Consider adding integration tests for the service boundaries
+3. Update API documentation to reflect the new module structure
+```
+
+---
+
+### Summary of Commands Used
+
+```
+/discover            Understand the codebase structure
+/check               Establish a passing baseline
+/plan                Design the refactoring strategy
+/team-backend        Execute the refactoring
+/check               Verify all existing tests pass
+/review              Confirm no behavior changes
+/handoff --save      Document the session
+```
+
+---
+
+## Scenario 6: Security Hardening
+
+### Goal
+
+Harden the application security after a penetration test report identified several vulnerabilities: missing input validation on API endpoints, insufficient CORS configuration, and missing rate limiting on public endpoints.
+
+### When to Use This Flow
+
+Use this flow when responding to security audit findings, penetration test reports, or when proactively hardening an application. Security changes require careful validation to avoid breaking existing functionality.
+
+### Step-by-Step
+
+#### Step 1: Run the Security Audit
+
+```
+/security
+```
+
+**What the AI does:**
+
+- Scans for OWASP Top 10 vulnerabilities
+- Checks dependency vulnerabilities via `npm audit` or equivalent
+- Scans for hardcoded secrets and credentials
+- Reviews authentication and authorization flows
+- Reports findings by severity
+
+**Expected output:**
+
+```
+## Security Audit
+
+### Findings
+
+| ID   | Severity | Category         | Finding                                      | Location              |
+|------|----------|-----------------|----------------------------------------------|-----------------------|
+| S-01 | CRITICAL | Input Validation | User input passed directly to SQL query      | src/api/search.ts:45  |
+| S-02 | HIGH     | CORS             | CORS allows all origins in production        | src/server/app.ts:12  |
+| S-03 | HIGH     | Rate Limiting    | No rate limit on /api/auth/* endpoints       | src/routes/auth.ts    |
+| S-04 | MEDIUM   | Dependencies     | express@4.17.1 has known prototype pollution | package.json          |
+| S-05 | LOW      | Headers          | Missing security headers (HSTS, X-Frame)     | src/server/app.ts     |
+```
+
+---
+
+#### Step 2: Plan the Fixes
+
+```
+/plan Fix all CRITICAL and HIGH security findings from the audit: parameterize the SQL query in search, restrict CORS to allowed origins, and add rate limiting to auth endpoints
+```
+
+---
+
+#### Step 3: Fix Security Issues
+
+```
+/team-security Fix the SQL injection vulnerability in src/api/search.ts, restrict CORS configuration to allowed origins, and add rate limiting to /api/auth/* endpoints
+```
+
+**What the AI does:**
+
+- Replaces raw SQL with parameterized queries
+- Configures CORS with an explicit allowlist read from environment variables
+- Adds rate limiting middleware with configurable thresholds
+- Adds tests for each security fix (input validation, CORS rejection, rate limit enforcement)
+- Runs quality gates to ensure nothing breaks
+
+---
+
+#### Step 4: Fix Dependency Vulnerabilities
+
+```
+/security --scan-type deps --fix
+```
+
+**What the AI does:**
+
+- Identifies packages with known vulnerabilities
+- Upgrades to patched versions where available
+- Reports any vulnerabilities that cannot be auto-fixed (no patch available)
+
+---
+
+#### Step 5: Validate and Review
+
+```
+/check
+/review --focus security
+```
+
+Run the full quality gate, then a security-focused code review to verify the fixes are correct and complete.
+
+---
+
+#### Step 6: Re-run the Security Audit
+
+```
+/security
+```
+
+Run the security audit again to confirm all CRITICAL and HIGH findings are resolved. The output should show the remaining items are MEDIUM or LOW only.
+
+```
+/handoff --save --tag security
+```
+
+---
+
+### Summary of Commands Used
+
+```
+/security            Initial security audit
+/plan                Plan fixes for critical findings
+/team-security       Implement security fixes
+/security --fix      Auto-fix dependency vulnerabilities
+/check               Validate nothing is broken
+/review              Security-focused code review
+/security            Confirm findings are resolved
+/handoff --save      Document the session
+```
+
+---
+
+## Scenario 7: Dependency Upgrade
+
+### Goal
+
+Upgrade a major dependency (e.g., React 18 to React 19, or Express 4 to Express 5) across the project. Major upgrades involve breaking changes, API migrations, and updated patterns that must be applied consistently.
+
+### When to Use This Flow
+
+Use this flow for major version upgrades of core dependencies. Minor and patch upgrades typically do not require this level of planning. This flow is also useful for Node.js major version upgrades (e.g., Node 20 to Node 22) or framework migrations (e.g., Webpack to Vite).
+
+### Step-by-Step
+
+#### Step 1: Assess Current State
+
+```
+/discover
+/healthcheck
+```
+
+Run discovery and healthcheck to establish a baseline. You need to know what is passing before you start — any pre-existing failures will be harder to distinguish from upgrade-related regressions.
+
+---
+
+#### Step 2: Plan the Upgrade
+
+```
+/plan Upgrade React from v18 to v19. Identify all breaking changes, deprecated APIs in use, and files that need migration. Include a rollback strategy.
+```
+
+**What the AI does:**
+
+- Reviews the changelog and migration guide for the target version
+- Scans the codebase for deprecated patterns and breaking change impacts
+- Produces a file-by-file migration plan
+- Lists specific API changes (e.g., removed hooks, changed signatures)
+
+**Expected plan highlights:**
+
+```
+## Breaking Changes Affecting This Project
+1. `ReactDOM.render` removed -- must use `createRoot` (4 files affected)
+2. `useEffect` cleanup timing changed -- review all effects with cleanup
+3. Automatic batching now default -- remove manual batching wrappers
+4. `forwardRef` no longer needed -- refs passed as regular props
+
+## Steps
+1. Update package.json: react@19, react-dom@19, @types/react@19
+2. Migrate ReactDOM.render to createRoot in src/client/index.tsx
+3. Remove forwardRef wrappers from 6 component files
+4. Remove manual batching calls from 3 event handler files
+5. Review and test all useEffect cleanup functions
+6. Update test utilities: @testing-library/react to compatible version
+7. Run full test suite and fix any failures
+
+## Rollback Plan
+1. git stash or revert the upgrade commit
+2. Run pnpm install to restore previous lockfile
+```
+
+---
+
+#### Step 3: Perform the Upgrade
+
+Option A — use the orchestrator for multi-team coordination:
+
+```
+/orchestrate Upgrade React from v18 to v19 per the plan above
+```
+
+Option B — use a single team for a more controlled approach:
+
+```
+/team-frontend Upgrade React from v18 to v19. Start by updating package.json and running pnpm install, then migrate each breaking change one at a time, running tests after each change.
+```
+
+**What the AI does:**
+
+- Updates the dependency version in `package.json`
+- Applies each migration step incrementally
+- Runs tests after each change to catch regressions immediately
+- If a test fails, investigates and fixes before moving to the next step
+- Keeps changes atomic (one migration concern per commit when possible)
+
+---
+
+#### Step 4: Validate Thoroughly
+
+```
+/check
+```
+
+Run the full quality gate. Pay special attention to:
+
+- **Typecheck:** New type definitions may cause errors
+- **Tests:** Behavioral changes in the dependency may cause test failures
+- **Build:** New peer dependency requirements may cause build failures
+
+```
+/review --range main..HEAD
+```
+
+Review all changes since the upgrade started. Look for:
+
+- Incomplete migrations (some files updated, others missed)
+- Inconsistent patterns (mixing old and new APIs)
+- Missing test updates
+
+---
+
+#### Step 5: Test in Context
+
+If your project has E2E tests or a staging environment:
+
+```
+/deploy staging --dry-run
+```
+
+Preview what would be deployed to catch any deployment-specific issues from the upgrade.
+
+---
+
+#### Step 6: Document and Hand Off
+
+```
+/handoff --save --tag dependency-upgrade
+```
+
+**Expected output:**
+
+```
+## What Was Done
+- Upgraded React from 18.2.0 to 19.0.0
+- Migrated ReactDOM.render to createRoot (4 files)
+- Removed forwardRef wrappers (6 components)
+- Removed manual batching (3 files)
+- Updated @testing-library/react to v16
+- All 165 tests pass
+- Build clean, no type errors
+
+## Current Blockers
+- None
+
+## Next 3 Actions
+1. Monitor production for any rendering regressions after deployment
+2. Remove legacy React 18 compatibility shims in src/utils/compat.ts
+3. Audit remaining useEffect hooks for cleanup timing changes
+```
+
+---
+
+### Summary of Commands Used
+
+```
+/discover            Understand the codebase
+/healthcheck         Establish a passing baseline
+/plan                Plan the migration with rollback strategy
+/team-frontend       Execute the upgrade incrementally
+/check               Full quality gate validation
+/review              Review all changes for completeness
+/handoff --save      Document the session
+```
+
+**Tips for major dependency upgrades:**
+
+- Always start from a clean, passing baseline. Run `/healthcheck` first.
+- Make changes incrementally and test after each step. Do not update everything at once.
+- If the upgrade breaks too many things, consider a staged migration (adapter pattern) instead of a big-bang upgrade.
+- Keep the rollback plan ready. If the upgrade is not going well after 30 minutes, revert and reassess.
+- For framework upgrades that touch many files, use `/orchestrate` to coordinate multiple teams. For library upgrades, a single `/team-*` command is usually sufficient.

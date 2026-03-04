@@ -52,6 +52,8 @@ AI coding assistants consume tokens for every interaction -- prompts sent and co
 
 ## Token Usage Logging
 
+> **Implementation note:** Token-level tracking (input/output tokens, cache tokens, estimated USD cost) is a **roadmap** feature. It requires API-level access to token counts, which varies by AI tool provider. The configuration and log formats below describe the *target* design. Currently, session-level fields (`sessionId`, `command`, `durationMs`, `user`, `repo`, `branch`) are populated; token and cost fields are placeholders that will be populated once token-level tracking is implemented.
+
 ### Enabling Token Logging
 
 Token usage logs are written to the `.agentkit/logs/` directory. To enable logging, ensure your overlay `settings.yaml` includes:
@@ -71,30 +73,38 @@ Each log entry is a JSON line (JSONL format) written to a date-stamped file:
 .agentkit/logs/usage-2025-01-15.jsonl
 ```
 
-Each line contains:
+**Session-level fields** (implemented):
 
 ```json
 {
   "timestamp": "2025-01-15T14:32:00.000Z",
   "sessionId": "abc123",
   "command": "plan",
+  "durationMs": 4500,
+  "user": "developer@example.com",
+  "repo": "my-project",
+  "branch": "feature/auth",
+  "filesModified": 3
+}
+```
+
+**Token-level fields** (roadmap -- will be added when token tracking is available):
+
+```json
+{
   "model": "claude-sonnet-4-20250514",
   "provider": "anthropic",
   "inputTokens": 12500,
   "outputTokens": 3200,
   "cacheReadTokens": 8000,
   "cacheWriteTokens": 4500,
-  "estimatedCostUSD": 0.0847,
-  "durationMs": 4500,
-  "user": "developer@example.com",
-  "repo": "my-project",
-  "branch": "feature/auth"
+  "estimatedCostUSD": 0.0847
 }
 ```
 
 ### Viewing Recent Usage
 
-Use the CLI to view a summary of recent token usage:
+Use the CLI to view a summary of recent session usage:
 
 ```bash
 node agentkit-forge/.agentkit/engines/node/src/cli.mjs cost --summary
@@ -325,6 +335,8 @@ Review monthly reports to identify:
 ---
 
 ## Budget Alerts and Limits
+
+> **Implementation note:** Budget alerts and limits are a **roadmap** feature. The configuration below describes the target design. Budget enforcement requires token-level tracking to calculate actual costs. Currently, you can set these values in `settings.yaml` but they will not trigger alerts until token tracking is implemented.
 
 ### Setting a Budget
 

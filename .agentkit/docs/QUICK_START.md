@@ -128,7 +128,7 @@ The `sync` command generated several directories and files in your repository ro
 
 | Path         | Purpose                                                                                                                                                                                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where the 24 commands like `/discover` and `/orchestrate` live.          |
+| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.          |
 | `.cursor/`   | **Cursor AI rules** -- Rules files in `.mdc` format that Cursor uses for context-aware code generation.                                                                                                |
 | `.windsurf/` | **Windsurf AI rules and workflows** -- Rules and workflow definitions for Windsurf's AI assistant.                                                                                                     |
 | `.ai/`       | **Portable rules** -- A tool-agnostic rules format compatible with Continue and other AI tools that support the `.ai/` convention.                                                                     |
@@ -260,7 +260,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ## Command Quick Reference
 
-AgentKit Forge provides 24 slash commands, organized into three categories.
+AgentKit Forge provides 29 slash commands, organized into five categories. See [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) for full details, flags, and examples.
 
 ### Workflow Commands
 
@@ -294,18 +294,26 @@ These commands validate and improve code quality.
 
 These commands activate specialized agent teams for focused work.
 
-| Command             | Team                | Focus Area                                    |
-| ------------------- | ------------------- | --------------------------------------------- |
-| `/team-backend`     | Backend (T1)        | API routes, services, core server logic       |
-| `/team-frontend`    | Frontend (T2)       | UI components, client state, accessibility    |
-| `/team-data`        | Data (T3)           | Database, models, migrations, queries         |
-| `/team-infra`       | Infrastructure (T4) | CI/CD, Docker, cloud configuration            |
-| `/team-auth`        | Auth (T5)           | Authentication & authorization                |
-| `/team-integration` | Integration (T6)    | Third-party services & webhooks               |
-| `/team-docs`        | Documentation (T7)  | Docs, ADRs, runbooks, guides                  |
-| `/team-devex`       | DevEx (T8)          | Tooling, linting, DX improvements             |
-| `/team-platform`    | Platform (T9)       | Shared libraries & core modules               |
-| `/team-quality`     | Quality (T10)       | Quality assurance, test strategy, reliability |
+| Command          | Team                | Focus Area                                         |
+| ---------------- | ------------------- | -------------------------------------------------- |
+| `/team-backend`  | Backend (T1)        | API routes, services, core server logic            |
+| `/team-frontend` | Frontend (T2)       | UI components, client state, accessibility         |
+| `/team-data`     | Data (T3)           | Database, models, migrations, queries              |
+| `/team-infra`    | Infrastructure (T4) | Terraform, Docker, cloud configuration             |
+| `/team-devops`   | DevOps (T5)         | CI/CD pipelines, containers, deployment automation |
+| `/team-testing`  | Testing (T6)        | Test strategy, coverage, E2E tests, benchmarks     |
+| `/team-security` | Security (T7)       | Authentication, authorization, compliance          |
+| `/team-docs`     | Documentation (T8)  | Docs, ADRs, runbooks, guides                       |
+| `/team-product`  | Product (T9)        | PRDs, feature specs, user stories, roadmap         |
+| `/team-quality`  | Quality (T10)       | Code review, refactoring, quality gate definitions |
+
+### Task Management Commands
+
+| Command     | Purpose                                           |
+| ----------- | ------------------------------------------------- |
+| `/tasks`    | List, filter, and inspect delegated tasks         |
+| `/delegate` | Create a delegated task and assign it to a team   |
+| `/doctor`   | Run diagnostics on your AgentKit Forge setup      |
 
 ---
 

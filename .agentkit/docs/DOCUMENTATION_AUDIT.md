@@ -133,14 +133,24 @@ The following gaps were filled as part of this audit:
 
 ---
 
-## Remaining Recommendations (Not Addressed in This Audit)
+## Additional Remediation Actions (Second Pass)
+
+The following items from the initial audit's "remaining recommendations" have also been addressed:
+
+7. **Updated `STATE_AND_SESSIONS.md`** — Added concrete `orchestrator.json` example (full JSON with all fields) and expanded `events.log` with 14 example entries covering all event action types, plus an event action types reference table
+8. **Updated `MCP_A2A_GUIDE.md`** — Added full JSON payload examples for all 4 A2A message types (`delegate`, `report`, `query`, `broadcast`)
+9. **Updated `ONBOARDING.md`** — Added GitLab CI and Azure Pipelines configuration examples alongside the existing GitHub Actions example
+10. **Updated `QUICK_START.md`** — Reconciled command count from "24" to "29" (added task management and diagnostic commands), updated team command table to match `teams.yaml` (replaced outdated team names)
+11. **Updated `COST_TRACKING.md`** — Added implementation status callouts to Token Usage Logging and Budget Alerts sections, split log format examples into implemented vs roadmap fields
+12. **Updated `WORKFLOWS.md`** — Added 3 new workflow scenarios: Code Refactoring (Scenario 5), Security Hardening (Scenario 6), and Dependency Upgrade (Scenario 7)
+
+---
+
+## Remaining Recommendations (Not Addressed)
 
 These items are lower priority and recommended for future work:
 
-1. **Add concrete examples to STATE_AND_SESSIONS.md** — Include sample `orchestrator.json` and `events.log` contents
-2. **Add A2A message examples to MCP_A2A_GUIDE.md** — Show actual agent-to-agent communication payloads
-3. **Expand ONBOARDING.md CI section** — Add GitLab CI and Azure Pipelines examples
-4. **Add troubleshooting entries** — Spec validation errors, team command failures, orchestrator mid-phase crashes
-5. **Reconcile command counts** — Update QUICK_START.md to reflect actual command inventory (or clarify counting methodology)
-6. **Clarify COST_TRACKING.md implementation status** — Distinguish implemented vs roadmap features more clearly
-7. **Add workflow examples** — Refactoring, security hardening, and dependency upgrade workflows to WORKFLOWS.md
+1. **Add troubleshooting entries** — Spec validation errors, team command failures, orchestrator mid-phase crashes
+2. **Add Docker-based installation** — Document Docker-based setup for CLI_INSTALLATION.md
+3. **Add shell completion** — Document bash/zsh/fish completion setup for CLI
+4. **Add platform comparison matrix** — Summarize AI tool support differences in PLATFORM_REFERENCE.md
