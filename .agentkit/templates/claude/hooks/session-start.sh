@@ -43,21 +43,36 @@ detect_tool() {
     fi
 }
 
-detect_tool "Node.js"  "node"
-detect_tool "pnpm"     "pnpm"
-detect_tool "npm"      "npm"
 detect_tool "Git"      "git"
 detect_tool "GitHub CLI" "gh"
-detect_tool "dotnet"   "dotnet"
-detect_tool "Cargo"    "cargo"
-detect_tool "Python"   "python3"
-detect_tool "Python"   "python"   # fallback if python3 is absent
 detect_tool "jq"       "jq"
 detect_tool "Bash"     "bash"
 detect_tool "PowerShell" "pwsh"
+
+{{#if hasLanguageJsLikeEffective}}
+detect_tool "Node.js"  "node"
+detect_tool "pnpm"     "pnpm"
+detect_tool "npm"      "npm"
+{{/if}}
+
+{{#if hasLanguageDotnetEffective}}
+detect_tool "dotnet"   "dotnet"
+{{/if}}
+
+{{#if hasLanguageRustEffective}}
+detect_tool "Cargo"    "cargo"
+{{/if}}
+
+{{#if hasLanguagePythonEffective}}
+detect_tool "Python"   "python3"
+detect_tool "Python"   "python"   # fallback if python3 is absent
+{{/if}}
+
+{{#if hasAnyInfraConfig}}
 detect_tool "Docker"   "docker"
 detect_tool "Azure CLI" "az"
 detect_tool "Terraform" "terraform"
+{{/if}}
 
 tools_summary=""
 if [[ ${#tools_found[@]} -gt 0 ]]; then
@@ -123,7 +138,7 @@ conventions_reminder="REMINDERS:
 - Run /check before creating a PR"
 
 # ── Compose the environment summary ─────────────────────────────────────
-env_summary=$(printf 'Session: %s\nWorking directory: %s\n\nToolchains:\n%s\n\nGit:\n%s\n\n%s' \
+env_summary=$(printf 'Session: %s\nWorking directory: %s\n{{#if showLanguageProfileDiagnostics}}Language profile source: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})\n{{/if}}\nToolchains:\n%s\n\nGit:\n%s\n\n%s' \
     "$SESSION_ID" "$CWD" "$tools_summary" "$git_summary" "$conventions_reminder")
 
 # ── Return structured output ────────────────────────────────────────────

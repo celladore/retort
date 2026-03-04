@@ -289,4 +289,174 @@ stack:
       ])
     );
   });
+
+  it('should report warning when language profile is inferred heuristically', async () => {
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+description: A test
+phase: active
+stack:
+  languages: []
+  frameworks:
+    backend: [node.js]
+testing:
+  unit: []
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('Language profile is being inferred heuristically'),
+        }),
+      ])
+    );
+  });
+
+  it('should report warning when configured and inferred language profiles diverge', async () => {
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+description: A test
+phase: active
+stack:
+  languages: [python]
+  frameworks:
+    backend: [node.js]
+testing:
+  unit: []
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('Configured stack.languages diverges'),
+        }),
+      ])
+    );
+  });
+
+  it('should report diagnostics disabled info when language profile diagnostics are off', async () => {
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+phase: active
+stack:
+  languages: [python]
+  frameworks:
+    backend: [node.js]
+automation:
+  languageProfile:
+    diagnostics: off
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'info',
+          message: expect.stringContaining('diagnostics are disabled'),
+        }),
+      ])
+    );
+  });
+
+  it('should warn when configured mode is set but stack.languages is empty', async () => {
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+phase: active
+stack:
+  languages: []
+automation:
+  languageProfile:
+    mode: configured
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('configured-only but stack.languages is empty'),
+        }),
+      ])
+    );
+  });
 });

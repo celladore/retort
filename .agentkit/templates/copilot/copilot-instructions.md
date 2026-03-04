@@ -23,6 +23,19 @@ Follow these instructions for all code generation, suggestions, and chat respons
 - **Default Branch**: {{defaultBranch}}
   {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
 
+{{#if showLanguageProfileDiagnostics}}
+## Language Profile Diagnostics
+
+- **Source**: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
+- **Configured languages present**: {{#if hasConfiguredLanguages}}yes{{else}}no{{/if}}
+- **JS-like**: configured={{hasLanguageJsLike}}, inferred={{hasLanguageJsLikeInferred}}, effective={{hasLanguageJsLikeEffective}}
+- **Python**: configured={{hasLanguagePython}}, inferred={{hasLanguagePythonInferred}}, effective={{hasLanguagePythonEffective}}
+- **.NET**: configured={{hasLanguageDotnet}}, inferred={{hasLanguageDotnetInferred}}, effective={{hasLanguageDotnetEffective}}
+- **Rust**: configured={{hasLanguageRust}}, inferred={{hasLanguageRustInferred}}, effective={{hasLanguageRustEffective}}
+{{#if hasLanguageInferenceMismatch}}- **Notice**: configured and inferred language signals diverge; generation uses configured values.{{/if}}
+{{#if hasLanguageInferenceUsed}}- **Notice**: heuristics are currently prepopulating effective language flags because configured languages are empty.{{/if}}
+{{/if}}
+
 ## Core Workflow
 
 This project uses a 5-phase orchestration lifecycle:
