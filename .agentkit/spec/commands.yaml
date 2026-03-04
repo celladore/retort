@@ -157,18 +157,31 @@ commands:
   - name: sync-backlog
     type: workflow
     description: >
-      Synchronizes the local backlog with GitHub Issues and project boards.
-      Pulls open issues, maps them to teams, updates local tracking documents,
+      Synchronizes the local backlog with the configured issue tracker
+      (GitHub or Linear), maps findings to ownership teams, updates local
+      tracking documents,
       and identifies stale or unassigned work items.
     flags:
+      - name: --tracker
+        description: 'Override tracker for this run (github, linear)'
+        type: string
+        default: null
+        required: false
+        enum: [github, linear]
       - name: --direction
-        description: 'Sync direction: pull (from GitHub), push (to GitHub), or both'
+        description: 'Sync direction: pull (from tracker), push (to tracker), or both'
         type: string
         default: 'pull'
       - name: --labels
-        description: 'Filter by GitHub labels (comma-separated)'
+        description: 'Filter by labels/tags (comma-separated)'
         type: string
         default: null
+      - name: --owner-team
+        description: 'Override intake owner team for this run'
+        type: string
+        default: null
+        required: false
+        enum: [backend, frontend, data, infra, devops, testing, security, docs, product, quality]
       - name: --team
         description: 'Filter issues relevant to a specific team'
         type: string
@@ -408,6 +421,49 @@ commands:
       - Read
       - Glob
       - Grep
+      - Bash
+
+  - name: brand
+    type: utility
+    description: >
+      Manage the project brand spec (brand.yaml) and editor theme. Supports
+      validation, palette preview, theme mapping, contrast auditing,
+      scaffolding, and regeneration of editor theme files.
+    flags:
+      - name: --validate
+        description: 'Validate brand.yaml and report errors/warnings (runs implicitly when no other flags are given)'
+        type: boolean
+        default: false
+      - name: --palette
+        description: 'Show the resolved color palette with hex values'
+        type: boolean
+        default: false
+      - name: --theme
+        description: 'Show the resolved editor theme mapping (VS Code color slots → hex values)'
+        type: boolean
+        default: false
+      - name: --contrast
+        description: 'Check foreground/background contrast ratios against WCAG thresholds'
+        type: boolean
+        default: false
+      - name: --init
+        description: 'Scaffold a brand.yaml with sensible defaults (interactive prompts for name, colors)'
+        type: boolean
+        default: false
+      - name: --generate
+        description: 'Regenerate editor theme settings from brand.yaml + editor-theme.yaml (re-runs syncEditorTheme)'
+        type: boolean
+        default: false
+      - name: --all
+        description: 'Run all audit steps: validate + palette + theme + contrast'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+      - Write
+      - Edit
       - Bash
 
   # ===========================================================================

@@ -138,13 +138,13 @@ can update or validate configuration.
 
 ## Measurable Objectives
 
-| Objective | Baseline | Target | Measurement Method | Owner | Target Date |
-| --- | --- | --- | --- | --- | --- |
-| Overlays created in UI by non-devs | 0% | ≥75% | UI session analytics (Mixpanel) | Dev Experience Lead | GA +90 days |
-| Median onboarding completion time | N/A | <120 seconds | In-app timer telemetry | UX/UI Designer | GA +90 days |
-| Support escalations (UI-based errors) | Baseline tracked | −70% | Support ticket system | Product Owner | GA launch |
-| NPS among non-dev users | Baseline TBD | >60 | Post-onboarding survey | Product Owner | GA launch |
-| UI/CLI output parity | N/A | 100% byte-identical | CI regression suite | Engineering Lead | Every release |
+| Objective                             | Baseline         | Target              | Measurement Method              | Owner               | Target Date   |
+| ------------------------------------- | ---------------- | ------------------- | ------------------------------- | ------------------- | ------------- |
+| Overlays created in UI by non-devs    | 0%               | ≥75%                | UI session analytics (Mixpanel) | Dev Experience Lead | GA +90 days   |
+| Median onboarding completion time     | N/A              | <120 seconds        | In-app timer telemetry          | UX/UI Designer      | GA +90 days   |
+| Support escalations (UI-based errors) | Baseline tracked | −70%                | Support ticket system           | Product Owner       | GA launch     |
+| NPS among non-dev users               | Baseline TBD     | >60                 | Post-onboarding survey          | Product Owner       | GA launch     |
+| UI/CLI output parity                  | N/A              | 100% byte-identical | CI regression suite             | Engineering Lead    | Every release |
 
 Metric legend:
 
@@ -154,15 +154,15 @@ Metric legend:
 
 ## Stakeholders
 
-| Stakeholder | Role | Responsibility |
-| --- | --- | --- |
-| Product Owner | Strategy, Requirements | Feature scope, success measurement, go/no-go |
-| Developer Experience Lead | Technical Architecture | CLI/engine integration, JSON-RPC API |
-| UX/UI Designer | Design, Onboarding | UI/UX flows, onboarding wizard, accessibility |
-| Pilot Users | Validation | User feedback, pilot deployment, NPS input |
-| Engineering Lead | Delivery | Architecture reviews, release coordination |
-| QA | Quality | Test coverage for GUI flows, regression, parity checks |
-| DevOps | Integration | CI/CD validation, deployment, desktop distribution |
+| Stakeholder               | Role                   | Responsibility                                         |
+| ------------------------- | ---------------------- | ------------------------------------------------------ |
+| Product Owner             | Strategy, Requirements | Feature scope, success measurement, go/no-go           |
+| Developer Experience Lead | Technical Architecture | CLI/engine integration, JSON-RPC API                   |
+| UX/UI Designer            | Design, Onboarding     | UI/UX flows, onboarding wizard, accessibility          |
+| Pilot Users               | Validation             | User feedback, pilot deployment, NPS input             |
+| Engineering Lead          | Delivery               | Architecture reviews, release coordination             |
+| QA                        | Quality                | Test coverage for GUI flows, regression, parity checks |
+| DevOps                    | Integration            | CI/CD validation, deployment, desktop distribution     |
 
 ## User Personas and Stories
 
@@ -264,15 +264,15 @@ Acceptance criteria:
 
 ### User Flow Matrix
 
-| Step | PWA Path | Desktop Path | Outcome |
-| --- | --- | --- | --- |
-| Launch | `npx agentkit-forge ui` | Open app | UI ready |
-| Connect repo | Auto-detect from CWD | "Open Repo" file picker | Repo linked |
-| Create overlay | Wizard form | Wizard form | Overlay created |
-| Edit overlay | Schema-driven editor | Schema-driven editor | Changes staged |
-| Preview | Side-by-side diff | Side-by-side diff | Impact visible |
-| Sync | One-click sync | One-click sync | Outputs updated |
-| Rollback | Version history picker | Version history picker | State restored |
+| Step           | PWA Path                | Desktop Path            | Outcome         |
+| -------------- | ----------------------- | ----------------------- | --------------- |
+| Launch         | `npx agentkit-forge ui` | Open app                | UI ready        |
+| Connect repo   | Auto-detect from CWD    | "Open Repo" file picker | Repo linked     |
+| Create overlay | Wizard form             | Wizard form             | Overlay created |
+| Edit overlay   | Schema-driven editor    | Schema-driven editor    | Changes staged  |
+| Preview        | Side-by-side diff       | Side-by-side diff       | Impact visible  |
+| Sync           | One-click sync          | One-click sync          | Outputs updated |
+| Rollback       | Version history picker  | Version history picker  | State restored  |
 
 ### Edge Cases
 
@@ -345,18 +345,18 @@ Acceptance criteria:
 
 ### Required API Endpoints
 
-| Endpoint | Method | Description |
-| --- | --- | --- |
-| `overlay/list` | GET | List all overlays in the connected repo |
-| `overlay/create` | POST | Create a new overlay from wizard data |
-| `overlay/update` | PUT | Update an existing overlay |
-| `overlay/delete` | DELETE | Remove an overlay |
-| `overlay/sync` | POST | Run sync engine and return outputs |
-| `overlay/validate` | POST | Validate overlay against schema |
-| `overlay/diff` | POST | Generate diff preview (current vs. proposed) |
-| `changelog/history` | GET | Retrieve edit history for an overlay |
-| `changelog/rollback` | POST | Restore overlay to a previous version |
-| `error/report` | POST | Submit error telemetry |
+| Endpoint             | Method | Description                                  |
+| -------------------- | ------ | -------------------------------------------- |
+| `overlay/list`       | GET    | List all overlays in the connected repo      |
+| `overlay/create`     | POST   | Create a new overlay from wizard data        |
+| `overlay/update`     | PUT    | Update an existing overlay                   |
+| `overlay/delete`     | DELETE | Remove an overlay                            |
+| `overlay/sync`       | POST   | Run sync engine and return outputs           |
+| `overlay/validate`   | POST   | Validate overlay against schema              |
+| `overlay/diff`       | POST   | Generate diff preview (current vs. proposed) |
+| `changelog/history`  | GET    | Retrieve edit history for an overlay         |
+| `changelog/rollback` | POST   | Restore overlay to a previous version        |
+| `error/report`       | POST   | Submit error telemetry                       |
 
 ## Non-Functional Requirements
 
@@ -379,12 +379,12 @@ Acceptance criteria:
 
 ## Mesh Layer Mapping
 
-| Layer | Role |
-| --- | --- |
-| Presentation / UI | Orchestration interface for `.agentkit/spec` overlays |
-| JSON-RPC bridge | Communication layer between UI and engine |
-| agentkit-forge engine | All sync, validation, and output logic (shared with CLI) |
-| Overlay directory | `.agentkit/overlays/` — source of truth persisted in repo |
+| Layer                 | Role                                                      |
+| --------------------- | --------------------------------------------------------- |
+| Presentation / UI     | Orchestration interface for `.agentkit/spec` overlays     |
+| JSON-RPC bridge       | Communication layer between UI and engine                 |
+| agentkit-forge engine | All sync, validation, and output logic (shared with CLI)  |
+| Overlay directory     | `.agentkit/overlays/` — source of truth persisted in repo |
 
 State manipulations are routed through the agentkit-forge sync engine. The UI
 never bypasses the engine to write files directly — no runtime-layer or team
@@ -419,12 +419,14 @@ bypass is possible.
 ### Onboarding Flow
 
 **PWA:**
+
 ```bash
 npx agentkit-forge ui
 # Browser opens → guided repo selection → scan overlays → wizard
 ```
 
 **Desktop (Tauri):**
+
 ```
 1. Download from GitHub Releases (or brew install / winget install)
 2. Open app → "Open Repo" → select project folder
@@ -433,6 +435,7 @@ npx agentkit-forge ui
 ```
 
 **First-run experience:**
+
 1. Repo connection (auto-detect or manual selection)
 2. Overlay scan — shows existing overlays or prompts to create first one
 3. Guided wizard — repo name, stack detection, render target checkboxes
@@ -455,14 +458,14 @@ npx agentkit-forge ui
 
 ### UI Screens
 
-| Screen | Purpose | Key Elements |
-| --- | --- | --- |
-| **Init Wizard** | First-time overlay setup | Repo name, stack detect, tool checkboxes |
-| **Overlay Editor** | Schema-driven form editing | Field controls, tooltips, "Show YAML" |
-| **Sync Dashboard** | One-click sync + output review | Tool-grouped output, inline diff viewer |
-| **Version Manager** | Update and rollback control | Version badge, changelog, rollback picker |
-| **Health Report** | Environment and config checks | Red/amber/green status per check |
-| **Audit Trail** | Change history and accountability | Timeline view, actor, diff per change |
+| Screen              | Purpose                           | Key Elements                              |
+| ------------------- | --------------------------------- | ----------------------------------------- |
+| **Init Wizard**     | First-time overlay setup          | Repo name, stack detect, tool checkboxes  |
+| **Overlay Editor**  | Schema-driven form editing        | Field controls, tooltips, "Show YAML"     |
+| **Sync Dashboard**  | One-click sync + output review    | Tool-grouped output, inline diff viewer   |
+| **Version Manager** | Update and rollback control       | Version badge, changelog, rollback picker |
+| **Health Report**   | Environment and config checks     | Red/amber/green status per check          |
+| **Audit Trail**     | Change history and accountability | Timeline view, actor, diff per change     |
 
 ## Accessibility Requirements
 
@@ -506,22 +509,22 @@ npx agentkit-forge ui
 
 ## Timeline and Milestones
 
-| Phase | Scope | Target Date | Dependencies |
-| --- | --- | --- | --- |
-| Alpha | CRUD, onboarding wizard, JSON-RPC bridge, basic diff preview | End Q1 | CLI bridge stable, overlay schema finalized |
-| Beta | Full error flows, audit logs, advanced diff, accessibility audit | Mid Q2 | Alpha feedback integration, UX review |
-| GA (PWA) | Production PWA, telemetry, NPS survey, documentation | End Q2 | QA sign-off, accessibility compliance |
-| GA (Desktop) | Tauri bundle, auto-updater, platform-specific testing | Q3 (demand-gated) | PWA adoption data justifies investment |
+| Phase        | Scope                                                            | Target Date       | Dependencies                                |
+| ------------ | ---------------------------------------------------------------- | ----------------- | ------------------------------------------- |
+| Alpha        | CRUD, onboarding wizard, JSON-RPC bridge, basic diff preview     | End Q1            | CLI bridge stable, overlay schema finalized |
+| Beta         | Full error flows, audit logs, advanced diff, accessibility audit | Mid Q2            | Alpha feedback integration, UX review       |
+| GA (PWA)     | Production PWA, telemetry, NPS survey, documentation             | End Q2            | QA sign-off, accessibility compliance       |
+| GA (Desktop) | Tauri bundle, auto-updater, platform-specific testing            | Q3 (demand-gated) | PWA adoption data justifies investment      |
 
 ### Key Milestones
 
-| Milestone | Target Date | Gate Criteria |
-| --- | --- | --- |
-| JSON-RPC API contract finalized | End Q1 | CLI and UI teams agree on interface |
-| Alpha internal dogfood | End Q1 | Core CRUD + wizard functional |
-| Beta pilot with 3+ customer teams | Mid Q2 | Onboarding <2 min, NPS >50 |
-| PWA GA | End Q2 | All measurable objectives met |
-| Tauri desktop GA decision | End Q2 | PWA adoption data reviewed |
+| Milestone                         | Target Date | Gate Criteria                       |
+| --------------------------------- | ----------- | ----------------------------------- |
+| JSON-RPC API contract finalized   | End Q1      | CLI and UI teams agree on interface |
+| Alpha internal dogfood            | End Q1      | Core CRUD + wizard functional       |
+| Beta pilot with 3+ customer teams | Mid Q2      | Onboarding <2 min, NPS >50          |
+| PWA GA                            | End Q2      | All measurable objectives met       |
+| Tauri desktop GA decision         | End Q2      | PWA adoption data reviewed          |
 
 ## Constraints and Dependencies
 
@@ -544,34 +547,34 @@ npx agentkit-forge ui
 
 ### Dependencies
 
-| Dependency | Owner | Risk Level |
-| --- | --- | --- |
+| Dependency                               | Owner            | Risk Level     |
+| ---------------------------------------- | ---------------- | -------------- |
 | agentkit-forge CLI/engine (JSON-RPC API) | Engineering Lead | Low (in-house) |
-| UX/design collaboration | UX/UI Designer | Medium |
-| QA test coverage (GUI flows, parity) | QA Lead | Medium |
-| Pilot users for early feedback | Product Owner | Medium |
-| Tauri build/signing infrastructure | DevOps | Low (deferred) |
+| UX/design collaboration                  | UX/UI Designer   | Medium         |
+| QA test coverage (GUI flows, parity)     | QA Lead          | Medium         |
+| Pilot users for early feedback           | Product Owner    | Medium         |
+| Tauri build/signing infrastructure       | DevOps           | Low (deferred) |
 
 ## Risks and Mitigations
 
-| Risk | Probability | Impact | Mitigation |
-| --- | --- | --- | --- |
-| UI and engine sync drift (output divergence) | Medium | High | Strict API contract; CI parity regression suite; version gating |
-| Insufficient desktop demand to justify Tauri | Low | Medium | Phase Tauri release; focus on PWA metrics first; decision gate at end Q2 |
-| Power user distrust of UI-generated overlays | Medium | Medium | Provide read-only YAML view; reliable undo/rollback; byte-identical outputs |
-| File/OS permission edge cases (desktop) | Medium | High | Desktop permission checks at launch; robust error handling in PWA fallback |
-| Schema changes break existing UI forms | Medium | High | Schema versioning; migration assistant; backward-compatible field additions |
-| Accessibility compliance gaps at launch | Low | High | Accessibility audit in Beta phase; automated a11y testing in CI |
-| Offline data loss (PWA) | Low | Medium | Auto-save drafts to browser storage every 30s; sync queue on reconnect |
+| Risk                                         | Probability | Impact | Mitigation                                                                  |
+| -------------------------------------------- | ----------- | ------ | --------------------------------------------------------------------------- |
+| UI and engine sync drift (output divergence) | Medium      | High   | Strict API contract; CI parity regression suite; version gating             |
+| Insufficient desktop demand to justify Tauri | Low         | Medium | Phase Tauri release; focus on PWA metrics first; decision gate at end Q2    |
+| Power user distrust of UI-generated overlays | Medium      | Medium | Provide read-only YAML view; reliable undo/rollback; byte-identical outputs |
+| File/OS permission edge cases (desktop)      | Medium      | High   | Desktop permission checks at launch; robust error handling in PWA fallback  |
+| Schema changes break existing UI forms       | Medium      | High   | Schema versioning; migration assistant; backward-compatible field additions |
+| Accessibility compliance gaps at launch      | Low         | High   | Accessibility audit in Beta phase; automated a11y testing in CI             |
+| Offline data loss (PWA)                      | Low         | Medium | Auto-save drafts to browser storage every 30s; sync queue on reconnect      |
 
 ## Open Questions
 
-| Question | Owner | Target Date | Impact if Unresolved |
-| --- | --- | --- | --- |
-| What % of UI overlay edits defines pilot/GA success? | Product Owner | Pre-pilot | Unclear go/no-go criteria |
-| Should/when is YAML override available for advanced users? | Engineering Lead | Post-GA | Limits power user trust and adoption |
-| Which UI framework (Preact, Svelte, web components)? | Engineering Lead | Alpha start | Blocks UI development kickoff |
-| Tauri code-signing and notarization process? | DevOps | Pre-desktop GA | Blocks desktop distribution |
+| Question                                                   | Owner            | Target Date    | Impact if Unresolved                 |
+| ---------------------------------------------------------- | ---------------- | -------------- | ------------------------------------ |
+| What % of UI overlay edits defines pilot/GA success?       | Product Owner    | Pre-pilot      | Unclear go/no-go criteria            |
+| Should/when is YAML override available for advanced users? | Engineering Lead | Post-GA        | Limits power user trust and adoption |
+| Which UI framework (Preact, Svelte, web components)?       | Engineering Lead | Alpha start    | Blocks UI development kickoff        |
+| Tauri code-signing and notarization process?               | DevOps           | Pre-desktop GA | Blocks desktop distribution          |
 
 ## Appendix
 
@@ -607,13 +610,13 @@ npx agentkit-forge ui
 
 ### Competitive Analysis
 
-| Capability | GitHub Copilot | Claude | Cursor | AgentKit Forge |
-| --- | --- | --- | --- | --- |
-| Multi-tool overlay system | No | No | No | **Yes** |
-| Visual GUI overlay editing | No | No | No | **Yes** |
-| Schema-driven validation in UI | No | No | No | **Yes** |
-| Audit trail with rollback | No | No | No | **Yes** |
-| Drift detection in CI | No | No | No | **Yes** |
+| Capability                     | GitHub Copilot | Claude | Cursor | AgentKit Forge |
+| ------------------------------ | -------------- | ------ | ------ | -------------- |
+| Multi-tool overlay system      | No             | No     | No     | **Yes**        |
+| Visual GUI overlay editing     | No             | No     | No     | **Yes**        |
+| Schema-driven validation in UI | No             | No     | No     | **Yes**        |
+| Audit trail with rollback      | No             | No     | No     | **Yes**        |
+| Drift detection in CI          | No             | No     | No     | **Yes**        |
 
 No competitor currently provides a visual, schema-driven overlay editor with
 audit history, rollback, and CI drift detection across AI tooling. This is a

@@ -26,6 +26,8 @@ or any Next.js / React code.
 - Follow a mobile-first responsive approach.
 - Use CSS custom properties (variables) for colors, spacing, and typography
   defined in the design system.
+  {{#if hasBrandGuide}}- All colors must reference brand tokens from `{{brandGuidePath}}` — never hardcode hex values that duplicate the brand palette.
+- Primary brand color: `{{brandPrimaryColor}}`. See brand.yaml for the full palette including semantic, neutral, and dark mode colors.{{/if}}
 - Never use `!important` unless overriding third-party styles.
 
 ## Accessibility (a11y)

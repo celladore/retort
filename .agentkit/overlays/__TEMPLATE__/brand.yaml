@@ -1,0 +1,11 @@
+# Repo-specific brand override
+# This file is copied by `agentkit init` and customized per repo.
+# Uncomment and fill in to override the shared brand.yaml spec.
+# Any values here are merged on top of .agentkit/spec/brand.yaml.
+
+# identity:
+#   name: "__TEMPLATE__"
+
+# colors:
+#   primary:
+#     brand: "#1976D2"
