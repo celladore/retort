@@ -10,12 +10,12 @@ Instructions for setting up a local development environment for agentkit-forge.
 
 ## Prerequisites
 
-| Tool | Version | Installation |
-|------|---------|-------------|
-| Node.js | <!-- e.g. >= 22 --> | [nodejs.org](https://nodejs.org) |
-| pnpm | <!-- e.g. >= 9 --> | `npm install -g pnpm` |
-| Docker | <!-- e.g. >= 24 --> | [docker.com](https://www.docker.com) |
-| <!-- Tool --> | <!-- Version --> | <!-- Link --> |
+| Tool          | Version             | Installation                         |
+| ------------- | ------------------- | ------------------------------------ |
+| Node.js       | <!-- e.g. >= 22 --> | [nodejs.org](https://nodejs.org)     |
+| pnpm          | <!-- e.g. >= 9 -->  | `npm install -g pnpm`                |
+| Docker        | <!-- e.g. >= 24 --> | [docker.com](https://www.docker.com) |
+| <!-- Tool --> | <!-- Version -->    | <!-- Link -->                        |
 
 ## Quick Start
 

@@ -2,12 +2,12 @@
 
 **Render target:** `warp`
 
-| | |
-|---|---|
-| **Type** | AI-Native Terminal / Agentic Development Environment |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — download from [warp.dev](https://www.warp.dev/) (macOS, Linux; Windows via WSL) |
-| **Documentation** | [docs.warp.dev](https://docs.warp.dev/) |
+|                        |                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| **Type**               | AI-Native Terminal / Agentic Development Environment                                              |
+| **Categories**         | AI-Native IDE                                                                                     |
+| **Access**             | Desktop app — download from [warp.dev](https://www.warp.dev/) (macOS, Linux; Windows via WSL)     |
+| **Documentation**      | [docs.warp.dev](https://docs.warp.dev/)                                                           |
 | **Performance Rating** | ⭐⭐⭐ — **63/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)) |
 
 ---
@@ -22,11 +22,11 @@ workflows, natural language commands, and integrated code review.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Project rules | `AGENTS.md` (preferred) or `WARP.md` | Plain Markdown |
-| Subdirectory rules | `<subdir>/AGENTS.md` | Plain Markdown |
-| Global rules | Warp settings UI | Warp config |
+| Feature            | Location                             | Format         |
+| ------------------ | ------------------------------------ | -------------- |
+| Project rules      | `AGENTS.md` (preferred) or `WARP.md` | Plain Markdown |
+| Subdirectory rules | `<subdir>/AGENTS.md`                 | Plain Markdown |
+| Global rules       | Warp settings UI                     | Warp config    |
 
 ### Key Capabilities
 
@@ -64,25 +64,25 @@ project/
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output            | Path      | Source                                    |
+| ----------------- | --------- | ----------------------------------------- |
 | Root instructions | `WARP.md` | `templates/warp/WARP.md` + `project.yaml` |
 
 ---
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| AGENTS.md (preferred) | ✅ Primary format | ✅ Always generated | None |
-| WARP.md (legacy) | ✅ Backward compatible | ✅ Generated | Consider deprecating in favor of AGENTS.md |
-| Subdirectory rules | ✅ Per-directory overrides | ❌ Not generated | Generate per-package rules in monorepos |
-| Global rules | ✅ Via Warp settings UI | ❌ Not applicable | Platform-managed, not file-based |
-| Multi-agent profiles | ✅ Concurrent agent roles | ❌ Not generated | Could generate agent role configs |
-| Agent autonomy levels | ✅ Propose vs auto-execute | ❌ Not configured | Could document recommended settings |
-| Warp Drive sync | ✅ Team command sharing | ❌ Not generated | Platform feature, not file-based |
-| Workflow templates | ✅ Reusable multi-step | ❌ Not generated | Could generate common workflows |
-| MCP integration | ✅ External tool connections | ❌ Not generated | Add MCP server config |
+| Feature               | Platform Supports            | AgentKit Forge Status | Gap                                        |
+| --------------------- | ---------------------------- | --------------------- | ------------------------------------------ |
+| AGENTS.md (preferred) | ✅ Primary format            | ✅ Always generated   | None                                       |
+| WARP.md (legacy)      | ✅ Backward compatible       | ✅ Generated          | Consider deprecating in favor of AGENTS.md |
+| Subdirectory rules    | ✅ Per-directory overrides   | ❌ Not generated      | Generate per-package rules in monorepos    |
+| Global rules          | ✅ Via Warp settings UI      | ❌ Not applicable     | Platform-managed, not file-based           |
+| Multi-agent profiles  | ✅ Concurrent agent roles    | ❌ Not generated      | Could generate agent role configs          |
+| Agent autonomy levels | ✅ Propose vs auto-execute   | ❌ Not configured     | Could document recommended settings        |
+| Warp Drive sync       | ✅ Team command sharing      | ❌ Not generated      | Platform feature, not file-based           |
+| Workflow templates    | ✅ Reusable multi-step       | ❌ Not generated      | Could generate common workflows            |
+| MCP integration       | ✅ External tool connections | ❌ Not generated      | Add MCP server config                      |
 
 **Summary:** Warp is primarily served via `AGENTS.md` (always generated) and
 the legacy `WARP.md`. Key gaps are subdirectory rules for monorepos and
@@ -92,15 +92,15 @@ generating multi-agent workflow templates.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 63/100 ⭐⭐⭐ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides) |
-| Developer Experience | 77/100 ⭐⭐⭐⭐ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ai-native-ides) |
-| Cost & Value | 69/100 ⭐⭐⭐½ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ai-native-ides) |
-| Customization | 62/100 ⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ai-native-ides) |
-| Privacy & Security | 51/100 ⭐⭐½ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ai-native-ides) |
-| Team & Enterprise | 54/100 ⭐⭐⭐ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ai-native-ides) |
-| **Weighted Total** | **65/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                       |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 63/100 ⭐⭐⭐     | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)   |
+| Developer Experience | 77/100 ⭐⭐⭐⭐   | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ai-native-ides) |
+| Cost & Value         | 69/100 ⭐⭐⭐½    | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ai-native-ides)        |
+| Customization        | 62/100 ⭐⭐⭐     | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ai-native-ides)        |
+| Privacy & Security   | 51/100 ⭐⭐½      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ai-native-ides)     |
+| Team & Enterprise    | 54/100 ⭐⭐⭐     | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ai-native-ides)      |
+| **Weighted Total**   | **65/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

@@ -2,12 +2,12 @@
 
 **Render target:** `windsurf`
 
-| | |
-|---|---|
-| **Type** | AI-Native Code Editor (Cascade AI) |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — download from [windsurf.com](https://windsurf.com/) (macOS, Windows, Linux) |
-| **Documentation** | [docs.windsurf.com](https://docs.windsurf.com/) |
+|                        |                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Type**               | AI-Native Code Editor (Cascade AI)                                                                 |
+| **Categories**         | AI-Native IDE                                                                                      |
+| **Access**             | Desktop app — download from [windsurf.com](https://windsurf.com/) (macOS, Windows, Linux)          |
+| **Documentation**      | [docs.windsurf.com](https://docs.windsurf.com/)                                                    |
 | **Performance Rating** | ⭐⭐⭐½ — **69/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)) |
 
 ---
@@ -22,12 +22,12 @@ multi-step automation sequences. It supports over 70 languages out of the box.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Rules | `.windsurf/rules/*.md` | Plain Markdown |
-| Commands | `.windsurf/commands/*.md` | Plain Markdown |
-| Workflows | `.windsurf/workflows/*.yml` | YAML |
-| Legacy rules | `.windsurfrules` (deprecated) | Plain text |
+| Feature      | Location                      | Format         |
+| ------------ | ----------------------------- | -------------- |
+| Rules        | `.windsurf/rules/*.md`        | Plain Markdown |
+| Commands     | `.windsurf/commands/*.md`     | Plain Markdown |
+| Workflows    | `.windsurf/workflows/*.yml`   | YAML           |
+| Legacy rules | `.windsurfrules` (deprecated) | Plain text     |
 
 ### Key Capabilities
 
@@ -65,31 +65,31 @@ multi-step automation sequences. It supports over 70 languages out of the box.
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
-| Project context rule | `.windsurf/rules/project.md` | `templates/windsurf/rules/` |
-| Security rule | `.windsurf/rules/security.md` | `templates/windsurf/rules/` |
-| Orchestrate rule | `.windsurf/rules/orchestrate.md` | `templates/windsurf/rules/` |
-| Team rules (10) | `.windsurf/rules/team-*.md` | `teams.yaml` |
-| Commands (19) | `.windsurf/commands/*.md` | `commands.yaml` (non-team commands) |
-| Workflows (2) | `.windsurf/workflows/*.yml` | `templates/windsurf/workflows/` |
+| Output               | Path                             | Source                              |
+| -------------------- | -------------------------------- | ----------------------------------- |
+| Project context rule | `.windsurf/rules/project.md`     | `templates/windsurf/rules/`         |
+| Security rule        | `.windsurf/rules/security.md`    | `templates/windsurf/rules/`         |
+| Orchestrate rule     | `.windsurf/rules/orchestrate.md` | `templates/windsurf/rules/`         |
+| Team rules (10)      | `.windsurf/rules/team-*.md`      | `teams.yaml`                        |
+| Commands (19)        | `.windsurf/commands/*.md`        | `commands.yaml` (non-team commands) |
+| Workflows (2)        | `.windsurf/workflows/*.yml`      | `templates/windsurf/workflows/`     |
 
 ---
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| Rules (.md) | ✅ Plain Markdown | ✅ 13 rules generated | None |
-| Commands | ✅ Custom commands | ✅ 19 generated | None |
-| Workflows (.yml) | ✅ Multi-step YAML sequences | ✅ 2 generated | Could expand workflow coverage |
-| Activation modes | ✅ Always / manual / glob / model | ⚠️ Implicit in rules | Could add explicit activation metadata |
-| Global rules | ✅ `~/.config/windsurf/` | ❌ Not generated | User-level, not project-scoped |
-| Memories system | ✅ Auto-learned context | ❌ Not generated | Platform-managed, not file-based |
-| AI behavior directives | ✅ Explain, check, propose | ⚠️ Partial in rules | Could add explicit AI behavior sections |
-| MCP integration | ✅ JSON/YAML tool connections | ❌ Not generated | Add MCP config generation |
-| AGENTS.md support | ⚠️ Not documented | ✅ Always generated | Windsurf may not read AGENTS.md natively |
-| Legacy `.windsurfrules` | ⚠️ Deprecated | ❌ Not generated | Correct — deprecated format |
+| Feature                 | Platform Supports                 | AgentKit Forge Status | Gap                                      |
+| ----------------------- | --------------------------------- | --------------------- | ---------------------------------------- |
+| Rules (.md)             | ✅ Plain Markdown                 | ✅ 13 rules generated | None                                     |
+| Commands                | ✅ Custom commands                | ✅ 19 generated       | None                                     |
+| Workflows (.yml)        | ✅ Multi-step YAML sequences      | ✅ 2 generated        | Could expand workflow coverage           |
+| Activation modes        | ✅ Always / manual / glob / model | ⚠️ Implicit in rules  | Could add explicit activation metadata   |
+| Global rules            | ✅ `~/.config/windsurf/`          | ❌ Not generated      | User-level, not project-scoped           |
+| Memories system         | ✅ Auto-learned context           | ❌ Not generated      | Platform-managed, not file-based         |
+| AI behavior directives  | ✅ Explain, check, propose        | ⚠️ Partial in rules   | Could add explicit AI behavior sections  |
+| MCP integration         | ✅ JSON/YAML tool connections     | ❌ Not generated      | Add MCP config generation                |
+| AGENTS.md support       | ⚠️ Not documented                 | ✅ Always generated   | Windsurf may not read AGENTS.md natively |
+| Legacy `.windsurfrules` | ⚠️ Deprecated                     | ❌ Not generated      | Correct — deprecated format              |
 
 **Summary:** Windsurf is well-supported for rules and commands. Gaps exist in
 workflow expansion, MCP configuration, and explicit AI behavior directives.
@@ -98,15 +98,15 @@ workflow expansion, MCP configuration, and explicit AI behavior directives.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 69/100 ⭐⭐⭐½ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides) |
-| Developer Experience | 77/100 ⭐⭐⭐⭐ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ai-native-ides) |
-| Cost & Value | 73/100 ⭐⭐⭐½ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ai-native-ides) |
-| Customization | 62/100 ⭐⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ai-native-ides) |
-| Privacy & Security | 55/100 ⭐⭐⭐ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ai-native-ides) |
-| Team & Enterprise | 51/100 ⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ai-native-ides) |
-| **Weighted Total** | **68/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 69/100 ⭐⭐⭐½     | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)   |
+| Developer Experience | 77/100 ⭐⭐⭐⭐    | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ai-native-ides) |
+| Cost & Value         | 73/100 ⭐⭐⭐½     | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ai-native-ides)        |
+| Customization        | 62/100 ⭐⭐⭐      | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ai-native-ides)        |
+| Privacy & Security   | 55/100 ⭐⭐⭐      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ai-native-ides)     |
+| Team & Enterprise    | 51/100 ⭐⭐½       | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ai-native-ides)      |
+| **Weighted Total**   | **68/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

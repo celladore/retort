@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
+
 # Instructions — documentation
 
 Standards for project documentation including the 8-category docs structure, ADR conventions, and generated file handling.

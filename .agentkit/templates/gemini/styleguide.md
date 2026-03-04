@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown style guide for Gemini Code Assist code review. -->
 <!-- Docs: https://developers.google.com/gemini-code-assist/docs/customize-gemini-behavior-github -->
+
 # Style Guide — {{repoName}}
 
 This style guide is auto-generated from the project's rule definitions.
@@ -16,24 +17,28 @@ See `AGENTS.md` for universal project conventions.
 - Use the strongest type safety available for the language.
 
 {{#if hasLogging}}
+
 ## Logging
 
 Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use structured logging.{{/if}}{{#if hasCorrelationId}} Include correlation IDs.{{/if}}
 {{/if}}
 
 {{#if hasErrorHandling}}
+
 ## Error Handling
 
 Strategy: {{errorStrategy}}.{{#if hasCustomExceptions}} Use custom exception types.{{/if}}
 {{/if}}
 
 {{#if hasAuth}}
+
 ## Authentication
 
 Provider: {{authProvider}}{{#if authStrategy}} ({{authStrategy}}){{/if}}.{{#if hasRbac}} RBAC enforced.{{/if}}
 {{/if}}
 
 {{#if commitConvention}}
+
 ## Commit Convention
 
 Follow {{commitConvention}} commits.

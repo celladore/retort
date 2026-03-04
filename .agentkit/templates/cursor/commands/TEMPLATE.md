@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Cursor command template. -->
 <!-- Docs: https://docs.cursor.com/context/rules -->
+
 # {{commandName}}
 
 {{commandDescription}}
@@ -19,7 +20,7 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 
 - Repository: {{repoName}}
 - Default branch: {{defaultBranch}}
-{{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
+  {{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
 
 ## Conventions
 

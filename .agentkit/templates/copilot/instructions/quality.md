@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Quality Assurance
 
 Apply these rules for all quality gate checks, CI configuration, and
@@ -10,16 +11,16 @@ code-review activities in **{{projectName}}**.
 
 A work item is complete only when **all** of the following pass:
 
-| Gate | Check | Tool |
-|------|-------|------|
-| Lint | Zero new lint errors | Project linter |
-| Type safety | No type errors | tsc / mypy / cargo check |
-| Unit tests pass | All tests green | {{#if testingUnit}}{{testingUnit}}{{/if}}{{#unless testingUnit}}project test runner{{/unless}} |
-| Coverage threshold | ≥ {{#if testingCoverage}}{{testingCoverage}}{{/if}}{{#unless testingCoverage}}target{{/unless}}% | Coverage tool |
-| Integration tests pass | All green | {{#if testingIntegration}}{{testingIntegration}}{{/if}}{{#unless testingIntegration}}project test runner{{/unless}} |
-| No secrets in diff | Clean | git-secrets / semgrep |
-| PR description complete | Template filled | Manual |
-| Code review approved | ≥ 1 approval | GitHub |
+| Gate                    | Check                                                                                            | Tool                                                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Lint                    | Zero new lint errors                                                                             | Project linter                                                                                                      |
+| Type safety             | No type errors                                                                                   | tsc / mypy / cargo check                                                                                            |
+| Unit tests pass         | All tests green                                                                                  | {{#if testingUnit}}{{testingUnit}}{{/if}}{{#unless testingUnit}}project test runner{{/unless}}                      |
+| Coverage threshold      | ≥ {{#if testingCoverage}}{{testingCoverage}}{{/if}}{{#unless testingCoverage}}target{{/unless}}% | Coverage tool                                                                                                       |
+| Integration tests pass  | All green                                                                                        | {{#if testingIntegration}}{{testingIntegration}}{{/if}}{{#unless testingIntegration}}project test runner{{/unless}} |
+| No secrets in diff      | Clean                                                                                            | git-secrets / semgrep                                                                                               |
+| PR description complete | Template filled                                                                                  | Manual                                                                                                              |
+| Code review approved    | ≥ 1 approval                                                                                     | GitHub                                                                                                              |
 
 ## Code Review Checklist
 
@@ -102,8 +103,7 @@ The CI pipeline must enforce:
 4. Coverage — fail if coverage drops below the configured threshold.
 5. Security scan — fail on critical or high severity findings.
 
-{{#if testingE2e}}
-6. E2E smoke tests — run the `@smoke` suite on every merge to main.
+{{#if testingE2e}} 6. E2E smoke tests — run the `@smoke` suite on every merge to main.
 {{/if}}
 
 ## Handling Flaky Tests

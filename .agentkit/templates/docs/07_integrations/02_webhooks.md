@@ -12,11 +12,11 @@
 
 ### Event Types
 
-| Event | Description | Payload Schema |
-|-------|-------------|---------------|
-| `resource.created` | Fired when a resource is created | See below |
-| `resource.updated` | Fired when a resource is updated | See below |
-| `resource.deleted` | Fired when a resource is deleted | See below |
+| Event              | Description                      | Payload Schema |
+| ------------------ | -------------------------------- | -------------- |
+| `resource.created` | Fired when a resource is created | See below      |
+| `resource.updated` | Fired when a resource is updated | See below      |
+| `resource.deleted` | Fired when a resource is deleted | See below      |
 
 ### Payload Format
 
@@ -47,8 +47,8 @@ HMAC-SHA256(webhook_secret, raw_body) == X-Signature header
 
 <!-- Describe any webhooks received from external services. -->
 
-| Source | Endpoint | Purpose |
-|--------|----------|---------|
+| Source               | Endpoint           | Purpose                      |
+| -------------------- | ------------------ | ---------------------------- |
 | <!-- e.g. Stripe --> | `/webhooks/stripe` | <!-- e.g. Payment events --> |
 
 ## Configuration

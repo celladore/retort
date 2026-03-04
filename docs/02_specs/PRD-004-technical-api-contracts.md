@@ -296,6 +296,6 @@ On repeated provider failure:
 ## 4) Data Contracts and Compatibility Notes
 
 - All timestamps are ISO-8601 UTC
-- All IDs are stable lowercase alphanumeric allowing dots (.), dashes (-), and underscores (_), except `updatedByRef` pseudonymous refs (examples: agentId, modelId, auditEventId)
+- All IDs are stable lowercase alphanumeric allowing dots (.), dashes (-), and underscores (\_), except `updatedByRef` pseudonymous refs (examples: agentId, modelId, auditEventId)
 - Backward compatible additions allowed; breaking changes require version bump
 - v1 uses REST contract as source of truth; gRPC parity in v2 will preserve field names and semantics

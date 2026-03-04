@@ -8,12 +8,12 @@ Historical documentation for significant PRs and implementations in {{repoName}}
 
 ## Directory Structure
 
-| Directory | Description |
-|-----------|-------------|
+| Directory                              | Description                                    |
+| -------------------------------------- | ---------------------------------------------- |
 | [implementations/](./implementations/) | Major implementations and architecture changes |
-| [bug-fixes/](./bug-fixes/) | Complex or critical bug resolutions |
-| [features/](./features/) | New feature launches |
-| [migrations/](./migrations/) | Major migrations and upgrades |
+| [bug-fixes/](./bug-fixes/)             | Complex or critical bug resolutions            |
+| [features/](./features/)               | New feature launches                           |
+| [migrations/](./migrations/)           | Major migrations and upgrades                  |
 
 ## Naming Convention
 

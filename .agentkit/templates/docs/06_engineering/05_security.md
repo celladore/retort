@@ -39,11 +39,11 @@ Security guidelines and practices for {{repoName}}.
 
 ## Data Protection
 
-| Data Type | Classification | Encryption |
-|-----------|---------------|------------|
-| PII | Confidential | <!-- e.g. AES-256 at rest, TLS in transit --> |
-| Credentials | Secret | <!-- e.g. Hashed with bcrypt/argon2 --> |
-| Logs | Internal | <!-- e.g. Redact sensitive fields --> |
+| Data Type   | Classification | Encryption                                    |
+| ----------- | -------------- | --------------------------------------------- |
+| PII         | Confidential   | <!-- e.g. AES-256 at rest, TLS in transit --> |
+| Credentials | Secret         | <!-- e.g. Hashed with bcrypt/argon2 -->       |
+| Logs        | Internal       | <!-- e.g. Redact sensitive fields -->         |
 
 ## Security Headers
 

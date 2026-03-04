@@ -2,13 +2,13 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI Code Completion (IDE extension) |
-| **Categories** | IDE Extension |
-| **Access** | VS Code / JetBrains / Neovim extension — [supermaven.com](https://supermaven.com/) |
-| **Documentation** | [docs.supermaven.com](https://docs.supermaven.com/) |
-| **Performance Rating** | ⭐⭐⭐½ — **70/100** |
+|                        |                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| **Type**               | AI Code Completion (IDE extension)                                                 |
+| **Categories**         | IDE Extension                                                                      |
+| **Access**             | VS Code / JetBrains / Neovim extension — [supermaven.com](https://supermaven.com/) |
+| **Documentation**      | [docs.supermaven.com](https://docs.supermaven.com/)                                |
+| **Performance Rating** | ⭐⭐⭐½ — **70/100**                                                               |
 
 ---
 
@@ -30,23 +30,23 @@ completions in the market while maintaining deep local code understanding.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                |
+| --------- | ----------- | ---------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 70/100 ⭐⭐⭐½ | Excellent completions; less agentic than competitors |
-| Developer Experience | 80/100 ⭐⭐⭐⭐ | Fastest response times; seamless IDE integration |
-| Cost & Value | 78/100 ⭐⭐⭐⭐ | Free tier available; Pro $10/mo |
-| Customization | 40/100 ⭐⭐ | Limited configuration; primarily completion-focused |
-| Privacy & Security | 70/100 ⭐⭐⭐½ | Local indexing; privacy-focused design |
-| Team & Enterprise | 55/100 ⭐⭐⭐ | Team features growing; enterprise plan available |
-| **Weighted Total** | **69/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 70/100 ⭐⭐⭐½     | Excellent completions; less agentic than competitors                          |
+| Developer Experience | 80/100 ⭐⭐⭐⭐    | Fastest response times; seamless IDE integration                              |
+| Cost & Value         | 78/100 ⭐⭐⭐⭐    | Free tier available; Pro $10/mo                                               |
+| Customization        | 40/100 ⭐⭐        | Limited configuration; primarily completion-focused                           |
+| Privacy & Security   | 70/100 ⭐⭐⭐½     | Local indexing; privacy-focused design                                        |
+| Team & Enterprise    | 55/100 ⭐⭐⭐      | Team features growing; enterprise plan available                              |
+| **Weighted Total**   | **69/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

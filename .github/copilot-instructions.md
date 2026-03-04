@@ -4,6 +4,7 @@
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. GitHub Copilot repository-wide instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # GitHub Copilot Instructions
 
 You are assisting with a project managed by the AgentKit Forge framework.

@@ -1,9 +1,9 @@
 ---
-description: "Security audit — OWASP top 10, dependency vulnerabilities, auth flows, hardcoded secrets"
+description: 'Security audit — OWASP top 10, dependency vulnerabilities, auth flows, hardcoded secrets'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(pip *), Bash(go *), Bash(grep *), Bash(find *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -23,6 +23,7 @@ By default, audit the entire repository. If `$ARGUMENTS` specifies a scope (file
 Check for the most common web application vulnerabilities:
 
 #### A01: Broken Access Control
+
 - Are API endpoints protected with authentication middleware?
 - Are authorization checks performed (role-based, resource ownership)?
 - Are there routes that should be protected but are not?
@@ -30,12 +31,14 @@ Check for the most common web application vulnerabilities:
 - Are admin endpoints properly restricted?
 
 #### A02: Cryptographic Failures
+
 - Are passwords hashed with a strong algorithm (bcrypt, argon2, scrypt)? Flag MD5, SHA1, plain text.
 - Is sensitive data encrypted at rest and in transit?
 - Are TLS certificates properly configured?
 - Are encryption keys hardcoded or properly managed?
 
 #### A03: Injection
+
 - **SQL Injection:** Are database queries parameterized? Check for string concatenation in SQL.
 - **Command Injection:** Are shell commands built from user input? Check `exec`, `spawn`, `system`, `os.popen`.
 - **XSS:** Is user input sanitized before rendering in HTML? Check for `dangerouslySetInnerHTML`, template literals in HTML.
@@ -43,20 +46,24 @@ Check for the most common web application vulnerabilities:
 - **NoSQL Injection:** Are MongoDB/Firestore queries built from unvalidated input?
 
 #### A04: Insecure Design
+
 - Are security controls client-side only (can be bypassed)?
 - Is rate limiting implemented on authentication endpoints?
 - Are error messages leaking internal details (stack traces, SQL errors)?
 
 #### A05: Security Misconfiguration
+
 - Are CORS policies overly permissive (`Access-Control-Allow-Origin: *` in production)?
 - Are default credentials or debug modes enabled?
 - Are security headers set (CSP, X-Frame-Options, X-Content-Type-Options)?
 - Are directory listings enabled on the web server?
 
 #### A06: Vulnerable and Outdated Components
+
 - (Covered in Dependency Audit below)
 
 #### A07: Identification and Authentication Failures
+
 - Are sessions properly managed (expiry, rotation, invalidation on logout)?
 - Is multi-factor authentication available for sensitive operations?
 - Are password requirements enforced (length, complexity)?
@@ -64,17 +71,20 @@ Check for the most common web application vulnerabilities:
 - Are refresh tokens properly rotated?
 
 #### A08: Software and Data Integrity Failures
+
 - Are CI/CD pipelines protected from unauthorized modification?
 - Are dependencies fetched over HTTPS with integrity checks?
 - Is deserialization of untrusted data handled safely?
 
 #### A09: Security Logging and Monitoring Failures
+
 - Are authentication events logged (login, logout, failed attempts)?
 - Are authorization failures logged?
 - Are logs protected from injection (log forging)?
 - Do logs avoid recording sensitive data (passwords, tokens, PII)?
 
 #### A10: Server-Side Request Forgery (SSRF)
+
 - Can user input control URLs that the server fetches?
 - Are internal network addresses blocked from user-provided URLs?
 - Is URL validation performed before making server-side HTTP requests?
@@ -83,15 +93,16 @@ Check for the most common web application vulnerabilities:
 
 Run the appropriate dependency vulnerability scanner:
 
-| Stack | Command | Alternative |
-|-------|---------|-------------|
-| npm/pnpm | `npm audit` / `pnpm audit` | `npx audit-ci` |
-| Cargo | `cargo audit` (if installed) | Check advisories manually |
-| .NET | `dotnet list package --vulnerable` | — |
-| Python | `pip audit` or `safety check` | — |
-| Go | `govulncheck ./...` (if installed) | — |
+| Stack    | Command                            | Alternative               |
+| -------- | ---------------------------------- | ------------------------- |
+| npm/pnpm | `npm audit` / `pnpm audit`         | `npx audit-ci`            |
+| Cargo    | `cargo audit` (if installed)       | Check advisories manually |
+| .NET     | `dotnet list package --vulnerable` | —                         |
+| Python   | `pip audit` or `safety check`      | —                         |
+| Go       | `govulncheck ./...` (if installed) | —                         |
 
 Report:
+
 - Total vulnerabilities found
 - Severity breakdown (critical, high, medium, low)
 - Top 5 most severe with CVE numbers and affected packages
@@ -100,6 +111,7 @@ Report:
 ### 3. Authentication & Authorization Flow Review
 
 Trace the authentication flow end-to-end:
+
 1. How do users authenticate? (session cookies, JWT, OAuth, API keys)
 2. Where is the auth middleware defined?
 3. Which endpoints are protected vs. public?
@@ -125,6 +137,7 @@ Patterns to search:
 ```
 
 Exclude from scan:
+
 - Test files with obviously fake values ("test-api-key", "password123" in tests)
 - Example/template files (`.env.example`, `.env.template`)
 - Documentation files
@@ -198,12 +211,12 @@ Exclude from scan:
 
 ## Severity Classification
 
-| Severity | Criteria |
-|----------|----------|
-| **CRITICAL** | Exploitable remotely, no authentication required, data breach or RCE possible |
-| **HIGH** | Exploitable with low complexity, authentication bypass, significant data exposure |
-| **MEDIUM** | Requires specific conditions to exploit, limited impact, defense-in-depth gap |
-| **LOW** | Informational, best practice violation, minimal direct impact |
+| Severity     | Criteria                                                                          |
+| ------------ | --------------------------------------------------------------------------------- |
+| **CRITICAL** | Exploitable remotely, no authentication required, data breach or RCE possible     |
+| **HIGH**     | Exploitable with low complexity, authentication bypass, significant data exposure |
+| **MEDIUM**   | Requires specific conditions to exploit, limited impact, defense-in-depth gap     |
+| **LOW**      | Informational, best practice violation, minimal direct impact                     |
 
 ## State Updates
 

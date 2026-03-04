@@ -17,13 +17,13 @@ This document defines the coding standards and conventions for {{repoName}}.
 
 ## Naming Conventions
 
-| Element | Convention | Example |
-|---------|-----------|---------|
-| Files | <!-- e.g. kebab-case --> | `user-service.ts` |
-| Classes | <!-- e.g. PascalCase --> | `UserService` |
-| Functions | <!-- e.g. camelCase --> | `getUserById` |
-| Constants | <!-- e.g. UPPER_SNAKE --> | `MAX_RETRIES` |
-| Database tables | <!-- e.g. snake_case --> | `user_accounts` |
+| Element         | Convention                | Example           |
+| --------------- | ------------------------- | ----------------- |
+| Files           | <!-- e.g. kebab-case -->  | `user-service.ts` |
+| Classes         | <!-- e.g. PascalCase -->  | `UserService`     |
+| Functions       | <!-- e.g. camelCase -->   | `getUserById`     |
+| Constants       | <!-- e.g. UPPER_SNAKE --> | `MAX_RETRIES`     |
+| Database tables | <!-- e.g. snake_case -->  | `user_accounts`   |
 
 ## Code Organisation
 

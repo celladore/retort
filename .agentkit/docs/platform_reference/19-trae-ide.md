@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI-Native Code Editor (VS Code fork) |
-| **Categories** | AI-Native IDE |
-| **Access** | Desktop app — download from [trae.ai](https://www.trae.ai/) (macOS, Windows; Linux pending) |
-| **Documentation** | [trae.ai/docs](https://www.trae.ai/docs) |
+|                        |                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Type**               | AI-Native Code Editor (VS Code fork)                                                               |
+| **Categories**         | AI-Native IDE                                                                                      |
+| **Access**             | Desktop app — download from [trae.ai](https://www.trae.ai/) (macOS, Windows; Linux pending)        |
+| **Documentation**      | [trae.ai/docs](https://www.trae.ai/docs)                                                           |
 | **Performance Rating** | ⭐⭐⭐½ — **72/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ai-native-ides)) |
 
 ---
@@ -33,18 +33,18 @@ deep AI integration. It provides free unlimited access to GPT-4o and Claude
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                                                |
+| --------- | ----------- | ------------------------------------------------------ |
 | AGENTS.md | `AGENTS.md` | Universal instructions (Trae reads standard AGENTS.md) |
 
 ### Gap Analysis
 
-| Capability | Native Support | AgentKit Forge Coverage | Gap |
-|-----------|---------------|------------------------|-----|
-| Project-level instructions | ✅ AGENTS.md | ✅ Generated | ✔ Covered |
-| Rules directory | ❌ Not documented | ❌ Not generated | 🟡 Minor — AGENTS.md covers basics |
-| Custom agents | ✅ Built-in | ❌ Not generated | 🔴 Gap — could generate agent configs |
-| MCP integration | ⚠️ Emerging | ❌ Not generated | 🟡 Monitor |
+| Capability                 | Native Support    | AgentKit Forge Coverage | Gap                                   |
+| -------------------------- | ----------------- | ----------------------- | ------------------------------------- |
+| Project-level instructions | ✅ AGENTS.md      | ✅ Generated            | ✔ Covered                             |
+| Rules directory            | ❌ Not documented | ❌ Not generated        | 🟡 Minor — AGENTS.md covers basics    |
+| Custom agents              | ✅ Built-in       | ❌ Not generated        | 🔴 Gap — could generate agent configs |
+| MCP integration            | ⚠️ Emerging       | ❌ Not generated        | 🟡 Monitor                            |
 
 ### AGENTS.md Integration
 
@@ -55,15 +55,15 @@ configuration format is required beyond the universal AGENTS.md standard.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 72/100 ⭐⭐⭐½ | Strong models (GPT-4o + Claude 3.7) but newer, less benchmarked |
-| Developer Experience | 79/100 ⭐⭐⭐⭐ | VS Code familiarity, polished UI, fast onboarding |
-| Cost & Value | 92/100 ⭐⭐⭐⭐½ | Free unlimited GPT-4o + Claude access — best value in market |
-| Customization | 55/100 ⭐⭐⭐ | Custom agents but limited rules/activation system |
-| Privacy & Security | 45/100 ⭐⭐ | Local file storage but cloud model processing; [privacy policy](https://www.trae.ai/privacy) should be reviewed for data handling specifics |
-| Team & Enterprise | 40/100 ⭐⭐ | Limited team/enterprise features |
-| **Weighted Total** | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                                                                                     |
+| -------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coding Performance   | 72/100 ⭐⭐⭐½     | Strong models (GPT-4o + Claude 3.7) but newer, less benchmarked                                                                             |
+| Developer Experience | 79/100 ⭐⭐⭐⭐    | VS Code familiarity, polished UI, fast onboarding                                                                                           |
+| Cost & Value         | 92/100 ⭐⭐⭐⭐½   | Free unlimited GPT-4o + Claude access — best value in market                                                                                |
+| Customization        | 55/100 ⭐⭐⭐      | Custom agents but limited rules/activation system                                                                                           |
+| Privacy & Security   | 45/100 ⭐⭐        | Local file storage but cloud model processing; [privacy policy](https://www.trae.ai/privacy) should be reviewed for data handling specifics |
+| Team & Enterprise    | 40/100 ⭐⭐        | Limited team/enterprise features                                                                                                            |
+| **Weighted Total**   | **71/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights)                                                               |
 
 ### Best For
 

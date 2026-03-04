@@ -8,27 +8,32 @@
 # Rust Rules
 
 ## Error Handling
+
 - Use explicit error handling with `Result` and `Option` types
 - Define custom error types with `thiserror` for libraries, `anyhow` for applications
 - Chain errors with `.context()` or `.with_context()`
 - Never use `.unwrap()` or `.expect()` in non-test code
 
 ## Code Quality
+
 - All code must pass `cargo clippy -- -D warnings`
 - All code must be formatted with `cargo fmt`
 - Use `#[allow(clippy::...)]` only with an explanatory comment
 
 ## Safety
+
 - Minimize `unsafe` blocks — every one must have a `// SAFETY:` comment
 - Prefer safe abstractions over unsafe code
 - New unsafe code requires review by a second contributor
 
 ## Documentation
+
 - All public items must have `///` documentation comments
 - Include examples in doc comments for complex APIs
 - Run `cargo doc` with no warnings
 
 ## Testing
+
 - Unit tests in `#[cfg(test)]` modules within each source file
 - Integration tests in `tests/` directory
 - Use `proptest` or `quickcheck` for property-based testing where appropriate

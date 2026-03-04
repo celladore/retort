@@ -8,9 +8,9 @@ the Agent-to-Agent (A2A) protocol templates shipped with AgentKit Forge.
 AgentKit Forge includes two template files under `.agentkit/templates/mcp/` that
 configure how AI agents interact with external tools and with each other:
 
-| File | Purpose |
-|------|---------|
-| `servers.json` | MCP server definitions for tool-level capabilities |
+| File              | Purpose                                                             |
+| ----------------- | ------------------------------------------------------------------- |
+| `servers.json`    | MCP server definitions for tool-level capabilities                  |
 | `a2a-config.json` | Agent-to-Agent protocol configuration for inter-agent communication |
 
 Both files are rendered by the sync engine and written to the `mcp/` directory in
@@ -88,12 +88,12 @@ tasks to team agents and aggregate their results.
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `enabled` | Whether A2A communication is active. Set to `false` to disable inter-agent messaging. |
-| `protocol_version` | Version of the A2A protocol in use. |
-| `task_format` | Serialization format for task payloads. Currently `"json"`. |
-| `context_transfer` | How context is shared between agents. `"memory"` uses the MCP memory server. |
+| Field                | Description                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `enabled`            | Whether A2A communication is active. Set to `false` to disable inter-agent messaging.                      |
+| `protocol_version`   | Version of the A2A protocol in use.                                                                        |
+| `task_format`        | Serialization format for task payloads. Currently `"json"`.                                                |
+| `context_transfer`   | How context is shared between agents. `"memory"` uses the MCP memory server.                               |
 | `result_aggregation` | Which agent collects and merges results. `"orchestrator"` means the coordinator agent handles aggregation. |
 
 ### Agent Definitions
@@ -128,30 +128,30 @@ capabilities:
 
 **Registered agents:**
 
-| Agent ID | Role | Domain | Capabilities |
-|----------|------|--------|-------------|
-| `orchestrator` | coordinator | (all) | delegate, aggregate, monitor |
-| `team-backend` | executor | api, services | implement, test, review |
-| `team-frontend` | executor | ui, components | implement, test, review |
-| `team-data` | executor | database, models | implement, test, review |
-| `team-infra` | executor | iac, cloud | implement, test, review |
-| `team-devops` | executor | ci, cd, automation | implement, test, review |
-| `team-testing` | executor | tests, quality | implement, test, review |
-| `team-security` | executor | auth, compliance | implement, test, review |
-| `team-docs` | executor | documentation | implement, review |
-| `team-product` | executor | features, prd | implement, review |
-| `team-quality` | executor | review, refactor | implement, test, review |
+| Agent ID        | Role        | Domain             | Capabilities                 |
+| --------------- | ----------- | ------------------ | ---------------------------- |
+| `orchestrator`  | coordinator | (all)              | delegate, aggregate, monitor |
+| `team-backend`  | executor    | api, services      | implement, test, review      |
+| `team-frontend` | executor    | ui, components     | implement, test, review      |
+| `team-data`     | executor    | database, models   | implement, test, review      |
+| `team-infra`    | executor    | iac, cloud         | implement, test, review      |
+| `team-devops`   | executor    | ci, cd, automation | implement, test, review      |
+| `team-testing`  | executor    | tests, quality     | implement, test, review      |
+| `team-security` | executor    | auth, compliance   | implement, test, review      |
+| `team-docs`     | executor    | documentation      | implement, review            |
+| `team-product`  | executor    | features, prd      | implement, review            |
+| `team-quality`  | executor    | review, refactor   | implement, test, review      |
 
 ### Message Types
 
 The A2A protocol supports four message types:
 
-| Type | Direction | Purpose |
-|------|-----------|---------|
-| `delegate` | coordinator to executor | Assign a task to a team agent |
-| `report` | executor to coordinator | Return results from a completed task |
-| `query` | any to any | Request information from another agent |
-| `broadcast` | coordinator to all | Send information to all agents simultaneously |
+| Type        | Direction               | Purpose                                       |
+| ----------- | ----------------------- | --------------------------------------------- |
+| `delegate`  | coordinator to executor | Assign a task to a team agent                 |
+| `report`    | executor to coordinator | Return results from a completed task          |
+| `query`     | any to any              | Request information from another agent        |
+| `broadcast` | coordinator to all      | Send information to all agents simultaneously |
 
 ---
 

@@ -25,14 +25,14 @@ use cases.
 
 ## Decision Dimensions & Weights
 
-| # | Dimension | Weight | Evaluation Document | What It Covers |
-|---|-----------|--------|-------------------|---------------|
-| 1 | **Coding Performance** | 30% | [PLATFORM_CODING_PERFORMANCE.md](./PLATFORM_CODING_PERFORMANCE.md) | Code correctness, context understanding, multi-file editing, autonomy |
-| 2 | **Developer Experience** | 20% | [PLATFORM_DEVELOPER_EXPERIENCE.md](./PLATFORM_DEVELOPER_EXPERIENCE.md) | Onboarding, workflow integration, UI quality, learning curve |
-| 3 | **Cost & Value** | 20% | [PLATFORM_COST_ANALYSIS.md](./PLATFORM_COST_ANALYSIS.md) | Free tier, plan value, predictability, total cost of ownership |
-| 4 | **Customization** | 10% | [PLATFORM_CUSTOMIZATION.md](./PLATFORM_CUSTOMIZATION.md) | Instruction depth, AGENTS.md, activation controls, MCP, model flex |
-| 5 | **Privacy & Security** | 10% | [PLATFORM_PRIVACY_SECURITY.md](./PLATFORM_PRIVACY_SECURITY.md) | Data residency, retention, local option, compliance, audit |
-| 6 | **Team & Enterprise** | 10% | [PLATFORM_TEAM_ENTERPRISE.md](./PLATFORM_TEAM_ENTERPRISE.md) | Collaboration, governance, SSO, org policies, scalability |
+| #   | Dimension                | Weight | Evaluation Document                                                    | What It Covers                                                        |
+| --- | ------------------------ | ------ | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 1   | **Coding Performance**   | 30%    | [PLATFORM_CODING_PERFORMANCE.md](./PLATFORM_CODING_PERFORMANCE.md)     | Code correctness, context understanding, multi-file editing, autonomy |
+| 2   | **Developer Experience** | 20%    | [PLATFORM_DEVELOPER_EXPERIENCE.md](./PLATFORM_DEVELOPER_EXPERIENCE.md) | Onboarding, workflow integration, UI quality, learning curve          |
+| 3   | **Cost & Value**         | 20%    | [PLATFORM_COST_ANALYSIS.md](./PLATFORM_COST_ANALYSIS.md)               | Free tier, plan value, predictability, total cost of ownership        |
+| 4   | **Customization**        | 10%    | [PLATFORM_CUSTOMIZATION.md](./PLATFORM_CUSTOMIZATION.md)               | Instruction depth, AGENTS.md, activation controls, MCP, model flex    |
+| 5   | **Privacy & Security**   | 10%    | [PLATFORM_PRIVACY_SECURITY.md](./PLATFORM_PRIVACY_SECURITY.md)         | Data residency, retention, local option, compliance, audit            |
+| 6   | **Team & Enterprise**    | 10%    | [PLATFORM_TEAM_ENTERPRISE.md](./PLATFORM_TEAM_ENTERPRISE.md)           | Collaboration, governance, SSO, org policies, scalability             |
 
 ### Why These Weights?
 
@@ -52,25 +52,25 @@ use cases.
 
 Dimension scores sourced from each evaluation document, combined with weights.
 
-| Platform | Perf (30%) | DX (20%) | Cost (20%) | Custom (10%) | Privacy (10%) | Enterprise (10%) | **Weighted Total** |
-|----------|-----------|---------|-----------|-------------|--------------|-----------------|-------------------|
-| Claude Code | 89 | 80 | 64 | 84 | 66 | 68 | **78** |
-| Cursor IDE | 77 | 84 | 68 | 79 | 63 | 63 | **74** |
-| GitHub Copilot | 78 | 86 | 72 | 76 | 74 | 88 | **79** |
-| Windsurf IDE | 69 | 77 | 73 | 62 | 55 | 51 | **68** |
-| OpenAI Codex | 79 | 69 | 59 | 67 | 62 | 50 | **67** |
-| Gemini CLI | 73 | 73 | 83 | 59 | 59 | 50 | **71** |
-| Warp Terminal | 63 | 77 | 69 | 62 | 51 | 54 | **65** |
-| Cline | 73 | 72 | 80 | 68 | 62 | 32 | **69** |
-| Roo Code | 73 | 72 | 80 | 75 | 62 | 34 | **70** |
-| Continue | 61 | 68 | 76 | 72 | 64 | 50 | **66** |
-| Google Jules | 71 | 68 | 62 | 41 | 49 | 43 | **62** |
-| Amazon Q Developer | 70 | 73 | 79 | 56 | 79 | 86 | **74** |
-| Sourcegraph Cody | 68 | 74 | 80 | 58 | 66 | 72 | **71** |
-| Aider | 76 | 74 | 80 | 62 | 62 | 30 | **70** |
-| Amp | 72 | 70 | 79 | 52 | 48 | 42 | **65** |
-| OpenCode | 56 | 61 | 79 | 51 | 61 | 22 | **58** |
-| Factory | 72 | 57 | 38 | 47 | 52 | 71 | **57** |
+| Platform           | Perf (30%) | DX (20%) | Cost (20%) | Custom (10%) | Privacy (10%) | Enterprise (10%) | **Weighted Total** |
+| ------------------ | ---------- | -------- | ---------- | ------------ | ------------- | ---------------- | ------------------ |
+| Claude Code        | 89         | 80       | 64         | 84           | 66            | 68               | **78**             |
+| Cursor IDE         | 77         | 84       | 68         | 79           | 63            | 63               | **74**             |
+| GitHub Copilot     | 78         | 86       | 72         | 76           | 74            | 88               | **79**             |
+| Windsurf IDE       | 69         | 77       | 73         | 62           | 55            | 51               | **68**             |
+| OpenAI Codex       | 79         | 69       | 59         | 67           | 62            | 50               | **67**             |
+| Gemini CLI         | 73         | 73       | 83         | 59           | 59            | 50               | **71**             |
+| Warp Terminal      | 63         | 77       | 69         | 62           | 51            | 54               | **65**             |
+| Cline              | 73         | 72       | 80         | 68           | 62            | 32               | **69**             |
+| Roo Code           | 73         | 72       | 80         | 75           | 62            | 34               | **70**             |
+| Continue           | 61         | 68       | 76         | 72           | 64            | 50               | **66**             |
+| Google Jules       | 71         | 68       | 62         | 41           | 49            | 43               | **62**             |
+| Amazon Q Developer | 70         | 73       | 79         | 56           | 79            | 86               | **74**             |
+| Sourcegraph Cody   | 68         | 74       | 80         | 58           | 66            | 72               | **71**             |
+| Aider              | 76         | 74       | 80         | 62           | 62            | 30               | **70**             |
+| Amp                | 72         | 70       | 79         | 52           | 48            | 42               | **65**             |
+| OpenCode           | 56         | 61       | 79         | 51           | 61            | 22               | **58**             |
+| Factory            | 72         | 57       | 38         | 47           | 52            | 71               | **57**             |
 
 ### Calculation Method
 
@@ -83,25 +83,25 @@ Weighted Total = (Perf × 0.30) + (DX × 0.20) + (Cost × 0.20)
 
 ## Final Rankings
 
-| Rank | Platform | Score | Rating | Best For |
-|------|----------|-------|--------|----------|
-| 1 | **GitHub Copilot** | 79 | ⭐⭐⭐⭐ | Enterprise teams, GitHub-centric workflows |
-| 2 | **Claude Code** | 78 | ⭐⭐⭐⭐ | Maximum coding power, complex multi-file tasks |
-| 3 | **Amazon Q Developer** | 74 | ⭐⭐⭐½ | AWS teams, security-conscious enterprises |
-| 4 | **Cursor IDE** | 74 | ⭐⭐⭐½ | Visual coding, AI-native IDE experience |
-| 5 | **Gemini CLI** | 71 | ⭐⭐⭐½ | Budget-conscious developers, Google ecosystem |
-| 6 | **Sourcegraph Cody** | 71 | ⭐⭐⭐½ | Large codebases, cross-repo understanding |
-| 7 | **Roo Code** | 70 | ⭐⭐⭐½ | Budget teams wanting agentic IDE extension |
-| 8 | **Aider** | 70 | ⭐⭐⭐½ | Open-source purists, terminal-native devs |
-| 9 | **Cline** | 69 | ⭐⭐⭐½ | Budget teams, VS Code agentic workflows |
-| 10 | **Windsurf IDE** | 68 | ⭐⭐⭐½ | Cursor alternative at lower price |
-| 11 | **OpenAI Codex** | 67 | ⭐⭐⭐½ | OpenAI ecosystem, autonomous cloud tasks |
-| 12 | **Continue** | 66 | ⭐⭐⭐½ | Model-agnostic teams, JetBrains users |
-| 13 | **Warp Terminal** | 65 | ⭐⭐⭐ | Terminal-first developers, DevOps |
-| 14 | **Amp** | 65 | ⭐⭐⭐ | Sourcegraph users, autonomous CLI tasks |
-| 15 | **Google Jules** | 62 | ⭐⭐⭐ | Hands-off bug fixes, async coding |
-| 16 | **OpenCode** | 58 | ⭐⭐⭐ | Go developers, minimal setup |
-| 17 | **Factory** | 57 | ⭐⭐⭐ | Enterprise autonomous development at scale |
+| Rank | Platform               | Score | Rating   | Best For                                       |
+| ---- | ---------------------- | ----- | -------- | ---------------------------------------------- |
+| 1    | **GitHub Copilot**     | 79    | ⭐⭐⭐⭐ | Enterprise teams, GitHub-centric workflows     |
+| 2    | **Claude Code**        | 78    | ⭐⭐⭐⭐ | Maximum coding power, complex multi-file tasks |
+| 3    | **Amazon Q Developer** | 74    | ⭐⭐⭐½  | AWS teams, security-conscious enterprises      |
+| 4    | **Cursor IDE**         | 74    | ⭐⭐⭐½  | Visual coding, AI-native IDE experience        |
+| 5    | **Gemini CLI**         | 71    | ⭐⭐⭐½  | Budget-conscious developers, Google ecosystem  |
+| 6    | **Sourcegraph Cody**   | 71    | ⭐⭐⭐½  | Large codebases, cross-repo understanding      |
+| 7    | **Roo Code**           | 70    | ⭐⭐⭐½  | Budget teams wanting agentic IDE extension     |
+| 8    | **Aider**              | 70    | ⭐⭐⭐½  | Open-source purists, terminal-native devs      |
+| 9    | **Cline**              | 69    | ⭐⭐⭐½  | Budget teams, VS Code agentic workflows        |
+| 10   | **Windsurf IDE**       | 68    | ⭐⭐⭐½  | Cursor alternative at lower price              |
+| 11   | **OpenAI Codex**       | 67    | ⭐⭐⭐½  | OpenAI ecosystem, autonomous cloud tasks       |
+| 12   | **Continue**           | 66    | ⭐⭐⭐½  | Model-agnostic teams, JetBrains users          |
+| 13   | **Warp Terminal**      | 65    | ⭐⭐⭐   | Terminal-first developers, DevOps              |
+| 14   | **Amp**                | 65    | ⭐⭐⭐   | Sourcegraph users, autonomous CLI tasks        |
+| 15   | **Google Jules**       | 62    | ⭐⭐⭐   | Hands-off bug fixes, async coding              |
+| 16   | **OpenCode**           | 58    | ⭐⭐⭐   | Go developers, minimal setup                   |
+| 17   | **Factory**            | 57    | ⭐⭐⭐   | Enterprise autonomous development at scale     |
 
 ---
 
@@ -111,12 +111,12 @@ Weighted Total = (Perf × 0.30) + (DX × 0.20) + (Cost × 0.20)
 
 **Recommended:** GitHub Copilot Enterprise or Amazon Q Developer
 
-| Requirement | Winner | Why |
-|------------|--------|-----|
-| Best admin controls | GitHub Copilot | Full org management, audit logs, SSO, policy enforcement |
-| AWS-heavy stack | Amazon Q Developer | Deep AWS integration, security scanning, IAM controls |
-| Maximum compliance | Amazon Q Developer | FedRAMP, SOC 2, ISO 27001, HIPAA — built on AWS |
-| GitHub-centric CI/CD | GitHub Copilot | Native issues → PRs → CI → deploy workflow |
+| Requirement          | Winner             | Why                                                      |
+| -------------------- | ------------------ | -------------------------------------------------------- |
+| Best admin controls  | GitHub Copilot     | Full org management, audit logs, SSO, policy enforcement |
+| AWS-heavy stack      | Amazon Q Developer | Deep AWS integration, security scanning, IAM controls    |
+| Maximum compliance   | Amazon Q Developer | FedRAMP, SOC 2, ISO 27001, HIPAA — built on AWS          |
+| GitHub-centric CI/CD | GitHub Copilot     | Native issues → PRs → CI → deploy workflow               |
 
 **Configuration:** Deploy both GitHub Copilot (for IDE + Coding Agent) and
 Amazon Q (for AWS-specific tasks). Use AgentKit Forge to generate instructions
@@ -128,12 +128,12 @@ for both simultaneously via `renderTargets: [copilot]` + `AGENTS.md`.
 
 **Recommended:** Claude Code (power) or Aider (budget)
 
-| Requirement | Winner | Why |
-|------------|--------|-----|
-| Maximum coding ability | Claude Code | Highest SWE-bench scores, richest config system |
-| Budget-conscious | Aider + Gemini CLI | Free/open-source tools with top-tier model access |
-| Visual IDE preference | Cursor IDE | Best AI-native IDE experience |
-| Terminal preference | Claude Code | Best CLI agent with hooks, subagents, skills |
+| Requirement            | Winner             | Why                                               |
+| ---------------------- | ------------------ | ------------------------------------------------- |
+| Maximum coding ability | Claude Code        | Highest SWE-bench scores, richest config system   |
+| Budget-conscious       | Aider + Gemini CLI | Free/open-source tools with top-tier model access |
+| Visual IDE preference  | Cursor IDE         | Best AI-native IDE experience                     |
+| Terminal preference    | Claude Code        | Best CLI agent with hooks, subagents, skills      |
 
 **Budget tier:** Aider (free) + Gemini CLI (free tier) gives strong capability
 at $0/month tool cost (API costs of $5–20/month depending on model choice).
@@ -147,12 +147,12 @@ experience for a professional developer.
 
 **Recommended:** Cursor IDE + Cline/Roo Code
 
-| Requirement | Winner | Why |
-|------------|--------|-----|
-| IDE + Agent combo | Cursor + Cline | Cursor for IDE rules; Cline for agentic tasks in VS Code |
-| Cost-effective team | Roo Code + Aider | Open-source stack with BYOK; $0 tool cost |
-| Shared conventions | Any + AgentKit Forge | Generate AGENTS.md + platform-specific rules for consistency |
-| Fast prototyping | Cursor IDE | Quick iteration with Composer mode and inline chat |
+| Requirement         | Winner               | Why                                                          |
+| ------------------- | -------------------- | ------------------------------------------------------------ |
+| IDE + Agent combo   | Cursor + Cline       | Cursor for IDE rules; Cline for agentic tasks in VS Code     |
+| Cost-effective team | Roo Code + Aider     | Open-source stack with BYOK; $0 tool cost                    |
+| Shared conventions  | Any + AgentKit Forge | Generate AGENTS.md + platform-specific rules for consistency |
+| Fast prototyping    | Cursor IDE           | Quick iteration with Composer mode and inline chat           |
 
 **Approach:** Use AgentKit Forge to generate shared AGENTS.md and
 platform-specific rules. Let developers choose their preferred tool — the
@@ -164,12 +164,12 @@ shared rules ensure consistency regardless of platform choice.
 
 **Recommended:** Amazon Q Developer or Cline/Roo Code with local models
 
-| Requirement | Winner | Why |
-|------------|--------|-----|
-| Data stays in-house | Cline + local model | Full air-gapped setup with Ollama/local LLM |
-| AWS + compliance | Amazon Q Developer | FedRAMP, HIPAA, SOC 2 with AWS region control |
-| Audit trail | GitHub Copilot Enterprise | Audit API, usage tracking, policy enforcement |
-| Zero code retention | Cursor (Privacy Mode) | Privacy Mode disables cloud code storage |
+| Requirement         | Winner                    | Why                                           |
+| ------------------- | ------------------------- | --------------------------------------------- |
+| Data stays in-house | Cline + local model       | Full air-gapped setup with Ollama/local LLM   |
+| AWS + compliance    | Amazon Q Developer        | FedRAMP, HIPAA, SOC 2 with AWS region control |
+| Audit trail         | GitHub Copilot Enterprise | Audit API, usage tracking, policy enforcement |
+| Zero code retention | Cursor (Privacy Mode)     | Privacy Mode disables cloud code storage      |
 
 **Important:** For classified work, only Cline, Roo Code, Continue, Aider, and
 OpenCode can run fully local with no external API calls.
@@ -180,12 +180,12 @@ OpenCode can run fully local with no external API calls.
 
 **Recommended:** GitHub Copilot Coding Agent or OpenAI Codex
 
-| Requirement | Winner | Why |
-|------------|--------|-----|
+| Requirement         | Winner               | Why                                          |
+| ------------------- | -------------------- | -------------------------------------------- |
 | Issue → PR pipeline | Copilot Coding Agent | Assign issues, auto-creates branches and PRs |
-| Sandboxed execution | OpenAI Codex | Cloud sandbox with full repo access |
-| Async bug fixes | Google Jules | Fire-and-forget task execution |
-| End-to-end SDLC | Factory | Enterprise autonomous development pipeline |
+| Sandboxed execution | OpenAI Codex         | Cloud sandbox with full repo access          |
+| Async bug fixes     | Google Jules         | Fire-and-forget task execution               |
+| End-to-end SDLC     | Factory              | Enterprise autonomous development pipeline   |
 
 ---
 
@@ -193,13 +193,13 @@ OpenCode can run fully local with no external API calls.
 
 **Recommended:** Aider + Cline + AgentKit Forge
 
-| Platform | Monthly Cost | What You Get |
-|----------|-------------|-------------|
-| Aider | $0 (tool) + API costs | Best open-source CLI agent; 60+ model support |
-| Cline | $0 (tool) + API costs | Best open-source IDE extension agent |
-| Gemini CLI | $0 (free tier) | Generous free API access |
-| OpenCode | $0 (tool) + API costs | Minimal but functional terminal AI |
-| Continue | $0 (tool) + API costs | Multi-IDE open-source assistant |
+| Platform   | Monthly Cost          | What You Get                                  |
+| ---------- | --------------------- | --------------------------------------------- |
+| Aider      | $0 (tool) + API costs | Best open-source CLI agent; 60+ model support |
+| Cline      | $0 (tool) + API costs | Best open-source IDE extension agent          |
+| Gemini CLI | $0 (free tier)        | Generous free API access                      |
+| OpenCode   | $0 (tool) + API costs | Minimal but functional terminal AI            |
+| Continue   | $0 (tool) + API costs | Multi-IDE open-source assistant               |
 
 **Tip:** Combine Gemini CLI's free tier (for routine tasks) with Aider using
 a paid model (for complex tasks) to minimize costs.
@@ -210,35 +210,35 @@ a paid model (for complex tasks) to minimize costs.
 
 ### Tier 1 — Best Overall (Score ≥ 75)
 
-| Platform | Strength | Weakness |
-|----------|----------|----------|
-| **GitHub Copilot** (79) | Best enterprise, deepest GitHub integration, great DX | Locked models, no MCP, higher cost |
-| **Claude Code** (78) | Best coding performance, richest customization | Anthropic-only models, premium pricing |
+| Platform                | Strength                                              | Weakness                               |
+| ----------------------- | ----------------------------------------------------- | -------------------------------------- |
+| **GitHub Copilot** (79) | Best enterprise, deepest GitHub integration, great DX | Locked models, no MCP, higher cost     |
+| **Claude Code** (78)    | Best coding performance, richest customization        | Anthropic-only models, premium pricing |
 
 ### Tier 2 — Strong Contenders (Score 68–74)
 
-| Platform | Strength | Weakness |
-|----------|----------|----------|
-| **Amazon Q Developer** (74) | Best compliance/security, AWS integration | AWS-centric, limited model choice |
-| **Cursor IDE** (74) | Best AI-native IDE, great DX, strong customization | Subscription cost, no free tier for power use |
-| **Gemini CLI** (71) | Best value (free), fast | Gemini-only models, limited config depth |
-| **Sourcegraph Cody** (71) | Best code graph intelligence, good value | Requires Sourcegraph for full power |
-| **Roo Code** (70) | Strong agentic + customization, budget-friendly | No enterprise features, BYOK variability |
-| **Aider** (70) | Best model flexibility, open-source, great git integration | No enterprise features, CLI only |
-| **Cline** (69) | Budget agentic IDE, cross-tool compatibility | No enterprise features, BYOK variability |
-| **Windsurf IDE** (68) | Good IDE at lower price than Cursor | Fewer customization options, no AGENTS.md |
+| Platform                    | Strength                                                   | Weakness                                      |
+| --------------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| **Amazon Q Developer** (74) | Best compliance/security, AWS integration                  | AWS-centric, limited model choice             |
+| **Cursor IDE** (74)         | Best AI-native IDE, great DX, strong customization         | Subscription cost, no free tier for power use |
+| **Gemini CLI** (71)         | Best value (free), fast                                    | Gemini-only models, limited config depth      |
+| **Sourcegraph Cody** (71)   | Best code graph intelligence, good value                   | Requires Sourcegraph for full power           |
+| **Roo Code** (70)           | Strong agentic + customization, budget-friendly            | No enterprise features, BYOK variability      |
+| **Aider** (70)              | Best model flexibility, open-source, great git integration | No enterprise features, CLI only              |
+| **Cline** (69)              | Budget agentic IDE, cross-tool compatibility               | No enterprise features, BYOK variability      |
+| **Windsurf IDE** (68)       | Good IDE at lower price than Cursor                        | Fewer customization options, no AGENTS.md     |
 
 ### Tier 3 — Specialized / Emerging (Score 57–67)
 
-| Platform | Strength | Weakness |
-|----------|----------|----------|
-| **OpenAI Codex** (67) | Strong autonomous cloud agent, Skills system | Expensive (Pro tier), limited config beyond AGENTS.md |
-| **Continue** (66) | Best model flexibility (BYOK), multi-IDE | Weaker coding performance, no AGENTS.md |
-| **Warp Terminal** (65) | Excellent terminal UX, team sharing | Limited IDE-level coding, fewer features |
-| **Amp** (65) | Free, autonomous, Sourcegraph-backed | Less mature, limited customization |
-| **Google Jules** (62) | Fully autonomous, fire-and-forget | Limited customization, async-only |
-| **OpenCode** (58) | Free, open-source, local model support | Early stage, limited features |
-| **Factory** (57) | Full SDLC automation | Enterprise-only, expensive, opaque pricing |
+| Platform               | Strength                                     | Weakness                                              |
+| ---------------------- | -------------------------------------------- | ----------------------------------------------------- |
+| **OpenAI Codex** (67)  | Strong autonomous cloud agent, Skills system | Expensive (Pro tier), limited config beyond AGENTS.md |
+| **Continue** (66)      | Best model flexibility (BYOK), multi-IDE     | Weaker coding performance, no AGENTS.md               |
+| **Warp Terminal** (65) | Excellent terminal UX, team sharing          | Limited IDE-level coding, fewer features              |
+| **Amp** (65)           | Free, autonomous, Sourcegraph-backed         | Less mature, limited customization                    |
+| **Google Jules** (62)  | Fully autonomous, fire-and-forget            | Limited customization, async-only                     |
+| **OpenCode** (58)      | Free, open-source, local model support       | Early stage, limited features                         |
+| **Factory** (57)       | Full SDLC automation                         | Enterprise-only, expensive, opaque pricing            |
 
 ---
 

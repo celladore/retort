@@ -3,9 +3,19 @@ import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
-  loadState, saveState, acquireLock, releaseLock, checkLock,
-  appendEvent, readEvents, advancePhase, setPhase, updateTeamStatus,
-  getStatus, PHASES, VALID_TEAM_IDS,
+  loadState,
+  saveState,
+  acquireLock,
+  releaseLock,
+  checkLock,
+  appendEvent,
+  readEvents,
+  advancePhase,
+  setPhase,
+  updateTeamStatus,
+  getStatus,
+  PHASES,
+  VALID_TEAM_IDS,
   getTasksSummary,
 } from '../orchestrator.mjs';
 
@@ -53,11 +63,7 @@ describe('orchestrator', () => {
         team_progress: {},
         completed: false,
       };
-      writeFileSync(
-        resolve(STATE_DIR, 'orchestrator.json'),
-        JSON.stringify(custom),
-        'utf-8'
-      );
+      writeFileSync(resolve(STATE_DIR, 'orchestrator.json'), JSON.stringify(custom), 'utf-8');
       const state = await loadState(TEST_ROOT);
       expect(state.repo_id).toBe('custom');
       expect(state.current_phase).toBe(3);
@@ -176,11 +182,7 @@ describe('orchestrator', () => {
         started_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
         session_id: '',
       };
-      writeFileSync(
-        resolve(STATE_DIR, 'orchestrator.lock'),
-        JSON.stringify(lockData),
-        'utf-8'
-      );
+      writeFileSync(resolve(STATE_DIR, 'orchestrator.lock'), JSON.stringify(lockData), 'utf-8');
 
       const status = await checkLock(TEST_ROOT);
       expect(status.locked).toBe(true);
@@ -268,7 +270,14 @@ describe('orchestrator', () => {
       writeFileSync(resolve(TASKS_DIR, 'bad.json'), '{ invalid json !!');
       writeFileSync(
         resolve(TASKS_DIR, 'good.json'),
-        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Do something', priority: 'P1', assignees: ['team-backend'], createdAt: new Date().toISOString() })
+        JSON.stringify({
+          id: 'task-001',
+          status: 'in_progress',
+          title: 'Do something',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: new Date().toISOString(),
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toContain('Active tasks: 1');
@@ -288,19 +297,47 @@ describe('orchestrator', () => {
       const now = new Date().toISOString();
       writeFileSync(
         resolve(TASKS_DIR, 'active1.json'),
-        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Task 1', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-001',
+          status: 'in_progress',
+          title: 'Task 1',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'active2.json'),
-        JSON.stringify({ id: 'task-002', status: 'submitted', title: 'Task 2', priority: 'P2', assignees: ['team-frontend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-002',
+          status: 'submitted',
+          title: 'Task 2',
+          priority: 'P2',
+          assignees: ['team-frontend'],
+          createdAt: now,
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'done1.json'),
-        JSON.stringify({ id: 'task-003', status: 'completed', title: 'Task 3', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-003',
+          status: 'completed',
+          title: 'Task 3',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'done2.json'),
-        JSON.stringify({ id: 'task-004', status: 'failed', title: 'Task 4', priority: 'P3', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-004',
+          status: 'failed',
+          title: 'Task 4',
+          priority: 'P3',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toContain('Active tasks: 2');
@@ -312,7 +349,14 @@ describe('orchestrator', () => {
       const now = new Date().toISOString();
       writeFileSync(
         resolve(TASKS_DIR, 'done.json'),
-        JSON.stringify({ id: 'task-001', status: 'canceled', title: 'Done', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-001',
+          status: 'canceled',
+          title: 'Done',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).not.toContain('Active tasks');
@@ -323,15 +367,36 @@ describe('orchestrator', () => {
       mkdirSync(TASKS_DIR, { recursive: true });
       writeFileSync(
         resolve(TASKS_DIR, 'task-low-priority.json'),
-        JSON.stringify({ id: 'task-low-priority', status: 'working', priority: 'P2', title: 'Low priority', assignees: [], createdAt: '2024-01-01T08:00:00Z' })
+        JSON.stringify({
+          id: 'task-low-priority',
+          status: 'working',
+          priority: 'P2',
+          title: 'Low priority',
+          assignees: [],
+          createdAt: '2024-01-01T08:00:00Z',
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'task-high-older.json'),
-        JSON.stringify({ id: 'task-high-older', status: 'working', priority: 'P0', title: 'High priority older', assignees: [], createdAt: '2024-01-01T09:00:00Z' })
+        JSON.stringify({
+          id: 'task-high-older',
+          status: 'working',
+          priority: 'P0',
+          title: 'High priority older',
+          assignees: [],
+          createdAt: '2024-01-01T09:00:00Z',
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'task-high-newer.json'),
-        JSON.stringify({ id: 'task-high-newer', status: 'working', priority: 'P0', title: 'Newer high priority', assignees: [], createdAt: '2024-01-01T10:00:00Z' })
+        JSON.stringify({
+          id: 'task-high-newer',
+          status: 'working',
+          priority: 'P0',
+          title: 'Newer high priority',
+          assignees: [],
+          createdAt: '2024-01-01T10:00:00Z',
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       const newerPos = result.indexOf('task-high-newer');

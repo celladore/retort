@@ -7,11 +7,11 @@ are linked in each file.
 
 ## Articles
 
-| File | Source | Topic |
-| --- | --- | --- |
-| [swe-bench-leaderboard-feb-2026.md](./swe-bench-leaderboard-feb-2026.md) | swebench.com, marc0.dev, simonwillison.net | SWE-bench Verified rankings for Feb 2026 |
-| [aider-polyglot-leaderboard-2025.md](./aider-polyglot-leaderboard-2025.md) | aider.chat, epoch.ai, simonwillison.net | Aider polyglot coding benchmark methodology and results |
-| [best-llm-for-coding-teams-2026.md](./best-llm-for-coding-teams-2026.md) | morphllm.com, kanaries.net, builder.io, noviai.ai | Practical coding model selection across team roles |
+| File                                                                       | Source                                            | Topic                                                   |
+| -------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------- |
+| [swe-bench-leaderboard-feb-2026.md](./swe-bench-leaderboard-feb-2026.md)   | swebench.com, marc0.dev, simonwillison.net        | SWE-bench Verified rankings for Feb 2026                |
+| [aider-polyglot-leaderboard-2025.md](./aider-polyglot-leaderboard-2025.md) | aider.chat, epoch.ai, simonwillison.net           | Aider polyglot coding benchmark methodology and results |
+| [best-llm-for-coding-teams-2026.md](./best-llm-for-coding-teams-2026.md)   | morphllm.com, kanaries.net, builder.io, noviai.ai | Practical coding model selection across team roles      |
 
 ## How to Use
 
