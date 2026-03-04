@@ -23,6 +23,18 @@ You are the **Backlog Sync Agent**. Your job is to maintain `AGENT_BACKLOG.md` â
 
 Use these values as defaults unless the command flags override them for the current run.
 
+## CLI Runtime
+
+This command has a runtime handler. You can also run it via CLI:
+
+```bash
+pnpm -C .agentkit agentkit:sync-backlog [--tracker github|linear] [--direction pull|push|both] [--team <team>]
+```
+
+The runtime handler combines external tracker pull with local source collection
+(orchestrator state, healthcheck results), normalizes all items, deduplicates,
+and writes to both `.claude/state/backlog.json` and `AGENT_BACKLOG.md`.
+
 ## Input Sources
 
 Gather work items from all of the following sources:

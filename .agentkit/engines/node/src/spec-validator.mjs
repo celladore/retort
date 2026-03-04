@@ -465,6 +465,10 @@ const projectSchema = {
             ownerTeam: { type: 'string', minLength: 1 },
             operationsTeam: { type: 'string', minLength: 1 },
             cadence: { type: 'string', enum: PROJECT_ENUMS.intakeCadence },
+            autoImport: { type: 'boolean' },
+            importLabelsMap: { type: 'object' },
+            importStateMap: { type: 'object' },
+            importTeamMap: { type: 'object' },
             routing: { type: 'object' },
             escalation: {
               type: 'object',
@@ -572,6 +576,42 @@ function validateProjectYaml(project) {
   if (!project || typeof project !== 'object') return { errors, warnings };
 
   errors.push(...validate(project, projectSchema, 'project.yaml'));
+
+  // Validate intake import maps
+  const intake = project?.process?.intake;
+  if (intake) {
+    const VALID_PRIORITIES = ['P0', 'P1', 'P2', 'P3'];
+    const VALID_STATUSES = ['open', 'in-progress', 'completed', 'blocked', 'deferred'];
+
+    if (intake.importLabelsMap && typeof intake.importLabelsMap === 'object') {
+      for (const [label, priority] of Object.entries(intake.importLabelsMap)) {
+        if (!VALID_PRIORITIES.includes(priority)) {
+          errors.push(
+            `project.yaml: process.intake.importLabelsMap.${label} must be one of [${VALID_PRIORITIES.join(', ')}], got "${priority}"`
+          );
+        }
+      }
+    }
+
+    if (intake.importStateMap && typeof intake.importStateMap === 'object') {
+      for (const [state, status] of Object.entries(intake.importStateMap)) {
+        if (!VALID_STATUSES.includes(status)) {
+          errors.push(
+            `project.yaml: process.intake.importStateMap.${state} must be one of [${VALID_STATUSES.join(', ')}], got "${status}"`
+          );
+        }
+      }
+    }
+
+    if (
+      intake.autoImport === true &&
+      project?.process?.issueTracker === 'none'
+    ) {
+      warnings.push(
+        'project.yaml: process.intake.autoImport is true but issueTracker is "none" — external import will be a no-op'
+      );
+    }
+  }
 
   return { errors, warnings };
 }

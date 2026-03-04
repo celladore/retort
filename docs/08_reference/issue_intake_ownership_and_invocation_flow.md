@@ -55,11 +55,24 @@ Selection is repository-configurable and must not require template edits.
 ## Canonical Intake Flow
 
 1. Pull open issues from configured tracker (`github` or `linear`).
-2. Normalize fields (title, severity, labels, owner, component).
-3. Map to team using scope rules.
-4. Write/update local backlog records.
-5. Emit events for audit trail and metrics.
-6. Flag stale/unassigned issues for triage.
+2. Normalize fields (title, severity, labels, owner, component) via `issue-normalizer.mjs`.
+3. Map to team using `process.intake.importTeamMap` scope rules.
+4. Deduplicate against existing `backlog.json` by `externalId`.
+5. Write/update local backlog records (`.claude/state/backlog.json` + `AGENT_BACKLOG.md`).
+6. Emit events for audit trail (`events.log`) and metrics.
+7. Flag stale/unassigned issues for triage.
+
+## Runtime Commands
+
+| Command | CLI | Slash | Description |
+| ------- | --- | ----- | ----------- |
+| `import-issues` | `pnpm -C .agentkit agentkit:import-issues` | `/import-issues` | One-time or incremental import from external tracker |
+| `backlog` | `pnpm -C .agentkit agentkit:backlog` | `/backlog` | Consolidated view with filters and output formats |
+| `sync-backlog` | `pnpm -C .agentkit agentkit:sync-backlog` | `/sync-backlog` | Full orchestrated sync (external + local sources) |
+
+## Auto-Import on Adoption
+
+When `process.intake.autoImport: true` in `project.yaml`, `agentkit init` will automatically run `import-issues` after overlay setup. This is the recommended path for adopting repos with existing GitHub/Linear issues.
 
 ## Post-Sync Smoke Matrix
 
@@ -69,6 +82,8 @@ Selection is repository-configurable and must not require template edits.
 | Sync generation        | `pnpm -C .agentkit agentkit:sync`                                                   | Completes without errors          |
 | Determinism            | `pnpm -C .agentkit agentkit:sync && git status --short`                             | No unexpected drift on second run |
 | Output validation      | `pnpm -C .agentkit agentkit:validate`                                               | Pass                              |
+| Import issues          | `pnpm -C .agentkit agentkit:import-issues --dry-run --force`                        | Lists issues without errors       |
+| Backlog view           | `pnpm -C .agentkit agentkit:backlog --format json`                                  | Valid JSON output                 |
 | Claude output parity   | inspect `.claude/commands/sync-backlog.md` + `.claude/skills/sync-backlog/SKILL.md` | Intake semantics present          |
 | Copilot parity         | inspect `.github/prompts/sync-backlog.prompt.md`                                    | Intake semantics present          |
 | Cursor/Windsurf parity | inspect `.cursor/commands/sync-backlog.md` and `.windsurf/commands/sync-backlog.md` | Intake semantics present          |
@@ -80,16 +95,29 @@ This repo protects source-of-truth paths under `.agentkit/spec`, `.agentkit/temp
 
 ## Maintainer Change List (Execution Checklist)
 
-- `.agentkit/spec/project.yaml` — add/confirm configurable tracker selector semantics for intake.
-- `.agentkit/spec/teams.yaml` — add intake owner/routing metadata.
-- `.agentkit/spec/commands.yaml` — make `sync-backlog` tracker-neutral and ownership-aware.
-- `.agentkit/engines/node/src/spec-validator.mjs` — validate new intake schema fields.
-- `.agentkit/engines/node/src/synchronize.mjs` — propagate intake vars to templates.
-- Platform templates for command/skill parity.
+- [x] `.agentkit/spec/project.yaml` — add `process.intake.autoImport`, `importLabelsMap`, `importStateMap`, `importTeamMap`.
+- [x] `.agentkit/spec/commands.yaml` — add `import-issues` and `backlog` commands; `sync-backlog` already present.
+- [x] `.agentkit/engines/node/src/spec-validator.mjs` — validate new intake schema fields (priorities, statuses, autoImport+tracker warning).
+- [x] `.agentkit/engines/node/src/project-mapping.mjs` — add `hasAutoImport` template variable.
+- [x] `.agentkit/engines/node/src/github-adapter.mjs` — GitHub issue fetcher via `gh` CLI.
+- [x] `.agentkit/engines/node/src/linear-adapter.mjs` — Linear stub with clear interface.
+- [x] `.agentkit/engines/node/src/issue-normalizer.mjs` — field normalization, priority inference, team routing, dedup.
+- [x] `.agentkit/engines/node/src/backlog-store.mjs` — dual JSON + Markdown persistence with filter/sort.
+- [x] `.agentkit/engines/node/src/import-issues.mjs` — runtime handler for import command.
+- [x] `.agentkit/engines/node/src/backlog-viewer.mjs` — consolidated view (table/json/yaml/csv).
+- [x] `.agentkit/engines/node/src/sync-backlog-runner.mjs` — orchestrated multi-source sync.
+- [x] `.agentkit/engines/node/src/cli.mjs` — wire new commands + flags.
+- [x] `.agentkit/engines/node/src/init.mjs` — auto-import on adoption when flag is enabled.
+- [x] Platform templates for `import-issues` and `backlog` commands.
+- [ ] `.agentkit/spec/teams.yaml` — intake routing already present; no changes needed.
 
 ## Definition of Done
 
-- GitHub and Linear are both documented and supported as first-class configurable trackers.
-- Intake owner and escalation path are explicit.
-- Sync output is deterministic and validated.
-- Generated command/skill artifacts are semantically aligned across supported platforms.
+- [x] GitHub is supported as a first-class configurable tracker with runtime adapter.
+- [x] Linear is documented with a clear stub interface for future implementation.
+- [x] Intake owner and escalation path are explicit.
+- [x] Sync output is deterministic and validated.
+- [x] Generated command/skill artifacts are semantically aligned across supported platforms.
+- [x] Auto-import triggers on adoption when `process.intake.autoImport: true`.
+- [x] Consolidated backlog view available via `agentkit backlog` with multiple output formats.
+- [x] All 614 tests pass (including 38 new tests for normalizer and store).

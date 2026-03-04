@@ -37,6 +37,9 @@ const VALID_COMMANDS = [
   'healthcheck',
   'cost',
   'project-review',
+  'import-issues',
+  'backlog',
+  'sync-backlog',
   'add',
   'remove',
   'list',
@@ -113,6 +116,9 @@ const VALID_FLAGS = {
     'help',
   ],
   doctor: ['verbose', 'help'],
+  'import-issues': ['tracker', 'state', 'labels', 'since', 'dry-run', 'limit', 'force', 'help'],
+  backlog: ['format', 'team', 'priority', 'source', 'status', 'sort', 'help'],
+  'sync-backlog': ['tracker', 'direction', 'labels', 'owner-team', 'team', 'help'],
   scaffold: ['type', 'name', 'stack', 'path', 'help'],
   preflight: ['stack', 'range', 'base', 'strict', 'help'],
   'project-review': ['scope', 'focus', 'phase', 'help'],
@@ -170,6 +176,15 @@ const FLAG_TYPES = {
   path: 'string',
   base: 'string',
   overlay: 'string',
+  tracker: 'string',
+  state: 'string',
+  labels: 'string',
+  since: 'string',
+  limit: 'string',
+  sort: 'string',
+  direction: 'string',
+  'owner-team': 'string',
+  source: 'string',
 
   // Booleans
   force: 'boolean',
@@ -519,6 +534,33 @@ async function main() {
           flags,
         });
         if (!result.ok) process.exit(1);
+        break;
+      }
+      case 'import-issues': {
+        const { runImportIssues } = await import('./import-issues.mjs');
+        await runImportIssues({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
+      case 'backlog': {
+        const { runBacklogViewer } = await import('./backlog-viewer.mjs');
+        await runBacklogViewer({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
+      case 'sync-backlog': {
+        const { runSyncBacklog } = await import('./sync-backlog-runner.mjs');
+        await runSyncBacklog({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
         break;
       }
       case 'tasks': {
