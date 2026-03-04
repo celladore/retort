@@ -299,6 +299,8 @@ const PROJECT_ENUMS = {
   ],
   envConfigStrategy: ['env-vars', 'config-files', 'vault', 'app-config', 'none'],
   monorepoTool: ['turborepo', 'nx', 'lerna', 'pnpm-workspaces'],
+  languageProfileMode: ['configured', 'hybrid', 'heuristic'],
+  languageProfileDiagnostics: ['off', 'minimal', 'verbose'],
   // Infrastructure
   infraStateBackend: ['azurerm', 's3', 'gcs', 'consul', 'local', 'none'],
   infraLockProvider: ['blob-lease', 'dynamodb', 'consul', 'none'],
@@ -484,6 +486,42 @@ const projectSchema = {
         integration: { type: 'array', items: { type: 'string' } },
         e2e: { type: 'array', items: { type: 'string' } },
         coverage: { type: 'number', min: 0, max: 100 },
+      },
+    },
+    automation: {
+      type: 'object',
+      properties: {
+        baselineProfile: { type: 'string' },
+        ciProfile: { type: 'string' },
+        checks: {
+          type: 'object',
+          properties: {
+            codeql: { type: 'boolean' },
+            semgrep: { type: 'boolean' },
+            dependencyAudit: { type: 'boolean' },
+          },
+        },
+        languageProfile: {
+          type: 'object',
+          properties: {
+            mode: { type: 'string', enum: PROJECT_ENUMS.languageProfileMode },
+            diagnostics: { type: 'string', enum: PROJECT_ENUMS.languageProfileDiagnostics },
+            inferFrom: {
+              type: 'object',
+              properties: {
+                frameworks: { type: 'boolean' },
+                tests: { type: 'boolean' },
+              },
+            },
+            scaffoldOverrides: {
+              type: 'object',
+              properties: {
+                alwaysRegenerate: { type: 'array', items: { type: 'string' } },
+                scaffoldOnce: { type: 'array', items: { type: 'string' } },
+              },
+            },
+          },
+        },
       },
     },
     integrations: {

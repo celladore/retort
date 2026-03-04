@@ -90,6 +90,7 @@ fi
 # -- Auto-detect stack and run checks --------------------------------------
 ran_check=false
 
+{{#if hasLanguageJsLikeEffective}}
 # Node.js / JavaScript / TypeScript
 if [[ -f "${CWD}/package.json" ]]; then
     ran_check=true
@@ -137,7 +138,9 @@ if [[ -f "${CWD}/package.json" ]]; then
         fi
     fi
 fi
+{{/if}}
 
+{{#if hasLanguageDotnetEffective}}
 # .NET
 SLN_FILE=$(find "$CWD" -maxdepth 2 -name '*.sln' -o -name '*.csproj' 2>/dev/null | head -n1 || true)
 if [[ -n "$SLN_FILE" ]] && command -v dotnet &>/dev/null; then
@@ -151,7 +154,9 @@ if [[ -n "$SLN_FILE" ]] && command -v dotnet &>/dev/null; then
         exit 0
     fi
 fi
+{{/if}}
 
+{{#if hasLanguageRustEffective}}
 # Rust / Cargo
 if [[ -f "${CWD}/Cargo.toml" ]] && command -v cargo &>/dev/null; then
     ran_check=true
@@ -164,7 +169,9 @@ if [[ -f "${CWD}/Cargo.toml" ]] && command -v cargo &>/dev/null; then
         exit 0
     fi
 fi
+{{/if}}
 
+{{#if hasLanguagePythonEffective}}
 # Python
 if [[ -f "${CWD}/pyproject.toml" ]]; then
     ran_check=true
@@ -182,6 +189,7 @@ if [[ -f "${CWD}/pyproject.toml" ]]; then
         fi
     fi
 fi
+{{/if}}
 
 # -- Check for missing history documentation --------------------------------
 if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
