@@ -36,15 +36,15 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Track version-bearing files that changed
-          VERSION_FILES_CHANGED=false
+          version_changed=false
           for pattern in '(^|/)package\.json$' '(^|/)Cargo\.toml$' '(^|/)pyproject\.toml$' '\.csproj$'; do
             if grep -qE "$pattern" /tmp/diff-files.txt; then
-              VERSION_FILES_CHANGED=true
+              version_changed=true
               echo "::notice::Version file changed: $(grep -E "$pattern" /tmp/diff-files.txt | head -5 | tr '\n' ', ')"
             fi
           done
 
-          echo "version_changed=$VERSION_FILES_CHANGED" >> $GITHUB_ENV
+          echo "version_changed=$version_changed" >> $GITHUB_ENV
 
       - name: Check for version bump on breaking changes
         run: |
