@@ -139,11 +139,11 @@ agents:
   api-refactor:
     team: backend
     model_override: gpt-5.2-high-thinking
-    reason: "Complex architecture redesign"
+    reason: 'Complex architecture redesign'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

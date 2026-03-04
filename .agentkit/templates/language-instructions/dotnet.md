@@ -1,5 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — .NET / C#
 
 Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
@@ -29,12 +30,13 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
 ## Testing
 
 {{#if testingUnit}}- Unit test framework: **{{testingUnit}}**.{{/if}}
+
 - Use xUnit or NUnit for unit tests; name test classes `<Class>Tests`.
 - xUnit: `[Fact]` for single-case, `[Theory]` + `[InlineData]` for parameterised tests.
 - NUnit: `[Test]` for single-case, `[TestCase(...)]` for parameterised tests.
 - Follow Arrange-Act-Assert with blank lines separating each phase.
 - Use `Moq` or `NSubstitute` for mocking; mock interfaces, not concrete types.
-{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
+  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
 
 ## API Compatibility
 
@@ -51,6 +53,7 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
   API reference documentation.
 
 {{#if ruleConventions}}
+
 ## Project Conventions
 
 The following conventions are enforced in **{{projectName}}** and derived from

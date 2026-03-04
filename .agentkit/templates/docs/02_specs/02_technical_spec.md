@@ -17,13 +17,13 @@
 
 ## Technology Stack
 
-| Layer | Technology | Rationale |
-|-------|-----------|-----------|
-| Language | <!-- e.g. TypeScript --> | <!-- Why --> |
-| Runtime | <!-- e.g. Node.js 22 --> | <!-- Why --> |
-| Framework | <!-- e.g. Express --> | <!-- Why --> |
-| Database | <!-- e.g. PostgreSQL 16 --> | <!-- Why --> |
-| Cache | <!-- e.g. Redis --> | <!-- Why --> |
+| Layer     | Technology                  | Rationale    |
+| --------- | --------------------------- | ------------ |
+| Language  | <!-- e.g. TypeScript -->    | <!-- Why --> |
+| Runtime   | <!-- e.g. Node.js 22 -->    | <!-- Why --> |
+| Framework | <!-- e.g. Express -->       | <!-- Why --> |
+| Database  | <!-- e.g. PostgreSQL 16 --> | <!-- Why --> |
+| Cache     | <!-- e.g. Redis -->         | <!-- Why --> |
 
 ## Component Design
 
@@ -47,8 +47,8 @@
 
 ## Performance Targets
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
+| Metric          | Target         | Measurement           |
+| --------------- | -------------- | --------------------- |
 | <!-- Metric --> | <!-- Value --> | <!-- How measured --> |
 
 ## References

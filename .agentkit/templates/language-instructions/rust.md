@@ -1,5 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — Rust
 
 Apply these rules when editing `.rs` files or `Cargo.toml`.
@@ -29,6 +30,7 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
 ## Testing
 
 {{#if testingUnit}}- Unit test framework: **{{testingUnit}}**.{{/if}}
+
 - Place unit tests in a `#[cfg(test)] mod tests` block at the bottom of
   each module.
 - Use `#[test]` for synchronous tests and `#[tokio::test]` for async tests.
@@ -36,7 +38,7 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
 - Use `assert_eq!` and `assert_ne!` over plain `assert!` for clearer failure
   messages.
 - Write integration tests in the `tests/` directory for cross-module behaviour.
-{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** on public API surfaces.{{/if}}
+  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** on public API surfaces.{{/if}}
 
 ## Dependencies
 
@@ -62,6 +64,7 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
 - Run `cargo doc --no-deps` to verify documentation builds without warnings.
 
 {{#if ruleConventions}}
+
 ## Project Conventions
 
 The following conventions are enforced in **{{projectName}}** and derived from

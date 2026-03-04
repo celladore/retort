@@ -8,15 +8,15 @@
 
 ## At a Glance
 
-| Attribute          | Value                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| **Provider**       | Mistral AI (Paris, France)                                                           |
-| **Founded**        | 2023                                                                                 |
-| **Architecture**   | Codestral 22B / 25.08: Transformer; Mamba-Codestral-7B: Mamba2 (linear-time inference) |
+| Attribute          | Value                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| **Provider**       | Mistral AI (Paris, France)                                                              |
+| **Founded**        | 2023                                                                                    |
+| **Architecture**   | Codestral 22B / 25.08: Transformer; Mamba-Codestral-7B: Mamba2 (linear-time inference)  |
 | **Latest model**   | Codestral 25.08 (API/release channel); open-weights: Codestral-22B-v0.1 on Hugging Face |
-| **Context window** | 128K tokens ([Codestral 25.08 docs](https://docs.mistral.ai/models/codestral-25-08)) |
-| **License**        | Proprietary (API) + open weights (Apache 2.0)                                        |
-| **Notable**        | European AI champion, strong FIM support for code completion                         |
+| **Context window** | 128K tokens ([Codestral 25.08 docs](https://docs.mistral.ai/models/codestral-25-08))    |
+| **License**        | Proprietary (API) + open weights (Apache 2.0)                                           |
+| **Notable**        | European AI champion, strong FIM support for code completion                            |
 
 ## Hugging Face Resources
 
@@ -37,9 +37,9 @@
 
 ## Models tracked from PRD-002 (base + profiles)
 
-| Base model      | Environment     | Profile variants covered | Cost tier | Cost multiplier | Tokens/problem | SWE-bench / Verified                                                   | HLE           | SWE-rebench   | Aider         | Coding ability summary                        | Decision Readiness | When to use                                          | Source quality         | Last verified |
-| --------------- | --------------- | ------------------------ | --------- | --------------------: | -------------: | ---------------------------------------------------------------------- | ------------- | ------------- | ------------- | --------------------------------------------- | ------------------ | ---------------------------------------------------- | ---------------------- | ------------- |
-| Codestral 25.08 | Windsurf/Intake | Codestral 25.08          | Paid      |                   1.0 |  Not evaluated | Devstral Small 1.1: 53.6%; Devstral Medium: 61.6% (SWE-bench Verified; Codestral benchmark proxied by Devstral—see note) | Not evaluated | Not evaluated | Not evaluated | Top open-model SWE-bench Verified performance | Medium             | Enterprise coding where open-weight SOTA is required | PRD-002 + Mistral blog | 2026-02-26    |
+| Base model      | Environment     | Profile variants covered | Cost tier | Cost multiplier | Tokens/problem | SWE-bench / Verified                                                                                                     | HLE           | SWE-rebench   | Aider         | Coding ability summary                        | Decision Readiness | When to use                                          | Source quality         | Last verified |
+| --------------- | --------------- | ------------------------ | --------- | --------------: | -------------: | ------------------------------------------------------------------------------------------------------------------------ | ------------- | ------------- | ------------- | --------------------------------------------- | ------------------ | ---------------------------------------------------- | ---------------------- | ------------- |
+| Codestral 25.08 | Windsurf/Intake | Codestral 25.08          | Paid      |             1.0 |  Not evaluated | Devstral Small 1.1: 53.6%; Devstral Medium: 61.6% (SWE-bench Verified; Codestral benchmark proxied by Devstral—see note) | Not evaluated | Not evaluated | Not evaluated | Top open-model SWE-bench Verified performance | Medium             | Enterprise coding where open-weight SOTA is required | PRD-002 + Mistral blog | 2026-02-26    |
 
 > **Note:** Devstral metrics are used as proxies for Codestral; Codestral and Devstral are related Mistral coding variants.
 

@@ -1,0 +1,11 @@
+# Lock files — auto-generated, do not format
+pnpm-lock.yaml
+**/pnpm-lock.yaml
+package-lock.json
+**/package-lock.json
+yarn.lock
+**/yarn.lock
+
+# Generated root docs managed by agentkit:sync
+AGENTS.md
+COMMAND_GUIDE.md

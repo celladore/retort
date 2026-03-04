@@ -46,14 +46,40 @@ export const PROJECT_MAPPING = [
   { src: 'externalKnowledge.enabled', dest: 'hasExternalKnowledge', type: 'boolean' },
   { src: 'externalKnowledge.mode', dest: 'externalKnowledgeMode' },
   { src: 'externalKnowledge.sources.windsurfDomainGuidesPath', dest: 'windsurfDomainGuidesPath' },
-  { src: 'externalKnowledge.sources.windsurfDomainGuidesPath', dest: 'hasWindsurfDomainGuidesPath', type: 'boolean', check: 'not-none' },
+  {
+    src: 'externalKnowledge.sources.windsurfDomainGuidesPath',
+    dest: 'hasWindsurfDomainGuidesPath',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'externalKnowledge.sources.mystiraDocsPath', dest: 'mystiraDocsPath' },
-  { src: 'externalKnowledge.sources.mystiraDocsPath', dest: 'hasMystiraDocsPath', type: 'boolean', check: 'not-none' },
-  { src: 'externalKnowledge.sources.markdownFiles', dest: 'externalMarkdownFiles', type: 'array-join' },
-  { src: 'externalKnowledge.sources.markdownFiles', dest: 'hasExternalMarkdownFiles', type: 'boolean-array-length' },
+  {
+    src: 'externalKnowledge.sources.mystiraDocsPath',
+    dest: 'hasMystiraDocsPath',
+    type: 'boolean',
+    check: 'not-none',
+  },
+  {
+    src: 'externalKnowledge.sources.markdownFiles',
+    dest: 'externalMarkdownFiles',
+    type: 'array-join',
+  },
+  {
+    src: 'externalKnowledge.sources.markdownFiles',
+    dest: 'hasExternalMarkdownFiles',
+    type: 'boolean-array-length',
+  },
   { src: 'externalKnowledge.sources.gitRepoUrls', dest: 'externalGitRepoUrls', type: 'array-join' },
-  { src: 'externalKnowledge.sources.gitRepoUrls', dest: 'hasExternalGitRepoUrls', type: 'boolean-array-length' },
-  { src: 'externalKnowledge.targetPlatforms', dest: 'externalKnowledgeTargetPlatforms', type: 'array-join' },
+  {
+    src: 'externalKnowledge.sources.gitRepoUrls',
+    dest: 'hasExternalGitRepoUrls',
+    type: 'boolean-array-length',
+  },
+  {
+    src: 'externalKnowledge.targetPlatforms',
+    dest: 'externalKnowledgeTargetPlatforms',
+    type: 'array-join',
+  },
 
   // Deployment
   { src: 'deployment.cloudProvider', dest: 'cloudProvider' },
@@ -68,7 +94,12 @@ export const PROJECT_MAPPING = [
   { src: 'infrastructure.org', dest: 'infraOrg' },
   { src: 'infrastructure.iacToolchain', dest: 'infraIacToolchain', type: 'array-join' },
   { src: 'infrastructure.stateBackend', dest: 'infraStateBackend', check: 'not-none' },
-  { src: 'infrastructure.stateBackend', dest: 'hasStateBackend', type: 'boolean', check: 'not-none' },
+  {
+    src: 'infrastructure.stateBackend',
+    dest: 'hasStateBackend',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'infrastructure.modulesRepo', dest: 'infraModulesRepo' },
   { src: 'infrastructure.lockProvider', dest: 'infraLockProvider', check: 'not-none' },
   { src: 'infrastructure.tagging.mandatory', dest: 'infraMandatoryTags', type: 'array-join' },
@@ -77,10 +108,20 @@ export const PROJECT_MAPPING = [
 
   // Observability
   { src: 'observability.monitoring.provider', dest: 'monitoringProvider', check: 'not-none' },
-  { src: 'observability.monitoring.provider', dest: 'hasMonitoring', type: 'boolean', check: 'not-none' },
+  {
+    src: 'observability.monitoring.provider',
+    dest: 'hasMonitoring',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'observability.monitoring.dashboards', dest: 'hasMonitoringDashboards', type: 'boolean' },
   { src: 'observability.alerting.provider', dest: 'alertingProvider', check: 'not-none' },
-  { src: 'observability.alerting.provider', dest: 'hasAlerting', type: 'boolean', check: 'not-none' },
+  {
+    src: 'observability.alerting.provider',
+    dest: 'hasAlerting',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'observability.alerting.channels', dest: 'alertingChannels', type: 'array-join' },
   { src: 'observability.tracing.provider', dest: 'tracingProvider', check: 'not-none' },
   { src: 'observability.tracing.provider', dest: 'hasTracing', type: 'boolean', check: 'not-none' },
@@ -93,7 +134,11 @@ export const PROJECT_MAPPING = [
   { src: 'compliance.framework', dest: 'hasCompliance', type: 'boolean', check: 'not-none' },
   { src: 'compliance.disasterRecovery.rpoHours', dest: 'drRpoHours', type: 'string' },
   { src: 'compliance.disasterRecovery.rtoHours', dest: 'drRtoHours', type: 'string' },
-  { src: 'compliance.disasterRecovery.backupSchedule', dest: 'drBackupSchedule', check: 'not-none' },
+  {
+    src: 'compliance.disasterRecovery.backupSchedule',
+    dest: 'drBackupSchedule',
+    check: 'not-none',
+  },
   { src: 'compliance.disasterRecovery.geoRedundancy', dest: 'hasGeoRedundancy', type: 'boolean' },
   { src: 'compliance.audit.enabled', dest: 'hasAudit', type: 'boolean' },
   { src: 'compliance.audit.appendOnly', dest: 'hasAppendOnlyAudit', type: 'boolean' },
@@ -115,9 +160,19 @@ export const PROJECT_MAPPING = [
   { src: 'testing.staticAnalysis', dest: 'testingStaticAnalysis', type: 'array-join' },
   { src: 'testing.staticAnalysis', dest: 'hasStaticAnalysis', type: 'boolean-array-length' },
   { src: 'testing.contractTesting', dest: 'testingContractTesting', check: 'not-none' },
-  { src: 'testing.contractTesting', dest: 'hasContractTesting', type: 'boolean', check: 'not-none' },
+  {
+    src: 'testing.contractTesting',
+    dest: 'hasContractTesting',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'testing.performanceTesting', dest: 'testingPerformanceTesting', check: 'not-none' },
-  { src: 'testing.performanceTesting', dest: 'hasPerformanceTesting', type: 'boolean', check: 'not-none' },
+  {
+    src: 'testing.performanceTesting',
+    dest: 'hasPerformanceTesting',
+    type: 'boolean',
+    check: 'not-none',
+  },
 
   // Automation
   { src: 'automation.baselineProfile', dest: 'baselineProfile' },
@@ -137,13 +192,27 @@ export const PROJECT_MAPPING = [
 
   // Error Handling
   { src: 'crosscutting.errorHandling.strategy', dest: 'errorStrategy', check: 'not-none' },
-  { src: 'crosscutting.errorHandling.strategy', dest: 'hasErrorHandling', type: 'boolean', check: 'not-none' },
+  {
+    src: 'crosscutting.errorHandling.strategy',
+    dest: 'hasErrorHandling',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'crosscutting.errorHandling.globalHandler', dest: 'hasGlobalHandler', type: 'boolean' },
-  { src: 'crosscutting.errorHandling.customExceptions', dest: 'hasCustomExceptions', type: 'boolean' },
+  {
+    src: 'crosscutting.errorHandling.customExceptions',
+    dest: 'hasCustomExceptions',
+    type: 'boolean',
+  },
 
   // Authentication
   { src: 'crosscutting.authentication.provider', dest: 'authProvider', check: 'not-none' },
-  { src: 'crosscutting.authentication.provider', dest: 'hasAuth', type: 'boolean', check: 'not-none' },
+  {
+    src: 'crosscutting.authentication.provider',
+    dest: 'hasAuth',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'crosscutting.authentication.strategy', dest: 'authStrategy' },
   { src: 'crosscutting.authentication.rbac', dest: 'hasRbac', type: 'boolean' },
   { src: 'crosscutting.authentication.multiTenant', dest: 'hasMultiTenant', type: 'boolean' },
@@ -156,27 +225,55 @@ export const PROJECT_MAPPING = [
 
   // API
   { src: 'crosscutting.api.versioning', dest: 'apiVersioning', check: 'not-none' },
-  { src: 'crosscutting.api.versioning', dest: 'hasApiVersioning', type: 'boolean', check: 'not-none' },
+  {
+    src: 'crosscutting.api.versioning',
+    dest: 'hasApiVersioning',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'crosscutting.api.pagination', dest: 'apiPagination', check: 'not-none' },
-  { src: 'crosscutting.api.pagination', dest: 'hasApiPagination', type: 'boolean', check: 'not-none' },
+  {
+    src: 'crosscutting.api.pagination',
+    dest: 'hasApiPagination',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'crosscutting.api.responseFormat', dest: 'apiResponseFormat' },
   { src: 'crosscutting.api.rateLimiting', dest: 'hasRateLimiting', type: 'boolean' },
 
   // Database
   { src: 'crosscutting.database.migrations', dest: 'dbMigrations', check: 'not-none' },
-  { src: 'crosscutting.database.migrations', dest: 'hasDbMigrations', type: 'boolean', check: 'not-none' },
+  {
+    src: 'crosscutting.database.migrations',
+    dest: 'hasDbMigrations',
+    type: 'boolean',
+    check: 'not-none',
+  },
   { src: 'crosscutting.database.seeding', dest: 'hasDbSeeding', type: 'boolean' },
-  { src: 'crosscutting.database.transactionStrategy', dest: 'dbTransactionStrategy', check: 'not-none' },
+  {
+    src: 'crosscutting.database.transactionStrategy',
+    dest: 'dbTransactionStrategy',
+    check: 'not-none',
+  },
   { src: 'crosscutting.database.connectionPooling', dest: 'hasConnectionPooling', type: 'boolean' },
 
   // Performance
   { src: 'crosscutting.performance.lazyLoading', dest: 'hasLazyLoading', type: 'boolean' },
-  { src: 'crosscutting.performance.imageOptimization', dest: 'hasImageOptimization', type: 'boolean' },
+  {
+    src: 'crosscutting.performance.imageOptimization',
+    dest: 'hasImageOptimization',
+    type: 'boolean',
+  },
   { src: 'crosscutting.performance.bundleBudget', dest: 'bundleBudget', type: 'string' },
 
   // Feature Flags
   { src: 'crosscutting.featureFlags.provider', dest: 'featureFlagProvider', check: 'not-none' },
-  { src: 'crosscutting.featureFlags.provider', dest: 'hasFeatureFlags', type: 'boolean', check: 'not-none' },
+  {
+    src: 'crosscutting.featureFlags.provider',
+    dest: 'hasFeatureFlags',
+    type: 'boolean',
+    check: 'not-none',
+  },
 
   // Environments
   { src: 'crosscutting.environments.naming', dest: 'envNames', type: 'array-join' },
@@ -200,7 +297,9 @@ export const PROJECT_MAPPING = [
  * Safely accesses a property from an object using a dot-notation path.
  */
 export function get(obj, path) {
-  return path.split('.').reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+  return path
+    .split('.')
+    .reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
 }
 
 /**

@@ -1,9 +1,9 @@
 ---
-description: "{{teamName}} ({{teamId}}) — {{teamFocus}}"
+description: '{{teamName}} ({{teamId}}) — {{teamFocus}}'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -54,21 +54,23 @@ Follow these steps in order for every work session:
      TTL, refresh `expiresAt` before continuing. If refreshing the lock fails or returns a conflict (another agent claimed the lock), the agent must abort the current operation, roll back any partial changes, release/clear local lock state, and surface an explicit error. Retry/backoff is only allowed for transient errors, not for lease conflicts.
 
 **Rollback Strategy for Lock Renewal Failures:**
+
 - **Transaction log schema:** `{taskId, lockId, operations: [{action, path, tempPath, inverseAction}], timestamps, state: "prepared"|"committed"}`. Canonical directory: `.claude/state/tasks/tx/` or configurable. Temp-file naming: `{taskId}.{lockId}.{opIndex}.tmp` correlating to tx entries. Action types: create, modify, delete, rename. Record inverse operations for rollback.
 - **Two-phase commit:** Prepare (write temps, record tx) → Commit (atomic renames) or Rollback (apply inverse ops, remove temps). Durable "prepared" state with recovery/commit markers.
 - **Cleanup routine:** `runCleanupOnLeaseFailure(txLogPath)` — documented recovery routine: read tx log, revert actions via inverse ops, remove temp files. Retry with backoff; record cleanup failures to metrics/alerts. Invoked by reconciliation job that scans orphaned tx logs; enforce TTL and alert when cleanup fails.
 - **Error reporting:** Include tx log identifier, lock id, and expiresAt in error output.
 - **Retention/TTL:** Default 24h; configurable via env or config.
-   - **Re-check status under lock:** read task file again and verify
-     `status === "submitted"`. If changed, release lock and skip.
-   - If still `submitted` and task is within scope and accepted type, perform a single atomic transition from "submitted"→"working":
-     write updated JSON to temp file in same directory with unique per-attempt naming (e.g., `{taskID}.tmp.{pid}.{timestamp}`),
-     set `status` to "working", append executor message. **Durability:** `fsync(temp_fd)` → `rename(temp, final)` → `open_dir(parent)` → `fsync(dir_fd)` → `close_dir`. fsync on the temp file alone is insufficient for POSIX crash safety; sync the parent directory after rename. Handle and log errors from opening/fsyncing the parent dir; retry or surface failures consistently.
-     If rename fails, attempt unlink of temp file. **Unlink retry policy:** Retry transient errors (EAGAIN, ETIMEDOUT, file-lock related) with exponential backoff, max 3 attempts. Escalate immediately for permissions/ENOENT. On failure beyond retries: emit alert/metric and log full context.
-     **Stale temp cleanup:** Inspect temp contents; attempt safe resume/cleanup or move to quarantine folder and log for manual review. TTL example: 60 minutes (configurable via `stale_temp_ttl_minutes`).
-   - If outside scope/type, **reject** with the same atomic update mechanism:
-     set `status` to "rejected", append reason + suggested team.
-   - **Always release lock** in `finally` after accept/reject/skip paths.
+  - **Re-check status under lock:** read task file again and verify
+    `status === "submitted"`. If changed, release lock and skip.
+  - If still `submitted` and task is within scope and accepted type, perform a single atomic transition from "submitted"→"working":
+    write updated JSON to temp file in same directory with unique per-attempt naming (e.g., `{taskID}.tmp.{pid}.{timestamp}`),
+    set `status` to "working", append executor message. **Durability:** `fsync(temp_fd)` → `rename(temp, final)` → `open_dir(parent)` → `fsync(dir_fd)` → `close_dir`. fsync on the temp file alone is insufficient for POSIX crash safety; sync the parent directory after rename. Handle and log errors from opening/fsyncing the parent dir; retry or surface failures consistently.
+    If rename fails, attempt unlink of temp file. **Unlink retry policy:** Retry transient errors (EAGAIN, ETIMEDOUT, file-lock related) with exponential backoff, max 3 attempts. Escalate immediately for permissions/ENOENT. On failure beyond retries: emit alert/metric and log full context.
+    **Stale temp cleanup:** Inspect temp contents; attempt safe resume/cleanup or move to quarantine folder and log for manual review. TTL example: 60 minutes (configurable via `stale_temp_ttl_minutes`).
+  - If outside scope/type, **reject** with the same atomic update mechanism:
+    set `status` to "rejected", append reason + suggested team.
+  - **Always release lock** in `finally` after accept/reject/skip paths.
+
 3. If no delegated tasks exist, fall through to Step 1 (backlog-based work).
 
 ### Step 1: Identify Work Items
@@ -143,24 +145,29 @@ After completing your work, produce a summary:
 **Items Completed:** <count>
 
 ### Changes Made
+
 - **<backlog item title>**
   - <file path>: <what was changed and why>
   - <file path>: <what was changed and why>
 
 ### Tests Added / Modified
+
 - `<test file path>`: <description of test coverage added>
   - <test name>: <what it verifies>
 
 ### Documentation Updated
+
 - <file path>: <what was updated>
 - "None — changes are internal only"
 
 ### Validation Commands
+
 ```bash
 <exact commands to verify the changes work>
 ```
 
 ### Quality Gate Results
+
 - Format: PASS/FAIL
 - Lint: PASS/FAIL
 - Typecheck: PASS/FAIL
@@ -168,10 +175,12 @@ After completing your work, produce a summary:
 - Build: PASS/FAIL
 
 ### Findings (outside our scope)
+
 - <issues discovered that belong to other teams>
 - <pre-existing problems worth noting>
 
 ### Remaining Backlog Items
+
 - <items in our scope that were not addressed this session>
 ````
 
@@ -191,11 +200,13 @@ If you were working on a delegated task from `.claude/state/tasks/`:
    - If validation passes, populate `handoffContext` with a one-paragraph summary of what was done and what the next team needs. The orchestrator will auto-create follow-up tasks only for statuses that explicitly allow it (e.g., "ready-for-followup"); require human clearance to move from "needs-review" to "ready-for-followup".
 
 **Notification Hook Interface:**
+
 - **Hook name:** `notifyOnCall(handoffEvent)`
 - **Parameters:** `{taskId, violatingTeams, depth, timestamp, message}`
 - **Validation:** `validateNotifyOnCall` invoked from orchestrator startup and task/deploy flows (e.g., AgentOrchestrator.start, createTask, deployTask). Fail early with clear error if config/env lacks notifyOnCall when `REQUIRE_NOTIFY_ON_CALL` is enabled (default: true for production).
 - **Implementation options:** HTTP endpoint, event bus, or local file sink (`.claude/state/alerts.json`)
 - **Failure handling:** On runtime notification errors: call `emitFallbackAlert`, log to events.log, set task.status = "needs-review" (not "blocked"). Prevent orchestrator auto-followup routine from creating follow-ups while status == "needs-review". Split handoffContext into `errorContext` (why fallback was triggered) and `workSummary` (what was done and next-team steps). `emitFallbackAlert` populates both.
+
 6. If no `handoffTo` is set but you identified downstream work, set
    `handoffTo` to the appropriate team(s) from your handoff chain:
    {{#if teamHandoffChain}}

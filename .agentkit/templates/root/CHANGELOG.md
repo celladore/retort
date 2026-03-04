@@ -13,6 +13,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 ## [Unreleased]
 
 ### Added
+
 - Initial AgentKit Forge integration (v{{version}})
 - Multi-agent team framework with 10 teams
 - 5-phase lifecycle orchestration model
@@ -21,16 +22,19 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Automated quality gates and validation
 
 ### Changed
+
 - (none yet)
 
 ### Fixed
+
 - (none yet)
 
 ### Removed
+
 - (none yet)
 
 ---
 
-*Maintained by AgentKit Forge. Update this file as part of the Ship phase.*
-*For significant changes, also create a history document: `./scripts/create-doc.sh <type> "<title>" <pr>`*
-*See [Changelog Best Practices](docs/06_engineering/07_changelog.md) for tooling options.*
+_Maintained by AgentKit Forge. Update this file as part of the Ship phase._
+_For significant changes, also create a history document: `./scripts/create-doc.sh <type> "<title>" <pr>`_
+_See [Changelog Best Practices](docs/06_engineering/07_changelog.md) for tooling options._

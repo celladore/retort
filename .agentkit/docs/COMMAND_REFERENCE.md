@@ -61,25 +61,27 @@ These seven commands form the core orchestration and lifecycle workflow.
 **One-line:** Master coordinator that runs the 5-phase lifecycle (discover, plan, implement, validate, ship) across all teams.
 
 **When to use:**
+
 - You have a complex task that spans multiple teams or multiple files.
 - You want an end-to-end automated workflow from assessment through shipping.
 - You need to resume a previously started orchestration session.
 
 **When NOT to use:**
+
 - The task is small and fits within a single team's scope. Use `/team-<name>` instead.
 - You only need to check quality. Use `/check` instead.
 - You only need to understand the codebase. Use `/discover` instead.
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--status` | Print the current orchestrator state and recent events, then exit. |
-| `--phase N` | Jump to a specific phase: 1=Discovery, 2=Planning, 3=Implementation, 4=Validation, 5=Ship. |
-| `--team <name>` | Delegate work only to the named team. |
-| `--assess-only` | Run discovery and healthcheck but do not delegate work. Report state and exit. |
-| `--dry-run` | Show what would be done without making changes. |
-| `--force-unlock` | Clear a stale lock from a previous crashed session. |
+| Flag             | Description                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| `--status`       | Print the current orchestrator state and recent events, then exit.                         |
+| `--phase N`      | Jump to a specific phase: 1=Discovery, 2=Planning, 3=Implementation, 4=Validation, 5=Ship. |
+| `--team <name>`  | Delegate work only to the named team.                                                      |
+| `--assess-only`  | Run discovery and healthcheck but do not delegate work. Report state and exit.             |
+| `--dry-run`      | Show what would be done without making changes.                                            |
+| `--force-unlock` | Clear a stale lock from a previous crashed session.                                        |
 
 **Example invocation:**
 
@@ -119,18 +121,20 @@ These seven commands form the core orchestration and lifecycle workflow.
 **One-line:** Scans the repository and produces a full codebase inventory including tech stacks, infrastructure, CI/CD, test frameworks, and issues.
 
 **When to use:**
+
 - First time working in a repository.
 - The codebase has changed significantly and you need an updated map.
 - The orchestrator needs a fresh `AGENT_TEAMS.md` before planning.
 
 **When NOT to use:**
+
 - You already know the stack and just need to run checks. Use `/check`.
 - You want to fix something. Discovery is read-only.
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
+| Flag                            | Description                                                           |
+| ------------------------------- | --------------------------------------------------------------------- |
 | `--output yaml\|json\|markdown` | Control the output format of the discovery report. Default: markdown. |
 
 **Example invocation:**
@@ -167,21 +171,23 @@ These seven commands form the core orchestration and lifecycle workflow.
 **One-line:** Pre-flight validation that verifies dependencies, build, lint, typecheck, and tests are all passing.
 
 **When to use:**
+
 - Starting a new session and you want to confirm the project is in a working state.
 - Before running `/orchestrate` or `/plan` to establish a baseline.
 - After pulling changes to verify nothing is broken.
 
 **When NOT to use:**
+
 - You want to fix issues. Healthcheck only reports; it does not fix.
 - You need auto-fix capabilities. Use `/check --fix` instead.
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--stack <name>` | Limit checks to a specific tech stack. |
-| `--fix` | Attempt to auto-fix issues found during checks. |
-| `--verbose` | Show detailed output for each check step. |
+| Flag             | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| `--stack <name>` | Limit checks to a specific tech stack.          |
+| `--fix`          | Attempt to auto-fix issues found during checks. |
+| `--verbose`      | Show detailed output for each check step.       |
 
 **Example invocation:**
 
@@ -218,12 +224,14 @@ These seven commands form the core orchestration and lifecycle workflow.
 **One-line:** Produces a structured implementation plan with steps, file touch list, validation commands, and rollback strategy before any code is written.
 
 **When to use:**
+
 - A backlog item involves more than 2 files.
 - The change touches shared infrastructure, APIs, or database schemas.
 - The orchestrator requests a plan before delegating to teams.
 - You want to think through an approach before committing to code.
 
 **When NOT to use:**
+
 - The change is trivial (single config tweak, typo fix).
 - You are ready to implement and the path is obvious. Go directly to `/team-<name>`.
 
@@ -282,22 +290,24 @@ after 5 failed attempts within 15 minutes per IP address.
 **One-line:** Universal quality gate that runs format, lint, typecheck, test, and build checks in a single pass with auto-detection.
 
 **When to use:**
+
 - After making changes, before committing or creating a PR.
 - As a final validation step before shipping.
 - To get a full quality report on the current state of the codebase.
 
 **When NOT to use:**
+
 - You only need to run tests. Use `/test` for a faster, focused test run.
 - You only need to format. Use `/format` for formatting only.
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--fix` | Enable auto-fix mode (format writes, lint auto-fix). |
-| `--fast` | Skip the build step; only run format + lint + typecheck. |
+| Flag              | Description                                                                     |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `--fix`           | Enable auto-fix mode (format writes, lint auto-fix).                            |
+| `--fast`          | Skip the build step; only run format + lint + typecheck.                        |
 | `--stack <scope>` | Limit checks to a subdirectory or workspace (e.g., `frontend`, `packages/api`). |
-| `--bail` | Stop at the first failing step instead of running all steps. |
+| `--bail`          | Stop at the first failing step instead of running all steps.                    |
 
 **Example invocation:**
 
@@ -340,22 +350,24 @@ Lint errors:
 **One-line:** Structured code review that evaluates changes for correctness, security, performance, test coverage, and documentation quality.
 
 **When to use:**
+
 - Before creating or merging a pull request.
 - After a team completes implementation and you want an automated review pass.
 - To catch security issues, missing tests, or logic errors.
 
 **When NOT to use:**
+
 - You want to run linters and formatters. Use `/check`.
 - You have not made any changes yet. Review operates on diffs.
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--pr <number>` | GitHub PR number to review. |
-| `--range <ref>` | Specify a commit range to review (e.g., `main..HEAD`, `abc123..def456`). |
-| `--file <path>` | Review a specific file instead of the full diff. |
-| `--focus <area>` | Focus area: security, performance, correctness, style, or all. Default: all. |
+| Flag                 | Description                                                                   |
+| -------------------- | ----------------------------------------------------------------------------- |
+| `--pr <number>`      | GitHub PR number to review.                                                   |
+| `--range <ref>`      | Specify a commit range to review (e.g., `main..HEAD`, `abc123..def456`).      |
+| `--file <path>`      | Review a specific file instead of the full diff.                              |
+| `--focus <area>`     | Focus area: security, performance, correctness, style, or all. Default: all.  |
 | `--severity <level>` | Minimum severity to report: info, warning, error, critical. Default: warning. |
 
 **Example invocation:**
@@ -396,22 +408,24 @@ Lint errors:
 **One-line:** Generates a session handoff document so the next session (human or AI) can pick up exactly where this one left off.
 
 **When to use:**
+
 - You are ending a work session and want to preserve context.
 - You need to pass work to another developer or agent.
 - The orchestrator has completed a run and needs to record what happened.
 
 **When NOT to use:**
+
 - You are in the middle of active work. Finish or reach a stopping point first.
 - You have not done anything yet this session. There is nothing to hand off.
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--save` | Write the handoff to the archive directory (`docs/ai_handoffs/`) in addition to console output. |
-| `--format <fmt>` | Output format: markdown or yaml. Default: markdown. |
-| `--include-diff` | Include a summary of all file changes in the handoff. |
-| `--tag <tag>` | Tag for categorizing the handoff (e.g., feature, bugfix, spike). |
+| Flag             | Description                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `--save`         | Write the handoff to the archive directory (`docs/ai_handoffs/`) in addition to console output. |
+| `--format <fmt>` | Output format: markdown or yaml. Default: markdown.                                             |
+| `--include-diff` | Include a summary of all file changes in the handoff.                                           |
+| `--tag <tag>`    | Tag for categorizing the handoff (e.g., feature, bugfix, spike).                                |
 
 **Example invocation:**
 
@@ -456,18 +470,18 @@ pnpm build && npx vitest run && npx tsc --noEmit
 
 Team commands invoke a specialized agent scoped to a particular domain. Each team reads from `AGENT_BACKLOG.md`, completes 1-3 high-priority items within its scope, runs quality gates, and produces a structured report.
 
-| Command | Team | Owns | When to Invoke |
-|---------|------|------|----------------|
-| `/team-backend` | Backend (T1) | API endpoints, services, server-side logic, request validation | Building or fixing API routes, service-layer code, backend error handling |
-| `/team-frontend` | Frontend (T2) | UI components, client state, routing, accessibility | Building or fixing React components, pages, client-side state, responsive layout |
-| `/team-data` | Data (T3) | Database schemas, migrations, ORM config, query optimization | Creating or modifying database migrations, schema changes, query performance |
-| `/team-infra` | Infrastructure (T4) | Terraform, Docker, cloud config, environment provisioning | Modifying Dockerfiles, Terraform modules, cloud resource configuration |
-| `/team-devops` | DevOps (T5) | CI/CD pipelines, containers, deployment automation | Fixing or creating GitHub Actions workflows, pipeline configuration, build automation |
-| `/team-testing` | Testing (T6) | Test strategy, coverage enforcement, E2E tests, benchmarks | Writing or fixing tests, improving coverage, setting up test infrastructure |
-| `/team-security` | Security (T7) | Authentication, authorization, security middleware, compliance | Implementing auth flows, fixing security vulnerabilities, hardening endpoints |
-| `/team-docs` | Documentation (T8) | Docs, ADRs, runbooks, onboarding guides | Writing or updating documentation, creating ADRs, maintaining operational runbooks |
-| `/team-product` | Product (T9) | PRDs, feature specs, user stories, roadmap | Drafting product requirements, writing user stories, defining acceptance criteria |
-| `/team-quality` | Quality (T10) | Code review, refactoring, quality gate definitions | Refactoring code for maintainability, reviewing code quality, enforcing standards |
+| Command          | Team                | Owns                                                           | When to Invoke                                                                        |
+| ---------------- | ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `/team-backend`  | Backend (T1)        | API endpoints, services, server-side logic, request validation | Building or fixing API routes, service-layer code, backend error handling             |
+| `/team-frontend` | Frontend (T2)       | UI components, client state, routing, accessibility            | Building or fixing React components, pages, client-side state, responsive layout      |
+| `/team-data`     | Data (T3)           | Database schemas, migrations, ORM config, query optimization   | Creating or modifying database migrations, schema changes, query performance          |
+| `/team-infra`    | Infrastructure (T4) | Terraform, Docker, cloud config, environment provisioning      | Modifying Dockerfiles, Terraform modules, cloud resource configuration                |
+| `/team-devops`   | DevOps (T5)         | CI/CD pipelines, containers, deployment automation             | Fixing or creating GitHub Actions workflows, pipeline configuration, build automation |
+| `/team-testing`  | Testing (T6)        | Test strategy, coverage enforcement, E2E tests, benchmarks     | Writing or fixing tests, improving coverage, setting up test infrastructure           |
+| `/team-security` | Security (T7)       | Authentication, authorization, security middleware, compliance | Implementing auth flows, fixing security vulnerabilities, hardening endpoints         |
+| `/team-docs`     | Documentation (T8)  | Docs, ADRs, runbooks, onboarding guides                        | Writing or updating documentation, creating ADRs, maintaining operational runbooks    |
+| `/team-product`  | Product (T9)        | PRDs, feature specs, user stories, roadmap                     | Drafting product requirements, writing user stories, defining acceptance criteria     |
+| `/team-quality`  | Quality (T10)       | Code review, refactoring, quality gate definitions             | Refactoring code for maintainability, reviewing code quality, enforcing standards     |
 
 **Example invocations:**
 
@@ -587,14 +601,14 @@ Displays AI token usage summaries, session costs, and budget status. See [COST_T
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--summary` | Show recent session overview with durations and file counts. |
-| `--sessions` | List recent sessions. |
-| `--report` | Generate an aggregate monthly usage report. |
-| `--month <YYYY-MM>` | Month for the report (default: current month). |
-| `--format <fmt>` | Export format: json, csv (default: table). |
-| `--last <period>` | Time period for session listing (e.g., 7d, 30d). |
+| Flag                | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `--summary`         | Show recent session overview with durations and file counts. |
+| `--sessions`        | List recent sessions.                                        |
+| `--report`          | Generate an aggregate monthly usage report.                  |
+| `--month <YYYY-MM>` | Month for the report (default: current month).               |
+| `--format <fmt>`    | Export format: json, csv (default: table).                   |
+| `--last <period>`   | Time period for session listing (e.g., 7d, 30d).             |
 
 ```
 /cost --summary

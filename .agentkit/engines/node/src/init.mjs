@@ -412,8 +412,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Phase 3.5: External Knowledge Integration ---
   const ekFromFlags =
     flags['external-knowledge'] === true ||
-    (typeof flags['external-mode'] === 'string' &&
-      flags['external-mode'].trim().length > 0) ||
+    (typeof flags['external-mode'] === 'string' && flags['external-mode'].trim().length > 0) ||
     (typeof flags['windsurf-guides-path'] === 'string' &&
       flags['windsurf-guides-path'].trim().length > 0) ||
     (typeof flags['mystira-docs-path'] === 'string' &&

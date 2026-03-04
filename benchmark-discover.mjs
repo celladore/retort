@@ -36,7 +36,7 @@ async function runBenchmark() {
     await runDiscover({
       agentkitRoot: process.cwd(),
       projectRoot: BENCH_DIR,
-      flags: { output: 'json' }
+      flags: { output: 'json' },
     });
   } finally {
     console.log = originalLog;
@@ -46,9 +46,11 @@ async function runBenchmark() {
   console.log(`Execution time: ${(end - start).toFixed(2)}ms`);
 }
 
-runBenchmark().then(() => {
-  rmSync(BENCH_DIR, { recursive: true, force: true });
-}).catch(err => {
-  console.error(err);
-  rmSync(BENCH_DIR, { recursive: true, force: true });
-});
+runBenchmark()
+  .then(() => {
+    rmSync(BENCH_DIR, { recursive: true, force: true });
+  })
+  .catch((err) => {
+    console.error(err);
+    rmSync(BENCH_DIR, { recursive: true, force: true });
+  });

@@ -18,10 +18,10 @@
 
 `GET /resource`
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `cursor` | `string` | No | Pagination cursor |
-| `limit` | `integer` | No | Items per page (default 20, max 100) |
+| Parameter | Type      | Required | Description                          |
+| --------- | --------- | -------- | ------------------------------------ |
+| `cursor`  | `string`  | No       | Pagination cursor                    |
+| `limit`   | `integer` | No       | Items per page (default 20, max 100) |
 
 **Response 200:**
 

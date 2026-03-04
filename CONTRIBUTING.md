@@ -21,7 +21,7 @@
 1. Fork and clone the repository
 2. Install dependencies for your stack (see `agentkit discover` output)
 3. Run `agentkit sync` to generate AI tool configurations
-4. Create a feature branch from `main`
+4. Create a feature branch from `dev`
 
 ---
 
@@ -29,11 +29,11 @@
 
 This project follows a 5-phase lifecycle model:
 
-1. __Discovery__ — Understand the problem, review existing docs
-2. __Planning__ — Design the solution, write ADRs for significant decisions
-3. __Implementation__ — Write code, add tests, run `/check` locally
-4. __Validation__ — Create PR, pass CI, get code review
-5. __Ship__ — Merge, update changelog, monitor deployment
+1. **Discovery** — Understand the problem, review existing docs
+2. **Planning** — Design the solution, write ADRs for significant decisions
+3. **Implementation** — Write code, add tests, run `/check` locally
+4. **Validation** — Create PR, pass CI, get code review
+5. **Ship** — Merge, update changelog, monitor deployment
 
 See [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md) for full details.
 
@@ -51,9 +51,9 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 [optional footer(s)]
 ```
 
-__Types__: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`
 
-__Examples__:
+**Examples**:
 
 - `feat(api): add user registration endpoint`
 - `fix(auth): handle expired token refresh`
@@ -64,7 +64,7 @@ __Examples__:
 
 ## Pull Request Process
 
-1. Ensure your branch is up to date with `main`
+1. Ensure your branch is up to date with `dev`
 2. Run all quality gates locally: `agentkit validate`
 3. Create a PR with a clear description and test plan
 4. All CI checks must pass
@@ -74,12 +74,12 @@ __Examples__:
 
 ### Mandatory Branch Flow (Enforced)
 
-- `feature/*`, `fix/*`, and other short-lived branches __must__ open PRs directly into `main`.
-- Keep branches short-lived and rebase/merge from `main` frequently to reduce drift.
-- `dev` can be used for optional integration rehearsal, but it is not the mandatory merge gate.
+- `feature/*`, `fix/*`, and other short-lived branches **must** open PRs into `dev`.
+- Direct PRs from feature/fix branches to `main` are not allowed.
+- Only `dev` opens release/integration PRs into `main`.
 - `main` requires at least 1 approval, stale approval dismissal on push, up-to-date branch before merge, and required status checks.
 
-In short: __feature branches → `main`__ (github-flow).
+In short: **feature branches → `dev` → `main`**.
 
 ---
 

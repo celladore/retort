@@ -38,7 +38,7 @@ spawnSync(executable, args, { shell: process.platform === 'win32' });
 ```
 
 **Command validation.** The `isValidCommand()` function rejects any command string
-containing shell metacharacters (`$ \` | ; & < > ( ) { } !  \`). Every command sourced
+containing shell metacharacters (`$ \` | ; & < > ( ) { } ! \`). Every command sourced
 from YAML spec files (formatter, linter, typecheck, test, build) is validated through
 `isValidCommand()` before execution in `check.mjs`. Commands that fail validation are
 skipped with a warning.
@@ -92,13 +92,13 @@ if (!abs.startsWith(resolve(projectRoot) + sep) && abs !== resolve(projectRoot))
 The review runner (`review-runner.mjs`) scans changed files against a set of high-signal
 secret patterns:
 
-| Pattern Name      | Detection Regex                                                 |
-| ----------------- | --------------------------------------------------------------- |
-| AWS Key           | `AKIA[0-9A-Z]{16}`                                              |
-| Private Key       | `-----BEGIN (RSA \| EC \| DSA )?PRIVATE KEY-----`             |
+| Pattern Name      | Detection Regex                                                     |
+| ----------------- | ------------------------------------------------------------------- |
+| AWS Key           | `AKIA[A-Z0-9]{16}`                                                  |
+| Private Key       | `-----BEGIN (RSA \| EC \| DSA )?PRIVATE KEY-----`                   |
 | Generic Secret    | `(password \| secret \| api_key \| apikey \| token)\s*[:=]\s*'...'` |
-| Connection String | `mongodb(+srv)?://...`                                          |
-| JWT               | `eyJ...` (three Base64url segments)                             |
+| Connection String | `mongodb(+srv)?://...`                                              |
+| JWT               | `eyJ...` (three Base64url segments)                                 |
 
 The validate command (`validate.mjs`) performs an additional scan of all generated
 output directories, adding patterns for GitHub tokens (`ghp_`), OpenAI/Anthropic keys
@@ -154,6 +154,7 @@ When a match is found, the hook returns a `permissionDecision: "deny"` response 
 guidance to propose changes via a PR to the agentkit-forge repository instead.
 
 This hook is complemented by:
+
 - **CODEOWNERS** — requires maintainer review for PRs touching `.agentkit/` source
 - **template-protection.yml workflow** — auto-labels PRs and runs validation
 - **Claude rules** — `template-protection.md` rule explaining the rationale to agents
@@ -186,7 +187,7 @@ all string values before they are interpolated into templates:
 ```js
 function sanitizeTemplateValue(value) {
   let s = value;
-  s = s.replace(/\$\([^)]*\)/g, (m) => m.slice(2, -1));  // unwrap $(...) to inner content
+  s = s.replace(/\$\([^)]*\)/g, (m) => m.slice(2, -1)); // unwrap $(...) to inner content
   s = s.replace(/[`$\\;|&<>!{}]/g, '');
   return s;
 }

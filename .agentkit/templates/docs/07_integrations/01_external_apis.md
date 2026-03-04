@@ -10,10 +10,10 @@ This document catalogues the external APIs that {{repoName}} integrates with.
 
 ## Integration Inventory
 
-| Service | Purpose | Auth Method | Docs |
-|---------|---------|-------------|------|
-| <!-- e.g. Stripe --> | <!-- e.g. Payment processing --> | <!-- e.g. API key --> | <!-- URL --> |
-| <!-- e.g. SendGrid --> | <!-- e.g. Email delivery --> | <!-- e.g. API key --> | <!-- URL --> |
+| Service                | Purpose                          | Auth Method           | Docs         |
+| ---------------------- | -------------------------------- | --------------------- | ------------ |
+| <!-- e.g. Stripe -->   | <!-- e.g. Payment processing --> | <!-- e.g. API key --> | <!-- URL --> |
+| <!-- e.g. SendGrid --> | <!-- e.g. Email delivery -->     | <!-- e.g. API key --> | <!-- URL --> |
 
 ## Integration Details
 
@@ -24,15 +24,15 @@ This document catalogues the external APIs that {{repoName}} integrates with.
 
 #### Endpoints Used
 
-| Method | Path | Purpose |
-|--------|------|---------|
+| Method       | Path               | Purpose              |
+| ------------ | ------------------ | -------------------- |
 | <!-- GET --> | <!-- /resource --> | <!-- Description --> |
 
 #### Configuration
 
-| Variable | Description |
-|----------|-------------|
-| `SERVICE_API_KEY` | API key for the service |
+| Variable           | Description                  |
+| ------------------ | ---------------------------- |
+| `SERVICE_API_KEY`  | API key for the service      |
 | `SERVICE_BASE_URL` | Base URL override (optional) |
 
 #### Error Handling

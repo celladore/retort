@@ -2,13 +2,13 @@
 
 **Render target:** `ai`
 
-| | |
-|---|---|
-| **Type** | AI Coding Assistant (IDE extension, open-source) |
-| **Categories** | IDE Extension |
-| **Access** | VS Code / JetBrains extension — install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Continue.continue) or [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22707-continue) |
-| **Documentation** | [docs.continue.dev](https://docs.continue.dev/) |
-| **Performance Rating** | ⭐⭐⭐ — **61/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)) |
+|                        |                                                                                                                                                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**               | AI Coding Assistant (IDE extension, open-source)                                                                                                                                                                          |
+| **Categories**         | IDE Extension                                                                                                                                                                                                             |
+| **Access**             | VS Code / JetBrains extension — install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Continue.continue) or [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22707-continue) |
+| **Documentation**      | [docs.continue.dev](https://docs.continue.dev/)                                                                                                                                                                           |
+| **Performance Rating** | ⭐⭐⭐ — **61/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions))                                                                                                                         |
 
 ---
 
@@ -23,12 +23,12 @@ target formats (Cursor, Claude, Copilot, Codex, Cody).
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Project rules | `.continue/rules/*.md` | Markdown with optional YAML frontmatter |
-| Hub/org rules | Continue Mission Control | Managed dashboard |
-| Portable rules | `.continuerules` | Plain text |
-| Cross-tool rules | `.cursorrules`, `.windsurfrules` | Auto-detected |
+| Feature          | Location                         | Format                                  |
+| ---------------- | -------------------------------- | --------------------------------------- |
+| Project rules    | `.continue/rules/*.md`           | Markdown with optional YAML frontmatter |
+| Hub/org rules    | Continue Mission Control         | Managed dashboard                       |
+| Portable rules   | `.continuerules`                 | Plain text                              |
+| Cross-tool rules | `.cursorrules`, `.windsurfrules` | Auto-detected                           |
 
 ### Key Capabilities
 
@@ -59,10 +59,10 @@ target formats (Cursor, Claude, Copilot, Codex, Cody).
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output         | Path                | Source                       |
+| -------------- | ------------------- | ---------------------------- |
 | Continue rules | `.ai/continuerules` | `templates/ai/continuerules` |
-| Cursor rules | `.ai/cursorrules` | `templates/ai/cursorrules` |
+| Cursor rules   | `.ai/cursorrules`   | `templates/ai/cursorrules`   |
 | Windsurf rules | `.ai/windsurfrules` | `templates/ai/windsurfrules` |
 
 These are portable rule files that work across multiple IDEs.
@@ -71,16 +71,16 @@ These are portable rule files that work across multiple IDEs.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| .continue/rules/ directory | ✅ Project-specific rules | ❌ Not generated | Generate rules in .continue/rules/ format |
-| Portable rules files | ✅ Multi-format | ✅ 3 portable files generated | None |
-| YAML frontmatter | ✅ title, objective, severity, applies | ❌ Not in portable files | Add frontmatter to generated rules |
-| Severity levels | ✅ block / warn | ❌ Not used | Could classify rules by severity |
-| Hub/org rules | ✅ Managed dashboard | ❌ Not applicable | Platform-managed feature |
-| Format conversion | ✅ Multi-target rendering | N/A | Continue can render from any format |
-| config.json | ✅ Model/provider config | ❌ Not generated | Could generate config.json |
-| AGENTS.md support | ⚠️ Not directly | ✅ Always generated | Continue uses own rule system |
+| Feature                    | Platform Supports                      | AgentKit Forge Status         | Gap                                       |
+| -------------------------- | -------------------------------------- | ----------------------------- | ----------------------------------------- |
+| .continue/rules/ directory | ✅ Project-specific rules              | ❌ Not generated              | Generate rules in .continue/rules/ format |
+| Portable rules files       | ✅ Multi-format                        | ✅ 3 portable files generated | None                                      |
+| YAML frontmatter           | ✅ title, objective, severity, applies | ❌ Not in portable files      | Add frontmatter to generated rules        |
+| Severity levels            | ✅ block / warn                        | ❌ Not used                   | Could classify rules by severity          |
+| Hub/org rules              | ✅ Managed dashboard                   | ❌ Not applicable             | Platform-managed feature                  |
+| Format conversion          | ✅ Multi-target rendering              | N/A                           | Continue can render from any format       |
+| config.json                | ✅ Model/provider config               | ❌ Not generated              | Could generate config.json                |
+| AGENTS.md support          | ⚠️ Not directly                        | ✅ Always generated           | Continue uses own rule system             |
 
 **Summary:** Continue is supported via portable rule files. Key gap is not
 generating rules in the native `.continue/rules/` directory format with
@@ -90,15 +90,15 @@ YAML frontmatter. The portable format works but misses Continue-specific feature
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 61/100 ⭐⭐⭐ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions) |
-| Developer Experience | 68/100 ⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
-| Cost & Value | 76/100 ⭐⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions) |
-| Customization | 72/100 ⭐⭐⭐½ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions) |
-| Privacy & Security | 64/100 ⭐⭐⭐ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions) |
-| Team & Enterprise | 50/100 ⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions) |
-| **Weighted Total** | **66/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 61/100 ⭐⭐⭐      | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--ide-extensions)   |
+| Developer Experience | 68/100 ⭐⭐⭐½     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--ide-extensions) |
+| Cost & Value         | 76/100 ⭐⭐⭐⭐    | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--ide-extensions)        |
+| Customization        | 72/100 ⭐⭐⭐½     | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--ide-extensions)        |
+| Privacy & Security   | 64/100 ⭐⭐⭐      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--ide-extensions)     |
+| Team & Enterprise    | 50/100 ⭐⭐½       | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--ide-extensions)      |
+| **Weighted Total**   | **66/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

@@ -1,5 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — TypeScript / JavaScript
 
 Apply these rules when editing `.ts`, `.tsx`, `.js`, `.mjs`, or `.jsx` files.
@@ -39,10 +40,11 @@ Apply these rules when editing `.ts`, `.tsx`, `.js`, `.mjs`, or `.jsx` files.
 ## Testing
 
 {{#if testingUnit}}- Unit test framework: **{{testingUnit}}**.{{/if}}
+
 - Co-locate test files with source: `foo.ts` → `foo.test.ts`.
 - Use descriptive test names that explain the expected behaviour.
 - Mock external dependencies at system boundaries, not internal modules.
-{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line, branch, and function.{{/if}}
+  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line, branch, and function.{{/if}}
 
 ```typescript
 describe('myFunction', () => {
@@ -68,6 +70,7 @@ describe('myFunction', () => {
 - Prefer packages with TypeScript declarations included.
 
 {{#if ruleConventions}}
+
 ## Project Conventions
 
 The following conventions are enforced in **{{projectName}}** and derived from

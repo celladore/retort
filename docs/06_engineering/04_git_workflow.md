@@ -21,6 +21,7 @@ Git branching strategy and contribution workflow for agentkit-forge.
 ## Workflow
 
 1. **Create a branch** from `develop` (or `main` for hotfixes):
+
    ```bash
    git checkout -b feature/my-feature develop
    ```

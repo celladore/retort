@@ -9,16 +9,16 @@ documentation category maintained by this repository.
 
 ## Categories
 
-| # | Category | Description |
-|---|----------|-------------|
-| 1 | [Product](./01_product/) | Product vision, strategy, personas, and metrics |
-| 2 | [Specs](./02_specs/) | Functional and technical specifications |
-| 3 | [Architecture](./03_architecture/) | System design, diagrams, ADRs, and tech stack |
-| 4 | [API](./04_api/) | API reference, authentication, versioning, and errors |
-| 5 | [Operations](./05_operations/) | CI/CD, deployments, monitoring, and troubleshooting |
-| 6 | [Engineering](./06_engineering/) | Setup, coding standards, testing, and contributing |
-| 7 | [Integrations](./07_integrations/) | External APIs, webhooks, and SDK |
-| 8 | [Reference](./08_reference/) | Glossary, acronyms, FAQ, and tool config |
+| #   | Category                           | Description                                           |
+| --- | ---------------------------------- | ----------------------------------------------------- |
+| 1   | [Product](./01_product/)           | Product vision, strategy, personas, and metrics       |
+| 2   | [Specs](./02_specs/)               | Functional and technical specifications               |
+| 3   | [Architecture](./03_architecture/) | System design, diagrams, ADRs, and tech stack         |
+| 4   | [API](./04_api/)                   | API reference, authentication, versioning, and errors |
+| 5   | [Operations](./05_operations/)     | CI/CD, deployments, monitoring, and troubleshooting   |
+| 6   | [Engineering](./06_engineering/)   | Setup, coding standards, testing, and contributing    |
+| 7   | [Integrations](./07_integrations/) | External APIs, webhooks, and SDK                      |
+| 8   | [Reference](./08_reference/)       | Glossary, acronyms, FAQ, and tool config              |
 
 ## Quick Links
 
@@ -26,14 +26,15 @@ documentation category maintained by this repository.
 - [API Overview](./04_api/01_overview.md)
 - [Getting Started](./06_engineering/01_setup.md)
 - [Changelog](./08_reference/03_changelog.md)
-{{#if hasPrd}}
+  {{#if hasPrd}}
 - [PRD Library](./prd/README.md)
-{{/if}}
+  {{/if}}
+
 ## Conventions
 
 - Files prefixed with numbers (e.g. `01_`) define reading order.
 - Placeholder tokens `{{repoName}}` and `{{version}}` are replaced at sync time.
-- Do __not__ edit generated files directly — run `pnpm -C .agentkit agentkit:sync`
+- Do **not** edit generated files directly — run `pnpm -C .agentkit agentkit:sync`
   to regenerate them from the AgentKit Forge spec and overlays.
 
 ---

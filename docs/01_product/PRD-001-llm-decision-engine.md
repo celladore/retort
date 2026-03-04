@@ -279,7 +279,7 @@ Acceptance criteria:
 ```yaml
 agents:
   - name: codebot
-    llm: claude-3-5-sonnet  # Replace with current recommended Anthropic model at deployment time
+    llm: claude-3-5-sonnet # Replace with current recommended Anthropic model at deployment time
     rationale: Best for code generation and large context tasks.
     weights:
       quality: 5
@@ -363,12 +363,12 @@ Project start date: **2026-03-03**
 
 > **Note:** All milestone dates below are absolute and derived from the project start date.
 
-| Phase               | Scope                                                                                                               | Target                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| v1 feature-complete | Scorecards, static config, docs                                                                                     | 2026-03-31            |
+| Phase               | Scope                                                                                                              | Target                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| v1 feature-complete | Scorecards, static config, docs                                                                                    | 2026-03-31            |
 | v1 GA               | Scorecards, static config, docs (audit trails, RBAC, compliance controls, GDPR/CCPA workflows deferred to post-v1) | 2026-05-01            |
-| v2                  | Dynamic mapping, feedback loop, optional UI                                                                         | 2026-06-15            |
-| v3+                 | Marketplace and expanded benchmarks                                                                                 | Target month: 2026-11 |
+| v2                  | Dynamic mapping, feedback loop, optional UI                                                                        | 2026-06-15            |
+| v3+                 | Marketplace and expanded benchmarks                                                                                | Target month: 2026-11 |
 
 > **Note:** Scorecard automation and non-blocking compliance integrations (e.g., third-party audit feeds) remain backlog items for post-v1 GA.
 
@@ -456,7 +456,7 @@ Project start date: **2026-03-03**
 | Codestral 25.08           | TBD          | TBD       | 128K    | $$   | TBD   | High          | Low     | Strong FIM support, European data residency, low-latency focus              |
 | Command A                 | TBD          | TBD       | 128K    | $$   | TBD   | High          | Medium  | Enterprise RAG specialist, platform dependencies, embedding strength        |
 
-*Note: Model names reflect current API conventions as of Feb 2026. "Gemini Ultra" is deprecated; current Gemini family includes Gemini 1.5/2.0/3.x variants. Authoritative data maintained in model family dossiers.*
+_Note: Model names reflect current API conventions as of Feb 2026. "Gemini Ultra" is deprecated; current Gemini family includes Gemini 1.5/2.0/3.x variants. Authoritative data maintained in model family dossiers._
 
 **Data population plan (v1):**
 

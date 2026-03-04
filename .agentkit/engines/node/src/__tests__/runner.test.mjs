@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import os from 'os';
-import { execCommand, commandExists, formatDuration, isValidCommand, formatTimestamp } from '../runner.mjs';
+import {
+  execCommand,
+  commandExists,
+  formatDuration,
+  isValidCommand,
+  formatTimestamp,
+} from '../runner.mjs';
 
 describe('execCommand()', () => {
   it('returns structured result for successful command', () => {

@@ -53,4 +53,4 @@ No breaking changes — this is the initial release.
 
 ---
 
-*This guide is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate.*
+_This guide is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate._

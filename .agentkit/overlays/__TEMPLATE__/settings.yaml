@@ -4,6 +4,14 @@ repoName: __TEMPLATE__
 defaultBranch: main
 primaryStack: auto
 windowsFirst: true
+
+# After template + overlay are combined, run an LLM synthesis pass that produces
+# AI-optimised output targeted at agent consumers (denser context, resolved conflicts,
+# decision trees).  The synthesised result is committed and only regenerated when inputs
+# change (content-hash cache).  Requires AGENTKIT_AI_KEY env var at sync time.
+# See docs/ai-synthesis.md for model selection and caching details.
+aiSynthesisLayer: false
+
 renderTargets:
   - claude
   - cursor

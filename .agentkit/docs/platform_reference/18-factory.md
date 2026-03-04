@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | Autonomous Cloud Coding Platform |
-| **Categories** | Cloud / Autonomous Agent |
-| **Access** | Web dashboard — [factory.ai](https://www.factory.ai/) — requires account and GitHub/GitLab repo access |
-| **Documentation** | [docs.factory.ai](https://docs.factory.ai/) |
+|                        |                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Type**               | Autonomous Cloud Coding Platform                                                                             |
+| **Categories**         | Cloud / Autonomous Agent                                                                                     |
+| **Access**             | Web dashboard — [factory.ai](https://www.factory.ai/) — requires account and GitHub/GitLab repo access       |
+| **Documentation**      | [docs.factory.ai](https://docs.factory.ai/)                                                                  |
 | **Performance Rating** | ⭐⭐⭐½ — **72/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents)) |
 
 ---
@@ -25,10 +25,10 @@ from `AGENTS.md` and working directly with your Git repositories.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
+| Feature              | Location                | Format         |
+| -------------------- | ----------------------- | -------------- |
 | Project instructions | `AGENTS.md` (repo root) | Plain Markdown |
-| Factory config | Factory dashboard | Web UI |
+| Factory config       | Factory dashboard       | Web UI         |
 
 ### Key Capabilities
 
@@ -44,8 +44,8 @@ from `AGENTS.md` and working directly with your Git repositories.
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output             | Path        | Source                               |
+| ------------------ | ----------- | ------------------------------------ |
 | Agent instructions | `AGENTS.md` | Always generated from `project.yaml` |
 
 Factory reads the universal `AGENTS.md`. No platform-specific files needed.
@@ -54,11 +54,11 @@ Factory reads the universal `AGENTS.md`. No platform-specific files needed.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| AGENTS.md | ✅ Native support | ✅ Always generated | None |
-| Dashboard config | ✅ Web UI configuration | N/A | Platform-managed, not file-based |
-| Organization policies | ✅ Enterprise guardrails | ❌ Not generated | Could document best practices |
+| Feature               | Platform Supports        | AgentKit Forge Status | Gap                              |
+| --------------------- | ------------------------ | --------------------- | -------------------------------- |
+| AGENTS.md             | ✅ Native support        | ✅ Always generated   | None                             |
+| Dashboard config      | ✅ Web UI configuration  | N/A                   | Platform-managed, not file-based |
+| Organization policies | ✅ Enterprise guardrails | ❌ Not generated      | Could document best practices    |
 
 **Summary:** Factory is fully served by the universal `AGENTS.md`. Its
 configuration is primarily dashboard-based, with `AGENTS.md` providing
@@ -77,15 +77,15 @@ test, and deployment information for best results.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 72/100 ⭐⭐⭐½ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents) |
-| Developer Experience | 57/100 ⭐⭐⭐ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cloud--autonomous-agents) |
-| Cost & Value | 38/100 ⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cloud--autonomous-agents) |
-| Customization | 47/100 ⭐⭐½ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cloud--autonomous-agents) |
-| Privacy & Security | 52/100 ⭐⭐½ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cloud--autonomous-agents) |
-| Team & Enterprise | 71/100 ⭐⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cloud--autonomous-agents) |
-| **Weighted Total** | **57/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                                 |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| Coding Performance   | 72/100 ⭐⭐⭐½    | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents)   |
+| Developer Experience | 57/100 ⭐⭐⭐     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cloud--autonomous-agents) |
+| Cost & Value         | 38/100 ⭐⭐       | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cloud--autonomous-agents)        |
+| Customization        | 47/100 ⭐⭐½      | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cloud--autonomous-agents)        |
+| Privacy & Security   | 52/100 ⭐⭐½      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cloud--autonomous-agents)     |
+| Team & Enterprise    | 71/100 ⭐⭐⭐½    | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cloud--autonomous-agents)      |
+| **Weighted Total**   | **57/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights)           |
 
 ### Best For
 

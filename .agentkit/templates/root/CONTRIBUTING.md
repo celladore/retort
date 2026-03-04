@@ -29,11 +29,11 @@
 
 This project follows a 5-phase lifecycle model:
 
-1. __Discovery__ — Understand the problem, review existing docs
-2. __Planning__ — Design the solution, write ADRs for significant decisions
-3. __Implementation__ — Write code, add tests, run `/check` locally
-4. __Validation__ — Create PR, pass CI, get code review
-5. __Ship__ — Merge, update changelog, monitor deployment
+1. **Discovery** — Understand the problem, review existing docs
+2. **Planning** — Design the solution, write ADRs for significant decisions
+3. **Implementation** — Write code, add tests, run `/check` locally
+4. **Validation** — Create PR, pass CI, get code review
+5. **Ship** — Merge, update changelog, monitor deployment
 
 See [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md) for full details.
 
@@ -51,9 +51,9 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 [optional footer(s)]
 ```
 
-__Types__: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`
 
-__Examples__:
+**Examples**:
 
 - `feat(api): add user registration endpoint`
 - `fix(auth): handle expired token refresh`

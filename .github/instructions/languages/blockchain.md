@@ -3,6 +3,7 @@
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 <!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-02 -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — Blockchain / Smart Contracts
 
 Apply these rules when editing `.sol` files or code in `contracts/`,
@@ -73,4 +74,3 @@ The following conventions are enforced in **agentkit-forge** and derived from
 - **[bc-gas-optimization]** Optimize for gas costs. Minimize storage operations, batch transactions where possible, and use calldata over memory for read-only function parameters. Document gas cost estimates for public functions.
 
 - **[bc-audit-trail]** All state-changing operations must emit events for off-chain indexing. Include sufficient context in events for reconstruction of state transitions. Log transaction hashes for cross-reference.
-
