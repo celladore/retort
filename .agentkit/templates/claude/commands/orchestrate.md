@@ -118,7 +118,7 @@ For machine-identifiable events, use JSON lines format:
 {"eventType": "CANCELED", "taskId": "<task-id>", "reason": "dependency-cycle", "cycleId": "<cycle-id>", "cycleMembers": ["<task-id-1>", "<task-id-2>"], "actor": "orchestrator", "timestamp": "<ISO-8601>"}
 ```
 
-**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`
+**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`, `INFRA_EVAL_COMPLETED`
 
 **cycleId format:** Generate a deterministic identifier per detected cycle. Hash the sorted list of member task IDs with SHA-256 and truncate to 12 chars. Reuse the same cycleId for all events from that cycle.
 
@@ -126,21 +126,22 @@ Required fields for DESCOPED events: `eventType` (must be "DESCOPED"), `taskId`,
 
 **Required and optional fields by eventType:**
 
-| eventType                       | Required fields                                                               | Optional fields     |
-| ------------------------------- | ----------------------------------------------------------------------------- | ------------------- |
-| `COMPLETED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `FAILED`                        | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `REJECTED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED` (dependency-cycle)   | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp` | `actor`, `metadata` |
-| `DESCOPED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `STARTED`                       | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `BLOCKED`                       | `taskId`, `blockedBy`, `timestamp`                                            | `actor`, `metadata` |
-| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                | `actor`, `metadata` |
-| `UNBLOCKED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                            | `actor`, `metadata` |
-| `ACCEPTED`                      | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                          | `actor`, `metadata` |
+| eventType                       | Required fields                                                                      | Optional fields     |
+| ------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
+| `COMPLETED`                     | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `FAILED`                        | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `REJECTED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `CANCELED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `CANCELED` (dependency-cycle)   | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp`        | `actor`, `metadata` |
+| `DESCOPED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `STARTED`                       | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `BLOCKED`                       | `taskId`, `blockedBy`, `timestamp`                                                   | `actor`, `metadata` |
+| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                       | `actor`, `metadata` |
+| `UNBLOCKED`                     | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                                   | `actor`, `metadata` |
+| `ACCEPTED`                      | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                                 | `actor`, `metadata` |
+| `INFRA_EVAL_COMPLETED`          | `timestamp`, `data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores` | `actor`, `metadata` |
 
 Example with all optional fields:
 
@@ -258,8 +259,11 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
 1. Verify all delegated tasks have reached a terminal state (`completed`, `failed`, `rejected`, or `canceled`).
 2. Invoke `/check` to run the full quality gate (format, lint, typecheck, tests, build).
 3. Invoke `/review` on all changed files since the orchestration began.
-4. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
-5. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
+   {{#if hasInfraEval}}
+4. Invoke `/infra-eval` to assess infrastructure fitness. Delegate to `team-infra` as an `investigate` task. Log results to `events.log` using the `INFRA_EVAL_COMPLETED` schema (`data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores`). A hard-gate FAIL should be surfaced as a risk but does not block Phase 5 unless the user explicitly requires it.
+   {{/if}}
+   {{#if hasInfraEval}}5{{else}}4{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+   {{#if hasInfraEval}}6{{else}}5{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
    **Retry key convention:**
    - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
@@ -287,12 +291,15 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
      3. Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
 
-   **Reset behavior:** Implement `shouldResetRetryState` and `isTimestampNewer` as exported utilities in the orchestrator's validation module (e.g., `orchestrator/validation.ts`). Use them to enforce the exact rules:
-   - **`isTimestampNewer(newTs?: string | null, oldTs?: string | null): boolean`** — Validate non-null ISO-8601 strings; normalize both to UTC; return false for null, undefined, malformed inputs.
-   - **`shouldResetRetryState(retryPolicy, retryEscalated): Promise<{allowed: boolean, reason?: string}>`** — Require `retryPolicy.allowReset === true`. If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison needed). If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be non-null and a valid ISO-8601 timestamp; call `isTimestampNewer(retryPolicy.lastResetAt, retryEscalated.at)` and only allow clearing `retryPolicy.roundRetries` when it returns true. When `isTimestampNewer` returns false: do NOT clear `roundRetries`; return `{allowed: false, reason: "reset prevented: lastResetAt not newer than retryEscalated.at"}` and ensure calling code logs/surfaces this reason.
-   - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where isTimestampNewer returns false (roundRetries remains unchanged).
+  **Reset behavior:** Enforce these exact rules in the orchestration validation path:
+  - Require `retryPolicy.allowReset === true` before allowing any reset.
+  - If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
+  - If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
+  - Treat null/undefined/malformed timestamps as non-newer and deny reset.
+  - When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
+  - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
 
-6. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
+{{#if hasInfraEval}}7{{else}}6{{/if}}. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 
 ### Phase 5 — Ship
 

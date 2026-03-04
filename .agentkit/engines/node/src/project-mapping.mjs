@@ -290,6 +290,18 @@ export const PROJECT_MAPPING = [
   { src: 'crosscutting.environments.naming', dest: 'envNames', type: 'array-join' },
   { src: 'crosscutting.environments.configStrategy', dest: 'envConfigStrategy', check: 'not-none' },
   { src: 'crosscutting.environments.envFilePattern', dest: 'envFilePattern' },
+
+  // Evaluation
+  { src: 'evaluation.infraEval', dest: 'hasInfraEval', type: 'boolean' },
+  { src: 'evaluation.weights.reliability', dest: 'evalWeightReliability', type: 'string' },
+  { src: 'evaluation.weights.cost', dest: 'evalWeightCost', type: 'string' },
+  { src: 'evaluation.weights.security', dest: 'evalWeightSecurity', type: 'string' },
+  { src: 'evaluation.weights.infra', dest: 'evalWeightInfra', type: 'string' },
+  { src: 'evaluation.weights.scalability', dest: 'evalWeightScale', type: 'string' },
+  { src: 'evaluation.weights.architecture', dest: 'evalWeightArch', type: 'string' },
+  { src: 'evaluation.weights.code', dest: 'evalWeightCode', type: 'string' },
+  { src: 'evaluation.weights.ops', dest: 'evalWeightOps', type: 'string' },
+  { src: 'evaluation.customGates', dest: 'evalCustomGates', check: 'not-none' },
 ];
 
 /**
