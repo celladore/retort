@@ -33,18 +33,31 @@ detect_tool() {
     local cmd="$2"
     if command -v "$cmd" &>/dev/null; then
         local ver
-        ver=$("$cmd" --version 2>/dev/null | head -n1) || ver="installed"
-        tools_found+=("${name}: ${ver}")
+        if ver=$("$cmd" --version 2>/dev/null | head -n1); then
+            if [[ -n "$ver" ]]; then
+                tools_found+=("${name}: ${ver}")
+            else
+                tools_found+=("${name}: installed")
+            fi
+        fi
     fi
 }
 
 detect_tool "Node.js"  "node"
 detect_tool "pnpm"     "pnpm"
 detect_tool "npm"      "npm"
+detect_tool "Git"      "git"
+detect_tool "GitHub CLI" "gh"
 detect_tool "dotnet"   "dotnet"
 detect_tool "Cargo"    "cargo"
 detect_tool "Python"   "python3"
 detect_tool "Python"   "python"   # fallback if python3 is absent
+detect_tool "jq"       "jq"
+detect_tool "Bash"     "bash"
+detect_tool "PowerShell" "pwsh"
+detect_tool "Docker"   "docker"
+detect_tool "Azure CLI" "az"
+detect_tool "Terraform" "terraform"
 
 tools_summary=""
 if [[ ${#tools_found[@]} -gt 0 ]]; then

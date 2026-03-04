@@ -853,8 +853,7 @@ function validateCrossReferences(specs) {
             continue;
           }
           // Extract bracketed rule IDs and validate against rules.yaml
-          const bracketMatch = rule.match(/\[([^\]]+)\]/);
-          if (bracketMatch) {
+          for (const bracketMatch of rule.matchAll(/\[([^\]]+)\]/g)) {
             const ids = bracketMatch[1].split(',').map((s) => s.trim());
             for (const id of ids) {
               if (id && !seenRuleIds.has(id)) {
@@ -877,6 +876,10 @@ function validateCrossReferences(specs) {
       let baseTool = tool;
       if (tool.startsWith('Bash(') && tool.endsWith(')')) {
         baseTool = 'Bash';
+        const pattern = tool.slice(5, -1);
+        if (!pattern) {
+          errors.push(`commands.yaml: command "${cmd.name}" has empty Bash() pattern`);
+        }
       }
       if (!VALID_TOOLS.includes(baseTool)) {
         errors.push(`commands.yaml: command "${cmd.name}" references unknown tool "${tool}"`);

@@ -5,7 +5,6 @@
  */
 import { existsSync, readFileSync } from 'fs';
 import { readdir } from 'fs/promises';
-import { resolve } from 'path';
 import yaml from 'js-yaml';
 import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
 import { appendEvent } from './events.mjs';
@@ -470,11 +469,11 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 
 // Export internal helpers so they can be directly unit-tested.
 export {
-  resolveFormatter,
-  resolveLinter,
+  ALLOWED_FORMATTER_BASES,
+  ALLOWED_LINTER_BASES,
+  ALLOWED_NPX_PACKAGES,
   isAllowedFormatter,
   isAllowedLinter,
-  ALLOWED_FORMATTER_BASES,
-  ALLOWED_NPX_PACKAGES,
-  ALLOWED_LINTER_BASES,
+  resolveFormatter,
+  resolveLinter,
 };
