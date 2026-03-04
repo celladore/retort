@@ -34,7 +34,12 @@ if (-not $SkipDefaultBranch) {
         Write-Host "[dry-run] Would set default branch to 'dev' for $Repo"
     }
     else {
-        gh api --method PATCH "/repos/$Repo" -f default_branch='dev' 1>$null
+        $defaultBranchResult = & gh api --method PATCH "/repos/$Repo" -f default_branch='dev' 2>&1
+        $defaultBranchCode = $LASTEXITCODE
+        if ($defaultBranchCode -ne 0) {
+            Write-Error "Failed to set default branch to 'dev' for $Repo: $defaultBranchResult"
+            exit $defaultBranchCode
+        }
         Write-Host "Default branch set to 'dev'."
     }
 }
@@ -45,7 +50,8 @@ $payload = @{
         contexts = @(
             "CI / test (ubuntu-latest, 24)",
             "CI / validate",
-            "Branch Protection / branch-rules"
+            "Branch Protection / branch-rules",
+            "block-agentkit-changes / check_agentkit_changes"
         )
     }
     enforce_admins = $false
@@ -70,7 +76,12 @@ if (-not $SkipProtection) {
             continue
         }
 
-        $payload | gh api --method PUT "/repos/$Repo/branches/$branch/protection" --input - 1>$null
+        $result = $payload | & gh api --method PUT "/repos/$Repo/branches/$branch/protection" --input - 2>&1
+        $code = $LASTEXITCODE
+        if ($code -ne 0) {
+            Write-Error "Failed to apply branch protection to $Repo/$branch: $result"
+            exit $code
+        }
         Write-Host "Branch protection applied to $branch."
     }
 }
