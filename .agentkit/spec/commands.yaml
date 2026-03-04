@@ -159,13 +159,21 @@ commands:
         description: 'Show findings without writing files or creating issues'
         type: boolean
         default: false
+    # Runtime allowed-tools are defined in the command template frontmatter
+    # with restricted Bash globs (e.g., Bash(git *), Bash(gh issue create*)).
+    # This list is metadata for documentation and validation only.
     allowed-tools:
       - Read
       - Write
       - Edit
       - Glob
       - Grep
-      - Bash
+      - 'Bash(git *)'
+      - 'Bash(gh issue create*)'
+      - 'Bash(gh issue list*)'
+      - 'Bash(gh issue view*)'
+      - 'Bash(linear *)'
+      - 'Bash(mkdir *)'
 
   - name: sync-backlog
     type: workflow

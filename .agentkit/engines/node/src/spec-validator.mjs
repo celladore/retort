@@ -742,10 +742,13 @@ function validateCrossReferences(specs) {
     }
   }
 
-  // Validate that allowed-tools in commands only reference known tools
+  // Validate that allowed-tools in commands only reference known tools.
+  // Tools may use restricted patterns like "Bash(git *)" — extract the
+  // base tool name before validation.
   for (const cmd of commands?.commands || []) {
     for (const tool of cmd['allowed-tools'] || []) {
-      if (!VALID_TOOLS.includes(tool)) {
+      const baseTool = tool.replace(/\(.*\)$/, '');
+      if (!VALID_TOOLS.includes(baseTool)) {
         errors.push(`commands.yaml: command "${cmd.name}" references unknown tool "${tool}"`);
       }
     }

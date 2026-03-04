@@ -48,12 +48,12 @@ jobs:
             fi
           done
 
-          echo "✓ .index.json is valid"
+          echo "OK — .index.json is valid"
 
       - name: Validate issue records
         run: |
           ISSUES_DIR="docs/history/issues"
-          if [ ! -d "$ISSUES_DIR" ] || [ -z "$(find "$ISSUES_DIR" -name '*.md' ! -name 'README.md' 2>/dev/null)" ]; then
+          if [ ! -d "$ISSUES_DIR" ] || ! compgen -G "$ISSUES_DIR/[0-9]*.md" > /dev/null 2>&1; then
             echo "No issue records to validate"
             exit 0
           fi
@@ -83,7 +83,7 @@ jobs:
       - name: Validate lesson records
         run: |
           LESSONS_DIR="docs/history/lessons-learned"
-          if [ ! -d "$LESSONS_DIR" ] || [ -z "$(find "$LESSONS_DIR" -name '*.md' ! -name 'README.md' 2>/dev/null)" ]; then
+          if [ ! -d "$LESSONS_DIR" ] || ! compgen -G "$LESSONS_DIR/[0-9]*.md" > /dev/null 2>&1; then
             echo "No lesson records to validate"
             exit 0
           fi

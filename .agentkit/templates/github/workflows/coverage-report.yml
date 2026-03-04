@@ -51,8 +51,8 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          # Detect package manager and coverage runner
-          if [ -f pnpm-lock.yaml ] || [ -f ../pnpm-lock.yaml ]; then
+          # Detect package manager (working-directory already set by detect step)
+          if [ -f pnpm-lock.yaml ]; then
             PM="pnpm"
           elif [ -f yarn.lock ]; then
             PM="yarn"

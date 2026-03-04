@@ -32,6 +32,8 @@ jobs:
     if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
