@@ -87,7 +87,7 @@ The following additional hard gates are configured for this project:
 
 ---
 
-> **`--gates-only` mode:** If `--gates-only` was passed, stop here after evaluating hard gates. Skip sections 3–5 entirely. Produce a gates-only report with PASS/FAIL per gate and an overall status, then jump to the Evaluation Process and Output Format sections.
+> **`--gates-only` mode:** If `--gates-only` was passed, stop here after evaluating hard gates. Skip sections 3–5 entirely. Produce a gates-only report with PASS/FAIL per gate and an overall status, then jump to the Evaluation Process and Output Format sections. Use the gates-only output payload (see Output Format below) — do **not** include `overall_score` or `dimension_scores`.
 
 ## 3. Weighted Evaluation Dimensions
 
@@ -302,11 +302,14 @@ Effort vs risk reduction. Each fix should map to one or more evaluation dimensio
 
 - **Read:** `AGENT_BACKLOG.md`, `.claude/state/orchestrator.json`
 - **Append to:** `.claude/state/events.log` — atomic, newline-terminated JSON entries only.
-  - **Schema:** `{"eventType":"INFRA_EVAL_COMPLETED","timestamp":"<RFC3339>","data":{"overall_score":<number>,"hard_gates_passed":<boolean>,"dimension_scores":{...}}}`
+  - **Schema (full):** `{"eventType":"INFRA_EVAL_COMPLETED","timestamp":"<RFC3339>","data":{"gates_only":false,"overall_score":<number>,"hard_gates_passed":<boolean>,"dimension_scores":{...}}}`
+  - **Schema (gates-only):** `{"eventType":"INFRA_EVAL_COMPLETED","timestamp":"<RFC3339>","data":{"gates_only":true,"hard_gates_passed":<boolean>,"overall_status":"PASS|FAIL","gate_results":{...}}}`
 
 ## Output Format
 
 Emit two required outputs:
+
+### Full evaluation (default)
 
 1. **stdout (minimal):** Single-line JSON:
 
@@ -316,6 +319,7 @@ Emit two required outputs:
   "phase": "evaluation",
   "timestamp": "<RFC3339>",
   "data": {
+    "gates_only": false,
     "overall_score": 72,
     "hard_gates_passed": true,
     "dimension_scores": {
@@ -331,6 +335,32 @@ Emit two required outputs:
   }
 }
 ```
+
+### Gates-only evaluation (`--gates-only`)
+
+When `--gates-only` is passed, omit `overall_score` and `dimension_scores`. Instead, include `gate_results` and `overall_status`:
+
+```json
+{
+  "eventType": "INFRA_EVAL_COMPLETED",
+  "phase": "evaluation",
+  "timestamp": "<RFC3339>",
+  "data": {
+    "gates_only": true,
+    "hard_gates_passed": false,
+    "overall_status": "FAIL",
+    "gate_results": {
+      "G1": "PASS",
+      "G2": "FAIL",
+      "G3": "N/A",
+      "G4": "PASS",
+      "G5": "N/A"
+    }
+  }
+}
+```
+
+> **Note:** Consumers of this payload must check `data.gates_only` before accessing `overall_score` or `dimension_scores` — those fields are only present when `gates_only` is `false`. The save logic for `docs/evaluations/` must likewise respect the payload shape: gates-only reports contain gate results only, not dimension scores.
 
 2. **events.log (envelope):** Append full JSON envelope with metadata per standard schema.
    {{/if}}
