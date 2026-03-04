@@ -41,7 +41,7 @@ if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.m
             DRIFT_FILES=$(git -C "$CWD" diff --name-only 2>/dev/null | head -20)
             ERRORS="${ERRORS}GENERATED FILE DRIFT DETECTED — Run 'pnpm -C .agentkit agentkit:sync' and commit before pushing.\nOut-of-sync files:\n${DRIFT_FILES}\n\n"
             # Restore the working tree since we're blocking
-            git -C "$CWD" checkout -- . 2>/dev/null || true
+            git -C "$CWD" checkout -- $DRIFT_FILES 2>/dev/null || true
         fi
     fi
 fi
@@ -49,13 +49,13 @@ fi
 # -- Check 2: Conventional Commits on unpushed commits --------------------
 # Get commits that would be pushed
 BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
+DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
 if [[ -n "$BRANCH" ]]; then
     UPSTREAM=$(git -C "$CWD" rev-parse --abbrev-ref "@{upstream}" 2>/dev/null || echo "")
     if [[ -n "$UPSTREAM" ]]; then
         RANGE="${UPSTREAM}..HEAD"
     else
         # No upstream yet — check last 20 commits against default branch
-        DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
         if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
             RANGE="origin/${DEFAULT_BRANCH}..HEAD"
         else
@@ -75,6 +75,15 @@ if [[ -n "$BRANCH" ]]; then
 
     if [[ -n "$BAD_COMMITS" ]]; then
         ERRORS="${ERRORS}CONVENTIONAL COMMITS VIOLATION — The following commits do not follow the format 'type(scope): description':\n${BAD_COMMITS}Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert\n\n"
+    fi
+fi
+
+# -- Check 3: Branch name follows type/description pattern -----------------
+# Skip check for default branch and claude/ prefixed branches (agent sessions)
+if [[ -n "$BRANCH" ]]; then
+    BRANCH_PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert|release|hotfix|claude)/[a-z0-9][a-z0-9._-]+$'
+    if [[ "$BRANCH" != "$DEFAULT_BRANCH" ]] && [[ "$BRANCH" != "develop" ]] && [[ ! "$BRANCH" =~ ^release/ ]] && [[ ! "$BRANCH" =~ $BRANCH_PATTERN ]]; then
+        ERRORS="${ERRORS}BRANCH NAMING VIOLATION — Branch '${BRANCH}' does not follow the pattern type/short-description.\nExpected: feat/*, fix/*, docs/*, chore/*, ci/*, refactor/*, test/*, etc.\nExample: feat/add-user-auth, fix/token-refresh\n\n"
     fi
 fi
 

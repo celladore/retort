@@ -53,7 +53,7 @@ if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.m
         drift_files=$(git -C "$CWD" diff --name-only 2>/dev/null | head -10)
         FAILURE_REASON="Generated files are out of sync with spec. Run 'pnpm -C .agentkit agentkit:sync' and commit the changes.\nDrifted files:\n${drift_files}"
         # Restore working tree
-        git -C "$CWD" checkout -- . 2>/dev/null || true
+        git -C "$CWD" checkout -- $drift_files 2>/dev/null || true
         jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
         exit 0
     fi
