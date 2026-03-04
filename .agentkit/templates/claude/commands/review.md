@@ -29,7 +29,12 @@ To determine the diff:
 
 Evaluate every changed file against the following criteria. Not all criteria apply to all file types — use judgment.
 
+Each criterion lists the **specialist agents** whose expertise applies and any **CI workflows** that provide automated coverage. The review agent synthesizes findings from all sources.
+
 ### 1. Correctness
+
+> **Agents:** backend, frontend, data, test-lead, integration-tester
+> **CI:** `ci.yml` (unit tests)
 
 - Does the logic do what the commit message / backlog item claims?
 - Are there off-by-one errors, null/undefined checks missing, or incorrect branching?
@@ -39,13 +44,19 @@ Evaluate every changed file against the following criteria. Not all criteria app
 
 ### 2. Security
 
+> **Agents:** security-auditor, dependency-watcher, environment-manager
+> **CI:** `dependency-audit.yml` (vulnerability scanning, license checks)
+
 - **Injection:** Are user inputs sanitized before use in SQL, shell commands, or HTML?
 - **Auth/AuthZ:** Are endpoints properly guarded? Are permissions checked?
 - **Secrets:** Are there any hardcoded credentials, API keys, or tokens in the diff?
-- **Dependencies:** Are new dependencies well-maintained and free of known vulnerabilities?
+- **Dependencies:** Are new dependencies well-maintained and free of known vulnerabilities? (The dependency-watcher agent and dependency-audit CI workflow provide automated coverage here.)
 - **Data exposure:** Could sensitive data leak through logs, error messages, or API responses?
 
 ### 3. Performance
+
+> **Agents:** backend, frontend, coverage-tracker
+> **CI:** —
 
 - Are there N+1 query patterns or unbounded loops?
 - Could any operation be expensive at scale (large arrays, deep recursion, unindexed queries)?
@@ -54,13 +65,20 @@ Evaluate every changed file against the following criteria. Not all criteria app
 
 ### 4. Tests & Coverage
 
+> **Agents:** test-lead, coverage-tracker, integration-tester
+> **CI:** `ci.yml` (test pass/fail), `coverage-report.yml` (coverage metrics and threshold enforcement)
+
 - Are there tests for the changed behavior?
 - Do the tests cover the happy path AND at least one error/edge case?
 - Are tests deterministic (no flaky timing, no external dependencies)?
 - If behavior was removed, were the corresponding tests removed or updated?
 - Is test quality sufficient? (Not just asserting `true === true`)
+- Has code coverage regressed? (The coverage-tracker agent and coverage-report CI workflow track this.)
 
 ### 5. Documentation & Readability
+
+> **Agents:** content-strategist, product-manager, ui-designer
+> **CI:** `ci.yml` (markdown-lint), `documentation-quality.yml` (structure validation)
 
 - Are public APIs documented (JSDoc, XML comments, doc comments)?
 - Are complex algorithms explained with comments?
@@ -70,10 +88,14 @@ Evaluate every changed file against the following criteria. Not all criteria app
 
 ### 6. Compatibility & Standards
 
+> **Agents:** release-manager, backend, project-shipper, devops
+> **CI:** `breaking-change-detection.yml` (export removals, signature changes, deprecation tracking, changelog verification)
+
 - Does the change follow existing patterns in the codebase?
-- Are breaking changes documented and versioned appropriately?
+- Are breaking changes documented and versioned appropriately? (The release-manager agent and breaking-change-detection CI workflow provide automated coverage here.)
 - Does the change maintain backwards compatibility where expected?
 - Are deprecations marked properly?
+- If version files changed, is the bump consistent with the scope of changes (patch/minor/major)?
 
 ## Output Format
 
