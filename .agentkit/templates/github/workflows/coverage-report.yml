@@ -34,30 +34,44 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Install dependencies
+      - name: Detect project root
+        id: detect
         run: |
           if [ -f pnpm-lock.yaml ]; then
-            pnpm install --frozen-lockfile
+            echo "project_dir=." >> $GITHUB_OUTPUT
           elif [ -f .agentkit/pnpm-lock.yaml ]; then
-            pnpm install --frozen-lockfile --dir .agentkit
+            echo "project_dir=.agentkit" >> $GITHUB_OUTPUT
           else
-            pnpm install --frozen-lockfile 2>/dev/null || true
+            echo "project_dir=." >> $GITHUB_OUTPUT
           fi
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile 2>/dev/null || true
+        working-directory: ${{ steps.detect.outputs.project_dir }}
 
       - name: Run tests with coverage
         run: |
+          # Detect package manager and coverage runner
+          if [ -f pnpm-lock.yaml ] || [ -f ../pnpm-lock.yaml ]; then
+            PM="pnpm"
+          elif [ -f yarn.lock ]; then
+            PM="yarn"
+          else
+            PM="npx"
+          fi
+
           # Try coverage script first, fall back to test with coverage flag
-          if pnpm run --filter . coverage 2>/dev/null; then
+          if $PM run coverage 2>/dev/null; then
             echo "Ran dedicated coverage script"
-          elif pnpm vitest run --coverage 2>/dev/null; then
+          elif $PM vitest run --coverage 2>/dev/null; then
             echo "Ran vitest with coverage"
-          elif pnpm jest --coverage 2>/dev/null; then
+          elif $PM jest --coverage 2>/dev/null; then
             echo "Ran jest with coverage"
           else
             echo "::notice::No coverage runner detected — running tests without coverage"
-            pnpm test || true
+            $PM test || true
           fi
-        working-directory: .agentkit
+        working-directory: ${{ steps.detect.outputs.project_dir }}
 
       - name: Parse coverage summary
         id: coverage
@@ -75,7 +89,7 @@ jobs:
 
           if [ -n "$COVERAGE_FILE" ]; then
             python3 -c "
-          import json
+          import json, os
           with open('$COVERAGE_FILE') as f:
               data = json.load(f)
           total = data.get('total', {})
@@ -89,9 +103,10 @@ jobs:
           print(f'| Branches | {branches}% |')
           print(f'| Functions | {functions}% |')
           print(f'| Statements | {stmts}% |')
+          # Write coverage to GITHUB_OUTPUT for threshold enforcement
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write(f'lines={lines}\n')
           " >> $GITHUB_STEP_SUMMARY
-            # Export coverage value for threshold enforcement step
-            echo "lines=${lines}" >> $GITHUB_OUTPUT
           else
             echo "No coverage-summary.json found — coverage data unavailable" >> $GITHUB_STEP_SUMMARY
             echo "::notice::Configure your test runner to output coverage-summary.json for automated tracking"

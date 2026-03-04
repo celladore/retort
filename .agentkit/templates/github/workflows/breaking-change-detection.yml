@@ -37,7 +37,7 @@ jobs:
 
           # Track version-bearing files that changed
           VERSION_FILES_CHANGED=false
-          for pattern in 'package.json' 'Cargo.toml' 'pyproject.toml' '\.csproj$'; do
+          for pattern in '(^|/)package\.json$' '(^|/)Cargo\.toml$' '(^|/)pyproject\.toml$' '\.csproj$'; do
             if grep -qE "$pattern" /tmp/diff-files.txt; then
               VERSION_FILES_CHANGED=true
               echo "::notice::Version file changed: $(grep -E "$pattern" /tmp/diff-files.txt | head -5 | tr '\n' ', ')"
