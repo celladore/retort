@@ -3,9 +3,8 @@
 # Regenerate: pnpm -C .agentkit agentkit:sync
 #
 # Collects code coverage from test runs and reports regressions on PRs.
-# By default non-blocking (continue-on-error). To make blocking, set
-# the COVERAGE_THRESHOLD environment variable in repository settings
-# and remove continue-on-error from the enforce-threshold step.
+# Non-blocking (continue-on-error). Threshold defaults to {{testingCoverage}}%
+# from project.yaml; override with COVERAGE_THRESHOLD env var in repo settings.
 
 name: Coverage Report
 
@@ -123,12 +122,11 @@ jobs:
             echo "::notice::Configure your test runner to output coverage-summary.json for automated tracking"
           fi
 
-      - name: Enforce threshold (optional)
-        if: env.COVERAGE_THRESHOLD != ''
+      - name: Enforce threshold
         run: |
-          THRESHOLD="${COVERAGE_THRESHOLD:-0}"
+          THRESHOLD="${COVERAGE_THRESHOLD:-{{testingCoverage}}}"
           ACTUAL="${{ steps.coverage.outputs.lines }}"
-          if [ -n "$ACTUAL" ] && [ "$(echo "$ACTUAL < $THRESHOLD" | bc -l 2>/dev/null)" = "1" ]; then
+          if [ -n "$ACTUAL" ] && [ "$THRESHOLD" -gt 0 ] 2>/dev/null && [ "$(echo "$ACTUAL < $THRESHOLD" | bc -l 2>/dev/null)" = "1" ]; then
             echo "::warning::Line coverage ${ACTUAL}% is below threshold ${THRESHOLD}%"
           fi
 
@@ -174,4 +172,4 @@ jobs:
       - name: Report
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "_This check is non-blocking by default. Set COVERAGE_THRESHOLD to enforce._" >> $GITHUB_STEP_SUMMARY
+          echo "_Coverage threshold: {{testingCoverage}}% (from project.yaml). Override with COVERAGE_THRESHOLD env var._" >> $GITHUB_STEP_SUMMARY
