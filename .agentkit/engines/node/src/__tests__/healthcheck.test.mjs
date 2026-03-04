@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-healthcheck');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'healthcheck');
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 
 describe('runHealthcheck()', () => {

@@ -13,7 +13,7 @@ vi.mock('child_process', () => {
 });
 
 describe('cost-tracker security', () => {
-  const TEST_ROOT = resolve('.test-cost-security');
+  const TEST_ROOT = resolve('.test-tmp', 'cost-security');
   const PROJECT_ROOT = resolve(TEST_ROOT, 'project');
 
   beforeEach(() => {

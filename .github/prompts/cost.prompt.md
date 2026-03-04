@@ -60,3 +60,4 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

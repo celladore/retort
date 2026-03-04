@@ -72,3 +72,4 @@ Report: formatters run, scope, mode, files changed/needing formatting, summary c
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

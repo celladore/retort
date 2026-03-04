@@ -34,3 +34,16 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+
+{{#if isSyncBacklog}}
+## Intake Semantics
+
+- Tracker: `{{issueTracker}}`
+- Intake owner team: `{{intakeOwnerTeam}}`
+- Operations team: `{{intakeOperationsTeam}}`
+- Cadence: `{{intakeCadence}}`
+{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+
+Keep backlog sync tracker-neutral (GitHub/Linear) and ownership-aware using the configured intake values.
+{{/if}}

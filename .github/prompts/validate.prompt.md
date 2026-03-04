@@ -51,3 +51,4 @@ Report: per-check pass/fail with details, overall PASS/FAIL status, list of miss
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

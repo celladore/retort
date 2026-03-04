@@ -40,7 +40,7 @@ describe('runValidate()', () => {
 });
 
 describe('validate - edge cases', () => {
-  const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-validate');
+  const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'validate');
 
   beforeEach(() => {
     if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true });

@@ -140,6 +140,8 @@ hooks:
       hook: protect-templates
     - matcher: 'Bash'
       hook: guard-destructive-commands
+    - matcher: 'Bash'
+      hook: pre-push-validate
 
   # ---------------------------------------------------------------------------
   # Post-tool-use hooks — run after a tool completes
