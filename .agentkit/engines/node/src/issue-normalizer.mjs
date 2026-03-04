@@ -36,7 +36,7 @@ function inferPriority(labels, importLabelsMap) {
   for (const label of labels) {
     const lowerLabel = label.toLowerCase();
     for (const [mapLabel, priority] of Object.entries(importLabelsMap)) {
-      if (lowerLabel === mapLabel.toLowerCase() || lowerLabel.includes(mapLabel.toLowerCase())) {
+      if (lowerLabel === mapLabel.toLowerCase()) {
         if ((PRIORITY_ORDER[priority] ?? 99) < (PRIORITY_ORDER[best] ?? 99)) {
           best = priority;
         }
@@ -59,7 +59,7 @@ function inferTeam(labels, importTeamMap, fallbackTeam) {
   for (const label of labels) {
     const lowerLabel = label.toLowerCase();
     for (const [mapLabel, team] of Object.entries(importTeamMap)) {
-      if (lowerLabel === mapLabel.toLowerCase() || lowerLabel.includes(mapLabel.toLowerCase())) {
+      if (lowerLabel === mapLabel.toLowerCase()) {
         return team;
       }
     }

@@ -48,6 +48,8 @@ export class GitHubAdapter {
    * @returns {object[]} Array of raw GitHub issue objects
    */
   fetchIssues({ state = 'open', labels = null, since = null, limit = 100 } = {}) {
+    // Clamp limit to prevent excessive API calls
+    limit = Math.min(Math.max(1, Number(limit) || 100), 1000);
     const auth = this.checkAuth();
     if (!auth.ok) {
       throw new Error(auth.message);

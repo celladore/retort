@@ -64,7 +64,9 @@ function formatCsv(items) {
   ];
   const escape = (v) => {
     const s = String(v ?? '');
-    return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? `"${s.replace(/"/g, '""')}"`
+      : s;
   };
   const header = fields.join(',');
   const rows = items.map((item) =>

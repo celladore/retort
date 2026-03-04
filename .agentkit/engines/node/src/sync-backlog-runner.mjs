@@ -122,18 +122,9 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   // 4. Merge
   const { merged, added, updated, preserved } = deduplicateItems(existing, allIncoming);
 
-  // Apply team filter if requested
-  let result = merged;
-  if (flags.team) {
-    const teamFilter = flags.team.toLowerCase();
-    result = merged.filter(
-      (i) => i.team?.toLowerCase() === teamFilter || !i.team
-    );
-  }
+  const sorted = sortItems(merged, 'priority');
 
-  const sorted = sortItems(result, 'priority');
-
-  // 5. Write
+  // 5. Write full backlog (never filter before persisting)
   await writeBacklogJson(projectRoot, sorted);
   const repoName = project?.name || '';
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
@@ -148,6 +139,16 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   const logEntry = `[${timestamp}] [BACKLOG] [SYNC] Synced backlog. Total: ${sorted.length}. P0: ${p0}. P1: ${p1}. New: ${added}. Updated: ${updated}. Manual: ${preserved}.\n`;
   await appendFile(eventsPath, logEntry, 'utf-8');
 
+  // Apply team filter for display only (does not affect persisted data)
+  let displayItems = sorted;
+  if (flags.team) {
+    const teamFilter = flags.team.toLowerCase();
+    displayItems = sorted.filter((i) => i.team?.toLowerCase() === teamFilter);
+  }
+
   console.log(`[agentkit:sync-backlog] Done.`);
   console.log(`  Total: ${sorted.length} | Added: ${added} | Updated: ${updated} | Manual: ${preserved}`);
+  if (flags.team) {
+    console.log(`  Showing: ${displayItems.length} items for team "${flags.team}"`);
+  }
 }

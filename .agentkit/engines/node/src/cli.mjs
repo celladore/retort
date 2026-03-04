@@ -118,7 +118,7 @@ const VALID_FLAGS = {
   doctor: ['verbose', 'help'],
   'import-issues': ['tracker', 'state', 'labels', 'since', 'dry-run', 'limit', 'force', 'help'],
   backlog: ['format', 'team', 'priority', 'source', 'status', 'sort', 'help'],
-  'sync-backlog': ['tracker', 'direction', 'labels', 'owner-team', 'team', 'help'],
+  'sync-backlog': ['tracker', 'state', 'direction', 'labels', 'owner-team', 'team', 'help'],
   scaffold: ['type', 'name', 'stack', 'path', 'help'],
   preflight: ['stack', 'range', 'base', 'strict', 'help'],
   'project-review': ['scope', 'focus', 'phase', 'help'],
