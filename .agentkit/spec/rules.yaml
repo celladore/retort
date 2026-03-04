@@ -728,6 +728,15 @@ rules:
         autofix: true
         tool: 'pnpm -C .agentkit agentkit:sync'
 
+      - id: gw-breaking-changes-docs
+        rule: >
+          PRs with breaking changes (indicated by '!:' in the title or the
+          word BREAKING) must include documentation in the PR body: a
+          '## Breaking Changes' section, an ADR reference, or a migration
+          guide. CI checks for this and will block the merge if missing.
+        severity: error
+        autofix: false
+
       - id: gw-squash-merge
         rule: >
           Use squash-merge when merging PRs to keep the default branch

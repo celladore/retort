@@ -28,6 +28,7 @@ These rules govern branching, committing, pull requests, and merge strategy.
   - Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `perf`, `build`, `revert`
   - Example: `feat(auth): add OAuth2 login flow` — NOT `Plan: Add OAuth2 login flow`
   - CI will reject PRs with non-conforming titles
+- **Breaking changes** (`!:` in title or `BREAKING` keyword) require a `## Breaking Changes` section, ADR reference, or migration guide in the PR body — CI checks for this
 - All changes to main require a PR with test plan
 - PRs modifying `.agentkit/` require CODEOWNERS (maintainer) approval
 - Use squash-merge to keep history clean
