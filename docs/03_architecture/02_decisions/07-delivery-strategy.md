@@ -29,6 +29,7 @@ We need a delivery mechanism that reduces these pain points while preserving the
 The forge repository is added as a git submodule at `.agentkit/`. All specs, templates, engines, and docs live inside the consumer repo. Sync runs locally.
 
 **How it works today:**
+
 ```bash
 git submodule add https://github.com/org/agentkit-forge.git .agentkit
 pnpm -C .agentkit install
@@ -41,6 +42,7 @@ node .agentkit/engines/node/src/cli.mjs sync
 Publish agentkit-forge as an npm package (`agentkit-forge`). The consumer installs it as a devDependency. The CLI is exposed via `npx agentkit-forge <command>`. Specs and templates ship inside the package. Overlays remain in the consumer repo.
 
 **Consumer workflow:**
+
 ```bash
 npm install -D agentkit-forge
 npx agentkit-forge init --repoName my-project
@@ -54,6 +56,7 @@ npx agentkit-forge sync
 Publish a lightweight CLI tool that fetches templates and specs on demand from a registry or CDN. No persistent footprint beyond the overlay directory and generated outputs.
 
 **Consumer workflow:**
+
 ```bash
 npx agentkit-forge@latest init --repoName my-project
 npx agentkit-forge@latest sync
@@ -66,6 +69,7 @@ npx agentkit-forge@latest sync
 Deliver the forge as a GitHub Action. Sync runs in CI on push/PR, and generated outputs are committed back (or checked for drift). Local development uses `npx` for ad-hoc sync.
 
 **Consumer workflow:**
+
 ```yaml
 # .github/workflows/agentkit-sync.yml
 - uses: org/agentkit-forge-action@v3
@@ -79,6 +83,7 @@ Deliver the forge as a GitHub Action. Sync runs in CI on push/PR, and generated 
 Publish agentkit-forge as a GitHub template repository. Consumers create repos from the template. Updates are pulled via `git merge` from the upstream template remote.
 
 **Consumer workflow:**
+
 ```bash
 # Initial
 gh repo create my-project --template org/agentkit-forge-template
@@ -117,12 +122,14 @@ Wrap the forge engine in a small UI shell — either a Progressive Web App (serv
 ```
 
 **Consumer workflow (PWA):**
+
 ```bash
 npx agentkit-forge ui              # launches localhost:4827
 # Browser opens → visual wizard for init, overlay editing, sync
 ```
 
 **Consumer workflow (Tauri desktop):**
+
 ```bash
 # Download from releases page or:
 brew install agentkit-forge         # macOS
@@ -131,61 +138,62 @@ winget install agentkit-forge       # Windows
 ```
 
 **What the UI surfaces:**
+
 - **Overlay editor** — form-based editing of `settings.yaml` with validation, autocomplete for render targets, and live preview of what sync will generate.
 - **Sync dashboard** — one-click sync with a visual diff of what changed, grouped by tool (Claude, Cursor, Copilot, etc.).
 - **Version manager** — see current version, available updates, changelog, one-click upgrade with rollback.
 - **Tool toggle** — visual grid of available render targets. Enable/disable with checkboxes instead of `cli add`/`remove` commands.
 - **Health check** — visual report from `doctor` and `healthcheck` commands.
 
-**Key trade-off:** The UI is a *complement* to the CLI, not a replacement. Power users and CI still use the CLI/action. The UI lowers the barrier for the other 80% of the team who interact with forge configuration infrequently.
+**Key trade-off:** The UI is a _complement_ to the CLI, not a replacement. Power users and CI still use the CLI/action. The UI lowers the barrier for the other 80% of the team who interact with forge configuration infrequently.
 
 ## Key Metrics
 
-| Metric | Definition | Why It Matters |
-| --- | --- | --- |
-| **Onboarding time** | Minutes from zero to first successful `sync` for a new consumer repo | First impression determines adoption velocity |
-| **Update friction** | Steps required to adopt a new forge version | High friction leads to version drift and stale configs |
-| **CI integration effort** | Lines of CI config required to validate/sync | DevOps overhead scales with number of consumer repos |
-| **Repo footprint** | MB of forge artifacts committed to consumer repo | Affects clone times, review noise, storage costs |
-| **Customization depth** | Can consumers override specs, templates, commands, and rules? | Core value proposition — must not regress |
-| **Version pinning** | Can consumers lock to a specific forge version? | Prevents surprise breaking changes |
-| **Offline capability** | Can sync run without network access after initial setup? | Required for air-gapped environments and flaky connections |
-| **Private registry support** | Works with private npm registries / GitHub Packages / Artifactory? | Enterprise requirement for internal distribution |
-| **Multi-language support** | Does it require Node.js in the consumer repo? | Rust, Python, .NET consumers may not have Node.js |
-| **Rollback speed** | Time to revert to previous forge version after a bad update | Safety net for breaking changes |
-| **Non-CLI accessibility** | Can non-terminal users (PMs, designers, leads) use it effectively? | Determines whole-team adoption vs. dev-only tooling |
+| Metric                       | Definition                                                           | Why It Matters                                             |
+| ---------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Onboarding time**          | Minutes from zero to first successful `sync` for a new consumer repo | First impression determines adoption velocity              |
+| **Update friction**          | Steps required to adopt a new forge version                          | High friction leads to version drift and stale configs     |
+| **CI integration effort**    | Lines of CI config required to validate/sync                         | DevOps overhead scales with number of consumer repos       |
+| **Repo footprint**           | MB of forge artifacts committed to consumer repo                     | Affects clone times, review noise, storage costs           |
+| **Customization depth**      | Can consumers override specs, templates, commands, and rules?        | Core value proposition — must not regress                  |
+| **Version pinning**          | Can consumers lock to a specific forge version?                      | Prevents surprise breaking changes                         |
+| **Offline capability**       | Can sync run without network access after initial setup?             | Required for air-gapped environments and flaky connections |
+| **Private registry support** | Works with private npm registries / GitHub Packages / Artifactory?   | Enterprise requirement for internal distribution           |
+| **Multi-language support**   | Does it require Node.js in the consumer repo?                        | Rust, Python, .NET consumers may not have Node.js          |
+| **Rollback speed**           | Time to revert to previous forge version after a bad update          | Safety net for breaking changes                            |
+| **Non-CLI accessibility**    | Can non-terminal users (PMs, designers, leads) use it effectively?   | Determines whole-team adoption vs. dev-only tooling        |
 
 ## Weighted Decision Matrix
 
 Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100. The addition of Option G (PWA/Desktop UI) prompted a new metric — **Non-CLI accessibility** — which shifts 3 points from Repo footprint (10 → 7) and 2 points from Offline capability (5 → 3) to fund the new 5-point weight, reflecting the reality that whole-team adoption matters more than disk savings or air-gap edge cases.
 
-| Criterion | Weight | A: Submodule | B: npm pkg | C: Standalone CLI | D: GH Action | E: Template Repo | F: npm + GH Action | G: PWA / Desktop UI |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Onboarding time** | 20 | 2 | 4 | 5 | 3 | 3 | 4 | 5 |
-| **Update friction** | 15 | 1 | 4 | 5 | 4 | 2 | 5 | 5 |
-| **CI integration effort** | 10 | 2 | 4 | 3 | 5 | 2 | 5 | 3 |
-| **Repo footprint** | 7 | 1 | 3 | 5 | 5 | 1 | 4 | 4 |
-| **Customization depth** | 15 | 5 | 5 | 4 | 3 | 5 | 5 | 4 |
-| **Version pinning** | 10 | 3 | 5 | 4 | 5 | 2 | 5 | 4 |
-| **Offline capability** | 3 | 5 | 5 | 2 | 1 | 5 | 4 | 4 |
-| **Private registry support** | 5 | 4 | 5 | 4 | 4 | 3 | 5 | 4 |
-| **Multi-language support** | 5 | 3 | 2 | 3 | 5 | 4 | 3 | 4 |
-| **Rollback speed** | 5 | 3 | 5 | 4 | 5 | 2 | 5 | 5 |
-| **Non-CLI accessibility** | 5 | 1 | 1 | 1 | 2 | 1 | 2 | 5 |
-| **Weighted Total** | **100** | **241** | **393** | **390** | **377** | **266** | **445** | **430** |
+| Criterion                    |  Weight | A: Submodule | B: npm pkg | C: Standalone CLI | D: GH Action | E: Template Repo | F: npm + GH Action | G: PWA / Desktop UI |
+| ---------------------------- | ------: | -----------: | ---------: | ----------------: | -----------: | ---------------: | -----------------: | ------------------: |
+| **Onboarding time**          |      20 |            2 |          4 |                 5 |            3 |                3 |                  4 |                   5 |
+| **Update friction**          |      15 |            1 |          4 |                 5 |            4 |                2 |                  5 |                   5 |
+| **CI integration effort**    |      10 |            2 |          4 |                 3 |            5 |                2 |                  5 |                   3 |
+| **Repo footprint**           |       7 |            1 |          3 |                 5 |            5 |                1 |                  4 |                   4 |
+| **Customization depth**      |      15 |            5 |          5 |                 4 |            3 |                5 |                  5 |                   4 |
+| **Version pinning**          |      10 |            3 |          5 |                 4 |            5 |                2 |                  5 |                   4 |
+| **Offline capability**       |       3 |            5 |          5 |                 2 |            1 |                5 |                  4 |                   4 |
+| **Private registry support** |       5 |            4 |          5 |                 4 |            4 |                3 |                  5 |                   4 |
+| **Multi-language support**   |       5 |            3 |          2 |                 3 |            5 |                4 |                  3 |                   4 |
+| **Rollback speed**           |       5 |            3 |          5 |                 4 |            5 |                2 |                  5 |                   5 |
+| **Non-CLI accessibility**    |       5 |            1 |          1 |                 1 |            2 |                1 |                  2 |                   5 |
+| **Weighted Total**           | **100** |      **241** |    **393** |           **390** |      **377** |          **266** |            **445** |             **430** |
 
 ### Score Breakdown
 
 **Weighted totals** (Weight x Score, summed):
 
-| Option | Calculation | Total |
-| --- | --- | ---: |
-| **A: Submodule** | 20(2) + 15(1) + 10(2) + 7(1) + 15(5) + 10(3) + 3(5) + 5(4) + 5(3) + 5(3) + 5(1) | **241** |
-| **B: npm Package** | 20(4) + 15(4) + 10(4) + 7(3) + 15(5) + 10(5) + 3(5) + 5(5) + 5(2) + 5(5) + 5(1) | **393** |
-| **C: Standalone CLI** | 20(5) + 15(5) + 10(3) + 7(5) + 15(4) + 10(4) + 3(2) + 5(4) + 5(3) + 5(4) + 5(1) | **390** |
-| **D: GH Action** | 20(3) + 15(4) + 10(5) + 7(5) + 15(3) + 10(5) + 3(1) + 5(4) + 5(5) + 5(5) + 5(2) | **377** |
-| **E: Template Repo** | 20(3) + 15(2) + 10(2) + 7(1) + 15(5) + 10(2) + 3(5) + 5(3) + 5(4) + 5(2) + 5(1) | **266** |
-| **F: npm + GH Action** | 20(4) + 15(5) + 10(5) + 7(4) + 15(5) + 10(5) + 3(4) + 5(5) + 5(3) + 5(5) + 5(2) | **445** |
+| Option                  | Calculation                                                                     |   Total |
+| ----------------------- | ------------------------------------------------------------------------------- | ------: |
+| **A: Submodule**        | 20(2) + 15(1) + 10(2) + 7(1) + 15(5) + 10(3) + 3(5) + 5(4) + 5(3) + 5(3) + 5(1) | **241** |
+| **B: npm Package**      | 20(4) + 15(4) + 10(4) + 7(3) + 15(5) + 10(5) + 3(5) + 5(5) + 5(2) + 5(5) + 5(1) | **393** |
+| **C: Standalone CLI**   | 20(5) + 15(5) + 10(3) + 7(5) + 15(4) + 10(4) + 3(2) + 5(4) + 5(3) + 5(4) + 5(1) | **390** |
+| **D: GH Action**        | 20(3) + 15(4) + 10(5) + 7(5) + 15(3) + 10(5) + 3(1) + 5(4) + 5(5) + 5(5) + 5(2) | **377** |
+| **E: Template Repo**    | 20(3) + 15(2) + 10(2) + 7(1) + 15(5) + 10(2) + 3(5) + 5(3) + 5(4) + 5(2) + 5(1) | **266** |
+| **F: npm + GH Action**  | 20(4) + 15(5) + 10(5) + 7(4) + 15(5) + 10(5) + 3(4) + 5(5) + 5(3) + 5(5) + 5(2) | **445** |
 | **G: PWA / Desktop UI** | 20(5) + 15(5) + 10(3) + 7(4) + 15(4) + 10(4) + 3(4) + 5(4) + 5(4) + 5(5) + 5(5) | **430** |
 
 ## Score Justifications
@@ -256,10 +264,10 @@ Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100. The addition of 
 
 Option F (445) and Option G (430) are not competing — they're complementary layers targeting different users:
 
-| Layer | Audience | Problem it solves |
-| --- | --- | --- |
-| **npm package** | Developers | Local sync, version pinning, offline support |
-| **GitHub Action** | CI/DevOps | Drift detection, automated validation |
+| Layer                | Audience   | Problem it solves                                      |
+| -------------------- | ---------- | ------------------------------------------------------ |
+| **npm package**      | Developers | Local sync, version pinning, offline support           |
+| **GitHub Action**    | CI/DevOps  | Drift detection, automated validation                  |
 | **PWA / Desktop UI** | Whole team | Visual config editing, discoverability, non-CLI access |
 
 The combined approach scores highest and addresses every pain point identified in the current submodule delivery:
@@ -321,6 +329,7 @@ The combined approach scores highest and addresses every pain point identified i
 ### Consumer Experience After Migration
 
 **Developer (CLI-first):**
+
 ```bash
 # Install
 npm install -D agentkit-forge
@@ -343,12 +352,14 @@ npx agentkit-forge sync
 ```
 
 **Non-developer / visual preference (UI):**
+
 ```bash
 npx agentkit-forge ui
 # Browser opens → visual wizard → click through init → toggle tools → sync
 ```
 
 **Or with the desktop app:**
+
 ```
 1. Open AgentKit Forge app
 2. Click "Open Repo" → select project folder
@@ -379,15 +390,15 @@ npx agentkit-forge ui
 
 ### Risks and Mitigations
 
-| Risk | Mitigation |
-| --- | --- |
-| Breaking change in forge breaks all consumers simultaneously | Semantic versioning + lock files. Consumers only upgrade when they choose to. |
-| Private registry not available for some orgs | Support `--registry` flag and document GitHub Packages / Artifactory setup. |
-| Template resolution path changes break existing overlays | Migration script validates output parity before completing. |
-| GitHub Action marketplace approval delays | Ship the npm package first (Phase 1). Action is additive, not blocking. |
+| Risk                                                                 | Mitigation                                                                                                                           |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Breaking change in forge breaks all consumers simultaneously         | Semantic versioning + lock files. Consumers only upgrade when they choose to.                                                        |
+| Private registry not available for some orgs                         | Support `--registry` flag and document GitHub Packages / Artifactory setup.                                                          |
+| Template resolution path changes break existing overlays             | Migration script validates output parity before completing.                                                                          |
+| GitHub Action marketplace approval delays                            | Ship the npm package first (Phase 1). Action is additive, not blocking.                                                              |
 | UI becomes a maintenance burden that distracts from core engine work | PWA-first (Phase 4a) keeps the build simple. Tauri native app (Phase 4b) is optional and only pursued if adoption data justifies it. |
-| UI and CLI diverge in behavior | Single JSON-RPC API layer used by both. UI is a presentation layer only — all logic lives in the engine. |
-| Desktop app distribution (code signing, notarization) | Defer Tauri to Phase 4b. PWA has zero distribution overhead — it's just a web page. |
+| UI and CLI diverge in behavior                                       | Single JSON-RPC API layer used by both. UI is a presentation layer only — all logic lives in the engine.                             |
+| Desktop app distribution (code signing, notarization)                | Defer Tauri to Phase 4b. PWA has zero distribution overhead — it's just a web page.                                                  |
 
 ## References
 
