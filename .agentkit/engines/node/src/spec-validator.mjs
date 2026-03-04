@@ -831,10 +831,54 @@ function validateCrossReferences(specs) {
     }
   }
 
-  // Validate that allowed-tools in commands only reference known tools
+  // Validate agent domain-rules: each entry must be a string, and any
+  // bracketed rule IDs (e.g. [gw-conventional-commits, gw-atomic-commits])
+  // must reference known convention IDs from rules.yaml.
+  if (agents?.agents) {
+    for (const [category, agentList] of Object.entries(agents.agents)) {
+      if (!Array.isArray(agentList)) continue;
+      for (const agent of agentList) {
+        const domainRules = agent['domain-rules'];
+        if (domainRules === undefined || domainRules === null) continue;
+        if (!Array.isArray(domainRules)) {
+          errors.push(`agents.yaml: agent "${agent.id}" domain-rules must be an array`);
+          continue;
+        }
+        for (let i = 0; i < domainRules.length; i++) {
+          const rule = domainRules[i];
+          if (typeof rule !== 'string') {
+            errors.push(
+              `agents.yaml: agent "${agent.id}" domain-rules[${i}] must be a string, got ${typeof rule}`
+            );
+            continue;
+          }
+          // Extract bracketed rule IDs and validate against rules.yaml
+          const bracketMatch = rule.match(/\[([^\]]+)\]/);
+          if (bracketMatch) {
+            const ids = bracketMatch[1].split(',').map((s) => s.trim());
+            for (const id of ids) {
+              if (id && !seenRuleIds.has(id)) {
+                errors.push(
+                  `agents.yaml: agent "${agent.id}" domain-rules[${i}] references unknown rule id "${id}"`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Validate that allowed-tools in commands only reference known tools.
+  // Only Bash supports restricted patterns like "Bash(git *)". Other tools
+  // must be plain names from VALID_TOOLS.
   for (const cmd of commands?.commands || []) {
     for (const tool of cmd['allowed-tools'] || []) {
-      if (!VALID_TOOLS.includes(tool)) {
+      let baseTool = tool;
+      if (tool.startsWith('Bash(') && tool.endsWith(')')) {
+        baseTool = 'Bash';
+      }
+      if (!VALID_TOOLS.includes(baseTool)) {
         errors.push(`commands.yaml: command "${cmd.name}" references unknown tool "${tool}"`);
       }
     }

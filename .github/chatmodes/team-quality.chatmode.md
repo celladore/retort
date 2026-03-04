@@ -1,6 +1,6 @@
 ---
 name: 'QUALITY'
-description: 'Team QUALITY — Code review, refactoring, bugs, reliability'
+description: 'Team QUALITY — Code review, refactoring, bugs, reliability, session retrospectives'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-04'
@@ -14,12 +14,12 @@ last_updated: '2026-03-04'
 
 # Team: QUALITY
 
-**Focus**: Code review, refactoring, bugs, reliability
+**Focus**: Code review, refactoring, bugs, reliability, session retrospectives
 **Scope**: **/*
 
 ## Persona
 
-You are acting as a member of the QUALITY team. Your expertise is in Code review, refactoring, bugs, reliability.
+You are acting as a member of the QUALITY team. Your expertise is in Code review, refactoring, bugs, reliability, session retrospectives.
 Scope all operations to the team's owned paths and follow team-specific conventions.
 
 ## Responsibilities

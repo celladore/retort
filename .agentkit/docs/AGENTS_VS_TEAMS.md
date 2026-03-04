@@ -33,7 +33,7 @@ Agents and teams are complementary but serve different purposes:
 - **Agents** define _who_ does the work -- the expertise and behavioral constraints.
 - **Teams** define _what domain_ the work falls into -- the organizational unit for delegation.
 
-Agents are grouped into six categories (engineering, design, marketing, operations, product, testing). Teams cut across these categories to form action-oriented groups. A single team may draw on multiple agents. For example, the Testing team maps to three agents (test-lead, coverage-tracker, integration-tester), while the Backend team maps primarily to the backend engineer agent.
+Agents are grouped into seven categories (engineering, design, marketing, operations, product, testing, project-management). Teams cut across these categories to form action-oriented groups. A single team may draw on multiple agents. For example, the Testing team maps to three agents (test-lead, coverage-tracker, integration-tester), while the Backend team maps primarily to the backend engineer agent.
 
 The orchestrator tracks progress per team (not per agent) using statuses: `idle`, `in_progress`, `blocked`, and `done`.
 
@@ -54,7 +54,7 @@ The orchestrator tracks progress per team (not per agent) using statuses: `idle`
 | `product`  | PRODUCT       | Features, PRDs, roadmap               | `/team-product`  |
 | `quality`  | QUALITY       | Code review, refactoring, reliability | `/team-quality`  |
 
-## The 16 Agents by Category
+## The 19 Agents by Category
 
 ### Engineering (5 agents)
 
@@ -102,6 +102,13 @@ The orchestrator tracks progress per team (not per agent) using statuses: `idle`
 | `test-lead`          | Test Lead          | Test strategy, quality gate definitions, test architecture  |
 | `coverage-tracker`   | Coverage Tracker   | Coverage metrics, threshold enforcement, gap analysis       |
 | `integration-tester` | Integration Tester | E2E tests, cross-service testing, API contract verification |
+
+### Project Management (2 agents)
+
+| Agent ID          | Name            | Primary Responsibility                                       |
+| ----------------- | --------------- | ------------------------------------------------------------ |
+| `project-shipper` | Project Shipper | Task scoping, delivery tracking, handoff documentation       |
+| `release-manager` | Release Manager | Release coordination, versioning, changelogs, deployment     |
 
 ---
 
@@ -158,6 +165,30 @@ Invoke a team directly using its slash command:
 | Review code quality or refactor for maintainability | `/team-quality`  |
 
 When a task spans multiple teams, use `/orchestrate` to let the orchestrator manage the delegation sequence and inter-team handoffs. For single-team tasks where you already know the right team, invoke the team command directly.
+
+---
+
+## Incoming Agents (In-Flight Branches)
+
+> The following agents are being developed on active branches. This section tracks them preemptively. Move entries to the main tables as each branch merges.
+
+### Retrospective Analyst (`retrospective-analyst`)
+
+**Branch:** `claude/elegant-knuth-iSy89` | **Category:** Operations
+
+Session knowledge capture agent activated via `/review --focus=retrospective`. Extracts issues and lessons from conversation history. Non-blocking.
+
+### Feature Operations Specialist (`feature-ops`)
+
+**Branch:** `claude/feature-management-strategy-1jUSw` | **Category:** Feature Management (new)
+
+Kit feature management agent that helps teams choose, configure, and audit feature presets. Activated via `/feature-configure`, `/feature-flow`, and `/feature-review`.
+
+**When these branches merge, update:**
+
+1. The agent count heading from "19" to "21"
+2. Add a "Feature Management" category (1 agent) to the category tables
+3. Add `retrospective-analyst` to the Operations table (bringing it to 4 agents)
 
 ---
 

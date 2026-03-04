@@ -273,8 +273,10 @@ Comprehensive guides for using AgentKit Forge:
 | **[MCP/A2A Guide](.agentkit/docs/MCP_A2A_GUIDE.md)**                   | Model Context Protocol and Agent-to-Agent integration               |
 | **[CLI Installation](.agentkit/docs/CLI_INSTALLATION.md)**             | Installing and configuring the CLI                                  |
 | **[Agents vs Teams](.agentkit/docs/AGENTS_VS_TEAMS.md)**               | When to use agents vs teams, comparison guide                       |
+| **[Agents Reference](.agentkit/docs/AGENTS_REFERENCE.md)**             | All 19 agent personas — roles, scopes, conventions, dependencies    |
 | **[Roadmap](.agentkit/docs/ROADMAP.md)**                               | Planned features and development roadmap                            |
 | **[PRD Library](docs/prd/README.md)**                                  | Product requirement docs and LLM-mapping PRD examples               |
+| **[Documentation Audit](.agentkit/docs/DOCUMENTATION_AUDIT.md)**       | Gap analysis and documentation completeness report                  |
 
 ---
 
