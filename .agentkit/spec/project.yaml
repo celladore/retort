@@ -168,6 +168,15 @@ automation:
     codeql: true
     semgrep: true
     dependencyAudit: true
+  languageProfile:
+    mode: hybrid # configured | hybrid | heuristic
+    diagnostics: verbose # off | minimal | verbose
+    inferFrom:
+      frameworks: true
+      tests: true
+    scaffoldOverrides:
+      alwaysRegenerate: [] # relative paths that must always be regenerated even if scaffold-once by default
+      scaffoldOnce: [] # relative paths that should be treated as scaffold-once
 
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:

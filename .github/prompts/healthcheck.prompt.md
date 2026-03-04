@@ -32,6 +32,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
 
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
+
 ## Conventions
 
 - Write minimal, focused diffs — change only what is necessary
