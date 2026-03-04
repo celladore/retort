@@ -245,7 +245,12 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
 1. Verify all delegated tasks have reached a terminal state (`completed`, `failed`, `rejected`, or `canceled`).
 2. Invoke `/check` to run the full quality gate (format, lint, typecheck, tests, build).
 3. Invoke `/review` on all changed files since the orchestration began.
+{{#if hasInfraEval}}
+4. Invoke `/infra-eval` to assess infrastructure fitness. Delegate to `team-infra` as an `investigate` task. Log the evaluation score and hard-gate status to `events.log`. A hard-gate FAIL should be surfaced as a risk but does not block Phase 5 unless the user explicitly requires it.
+5. If any check, review, or evaluation finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+{{else}}
 4. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+{{/if}}
 5. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
    **Retry key convention:**
