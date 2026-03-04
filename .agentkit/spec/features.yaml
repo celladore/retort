@@ -406,6 +406,19 @@ features:
     affectsTemplates:
       - renovate/renovate.json
 
+  - id: infra-eval
+    name: Infrastructure Evaluation
+    category: infra
+    description: >-
+      On-demand infrastructure fitness assessment via /infra-eval.
+      Scores dimensions like scalability, security posture, and
+      observability. Results feed into Phase 4 validation.
+    alwaysOn: false
+    default: false
+    dependencies: []
+    templateVars:
+      - hasInfraEval
+
   # ---------------------------------------------------------------------------
   # Advanced — Power-user features
   # ---------------------------------------------------------------------------
@@ -561,4 +574,5 @@ presets:
       - dependency-management
       - mcp-integration
       - healthcheck
+      - infra-eval
       - project-review

@@ -270,12 +270,15 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
 2. Verify all auto-created cross-agent tasks (test, docs, security) from Phase 3 step 9 have also reached terminal state. If not, wait or process them before proceeding.
 3. Invoke `/check --coverage` to run the full quality gate **including coverage threshold enforcement** (format, lint, typecheck, tests, coverage, build).
 4. Invoke `/review` on all changed files since the orchestration began. This now includes automated coverage delta checking.
-5. **Test failure routing:** If `/check` reports test, lint, or typecheck failures:
+{{#if hasInfraEval}}
+5. Invoke `/infra-eval` to assess infrastructure fitness. Delegate to `team-infra` as an `investigate` task. Log results to `events.log` using the `INFRA_EVAL_COMPLETED` schema (`data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores`). A hard-gate FAIL should be surfaced as a risk but does not block Phase 5 unless the user explicitly requires it.
+{{/if}}
+{{#if hasInfraEval}}6{{else}}5{{/if}}. **Test failure routing:** If `/check` reports test, lint, or typecheck failures:
    - Create a `test` task assigned to `team-testing` (not just the engineering team) to diagnose and fix the failures.
    - Include the failure details, responsible teams, and affected files in the task description.
    - The testing team coordinates with the responsible engineering team to resolve issues.
-6. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
-7. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
+{{#if hasInfraEval}}7{{else}}6{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+{{#if hasInfraEval}}8{{else}}7{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
    **Retry key convention:**
    - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
@@ -307,7 +310,7 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
    - **`isTimestampNewer(newTs?: string | null, oldTs?: string | null): boolean`** — Validate non-null ISO-8601 strings; normalize both to UTC; return false for null, undefined, malformed inputs.
    - **`shouldResetRetryState(retryPolicy, retryEscalated): Promise<{allowed: boolean, reason?: string}>`** — Require `retryPolicy.allowReset === true`. If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison needed). If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be non-null and a valid ISO-8601 timestamp; call `isTimestampNewer(retryPolicy.lastResetAt, retryEscalated.at)` and only allow clearing `retryPolicy.roundRetries` when it returns true. When `isTimestampNewer` returns false: do NOT clear `roundRetries`; return `{allowed: false, reason: "reset prevented: lastResetAt not newer than retryEscalated.at"}` and ensure calling code logs/surfaces this reason.
    - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where isTimestampNewer returns false (roundRetries remains unchanged).
-8. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
+{{#if hasInfraEval}}9{{else}}8{{/if}}. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 
 ### Phase 5 — Ship
 
