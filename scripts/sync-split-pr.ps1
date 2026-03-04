@@ -18,6 +18,17 @@ function Write-UsageLog {
   Add-Content -Path $file -Value ($Payload | ConvertTo-Json -Compress)
 }
 
+function Assert-RequiredCommand {
+  param([string]$Name)
+  if (-not (Get-Command -Name $Name -ErrorAction SilentlyContinue)) {
+    throw "Required command '$Name' is not available in PATH. Install it and retry."
+  }
+}
+
+Assert-RequiredCommand -Name 'git'
+Assert-RequiredCommand -Name 'pnpm'
+Assert-RequiredCommand -Name 'gh'
+
 $status = git status --porcelain
 if ($status) {
   throw 'Working tree is not clean. Commit/stash/discard changes before running sync split.'
@@ -33,21 +44,21 @@ if (-not $Branch) {
   $Branch = "chore/sync-generated-$stamp"
 }
 
-Write-Host 'Running sync...'
+Write-Information 'Running sync...' -InformationAction Continue
 pnpm -C .agentkit agentkit:sync
 
 $changed = git status --porcelain
 if (-not $changed) {
-  Write-Host 'No sync-generated changes detected.'
+  Write-Information 'No sync-generated changes detected.' -InformationAction Continue
   Write-UsageLog @{ tool = 'sync-split-pr'; outcome = 'no_changes'; base = $Base; branch = $currentBranch }
   exit 0
 }
 
 $filesCount = @($changed -split "`n" | Where-Object { $_.Trim() }).Count
-Write-Host "Detected $filesCount changed file(s) from sync."
+Write-Information "Detected $filesCount changed file(s) from sync." -InformationAction Continue
 
 if ($DryRun) {
-  Write-Host 'Dry run enabled; not creating branch/commit/PR.'
+  Write-Information 'Dry run enabled; not creating branch/commit/PR.' -InformationAction Continue
   git status --short
   Write-UsageLog @{ tool = 'sync-split-pr'; outcome = 'dry_run'; files = $filesCount; base = $Base; branch = $currentBranch }
   exit 0
@@ -67,7 +78,7 @@ Automated sync-only PR.
 "@
 
 $prUrl = gh pr create --base $Base --head $Branch --title $PrTitle --body $prBody
-Write-Host "Created PR: $prUrl"
+Write-Information "Created PR: $prUrl" -InformationAction Continue
 
 Write-UsageLog @{
   tool = 'sync-split-pr'

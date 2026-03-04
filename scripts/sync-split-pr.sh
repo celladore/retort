@@ -7,30 +7,8 @@ COMMIT_MESSAGE="chore(sync): regenerate generated outputs"
 PR_TITLE="chore(sync): regenerate generated outputs"
 DRY_RUN=0
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --base)
-      BASE_BRANCH="${2:-}"
-      shift 2
-      ;;
-    --branch)
-      NEW_BRANCH="${2:-}"
-      shift 2
-      ;;
-    --commit-message)
-      COMMIT_MESSAGE="${2:-}"
-      shift 2
-      ;;
-    --pr-title)
-      PR_TITLE="${2:-}"
-      shift 2
-      ;;
-    --dry-run)
-      DRY_RUN=1
-      shift
-      ;;
-    -h|--help)
-      cat <<'EOF'
+print_usage() {
+  cat <<'EOF'
 Usage: scripts/sync-split-pr.sh [options]
 
 Creates a dedicated branch + commit + PR for files produced by `agentkit:sync`.
@@ -43,6 +21,59 @@ Options:
   --dry-run                  Run sync and report changes without creating branch/commit/PR
   -h, --help                 Show help
 EOF
+}
+
+require_option_value() {
+  local option_name="$1"
+  if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
+    echo "Error: ${option_name} requires a non-empty value." >&2
+    print_usage >&2
+    exit 1
+  fi
+}
+
+require_commands() {
+  local missing=0
+  for cmd in git pnpm gh; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      echo "Error: required command '$cmd' is not available in PATH." >&2
+      missing=1
+    fi
+  done
+
+  if [[ "$missing" -ne 0 ]]; then
+    exit 1
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --base)
+      require_option_value "$1" "$@"
+      BASE_BRANCH="${2:-}"
+      shift 2
+      ;;
+    --branch)
+      require_option_value "$1" "$@"
+      NEW_BRANCH="${2:-}"
+      shift 2
+      ;;
+    --commit-message)
+      require_option_value "$1" "$@"
+      COMMIT_MESSAGE="${2:-}"
+      shift 2
+      ;;
+    --pr-title)
+      require_option_value "$1" "$@"
+      PR_TITLE="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    -h|--help)
+      print_usage
       exit 0
       ;;
     *)
@@ -51,6 +82,8 @@ EOF
       ;;
   esac
 done
+
+require_commands
 
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "Working tree is not clean. Commit/stash/discard changes before running sync split." >&2
@@ -90,6 +123,8 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$FILES_COUNT" "$BASE_BRANCH" "$CURRENT_BRANCH" >> .agentkit/logs/tool-usage.jsonl
   exit 0
 fi
+
+require_commands
 
 git checkout -b "$NEW_BRANCH"
 git add -A
