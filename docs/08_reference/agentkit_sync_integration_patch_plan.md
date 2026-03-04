@@ -41,7 +41,7 @@ In generated branch-protection workflow:
 
 - Trigger applies to PRs targeting `dev` and `main`.
 - If PR touches `.agentkit/**`, PR body must contain upstream issue URL pattern:
-  - [https://github.com/JustAGhosT/agentkit-forge/issues/<number>](https://github.com/JustAGhosT/agentkit-forge/issues/170)
+  - [https://github.com/JustAGhosT/agentkit-forge/issues/<number>](https://github.com/JustAGhosT/agentkit-forge/issues/<number>)
 - On missing link, required check fails with clear remediation message.
 
 ### 2) Branch protection script behavior
