@@ -28,7 +28,9 @@ EXTRA_LABEL=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --apply) APPLY=true; shift ;;
-    --label)  EXTRA_LABEL="$2"; shift 2 ;;
+    --label)
+      [[ $# -ge 2 ]] || { echo "Error: --label requires a value"; exit 1; }
+      EXTRA_LABEL="$2"; shift 2 ;;
     -h|--help)
       echo "Usage: $0 [--apply] [--label <label>]"
       echo "  --apply   Create GitHub Issues (default is dry-run)"
@@ -57,10 +59,12 @@ fi
 # Discover unsynced issue files
 # ---------------------------------------------------------------------------
 
-SYNCED=0
+CANDIDATES=0
 SKIPPED=0
 FAILED=0
 
+# Glob matches the enforced naming convention: XXXX-YYYY-MM-DD-slug-issue.md
+# Files created outside create-doc.sh without the -issue suffix are not picked up.
 for issue_file in "$ISSUES_DIR"/*-issue.md; do
   [[ -f "$issue_file" ]] || continue
 
@@ -112,17 +116,18 @@ _Synced from \`docs/history/issues/$basename_file\`_"
     echo "          Labels: $LABELS"
     echo "          Source: $basename_file"
     echo ""
-    SYNCED=$((SYNCED + 1))
+    CANDIDATES=$((CANDIDATES + 1))
     continue
   fi
 
-  # Create the GitHub Issue
+  # Create the GitHub Issue — stderr is discarded; gh outputs only the URL on
+  # stdout on success.
   echo "Creating issue: \"$TITLE\" ..."
   ISSUE_URL="$(gh issue create \
     --title "$TITLE" \
     --body "$BODY" \
-    --label "$LABELS" 2>&1)" || {
-    echo "  FAILED: $ISSUE_URL"
+    --label "$LABELS" 2>/dev/null)" || {
+    echo "  FAILED to create issue: \"$TITLE\""
     FAILED=$((FAILED + 1))
     continue
   }
@@ -132,16 +137,17 @@ _Synced from \`docs/history/issues/$basename_file\`_"
 
   echo "  Created: $ISSUE_URL (#$ISSUE_NUMBER)"
 
-  # Stamp the local file with sync metadata
+  # Stamp the local file with sync metadata (portable: temp file instead of sed -i)
   SYNC_DATE="$(date +%Y-%m-%d)"
-  sed -i "s/^\(- \*\*gh_synced\*\*:\) .*/\1 true/" "$issue_file"
-  sed -i "s/^\(- \*\*gh_issue_number\*\*:\) .*/\1 #$ISSUE_NUMBER/" "$issue_file"
-  sed -i "s/^\(- \*\*gh_synced_at\*\*:\) .*/\1 $SYNC_DATE/" "$issue_file"
+  TMPFILE="$(mktemp)"
+  sed \
+    -e "s/^\(- \*\*gh_synced\*\*:\) .*/\1 true/" \
+    -e "s/^\(- \*\*gh_issue_number\*\*:\) .*/\1 #$ISSUE_NUMBER/" \
+    -e "s/^\(- \*\*gh_synced_at\*\*:\) .*/\1 $SYNC_DATE/" \
+    -e "s|\(- \*\*Issue tracker\*\*:\) \[GitHub Issue.*\]|\1 $ISSUE_URL|" \
+    "$issue_file" > "$TMPFILE" && mv "$TMPFILE" "$issue_file"
 
-  # Also update the Issue tracker field if it's still a placeholder
-  sed -i "s|\(- \*\*Issue tracker\*\*:\) \[GitHub Issue.*\]|\1 $ISSUE_URL|" "$issue_file"
-
-  SYNCED=$((SYNCED + 1))
+  CANDIDATES=$((CANDIDATES + 1))
 done
 
 # ---------------------------------------------------------------------------
@@ -150,8 +156,8 @@ done
 
 echo "---"
 if [[ "$APPLY" == false ]]; then
-  echo "Dry-run complete. $SYNCED issue(s) would be created, $SKIPPED already synced."
+  echo "Dry-run complete. $CANDIDATES issue(s) would be created, $SKIPPED already synced."
   echo "Run with --apply to create GitHub Issues."
 else
-  echo "Sync complete. $SYNCED created, $SKIPPED already synced, $FAILED failed."
+  echo "Sync complete. $CANDIDATES created, $SKIPPED already synced, $FAILED failed."
 fi
