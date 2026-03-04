@@ -17,12 +17,6 @@ on:
       - '**/pnpm-lock.yaml'
       - 'yarn.lock'
       - 'package-lock.json'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'pyproject.toml'
-      - 'requirements*.txt'
-      - '*.csproj'
-      - 'Directory.Packages.props'
 
 jobs:
   audit-node:
