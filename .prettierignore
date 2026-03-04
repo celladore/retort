@@ -6,8 +6,8 @@ package-lock.json
 yarn.lock
 **/yarn.lock
 
-# Ephemeral test fixture directories (created by vitest at repo root)
-.test-*
+# Ephemeral test fixture directory (created by vitest at repo root)
+.test-tmp
 
 # Generated root docs managed by agentkit:sync
 AGENTS.md
