@@ -60,24 +60,33 @@ if [[ -f "${CWD}/package.json" ]]; then
     fi
 
     # Try lint, then test, then build -- stop at first failure.
+    # pnpm uses -C <dir> before the subcommand; npm/yarn use --prefix after.
+    pm_run() {
+        local script="$1"
+        if [[ "$pm" == "pnpm" ]]; then
+            "$pm" -C "$CWD" run "$script"
+        else
+            "$pm" run "$script" --prefix "$CWD"
+        fi
+    }
     has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
 
     if has_script "lint"; then
-        if ! run_check "${pm} lint" "$pm" run lint --prefix "$CWD"; then
+        if ! run_check "${pm} lint" pm_run lint; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
     fi
 
     if has_script "test"; then
-        if ! run_check "${pm} test" "$pm" run test --prefix "$CWD"; then
+        if ! run_check "${pm} test" pm_run test; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
     fi
 
     if has_script "build"; then
-        if ! run_check "${pm} build" "$pm" run build --prefix "$CWD"; then
+        if ! run_check "${pm} build" pm_run build; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
