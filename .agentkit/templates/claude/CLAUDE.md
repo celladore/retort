@@ -37,19 +37,19 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 
 ## Quick Reference
 
-| Command         | Purpose                                      |
-| --------------- | -------------------------------------------- |
-| `/orchestrate`  | Master coordinator — assess, plan, delegate  |
-| `/discover`     | Scan codebase, detect tech stacks            |
-| `/healthcheck`  | Pre-flight validation                        |
-| `/review`       | Code review with quality gates               |
-| `/check`        | Universal quality gate (lint + test + build) |
-| `/plan`         | Structured planning before implementation    |
-| `/build`        | Build project (auto-detects stack)           |
-| `/test`         | Run tests (auto-detects stack)               |
-| `/format`       | Format code (auto-detects stack)             |
-| `/deploy`       | Deployment automation                        |
-| `/security`     | Security audit                               |
+| Command              | Purpose                                      |
+| -------------------- | -------------------------------------------- |
+| `/orchestrate`       | Master coordinator — assess, plan, delegate  |
+| `/discover`          | Scan codebase, detect tech stacks            |
+| `/healthcheck`       | Pre-flight validation                        |
+| `/review`            | Code review with quality gates               |
+| `/check`             | Universal quality gate (lint + test + build) |
+| `/plan`              | Structured planning before implementation    |
+| `/build`             | Build project (auto-detects stack)           |
+| `/test`              | Run tests (auto-detects stack)               |
+| `/format`            | Format code (auto-detects stack)             |
+| `/deploy`            | Deployment automation                        |
+| `/security`          | Security audit                               |
 | `/sync-backlog`      | Update AGENT_BACKLOG.md                      |
 | `/document-history`  | Create history doc for completed work        |
 | `/handoff`           | Session handoff summary                      |

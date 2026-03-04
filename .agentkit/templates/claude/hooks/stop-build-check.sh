@@ -190,14 +190,14 @@ if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &
         changed_src_files=0
         if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
             changed_src_files=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
-                | grep -cE '\.(ts|tsx|js|jsx|py|rs|go|cs|java|rb|swift|kt)$' || echo "0")
+                | { grep -cE '\.(ts|tsx|js|jsx|py|rs|go|cs|java|rb|swift|kt)$' || true; })
         fi
 
         # Check if any history doc was created in this branch
         history_docs_created=0
         if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
             history_docs_created=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
-                | grep -c '^docs/history/' || echo "0")
+                | { grep -c '^docs/history/' || true; })
         fi
 
         # If significant source changes but no history doc, warn (non-blocking)
