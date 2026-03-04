@@ -118,7 +118,7 @@ For machine-identifiable events, use JSON lines format:
 {"eventType": "CANCELED", "taskId": "<task-id>", "reason": "dependency-cycle", "cycleId": "<cycle-id>", "cycleMembers": ["<task-id-1>", "<task-id-2>"], "actor": "orchestrator", "timestamp": "<ISO-8601>"}
 ```
 
-**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`, `INFRA_EVAL_COMPLETED`
+**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`, `INFRA_EVAL_COMPLETED`, `TURN_LIMIT_REACHED`, `LOOP_DETECTED`, `STAGNATION_DETECTED`, `HANDOFF_DEPTH_EXCEEDED`
 
 **cycleId format:** Generate a deterministic identifier per detected cycle. Hash the sorted list of member task IDs with SHA-256 and truncate to 12 chars. Reuse the same cycleId for all events from that cycle.
 
@@ -142,6 +142,10 @@ Required fields for DESCOPED events: `eventType` (must be "DESCOPED"), `taskId`,
 | `ACCEPTED`                      | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
 | `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                                 | `actor`, `metadata` |
 | `INFRA_EVAL_COMPLETED`          | `timestamp`, `data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores` | `actor`, `metadata` |
+| `TURN_LIMIT_REACHED`            | `taskId`, `turnCount`, `timestamp`                                                   | `actor`, `metadata` |
+| `LOOP_DETECTED`                 | `taskId`, `repeatedAction`, `count`, `timestamp`                                     | `actor`, `metadata` |
+| `STAGNATION_DETECTED`           | `taskId`, `turnsSinceProgress`, `timestamp`                                          | `actor`, `metadata` |
+| `HANDOFF_DEPTH_EXCEEDED`        | `taskId`, `depth`, `maxDepth`, `violatingTeams`, `timestamp`                         | `actor`, `metadata` |
 
 Example with all optional fields:
 

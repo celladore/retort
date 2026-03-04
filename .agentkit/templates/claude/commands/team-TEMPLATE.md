@@ -29,7 +29,25 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 
 **Allowed task statuses:** `submitted`, `accepted`, `working`, `input-required`, `completed`, `failed`, `rejected`, `canceled`, `BLOCKED_ON_CANCELED`. These align with the runtime task protocol; use only canonical statuses.
 
-**MAX_HANDOFF_CHAIN_DEPTH:** 5 (configurable). Rationale: limits handoff chain length to avoid unbounded delegation; default balances flexibility with traceability.
+**MAX_HANDOFF_CHAIN_DEPTH:** 5 (configurable, hard limit). Rationale: limits handoff chain length to avoid unbounded delegation; default balances flexibility with traceability. If `task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH`, the handoff is **blocked** (set `status` to `"blocked"`, append reason to `handoffContext`, emit events.log entry). This is a hard stop, not a warning.
+
+**MAX_TASK_TURNS:** 25 (configurable). Maximum number of agentic turns (tool calls / LLM round-trips) allowed per task execution. Track the current turn count in the task file under `_turnCount` (initialize to 0). Increment `_turnCount` before each action (file edit, tool call, command execution). If `_turnCount >= MAX_TASK_TURNS`:
+1. Stop work immediately.
+2. Set task status to `input-required`.
+3. Append a message: `"Turn limit reached (MAX_TASK_TURNS=25). Requesting human guidance to continue or descope."`.
+4. Emit an events.log entry: `{"eventType": "TURN_LIMIT_REACHED", "taskId": "<id>", "turnCount": <N>, "timestamp": "<ISO>"}`.
+5. Do NOT continue working or retry — wait for human intervention.
+
+**Action Repetition Detection:** Track the last 5 actions (tool name + target file + action summary) in the task file under `_recentActions[]`. Before each action, check if the new action is substantially similar to 3 or more of the last 5 entries (same tool + same target file + similar intent). If repetition is detected:
+1. Stop work immediately.
+2. Set task status to `input-required`.
+3. Append a message: `"Repetition loop detected: same action attempted 3+ times without progress. Requesting human guidance."`.
+4. Emit an events.log entry: `{"eventType": "LOOP_DETECTED", "taskId": "<id>", "repeatedAction": "<summary>", "count": <N>, "timestamp": "<ISO>"}`.
+
+**Stagnation Detection:** Track the timestamp of the last meaningful progress (file changed, test added, artifact produced) in `_lastProgressAt`. If more than 10 turns have elapsed since `_lastProgressAt` was updated and no `files-changed` or `test-results` artifact has been added:
+1. Set task status to `input-required`.
+2. Append a message: `"Stagnation detected: no measurable progress in 10 turns. Requesting human guidance."`.
+3. Emit an events.log entry: `{"eventType": "STAGNATION_DETECTED", "taskId": "<id>", "turnsSinceProgress": <N>, "timestamp": "<ISO>"}`.
 
 **Accepted task types:** {{teamAccepts}}
 {{#if teamHandoffChain}}
@@ -196,7 +214,7 @@ If you were working on a delegated task from `.claude/state/tasks/`:
 4. Add a final message summarising what was done.
 5. If the task has a `handoffTo` array, validate handoff:
    - **Reject and block:** (1) if `handoffTo` contains `currentTeam` (self-handoff) → set status to "blocked"; (2) if `handoffTo` contains the immediate predecessor (last entry in task.handoffHistory) → set status to "blocked"; (3) if `handoffTo` contains duplicate team IDs → set status to "needs-review". In all cases: append explanatory text to task.handoffContext, create events.log entry, call notification hook. Human clearance required for "needs-review" before orchestrator can create follow-ups.
-   - **Depth-based warning (not hard-fail):** If task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH (default 5), emit a warning entry in events.log, append a warning to task.handoffContext, call the notification hook — but do NOT change task.status or prevent the handoff. Keep duplicate-ID check within task.handoffTo (reject duplicates). All log entries must include task id, violating teams, depth, and timestamp.
+   - **Depth-based hard stop:** If task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH (default 5), set task.status to "blocked", emit an error entry in events.log with `{"eventType": "HANDOFF_DEPTH_EXCEEDED", "taskId": "<id>", "depth": <N>, "maxDepth": 5, "violatingTeams": [...], "timestamp": "<ISO>"}`, append reason to task.handoffContext, and call the notification hook. Do NOT allow the handoff to proceed. Keep duplicate-ID check within task.handoffTo (reject duplicates). All log entries must include task id, violating teams, depth, and timestamp. Human clearance is required to override.
    - If validation passes, populate `handoffContext` with a one-paragraph summary of what was done and what the next team needs. The orchestrator will auto-create follow-up tasks only for statuses that explicitly allow it (e.g., "ready-for-followup"); require human clearance to move from "needs-review" to "ready-for-followup".
 
 **Notification Hook Interface:**
