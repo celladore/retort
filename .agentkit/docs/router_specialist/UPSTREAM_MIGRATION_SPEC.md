@@ -111,6 +111,6 @@ Treat as downstream consumer in this phase, with the following checkpoints:
 ## 9) Acceptance Criteria
 
 - No authoritative section in consumer docs claims implementation ownership over generated router-specialist artifacts.
-- Upstream docs are sufficient to execute Waves 0–3.5 without relying on consumer-repo copies.
+- Upstream docs are sufficient to execute Waves A–C without relying on consumer-repo copies.
 - Runtime handoff and analytics integration checkpoints are explicitly represented in the upstream checklist.
 - Upstream `COMMAND_REFERENCE`, `QUICK_START`, `commands.yaml`, command templates, and hook templates are aligned with the intended `/mode` + delegated-task protocol and hook output contract.

@@ -198,7 +198,11 @@ const FLAG_TYPES = {
 
 const args = process.argv.slice(2);
 const command = args[0];
-const commandArgs = args.slice(1);
+// Strip the bare `--` separator injected by `npm run`/`pnpm run` when the
+// caller uses `pnpm run agentkit:init -- --repoName foo` so that flags reach
+// parseArgs correctly.
+let commandArgs = args.slice(1);
+if (commandArgs[0] === '--') commandArgs = commandArgs.slice(1);
 
 function parseFlags(command, args) {
   try {

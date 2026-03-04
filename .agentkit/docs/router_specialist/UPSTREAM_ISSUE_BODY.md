@@ -1,5 +1,7 @@
 # Router-Specialist Upstream Migration: Source-of-Truth Realignment (Issue/Spec First)
 
+> Upstream-only governance document: this file is authoritative in `justaghost/agentkit-forge` and must not be treated as generated/synced consumer source-of-truth under consumer `.agentkit` paths.
+
 ## Summary
 
 Migrate router-specialist authoritative planning/docs ownership to `justaghost/agentkit-forge` and treat generated `.agentkit` router docs in consumer repositories as reference-only.
@@ -11,6 +13,8 @@ Consumer repos currently carry generated router-specialist content that can drif
 ## Scope (this pass)
 
 ### Router core trio
+
+These router-core documents are upstream-only authoritative artifacts and are not consumer-generated source-of-truth.
 
 - `.agentkit/docs/router_specialist/IMPLEMENTATION_PLAN_V3.md`
 - `.agentkit/docs/router_specialist/IMPLEMENTATION_CHECKLIST.md`
@@ -37,12 +41,12 @@ Consumer repos currently carry generated router-specialist content that can drif
 
 ## Repository Responsibility Model
 
-| Concern | Primary Repo | Secondary/Consumer |
-| --- | --- | --- |
-| Router-specialist specs/templates/contracts | `justaghost/agentkit-forge` | Generated copies in consumer repos |
-| Gateway runtime behavior and SLO operations | `phoenixvc/ai-gateway` | N/A |
-| Consumer overlays and local integration notes | Consumer repos | N/A |
-| Cost analytics and KPI dashboards | `phoenixvc/pvc-costops-analytics` | Downstream consumer |
+| Concern                                       | Primary Repo                      | Secondary/Consumer                 |
+| --------------------------------------------- | --------------------------------- | ---------------------------------- |
+| Router-specialist specs/templates/contracts   | `justaghost/agentkit-forge`       | Generated copies in consumer repos |
+| Gateway runtime behavior and SLO operations   | `phoenixvc/ai-gateway`            | N/A                                |
+| Consumer overlays and local integration notes | Consumer repos                    | N/A                                |
+| Cost analytics and KPI dashboards             | `phoenixvc/pvc-costops-analytics` | Downstream consumer                |
 
 ## Deliverables
 
@@ -109,7 +113,7 @@ Consumer repos currently carry generated router-specialist content that can drif
 ## Acceptance Criteria
 
 - Consumer docs do not claim authoritative implementation ownership for generated router-specialist artifacts.
-- Upstream docs are sufficient to execute Waves 0–3.5 without relying on consumer copies.
+- Upstream docs are sufficient to execute Waves A–C without relying on consumer copies.
 - Runtime handoff and analytics checkpoints are explicitly represented in upstream checklist/tracker.
 - Upstream `COMMAND_REFERENCE`, `QUICK_START`, `commands.yaml`, command templates, and hook templates are aligned with `/mode` + delegated-task protocol and hook output contract.
 

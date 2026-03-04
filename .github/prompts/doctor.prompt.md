@@ -3,7 +3,7 @@ mode: "agent"
 description: "Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues."
 generated_by: "agentkit-forge"
 last_model: "sync-engine"
-last_updated: "2026-03-03"
+last_updated: "2026-03-04"
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
