@@ -127,9 +127,9 @@ const ALLOWED_NPX_PACKAGES = new Set(['prettier']);
 function resolveFormatter(formatter) {
   const map = {
     prettier: {
-      cmd: 'npx prettier',
-      check: 'npx prettier --check .',
-      fix: 'npx prettier --write .',
+      cmd: 'prettier',
+      check: 'node .agentkit/node_modules/prettier/bin/prettier.cjs --check .',
+      fix: 'node .agentkit/node_modules/prettier/bin/prettier.cjs --write .',
     },
     black: { cmd: 'black', check: 'black --check .', fix: 'black .' },
     'cargo fmt': { cmd: 'cargo fmt', check: 'cargo fmt -- --check', fix: 'cargo fmt' },

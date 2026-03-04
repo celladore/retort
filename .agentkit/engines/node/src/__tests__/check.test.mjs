@@ -120,9 +120,9 @@ describe('runCheck()', () => {
 describe('resolveFormatter()', () => {
   it('maps known formatters to check/fix commands', () => {
     const r = resolveFormatter('prettier');
-    expect(r.check).toBe('npx prettier --check .');
-    expect(r.fix).toBe('npx prettier --write .');
-    expect(r.cmd).toBe('npx prettier');
+    expect(r.check).toBe('node .agentkit/node_modules/prettier/bin/prettier.cjs --check .');
+    expect(r.fix).toBe('node .agentkit/node_modules/prettier/bin/prettier.cjs --write .');
+    expect(r.cmd).toBe('prettier');
   });
 
   it('maps black formatter correctly', () => {
