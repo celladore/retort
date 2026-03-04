@@ -4,8 +4,9 @@
  * Now includes spec-aware validation via spec-validator.mjs.
  */
 import { existsSync, readdirSync, readFileSync } from 'fs';
+import yaml from 'js-yaml';
 import { extname, join, resolve } from 'path';
-import { validateSpec } from './spec-validator.mjs';
+import { validateSpec, PROJECT_ENUMS } from './spec-validator.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   console.log('[agentkit:validate] Validating generated outputs...');
@@ -209,6 +210,91 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
     );
   }
   console.log(`  Scanned ${scannedFiles} files for secrets`);
+
+  // ─── Phase 9: Validate issue template fields ────────────────────────────
+  console.log('\n  --- Issue Template Validation ---');
+  const issueTemplateDir = resolve(projectRoot, '.github', 'ISSUE_TEMPLATE');
+  if (existsSync(issueTemplateDir)) {
+    const templateFiles = readdirSync(issueTemplateDir).filter(
+      (f) => f.endsWith('.yml') || f.endsWith('.yaml')
+    );
+    for (const file of templateFiles) {
+      if (file === 'config.yml' || file === 'config.yaml') continue;
+      const fullPath = join(issueTemplateDir, file);
+      try {
+        const content = readFileSync(fullPath, 'utf-8');
+        const parsed = yaml.load(content);
+        if (!parsed || !Array.isArray(parsed.body)) {
+          console.warn(`  WARN: ${file} — not a valid issue form (missing body array)`);
+          warnings++;
+          continue;
+        }
+        let fieldErrors = 0;
+        for (const field of parsed.body) {
+          if (field.type !== 'dropdown' || !field.attributes?.options) continue;
+          const id = field.id || field.attributes?.label || 'unknown';
+          const options = field.attributes.options;
+
+          if (id === 'area') {
+            for (const opt of options) {
+              if (!PROJECT_ENUMS.issueArea.includes(opt)) {
+                console.error(`  FAIL: ${file} field "area" has invalid option "${opt}"`);
+                errors++;
+                fieldErrors++;
+              }
+            }
+          }
+          if (id === 'priority') {
+            for (const opt of options) {
+              const prioMatch = String(opt).match(/^(P\d)/);
+              if (!prioMatch || !PROJECT_ENUMS.issuePriority.includes(prioMatch[1])) {
+                console.error(`  FAIL: ${file} field "priority" has invalid option "${opt}"`);
+                errors++;
+                fieldErrors++;
+              }
+            }
+          }
+          if (id === 'severity') {
+            for (const opt of options) {
+              const sevLevel = String(opt).split(' — ')[0].trim();
+              if (!PROJECT_ENUMS.issueSeverity.includes(sevLevel)) {
+                console.error(`  FAIL: ${file} field "severity" has invalid option "${opt}"`);
+                errors++;
+                fieldErrors++;
+              }
+            }
+          }
+          if (id === 'phase') {
+            for (const opt of options) {
+              if (!PROJECT_ENUMS.phase.includes(opt)) {
+                console.error(`  FAIL: ${file} field "phase" has invalid option "${opt}"`);
+                errors++;
+                fieldErrors++;
+              }
+            }
+          }
+          if (id === 'impact') {
+            for (const opt of options) {
+              if (!PROJECT_ENUMS.issueImpact.includes(opt)) {
+                console.error(`  FAIL: ${file} field "impact" has invalid option "${opt}"`);
+                errors++;
+                fieldErrors++;
+              }
+            }
+          }
+        }
+        if (fieldErrors === 0) {
+          console.log(`  OK: ${file} — all dropdown values valid`);
+        }
+      } catch (err) {
+        console.error(`  FAIL: ${file} — parse error: ${err.message}`);
+        errors++;
+      }
+    }
+  } else {
+    console.warn('  WARN: No .github/ISSUE_TEMPLATE/ directory found');
+    warnings++;
+  }
 
   // ─── Summary ───────────────────────────────────────────────────────────
   console.log('');
