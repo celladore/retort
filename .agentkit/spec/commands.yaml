@@ -35,9 +35,9 @@ commands:
 
       ## State Management
 
-      - **State file:** `.claude/state/orchestrator.json` — tracks phase, teams, metrics, risks, retry policy
-      - **Events log:** `.claude/state/events.log` — append-only audit trail
-      - **Task files:** `.claude/state/tasks/` — per-task JSON with lifecycle: submitted → accepted → working → completed/failed/rejected
+      - **State file:** `{{stateDir}}/orchestrator.json` — tracks phase, teams, metrics, risks, retry policy
+      - **Events log:** `{{stateDir}}/events.log` — append-only audit trail
+      - **Task files:** `{{stateDir}}/tasks/` — per-task JSON with lifecycle: submitted → accepted → working → completed/failed/rejected
       - **Lock:** Check for stale locks (>30 min) before starting. Always release on completion.
 
       ## Output

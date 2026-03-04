@@ -430,7 +430,7 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.cursor/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.cursor', 'commands', `${cmd.name}.md`), withHeader);
@@ -481,7 +481,7 @@ async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoNam
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.windsurf/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.windsurf', 'commands', `${cmd.name}.md`), withHeader);
@@ -527,7 +527,7 @@ async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName,
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.github/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`), withHeader);
@@ -717,7 +717,7 @@ async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, co
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.agents/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.agents', 'skills', cmd.name, 'SKILL.md'), withHeader);
@@ -821,14 +821,18 @@ async function syncA2aConfig(
 // Variable builder helpers (private — used by tool-specific sync functions)
 // ---------------------------------------------------------------------------
 
-function buildCommandVars(cmd, vars) {
+function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
+  let prompt = typeof cmd.prompt === 'string' ? cmd.prompt.trim() : '';
+  if (prompt) {
+    prompt = prompt.replaceAll('{{stateDir}}', stateDir);
+  }
   return {
     ...vars,
     commandName: cmd.name,
     commandDescription:
       typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
-    commandPrompt: typeof cmd.prompt === 'string' ? cmd.prompt.trim() : '',
+    commandPrompt: prompt,
   };
 }
 
