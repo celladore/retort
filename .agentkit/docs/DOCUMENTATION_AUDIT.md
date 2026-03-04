@@ -146,6 +146,42 @@ The following items from the initial audit's "remaining recommendations" have al
 
 ---
 
+## Preemptive Documentation for In-Flight Branches (Third Pass)
+
+A comprehensive analysis of 7 active branches identified 6 new commands, 2 new agents, and 3 new systems that will need documentation when merged. Rather than waiting for merge, the following preemptive documentation has been added:
+
+13. **Updated `COMMAND_REFERENCE.md`** — Added "Incoming Commands" section documenting `/infra-eval`, `/brand`, `/feature-configure`, `/feature-flow`, `/feature-review`, and `/review --focus=retrospective` with full flags, descriptions, and integration notes. Also documented the merge conflict resolution system and CI/CD audit.
+14. **Updated `AGENTS_REFERENCE.md`** — Added "Incoming Agents" section documenting `retrospective-analyst` (operations) and `feature-ops` (new feature-management category) with roles, scopes, and responsibilities.
+15. **Updated `AGENTS_VS_TEAMS.md`** — Added "Incoming Agents" section with merge instructions for updating agent counts and category tables.
+16. **Updated `QUICK_START.md`** — Added "Coming Soon" table listing all 6 incoming commands with their source branches.
+17. **Updated `WORKFLOWS.md`** — Added 4 new workflow scenarios: Infrastructure Fitness Evaluation (Scenario 8), Feature Management Setup (Scenario 9), Session Retrospective (Scenario 10), Brand & Editor Theme Setup (Scenario 11).
+
+### Branch-by-Branch Impact Summary
+
+| Branch | New Commands | New Agents | Key Documentation Impact |
+|--------|-------------|------------|--------------------------|
+| `agentforge-template-integration` | `/infra-eval` | — | 8-dimension evaluation framework, hard gates, orchestrator Phase 4 integration |
+| `elegant-knuth` | `/review` enhancements | `retrospective-analyst` | 4 new review criteria (7-10), retrospective mode, 4 CI workflows, docs/history/ structure |
+| `feature-management-strategy` | `/feature-configure`, `/feature-flow`, `/feature-review` | `feature-ops` | Feature gating system, presets, 564-line features.yaml spec, feature-aware sync |
+| `repo-specific-editor-theme` | `/brand` | — | Brand spec system, editor theme generation, brand-resolver engine |
+| `resolve-merge-conflicts` | — (system) | — | Merge conflict resolution scripts, CI workflow, gitattributes merge driver |
+| `review-cicd-infrastructure` | — (audit) | — | 502-line CI/CD audit with 28 findings and 4-wave remediation roadmap |
+| `docs/issue-intake-ownership-flow` | — (spec) | — | Issue intake ownership model for GitHub/Linear, enhances `/sync-backlog` |
+
+### Merge Checklist
+
+When each branch merges, the following documentation actions are needed:
+
+- [ ] Move command entries from "Incoming Commands" to main COMMAND_REFERENCE sections
+- [ ] Move agent entries from "Incoming Agents" to main AGENTS_REFERENCE sections
+- [ ] Update agent count in AGENTS_VS_TEAMS.md heading (19 → 21 when both agent branches merge)
+- [ ] Update command count in QUICK_START.md (29 → 35 when all command branches merge)
+- [ ] Remove "Coming Soon" entries from QUICK_START.md as branches merge
+- [ ] Move workflow scenarios from "(Incoming)" suffix to regular numbered scenarios
+- [ ] Update this audit document to mark preemptive items as finalized
+
+---
+
 ## Remaining Recommendations (Not Addressed)
 
 These items are lower priority and recommended for future work:

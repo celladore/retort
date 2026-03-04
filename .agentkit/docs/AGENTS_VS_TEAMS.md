@@ -168,4 +168,28 @@ When a task spans multiple teams, use `/orchestrate` to let the orchestrator man
 
 ---
 
+## Incoming Agents (In-Flight Branches)
+
+> The following agents are being developed on active branches. This section tracks them preemptively. Move entries to the main tables as each branch merges.
+
+### Retrospective Analyst (`retrospective-analyst`)
+
+**Branch:** `claude/elegant-knuth-iSy89` | **Category:** Operations
+
+Session knowledge capture agent activated via `/review --focus=retrospective`. Extracts issues and lessons from conversation history. Non-blocking.
+
+### Feature Operations Specialist (`feature-ops`)
+
+**Branch:** `claude/feature-management-strategy-1jUSw` | **Category:** Feature Management (new)
+
+Kit feature management agent that helps teams choose, configure, and audit feature presets. Activated via `/feature-configure`, `/feature-flow`, and `/feature-review`.
+
+**When these branches merge, update:**
+
+1. The agent count heading from "19" to "21"
+2. Add a "Feature Management" category (1 agent) to the category tables
+3. Add `retrospective-analyst` to the Operations table (bringing it to 4 agents)
+
+---
+
 See also: [TEAM_GUIDE.md](./TEAM_GUIDE.md) for decision matrices, inter-team handoff patterns, and orchestrate-vs-manual guidance.

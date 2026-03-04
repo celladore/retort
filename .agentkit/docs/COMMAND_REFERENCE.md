@@ -13,6 +13,7 @@ A unified reference for every slash command available in AgentKit Forge, with us
 5. [Utility Commands](#utility-commands)
 6. [Diagnostic Commands](#diagnostic-commands)
 7. [Slash-Command-Only Commands](#slash-command-only-commands)
+8. [Incoming Commands (In-Flight Branches)](#incoming-commands-in-flight-branches)
 
 ---
 
@@ -923,3 +924,231 @@ These commands are available only as slash commands within AI coding tools. They
 /preflight --base main --strict
 /preflight --range v1.0.0..HEAD
 ```
+
+---
+
+## Incoming Commands (In-Flight Branches)
+
+> **Note:** The following commands are being developed on active branches and are not yet merged into `dev` or `main`. This section documents them preemptively so that documentation stays ahead of code delivery. Update this section and move entries to the main reference as each branch merges.
+
+---
+
+### `/infra-eval`
+
+**Branch:** `claude/agentforge-template-integration-eCegs`
+
+**One-line:** Risk-aware infrastructure and codebase fitness evaluation scoring 8 weighted dimensions with hard gate enforcement.
+
+**When to use:**
+
+- Quarterly reassessment of infrastructure health.
+- Pre-funding due diligence on technical maturity.
+- Before architectural decisions that affect reliability or cost.
+
+**Flags:**
+
+| Flag           | Description                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| `--scope <path>` | Limit evaluation to specific paths or modules.                                           |
+| `--focus <area>` | Target dimension: all, reliability, cost, security, infra, scalability, architecture, code, ops. |
+| `--output <fmt>` | Output format: markdown, json, yaml.                                                     |
+| `--save`       | Save report to `docs/evaluations/`. Default: true.                                        |
+| `--no-save`    | Do not save report.                                                                        |
+| `--gates-only` | Run hard gate checks only (skip dimensional scoring).                                      |
+
+**8 evaluation dimensions (weighted):**
+
+1. Reliability & Resilience (18%)
+2. Cost Efficiency (16%)
+3. Security & Compliance (14%)
+4. Infrastructure & Delivery Safety (12%)
+5. Scalability Path (12%)
+6. Architecture Quality (10%)
+7. Code Quality (10%)
+8. Operational Maturity (8%)
+
+**Hard gates (non-negotiable):** Any gate failure = overall FAIL.
+
+- G1: No tested backup restore for critical data
+- G2: No cost attribution or billing explanation
+- G3: No content moderation audit trail (if applicable)
+- G4: No rollback strategy for production
+- G5: Identity/role boundaries not technically enforced (if multi-role)
+
+**Integration:** Wired into `/orchestrate` Phase 4 (Validate). New event type: `INFRA_EVAL_COMPLETED`. Requires `evaluation.infraEval: true` in `project.yaml` to enable.
+
+---
+
+### `/brand`
+
+**Branch:** `claude/repo-specific-editor-theme-zMOG1`
+
+**One-line:** Brand management and editor theme generation from a centralized `brand.yaml` specification.
+
+**When to use:**
+
+- Scaffolding a new brand identity for your repository.
+- Generating editor themes (VS Code, Cursor, Windsurf) from brand colors.
+- Auditing accessibility compliance (WCAG) of your color palette.
+
+**Modes:**
+
+| Flag           | Description                                                  |
+| -------------- | ------------------------------------------------------------ |
+| `--init`       | Scaffold `brand.yaml` and `editor-theme.yaml` templates.     |
+| `--validate`   | Validate brand spec for completeness and accessibility.       |
+| `--palette`    | Preview color palette with contrast ratios.                   |
+| `--theme`      | Regenerate editor theme files from brand spec.                |
+| `--contrast`   | Audit WCAG compliance of color combinations.                  |
+| `--all`        | Run all validations and generation.                           |
+
+**Key files:**
+
+- `.agentkit/spec/brand.yaml` — Brand identity specification (colors, typography, spacing, motion, accessibility)
+- `.agentkit/spec/editor-theme.yaml` — Maps brand colors to editor UI elements (light/dark mode)
+- `.agentkit/engines/node/src/brand-resolver.mjs` — Color resolution and validation engine
+
+---
+
+### `/feature-configure`
+
+**Branch:** `claude/feature-management-strategy-1jUSw`
+
+**One-line:** Interactive workflow to configure which AgentKit Forge features are enabled for your repository.
+
+**When to use:**
+
+- Initial setup to choose a feature preset (minimal, lean, standard, full).
+- Enabling or disabling specific features with dependency checking.
+- Previewing changes before applying with dry-run mode.
+
+**Presets:**
+
+| Preset     | Features | Description                                          |
+| ---------- | -------- | ---------------------------------------------------- |
+| `minimal`  | 5        | Sync + basic quality gates, no team orchestration    |
+| `lean`     | 8        | Quality + docs, no team overhead (solo developers)   |
+| `standard` | 12       | **Default** — teams + quality + docs + security      |
+| `full`     | 20       | Everything including cost tracking, MCP, healthcheck |
+
+**Key files:**
+
+- `.agentkit/spec/features.yaml` — Canonical registry of all kit features with dependencies
+- `.agentkit/engines/node/src/feature-manager.mjs` — Feature resolution engine
+
+**CLI equivalents:**
+
+```bash
+agentkit features                          # List features and status
+agentkit features enable <id> [id2...]     # Enable specific features
+agentkit features disable <id> [id2...]    # Disable specific features
+agentkit features preset <name>            # Apply preset
+```
+
+---
+
+### `/feature-flow`
+
+**Branch:** `claude/feature-management-strategy-1jUSw`
+
+**One-line:** End-to-end tracing of a feature from spec definition through template rendering to generated output.
+
+**When to use:**
+
+- Debugging why a feature's generated output looks wrong.
+- Understanding the full resolution chain for a specific feature.
+- Verifying template variable injection is correct.
+
+**Flags:**
+
+| Flag               | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `--show-output`    | Include generated output file contents.        |
+| `--show-templates` | Include raw template content before rendering. |
+
+---
+
+### `/feature-review`
+
+**Branch:** `claude/feature-management-strategy-1jUSw`
+
+**One-line:** Audit feature configuration for consistency, recommend features based on codebase analysis, and detect stale configs.
+
+**Flags:**
+
+| Flag          | Description                                                          |
+| ------------- | -------------------------------------------------------------------- |
+| `--recommend` | Scan codebase and recommend features based on detected patterns.     |
+| `--audit`     | Check if enabled features have corresponding generated files.        |
+
+---
+
+### `/review --focus=retrospective`
+
+**Branch:** `claude/elegant-knuth-iSy89`
+
+**One-line:** Session-aware retrospective mode that reviews conversation history to extract issues encountered and lessons learned.
+
+**When to use:**
+
+- End of a sprint or development session to capture institutional knowledge.
+- After resolving a difficult bug to document the debugging process.
+- To build a library of lessons for future sessions.
+
+**New `/review` flags (this branch):**
+
+| Flag             | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| `--focus=retrospective` | Activate retrospective mode instead of code review.          |
+| `--open-issues`  | Automatically file issues in external tracker for critical findings.|
+| `--dry-run`      | Preview findings without writing files or creating issues.         |
+
+**Expanded review criteria (7-10, new):**
+
+| # | Criterion | Description |
+|---|-----------|-------------|
+| 7 | Completeness | Ensures features are fully implemented, no stubs/TODOs left |
+| 8 | Documentation Gaps | Validates all public APIs/components/changes have docs |
+| 9 | Bug Detection | Identifies latent bugs and race conditions |
+| 10 | Enhancement Opportunities | Non-blocking improvement suggestions |
+
+**Output locations:**
+
+- `docs/history/issues/` — Records of issues encountered during sessions
+- `docs/history/lessons-learned/` — Lessons extracted from retrospectives
+
+**New agent:** `retrospective-analyst` (operations category) — activates when `--focus=retrospective` is used.
+
+---
+
+### Merge Conflict Resolution (Not a Command)
+
+**Branch:** `claude/resolve-merge-conflicts-WBEqO`
+
+**What it adds:** Automated merge conflict resolution system for generated files. Not a slash command, but a supporting system.
+
+**Key components:**
+
+- `scripts/resolve-merge.sh` / `.ps1` — Cross-platform resolution script
+- `.github/workflows/merge-conflict-detection.yml` — CI workflow that detects conflicts on open PRs and posts resolution instructions
+- `.gitattributes` updates — Custom `agentkit-generated` merge driver for auto-resolved files
+
+**Auto-resolved files:** Generated skill packs, agent metadata, chat modes, prompt definitions, doc indexes, Copilot config, PR templates, lockfiles.
+
+**Manual resolution required:** Engine source (`.agentkit/engines/**`), spec files (`.agentkit/spec/*.yaml`), source code.
+
+---
+
+### CI/CD Infrastructure Review (Not a Command)
+
+**Branch:** `claude/review-cicd-infrastructure-vsSil`
+
+**What it adds:** A 502-line audit document (`docs/reviews/cicd-infrastructure-review-2026-03-04.md`) analyzing 28 identified issues across CI/CD pipeline gaps, infrastructure generation, agent workforce alignment, and security/supply chain. Provides a 4-wave remediation roadmap.
+
+---
+
+### Issue Intake Ownership Flow (Not a Command)
+
+**Branch:** `docs/issue-intake-ownership-flow`
+
+**What it adds:** Specification for configurable issue intake from GitHub and Linear trackers, with ownership routing, team assignment, and escalation rules. Enhances the existing `/sync-backlog` command to be tracker-neutral.

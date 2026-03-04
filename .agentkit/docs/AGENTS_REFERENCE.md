@@ -669,3 +669,70 @@ docs/releases/**
 - Manage hotfix workflows and emergency release procedures
 - Communicate release notes to stakeholders
 - Maintain release automation scripts and workflows
+
+---
+
+## Incoming Agents (In-Flight Branches)
+
+> **Note:** The following agents are being developed on active branches and are not yet merged. This section documents them preemptively. Move entries to the main reference as each branch merges.
+
+---
+
+### Retrospective Analyst (`retrospective-analyst`)
+
+**Branch:** `claude/elegant-knuth-iSy89`
+**Category:** Operations
+
+Session knowledge capture specialist that reviews conversation history to extract issues encountered and lessons learned. Activated via `/review --focus=retrospective`. Non-blocking — never gates delivery or merges.
+
+- **Accepts:** review, investigate
+- **Depends on:** None
+- **Notifies:** None
+
+**Focus scope:**
+
+```
+docs/history/issues/**
+docs/history/lessons-learned/**
+docs/history/.index.json
+```
+
+**Key responsibilities:**
+
+- Extract and classify issues by severity (critical/high/medium/low) and status
+- Categorize lessons (technical, process, tooling, architecture, communication)
+- Maintain sequential numbering via `docs/history/.index.json`
+- Avoid duplicate records by cross-referencing existing history
+- Optionally file external issues for unresolved problems (with `--open-issues`)
+
+---
+
+### Feature Operations Specialist (`feature-ops`)
+
+**Branch:** `claude/feature-management-strategy-1jUSw`
+**Category:** Feature Management (new category)
+
+Kit feature management specialist responsible for analyzing, configuring, and auditing AgentKit Forge features. Helps teams choose the right feature set for their workflow.
+
+- **Accepts:** review, investigate
+- **Depends on:** None
+- **Notifies:** None
+
+**Focus scope:**
+
+```
+.agentkit/spec/features.yaml
+.agentkit/overlays/**/settings.yaml
+.agentkit/engines/node/src/feature-manager.mjs
+CLAUDE.md
+.claude/commands/**
+.agentkit/spec/agents.yaml
+```
+
+**Key responsibilities:**
+
+- Analyze repository patterns and recommend appropriate feature presets
+- Configure features with dependency validation and conflict resolution
+- Audit enabled features against generated outputs for staleness
+- Explain feature behavior, resolution precedence, and template variable injection
+- Guide teams through feature migration (preset changes, explicit feature lists)

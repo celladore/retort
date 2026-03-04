@@ -15,6 +15,10 @@
 5. [Scenario 5: Code Refactoring](#scenario-5-code-refactoring)
 6. [Scenario 6: Security Hardening](#scenario-6-security-hardening)
 7. [Scenario 7: Dependency Upgrade](#scenario-7-dependency-upgrade)
+8. [Scenario 8: Infrastructure Fitness Evaluation (Incoming)](#scenario-8-infrastructure-fitness-evaluation-incoming)
+9. [Scenario 9: Feature Management Setup (Incoming)](#scenario-9-feature-management-setup-incoming)
+10. [Scenario 10: Session Retrospective (Incoming)](#scenario-10-session-retrospective-incoming)
+11. [Scenario 11: Brand & Editor Theme Setup (Incoming)](#scenario-11-brand--editor-theme-setup-incoming)
 
 ---
 
@@ -1463,3 +1467,321 @@ Preview what would be deployed to catch any deployment-specific issues from the 
 - If the upgrade breaks too many things, consider a staged migration (adapter pattern) instead of a big-bang upgrade.
 - Keep the rollback plan ready. If the upgrade is not going well after 30 minutes, revert and reassess.
 - For framework upgrades that touch many files, use `/orchestrate` to coordinate multiple teams. For library upgrades, a single `/team-*` command is usually sufficient.
+
+---
+
+## Scenario 8: Infrastructure Fitness Evaluation (Incoming)
+
+> **Branch:** `claude/agentforge-template-integration-eCegs` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Run a quarterly infrastructure fitness evaluation to assess reliability, cost efficiency, security, and operational maturity. Produce a scored report with actionable recommendations.
+
+### When to Use This Flow
+
+Use this flow for periodic infrastructure health assessments, pre-funding due diligence, or before major architectural decisions. The evaluation scores 8 weighted dimensions and enforces non-negotiable hard gates.
+
+### Prerequisites
+
+- Repository initialized with AgentKit Forge
+- `evaluation.infraEval: true` set in `.agentkit/spec/project.yaml`
+- Run `agentkit sync` after enabling the evaluation feature
+
+### Step-by-Step
+
+#### Step 1: Enable Infrastructure Evaluation
+
+In `.agentkit/spec/project.yaml`:
+
+```yaml
+evaluation:
+  infraEval: true
+  weights:
+    reliability: 18
+    cost: 16
+    security: 14
+    infra: 12
+    scalability: 12
+    architecture: 10
+    code: 10
+    ops: 8
+```
+
+#### Step 2: Run the Evaluation
+
+```
+/infra-eval
+```
+
+**What the AI does:**
+
+- Scans the repository for evidence across all 8 dimensions
+- Scores each dimension on a 0–5 scale
+- Runs 5 hard gate checks (backup restore, cost attribution, content moderation, rollback strategy, identity boundaries)
+- Computes a weighted overall score
+
+#### Step 3: Review the Report
+
+The evaluation produces:
+
+- **Scored summary** with narrative risk analysis
+- **Top 5 risk drivers** ranked by impact × likelihood
+- **Top 5 fixes by ROI** — most impactful improvements
+- **Scale ceiling narrative** — what breaks at 10×? 50×?
+
+Score interpretation:
+
+| Score Range | Meaning                        |
+| ----------- | ------------------------------ |
+| 50–65       | High risk, significant gaps    |
+| 65–75       | Healthy startup baseline       |
+| 75–85       | Strong infrastructure posture  |
+| >85         | Likely over-engineered         |
+
+#### Step 4: Address Hard Gate Failures
+
+Any hard gate failure results in an overall FAIL regardless of dimension scores. Fix these first:
+
+```
+/team-infra --task "Address hard gate G1: implement tested backup restore"
+/check
+```
+
+#### Step 5: Plan Remediation
+
+```
+/plan "Address top 3 risk drivers from infra-eval report"
+/orchestrate
+```
+
+### Command Sequence Summary
+
+```
+/infra-eval                          Full evaluation with all dimensions
+/infra-eval --gates-only             Quick check — hard gates only
+/infra-eval --focus reliability      Single dimension deep dive
+/infra-eval --output json --save     Machine-readable report saved to docs/evaluations/
+```
+
+---
+
+## Scenario 9: Feature Management Setup (Incoming)
+
+> **Branch:** `claude/feature-management-strategy-1jUSw` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Configure which AgentKit Forge features are enabled for your repository, choosing between presets (minimal, lean, standard, full) or custom feature selection.
+
+### When to Use This Flow
+
+Use this flow when onboarding a new repository, when a solo developer wants to disable team orchestration overhead, or when you want to audit which features are actually in use.
+
+### Step-by-Step
+
+#### Step 1: Review Available Features
+
+```
+/feature-review
+```
+
+**What the AI does:**
+
+- Lists all features by category with current enabled/disabled status
+- Highlights dependency issues or conflicts
+- Shows which preset is currently active
+
+#### Step 2: Choose a Preset or Customize
+
+**Option A — Apply a preset:**
+
+```
+/feature-configure
+```
+
+The AI walks you through an interactive preset selection with diff preview.
+
+**Option B — CLI direct:**
+
+```bash
+agentkit features preset lean              # Solo developer, no team overhead
+agentkit features enable mcp-integration   # Add a specific feature
+```
+
+#### Step 3: Verify and Regenerate
+
+```bash
+agentkit sync                              # Regenerate configs with new feature set
+```
+
+#### Step 4: Audit the Configuration
+
+```
+/feature-review --audit
+```
+
+**What the AI does:**
+
+- Checks that every enabled feature has corresponding generated files
+- Flags stale configurations (enabled features with missing output)
+- Reports features that could be disabled based on actual usage
+
+#### Step 5: Trace a Specific Feature (Debugging)
+
+```
+/feature-flow team-orchestration --show-output
+```
+
+**What the AI does:**
+
+- Shows the full resolution chain: spec definition → overlay config → template variables → generated output
+- Useful for debugging why a command or agent is missing from generated configs
+
+### Preset Comparison
+
+| Preset     | Features | Best For                              |
+| ---------- | -------- | ------------------------------------- |
+| `minimal`  | 5        | CI-only validation, no AI interaction |
+| `lean`     | 8        | Solo developer, no team overhead      |
+| `standard` | 12       | Small-to-medium teams (default)       |
+| `full`     | 20       | Enterprise, full orchestration        |
+
+---
+
+## Scenario 10: Session Retrospective (Incoming)
+
+> **Branch:** `claude/elegant-knuth-iSy89` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Capture issues encountered and lessons learned during a development session, building an institutional knowledge library for future sessions.
+
+### When to Use This Flow
+
+Use this flow at the end of a sprint, after resolving a difficult bug, or periodically to extract patterns from development work.
+
+### Step-by-Step
+
+#### Step 1: Complete Your Development Work
+
+Finish whatever task you were working on. The retrospective works best when there is a meaningful session to analyze.
+
+#### Step 2: Run the Retrospective
+
+```
+/review --focus=retrospective
+```
+
+**What the AI does:**
+
+- Reviews the full conversation history for the current session
+- Identifies issues encountered (bugs, blockers, misunderstandings, tooling failures)
+- Extracts lessons learned (patterns, debugging techniques, architectural insights)
+- Classifies each by severity/category
+- Writes structured records to `docs/history/`
+
+#### Step 3: Review and Refine
+
+The AI produces:
+
+- **Issue records** in `docs/history/issues/XXXX-YYYY-MM-DD-slug-issue.md`
+- **Lesson records** in `docs/history/lessons-learned/XXXX-YYYY-MM-DD-slug-lesson.md`
+
+Review the generated records and edit as needed. The sequential numbering and deduplication are handled automatically.
+
+#### Step 4: Optionally File External Issues
+
+```
+/review --focus=retrospective --open-issues
+```
+
+This files unresolved issues to your external tracker (GitHub Issues or Linear) in addition to local records.
+
+#### Step 5: Preview Without Writing (Dry Run)
+
+```
+/review --focus=retrospective --dry-run
+```
+
+Shows what would be captured without writing any files.
+
+---
+
+## Scenario 11: Brand & Editor Theme Setup (Incoming)
+
+> **Branch:** `claude/repo-specific-editor-theme-zMOG1` — this scenario documents a workflow that is not yet merged.
+
+### Goal
+
+Define a brand identity for your repository and generate matching editor themes for VS Code, Cursor, and Windsurf.
+
+### When to Use This Flow
+
+Use this flow when you want consistent visual identity in your editor workspace, when onboarding a team to a project with established brand guidelines, or when auditing accessibility of your color palette.
+
+### Step-by-Step
+
+#### Step 1: Scaffold Brand Files
+
+```
+/brand --init
+```
+
+**What the AI does:**
+
+- Creates `.agentkit/spec/brand.yaml` with a template brand identity
+- Creates `.agentkit/spec/editor-theme.yaml` with default color mappings
+- Guides you through filling in brand colors, typography, and accessibility requirements
+
+#### Step 2: Customize the Brand Spec
+
+Edit `.agentkit/spec/brand.yaml` with your brand's colors, fonts, and identity attributes. The spec supports:
+
+- Simple hex colors (`#1a73e8`) or detailed objects with role/rationale
+- Dark mode variants
+- WCAG accessibility compliance levels
+- Typography scale with semantic names
+
+#### Step 3: Validate and Preview
+
+```
+/brand --validate
+/brand --palette
+/brand --contrast
+```
+
+**What the AI does:**
+
+- Validates required fields and color format
+- Previews the resolved color palette
+- Audits WCAG compliance of color combinations and flags failures
+
+#### Step 4: Generate Editor Themes
+
+```
+/brand --theme
+```
+
+Or regenerate everything through the sync pipeline:
+
+```bash
+agentkit sync
+```
+
+The sync engine reads `brand.yaml` and `editor-theme.yaml`, resolves brand colors using dot-notation paths, and generates `workbench.colorCustomizations` in:
+
+- `.vscode/settings.json`
+- `.cursor/settings.json`
+- `.windsurf/settings.json`
+
+#### Step 5: Per-Repo Overrides
+
+For repository-specific theme tweaks, create:
+
+```yaml
+# .agentkit/overlays/my-repo/editor-theme.yaml
+mode: dark
+cursor:
+  statusBar.background: colors.secondary.lilac
+```

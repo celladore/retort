@@ -315,6 +315,19 @@ These commands activate specialized agent teams for focused work.
 | `/delegate` | Create a delegated task and assign it to a team   |
 | `/doctor`   | Run diagnostics on your AgentKit Forge setup      |
 
+### Coming Soon (In-Flight Branches)
+
+The following commands are in active development. See [COMMAND_REFERENCE.md — Incoming Commands](./COMMAND_REFERENCE.md#incoming-commands-in-flight-branches) for full details.
+
+| Command              | Purpose                                                         | Branch                          |
+| -------------------- | --------------------------------------------------------------- | ------------------------------- |
+| `/infra-eval`        | Infrastructure fitness evaluation (8 dimensions, hard gates)    | `agentforge-template-integration` |
+| `/brand`             | Brand identity management and editor theme generation           | `repo-specific-editor-theme`    |
+| `/feature-configure` | Interactive feature preset and toggle management                | `feature-management-strategy`   |
+| `/feature-flow`      | End-to-end feature tracing from spec to output                  | `feature-management-strategy`   |
+| `/feature-review`    | Feature configuration audit and recommendations                 | `feature-management-strategy`   |
+| `/review --focus=retrospective` | Session retrospective for issue/lesson capture       | `elegant-knuth`                 |
+
 ---
 
 ## Next Steps
