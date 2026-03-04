@@ -14,6 +14,24 @@ They mirror the runtime implementation already validated in this branch.
 4. `.agentkit/templates/github/scripts/README.md`
 5. Run sync and validate
 
+## Verification snapshot (2026-03-05)
+
+Status of referenced source-of-truth paths (checked in this repo):
+
+| Path | Exists | Up-to-date vs runtime intent | Task |
+|---|---:|---:|---|
+| `.agentkit/templates/github/workflows/branch-protection.yml` | ❌ | ❌ | [#252](https://github.com/JustAGhosT/agentkit-forge/issues/252) |
+| `.agentkit/templates/github/scripts/setup-branch-protection.sh` | ✅ | ❌ | [#253](https://github.com/JustAGhosT/agentkit-forge/issues/253) |
+| `.agentkit/templates/github/scripts/setup-branch-protection.ps1` | ✅ | ❌ | [#254](https://github.com/JustAGhosT/agentkit-forge/issues/254) |
+| `.agentkit/templates/github/scripts/README.md` | ✅ | ❌ | [#255](https://github.com/JustAGhosT/agentkit-forge/issues/255) |
+
+Related runtime/generated references currently present:
+
+- `.github/workflows/branch-protection.yml` ✅
+- `.github/scripts/setup-branch-protection.sh` ✅
+- `.github/scripts/setup-branch-protection.ps1` ✅
+- `.github/scripts/README.md` ✅
+
 ---
 
 ## 1) Add workflow template
