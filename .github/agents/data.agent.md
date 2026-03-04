@@ -38,6 +38,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - prisma/**
 - seeds/**
 - scripts/db/**
+- adx/**
+- grafana/**
 
 ## Responsibilities
 
@@ -48,6 +50,9 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Manage seed data and test fixtures
 - Ensure data integrity constraints and referential integrity
 - Plan and execute data migration strategies for breaking changes
+- Build and maintain cost attribution dashboards and analytics (ADX/KQL for Azure, or provider-equivalent)
+- Implement cost-centre reporting functions (cost_by_product, cost_trend_by_product, untagged_resources)
+- Monitor cost anomalies and generate alerts for spend exceeding budget thresholds
 
 ## Tools
 

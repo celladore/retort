@@ -50,6 +50,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Manage cloud resources across environments (dev, staging, prod)
 - Implement networking, security groups, and access policies
 - Optimize cloud costs and resource utilization
+- Provision consumption budget resources (e.g. azurerm_consumption_budget_resource_group) for every resource group
+- Enforce cost-center tag on all resources; reject plans missing cost attribution
+- Run cost impact assessment before provisioning resources exceeding $100/month estimated
+- When cloudProvider is azure, ensure resource groups have associated consumption budgets with alert thresholds at 80%, 100%, and 120% (forecasted)
 - Maintain Kubernetes manifests and Helm charts
 - Plan and execute infrastructure migrations
 - Implement disaster recovery and backup strategies
