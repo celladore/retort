@@ -29,10 +29,19 @@ Team commands are most useful as **AI tool context switches** — they set the a
 
 ```javascript
 const SLASH_ONLY_COMMANDS = [
-  'project-review', 'scaffold', 'preflight',
-  'team-backend', 'team-frontend', 'team-data', 'team-infra',
-  'team-devops', 'team-testing', 'team-security', 'team-docs',
-  'team-product', 'team-quality',
+  'project-review',
+  'scaffold',
+  'preflight',
+  'team-backend',
+  'team-frontend',
+  'team-data',
+  'team-infra',
+  'team-devops',
+  'team-testing',
+  'team-security',
+  'team-docs',
+  'team-product',
+  'team-quality',
 ];
 ```
 

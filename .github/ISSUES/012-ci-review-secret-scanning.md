@@ -21,16 +21,16 @@ A developer could accidentally commit an AWS key, and CI wouldn't catch it.
 In `.github/workflows/ci.yml`, add after the doctor diagnostics step:
 
 ```yaml
-      - name: Scan for secrets in changes
-        run: |
-          # Scan the diff between this branch and the base
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            RANGE="${{ github.event.pull_request.base.sha }}..HEAD"
-          else
-            RANGE="HEAD~1..HEAD"
-          fi
-          node engines/node/src/cli.mjs review --range "$RANGE"
-        working-directory: .agentkit
+- name: Scan for secrets in changes
+  run: |
+    # Scan the diff between this branch and the base
+    if [ "${{ github.event_name }}" = "pull_request" ]; then
+      RANGE="${{ github.event.pull_request.base.sha }}..HEAD"
+    else
+      RANGE="HEAD~1..HEAD"
+    fi
+    node engines/node/src/cli.mjs review --range "$RANGE"
+  working-directory: .agentkit
 ```
 
 ### Step 2: Add review as a PR check (~15 min)
@@ -38,35 +38,35 @@ In `.github/workflows/ci.yml`, add after the doctor diagnostics step:
 Create a new job in `ci.yml` that runs in parallel with test/validate:
 
 ```yaml
-  secret-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Need full history for diff
+secret-scan:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Need full history for diff
 
-      - uses: pnpm/action-setup@v4
-        with:
-          package_json_file: package.json
+    - uses: pnpm/action-setup@v4
+      with:
+        package_json_file: package.json
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: .agentkit/pnpm-lock.yaml
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: 'pnpm'
+        cache-dependency-path: .agentkit/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: .agentkit
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      working-directory: .agentkit
 
-      - name: Secret scan
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            node engines/node/src/cli.mjs review --range "${{ github.event.pull_request.base.sha }}..HEAD"
-          else
-            node engines/node/src/cli.mjs review --range "HEAD~1..HEAD"
-          fi
-        working-directory: .agentkit
+    - name: Secret scan
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          node engines/node/src/cli.mjs review --range "${{ github.event.pull_request.base.sha }}..HEAD"
+        else
+          node engines/node/src/cli.mjs review --range "HEAD~1..HEAD"
+        fi
+      working-directory: .agentkit
 ```
 
 ### Step 3: Add `--fail-on` flag to review command (~30 min)
@@ -77,7 +77,7 @@ Currently `review` exits with code 1 on HIGH severity findings. Add a `--fail-on
 // In review-runner.mjs
 const failOn = flags['fail-on'] || 'HIGH';
 const severityOrder = { LOW: 0, MEDIUM: 1, HIGH: 2 };
-const shouldFail = allFindings.some(f => severityOrder[f.severity] >= severityOrder[failOn]);
+const shouldFail = allFindings.some((f) => severityOrder[f.severity] >= severityOrder[failOn]);
 ```
 
 CI can then use: `agentkit review --range $RANGE --fail-on HIGH`
@@ -87,12 +87,12 @@ CI can then use: `agentkit review --range $RANGE --fail-on HIGH`
 For large repos, scanning all files in a range can be slow. Add caching:
 
 ```yaml
-      - name: Cache review results
-        uses: actions/cache@v4
-        with:
-          path: .claude/state/review-cache.json
-          key: review-${{ github.sha }}
-          restore-keys: review-
+- name: Cache review results
+  uses: actions/cache@v4
+  with:
+    path: .claude/state/review-cache.json
+    key: review-${{ github.sha }}
+    restore-keys: review-
 ```
 
 ---

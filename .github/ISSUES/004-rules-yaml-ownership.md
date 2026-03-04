@@ -59,23 +59,29 @@ labels: governance, rules
 ---
 
 ## Rule Change Type
+
 - [ ] Add new rule
 - [ ] Modify existing rule
 - [ ] Remove/deprecate rule
 
 ## Affected Section
+
 <!-- Which rules.yaml section? e.g., typescript, dotnet, python, rust -->
 
 ## Current Rule (if modifying/removing)
+
 <!-- Copy the current rule text -->
 
 ## Proposed Change
+
 <!-- What should the rule say/do? -->
 
 ## Rationale
+
 <!-- Why is this change needed? Link to ADRs, incidents, or best practices -->
 
 ## Impact Assessment
+
 - Files affected: <!-- estimate -->
 - Breaking change: <!-- yes/no -->
 - Migration needed: <!-- yes/no, describe if yes -->

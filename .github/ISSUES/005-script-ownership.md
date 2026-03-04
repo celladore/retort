@@ -14,15 +14,15 @@
 
 ## Current Scripts
 
-| Script | Purpose | Proposed Owner |
-|--------|---------|----------------|
-| `resolve-merge.sh` / `.ps1` | Merge conflict resolution | `maintenance-coordinator` |
-| `setup-agentkit-branch-governance.sh` / `.ps1` | Branch protection setup | `maintenance-coordinator` |
-| `update-changelog.sh` / `.ps1` | CHANGELOG.md updates | `release-manager` |
-| `create-doc.sh` / `.ps1` | Documentation file creation | `content-strategist` |
-| `validate-documentation.sh` | Validate docs | `content-strategist` |
-| `validate-numbering.sh` | Validate doc numbering | `content-strategist` |
-| `check-documentation-requirement.sh` | Doc requirements check | `content-strategist` |
+| Script                                         | Purpose                     | Proposed Owner            |
+| ---------------------------------------------- | --------------------------- | ------------------------- |
+| `resolve-merge.sh` / `.ps1`                    | Merge conflict resolution   | `maintenance-coordinator` |
+| `setup-agentkit-branch-governance.sh` / `.ps1` | Branch protection setup     | `maintenance-coordinator` |
+| `update-changelog.sh` / `.ps1`                 | CHANGELOG.md updates        | `release-manager`         |
+| `create-doc.sh` / `.ps1`                       | Documentation file creation | `content-strategist`      |
+| `validate-documentation.sh`                    | Validate docs               | `content-strategist`      |
+| `validate-numbering.sh`                        | Validate doc numbering      | `content-strategist`      |
+| `check-documentation-requirement.sh`           | Doc requirements check      | `content-strategist`      |
 
 ---
 
@@ -33,6 +33,7 @@
 In `.agentkit/spec/agents.yaml`:
 
 **maintenance-coordinator** (from #002):
+
 ```yaml
 focus:
   - 'scripts/resolve-merge.*'
@@ -40,6 +41,7 @@ focus:
 ```
 
 **release-manager** — add to existing focus:
+
 ```yaml
 focus:
   # ... existing entries ...
@@ -47,6 +49,7 @@ focus:
 ```
 
 **content-strategist** — add to existing focus:
+
 ```yaml
 focus:
   # ... existing entries ...
@@ -73,7 +76,7 @@ scripts/check-documentation-*              @docs-team
 // 6) Script health
 const scriptsDir = resolve(projectRoot, 'scripts');
 if (existsSync(scriptsDir)) {
-  const scripts = readdirSync(scriptsDir).filter(f => f.endsWith('.sh'));
+  const scripts = readdirSync(scriptsDir).filter((f) => f.endsWith('.sh'));
   for (const script of scripts) {
     const scriptPath = resolve(scriptsDir, script);
     const stat = statSync(scriptPath);

@@ -62,16 +62,36 @@ export async function runSecurity({ agentkitRoot, projectRoot, flags = {} }) {
     console.log('--- OWASP Pattern Scan ---');
     // Scan for common vulnerabilities:
     const OWASP_PATTERNS = [
-      { name: 'eval-injection', pattern: /\beval\s*\(/, severity: 'HIGH',
-        message: 'eval() usage — potential code injection' },
-      { name: 'inner-html', pattern: /\.innerHTML\s*=/, severity: 'MEDIUM',
-        message: 'innerHTML assignment — potential XSS' },
-      { name: 'sql-concat', pattern: /['"`]\s*\+\s*\w+.*(?:SELECT|INSERT|UPDATE|DELETE)/i,
-        severity: 'HIGH', message: 'SQL string concatenation — potential injection' },
-      { name: 'hardcoded-ip', pattern: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/,
-        severity: 'LOW', message: 'Hardcoded IP address' },
-      { name: 'http-no-tls', pattern: /http:\/\/(?!localhost|127\.0\.0\.1)/,
-        severity: 'MEDIUM', message: 'HTTP without TLS' },
+      {
+        name: 'eval-injection',
+        pattern: /\beval\s*\(/,
+        severity: 'HIGH',
+        message: 'eval() usage — potential code injection',
+      },
+      {
+        name: 'inner-html',
+        pattern: /\.innerHTML\s*=/,
+        severity: 'MEDIUM',
+        message: 'innerHTML assignment — potential XSS',
+      },
+      {
+        name: 'sql-concat',
+        pattern: /['"`]\s*\+\s*\w+.*(?:SELECT|INSERT|UPDATE|DELETE)/i,
+        severity: 'HIGH',
+        message: 'SQL string concatenation — potential injection',
+      },
+      {
+        name: 'hardcoded-ip',
+        pattern: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/,
+        severity: 'LOW',
+        message: 'Hardcoded IP address',
+      },
+      {
+        name: 'http-no-tls',
+        pattern: /http:\/\/(?!localhost|127\.0\.0\.1)/,
+        severity: 'MEDIUM',
+        message: 'HTTP without TLS',
+      },
     ];
     // Walk source files, apply patterns, collect findings
   }
@@ -97,7 +117,10 @@ export async function runSecurity({ agentkitRoot, projectRoot, flags = {} }) {
     printMarkdownReport(allFindings, severity);
   }
 
-  return { findings: allFindings, status: allFindings.some(f => f.severity === 'HIGH') ? 'FAIL' : 'PASS' };
+  return {
+    findings: allFindings,
+    status: allFindings.some((f) => f.severity === 'HIGH') ? 'FAIL' : 'PASS',
+  };
 }
 ```
 

@@ -12,6 +12,7 @@
 19 agents cover engineering, design, marketing, operations, product, testing, and project management — but no agent owns the **maintenance lifecycle**. `project.yaml` declares `phase: active` with a valid transition to `maintenance`, but when that transition happens there's no coordinator.
 
 Scattered maintenance concerns today:
+
 - `dependency-watcher` monitors dependencies (isolated)
 - `environment-manager` handles environment config (isolated)
 - `devops` owns CI/CD pipelines
@@ -26,48 +27,48 @@ Scattered maintenance concerns today:
 Append to the operations category in `.agentkit/spec/agents.yaml`:
 
 ```yaml
-  - id: maintenance-coordinator
-    category: operations
-    name: Maintenance Coordinator
-    role: >
-      System maintenance specialist responsible for framework health, rule
-      governance, technical debt tracking, script ownership, and coordination
-      of maintenance-phase operations. Stewards AgentKit Forge internals and
-      ensures CLI, hooks, CI, and generated outputs remain consistent with
-      specifications.
-    accepts:
-      - implement
-      - review
-      - investigate
-    depends-on: []
-    notifies:
-      - devops
-      - test-lead
-      - dependency-watcher
-    preferred-tools:
-      - Read
-      - Write
-      - Edit
-      - Glob
-      - Grep
-      - Bash
-    focus:
-      - '.agentkit/spec/rules.yaml'
-      - '.agentkit/engines/node/src/**'
-      - 'scripts/**'
-      - '.github/workflows/**'
-      - '.gitattributes'
-      - 'CHANGELOG.md'
-      - 'CONTRIBUTING.md'
-    responsibilities:
-      - Own and evolve .agentkit/spec/rules.yaml with quarterly review cadence
-      - Maintain scripts/ directory (resolve-merge.sh, update-changelog.sh, etc.)
-      - Track technical debt inventory and prioritize remediation
-      - Ensure CLI commands match spec definitions (no phantom commands)
-      - Validate hook completeness and lifecycle correctness
-      - Monitor merge driver health via doctor.mjs diagnostics
-      - Coordinate dependency update strategy with dependency-watcher
-      - Lead maintenance-phase transition when project.yaml phase changes
+- id: maintenance-coordinator
+  category: operations
+  name: Maintenance Coordinator
+  role: >
+    System maintenance specialist responsible for framework health, rule
+    governance, technical debt tracking, script ownership, and coordination
+    of maintenance-phase operations. Stewards AgentKit Forge internals and
+    ensures CLI, hooks, CI, and generated outputs remain consistent with
+    specifications.
+  accepts:
+    - implement
+    - review
+    - investigate
+  depends-on: []
+  notifies:
+    - devops
+    - test-lead
+    - dependency-watcher
+  preferred-tools:
+    - Read
+    - Write
+    - Edit
+    - Glob
+    - Grep
+    - Bash
+  focus:
+    - '.agentkit/spec/rules.yaml'
+    - '.agentkit/engines/node/src/**'
+    - 'scripts/**'
+    - '.github/workflows/**'
+    - '.gitattributes'
+    - 'CHANGELOG.md'
+    - 'CONTRIBUTING.md'
+  responsibilities:
+    - Own and evolve .agentkit/spec/rules.yaml with quarterly review cadence
+    - Maintain scripts/ directory (resolve-merge.sh, update-changelog.sh, etc.)
+    - Track technical debt inventory and prioritize remediation
+    - Ensure CLI commands match spec definitions (no phantom commands)
+    - Validate hook completeness and lifecycle correctness
+    - Monitor merge driver health via doctor.mjs diagnostics
+    - Coordinate dependency update strategy with dependency-watcher
+    - Lead maintenance-phase transition when project.yaml phase changes
 ```
 
 ### Step 2: Run sync to generate outputs (~5 min)
@@ -77,6 +78,7 @@ pnpm -C .agentkit agentkit:sync
 ```
 
 This generates:
+
 - `.github/agents/maintenance-coordinator.agent.md`
 - Updates to `.claude/commands/` referencing the new agent
 - Updates to CLAUDE.md agent index
@@ -95,19 +97,19 @@ If the sync template for Copilot agents doesn't auto-generate detailed enough co
 In `.agentkit/spec/teams.yaml`, the `quality` team (cross-cutting) should list `maintenance-coordinator` as a member, or create a dedicated maintenance team scope:
 
 ```yaml
-  - id: maintenance
-    name: MAINTENANCE
-    focus: Framework health, rules governance, tech debt
-    scope:
-      - '.agentkit/**'
-      - 'scripts/**'
-      - '.github/workflows/**'
-    accepts:
-      - implement
-      - review
-      - investigate
-    handoff:
-      - quality
+- id: maintenance
+  name: MAINTENANCE
+  focus: Framework health, rules governance, tech debt
+  scope:
+    - '.agentkit/**'
+    - 'scripts/**'
+    - '.github/workflows/**'
+  accepts:
+    - implement
+    - review
+    - investigate
+  handoff:
+    - quality
 ```
 
 ### Step 5: Verify no circular dependencies (~5 min)

@@ -11,14 +11,14 @@
 
 6 commands are fully defined in `.agentkit/spec/commands.yaml` (with types, flags, descriptions, allowed tools) but have **no `case` statement** in `cli.mjs` (lines 442-566). Running them produces `Unknown command`.
 
-| Command | Spec Type | Spec Lines | Flags Defined |
-|---------|-----------|-----------|---------------|
-| `build` | utility | 433-459 | `--stack`, `--package`, `--production`, `--verbose` |
-| `test` | utility | 460-491 | `--stack`, `--filter`, `--coverage`, `--watch`, `--package` |
-| `format` | utility | 492-515 | `--stack`, `--check`, `--path` |
-| `deploy` | utility | 516-544 | `--environment`, `--dry-run`, `--skip-checks`, `--stack` |
-| `security` | utility | 545-573 | `--scan-type`, `--severity`, `--fix`, `--output` |
-| `sync-backlog` | workflow | 157-177 | `--direction`, `--labels`, `--team` |
+| Command        | Spec Type | Spec Lines | Flags Defined                                               |
+| -------------- | --------- | ---------- | ----------------------------------------------------------- |
+| `build`        | utility   | 433-459    | `--stack`, `--package`, `--production`, `--verbose`         |
+| `test`         | utility   | 460-491    | `--stack`, `--filter`, `--coverage`, `--watch`, `--package` |
+| `format`       | utility   | 492-515    | `--stack`, `--check`, `--path`                              |
+| `deploy`       | utility   | 516-544    | `--environment`, `--dry-run`, `--skip-checks`, `--stack`    |
+| `security`     | utility   | 545-573    | `--scan-type`, `--severity`, `--fix`, `--output`            |
+| `sync-backlog` | workflow  | 157-177    | `--direction`, `--labels`, `--team`                         |
 
 ---
 
@@ -37,6 +37,7 @@ Extract `detectStacks()` (lines 220-259) and the formatter/linter resolver funct
 ```
 
 Exports:
+
 - `detectStacks(agentkitRoot, projectRoot, filterStack)` — moved from check.mjs
 - `resolveFormatter(formatter, agentkitRoot)` — moved from check.mjs
 - `resolveLinter(linter)` — moved from check.mjs
@@ -189,11 +190,13 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags = {} }) 
 In `cli.mjs`:
 
 1. Add to `VALID_COMMANDS` array (line 26-48):
+
    ```javascript
-   'build', 'test', 'format', 'deploy', 'security', 'sync-backlog'
+   ('build', 'test', 'format', 'deploy', 'security', 'sync-backlog');
    ```
 
 2. Add flag definitions to `VALID_FLAGS` (line 56-122):
+
    ```javascript
    build: ['stack', 'package', 'production', 'verbose', 'help'],
    test: ['stack', 'filter', 'coverage', 'watch', 'package', 'help'],
@@ -204,6 +207,7 @@ In `cli.mjs`:
    ```
 
 3. Add `case` statements (after line 522):
+
    ```javascript
    case 'build': { ... }
    case 'test': { ... }

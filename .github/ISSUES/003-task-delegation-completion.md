@@ -11,6 +11,7 @@
 `task-cli.mjs` and `task-protocol.mjs` implement create + list + single-task-detail + handoff processing, but the CLAUDE.md templates promise a richer protocol that isn't fully realized:
 
 **What exists:**
+
 - `agentkit delegate --to <team> --title <text>` — creates a task file
 - `agentkit tasks` — lists tasks with filters (--status, --assignee, --type, --priority)
 - `agentkit tasks --id <id>` — shows task detail with messages/artifacts
@@ -18,6 +19,7 @@
 - `checkDependencies()` — unblocks tasks whose dependencies are met
 
 **What's missing:**
+
 - No `agentkit tasks --update <id> --status working` (state transitions)
 - No task conflict detection (two agents claiming same task)
 - No task timeout/staleness detection
@@ -37,7 +39,7 @@ In `task-cli.mjs`, add handling for `--update` + `--status`:
 // In runTasks(), after the --id single-task block:
 if (flags.update) {
   const result = await updateTaskStatus(projectRoot, flags.update, {
-    status: flags.status,   // submitted | working | blocked | completed | delivered
+    status: flags.status, // submitted | working | blocked | completed | delivered
     message: flags.message, // optional status message
   });
   // Validate transitions: submitted→working, working→completed, completed→delivered

@@ -69,9 +69,18 @@ The settings.json hooks section uses tool name matchers (e.g., `Write|Edit`, `Ba
 
 ```javascript
 const VALID_TOOL_NAMES = [
-  'Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep',
-  'WebSearch', 'WebFetch', 'TodoWrite', 'Agent',
-  'NotebookEdit', 'AskUserQuestion',
+  'Read',
+  'Write',
+  'Edit',
+  'Bash',
+  'Glob',
+  'Grep',
+  'WebSearch',
+  'WebFetch',
+  'TodoWrite',
+  'Agent',
+  'NotebookEdit',
+  'AskUserQuestion',
 ];
 
 // For each hook in settings.json:

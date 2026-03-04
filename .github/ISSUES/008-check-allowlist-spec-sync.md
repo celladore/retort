@@ -25,37 +25,37 @@ If a team adds a new tech stack with an unlisted formatter (e.g., `ktlint` for K
 Add to the `check` command spec:
 
 ```yaml
-  - name: check
-    type: workflow
-    # ... existing fields ...
-    security:
-      description: >
-        For safety, only allowlisted formatter and linter binaries are executed.
-        Unknown tools are silently skipped to prevent arbitrary code execution
-        from a compromised spec file.
-      allowed-formatters:
-        - prettier
-        - black
-        - cargo fmt
-        - dotnet format
-        - gofmt
-        - rustfmt
-        - clang-format
-        - autopep8
-        - yapf
-        - isort
-        - shfmt
-        - stylua
-      allowed-linters:
-        - eslint
-        - cargo clippy
-        - pylint
-        - flake8
-        - rubocop
-        - golangci-lint
-        - tslint
-        - stylelint
-        - shellcheck
+- name: check
+  type: workflow
+  # ... existing fields ...
+  security:
+    description: >
+      For safety, only allowlisted formatter and linter binaries are executed.
+      Unknown tools are silently skipped to prevent arbitrary code execution
+      from a compromised spec file.
+    allowed-formatters:
+      - prettier
+      - black
+      - cargo fmt
+      - dotnet format
+      - gofmt
+      - rustfmt
+      - clang-format
+      - autopep8
+      - yapf
+      - isort
+      - shfmt
+      - stylua
+    allowed-linters:
+      - eslint
+      - cargo clippy
+      - pylint
+      - flake8
+      - rubocop
+      - golangci-lint
+      - tslint
+      - stylelint
+      - shellcheck
 ```
 
 ### Step 2: Make check.mjs read allowlists from spec (~1 hour)
@@ -66,7 +66,7 @@ Instead of hardcoding, read from `commands.yaml` or a dedicated `security.yaml`:
 function loadAllowlists(agentkitRoot) {
   const specPath = resolve(agentkitRoot, 'spec', 'commands.yaml');
   const spec = yaml.load(readFileSync(specPath, 'utf-8'));
-  const checkCmd = spec.workflow.find(c => c.name === 'check');
+  const checkCmd = spec.workflow.find((c) => c.name === 'check');
   return {
     formatters: new Set(checkCmd?.security?.['allowed-formatters'] || []),
     linters: new Set(checkCmd?.security?.['allowed-linters'] || []),

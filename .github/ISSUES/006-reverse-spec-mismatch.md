@@ -10,16 +10,16 @@
 
 8 commands exist in CLI (`VALID_COMMANDS`, cli.mjs:26-48) but are **not defined** in `commands.yaml`. This is the reverse of #001 — commands work but aren't spec'd.
 
-| CLI Command | Handler | Why It's Missing |
-|------------|---------|------------------|
-| `init` | `init.mjs` | Framework-internal, not a user workflow command |
-| `sync` | `synchronize.mjs` | Framework-internal |
-| `spec-validate` | `spec-validator.mjs` | Framework-internal |
-| `add` | `tool-manager.mjs` | Tool management utility |
-| `remove` | `tool-manager.mjs` | Tool management utility |
-| `list` | `tool-manager.mjs` | Tool management utility |
-| `tasks` | `task-cli.mjs` | Task management utility |
-| `delegate` | `task-cli.mjs` | Task management utility |
+| CLI Command     | Handler              | Why It's Missing                                |
+| --------------- | -------------------- | ----------------------------------------------- |
+| `init`          | `init.mjs`           | Framework-internal, not a user workflow command |
+| `sync`          | `synchronize.mjs`    | Framework-internal                              |
+| `spec-validate` | `spec-validator.mjs` | Framework-internal                              |
+| `add`           | `tool-manager.mjs`   | Tool management utility                         |
+| `remove`        | `tool-manager.mjs`   | Tool management utility                         |
+| `list`          | `tool-manager.mjs`   | Tool management utility                         |
+| `tasks`         | `task-cli.mjs`       | Task management utility                         |
+| `delegate`      | `task-cli.mjs`       | Task management utility                         |
 
 ---
 

@@ -80,18 +80,19 @@ The system has 19 agents covering engineering, design, marketing, operations, pr
 
 Commands fully defined in `commands.yaml` but **not routable via CLI** (`cli.mjs` has no `case` statement):
 
-| Command | Type | Spec Lines | Issue |
-|---------|------|-----------|-------|
-| `build` | utility | 433-459 | Has flags (stack, package, production, verbose) but no handler |
-| `test` | utility | 460-491 | Has flags (stack, filter, coverage, watch) but no handler |
-| `format` | utility | 492-515 | Has flags (stack, check, path) but no handler |
-| `deploy` | utility | 516-544 | Has flags (environment, dry-run, skip-checks) — completely unimplemented |
-| `security` | utility | 545-573 | Has flags (scan-type, severity, fix, output) — completely unimplemented |
-| `sync-backlog` | workflow | 157-177 | Has flags (direction, labels, team) — completely unimplemented |
+| Command        | Type     | Spec Lines | Issue                                                                    |
+| -------------- | -------- | ---------- | ------------------------------------------------------------------------ |
+| `build`        | utility  | 433-459    | Has flags (stack, package, production, verbose) but no handler           |
+| `test`         | utility  | 460-491    | Has flags (stack, filter, coverage, watch) but no handler                |
+| `format`       | utility  | 492-515    | Has flags (stack, check, path) but no handler                            |
+| `deploy`       | utility  | 516-544    | Has flags (environment, dry-run, skip-checks) — completely unimplemented |
+| `security`     | utility  | 545-573    | Has flags (scan-type, severity, fix, output) — completely unimplemented  |
+| `sync-backlog` | workflow | 157-177    | Has flags (direction, labels, team) — completely unimplemented           |
 
 **Impact:** Users running `agentkit build` get `Unknown command: "build"` even though the spec and CLAUDE.md docs promise it exists.
 
 **Proposed resolution:**
+
 - `build`, `test`, `format`: Extract from `check.mjs` into standalone handlers. `check` becomes a composition: `check = format ∘ lint ∘ typecheck ∘ test ∘ build`
 - `deploy`: Implement as pre-deployment gate (validate → build → test → deploy artifact)
 - `security`: Extend `review-runner.mjs` with dependency audit + OWASP patterns
@@ -100,6 +101,7 @@ Commands fully defined in `commands.yaml` but **not routable via CLI** (`cli.mjs
 ### GAP 2 — HIGH: No Agent Owns `rules.yaml`
 
 `.agentkit/spec/rules.yaml` contains critical domain-specific coding standards (TypeScript, .NET, Python, Rust rules) but:
+
 - No agent has `rules.yaml` in their `focus` area
 - The file is protected by `protect-templates.sh` hook (cannot be edited at all)
 - No governance workflow exists for proposing rule changes
@@ -110,6 +112,7 @@ Commands fully defined in `commands.yaml` but **not routable via CLI** (`cli.mjs
 ### GAP 3 — HIGH: Incomplete Task Delegation System
 
 `task-cli.mjs`, `task-protocol.mjs`, and `task-types.mjs` exist but:
+
 - Task lifecycle state management is minimal (create + list only)
 - No automatic handoff transitions when tasks complete
 - No task dependency resolution
@@ -122,14 +125,14 @@ Commands fully defined in `commands.yaml` but **not routable via CLI** (`cli.mjs
 
 11 scripts in `scripts/` have no designated agent owner:
 
-| Script | Natural Owner |
-|--------|--------------|
-| `resolve-merge.sh` / `.ps1` | `maintenance-coordinator` |
-| `update-changelog.sh` / `.ps1` | `release-manager` |
-| `create-doc.sh` / `.ps1` | `content-strategist` |
-| `validate-documentation.sh` | `content-strategist` |
-| `validate-numbering.sh` | `content-strategist` |
-| `check-documentation-requirement.sh` | `content-strategist` |
+| Script                                         | Natural Owner             |
+| ---------------------------------------------- | ------------------------- |
+| `resolve-merge.sh` / `.ps1`                    | `maintenance-coordinator` |
+| `update-changelog.sh` / `.ps1`                 | `release-manager`         |
+| `create-doc.sh` / `.ps1`                       | `content-strategist`      |
+| `validate-documentation.sh`                    | `content-strategist`      |
+| `validate-numbering.sh`                        | `content-strategist`      |
+| `check-documentation-requirement.sh`           | `content-strategist`      |
 | `setup-agentkit-branch-governance.sh` / `.ps1` | `maintenance-coordinator` |
 
 ### GAP 5 — MEDIUM: CLI Commands Not in Spec (Reverse Mismatch)
@@ -143,6 +146,7 @@ These are framework-internal commands and may be intentionally omitted from spec
 ### GAP 6 — LOW: Team Context Routing Undefined
 
 `team-backend`, `team-frontend`, etc. are defined in spec (10 commands) with full flag definitions, but:
+
 - No CLI handler implements team-based routing
 - Agent routing uses `notifies`/`depends-on` (explicit agent handoff), not team context
 - Unclear if team commands are intended as context-switching or actual routing
@@ -176,6 +180,7 @@ These are framework-internal commands and may be intentionally omitted from spec
 ### 1. Wire `doctor.mjs` Into Pre-Sync Validation
 
 `doctor.mjs` now checks merge driver health (added in `e8bdfa0`), but it's only run manually or in CI. It should also run automatically:
+
 - As a pre-sync hook (before `agentkit sync` renders outputs)
 - As part of `healthcheck` (it currently isn't called from healthcheck.mjs)
 - On `session-start.sh` (lightweight check that merge drivers are configured)
@@ -183,6 +188,7 @@ These are framework-internal commands and may be intentionally omitted from spec
 ### 2. Connect `review-runner.mjs` to `security` Command
 
 `review-runner.mjs` already has secret scanning (AWS keys, private keys, JWT, connection strings) and could be the foundation for the missing `security` CLI command. Extend it with:
+
 - Dependency vulnerability scanning (`npm audit`, `cargo audit`, `pip-audit`)
 - OWASP pattern detection
 - Permission auditing (check `settings.yaml` allow/deny rules)
@@ -190,6 +196,7 @@ These are framework-internal commands and may be intentionally omitted from spec
 ### 3. Hook Lifecycle Completeness Check
 
 `validate.mjs` checks that hook scripts exist, but doesn't verify:
+
 - Hook scripts are executable (`chmod +x`)
 - Hook scripts have correct shebang lines
 - Hook event matchers in `settings.json` reference valid tool names
@@ -200,6 +207,7 @@ These are framework-internal commands and may be intentionally omitted from spec
 ### 4. CI Pipeline: Run `doctor` + `review` in Validate Job
 
 The CI pipeline (`ci.yml`) now runs `doctor` in the validate job (added in this branch), but `review` (secret scanning) only runs manually. Consider:
+
 - Adding `agentkit review --range HEAD~1..HEAD` to CI for per-commit secret scanning
 - Running `agentkit review` as a PR check (not just manual invocation)
 
@@ -230,19 +238,19 @@ The CI pipeline (`ci.yml`) now runs `doctor` in the validate job (added in this 
 
 ## Sub-Issues (with implementation plans)
 
-| # | File | Title | Priority | Status |
-|---|------|-------|----------|--------|
-| 001 | `001-missing-cli-handlers.md` | CRITICAL: Implement 6 missing CLI command handlers | P0 | Open |
-| 002 | `002-maintenance-coordinator-agent.md` | Add `maintenance-coordinator` agent | P1 | Open |
-| 003 | `003-task-delegation-completion.md` | Complete task delegation lifecycle | P1 | Open |
-| 004 | `004-rules-yaml-ownership.md` | Assign ownership for rules.yaml | P2 | Open |
-| 005 | `005-script-ownership.md` | Assign agent ownership for scripts | P2 | Open |
-| 006 | `006-reverse-spec-mismatch.md` | Document 8 CLI-only commands missing from spec | P2 | Open |
-| 007 | `007-team-context-routing.md` | Clarify or implement team command routing | P3 | Open |
-| 008 | `008-check-allowlist-spec-sync.md` | Sync check.mjs allowlists with spec | P3 | Open |
-| 009 | `009-doctor-presync-healthcheck.md` | Wire doctor into pre-sync and healthcheck | P2 | Open |
-| 010 | `010-security-command-from-review.md` | Build security command on review-runner | P1 | Open |
-| 011 | `011-hook-validation.md` | Add hook executable and shebang validation | P2 | Open |
-| 012 | `012-ci-review-secret-scanning.md` | Add per-commit secret scanning in CI | P2 | Open |
+| #   | File                                   | Title                                              | Priority | Status |
+| --- | -------------------------------------- | -------------------------------------------------- | -------- | ------ |
+| 001 | `001-missing-cli-handlers.md`          | CRITICAL: Implement 6 missing CLI command handlers | P0       | Open   |
+| 002 | `002-maintenance-coordinator-agent.md` | Add `maintenance-coordinator` agent                | P1       | Open   |
+| 003 | `003-task-delegation-completion.md`    | Complete task delegation lifecycle                 | P1       | Open   |
+| 004 | `004-rules-yaml-ownership.md`          | Assign ownership for rules.yaml                    | P2       | Open   |
+| 005 | `005-script-ownership.md`              | Assign agent ownership for scripts                 | P2       | Open   |
+| 006 | `006-reverse-spec-mismatch.md`         | Document 8 CLI-only commands missing from spec     | P2       | Open   |
+| 007 | `007-team-context-routing.md`          | Clarify or implement team command routing          | P3       | Open   |
+| 008 | `008-check-allowlist-spec-sync.md`     | Sync check.mjs allowlists with spec                | P3       | Open   |
+| 009 | `009-doctor-presync-healthcheck.md`    | Wire doctor into pre-sync and healthcheck          | P2       | Open   |
+| 010 | `010-security-command-from-review.md`  | Build security command on review-runner            | P1       | Open   |
+| 011 | `011-hook-validation.md`               | Add hook executable and shebang validation         | P2       | Open   |
+| 012 | `012-ci-review-secret-scanning.md`     | Add per-commit secret scanning in CI               | P2       | Open   |
 
 All sub-issues are in `.github/ISSUES/` with detailed implementation plans, code samples, and acceptance criteria.

@@ -9,10 +9,12 @@
 ## Problem
 
 `doctor.mjs` runs 4 diagnostic checks (spec validation, overlay sanity, project completeness, merge driver health) but is only invoked:
+
 - Manually via `agentkit doctor`
 - In CI via the validate job (added in this branch)
 
 It's **not called from**:
+
 - `healthcheck.mjs` (which checks tools + stacks but not framework health)
 - `synchronize.mjs` pre-sync (which could catch issues before rendering)
 - `session-start.sh` hook (lightweight check on session open)
@@ -36,8 +38,8 @@ try {
     flags: { verbose: false },
   });
 
-  const errorCount = doctorResult.findings.filter(f => f.severity === 'error').length;
-  const warnCount = doctorResult.findings.filter(f => f.severity === 'warning').length;
+  const errorCount = doctorResult.findings.filter((f) => f.severity === 'error').length;
+  const warnCount = doctorResult.findings.filter((f) => f.severity === 'warning').length;
 
   console.log(`  Doctor: ${doctorResult.status} (${errorCount} errors, ${warnCount} warnings)`);
 
@@ -70,7 +72,9 @@ try {
     flags: { verbose: false },
   });
   if (result.status === 'FAIL') {
-    console.warn('[agentkit:sync] Doctor reports issues. Run "agentkit doctor --verbose" for details.');
+    console.warn(
+      '[agentkit:sync] Doctor reports issues. Run "agentkit doctor --verbose" for details.'
+    );
     // Don't block sync — just warn
   }
 } catch {
