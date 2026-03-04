@@ -155,7 +155,9 @@ The A2A protocol supports four message types:
 
 ### Message Payload Examples
 
-Each message type has a defined JSON payload structure. Below are examples of each.
+> **Note:** The following JSON payloads are **illustrative examples** showing the intended message structure and content. They are not normative schemas — field names, nesting, and envelope structure may differ from the runtime implementation. Use these as a conceptual guide for understanding message flow, not as a wire-format specification.
+
+Below are examples of each message type.
 
 **`delegate` message** (coordinator to executor):
 

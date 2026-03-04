@@ -50,16 +50,16 @@ A typical `orchestrator.json` looks like this:
   "last_phase_completed": 2,
   "next_action": "Delegate rate limiting implementation to team-backend",
   "team_progress": {
-    "T1-backend": { "status": "in-progress", "items_completed": 1, "items_remaining": 2 },
-    "T2-frontend": { "status": "pending", "items_completed": 0, "items_remaining": 0 },
-    "T3-data": { "status": "complete", "items_completed": 1, "items_remaining": 0 },
-    "T4-infra": { "status": "not-assigned", "items_completed": 0, "items_remaining": 0 },
-    "T5-devops": { "status": "not-assigned", "items_completed": 0, "items_remaining": 0 },
-    "T6-testing": { "status": "pending", "items_completed": 0, "items_remaining": 3 },
-    "T7-security": { "status": "not-assigned", "items_completed": 0, "items_remaining": 0 },
-    "T8-docs": { "status": "not-assigned", "items_completed": 0, "items_remaining": 0 },
-    "T9-product": { "status": "not-assigned", "items_completed": 0, "items_remaining": 0 },
-    "T10-quality": { "status": "not-assigned", "items_completed": 0, "items_remaining": 0 }
+    "T1-backend": { "status": "in_progress", "notes": "Task TASK-002: Add rate limit to auth endpoints", "last_updated": "2026-02-23T14:28:00.000Z" },
+    "T2-frontend": { "status": "idle", "notes": "" },
+    "T3-data": { "status": "done", "notes": "Task TASK-001: Create rate limit schema", "last_updated": "2026-02-23T14:20:00.000Z" },
+    "T4-infra": { "status": "idle", "notes": "" },
+    "T5-devops": { "status": "idle", "notes": "" },
+    "T6-testing": { "status": "idle", "notes": "" },
+    "T7-security": { "status": "idle", "notes": "" },
+    "T8-docs": { "status": "idle", "notes": "" },
+    "T9-product": { "status": "idle", "notes": "" },
+    "T10-quality": { "status": "idle", "notes": "" }
   },
   "todo_items": [
     { "id": "TASK-002", "title": "Add rate limit to auth endpoints", "team": "backend", "priority": "P1", "status": "in-progress" },
@@ -99,19 +99,20 @@ The events log uses JSONL format (one JSON object per line). Each entry contains
 Example entries:
 
 ```jsonl
-{"timestamp":"2026-02-23T10:00:00.000Z","action":"phase_start","phase":1,"phase_name":"Discovery"}
+{"timestamp":"2026-02-23T10:00:00.000Z","action":"phase_set","phase":1,"phase_name":"Discovery"}
 {"timestamp":"2026-02-23T10:01:12.000Z","action":"discovery_complete","stacks":["typescript","react"],"build":"pnpm","tests":"vitest","issues":2}
-{"timestamp":"2026-02-23T10:02:00.000Z","action":"phase_start","phase":2,"phase_name":"Planning"}
+{"timestamp":"2026-02-23T10:02:00.000Z","action":"phase_set","phase":2,"phase_name":"Planning"}
 {"timestamp":"2026-02-23T10:03:30.000Z","action":"plan_created","task":"Add rate limiting","steps":4,"files_to_touch":5}
-{"timestamp":"2026-02-23T10:03:31.000Z","action":"phase_start","phase":3,"phase_name":"Implementation"}
+{"timestamp":"2026-02-23T10:03:31.000Z","action":"phase_set","phase":3,"phase_name":"Implementation"}
 {"timestamp":"2026-02-23T10:03:45.000Z","action":"team_dispatch","team":"backend","task_id":"TASK-001","title":"Create rate limit middleware"}
 {"timestamp":"2026-02-23T10:08:30.000Z","action":"task_complete","team":"backend","task_id":"TASK-001","status":"success","files_changed":3,"tests_added":4}
 {"timestamp":"2026-02-23T10:08:45.000Z","action":"team_dispatch","team":"testing","task_id":"TASK-002","title":"Write integration tests for rate limiter"}
 {"timestamp":"2026-02-23T10:12:00.000Z","action":"task_complete","team":"testing","task_id":"TASK-002","status":"success","files_changed":1,"tests_added":6}
-{"timestamp":"2026-02-23T10:12:01.000Z","action":"phase_start","phase":4,"phase_name":"Validation"}
-{"timestamp":"2026-02-23T10:13:15.000Z","action":"quality_gate","result":"pass","format":"pass","lint":"pass","typecheck":"pass","tests":"pass","build":"pass"}
-{"timestamp":"2026-02-23T10:13:16.000Z","action":"phase_start","phase":5,"phase_name":"Ship"}
-{"timestamp":"2026-02-23T10:14:00.000Z","action":"handoff_saved","path":"docs/ai_handoffs/2026-02-23-rate-limiting.md"}
+{"timestamp":"2026-02-23T10:12:01.000Z","action":"healthcheck_completed","status":"pass"}
+{"timestamp":"2026-02-23T10:12:30.000Z","action":"check_completed","result":"pass","format":"pass","lint":"pass","typecheck":"pass","tests":"pass","build":"pass"}
+{"timestamp":"2026-02-23T10:13:00.000Z","action":"review_completed","verdict":"APPROVE","files_reviewed":4}
+{"timestamp":"2026-02-23T10:13:16.000Z","action":"phase_set","phase":5,"phase_name":"Ship"}
+{"timestamp":"2026-02-23T10:14:00.000Z","action":"handoff_generated","path":"docs/ai_handoffs/2026-02-23-rate-limiting.md"}
 {"timestamp":"2026-02-23T10:14:01.000Z","action":"session_complete","tasks_completed":2,"files_changed":4,"tests_added":10}
 ```
 
@@ -119,17 +120,19 @@ Example entries:
 
 | Action | Phase | Description |
 |--------|-------|-------------|
-| `phase_start` | Any | Orchestrator transitions to a new phase |
+| `orchestrate_invoked` | Any | Default orchestrate run started |
+| `phase_set` | Any | Orchestrator transitions to a new phase |
 | `discovery_complete` | 1 | Codebase scan finished |
 | `plan_created` | 2 | Implementation plan generated |
+| `plan_viewed` | 2 | Plan viewed via `/plan` |
 | `team_dispatch` | 3 | Task assigned to a team agent |
 | `task_complete` | 3 | Team agent finished a task |
-| `quality_gate` | 4 | Full quality check results |
-| `review_complete` | 4 | Code review verdict |
-| `handoff_saved` | 5 | Handoff document written to disk |
+| `healthcheck_completed` | 4 | Healthcheck finished |
+| `check_completed` | 4 | Full quality check results |
+| `review_completed` | 4 | Code review verdict |
+| `handoff_generated` | 5 | Handoff document written to disk |
 | `session_complete` | 5 | Orchestration run finished |
-| `lock_acquired` | Any | Session lock taken |
-| `lock_released` | Any | Session lock released |
+| `lock_force_released` | Any | Session lock force-cleared via `--force-unlock` |
 
 ### Purpose
 

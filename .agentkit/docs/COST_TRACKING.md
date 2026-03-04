@@ -52,7 +52,7 @@ AI coding assistants consume tokens for every interaction -- prompts sent and co
 
 ## Token Usage Logging
 
-> **Implementation note:** Token-level tracking (input/output tokens, cache tokens, estimated USD cost) is a **roadmap** feature. It requires API-level access to token counts, which varies by AI tool provider. The configuration and log formats below describe the *target* design. Currently, session-level fields (`sessionId`, `command`, `durationMs`, `user`, `repo`, `branch`) are populated; token and cost fields are placeholders that will be populated once token-level tracking is implemented.
+> **Implementation note:** Token-level tracking (input/output tokens, cache tokens, estimated USD cost) is a **roadmap** feature. It requires API-level access to token counts, which varies by AI tool provider. The configuration and log formats below describe the *target* design. Currently, two data paths emit session events: (1) **Shell hooks** (`session-start.sh` / `stop-build-check.sh`) log `sessionId`, `user` (hashed), `branch`, and `cwd` on start, and `sessionId` and `filesModified` on end. (2) **The cost-tracker engine** (`cost-tracker.mjs`) logs `sessionId`, `user`, `repo`, and `branch` on start, and `sessionId`, `durationMs`, and `filesModified` on end. The `command` field appears only in separate `command_run` events. Token and cost fields are placeholders that will be populated once token-level tracking is implemented.
 
 ### Enabling Token Logging
 
@@ -73,20 +73,33 @@ Each log entry is a JSON line (JSONL format) written to a date-stamped file:
 .agentkit/logs/usage-2025-01-15.jsonl
 ```
 
-**Session-level fields** (implemented):
+**Session start event** (shell hook — implemented):
 
 ```json
 {
   "timestamp": "2025-01-15T14:32:00.000Z",
+  "event": "session_start",
   "sessionId": "abc123",
-  "command": "plan",
-  "durationMs": 4500,
-  "user": "developer@example.com",
-  "repo": "my-project",
+  "user": "a1b2c3d4e5f6",
   "branch": "feature/auth",
+  "cwd": "/home/user/my-project"
+}
+```
+
+> The `user` field is a SHA-256 hash (first 12 chars) of `git user.email`. The cost-tracker engine emits a similar event with `user` as the plain email and `repo` instead of `cwd`.
+
+**Session end event** (shell hook — implemented):
+
+```json
+{
+  "timestamp": "2025-01-15T14:45:00.000Z",
+  "event": "session_end",
+  "sessionId": "abc123",
   "filesModified": 3
 }
 ```
+
+> The cost-tracker engine emits a similar event that also includes `durationMs`. The `command` field is only present in separate `command_run` events logged by the engine's `recordCommand()` function.
 
 **Token-level fields** (roadmap -- will be added when token tracking is available):
 

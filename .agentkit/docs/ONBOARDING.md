@@ -300,10 +300,10 @@ agentkit-check:
 trigger:
   paths:
     include:
-      - agentkit-forge/*
-      - .claude/*
-      - .cursor/*
-      - .windsurf/*
+      - agentkit-forge/**
+      - .claude/**
+      - .cursor/**
+      - .windsurf/**
 
 pool:
   vmImage: 'ubuntu-latest'

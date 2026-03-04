@@ -1238,7 +1238,7 @@ Use this flow when responding to security audit findings, penetration test repor
 
 - Replaces raw SQL with parameterized queries
 - Configures CORS with an explicit allowlist read from environment variables
-- Adds rate limiting middleware with configurable thresholds
+- Adds rate-limiting middleware with configurable thresholds
 - Adds tests for each security fix (input validation, CORS rejection, rate limit enforcement)
 - Runs quality gates to ensure nothing breaks
 
@@ -1339,16 +1339,19 @@ Run discovery and healthcheck to establish a baseline. You need to know what is 
 ```
 ## Breaking Changes Affecting This Project
 1. `ReactDOM.render` removed -- must use `createRoot` (4 files affected)
-2. `useEffect` cleanup timing changed -- review all effects with cleanup
-3. Automatic batching now default -- remove manual batching wrappers
-4. `forwardRef` no longer needed -- refs passed as regular props
+2. `ReactDOM.hydrate` removed -- must use `hydrateRoot` (if SSR is used)
+3. `propTypes` and `defaultProps` on function components deprecated -- use ES default parameters
+4. Legacy Context API (`contextTypes`, `childContextTypes`) removed -- use `React.createContext`
+5. String refs removed -- use `useRef` or callback refs
+6. `ReactDOM.findDOMNode` removed -- use ref forwarding
+7. New error handling: `onUncaughtError` and `onCaughtError` on `createRoot`
 
 ## Steps
 1. Update package.json: react@19, react-dom@19, @types/react@19
-2. Migrate ReactDOM.render to createRoot in src/client/index.tsx
-3. Remove forwardRef wrappers from 6 component files
-4. Remove manual batching calls from 3 event handler files
-5. Review and test all useEffect cleanup functions
+2. Run the official codemod: `npx codemod@latest react/19/migration-recipe`
+3. Migrate ReactDOM.render to createRoot in src/client/index.tsx
+4. Replace `defaultProps` with ES default parameters on function components
+5. Remove any string refs and legacy context usage
 6. Update test utilities: @testing-library/react to compatible version
 7. Run full test suite and fix any failures
 
@@ -1810,7 +1813,7 @@ cursor:
 ```
 /brand --init                    Scaffold brand.yaml with interactive prompts
 /brand --validate                Validate required fields and color format
-/brand --preview                 Preview resolved color palette
+/brand --palette                 Preview resolved color palette
 /brand --contrast                Audit WCAG compliance of color combinations
 /brand --theme                   Generate editor themes from brand spec
 agentkit sync                    Full sync including brand-resolved themes

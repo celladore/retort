@@ -94,7 +94,7 @@ Team commands in COMMAND_REFERENCE.md have a quick-reference table but lack:
 
 | Issue | Location | Details |
 |-------|----------|---------|
-| Command count mismatch | QUICK_START.md says "24 commands"; CLI registers 48 valid commands | Should be reconciled |
+| Command count mismatch | QUICK_START.md says "24 commands"; `VALID_COMMANDS` in `cli.mjs` contains 21 CLI-routable commands; `commands.yaml` defines 30 total commands (including 10 team commands and 3 slash-only commands not in the CLI router). The prior "48" figure was erroneous. | Reconciled to 29 in QUICK_START.md (see remediation item 10) |
 | Agent count mismatch | AGENTS_VS_TEAMS.md lists "16 agents"; agents.yaml defines 19 | agents.yaml is authoritative |
 | Team count | Consistent at 10 across all docs | No issue |
 | `/sync` vs `agentkit sync` | Some docs use slash-command syntax, others use CLI | Should clarify that `/sync` is not a slash command — it's CLI-only |

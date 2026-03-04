@@ -726,7 +726,7 @@ These commands manage the delegated task system used by the orchestrator and tea
 
 | Flag                                   | Description                                                      |
 | -------------------------------------- | ---------------------------------------------------------------- |
-| `--status <status>`                    | Filter by task status (pending, in-progress, completed, blocked).|
+| `--status <status>`                    | Filter by task status (submitted, accepted, working, completed, failed, rejected, canceled). Maps to the task protocol lifecycle defined in `task-protocol.mjs`.|
 | `--assignee <team>`                    | Filter by assigned team (e.g., backend, frontend).               |
 | `--id <task-id>`                       | Show details for a specific task.                                |
 | `--type <type>`                        | Filter by task type (implement, review, plan, investigate, test, document). |
@@ -737,9 +737,9 @@ These commands manage the delegated task system used by the orchestrator and tea
 
 ```
 /tasks                                  -- list all tasks
-/tasks --status pending --assignee backend
+/tasks --status submitted --assignee backend
 /tasks --id TASK-042
-/tasks --priority P0 --status pending   -- show urgent unstarted work
+/tasks --priority P0 --status submitted   -- show urgent unstarted work
 ```
 
 **Expected output sample:**
