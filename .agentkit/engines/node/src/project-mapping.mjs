@@ -192,6 +192,38 @@ export const PROJECT_MAPPING = [
   { src: 'automation.checks.codeql', dest: 'enableCodeql', type: 'boolean' },
   { src: 'automation.checks.semgrep', dest: 'enableSemgrep', type: 'boolean' },
   { src: 'automation.checks.dependencyAudit', dest: 'enableDependencyAudit', type: 'boolean' },
+  { src: 'automation.languageProfile.mode', dest: 'languageProfileMode' },
+  { src: 'automation.languageProfile.diagnostics', dest: 'languageProfileDiagnostics' },
+  {
+    src: 'automation.languageProfile.inferFrom.frameworks',
+    dest: 'languageInferenceFromFrameworks',
+    type: 'boolean',
+  },
+  {
+    src: 'automation.languageProfile.inferFrom.tests',
+    dest: 'languageInferenceFromTests',
+    type: 'boolean',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.alwaysRegenerate',
+    dest: 'languageProfileScaffoldAlwaysRegenerate',
+    type: 'array-join',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.alwaysRegenerate',
+    dest: 'hasLanguageProfileScaffoldAlwaysRegenerate',
+    type: 'boolean-array-length',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.scaffoldOnce',
+    dest: 'languageProfileScaffoldOnce',
+    type: 'array-join',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.scaffoldOnce',
+    dest: 'hasLanguageProfileScaffoldOnce',
+    type: 'boolean-array-length',
+  },
 
   // Cross-cutting (formerly flattenCrosscutting)
   // Logging

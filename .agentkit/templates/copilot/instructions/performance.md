@@ -39,7 +39,7 @@ bench('process 1000 items', () => {
 Include a baseline comparison (`bench.todo` or commented reference) so
 regressions are visible in the diff.
 {{/if}}
-{{#if hasLanguageRust}}
+{{#if hasLanguageRustEffective}}
 
 ### Rust
 
@@ -59,7 +59,7 @@ criterion_main!(benches);
 
 Use [Criterion.rs](https://github.com/bheisler/criterion.rs) for stable, statistically rigorous benchmarks.
 {{/if}}
-{{#if hasLanguagePython}}
+{{#if hasLanguagePythonEffective}}
 
 ### Python
 
