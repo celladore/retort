@@ -2,7 +2,7 @@ name: Branch Protection
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
     types: [opened, synchronize, reopened, edited]
 
 # Enforce that all PRs to main pass required checks before merge.
@@ -67,6 +67,52 @@ jobs:
               }
             }
 
+      - name: Require upstream issue link for .agentkit changes
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+              (response) => response.data
+            );
+
+            const touchesAgentkit = files.some((file) => file.filename.startsWith('.agentkit/'));
+
+            if (!touchesAgentkit) {
+              core.info('No .agentkit changes detected; upstream issue link check skipped.');
+              return;
+            }
+
+            const isAgentkitForgeRepo =
+              context.repo.owner.toLowerCase() === 'justaghost' &&
+              context.repo.repo.toLowerCase() === 'agentkit-forge';
+
+            if (isAgentkitForgeRepo) {
+              core.info('Running in agentkit-forge source repo; upstream issue link check skipped.');
+              return;
+            }
+
+            const body = pr.body || '';
+            const hasUpstreamIssueLink = /https:\/\/github\.com\/JustAGhosT\/agentkit-forge\/issues\/\d+/i.test(body);
+
+            if (!hasUpstreamIssueLink) {
+              core.setFailed(
+                'This PR modifies .agentkit/** and must include an upstream issue link in the PR body.\n' +
+                'Required format example: https://github.com/JustAGhosT/agentkit-forge/issues/170'
+              );
+              return;
+            }
+
+            core.info('Upstream issue link found for .agentkit changes.');
+
       - name: Verify no secrets in diff
         run: |
           # Check for common secret patterns in added lines only (not removals)
@@ -78,7 +124,7 @@ jobs:
           )
 
           # Filter to added lines only (lines starting with + but not +++)
-          ADDED=$(git diff --unified=0 origin/main...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' ':!.agentkit/pnpm-lock.yaml' | grep -E '^\+[^+]' || true)
+          ADDED=$(git diff --unified=0 origin/${{ github.event.pull_request.base.ref }}...HEAD -- . ':!*.lock' ':!pnpm-lock.yaml' ':!.agentkit/pnpm-lock.yaml' | grep -E '^\+[^+]' || true)
 
           for pattern in "${PATTERNS[@]}"; do
             if echo "$ADDED" | grep -qE "$pattern"; then

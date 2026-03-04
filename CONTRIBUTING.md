@@ -72,6 +72,15 @@ __Examples__:
 6. Address review feedback
 7. Squash-merge when approved
 
+### Mandatory Branch Flow (Enforced)
+
+- `feature/*`, `fix/*`, and other short-lived branches __must__ open PRs directly into `main`.
+- Keep branches short-lived and rebase/merge from `main` frequently to reduce drift.
+- `dev` can be used for optional integration rehearsal, but it is not the mandatory merge gate.
+- `main` requires at least 1 approval, stale approval dismissal on push, up-to-date branch before merge, and required status checks.
+
+In short: __feature branches → `main`__ (github-flow).
+
 ---
 
 ## AI Agent Contributions
