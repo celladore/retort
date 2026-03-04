@@ -46,11 +46,7 @@ describe('review-runner', () => {
     it('detects AWS access keys', async () => {
       setupTestRepo();
       // Create file with fake AWS key
-      writeFileSync(
-        resolve(TEST_ROOT, 'config.js'),
-        `const key = "${FAKE_AWS_KEY}";`,
-        'utf-8'
-      );
+      writeFileSync(resolve(TEST_ROOT, 'config.js'), `const key = "${FAKE_AWS_KEY}";`, 'utf-8');
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -68,11 +64,7 @@ describe('review-runner', () => {
 
     it('detects private keys', async () => {
       setupTestRepo();
-      writeFileSync(
-        resolve(TEST_ROOT, 'key.pem'),
-        `${FAKE_PRIVATE_KEY_HEADER}\nfake`,
-        'utf-8'
-      );
+      writeFileSync(resolve(TEST_ROOT, 'key.pem'), `${FAKE_PRIVATE_KEY_HEADER}\nfake`, 'utf-8');
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -127,11 +119,7 @@ describe('review-runner', () => {
 
     it('skips .lock files', async () => {
       setupTestRepo();
-      writeFileSync(
-        resolve(TEST_ROOT, 'yarn.lock'),
-        `const key = "${FAKE_AWS_KEY}";`,
-        'utf-8'
-      );
+      writeFileSync(resolve(TEST_ROOT, 'yarn.lock'), `const key = "${FAKE_AWS_KEY}";`, 'utf-8');
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -146,11 +134,7 @@ describe('review-runner', () => {
 
     it('skips .snap files', async () => {
       setupTestRepo();
-      writeFileSync(
-        resolve(TEST_ROOT, 'test.snap'),
-        `const key = "${FAKE_AWS_KEY}";`,
-        'utf-8'
-      );
+      writeFileSync(resolve(TEST_ROOT, 'test.snap'), `const key = "${FAKE_AWS_KEY}";`, 'utf-8');
 
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
