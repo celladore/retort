@@ -281,6 +281,7 @@ agents:
         - Follow iac domain rules [iac-naming-convention, iac-tagging, iac-no-hardcoded-secrets, iac-plan-before-apply] — use naming conventions, tag resources, no hardcoded secrets
         - Follow security domain rules [sec-least-privilege, sec-encryption, sec-no-secrets] — enforce least-privilege IAM, encrypt at rest and in transit
         - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
+        - Execute /infra-eval assessments when evaluation.infraEval is enabled
       conventions:
         - Keep root modules thin and delegate reusable logic to versioned shared modules
         - Run terraform fmt/validate and plan before apply in every environment

@@ -51,6 +51,9 @@
 # =============================================================================
 node_modules/
 
+# Test fixture directory (ephemeral, created by vitest)
+.test-tmp/
+
 # Agentkit internal
 .agentkit/.tmp/
 .agentkit/.bak/

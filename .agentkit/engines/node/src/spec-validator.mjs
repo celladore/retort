@@ -258,6 +258,8 @@ const PROJECT_ENUMS = {
   commitConvention: ['conventional', 'semantic', 'none'],
   codeReview: ['required-pr', 'optional', 'none'],
   teamSize: ['solo', 'small', 'medium', 'large'],
+  issueTracker: ['github', 'linear', 'none'],
+  intakeCadence: ['daily', 'on-demand', 'weekly'],
   loggingFramework: [
     'serilog',
     'winston',
@@ -317,6 +319,21 @@ const PROJECT_ENUMS = {
   auditEventBus: ['service-bus', 'event-hub', 'sns', 'none'],
 };
 
+const teamsIntakeSchema = {
+  type: 'object',
+  properties: {
+    ownerTeam: { type: 'string', required: true, minLength: 1 },
+    operationsTeam: { type: 'string', required: true, minLength: 1 },
+    routing: { type: 'object' },
+    escalation: {
+      type: 'object',
+      properties: {
+        securityCritical: { type: 'array', items: { type: 'string' } },
+        blockedCrossTeam: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  },
+};
 // ---------------------------------------------------------------------------
 // Schema: project.yaml
 // ---------------------------------------------------------------------------
@@ -441,6 +458,23 @@ const projectSchema = {
         commitConvention: { type: 'string', enum: PROJECT_ENUMS.commitConvention },
         codeReview: { type: 'string', enum: PROJECT_ENUMS.codeReview },
         teamSize: { type: 'string', enum: PROJECT_ENUMS.teamSize },
+        issueTracker: { type: 'string', enum: PROJECT_ENUMS.issueTracker },
+        intake: {
+          type: 'object',
+          properties: {
+            ownerTeam: { type: 'string', minLength: 1 },
+            operationsTeam: { type: 'string', minLength: 1 },
+            cadence: { type: 'string', enum: PROJECT_ENUMS.intakeCadence },
+            routing: { type: 'object' },
+            escalation: {
+              type: 'object',
+              properties: {
+                securityCritical: { type: 'array', items: { type: 'string' } },
+                blockedCrossTeam: { type: 'array', items: { type: 'string' } },
+              },
+            },
+          },
+        },
       },
     },
     testing: {
@@ -729,6 +763,60 @@ function validateCrossReferences(specs) {
     detectHandoffCycle(teamId);
   }
 
+  // Validate teams.intake ownership/routing references
+  const intake = teams?.intake;
+  if (intake && typeof intake === 'object' && !Array.isArray(intake)) {
+    const ownerTeam = intake.ownerTeam;
+    if (typeof ownerTeam === 'string' && ownerTeam && !teamIds.has(ownerTeam)) {
+      errors.push(`teams.yaml: intake.ownerTeam references unknown team "${ownerTeam}"`);
+    }
+
+    const operationsTeam = intake.operationsTeam;
+    if (typeof operationsTeam === 'string' && operationsTeam && !teamIds.has(operationsTeam)) {
+      errors.push(
+        `teams.yaml: intake.operationsTeam references unknown team "${operationsTeam}"`
+      );
+    }
+
+    const routing = intake.routing;
+    if (routing && typeof routing === 'object' && !Array.isArray(routing)) {
+      for (const [routeKey, routeTeam] of Object.entries(routing)) {
+        if (typeof routeTeam !== 'string') {
+          errors.push(`teams.yaml: intake.routing.${routeKey} must be a string team id`);
+          continue;
+        }
+        if (!teamIds.has(routeTeam)) {
+          errors.push(
+            `teams.yaml: intake.routing.${routeKey} references unknown team "${routeTeam}"`
+          );
+        }
+      }
+    }
+
+    const escalation = intake.escalation;
+    if (escalation && typeof escalation === 'object' && !Array.isArray(escalation)) {
+      for (const [escalationKey, escalationTeams] of Object.entries(escalation)) {
+        if (!Array.isArray(escalationTeams)) {
+          errors.push(`teams.yaml: intake.escalation.${escalationKey} must be an array`);
+          continue;
+        }
+        for (const escalationTeam of escalationTeams) {
+          if (typeof escalationTeam !== 'string') {
+            errors.push(
+              `teams.yaml: intake.escalation.${escalationKey} entries must be string team ids`
+            );
+            continue;
+          }
+          if (!teamIds.has(escalationTeam)) {
+            errors.push(
+              `teams.yaml: intake.escalation.${escalationKey} references unknown team "${escalationTeam}"`
+            );
+          }
+        }
+      }
+    }
+  }
+
   // Check for duplicate rule convention IDs
   const seenRuleIds = new Set();
   for (const domain of specs.rules?.rules || []) {
@@ -829,6 +917,9 @@ export function validateSpec(agentkitRoot) {
           );
         }
       }
+    }
+    if (teams.intake !== undefined && teams.intake !== null) {
+      errors.push(...validate(teams.intake, teamsIntakeSchema, 'teams.yaml.intake'));
     }
   }
 

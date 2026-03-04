@@ -132,12 +132,18 @@ process:
   commitConvention: conventional # conventional | semantic | none
   codeReview: required-pr # required-pr | optional | none
   teamSize: solo # solo | small | medium | large
-  # Issue tracker used by review/project-review agents to file template or generated-format findings.
+  # Issue tracker used by review/project-review/sync-backlog workflows.
   # github   → gh issue create (requires gh CLI authenticated)
   # linear   → Linear MCP or linear CLI
-  # jira     → jira CLI or REST API via Bash
   # none     → log finding to events.log only, do not open external issue
-  issueTracker: github # github | linear | jira | none
+  issueTracker: github # github | linear | none
+  intake:
+    ownerTeam: product # primary triage owner
+    operationsTeam: quality # routing/hygiene executor
+    cadence: daily # daily | on-demand | weekly
+    escalation:
+      securityCritical: [security, devops]
+      blockedCrossTeam: [product]
 
 # Testing strategy
 testing:
@@ -167,6 +173,22 @@ automation:
 #   - name: PayFast
 #     purpose: payments
 integrations: []
+
+# Evaluation — opt-in infrastructure & codebase fitness evaluation
+# Enable this to add the /infra-eval command for adopting repos.
+# Weights must sum to 100. Custom gates extend the default hard gate set.
+evaluation:
+  infraEval: false # set to true to enable /infra-eval command
+  weights:
+    reliability: 18
+    cost: 16
+    security: 14
+    infra: 12
+    scalability: 12
+    architecture: 10
+    code: 10
+    ops: 8
+  customGates: null # free-text markdown block for project-specific hard gates
 
 # Cross-cutting concerns (project-specific decisions agents must follow)
 crosscutting:

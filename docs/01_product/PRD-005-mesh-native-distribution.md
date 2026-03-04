@@ -121,15 +121,15 @@ forge's core differentiator.
 
 ## Measurable Objectives
 
-| Objective | Baseline | Target | Measurement Method | Owner | Target Date |
-| --- | --- | --- | --- | --- | --- |
-| Onboarding time (MTTFS) | ~15 min (submodule) | ≤3 min (CLI), ≤1 min (UI) | Timed onboarding test per release | Dev Experience Lead | GA launch |
-| Monthly Active Installs (MAI) | 175 | 500+ | npm download stats + action usage | Product Owner | Q4 2024 |
-| Overlay edits by non-dev personas | <5% | >50% | UI session analytics (Mixpanel) | Dev Experience Lead | GA +90 days |
-| CI drift events in enabled repos | Regular | 0 | GitHub Action check results | DevOps Owner | GA +30 days |
-| Onboarding support tickets | 12/mo | ≤2/mo | Support system tracking | Product Owner | Post-migration |
-| Upgrade failure rate | 8% | <1% | npm update error telemetry | Engineering Lead | GA +30 days |
-| NPS for delivery experience | 48 | 65+ | Quarterly survey | Product Owner | Q4 2024 |
+| Objective                         | Baseline            | Target                    | Measurement Method                | Owner               | Target Date    |
+| --------------------------------- | ------------------- | ------------------------- | --------------------------------- | ------------------- | -------------- |
+| Onboarding time (MTTFS)           | ~15 min (submodule) | ≤3 min (CLI), ≤1 min (UI) | Timed onboarding test per release | Dev Experience Lead | GA launch      |
+| Monthly Active Installs (MAI)     | 175                 | 500+                      | npm download stats + action usage | Product Owner       | Q4 2024        |
+| Overlay edits by non-dev personas | <5%                 | >50%                      | UI session analytics (Mixpanel)   | Dev Experience Lead | GA +90 days    |
+| CI drift events in enabled repos  | Regular             | 0                         | GitHub Action check results       | DevOps Owner        | GA +30 days    |
+| Onboarding support tickets        | 12/mo               | ≤2/mo                     | Support system tracking           | Product Owner       | Post-migration |
+| Upgrade failure rate              | 8%                  | <1%                       | npm update error telemetry        | Engineering Lead    | GA +30 days    |
+| NPS for delivery experience       | 48                  | 65+                       | Quarterly survey                  | Product Owner       | Q4 2024        |
 
 Metric legend:
 
@@ -139,14 +139,14 @@ Metric legend:
 
 ## Stakeholders
 
-| Stakeholder | Role | Responsibility |
-| --- | --- | --- |
-| Product Owner | Direction, Approval | Feature scope, acceptance criteria, GTM alignment |
-| Tech Lead | Technical Guidance | Architecture, code review, ADR ownership |
-| Core Engineering | Build & Maintenance | Engineering delivery across all three channels |
-| DevOps Owner | Automation, Integration | CI/CD adoption, drift detection, action publishing |
-| Pilot Customer(s) | Early Feedback | Validation, pilot deployment, NPS input |
-| Head of Dev Experience | UX, Docs | Usability, onboarding content, accessibility |
+| Stakeholder            | Role                    | Responsibility                                     |
+| ---------------------- | ----------------------- | -------------------------------------------------- |
+| Product Owner          | Direction, Approval     | Feature scope, acceptance criteria, GTM alignment  |
+| Tech Lead              | Technical Guidance      | Architecture, code review, ADR ownership           |
+| Core Engineering       | Build & Maintenance     | Engineering delivery across all three channels     |
+| DevOps Owner           | Automation, Integration | CI/CD adoption, drift detection, action publishing |
+| Pilot Customer(s)      | Early Feedback          | Validation, pilot deployment, NPS input            |
+| Head of Dev Experience | UX, Docs                | Usability, onboarding content, accessibility       |
 
 ## User Personas and Stories
 
@@ -257,13 +257,13 @@ npx agentkit-forge ui
 
 ### User Flow Matrix
 
-| Step | CLI / Automation | UI Path | Outcome |
-| --- | --- | --- | --- |
-| Install | `npm i -D agentkit-forge` | PWA onboarding wizard | AgentKit Forge ready |
-| Sync / init | `npx agentkit-forge sync` | "Sync Now" in UI | Overlays in place |
-| Overlay mgmt | CLI commands | Dashboard editor | Changes committed |
-| Drift check | GitHub Action step | CI status in UI | Drift flagged/cleared |
-| Update | `npm update` + sync | "Apply/Rollback" in UI | State current/restored |
+| Step         | CLI / Automation          | UI Path                | Outcome                |
+| ------------ | ------------------------- | ---------------------- | ---------------------- |
+| Install      | `npm i -D agentkit-forge` | PWA onboarding wizard  | AgentKit Forge ready   |
+| Sync / init  | `npx agentkit-forge sync` | "Sync Now" in UI       | Overlays in place      |
+| Overlay mgmt | CLI commands              | Dashboard editor       | Changes committed      |
+| Drift check  | GitHub Action step        | CI status in UI        | Drift flagged/cleared  |
+| Update       | `npm update` + sync       | "Apply/Rollback" in UI | State current/restored |
 
 ### Edge Cases
 
@@ -304,13 +304,13 @@ npx agentkit-forge ui
 
 ### CLI Commands
 
-| Command | Description |
-| --- | --- |
-| `agentkit-forge init` | Initialize overlays for a new consumer repo |
-| `agentkit-forge sync` | Regenerate outputs from current overlays and specs |
-| `agentkit-forge ui` | Launch PWA UI on localhost:4827 |
-| `agentkit-forge doctor` | Health check — validate environment and config |
-| `agentkit-forge overlay edit` | Open overlay in editor with schema validation |
+| Command                       | Description                                        |
+| ----------------------------- | -------------------------------------------------- |
+| `agentkit-forge init`         | Initialize overlays for a new consumer repo        |
+| `agentkit-forge sync`         | Regenerate outputs from current overlays and specs |
+| `agentkit-forge ui`           | Launch PWA UI on localhost:4827                    |
+| `agentkit-forge doctor`       | Health check — validate environment and config     |
+| `agentkit-forge overlay edit` | Open overlay in editor with schema validation      |
 
 ### UI Screens
 
@@ -341,13 +341,13 @@ npx agentkit-forge ui
 
 ## Mesh Layer Mapping
 
-| Forge Layer | Role |
-| --- | --- |
+| Forge Layer                | Role                                                       |
+| -------------------------- | ---------------------------------------------------------- |
 | Orchestration (build-time) | Overlays are source-of-truth; sync engine produces outputs |
-| Output renderers | Config writers for all supported AI tools |
-| Distribution channels | npm package, GitHub Action, PWA UI |
-| Plugin extension hooks | Stubbed in v1; extensible for future integrations |
-| Connections | Overlay dir ↔ CLI ↔ UI ↔ GitHub Action |
+| Output renderers           | Config writers for all supported AI tools                  |
+| Distribution channels      | npm package, GitHub Action, PWA UI                         |
+| Plugin extension hooks     | Stubbed in v1; extensible for future integrations          |
+| Connections                | Overlay dir ↔ CLI ↔ UI ↔ GitHub Action                     |
 
 ## APIs and Integrations
 
@@ -363,12 +363,12 @@ npx agentkit-forge ui
 
 ### External Dependencies
 
-| Dependency | Purpose | Fallback |
-| --- | --- | --- |
-| npm registry | Package distribution | Private registry / cached install |
-| Node.js 22+ | Dev-time runtime | Required — no fallback |
-| GitHub Actions runner | CI drift detection | Manual CLI sync |
-| Modern browser | PWA UI | CLI fallback |
+| Dependency            | Purpose              | Fallback                          |
+| --------------------- | -------------------- | --------------------------------- |
+| npm registry          | Package distribution | Private registry / cached install |
+| Node.js 22+           | Dev-time runtime     | Required — no fallback            |
+| GitHub Actions runner | CI drift detection   | Manual CLI sync                   |
+| Modern browser        | PWA UI               | CLI fallback                      |
 
 ### Data Models
 
@@ -383,6 +383,7 @@ npx agentkit-forge ui
 ### Onboarding Flow
 
 **CLI path:**
+
 ```bash
 npm install -D agentkit-forge        # or npm install -g agentkit-forge
 npx agentkit-forge init --repoName my-project
@@ -390,12 +391,14 @@ npx agentkit-forge sync
 ```
 
 **UI path:**
+
 ```bash
 npx agentkit-forge ui
 # Browser opens → visual wizard → detect stack → select tools → create overlay → sync
 ```
 
 **CI path:**
+
 ```yaml
 - uses: org/agentkit-forge-action@v3
   with:
@@ -416,11 +419,11 @@ npx agentkit-forge ui
 
 Minimal manual steps, rapid path to first agent deployed or registered:
 
-| Persona | Path | Time to First Sync |
-| --- | --- | --- |
-| Developer | `npm install` + `init` + `sync` | ~3 min |
-| Non-developer | PWA wizard | ~1 min |
-| DevOps | GitHub Action added to workflow | ~5 min (including PR) |
+| Persona       | Path                            | Time to First Sync    |
+| ------------- | ------------------------------- | --------------------- |
+| Developer     | `npm install` + `init` + `sync` | ~3 min                |
+| Non-developer | PWA wizard                      | ~1 min                |
+| DevOps        | GitHub Action added to workflow | ~5 min (including PR) |
 
 ## Accessibility Requirements
 
@@ -460,22 +463,22 @@ Minimal manual steps, rapid path to first agent deployed or registered:
 
 ## Timeline and Milestones
 
-| Phase | Scope | Target Date | Dependencies |
-| --- | --- | --- | --- |
-| Phase 1 | npm package publication pipeline, verification, baseline metrics | Month 1 (Q2) | npm registry, Node.js 22+ |
-| Phase 1 | GA release of PWA for greenfield customers | Month 1 (Q2) | UX design, browser testing |
-| Phase 2 | GitHub Action mandatory for CI/CD installs; docs and champion enablement | Month 2 (Q2) | GH Actions marketplace |
-| Phase 2 | Migration guides and CLI tooling for self-service onboarding | Month 2 (Q2) | Phase 1 stable |
-| Phase 3 | Plugin/alternative-ecosystem stub | Month 3 (Q2) | Core stubs, pilot feedback |
+| Phase   | Scope                                                                    | Target Date  | Dependencies               |
+| ------- | ------------------------------------------------------------------------ | ------------ | -------------------------- |
+| Phase 1 | npm package publication pipeline, verification, baseline metrics         | Month 1 (Q2) | npm registry, Node.js 22+  |
+| Phase 1 | GA release of PWA for greenfield customers                               | Month 1 (Q2) | UX design, browser testing |
+| Phase 2 | GitHub Action mandatory for CI/CD installs; docs and champion enablement | Month 2 (Q2) | GH Actions marketplace     |
+| Phase 2 | Migration guides and CLI tooling for self-service onboarding             | Month 2 (Q2) | Phase 1 stable             |
+| Phase 3 | Plugin/alternative-ecosystem stub                                        | Month 3 (Q2) | Core stubs, pilot feedback |
 
 ### Key Milestones
 
-| Milestone | Target Date |
-| --- | --- |
-| Hybrid launch GA (npm + Action + PWA) | 2024-08-01 |
-| Legacy deprecation (manual/cloud binary) | 2024-09-30 |
-| PWA GA for all browser-based onboarding | 2024-09-30 |
-| Plugin stub v1 | Q3 2024 |
+| Milestone                                | Target Date |
+| ---------------------------------------- | ----------- |
+| Hybrid launch GA (npm + Action + PWA)    | 2024-08-01  |
+| Legacy deprecation (manual/cloud binary) | 2024-09-30  |
+| PWA GA for all browser-based onboarding  | 2024-09-30  |
+| Plugin stub v1                           | Q3 2024     |
 
 ## Constraints and Dependencies
 
@@ -498,36 +501,36 @@ Minimal manual steps, rapid path to first agent deployed or registered:
 
 ### Dependencies
 
-| Dependency | Owner | Risk Level |
-| --- | --- | --- |
-| npm registry and distribution infrastructure | Platform Lead | Medium |
-| GitHub Actions platform and runner fidelity | DevOps Owner | Low |
-| Browser deployment and UX collaboration | Dev Experience Lead | Medium |
-| Pilot feedback loops from target customers | Product Owner | Medium |
+| Dependency                                   | Owner               | Risk Level |
+| -------------------------------------------- | ------------------- | ---------- |
+| npm registry and distribution infrastructure | Platform Lead       | Medium     |
+| GitHub Actions platform and runner fidelity  | DevOps Owner        | Low        |
+| Browser deployment and UX collaboration      | Dev Experience Lead | Medium     |
+| Pilot feedback loops from target customers   | Product Owner       | Medium     |
 
 ## Risks and Mitigations
 
-| Risk | Impact | Probability | Mitigation |
-| --- | --- | --- | --- |
-| npm registry outages or delays | Medium | Medium | Dual-publish critical updates; status monitoring; fallback guides |
-| GitHub Actions ecosystem disruption | High | Low | Maintain validated fallback/manual install path during launch |
-| PWA browser support fragmentation | Medium | Medium | Restrict to tested browsers (Chrome, Edge); clear communication |
-| Release process overhead (Hybrid complexity) | Medium | High | Monorepo + CI pipelines for update alignment; automate most ops |
-| User confusion during transition | Medium | Medium | Clear migration comms, in-product prompts and guides |
-| Security vulnerabilities in third-party routes | High | Medium | Continuous dependency scanning (SAST), formal security review |
-| CI drift detection fails silently | High | Medium | Force action validation; pre-launch robustness testing |
-| Overlay YAML parse errors block users | Medium | High | Schema checks, UI error feedback with remediation help |
-| UI and CLI feature divergence | Medium | Medium | Shared core engine; strictly decoupled presentation layer |
-| Support load exceeds expectations | Medium | Low | In-app docs, self-diagnosis/help pages, community resources |
+| Risk                                           | Impact | Probability | Mitigation                                                        |
+| ---------------------------------------------- | ------ | ----------- | ----------------------------------------------------------------- |
+| npm registry outages or delays                 | Medium | Medium      | Dual-publish critical updates; status monitoring; fallback guides |
+| GitHub Actions ecosystem disruption            | High   | Low         | Maintain validated fallback/manual install path during launch     |
+| PWA browser support fragmentation              | Medium | Medium      | Restrict to tested browsers (Chrome, Edge); clear communication   |
+| Release process overhead (Hybrid complexity)   | Medium | High        | Monorepo + CI pipelines for update alignment; automate most ops   |
+| User confusion during transition               | Medium | Medium      | Clear migration comms, in-product prompts and guides              |
+| Security vulnerabilities in third-party routes | High   | Medium      | Continuous dependency scanning (SAST), formal security review     |
+| CI drift detection fails silently              | High   | Medium      | Force action validation; pre-launch robustness testing            |
+| Overlay YAML parse errors block users          | Medium | High        | Schema checks, UI error feedback with remediation help            |
+| UI and CLI feature divergence                  | Medium | Medium      | Shared core engine; strictly decoupled presentation layer         |
+| Support load exceeds expectations              | Medium | Low         | In-app docs, self-diagnosis/help pages, community resources       |
 
 ## Open Questions
 
-| Question | Owner | Target Date | Impact if Unresolved |
-| --- | --- | --- | --- |
-| Priority and spec for non-Node.js wrappers (Rust, Python, .NET) | Product Owner, Engineering | Q2 2024 | Slower adoption in alternative ecosystems |
-| Plugin system phase timeline and extension API | Tech Lead | Q2 2024 | Limits alternative-tool expansion |
-| External ecosystem integration cadence (partner repos) | Product Owner | Q3 2024 | Blocks broader mesh-native coverage |
-| Tauri desktop app: build or defer based on PWA adoption data? | Product Owner, Dev Experience | Q4 2024 | Potential gap for offline-heavy users |
+| Question                                                        | Owner                         | Target Date | Impact if Unresolved                      |
+| --------------------------------------------------------------- | ----------------------------- | ----------- | ----------------------------------------- |
+| Priority and spec for non-Node.js wrappers (Rust, Python, .NET) | Product Owner, Engineering    | Q2 2024     | Slower adoption in alternative ecosystems |
+| Plugin system phase timeline and extension API                  | Tech Lead                     | Q2 2024     | Limits alternative-tool expansion         |
+| External ecosystem integration cadence (partner repos)          | Product Owner                 | Q3 2024     | Blocks broader mesh-native coverage       |
+| Tauri desktop app: build or defer based on PWA adoption data?   | Product Owner, Dev Experience | Q4 2024     | Potential gap for offline-heavy users     |
 
 ## Appendix
 
@@ -561,12 +564,12 @@ Minimal manual steps, rapid path to first agent deployed or registered:
 
 ### Competitive Analysis
 
-| Capability | GitHub Copilot | Claude | Cursor | AgentKit Forge |
-| --- | --- | --- | --- | --- |
-| Multi-tool overlay system | No | No | No | **Yes** |
-| PWA / UI-based editing | No | No | No | **Yes** |
-| Drift detection in CI | No | No | No | **Yes** |
-| Ecosystem extensibility | No | Some | No | **Planned (stub v1)** |
+| Capability                | GitHub Copilot | Claude | Cursor | AgentKit Forge        |
+| ------------------------- | -------------- | ------ | ------ | --------------------- |
+| Multi-tool overlay system | No             | No     | No     | **Yes**               |
+| PWA / UI-based editing    | No             | No     | No     | **Yes**               |
+| Drift detection in CI     | No             | No     | No     | **Yes**               |
+| Ecosystem extensibility   | No             | Some   | No     | **Planned (stub v1)** |
 
 No competitor currently provides unified overlays, visual UI, or mesh-native CI
 drift detection across AI tooling. This is a first-mover opportunity.
