@@ -22,6 +22,24 @@ This is planning guidance only; no implementation is performed by this document.
 
 ---
 
+## #159 — Router Integration Governance Rollout (Epic)
+
+This is an organizational epic and orchestrates sub-issues `#160`–`#170`.
+
+Epic-level impacted files/components:
+
+- `docs/08_reference/router_integration_governance_rollout.md` (tracking)
+- `docs/08_reference/governance_issue_file_impact_map.md` (mapping)
+- `docs/08_reference/agentkit_adopter_branch_governance_checklist.md` (adopter process)
+- `docs/08_reference/agentkit_sync_integration_patch_plan.md` (sync integration blueprint)
+
+Ownership:
+
+- Primary: `JustAGhosT/agentkit-forge` maintainers
+- Linked downstream: `phoenixvc/ai-gateway`, `phoenixvc/pvc-costops-analytics`
+
+---
+
 ## #160 — Full render-target parity baseline + gap ledger
 
 Primary files:

@@ -9,6 +9,10 @@ SKIP_PROTECTION=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo)
+      if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == -* ]]; then
+        echo "Error: --repo requires a value in the form owner/name"
+        exit 1
+      fi
       REPO="$2"
       shift 2
       ;;
@@ -75,7 +79,8 @@ PAYLOAD=$(cat <<'JSON'
     "contexts": [
       "CI / test (ubuntu-latest, 24)",
       "CI / validate",
-      "Branch Protection / branch-rules"
+      "Branch Protection / branch-rules",
+      "block-agentkit-changes / check_agentkit_changes"
     ]
   },
   "enforce_admins": false,
