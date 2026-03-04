@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-handoff');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'handoff');
 const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
 
 function setupTestProject(stateOverrides = {}) {
