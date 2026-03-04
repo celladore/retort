@@ -11,7 +11,7 @@ repositories that have integrated AgentKit Forge.
 
 - Repository: `JustAGhosT/agentkit-forge`
 - Milestone: `CLI Distribution & Delivery Improvements`
-- Suggested milestone number: `#2` (create as next milestone)
+- Milestone number: `#2` (created)
 
 ## Issues in this Milestone
 
@@ -19,18 +19,18 @@ repositories that have integrated AgentKit Forge.
 | --- | --- | --- | --- |
 | [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain availability (gh, az, etc.) | Open | N/A |
 | [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR (blocking) and post-commit (non-blocking) for adopters | Open | N/A |
-| TBD | feat(cli): implement autoupdate functionality for adopter repositories | Planned | [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md) |
+| [#258](https://github.com/JustAGhosT/agentkit-forge/issues/258) | feat(cli): implement autoupdate functionality for repositories adopting AgentKit Forge | Open | [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md) |
 
-> **Note for maintainer:** The autoupdate issue must be created as a GitHub issue in
-> `JustAGhosT/agentkit-forge` and added to this milestone. Template content for the
-> issue body is provided in [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md).
-> Issues #196 and #194 should also be updated with a cross-reference comment pointing
-> to the new autoupdate issue.
+> **Status update:** Milestone and autoupdate issue have been created.
+> - Milestone: [#2](https://github.com/JustAGhosT/agentkit-forge/milestone/2)
+> - Autoupdate issue: [#258](https://github.com/JustAGhosT/agentkit-forge/issues/258)
+> - Cross-reference comments added on [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)
+>   and [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194)
 
 ## Cross-References (Issue Updates Required)
 
-The following updates must be applied to GitHub issues once the autoupdate issue
-number is assigned:
+The following updates were applied to GitHub issues after autoupdate issue
+#258 was assigned:
 
 ### Issue #196 — adoption/startup-hooks: enforce required CLI toolchain
 
@@ -39,7 +39,7 @@ Add the following cross-reference section to the issue body or as a comment:
 ```markdown
 ## Related
 
-- See also: [feat(cli): implement autoupdate for adopter repositories](#<new-issue-number>)
+- See also: [feat(cli): implement autoupdate for adopter repositories](https://github.com/JustAGhosT/agentkit-forge/issues/258)
   — autoupdate preflight checks reuse the CLI toolchain validation requirements defined here.
 - Milestone: CLI Distribution & Delivery Improvements
 ```
@@ -51,7 +51,7 @@ Add the following cross-reference section to the issue body or as a comment:
 ```markdown
 ## Related
 
-- See also: [feat(cli): implement autoupdate for adopter repositories](#<new-issue-number>)
+- See also: [feat(cli): implement autoupdate for adopter repositories](https://github.com/JustAGhosT/agentkit-forge/issues/258)
   — `update --apply` must trigger sync as part of its upgrade flow, satisfying the
   pre-PR sync enforcement contract defined here.
 - Milestone: CLI Distribution & Delivery Improvements
