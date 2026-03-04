@@ -12,7 +12,7 @@ PRDs (Product Requirement Documents) define the "what" and "why" of features bef
 
 PRDs are stored in `docs/01_product/` using the naming convention:
 
-```
+```text
 PRD-{NNN}-{slug}.md
 ```
 
