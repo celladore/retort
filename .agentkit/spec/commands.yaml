@@ -418,9 +418,9 @@ commands:
       scaffolding, and regeneration of editor theme files.
     flags:
       - name: --validate
-        description: 'Validate brand.yaml and report errors/warnings (default when no flags given)'
+        description: 'Validate brand.yaml and report errors/warnings (runs implicitly when no other flags are given)'
         type: boolean
-        default: true
+        default: false
       - name: --palette
         description: 'Show the resolved color palette with hex values'
         type: boolean

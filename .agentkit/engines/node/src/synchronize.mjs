@@ -208,7 +208,7 @@ async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) 
  * @param {Function} log - Logging function
  * @param {{ force?: boolean }} [flags] - Optional flags (force skips scaffold-once check)
  */
-async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags) {
+async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutputs) {
   if (!vars.editorThemeEnabled) return;
 
   const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
@@ -311,6 +311,12 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags) {
   const writePromises = [];
   for (const [tool, outputPath] of Object.entries(outputs)) {
     if (!outputPath) continue; // null = skip this target
+
+    // Scaffold-once: skip targets that already exist in projectRoot (unless --overwrite/--force)
+    if (skipOutputs && skipOutputs.has(outputPath)) {
+      log(`[agentkit:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
+      continue;
+    }
 
     // Path traversal protection — resolve and verify the output stays inside tmpDir
     const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
@@ -1165,13 +1171,27 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   ]);
 
   // --- Editor theme (must run after vscode template copy to merge into settings) ---
-  // Scaffold-once: skip if .vscode/settings.json already exists in projectRoot (unless --overwrite/--force)
+  // Scaffold-once: pass existing output paths so syncEditorTheme can skip per-target
   const forceTheme = flags?.overwrite || flags?.force;
-  const vscodeSettingsExists = existsSync(resolve(projectRoot, '.vscode', 'settings.json'));
-  if (!vscodeSettingsExists || forceTheme) {
+  if (forceTheme) {
     await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags);
   } else {
-    log('[agentkit:sync] Editor theme: .vscode/settings.json exists (scaffold-once) — skipping. Use --overwrite to regenerate.');
+    // Build set of output paths that already exist in projectRoot — scaffold-once per target
+    const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
+    const outputs = themeSpec?.outputs || { vscode: '.vscode/settings.json' };
+    const existingOutputs = new Set();
+    for (const [, outputPath] of Object.entries(outputs)) {
+      if (outputPath && existsSync(resolve(projectRoot, outputPath))) {
+        existingOutputs.add(outputPath);
+      }
+    }
+    if (existingOutputs.size < Object.keys(outputs).length) {
+      // At least one target doesn't exist yet — run theme sync
+      // Pass existingOutputs so syncEditorTheme can skip already-scaffolded targets
+      await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs);
+    } else {
+      log('[agentkit:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.');
+    }
   }
 
   // --- Gated by renderTargets ---

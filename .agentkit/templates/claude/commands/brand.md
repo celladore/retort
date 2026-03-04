@@ -52,8 +52,8 @@ Only run this mode if `--init` is in `$ARGUMENTS`.
    colors:
      primary:
        brand: "#XXXXXX"
-       light: "<+15% lightness>"
-       dark: "<-15% lightness>"
+       light: "#YYYYYY"   # Compute: increase HSL lightness of brand by ~15%
+       dark: "#ZZZZZZ"    # Compute: decrease HSL lightness of brand by ~15%
      semantic:
        success: "#2E7D32"
        warning: "#F57F17"
@@ -92,8 +92,9 @@ Only run this mode if `--generate` is in `$ARGUMENTS`.
 
 1. Verify `.agentkit/spec/brand.yaml` and `.agentkit/spec/editor-theme.yaml`
    both exist. If either is missing, error with guidance.
-2. Run `npx agentkit sync --only claude` (or the appropriate sync command) to
-   regenerate `.vscode/settings.json` from the current brand + theme specs.
+2. Run `npx agentkit sync --overwrite` to regenerate editor theme settings
+   from the current brand + theme specs. This bypasses the scaffold-once gate
+   and writes to all configured output targets (vscode, cursor, windsurf).
 3. Report which files were written and show a before/after diff if the file
    already existed.
 

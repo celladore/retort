@@ -40,9 +40,9 @@ If no README exists, infer from code patterns and state your confidence level.
 
 ## Phase 0.5: Design & Visual Identity
 
-{{#if hasBrandGuide}}Read the canonical brand spec at `{{brandGuidePath}}` and validate it: check that identity.name exists, colors.primary.brand is a valid hex, semantic colors are complete, and dark mode colors are present. Summarise the brand identity (name, primary color, attributes) and flag any validation warnings.
+{{#if hasBrandGuide}}Read the canonical brand spec at `{{brandGuidePath}}` and validate it: check that identity.name exists, colors.primary.brand is a valid hex (either a plain string like `"#1976D2"` or an object with a `.hex` field), semantic colors are complete, and dark mode colors are present. Summarise the brand identity (name, primary color, attributes) and flag any validation warnings.
 
-Then search for design assets, style guides, theme files, and UI libraries. Cross-reference discovered design tokens against brand.yaml for consistency — flag any hardcoded hex values that diverge from the brand palette.{{else}}Search for design assets, style guides, theme files, and UI libraries. If missing, reverse-engineer a basic design system from the UI code: color palette, typography, spacing, and component patterns.{{/if}}
+Then search for design assets, style guides, theme files, and UI libraries. Cross-reference discovered design tokens against `{{brandGuidePath}}` for consistency — flag any hardcoded hex values that diverge from the brand palette.{{else}}Search for design assets, style guides, theme files, and UI libraries. If missing, reverse-engineer a basic design system from the UI code: color palette, typography, spacing, and component patterns.{{/if}}
 
 ## Phase 1a: Technology Assessment
 

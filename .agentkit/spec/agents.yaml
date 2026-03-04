@@ -320,7 +320,7 @@ agents:
         - Ensure generated editor themes (.vscode, .cursor, .windsurf) match brand intent
       domain-rules:
         - .agentkit/spec/brand.yaml is the single source of truth for all brand colors, typography, and design tokens — never define colors outside this file
-        - Editor themes are derived from brand.yaml via editor-theme.yaml mappings — never hardcode hex values in .vscode/settings.json, .cursor/settings.json, or .windsurf/settings.json
+        - Editor themes are derived from brand.yaml via editor-theme.yaml mappings — the sync engine generates hex values in settings.json (this is expected), but never manually edit those generated hex values; always update brand.yaml or editor-theme.yaml and re-run sync
         - All color entries in brand.yaml support simple hex strings ("#RRGGBB") or detailed objects ({ hex, role, rationale, usage }) — the resolver handles both formats transparently
         - Brand colors must meet WCAG AA contrast ratios (4.5:1 body text, 3:1 large text / UI components) per the accessibility section in brand.yaml
         - Color changes in brand.yaml must propagate to all three editor targets (vscode, cursor, windsurf) via agentkit sync — never update one target manually
