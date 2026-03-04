@@ -72,6 +72,7 @@ function Send-Block {
 # -- Auto-detect stack and run checks --------------------------------------
 $ranCheck = $false
 
+{{#if hasLanguageJsLikeEffective}}
 # Node.js / JavaScript / TypeScript
 $packageJsonPath = Join-Path $cwd "package.json"
 if (Test-Path $packageJsonPath) {
@@ -124,7 +125,9 @@ if (Test-Path $packageJsonPath) {
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 }
+{{/if}}
 
+{{#if hasLanguageDotnetEffective}}
 # .NET
 $slnFiles = Get-ChildItem -Path $cwd -Recurse -Depth 2 -Include "*.sln", "*.csproj" -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($slnFiles -and (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
@@ -137,7 +140,9 @@ if ($slnFiles -and (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
     $result = Invoke-Check -Label "dotnet test" -Command "dotnet" -Arguments @("test", $slnPath, "--nologo", "--verbosity", "quiet", "--no-build") -WorkingDirectory $cwd
     if (-not $result.Success) { Send-Block -Reason $result.Output }
 }
+{{/if}}
 
+{{#if hasLanguageRustEffective}}
 # Rust / Cargo
 $cargoTomlPath = Join-Path $cwd "Cargo.toml"
 if ((Test-Path $cargoTomlPath) -and (Get-Command "cargo" -ErrorAction SilentlyContinue)) {
@@ -149,7 +154,9 @@ if ((Test-Path $cargoTomlPath) -and (Get-Command "cargo" -ErrorAction SilentlyCo
     $result = Invoke-Check -Label "cargo test" -Command "cargo" -Arguments @("test", "--manifest-path", $cargoTomlPath, "--quiet") -WorkingDirectory $cwd
     if (-not $result.Success) { Send-Block -Reason $result.Output }
 }
+{{/if}}
 
+{{#if hasLanguagePythonEffective}}
 # Python
 $pyprojectPath = Join-Path $cwd "pyproject.toml"
 if (Test-Path $pyprojectPath) {
@@ -166,6 +173,7 @@ if (Test-Path $pyprojectPath) {
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 }
+{{/if}}
 
 # If no build tools were found, or all checks passed -- allow stop.
 exit 0
