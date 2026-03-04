@@ -63,17 +63,23 @@ echo "Repository: $REPO"
 echo "Branch:     $BRANCH"
 echo ""
 
+# -- Helper: strip trailing commas from JSON produced by {{#each}} blocks ----
+strip_trailing_commas() {
+    sed -E 's/,([[:space:]]*[\]}])/\1/g'
+}
+
 # =============================================================================
 # 1. Branch protection rules (legacy API)
 # =============================================================================
 
-PAYLOAD=$(cat <<'ENDJSON'
+PAYLOAD=$(cat <<'ENDJSON' | strip_trailing_commas
 {
   "required_status_checks": {
     "strict": {{bpStrictStatusChecks}},
     "contexts": [
 {{#each bpRequiredStatusChecks}}
-      "{{.}}"{{/each}}
+      "{{.}}",
+{{/each}}
     ]
   },
   "enforce_admins": {{bpEnforceAdmins}},
@@ -162,7 +168,7 @@ echo ""
 # =============================================================================
 
 {{#if bpCodeScanningEnabled}}
-CODE_SCANNING_RULESET=$(cat <<'ENDJSON'
+CODE_SCANNING_RULESET=$(cat <<'ENDJSON' | strip_trailing_commas
 {
   "name": "code-scanning",
   "target": "branch",
@@ -183,7 +189,8 @@ CODE_SCANNING_RULESET=$(cat <<'ENDJSON'
             "tool": "{{.name}}",
             "security_alerts_threshold": "{{.securityAlertThreshold}}",
             "alerts_threshold": "{{.alertThreshold}}"
-          }{{/each}}
+          },
+{{/each}}
         ]
       }
     }
@@ -226,26 +233,27 @@ echo ""
 {{#if bpCopilotReviewEnabled}}
 COPILOT_REVIEW=$(cat <<'ENDJSON'
 {
-  "copilot_code_review": {
-    "enabled": true
-  }
+  "enabled": true,
+  "review_new_pushes": {{bpCopilotReviewNewPushes}},
+  "review_draft_pull_requests": {{bpCopilotReviewDraftPRs}}
 }
 ENDJSON
 )
 
 if [[ "$DRY_RUN" == "true" ]]; then
-    echo "[dry-run] Would enable Copilot code review on $REPO"
-    echo "  Review new pushes: {{bpCopilotReviewNewPushes}}"
-    echo "  Review draft PRs:  {{bpCopilotReviewDraftPRs}}"
+    echo "[dry-run] Would enable Copilot code review on $REPO:"
+    echo ""
+    echo "$COPILOT_REVIEW" | python3 -m json.tool 2>/dev/null || echo "$COPILOT_REVIEW"
+    echo ""
 else
     echo "Enabling Copilot code review..."
-    # Copilot code review is configured via repository settings
-    # Note: This requires Copilot Enterprise or a Copilot-enabled organization
+    # Note: Requires GitHub Copilot subscription with code review enabled for the organization.
+    # Endpoint may return 404 if Copilot code review is not available for this repo.
     gh api \
-        --method PATCH \
-        "/repos/$REPO" \
+        --method PUT \
+        "/repos/$REPO/copilot/code_review" \
         --input - <<< "$COPILOT_REVIEW" \
-        2>/dev/null || echo "  Note: Copilot code review requires Copilot Enterprise."
+        2>/dev/null || echo "  Note: Copilot code review requires a Copilot-enabled organization."
     echo "Copilot code review configured."
 fi
 echo ""

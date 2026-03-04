@@ -203,22 +203,25 @@ Write-Host ""
 
 {{#if bpCopilotReviewEnabled}}
 $CopilotReview = @{
-    copilot_code_review = @{
-        enabled = $true
-    }
-} | ConvertTo-Json -Depth 3
+    enabled                    = $true
+    review_new_pushes          = ${{bpCopilotReviewNewPushes}}
+    review_draft_pull_requests = ${{bpCopilotReviewDraftPRs}}
+} | ConvertTo-Json -Depth 2
 
 if ($DryRun) {
-    Write-Host "[dry-run] Would enable Copilot code review on $Repo"
-    Write-Host "  Review new pushes: {{bpCopilotReviewNewPushes}}"
-    Write-Host "  Review draft PRs:  {{bpCopilotReviewDraftPRs}}"
+    Write-Host "[dry-run] Would enable Copilot code review on ${Repo}:"
+    Write-Host ""
+    Write-Host $CopilotReview
+    Write-Host ""
 } else {
     Write-Host "Enabling Copilot code review..."
+    # Note: Requires GitHub Copilot subscription with code review enabled for the organization.
+    # Endpoint may return 404 if Copilot code review is not available for this repo.
     try {
-        $CopilotReview | gh api --method PATCH "/repos/$Repo" --input -
+        $CopilotReview | gh api --method PUT "/repos/$Repo/copilot/code_review" --input -
         Write-Host "Copilot code review configured."
     } catch {
-        Write-Host "  Note: Copilot code review requires Copilot Enterprise."
+        Write-Host "  Note: Copilot code review requires a Copilot-enabled organization."
     }
 }
 Write-Host ""

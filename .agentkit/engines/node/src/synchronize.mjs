@@ -1165,6 +1165,33 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     syncDate: new Date().toISOString().slice(0, 10),
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'agentkit-forge',
+    // Branch protection defaults — ensure generated scripts produce valid
+    // JSON even when project.yaml omits the branchProtection section.
+    bpRequiredReviewCount: projectVars.bpRequiredReviewCount ?? '1',
+    bpDismissStaleReviews: projectVars.bpDismissStaleReviews ?? true,
+    bpRequireCodeOwnerReviews: projectVars.bpRequireCodeOwnerReviews ?? true,
+    bpRequireLastPushApproval: projectVars.bpRequireLastPushApproval ?? false,
+    bpStrictStatusChecks: projectVars.bpStrictStatusChecks ?? true,
+    bpEnforceAdmins: projectVars.bpEnforceAdmins ?? false,
+    bpRequiredLinearHistory: projectVars.bpRequiredLinearHistory ?? true,
+    bpRequireSignedCommits: projectVars.bpRequireSignedCommits ?? false,
+    bpAllowForcePushes: projectVars.bpAllowForcePushes ?? false,
+    bpAllowDeletions: projectVars.bpAllowDeletions ?? false,
+    bpBlockCreations: projectVars.bpBlockCreations ?? false,
+    bpRequiredConversationResolution: projectVars.bpRequiredConversationResolution ?? true,
+    bpCodeScanningEnabled: projectVars.bpCodeScanningEnabled ?? false,
+    bpCopilotReviewEnabled: projectVars.bpCopilotReviewEnabled ?? false,
+    bpCopilotReviewNewPushes: projectVars.bpCopilotReviewNewPushes ?? false,
+    bpCopilotReviewDraftPRs: projectVars.bpCopilotReviewDraftPRs ?? false,
+    bpAllowMergeCommits: projectVars.bpAllowMergeCommits ?? false,
+    bpAllowSquashMerge: projectVars.bpAllowSquashMerge ?? true,
+    bpAllowRebaseMerge: projectVars.bpAllowRebaseMerge ?? false,
+    bpDeleteBranchOnMerge: projectVars.bpDeleteBranchOnMerge ?? true,
+    bpAllowAutoMerge: projectVars.bpAllowAutoMerge ?? false,
+    bpMergeQueueEnabled: projectVars.bpMergeQueueEnabled ?? false,
+    bpMergeQueueMethod: projectVars.bpMergeQueueMethod || 'squash',
+    bpMergeQueueMinGroupSize: projectVars.bpMergeQueueMinGroupSize ?? '1',
+    bpMergeQueueMaxGroupSize: projectVars.bpMergeQueueMaxGroupSize ?? '5',
   };
 
   // Inject brand identity into template vars when brand guide exists

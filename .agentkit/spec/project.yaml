@@ -177,9 +177,9 @@ branchProtection:
     enabled: true
     tools:
       - name: CodeQL
-        # none | errors | warnings | all
+        # none | critical | high_or_higher | medium_or_higher | all
         securityAlertThreshold: high_or_higher
-        # none | errors | warnings | notes | all
+        # none | errors | warnings | all
         alertThreshold: errors
 
   # GitHub Copilot automated code review

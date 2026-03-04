@@ -17,6 +17,7 @@ import {
   ALL_RENDER_TARGETS,
   collapseBlankLines,
 } from '../template-utils.mjs';
+import { transform } from '../project-mapping.mjs';
 
 // ---------------------------------------------------------------------------
 // renderTemplate
@@ -748,6 +749,174 @@ describe('flattenProjectYaml', () => {
       infrastructure: { tagging: { mandatory: ['owner'] } },
     });
     expect(vars.infraOptionalTagsList).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// branchProtection mappings (flattenProjectYaml)
+// ---------------------------------------------------------------------------
+describe('flattenProjectYaml — branchProtection', () => {
+  it('maps core branch protection booleans and scalars', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        requiredReviewCount: 2,
+        dismissStaleReviews: true,
+        requireCodeOwnerReviews: false,
+        requireLastPushApproval: true,
+        strictStatusChecks: true,
+        enforceAdmins: true,
+        requiredLinearHistory: false,
+        requireSignedCommits: true,
+        allowForcePushes: false,
+        allowDeletions: true,
+        blockCreations: true,
+        requiredConversationResolution: false,
+      },
+    });
+    expect(vars.bpRequiredReviewCount).toBe('2');
+    expect(vars.bpDismissStaleReviews).toBe(true);
+    expect(vars.bpRequireCodeOwnerReviews).toBe(false);
+    expect(vars.bpRequireLastPushApproval).toBe(true);
+    expect(vars.bpStrictStatusChecks).toBe(true);
+    expect(vars.bpEnforceAdmins).toBe(true);
+    expect(vars.bpRequiredLinearHistory).toBe(false);
+    expect(vars.bpRequireSignedCommits).toBe(true);
+    expect(vars.bpAllowForcePushes).toBe(false);
+    expect(vars.bpAllowDeletions).toBe(true);
+    expect(vars.bpBlockCreations).toBe(true);
+    expect(vars.bpRequiredConversationResolution).toBe(false);
+  });
+
+  it('maps requiredStatusChecks as array (not joined string)', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        requiredStatusChecks: ['CI / test', 'CI / validate'],
+      },
+    });
+    expect(vars.bpRequiredStatusChecks).toEqual(['CI / test', 'CI / validate']);
+  });
+
+  it('maps code scanning fields', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        codeScanning: {
+          enabled: true,
+          tools: [
+            { name: 'CodeQL', securityAlertThreshold: 'high_or_higher', alertThreshold: 'errors' },
+          ],
+        },
+      },
+    });
+    expect(vars.bpCodeScanningEnabled).toBe(true);
+    expect(vars.bpCodeScanningTools).toEqual([
+      { name: 'CodeQL', securityAlertThreshold: 'high_or_higher', alertThreshold: 'errors' },
+    ]);
+  });
+
+  it('maps copilot review fields', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        copilotReview: {
+          enabled: true,
+          reviewNewPushes: true,
+          reviewDraftPRs: false,
+        },
+      },
+    });
+    expect(vars.bpCopilotReviewEnabled).toBe(true);
+    expect(vars.bpCopilotReviewNewPushes).toBe(true);
+    expect(vars.bpCopilotReviewDraftPRs).toBe(false);
+  });
+
+  it('maps merge strategy and merge queue fields', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        mergeStrategies: {
+          allowMergeCommits: false,
+          allowSquashMerge: true,
+          allowRebaseMerge: false,
+          deleteBranchOnMerge: true,
+          allowAutoMerge: true,
+        },
+        mergeQueue: {
+          enabled: true,
+          mergeMethod: 'squash',
+          minGroupSize: 2,
+          maxGroupSize: 10,
+        },
+      },
+    });
+    expect(vars.bpAllowMergeCommits).toBe(false);
+    expect(vars.bpAllowSquashMerge).toBe(true);
+    expect(vars.bpAllowRebaseMerge).toBe(false);
+    expect(vars.bpDeleteBranchOnMerge).toBe(true);
+    expect(vars.bpAllowAutoMerge).toBe(true);
+    expect(vars.bpMergeQueueEnabled).toBe(true);
+    expect(vars.bpMergeQueueMethod).toBe('squash');
+    expect(vars.bpMergeQueueMinGroupSize).toBe('2');
+    expect(vars.bpMergeQueueMaxGroupSize).toBe('10');
+  });
+
+  it('returns no bp* vars when branchProtection is absent', () => {
+    const vars = flattenProjectYaml({ name: 'NoProtection' });
+    expect(vars.bpRequiredReviewCount).toBeUndefined();
+    expect(vars.bpCodeScanningEnabled).toBeUndefined();
+    expect(vars.bpCopilotReviewEnabled).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// transform — array type
+// ---------------------------------------------------------------------------
+describe('transform — array type', () => {
+  it('passes through arrays unchanged', () => {
+    expect(transform(['a', 'b'], 'array')).toEqual(['a', 'b']);
+  });
+
+  it('passes through object arrays unchanged', () => {
+    const tools = [{ name: 'CodeQL', threshold: 'errors' }];
+    expect(transform(tools, 'array')).toEqual(tools);
+  });
+
+  it('returns undefined for non-array values', () => {
+    expect(transform('not-array', 'array')).toBeUndefined();
+    expect(transform(42, 'array')).toBeUndefined();
+  });
+
+  it('returns empty array for empty array', () => {
+    expect(transform([], 'array')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveEachBlocks — JSON comma handling
+// ---------------------------------------------------------------------------
+describe('resolveEachBlocks — JSON array rendering', () => {
+  it('renders object arrays with trailing commas for JSON post-processing', () => {
+    const template =
+      '[\n{{#each tools}}  {"tool": "{{.name}}", "threshold": "{{.threshold}}"},\n{{/each}}]';
+    const result = resolveEachBlocks(template, {
+      tools: [
+        { name: 'CodeQL', threshold: 'errors' },
+        { name: 'Semgrep', threshold: 'warnings' },
+      ],
+    });
+    // Each item gets a trailing comma; the last comma before ] can be stripped by the consumer
+    expect(result).toContain('"tool": "CodeQL"');
+    expect(result).toContain('"tool": "Semgrep"');
+    // Verify the trailing-comma-then-strip pattern produces valid JSON
+    const cleaned = result.replace(/,(\s*[\]}])/g, '$1');
+    expect(() => JSON.parse(cleaned)).not.toThrow();
+  });
+
+  it('renders string arrays with trailing commas for JSON post-processing', () => {
+    const template = '[\n{{#each checks}}  "{{.}}",\n{{/each}}]';
+    const result = resolveEachBlocks(template, {
+      checks: ['CI / test', 'CI / validate', 'Branch Protection / branch-rules'],
+    });
+    const cleaned = result.replace(/,(\s*[\]}])/g, '$1');
+    const parsed = JSON.parse(cleaned);
+    expect(parsed).toEqual(['CI / test', 'CI / validate', 'Branch Protection / branch-rules']);
   });
 });
 
