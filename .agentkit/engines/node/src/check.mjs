@@ -18,16 +18,17 @@ import { appendEvent } from './orchestrator.mjs';
  * Build the check steps for a detected stack.
  * @param {object} stack - Stack config from teams.yaml techStacks
  * @param {object} flags - CLI flags
+ * @param {string} agentkitRoot - Path to .agentkit root
  * @returns {Array<{ name: string, command: string, fixCommand?: string }>}
  */
-function buildSteps(stack, flags) {
+function buildSteps(stack, flags, agentkitRoot) {
   const steps = [];
 
   if (stack.formatter) {
     if (typeof stack.formatter !== 'string' || !stack.formatter.trim()) {
       console.warn(`[agentkit:check] Skipping non-string formatter value`);
     } else {
-      const resolved = resolveFormatter(stack.formatter);
+      const resolved = resolveFormatter(stack.formatter, agentkitRoot);
       if (!isValidCommand(resolved.check)) {
         console.warn(`[agentkit:check] Skipping invalid formatter command: ${stack.formatter}`);
       } else if (!isAllowedFormatter(resolved)) {
@@ -122,14 +123,19 @@ const ALLOWED_NPX_PACKAGES = new Set(['prettier']);
  * Returns an object with { cmd, check, fix } so buildSteps can use
  * tool-specific CLI syntax instead of hardcoding Prettier-style flags.
  * @param {string} formatter
+ * @param {string} [agentkitRoot]
  * @returns {{ cmd: string, check: string, fix: string }}
  */
-function resolveFormatter(formatter) {
+function resolveFormatter(formatter, agentkitRoot) {
+  const prettierBin = agentkitRoot
+    ? resolve(agentkitRoot, 'node_modules', 'prettier', 'bin', 'prettier.cjs').replace(/\\/g, '/')
+    : '.agentkit/node_modules/prettier/bin/prettier.cjs';
+
   const map = {
     prettier: {
-      cmd: 'npx prettier',
-      check: 'npx prettier --check .',
-      fix: 'npx prettier --write .',
+      cmd: 'prettier',
+      check: `node "${prettierBin}" --check .`,
+      fix: `node "${prettierBin}" --write .`,
     },
     black: { cmd: 'black', check: 'black --check .', fix: 'black .' },
     'cargo fmt': { cmd: 'cargo fmt', check: 'cargo fmt -- --check', fix: 'cargo fmt' },
@@ -280,7 +286,7 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 
   for (const stack of detectedStacks) {
     console.log(`--- Stack: ${stack.name} ---`);
-    const steps = buildSteps(stack, flags);
+    const steps = buildSteps(stack, flags, agentkitRoot);
     const stackResults = [];
 
     for (const step of steps) {
