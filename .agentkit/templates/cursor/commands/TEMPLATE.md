@@ -6,6 +6,10 @@
 
 {{commandDescription}}
 
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
@@ -15,6 +19,7 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 3. **Execute** the task following project conventions
 4. **Validate** the output meets quality gates
 5. **Report** results clearly
+   {{/if}}
 
 ## Project Context
 

@@ -828,6 +828,7 @@ function buildCommandVars(cmd, vars) {
     commandDescription:
       typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
+    commandPrompt: typeof cmd.prompt === 'string' ? cmd.prompt.trim() : '',
   };
 }
 

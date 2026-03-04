@@ -202,11 +202,11 @@ Scores are 1–5 (1 = poor, 5 = excellent). Weights sum to 100. The addition of 
 
 **Executive Recommendation:** Adopt the Hybrid distribution model (npm + GitHub Action + PWA) as the baseline, launching all three as Generally Available for new installs. This ensures fast onboarding, automation-centric distribution, and a browser-native experience.
 
-| Layer | Purpose |
-| --- | --- |
-| **npm (Node package)** | Primary for CLI and SDK distribution, developer-focused. |
-| **GitHub Action** | Official path for CI-driven installs and upgrades; the only supported CI for new deployments. |
-| **PWA** | General Availability for UI-driven onboarding; targeted for greenfield projects, zero-dependency browser installs only. |
+| Layer                  | Purpose                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **npm (Node package)** | Primary for CLI and SDK distribution, developer-focused.                                                                |
+| **GitHub Action**      | Official path for CI-driven installs and upgrades; the only supported CI for new deployments.                           |
+| **PWA**                | General Availability for UI-driven onboarding; targeted for greenfield projects, zero-dependency browser installs only. |
 
 All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 
@@ -224,9 +224,9 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 
 ### Milestones
 
-| Milestone | Date |
-| --- | --- |
-| Hybrid launch GA | 2024-08-01 |
+| Milestone                                | Date       |
+| ---------------------------------------- | ---------- |
+| Hybrid launch GA                         | 2024-08-01 |
 | Legacy deprecation (manual/cloud binary) | 2024-09-30 |
 | PWA: GA for all browser-based onboarding | 2024-09-30 |
 
@@ -242,10 +242,10 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 ### CLI-First Personas
 
 **Install AgentKit Forge via npm:**
-| Layer                | Audience   | Problem it solves                                      |
+| Layer | Audience | Problem it solves |
 | -------------------- | ---------- | ------------------------------------------------------ |
-| **npm package**      | Developers | Local sync, version pinning, offline support           |
-| **GitHub Action**    | CI/DevOps  | Drift detection, automated validation                  |
+| **npm package** | Developers | Local sync, version pinning, offline support |
+| **GitHub Action** | CI/DevOps | Drift detection, automated validation |
 | **PWA / Desktop UI** | Whole team | Visual config editing, discoverability, non-CLI access |
 
 ### Implementation Plan
@@ -313,6 +313,7 @@ npm install -g agentkit-forge
 - Immediate CLI and SDK access with autoupdate support
 
 **Automated CI workflows through the official GitHub Action:**
+
 - Integrated with organizational CI pipelines
 - Semaphore for successful install/regression
 
@@ -362,14 +363,14 @@ Adopting the Hybrid model unlocks growth and developer satisfaction, at the cost
 
 ## Risks and Mitigations
 
-| Risk | Probability | Business Impact | Mitigation |
-| --- | --- | --- | --- |
-| npm registry outages or delays | Medium | Medium | Dual-publish critical updates; status monitoring; fallback guides |
-| GitHub Actions ecosystem disruption | Low | High | Maintain validated fallback/manual install path during launch |
-| PWA browser support fragmentation | Medium | Medium | Restrict PWA to tested browsers (Chrome, Edge), clear communication |
-| Release process overhead (Hybrid complexity) | High | Medium | Use monorepo + CI pipelines for update alignment, automate most ops |
-| User confusion during transition | Medium | Medium | Clear migration comms, in-product prompts and guides |
-| Security vulnerabilities in third-party routes | Medium | High | Continuous dependency scanning and SAST, formal security review process |
+| Risk                                           | Probability | Business Impact | Mitigation                                                              |
+| ---------------------------------------------- | ----------- | --------------- | ----------------------------------------------------------------------- |
+| npm registry outages or delays                 | Medium      | Medium          | Dual-publish critical updates; status monitoring; fallback guides       |
+| GitHub Actions ecosystem disruption            | Low         | High            | Maintain validated fallback/manual install path during launch           |
+| PWA browser support fragmentation              | Medium      | Medium          | Restrict PWA to tested browsers (Chrome, Edge), clear communication     |
+| Release process overhead (Hybrid complexity)   | High        | Medium          | Use monorepo + CI pipelines for update alignment, automate most ops     |
+| User confusion during transition               | Medium      | Medium          | Clear migration comms, in-product prompts and guides                    |
+| Security vulnerabilities in third-party routes | Medium      | High            | Continuous dependency scanning and SAST, formal security review process |
 
 | Risk                                                                 | Mitigation                                                                                                                           |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |

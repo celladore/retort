@@ -16,6 +16,10 @@ last_updated: '{{syncDate}}'
 
 Invoke this skill when you need to perform the `{{commandName}}` operation.
 
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
+
 ## Instructions
 
 1. Parse command arguments and identify requested scope/files
@@ -29,6 +33,7 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Return a concise summary with status (`success`/`partial`/`failed`)
 - Include validation evidence (exit code, failing command, or passing summary)
 - Include next-step remediation when checks fail
+  {{/if}}
 
 ## Project Context
 

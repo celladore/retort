@@ -13,6 +13,10 @@ Invoke this command when the user requests or implies the
 
 {{commandDescription}}
 
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
+
 ## Shared State
 
 This command participates in the shared workflow state. Read and update:
@@ -24,6 +28,7 @@ This command participates in the shared workflow state. Read and update:
 ## Implementation
 
 Execute the steps defined in the corresponding command (`.windsurf/commands/{{commandName}}.md`). The full specification and allowed tools are in that file.
+{{/if}}
 
 ## Related Commands
 
