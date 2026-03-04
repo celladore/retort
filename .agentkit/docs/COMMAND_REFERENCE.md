@@ -9,7 +9,10 @@ A unified reference for every slash command available in AgentKit Forge, with us
 1. [Decision Tree](#decision-tree)
 2. [Workflow Commands](#workflow-commands)
 3. [Team Commands](#team-commands)
-4. [Utility Commands](#utility-commands)
+4. [Task Management Commands](#task-management-commands)
+5. [Utility Commands](#utility-commands)
+6. [Diagnostic Commands](#diagnostic-commands)
+7. [Slash-Command-Only Commands](#slash-command-only-commands)
 
 ---
 
@@ -80,6 +83,7 @@ These seven commands form the core orchestration and lifecycle workflow.
 | `--phase N`      | Jump to a specific phase: 1=Discovery, 2=Planning, 3=Implementation, 4=Validation, 5=Ship. |
 | `--team <name>`  | Delegate work only to the named team.                                                      |
 | `--assess-only`  | Run discovery and healthcheck but do not delegate work. Report state and exit.             |
+| `--scope <path>` | Limit orchestration to specific file paths or directories.                                 |
 | `--dry-run`      | Show what would be done without making changes.                                            |
 | `--force-unlock` | Clear a stale lock from a previous crashed session.                                        |
 
@@ -136,6 +140,8 @@ These seven commands form the core orchestration and lifecycle workflow.
 | Flag                            | Description                                                           |
 | ------------------------------- | --------------------------------------------------------------------- |
 | `--output yaml\|json\|markdown` | Control the output format of the discovery report. Default: markdown. |
+| `--depth <n>`                   | Limit directory traversal depth during scanning.                      |
+| `--include-deps`                | Include dependency analysis in the discovery report.                  |
 
 **Example invocation:**
 
@@ -235,7 +241,13 @@ These seven commands form the core orchestration and lifecycle workflow.
 - The change is trivial (single config tweak, typo fix).
 - You are ready to implement and the path is obvious. Go directly to `/team-<name>`.
 
-**Flags:** None. Pass the task description or backlog item reference as arguments.
+**Flags:**
+
+| Flag                                | Description                                                     |
+| ----------------------------------- | --------------------------------------------------------------- |
+| `--issue <number>`                  | GitHub issue number to plan for.                                |
+| `--output markdown\|yaml\|json`    | Output format for the plan. Default: markdown.                  |
+| `--depth high\|medium\|low`        | Level of detail in the plan. Default: medium.                   |
 
 **Example invocation:**
 
@@ -483,13 +495,29 @@ Team commands invoke a specialized agent scoped to a particular domain. Each tea
 | `/team-product`  | Product (T9)        | PRDs, feature specs, user stories, roadmap                     | Drafting product requirements, writing user stories, defining acceptance criteria     |
 | `/team-quality`  | Quality (T10)       | Code review, refactoring, quality gate definitions             | Refactoring code for maintainability, reviewing code quality, enforcing standards     |
 
+**Flags (all team commands):**
+
+| Flag              | Description                                                             |
+| ----------------- | ----------------------------------------------------------------------- |
+| `--task <text>`   | Specify a specific task instead of pulling from the backlog.            |
+
+**How team commands work:**
+
+1. The team agent activates with its predefined role, scope, and conventions.
+2. Without `--task`, it reads `AGENT_BACKLOG.md` and picks the highest-priority item within its scope.
+3. It implements the work, runs quality gates (`/check`), and produces a structured report.
+4. If the team's handoff chain is defined (in `teams.yaml`), it notes the next team to continue.
+
+**What happens when no backlog items exist:** The team agent reports that no actionable items are in its scope and suggests running `/discover` or `/sync-backlog` to populate the backlog.
+
 **Example invocations:**
 
 ```
-/team-backend          -- picks up highest-priority backend backlog items
-/team-frontend         -- works on frontend backlog items
-/team-testing          -- writes tests for recently changed code
-/team-security         -- audits and hardens auth flows
+/team-backend                              -- picks up highest-priority backend backlog items
+/team-frontend                             -- works on frontend backlog items
+/team-testing                              -- writes tests for recently changed code
+/team-security                             -- audits and hardens auth flows
+/team-backend --task "Add pagination to GET /api/users"  -- specific task
 ```
 
 ---
@@ -504,12 +532,19 @@ These commands perform focused, single-purpose operations. They are often invoke
 
 Build the project with auto-detected stack. Supports scoped builds for monorepos.
 
-**Flags:** `--verbose`, `--clean`
+**Flags:**
+
+| Flag               | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `--stack <name>`   | Limit build to a specific tech stack (node, dotnet, rust, python). |
+| `--package <name>` | Build a specific package in a monorepo.                        |
+| `--production`     | Run a production-optimized build.                              |
+| `--verbose`        | Show detailed build output.                                    |
 
 ```
 /build
 /build packages/api
-/build --clean
+/build --stack node --production
 ```
 
 ---
@@ -518,13 +553,24 @@ Build the project with auto-detected stack. Supports scoped builds for monorepos
 
 Run the test suite with auto-detected framework. Supports scoped runs, filters, watch mode, and coverage.
 
-**Flags:** `--watch`, `--coverage`, `--verbose`, `--update-snapshots`, `--bail`
+**Flags:**
+
+| Flag                   | Description                                                     |
+| ---------------------- | --------------------------------------------------------------- |
+| `--stack <name>`       | Limit tests to a specific tech stack.                           |
+| `--filter <pattern>`   | Run only tests matching the given name or pattern.              |
+| `--coverage`           | Generate coverage report after test run.                        |
+| `--watch`              | Run tests in watch mode (re-run on file changes).               |
+| `--package <name>`     | Run tests for a specific monorepo package.                      |
+| `--bail`               | Stop on first test failure.                                     |
+| `--update-snapshots`   | Update snapshot files.                                          |
+| `--verbose`            | Show detailed test output.                                      |
 
 ```
 /test
 /test src/auth/
 /test --coverage
-/test "should validate token" --bail
+/test --filter "should validate token" --bail
 ```
 
 ---
@@ -533,13 +579,21 @@ Run the test suite with auto-detected framework. Supports scoped runs, filters, 
 
 Run code formatters across the project. Defaults to write mode (applies fixes). Supports scoped formatting and staged-files-only mode.
 
-**Flags:** `--check`, `--staged`, `--changed`
+**Flags:**
+
+| Flag             | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| `--stack <name>` | Limit formatting to a specific tech stack.                           |
+| `--check`        | Check formatting without writing changes. Exit non-zero if unformatted. |
+| `--path <path>`  | Format only files under the specified path.                          |
+| `--staged`       | Format only git-staged files.                                        |
+| `--changed`      | Format only files changed since the last commit.                     |
 
 ```
 /format
 /format --check
 /format --staged
-/format src/api/
+/format --path src/api/
 ```
 
 ---
@@ -548,7 +602,16 @@ Run code formatters across the project. Defaults to write mode (applies fixes). 
 
 Deployment automation with safety checks, explicit confirmation gates, and rollback support. Requires user confirmation before executing any deployment.
 
-**Flags:** `--dry-run`, `--skip-healthcheck`, `--rollback`, `--tag <version>`
+**Flags:**
+
+| Flag                    | Description                                                      |
+| ----------------------- | ---------------------------------------------------------------- |
+| `--environment <env>`   | Target environment (e.g., staging, production).                  |
+| `--dry-run`             | Show what would be deployed without executing.                   |
+| `--skip-checks`         | Skip pre-deployment healthcheck (use with caution).              |
+| `--stack <name>`        | Deploy only a specific stack in a polyglot project.              |
+| `--rollback`            | Roll back the last deployment.                                   |
+| `--tag <version>`       | Deploy a specific version tag.                                   |
 
 ```
 /deploy staging
@@ -560,13 +623,22 @@ Deployment automation with safety checks, explicit confirmation gates, and rollb
 
 ### `/security`
 
-Full security audit covering OWASP Top 10, dependency vulnerabilities, auth flow review, and hardcoded secrets scan. Reports only; does not fix.
+Full security audit covering OWASP Top 10, dependency vulnerabilities, auth flow review, and hardcoded secrets scan.
 
-**Flags:** Pass a scope as an argument to focus the audit on a specific area.
+**Flags:**
+
+| Flag                                               | Description                                                    |
+| -------------------------------------------------- | -------------------------------------------------------------- |
+| `--scan-type deps\|secrets\|code\|all`             | Type of security scan to run. Default: all.                    |
+| `--severity info\|warning\|error\|critical`        | Minimum severity to report. Default: warning.                  |
+| `--fix`                                            | Attempt to auto-fix issues (e.g., dependency upgrades).        |
+| `--output json\|markdown`                          | Output format. Default: markdown.                              |
 
 ```
 /security
 /security src/auth/
+/security --scan-type deps --fix
+/security --severity critical --output json
 ```
 
 ---
@@ -575,10 +647,18 @@ Full security audit covering OWASP Top 10, dependency vulnerabilities, auth flow
 
 Updates `AGENT_BACKLOG.md` by gathering work items from discovery findings, healthcheck results, orchestrator state, code TODOs, and review findings. Prioritizes and assigns items to teams.
 
-**Flags:** None.
+**Flags:**
+
+| Flag                         | Description                                                        |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `--direction pull\|push\|both` | Sync direction: pull from GitHub Issues, push to Issues, or both. |
+| `--labels <csv>`             | Filter GitHub Issues by labels (comma-separated).                  |
+| `--team <name>`              | Only sync backlog items for a specific team.                       |
 
 ```
 /sync-backlog
+/sync-backlog --direction pull --labels "bug,priority:high"
+/sync-backlog --team backend
 ```
 
 ---
@@ -587,10 +667,17 @@ Updates `AGENT_BACKLOG.md` by gathering work items from discovery findings, heal
 
 Runs a comprehensive project-wide audit combining discovery, healthcheck, security scan, and quality gate checks into a single consolidated report. Use this for periodic full-project health assessments.
 
-**Flags:** None.
+**Flags:**
+
+| Flag              | Description                                                              |
+| ----------------- | ------------------------------------------------------------------------ |
+| `--scope <path>`  | Limit the review to a specific directory or set of files.                |
+| `--focus <area>`  | Focus area: security, performance, correctness, architecture, or all.    |
+| `--phase <n>`     | Run only a specific phase of the review.                                 |
 
 ```
 /project-review
+/project-review --scope src/api/ --focus security
 ```
 
 ---
@@ -614,4 +701,225 @@ Displays AI token usage summaries, session costs, and budget status. See [COST_T
 /cost --summary
 /cost --sessions --last 7d
 /cost --report --month 2026-02 --format json
+```
+
+---
+
+## Task Management Commands
+
+These commands manage the delegated task system used by the orchestrator and team agents.
+
+---
+
+### `/tasks`
+
+**One-line:** List, filter, and inspect delegated tasks across all teams.
+
+**When to use:**
+
+- You want to see what tasks are pending, in-progress, or completed.
+- You need to check the status of a specific task by ID.
+- You want to filter tasks by team, priority, or status before deciding what to work on next.
+
+**Flags:**
+
+| Flag                                   | Description                                                      |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| `--status <status>`                    | Filter by task status (pending, in-progress, completed, blocked).|
+| `--assignee <team>`                    | Filter by assigned team (e.g., backend, frontend).               |
+| `--id <task-id>`                       | Show details for a specific task.                                |
+| `--type <type>`                        | Filter by task type (implement, review, plan, investigate, test, document). |
+| `--priority <level>`                   | Filter by priority (P0, P1, P2, P3).                            |
+| `--process-handoffs`                   | Process handoff chains before listing tasks.                     |
+
+**Example invocations:**
+
+```
+/tasks                                  -- list all tasks
+/tasks --status pending --assignee backend
+/tasks --id TASK-042
+/tasks --priority P0 --status pending   -- show urgent unstarted work
+```
+
+**Expected output sample:**
+
+```
+## Delegated Tasks
+
+| ID       | Title                          | Team     | Priority | Status      | Type       |
+|----------|-------------------------------|----------|----------|-------------|------------|
+| TASK-001 | Add rate limiting middleware   | backend  | P1       | completed   | implement  |
+| TASK-002 | Write rate limit tests        | testing  | P1       | in-progress | test       |
+| TASK-003 | Update API docs for rate limit| docs     | P2       | pending     | document   |
+
+Total: 3 tasks (1 completed, 1 in-progress, 1 pending)
+```
+
+---
+
+### `/delegate`
+
+**One-line:** Create a new delegated task and assign it to a team with optional dependencies and handoff chains.
+
+**When to use:**
+
+- You want to break a large effort into team-scoped tasks.
+- The orchestrator has identified work that should be routed to a specific team.
+- You need to set up task dependencies (task B waits for task A).
+
+**Flags:**
+
+| Flag                      | Description                                                            |
+| ------------------------- | ---------------------------------------------------------------------- |
+| `--to <team>`             | **(Required)** The team to assign the task to.                         |
+| `--title <text>`          | **(Required)** Short title for the task.                               |
+| `--type <type>`           | Task type: implement, review, plan, investigate, test, document. Default: implement. |
+| `--priority <level>`      | Priority level: P0, P1, P2, P3. Default: P2.                          |
+| `--depends-on <task-id>`  | Task ID that must complete before this task can start.                 |
+| `--handoff-to <team>`     | Team to automatically hand off to when this task completes.            |
+| `--scope <path>`          | File path or directory scope for the task.                             |
+| `--description <text>`    | Detailed description of what needs to be done.                         |
+
+**Example invocations:**
+
+```
+/delegate --to backend --title "Add pagination to GET /api/users" --priority P1
+/delegate --to testing --title "Write E2E tests for auth flow" --depends-on TASK-001
+/delegate --to docs --title "Update API reference" --handoff-to quality --type document
+```
+
+**Expected output sample:**
+
+```
+## Task Created
+
+**ID:** TASK-004
+**Title:** Add pagination to GET /api/users
+**Assigned to:** team-backend
+**Priority:** P1
+**Type:** implement
+**Status:** pending
+**Dependencies:** none
+**Handoff:** none
+
+Task added to AGENT_BACKLOG.md. Run `/team-backend` to begin work.
+```
+
+---
+
+## Diagnostic Commands
+
+---
+
+### `/doctor`
+
+**One-line:** Runs AgentKit Forge diagnostics to verify your setup, configuration, and environment health.
+
+**When to use:**
+
+- Something is not working and you need to identify the problem.
+- After initial setup to verify everything is configured correctly.
+- After upgrading AgentKit Forge to verify the migration succeeded.
+
+**When NOT to use:**
+
+- You want to check code quality. Use `/check` instead.
+- You want to validate generated outputs. Use `agentkit validate` (CLI) instead.
+
+**Flags:**
+
+| Flag        | Description                              |
+| ----------- | ---------------------------------------- |
+| `--verbose` | Show detailed diagnostic output.         |
+
+**Example invocations:**
+
+```
+/doctor
+/doctor --verbose
+```
+
+**Expected output sample:**
+
+```
+## AgentKit Forge Diagnostics
+
+| Check                  | Status | Details                              |
+|-----------------------|--------|--------------------------------------|
+| Node.js version       | PASS   | v22.12.0 (>=22.0.0 required)        |
+| pnpm version          | PASS   | 10.30.3 (>=9.0.0 required)          |
+| Git version           | PASS   | 2.43.0 (>=2.30.0 required)          |
+| .agentkit/ directory  | PASS   | Found at project root                |
+| package.json          | PASS   | Valid, version 3.1.0                 |
+| Spec files            | PASS   | 8/8 YAML files valid                 |
+| Overlay               | PASS   | my-project overlay found             |
+| Node modules          | PASS   | Dependencies installed               |
+| Generated files       | WARN   | 3 files out of date (run sync)       |
+| Lock file             | PASS   | No stale locks                       |
+
+### Overall: PASS (1 warning)
+
+Run `pnpm -C .agentkit agentkit:sync` to regenerate outdated files.
+```
+
+---
+
+## Slash-Command-Only Commands
+
+These commands are available only as slash commands within AI coding tools. They cannot be invoked via the CLI.
+
+---
+
+### `/scaffold`
+
+**One-line:** Generates convention-aligned code skeletons (files, modules, components) based on project patterns and stack.
+
+**When to use:**
+
+- You need to create a new file that should follow project conventions (component, service, test, migration).
+- You want boilerplate generated with correct imports, naming, and structure.
+
+**Flags:**
+
+| Flag             | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| `--type <type>`  | Scaffold type (e.g., component, service, middleware, migration, test). |
+| `--name <name>`  | Name for the generated entity.                                        |
+| `--stack <name>` | Tech stack context (auto-detected if omitted).                        |
+| `--path <path>`  | Target directory for the generated file(s).                           |
+
+**Example invocations:**
+
+```
+/scaffold --type component --name UserProfile
+/scaffold --type service --name billing --stack node
+/scaffold --type migration --name add-user-preferences
+```
+
+---
+
+### `/preflight`
+
+**One-line:** Release-readiness checks that verify the project is ready to ship, including changelog, version, tests, and documentation.
+
+**When to use:**
+
+- Before cutting a release to verify all release criteria are met.
+- As part of a release checklist to catch missing items.
+
+**Flags:**
+
+| Flag              | Description                                                        |
+| ----------------- | ------------------------------------------------------------------ |
+| `--stack <name>`  | Limit checks to a specific tech stack.                             |
+| `--base <ref>`    | Base branch or commit to compare against. Default: main.           |
+| `--range <range>` | Git commit range to check (e.g., v1.0.0..HEAD).                   |
+| `--strict`        | Fail on warnings in addition to errors.                            |
+
+**Example invocations:**
+
+```
+/preflight
+/preflight --base main --strict
+/preflight --range v1.0.0..HEAD
 ```
