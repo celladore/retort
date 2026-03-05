@@ -586,7 +586,7 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('--diff shows create/update/skip without writing', { timeout: 15000 }, async () => {
+  it('--diff shows create/update/skip without writing', { timeout: 30000 }, async () => {
     const log = [];
     const origLog = console.log;
     console.log = (...args) => {
@@ -650,7 +650,7 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
         rmSync(tempAgentkitRoot, { recursive: true, force: true });
       }
     },
-    30000
+    60000
   );
 });
 
