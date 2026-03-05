@@ -794,6 +794,15 @@ export function validateAffectsTemplates(features, templatesDir) {
 
   for (const feature of features) {
     for (const tplPath of feature.affectsTemplates || []) {
+      // Reject paths that escape the templates root (path traversal)
+      if (tplPath.startsWith('/') || tplPath.startsWith('\\') || tplPath.includes('..')) {
+        warnings.push(
+          `features.yaml: feature "${feature.id}" affectsTemplates path "${tplPath}" ` +
+            `must be a relative path within the templates directory (no "..", absolute, or backslash paths)`
+        );
+        continue;
+      }
+
       // Directory references end with / — check if directory exists
       if (tplPath.endsWith('/')) {
         const dirPath = resolve(templatesDir, tplPath);
@@ -879,6 +888,20 @@ export function validateOverlayFeatures(overlaySettings, features, presets) {
           `Available: ${Object.keys(presets).join(', ')}`
       );
     }
+  }
+
+  // Reject non-array feature lists early
+  if (overlaySettings.enabledFeatures !== undefined && !Array.isArray(overlaySettings.enabledFeatures)) {
+    errors.push(
+      `overlay settings.yaml: "enabledFeatures" must be an array, got ${typeof overlaySettings.enabledFeatures}`
+    );
+    return { errors, warnings };
+  }
+  if (overlaySettings.disabledFeatures !== undefined && !Array.isArray(overlaySettings.disabledFeatures)) {
+    errors.push(
+      `overlay settings.yaml: "disabledFeatures" must be an array, got ${typeof overlaySettings.disabledFeatures}`
+    );
+    return { errors, warnings };
   }
 
   const enabledSet = new Set(overlaySettings.enabledFeatures || []);

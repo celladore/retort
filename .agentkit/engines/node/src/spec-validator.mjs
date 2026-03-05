@@ -1043,7 +1043,11 @@ export function validateSpec(agentkitRoot) {
   if (existsSync(featuresPath)) {
     try {
       const featuresData = yaml.load(readFileSync(featuresPath, 'utf-8'));
-      if (featuresData && typeof featuresData === 'object') {
+      if (featuresData === null || featuresData === undefined) {
+        errors.push('features.yaml: file is empty or contains only null');
+      } else if (typeof featuresData !== 'object' || Array.isArray(featuresData)) {
+        errors.push(`features.yaml: root must be an object, got ${Array.isArray(featuresData) ? 'array' : typeof featuresData}`);
+      } else if (featuresData && typeof featuresData === 'object') {
         if (!featuresData.features || !Array.isArray(featuresData.features)) {
           errors.push('features.yaml: missing or invalid "features" array');
         } else {

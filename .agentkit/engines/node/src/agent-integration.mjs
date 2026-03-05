@@ -1194,7 +1194,7 @@ export async function processTaskCompletion(projectRoot, agentkitRoot, completed
       result.dependencyAudits.length +
       result.qualityReviews.length;
     if (totalCreated > 0 || result.warnings.length > 0) {
-      appendEvent(projectRoot, 'task_completion_processed', {
+      await appendEvent(projectRoot, 'task_completion_processed', {
         sourceTaskId: completedTask.id,
         notificationsSent: result.notifications.length,
         testTasksCreated: result.testTasks.length,

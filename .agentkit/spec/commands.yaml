@@ -1195,7 +1195,6 @@ commands:
       - name: --feature
         description: 'Feature ID to trace (e.g., team-orchestration, quality-gates)'
         type: string
-        default: null
         required: true
       - name: --show-templates
         description: 'Show the raw template content that uses this feature'
