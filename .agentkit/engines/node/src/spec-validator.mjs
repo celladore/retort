@@ -1108,5 +1108,34 @@ export function runSpecValidation(agentkitRoot) {
   return result;
 }
 
+/**
+ * Validates that critical project.yaml fields required for template variable coverage are present.
+ * Returns an array of warning strings (empty array when all critical fields are covered).
+ */
+export function validateMappingCoverage(specRoot) {
+  const warnings = [];
+  const projectPath = resolve(specRoot, 'spec', 'project.yaml');
+  if (!existsSync(projectPath)) {
+    return warnings;
+  }
+  try {
+    const project = yaml.load(readFileSync(projectPath, 'utf-8'));
+    if (!project || typeof project !== 'object') {
+      return warnings;
+    }
+    const requiredFields = ['name', 'phase'];
+    for (const field of requiredFields) {
+      if (project[field] == null || project[field] === '') {
+        warnings.push(
+          `project.yaml: missing '${field}' — template variable coverage will be incomplete.`
+        );
+      }
+    }
+  } catch {
+    // Parse errors are reported by other doctor checks; silently skip here.
+  }
+  return warnings;
+}
+
 // Export validate for testing
 export { PROJECT_ENUMS, validate, validateCrossReferences, validateProjectYaml };

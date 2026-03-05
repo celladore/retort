@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { resolve } from 'path';
-import { validateSpec } from './spec-validator.mjs';
+import { validateSpec, validateMappingCoverage } from './spec-validator.mjs';
 import { computeProjectCompleteness } from './project-completeness.mjs';
 import { flattenProjectYaml } from './template-utils.mjs';
 
@@ -105,7 +105,15 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
     }
   }
 
-  // 2) Overlay/template sanity
+  // 2) Mapping coverage
+  const mappingWarnings = validateMappingCoverage(specRoot);
+  if (mappingWarnings && mappingWarnings.length > 0) {
+    for (const w of mappingWarnings) {
+      findings.push({ severity: 'warning', message: w });
+    }
+  }
+
+  // 3) Overlay/template sanity
   const { targets, error: overlayError } = loadOverlayRenderTargets(templateSpecRoot);
   if (overlayError) {
     findings.push({ severity: 'error', message: overlayError });
@@ -131,7 +139,7 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
       });
   }
 
-  // 3) project.yaml completeness
+  // 4) project.yaml completeness
   const projectPath = resolve(specRoot, 'spec', 'project.yaml');
   if (existsSync(projectPath)) {
     try {
