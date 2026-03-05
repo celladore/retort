@@ -30,7 +30,7 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 
 - Repository: agentkit-forge
 - Default branch: main
-- Tech stack: javascript, yaml, markdown
+  - Tech stack: javascript, yaml, markdown
 
 ## Language Profile Diagnostics
 

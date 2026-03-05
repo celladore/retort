@@ -72,10 +72,8 @@ PAYLOAD=$(cat <<'ENDJSON'
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "AgentKit Forge CI / Test (ubuntu-latest)",
-      "AgentKit Forge CI / Test (windows-latest)",
-      "AgentKit Forge CI / Test (macos-latest)",
-      "AgentKit Forge CI / Validate",
+      "CI / test (ubuntu-latest, 24)",
+      "CI / validate",
       "Branch Protection / branch-rules"
     ]
   },
