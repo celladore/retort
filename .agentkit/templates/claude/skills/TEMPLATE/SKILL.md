@@ -16,6 +16,12 @@ last_updated: '{{syncDate}}'
 
 Invoke this skill when you need to perform the `{{commandName}}` operation.
 
+{{#if commandFlags}}
+## Flags
+
+{{commandFlags}}
+
+{{/if}}
 ## Instructions
 
 1. Parse any arguments provided

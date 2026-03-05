@@ -16,6 +16,15 @@ last_updated: '2026-03-05'
 
 Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--type` | Scaffold type: endpoint, component, module, migration, test, service | — |
+| `--name` | Name of the scaffold artifact | — |
+| `--stack` | Target tech stack override | — |
+| `--path` | Target output path (must be inside workspace root) | — |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
