@@ -12,6 +12,12 @@ last_updated: '{{syncDate}}'
 
 {{commandDescription}}
 
+{{#if commandFlags}}
+## Flags
+
+{{commandFlags}}
+
+{{/if}}
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

@@ -13,6 +13,8 @@ export const PROJECT_MAPPING = [
   { src: 'stack.database', dest: 'stackDatabase', type: 'array-join' },
   { src: 'stack.search', dest: 'stackSearch', type: 'string' },
   { src: 'stack.messaging', dest: 'stackMessaging', type: 'array-join' },
+  { src: 'stack.nodeVersion', dest: 'nodeVersion' },
+  { src: 'stack.pythonVersion', dest: 'pythonVersion' },
 
   // Architecture
   { src: 'architecture.pattern', dest: 'architecturePattern' },
@@ -41,6 +43,7 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.designSystemPath', dest: 'designSystemPath' },
   { src: 'documentation.storybook', dest: 'hasStorybook', type: 'boolean' },
   { src: 'documentation.designTokensPath', dest: 'designTokensPath' },
+  { src: 'documentation.historyPath', dest: 'docsHistoryPath' },
   { src: 'documentation.hasBrandGuide', dest: 'hasBrandGuide', type: 'boolean' },
   { src: 'documentation.brandGuidePath', dest: 'brandGuidePath' },
 
@@ -153,6 +156,7 @@ export const PROJECT_MAPPING = [
 
   // Process
   { src: 'process.branchStrategy', dest: 'branchStrategy' },
+  { src: 'process.protectedBranches', dest: 'protectedBranches', type: 'array-join' },
   { src: 'process.commitConvention', dest: 'commitConvention' },
   { src: 'process.codeReview', dest: 'codeReview' },
   { src: 'process.teamSize', dest: 'teamSize' },

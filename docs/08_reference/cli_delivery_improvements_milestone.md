@@ -11,47 +11,47 @@ repositories that have integrated AgentKit Forge.
 
 - Repository: `JustAGhosT/agentkit-forge`
 - Milestone: `CLI Distribution & Delivery Improvements`
-- Suggested milestone number: `#2` (create as next milestone)
+- Milestone number: `#2` (created)
 
 ## Issues in this Milestone
 
-| # | Title | Status | PRD / Spec |
-| --- | --- | --- | --- |
-| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain availability (gh, az, etc.) | Open | N/A |
-| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR (blocking) and post-commit (non-blocking) for adopters | Open | N/A |
-| TBD | feat(cli): implement autoupdate functionality for adopter repositories | Planned | [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md) |
+| #                                                               | Title                                                                                           | Status | PRD / Spec                                                |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------- |
+| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain availability (gh, az, etc.)              | Open   | N/A                                                       |
+| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR (blocking) and post-commit (non-blocking) for adopters | Open   | N/A                                                       |
+| [#258](https://github.com/JustAGhosT/agentkit-forge/issues/258) | feat(cli): implement autoupdate functionality for repositories adopting AgentKit Forge          | Open   | [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md) |
 
-> **Note for maintainer:** The autoupdate issue must be created as a GitHub issue in
-> `JustAGhosT/agentkit-forge` and added to this milestone. Template content for the
-> issue body is provided in [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md).
-> Issues #196 and #194 should also be updated with a cross-reference comment pointing
-> to the new autoupdate issue.
+> **Status update:** Milestone and autoupdate issue have been created.
+> - Milestone: [#2](https://github.com/JustAGhosT/agentkit-forge/milestone/2)
+> - Autoupdate issue: [#258](https://github.com/JustAGhosT/agentkit-forge/issues/258)
+> - Cross-reference comments added on [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)
+>   and [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194)
 
-## Cross-References (Issue Updates Required)
+## Cross-References (Issue Updates Applied)
 
-The following updates must be applied to GitHub issues once the autoupdate issue
-number is assigned:
+The following updates were applied to GitHub issues after autoupdate issue
+#258 was assigned:
 
 ### Issue #196 — adoption/startup-hooks: enforce required CLI toolchain
 
-Add the following cross-reference section to the issue body or as a comment:
+Template that was added to the issue body/comment:
 
 ```markdown
 ## Related
 
-- See also: [feat(cli): implement autoupdate for adopter repositories](#<new-issue-number>)
+- See also: [feat(cli): implement autoupdate for adopter repositories](https://github.com/JustAGhosT/agentkit-forge/issues/258)
   — autoupdate preflight checks reuse the CLI toolchain validation requirements defined here.
 - Milestone: CLI Distribution & Delivery Improvements
 ```
 
 ### Issue #194 — governance: enforce agentkit sync pre-PR for adopters
 
-Add the following cross-reference section to the issue body or as a comment:
+Template that was added to the issue body/comment:
 
 ```markdown
 ## Related
 
-- See also: [feat(cli): implement autoupdate for adopter repositories](#<new-issue-number>)
+- See also: [feat(cli): implement autoupdate for adopter repositories](https://github.com/JustAGhosT/agentkit-forge/issues/258)
   — `update --apply` must trigger sync as part of its upgrade flow, satisfying the
   pre-PR sync enforcement contract defined here.
 - Milestone: CLI Distribution & Delivery Improvements
@@ -86,10 +86,10 @@ adopter repos accumulate version drift, triggering avoidable CI failures when
 new forge versions introduce breaking template changes.
 
 This issue tracks delivery of the autoupdate capability as described in
-[PRD-007](docs/01_product/PRD-007-adopter-autoupdate.md), building on the
+[PRD-007](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-007-adopter-autoupdate.md), building on the
 delivery channel established in
-[ADR-07](docs/03_architecture/02_decisions/07-delivery-strategy.md) and
-[PRD-005](docs/01_product/PRD-005-mesh-native-distribution.md).
+[ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/03_architecture/02_decisions/07-delivery-strategy.md) and
+[PRD-005](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-005-mesh-native-distribution.md).
 
 ## Scope
 
@@ -120,8 +120,8 @@ delivery channel established in
 
 - Prereq: #196 — CLI toolchain enforcement (preflight check dependency)
 - Prereq: #194 — agentkit sync pre-PR enforcement (sync gate dependency)
-- Parent PRD: [PRD-007: Adopter Autoupdate](docs/01_product/PRD-007-adopter-autoupdate.md)
-- Delivery strategy: [ADR-07](docs/03_architecture/02_decisions/07-delivery-strategy.md)
+- Parent PRD: [PRD-007: Adopter Autoupdate](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-007-adopter-autoupdate.md)
+- Delivery strategy: [ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/03_architecture/02_decisions/07-delivery-strategy.md)
 - Analytics: #241 (telemetry events for version tracking)
 ```
 
@@ -131,7 +131,7 @@ delivery channel established in
 
 ```text
 #196 (CLI toolchain) ──────────┐
-                                ├──► autoupdate issue (TBD)
+                                ├──► #258 (autoupdate)
 #194 (sync enforcement) ───────┘
 ```
 

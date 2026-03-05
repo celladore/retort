@@ -21,6 +21,12 @@ This command participates in the shared workflow state. Read and update:
 - **.windsurf/state/orchestrator.json** — Phase, team status, metrics; read for context
 - **.windsurf/state/events.log** — Append a log line when completing significant actions
 
+{{#if commandFlags}}
+## Flags
+
+{{commandFlags}}
+
+{{/if}}
 ## Implementation
 
 Execute the steps defined in the corresponding command (`.windsurf/commands/{{commandName}}.md`). The full specification and allowed tools are in that file.

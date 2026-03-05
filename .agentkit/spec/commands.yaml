@@ -100,6 +100,11 @@ commands:
         default: null
         required: false
         enum: [node, dotnet, rust, python]
+      - name: --project
+        description: 'Scope health check to a specific project or package in a monorepo'
+        type: string
+        default: null
+        required: false
       - name: --fix
         description: 'Attempt to auto-fix discovered issues'
         type: boolean
@@ -129,6 +134,11 @@ commands:
         type: integer
         default: null
         required: false
+      - name: --branch
+        description: 'Branch to review (defaults to current branch). Compares against base branch to determine diff.'
+        type: string
+        default: null
+        required: false
       - name: --range
         description: 'Git commit range to review (e.g., main..HEAD)'
         type: string
@@ -136,6 +146,11 @@ commands:
         required: false
       - name: --file
         description: 'Review a specific file'
+        type: string
+        default: null
+        required: false
+      - name: --project
+        description: 'Scope review to a specific project or package in a monorepo (e.g., --project=api)'
         type: string
         default: null
         required: false
@@ -321,6 +336,11 @@ commands:
         description: 'Check only a specific tech stack'
         type: string
         default: null
+      - name: --project
+        description: 'Scope to a specific project or package in a monorepo (e.g., --project=api)'
+        type: string
+        default: null
+        required: false
       - name: --fix
         description: 'Auto-fix issues where possible (lint, format)'
         type: boolean
@@ -510,6 +530,10 @@ commands:
         description: 'Limit checks to a specific stack'
         type: string
         default: null
+      - name: --branch
+        description: 'Branch to check (defaults to current branch)'
+        type: string
+        default: null
       - name: --base
         description: 'Remote base branch used for merge-base when --range is omitted (e.g., origin/main)'
         type: string
@@ -666,6 +690,47 @@ commands:
       - Edit
       - Bash
 
+  - name: expand
+    type: utility
+    description: >
+      Runs the expansion analyzer to identify gaps, missing capabilities,
+      undocumented decisions, and improvement opportunities in the codebase.
+      Produces a ranked list of suggestions with rationale, impact scores,
+      and effort estimates. Never creates tasks in analysis mode — all
+      suggestions require explicit human approval. Use --save to persist
+      suggestions to disk for later review.
+    flags:
+      - name: --category
+        description: 'Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature'
+        type: string
+        default: null
+        required: false
+      - name: --max-suggestions
+        description: 'Maximum number of suggestions to return'
+        type: integer
+        default: 10
+      - name: --min-impact
+        description: 'Minimum impact level to include: critical, high, medium, low'
+        type: string
+        default: 'low'
+        required: false
+        enum: [critical, high, medium, low]
+      - name: --output
+        description: 'Output format: markdown, yaml, or json'
+        type: string
+        default: 'markdown'
+        required: false
+        enum: [markdown, yaml, json]
+      - name: --save
+        description: 'Save suggestions to .claude/state/suggestions/ for later review'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Write
+      - Glob
+      - Grep
+
   # ===========================================================================
   # Framework Commands — AgentKit Forge internal tooling
   # ===========================================================================
@@ -784,6 +849,10 @@ commands:
         description: 'Simulate deployment without executing'
         type: boolean
         default: true
+      - name: --project
+        description: 'Deploy a specific project or package in a monorepo'
+        type: string
+        default: null
       - name: --skip-checks
         description: 'Skip pre-deployment quality checks (use with caution)'
         type: boolean

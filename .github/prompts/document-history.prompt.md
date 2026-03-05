@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
+description: 'Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,17 +12,19 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# format
+# document-history
 
-Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.
+Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.
 
 ## Flags
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--stack` | Force a specific tech stack formatter | — |
-| `--check` | Check formatting without making changes | false |
-| `--path` | Format only files matching this path or glob | — |
+| `--type` | Document type. The four primary types are used directly; issue and lesson are typically created via /review --focus=retrospective but can also be created manually. | — |
+| `--title` | Human-readable title for the document | — |
+| `--pr` | PR number to reference in the document | — |
+| `--auto` | Auto-detect type and title from recent git history | false |
+| `--dry-run` | Show what would be created without writing files | false |
 
 ## Instructions
 

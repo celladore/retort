@@ -16,6 +16,12 @@ last_updated: '2026-03-05'
 
 Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--verbose` | Include detailed diagnostics | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
