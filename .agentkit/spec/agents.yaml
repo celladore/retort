@@ -152,6 +152,8 @@ agents:
         - 'prisma/**'
         - 'seeds/**'
         - 'scripts/db/**'
+        - 'adx/**'
+        - 'grafana/**'
       responsibilities:
         - Design and maintain database schemas and data models
         - Write and review migration scripts for safety and reversibility
@@ -160,6 +162,9 @@ agents:
         - Manage seed data and test fixtures
         - Ensure data integrity constraints and referential integrity
         - Plan and execute data migration strategies for breaking changes
+        - Build and maintain cost attribution dashboards and analytics (ADX/KQL for Azure, or provider-equivalent)
+        - Implement cost-centre reporting functions (cost_by_product, cost_trend_by_product, untagged_resources)
+        - Monitor cost anomalies and generate alerts for spend exceeding budget thresholds
       domain-rules:
         - "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles"
         - "Follow security domain rules [sec-no-secrets, sec-input-validation] — never expose sensitive data in migrations, validate inputs"
@@ -271,6 +276,10 @@ agents:
         - Manage cloud resources across environments (dev, staging, prod)
         - Implement networking, security groups, and access policies
         - Optimize cloud costs and resource utilization
+        - Provision consumption budget resources (e.g. azurerm_consumption_budget_resource_group) for every resource group
+        - Enforce cost-center tag on all resources; reject plans missing cost attribution
+        - Run cost impact assessment before provisioning resources exceeding $100/month estimated
+        - When cloudProvider is azure, ensure resource groups have associated consumption budgets with alert thresholds at 80%, 100%, and 120% (forecasted)
         - Maintain Kubernetes manifests and Helm charts
         - Plan and execute infrastructure migrations
         - Implement disaster recovery and backup strategies

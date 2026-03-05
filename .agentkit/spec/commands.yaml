@@ -583,9 +583,46 @@ commands:
         description: 'Time period for queries (e.g. 7d, 30d)'
         type: string
         default: '7d'
+      - name: --budget
+        description: 'Show budget enforcement status (session + daily limits)'
+        type: boolean
+        default: false
     allowed-tools:
       - Read
       - Glob
+
+  - name: cost-centres
+    type: utility
+    description: >
+      Cost centre management for cloud infrastructure. Manages budget
+      allocations, resource group mappings, tag compliance, and spend
+      tracking. Requires a FinOps-enabled overlay (finops rule domain).
+      For AI session cost tracking, use /cost instead.
+    flags:
+      - name: action
+        description: 'Action: list, show, create, budget, map, unmap, status, unbudgeted, audit'
+        type: string
+        default: 'list'
+        positional: true
+      - name: --centre-id
+        description: 'Cost centre identifier'
+        type: string
+        default: null
+      - name: --rg
+        description: 'Azure resource group name'
+        type: string
+        default: null
+      - name: --amount
+        description: 'Monthly budget amount in USD'
+        type: number
+        default: null
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+      - Write
+      - Edit
 
   - name: doctor
     type: utility
