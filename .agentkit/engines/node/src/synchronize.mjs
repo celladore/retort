@@ -583,6 +583,8 @@ async function syncClaudeCommands(
       teamId: team.id,
       teamFocus: team.focus || '',
       teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
+      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
+      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' \u2192 ') : team['handoff-chain'] || '',
     };
     const rendered = renderTemplate(teamTemplate, teamVars, teamTemplatePath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -681,6 +683,8 @@ Scope all operations to the team's owned paths.
       teamId: team.id,
       teamFocus: team.focus || '',
       teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
+      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
+      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' \u2192 ') : team['handoff-chain'] || '',
     };
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.mdc', version, repoName);
@@ -732,6 +736,8 @@ Scope all operations to the team's owned paths.
       teamId: team.id,
       teamFocus: team.focus || '',
       teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
+      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
+      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' \u2192 ') : team['handoff-chain'] || '',
     };
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -843,6 +849,8 @@ async function syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoNam
       teamId: team.id,
       teamFocus: team.focus || '',
       teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
+      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
+      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' \u2192 ') : team['handoff-chain'] || '',
     };
     const rendered = renderTemplate(template, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);

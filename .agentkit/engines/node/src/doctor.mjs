@@ -3,11 +3,12 @@
  * Repository diagnostics and setup checks.
  */
 import { execSync } from 'child_process';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { resolve } from 'path';
-import { validateSpec } from './spec-validator.mjs';
+import { validateSpec, validateMappingCoverage } from './spec-validator.mjs';
 import { computeProjectCompleteness } from './project-completeness.mjs';
+import { PROJECT_MAPPING } from './project-mapping.mjs';
 import { flattenProjectYaml } from './template-utils.mjs';
 
 function resolveSpecRoot(agentkitRoot, projectRoot) {
@@ -68,6 +69,93 @@ function loadOverlayRenderTargets(agentkitRoot) {
       error: `Failed to parse overlay settings at ${overlayPath}: ${err.message}`,
     };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Template hygiene — detect hardcoded values that should use template vars
+// ---------------------------------------------------------------------------
+
+/**
+ * Known patterns: maps a template var name to regex patterns that indicate
+ * the literal value is hardcoded instead of using the template placeholder.
+ * Each entry: { varName, patterns: RegExp[], description }
+ */
+const HYGIENE_RULES = [
+  {
+    varName: 'nodeVersion',
+    patterns: [/node-version:\s*(?:lts\/\*|\d+)/],
+    description: 'Node version should use {{nodeVersion}}',
+  },
+  {
+    varName: 'pythonVersion',
+    patterns: [/python-version:\s*['"]\d+\.\d+['"]/],
+    description: 'Python version should use {{pythonVersion}}',
+  },
+  {
+    varName: 'protectedBranches',
+    patterns: [/branches:\s*\[(?:main|master)(?:,\s*\w+)*\]/],
+    description: 'Branch list should use {{protectedBranches}}',
+  },
+  {
+    varName: 'docsHistoryPath',
+    patterns: [/docs\/history(?:\/|\*|'|")/],
+    description: 'History path should use {{docsHistoryPath}}',
+  },
+  {
+    varName: 'testingCoverage',
+    patterns: [/THRESHOLD[^}]*:-\s*\d+/],
+    description: 'Coverage threshold should use {{testingCoverage}}',
+  },
+];
+
+/**
+ * Scans workflow templates for hardcoded values that should use template vars.
+ * Returns an array of findings with file, line, and recommendation.
+ */
+export function checkTemplateHygiene(agentkitRoot) {
+  const findings = [];
+  const workflowDir = resolve(agentkitRoot, 'templates', 'github', 'workflows');
+  if (!existsSync(workflowDir)) return findings;
+
+  let files;
+  try {
+    files = readdirSync(workflowDir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
+  } catch {
+    return findings;
+  }
+
+  for (const file of files) {
+    const filePath = resolve(workflowDir, file);
+    let content;
+    try {
+      content = readFileSync(filePath, 'utf-8');
+    } catch {
+      continue;
+    }
+
+    const lines = content.split('\n');
+    for (const rule of HYGIENE_RULES) {
+      const placeholder = `{{${rule.varName}}}`;
+
+      // Check each line for the hardcoded pattern
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes(placeholder)) continue;
+        for (const pattern of rule.patterns) {
+          if (pattern.test(line)) {
+            findings.push({
+              file,
+              line: i + 1,
+              varName: rule.varName,
+              description: rule.description,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return findings;
 }
 
 export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
@@ -148,6 +236,14 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
           severity: 'warning',
           message: `Top missing high-impact fields: ${c.missing.slice(0, 5).join(', ')}`,
         });
+      }
+
+      // 3b) Validate PROJECT_MAPPING src paths exist in project.yaml
+      const mappingWarnings = validateMappingCoverage(project, PROJECT_MAPPING);
+      if (mappingWarnings && mappingWarnings.length > 0) {
+        for (const w of mappingWarnings) {
+          findings.push({ severity: 'warning', message: w });
+        }
       }
 
       const vars = flattenProjectYaml(project);
@@ -248,6 +344,26 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
       severity: 'error',
       message: '.gitattributes not found. Run sync to generate merge driver configuration.',
     });
+  }
+
+  // 5) Template hygiene — detect hardcoded values that should use template vars
+  const hygieneFindings = checkTemplateHygiene(agentkitRoot);
+  if (hygieneFindings.length === 0) {
+    findings.push({
+      severity: 'info',
+      message: 'Template hygiene: all workflow templates use template vars correctly.',
+    });
+  } else {
+    findings.push({
+      severity: 'warning',
+      message: `Template hygiene: ${hygieneFindings.length} hardcoded value(s) should use template vars.`,
+    });
+    for (const h of hygieneFindings) {
+      findings.push({
+        severity: 'warning',
+        message: `  ${h.file}:${h.line} — ${h.description}`,
+      });
+    }
   }
 
   // Output
