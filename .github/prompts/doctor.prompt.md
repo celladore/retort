@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-04'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -16,36 +16,25 @@ last_updated: '2026-03-05'
 
 Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.
 
-## Flags
+## Workflow
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--verbose` | Include detailed diagnostics | false |
+1. Validate all spec files (commands.yaml, teams.yaml, agents.yaml, rules.yaml, settings.yaml)
+2. Verify required template roots exist for active render targets
+3. Check `.agentkit-repo` marker and overlay alignment
+4. Highlight high-impact missing `project.yaml` fields
+5. Suggest next actions sorted by impact
 
-## Instructions
+## Output
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
-
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+- Overall status: PASS / WARN / FAIL
+- Findings list with severity (ERROR, WARN, INFO)
+- Suggested command sequence to remediate each finding
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

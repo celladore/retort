@@ -1,4 +1,4 @@
-# Follow-Up Issues for Brand-Driven Editor Theme
+# Follow-Up Issues
 
 These items should be filed as GitHub issues. Created during the review cycle of the brand theme feature.
 
@@ -126,3 +126,44 @@ Extend `validateBrandSpec()` to compute actual contrast ratios between foregroun
 - Use relative luminance formula per WCAG 2.1
 - Check: brand color on white, brand color on dark background, semantic colors on their typical backgrounds
 - Report as warnings (not errors) with the computed ratio vs. required ratio
+
+---
+
+## Issue 6: Add linter guard for test file imports
+
+**Type**: Bug / DX
+**Priority**: Medium
+
+### Summary
+
+The project linter (likely an import auto-organizer) repeatedly strips the `spawnSync` import from `child_process` in test files when it reformats them. This caused the prettier formatting test to fail with `ReferenceError: spawnSync is not defined` multiple times during development.
+
+### Root Cause
+
+The linter sees `spawnSync` as "unused" when it analyzes the file in isolation, because the prettier test block uses it inside a `describe()` callback that the linter may not fully trace.
+
+### Fix Applied
+
+Extracted the prettier test into its own file (`prettier.test.mjs`) so the `spawnSync` import is clearly the primary dependency and the linter will not strip it.
+
+### Prevention
+
+- Consider adding an ESLint rule or `.eslintrc` override to prevent auto-removal of `child_process` imports in test files
+- If using `eslint-plugin-unused-imports`, configure exceptions for test files that use `spawnSync`
+- Document in CONTRIBUTING.md that test files with shell-spawning tests should be isolated
+
+---
+
+## Issue 7: Add parameterized stateDir test for all platforms
+
+**Type**: Enhancement / Testing
+**Priority**: Low
+
+### Summary
+
+The `{{stateDir}}` template variable is resolved per-platform in `buildCommandVars()`. Test coverage now exists for Claude, Cursor, Copilot, Codex, and Windsurf but future platforms (Gemini, Cline, Roo, Warp) should also be covered if they support state directories.
+
+### Suggestion
+
+- When adding a new render target that uses `{{stateDir}}`, add a corresponding integration test
+- Consider a parameterized test that iterates over all platforms with state directories automatically

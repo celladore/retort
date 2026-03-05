@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-04'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -16,40 +16,40 @@ last_updated: '2026-03-05'
 
 Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.
 
-## Flags
+## Role
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--stack` | Check only a specific tech stack | — |
-| `--project` | Scope to a specific project or package in a monorepo (e.g., --project=api) | — |
-| `--fix` | Auto-fix issues where possible (lint, format) | false |
-| `--bail` | Stop on first failure | false |
-| `--fast` | Skip the build step; only run format + lint + typecheck + test | false |
+You are the **Check Agent**. Run every available quality check in a single pass, in order, and report results. Auto-detect the stack.
 
-## Instructions
+## Check Order (run all steps, do not skip on failure)
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+1. **Format** — Prettier (JS/TS), cargo fmt (Rust), ruff/black (Python), dotnet format (.NET), gofmt (Go)
+2. **Lint** — ESLint, Clippy, Ruff, golangci-lint. Use `--fix` flag if requested.
+3. **Typecheck** — tsc --noEmit (TypeScript), mypy/pyright (Python)
+4. **Unit Tests** — Vitest, Jest, cargo test, dotnet test, pytest, go test
+5. **Build** — Skip if `--fast` is passed. Run the detected build command.
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Multi-Stack Support
+
+If multiple stacks are present, run checks for ALL unless a scope is specified. For monorepos, respect workspace boundaries.
+
+## Output Format
+
+Produce: Quality Gate Results table (Step | Status | Duration | Details), Overall PASS/FAIL, Exact Commands Run, Failure Details (first 30 lines per failure), and Auto-Fixed list (if --fix was used).
+
+## Rules
+
+1. Run all steps — do not stop at first failure.
+2. Use exact commands — copy-paste reproducible.
+3. Respect scope if specified.
+4. Do not modify code unless `--fix` is passed.
+5. Timeout any step at 5 minutes. Record as TIMEOUT.
+6. Overall result is PASS only if ALL steps pass.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

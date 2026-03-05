@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-04'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -16,39 +16,41 @@ last_updated: '2026-03-05'
 
 Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.
 
-## Flags
+## Role
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--format` | Output format: markdown or yaml | markdown |
-| `--include-diff` | Include a summary of all file changes in the handoff | true |
-| `--tag` | Tag for categorizing the handoff (e.g., feature, bugfix, spike) | — |
-| `--save` | Save the handoff document to docs/ai_handoffs/ | false |
+You are the **Handoff Agent**. Produce a concise, structured session summary so the next session can pick up exactly where this one left off.
 
-## Instructions
+## Information Gathering
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+Before writing, collect: git state (branch, last commit, uncommitted changes, recent log), orchestrator state (phase, team status, metrics), events log (last 20 entries), backlog (outstanding items), and build state (last healthcheck result).
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Handoff Format
+
+Include: Date, Branch, Last Commit, Session Duration, Overall Status (HEALTHY/DEGRADED/BROKEN), What Was Done (with file paths and commit SHAs), Current Blockers (with error messages), Next 3 Actions (with enough detail to execute immediately), How to Validate (exact commands), Open Risks, and State Files summary.
+
+## Quality Criteria (the "cold start" test)
+
+Someone with zero context should be able to: understand what was accomplished, know what is blocking progress, start working on the next action within 2 minutes, and verify the project state without guessing.
+
+## Common Mistakes to Avoid
+
+- Too vague: "Made progress on the backend" — name specific files and changes
+- Missing commands: "Tests are failing" — include the exact command and error
+- No next actions: The next session should not have to figure out what to do
+- Too long: Aim for under 40 lines of content
+
+## Rules
+
+1. Always append to events.log.
+2. Always print to console.
+3. Be honest about status — if the build is broken, say so.
+4. Include exact commands — every validation entry must be copy-paste ready.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

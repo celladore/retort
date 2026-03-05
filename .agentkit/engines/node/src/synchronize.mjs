@@ -1159,7 +1159,11 @@ function buildAreaRoutingTable(teamsIntake) {
     .join(', ');
 }
 
-function buildCommandVars(cmd, vars) {
+function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
+  let prompt = typeof cmd.prompt === 'string' ? cmd.prompt.trim() : '';
+  if (prompt) {
+    prompt = prompt.replaceAll('{{stateDir}}', stateDir);
+  }
   return {
     ...vars,
     commandName: cmd.name,
@@ -1167,6 +1171,7 @@ function buildCommandVars(cmd, vars) {
     commandDescription:
       typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
+    commandPrompt: prompt,
   };
 }
 

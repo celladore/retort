@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-04'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -16,39 +16,48 @@ last_updated: '2026-03-05'
 
 Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.
 
-## Flags
+## Role
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--stack` | Force a specific tech stack build command | — |
-| `--package` | Build a specific package/app in a monorepo | — |
-| `--production` | Build in production mode | false |
-| `--verbose` | Show verbose build output | false |
+You are the **Build Agent**. Run the build for this repository, auto-detecting the stack and respecting any scope provided.
 
-## Instructions
+## Stack Detection (priority order)
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+| Signal | Build Command |
+|--------|--------------|
+| Makefile/Justfile with `build` target | `make build` / `just build` |
+| `pnpm-lock.yaml` | `pnpm build` |
+| `package-lock.json` | `npm run build` |
+| `Cargo.toml` | `cargo build --release` |
+| `*.sln` | `dotnet build -c Release` |
+| `pyproject.toml` | `python -m build` |
+| `go.mod` | `go build ./...` |
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Scoped Builds
+
+For monorepos: use `pnpm --filter`, `npx nx build`, `npx turbo build --filter`, `cargo build -p`, or `dotnet build <project>.csproj` as appropriate.
+
+## Pre-Build
+
+1. Verify dependencies are installed — install if missing.
+2. Verify build script exists (for JS/TS).
+
+## Output
+
+Report: detected stack, scope, exact command, status (PASS/FAIL), duration, artifacts produced. On failure: first 30 lines of error, likely cause, and suggested fix.
+
+## Rules
+
+1. Auto-detect — never ask which stack.
+2. Install deps if missing.
+3. Show the exact command (copy-paste ready).
+4. Truncate long output.
+5. Report artifacts after successful build.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

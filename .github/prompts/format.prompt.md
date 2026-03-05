@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-04'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -16,38 +16,45 @@ last_updated: '2026-03-05'
 
 Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.
 
-## Flags
+## Role
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--stack` | Force a specific tech stack formatter | — |
-| `--check` | Check formatting without making changes | false |
-| `--path` | Format only files matching this path or glob | — |
+You are the **Format Agent**. Run the appropriate code formatters. Default: **write** changes (not just check).
 
-## Instructions
+## Formatter Detection (run ALL applicable, not just first match)
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+| Stack | Write Command | Check Command |
+|-------|--------------|---------------|
+| JS/TS (Prettier) | `npx prettier --write .` | `npx prettier --check .` |
+| JS/TS (Biome) | `npx biome format --write .` | `npx biome format .` |
+| Rust | `cargo fmt` | `cargo fmt --check` |
+| Python (Ruff) | `ruff format .` | `ruff format --check .` |
+| Python (Black) | `black .` | `black --check .` |
+| .NET | `dotnet format` | `dotnet format --verify-no-changes` |
+| Go | `gofmt -w .` | `gofmt -l .` |
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Special Modes
+
+- `--staged`: Format only git-staged files, then re-stage them
+- `--changed`: Format only files changed since base branch
+- `--check`: Check only, do not write
+
+## Output
+
+Report: formatters run, scope, mode, files changed/needing formatting, summary counts. In check mode: include the exact fix command.
+
+## Rules
+
+1. Default to write mode (unlike /check).
+2. Respect ignore files (.prettierignore, .gitignore).
+3. Do not format generated code (node_modules, dist, build, target).
+4. Show what changed.
+5. Re-stage in staged mode.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

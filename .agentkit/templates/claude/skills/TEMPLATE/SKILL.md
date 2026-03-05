@@ -16,34 +16,18 @@ last_updated: '{{syncDate}}'
 
 Invoke this skill when you need to perform the `{{commandName}}` operation.
 
-{{#if commandFlags}}
-## Flags
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
 
-{{commandFlags}}
-
-{{/if}}
 ## Instructions
-
-**IMPORTANT:** This skill stub contains only metadata. The full prompt with
-detailed instructions, output format, and criteria lives in the corresponding
-command file. Before executing, **read** `.claude/commands/{{commandName}}.md`
-for the complete instructions. Follow that file's guidance, not the generic
-steps below.
-
-Fallback steps (use only if the command file does not exist):
 
 1. Parse any arguments provided
 2. Scan relevant files to understand the current state
 3. Execute the task following project conventions
 4. Validate the output against quality gates
 5. Report results clearly
-
-## Progress Tracking
-
-Use the `TodoWrite` tool to track progress through each phase or criterion
-of the command. Create one todo item per phase, mark each `in_progress` as
-you start it and `completed` when done. This gives the user visibility into
-what has been reviewed or executed.
+{{/if}}
 
 ## Project Context
 

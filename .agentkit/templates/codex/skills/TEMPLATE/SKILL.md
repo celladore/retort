@@ -16,12 +16,10 @@ last_updated: '{{syncDate}}'
 
 Invoke this skill when you need to perform the `{{commandName}}` operation.
 
-{{#if commandFlags}}
-## Flags
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
 
-{{commandFlags}}
-
-{{/if}}
 ## Instructions
 
 1. Parse command arguments and identify requested scope/files
@@ -35,6 +33,7 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Return a concise summary with status (`success`/`partial`/`failed`)
 - Include validation evidence (exit code, failing command, or passing summary)
 - Include next-step remediation when checks fail
+{{/if}}
 
 ## Project Context
 
@@ -61,12 +60,4 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 For backlog sync, use tracker-neutral intake and ownership-aware routing based on configured intake values.
-
-### Issue Field Routing
-
-Route issues to teams by area: {{intakeAreaRoutingTable}}
-
-**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
-**Severity (bugs):** critical · high · medium · low
-**Escalation:** severity=critical + area in [security,infra,backend] → cc {{intakeSecurityEscalationTeams}}; impact=all users + P0 → cc {{intakeBlockedEscalationTeams}}
 {{/if}}
