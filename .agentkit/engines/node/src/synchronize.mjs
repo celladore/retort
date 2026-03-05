@@ -1357,15 +1357,17 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   vars.bpRequiredStatusChecksJson = JSON.stringify(
     Array.isArray(statusChecks) ? statusChecks : []
   );
-  const scanningTools = vars.bpCodeScanningTools ?? projectVars.bpCodeScanningTools ?? [];
+  const scanningToolsRaw = vars.bpCodeScanningTools ?? projectVars.bpCodeScanningTools ?? [];
+  const scanningTools = Array.isArray(scanningToolsRaw)
+    ? scanningToolsRaw.filter((t) => t && typeof t === 'object')
+    : [];
   vars.bpCodeScanningToolsJson = JSON.stringify(
-    Array.isArray(scanningTools)
-      ? scanningTools.map((t) => ({
-          tool: t.name || '',
-          security_alerts_threshold: t.securityAlertThreshold || 'none',
-          alerts_threshold: t.alertThreshold || 'none',
-        }))
-      : []
+    scanningTools.map((t) => ({
+      tool: typeof t.name === 'string' ? t.name : '',
+      security_alerts_threshold:
+        typeof t.securityAlertThreshold === 'string' ? t.securityAlertThreshold : 'none',
+      alerts_threshold: typeof t.alertThreshold === 'string' ? t.alertThreshold : 'none',
+    }))
   );
 
   // Inject brand identity into template vars when brand guide exists

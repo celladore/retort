@@ -318,23 +318,32 @@ echo ""
 # 7. Labels
 # =============================================================================
 
-echo "Ensuring labels exist..."
+if [[ "$DRY_RUN" == "true" ]]; then
+    echo "[dry-run] Would ensure labels exist:"
+    echo "  - forge-source-change"
+    echo "  - needs-maintainer-review"
+    echo "  - dependencies"
+    echo "  - breaking-change"
+    echo "  - security"
+else
+    echo "Ensuring labels exist..."
 
-create_label_if_missing() {
-    local name="$1" color="$2" description="$3"
-    if ! gh label view "$name" --repo "$REPO" &>/dev/null 2>&1; then
-        gh label create "$name" --color "$color" --description "$description" --repo "$REPO"
-        echo "  Created label: $name"
-    else
-        echo "  Label exists: $name"
-    fi
-}
+    create_label_if_missing() {
+        local name="$1" color="$2" description="$3"
+        if ! gh label view "$name" --repo "$REPO" &>/dev/null 2>&1; then
+            gh label create "$name" --color "$color" --description "$description" --repo "$REPO"
+            echo "  Created label: $name"
+        else
+            echo "  Label exists: $name"
+        fi
+    }
 
-create_label_if_missing "forge-source-change"      "d93f0b" "PR modifies AgentKit Forge source files"
-create_label_if_missing "needs-maintainer-review"   "e4e669" "Requires maintainer review before merge"
-create_label_if_missing "dependencies"              "0075ca" "Dependency updates"
-create_label_if_missing "breaking-change"           "b60205" "Contains breaking changes"
-create_label_if_missing "security"                  "d93f0b" "Security-related changes"
+    create_label_if_missing "forge-source-change"      "d93f0b" "PR modifies AgentKit Forge source files"
+    create_label_if_missing "needs-maintainer-review"   "e4e669" "Requires maintainer review before merge"
+    create_label_if_missing "dependencies"              "0075ca" "Dependency updates"
+    create_label_if_missing "breaking-change"           "b60205" "Contains breaking changes"
+    create_label_if_missing "security"                  "d93f0b" "Security-related changes"
+fi
 
 echo ""
 

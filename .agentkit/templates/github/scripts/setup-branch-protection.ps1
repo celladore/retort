@@ -91,7 +91,7 @@ $Payload = @"
 "@
 
 if ($DryRun) {
-    Write-Host "[dry-run] Would apply the following branch protection to $Repo/$Branch:"
+    Write-Host "[dry-run] Would apply the following branch protection to $Repo/${Branch}:"
     Write-Host ""
     Write-Host $Payload
     Write-Host ""
@@ -294,25 +294,34 @@ Write-Host ""
 # 7. Labels
 # =============================================================================
 
-Write-Host "Ensuring labels exist..."
+if ($DryRun) {
+    Write-Host "[dry-run] Would ensure labels exist:"
+    Write-Host "  - forge-source-change"
+    Write-Host "  - needs-maintainer-review"
+    Write-Host "  - dependencies"
+    Write-Host "  - breaking-change"
+    Write-Host "  - security"
+} else {
+    Write-Host "Ensuring labels exist..."
 
-function New-LabelIfMissing {
-    param([string]$Name, [string]$Color, [string]$Description)
+    function New-LabelIfMissing {
+        param([string]$Name, [string]$Color, [string]$Description)
 
-    $existing = gh label view $Name --repo $Repo 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        gh label create $Name --color $Color --description $Description --repo $Repo
-        Write-Host "  Created label: $Name"
-    } else {
-        Write-Host "  Label exists: $Name"
+        $existing = gh label view $Name --repo $Repo 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            gh label create $Name --color $Color --description $Description --repo $Repo
+            Write-Host "  Created label: $Name"
+        } else {
+            Write-Host "  Label exists: $Name"
+        }
     }
-}
 
-New-LabelIfMissing "forge-source-change"    "d93f0b" "PR modifies AgentKit Forge source files"
-New-LabelIfMissing "needs-maintainer-review" "e4e669" "Requires maintainer review before merge"
-New-LabelIfMissing "dependencies"           "0075ca" "Dependency updates"
-New-LabelIfMissing "breaking-change"        "b60205" "Contains breaking changes"
-New-LabelIfMissing "security"               "d93f0b" "Security-related changes"
+    New-LabelIfMissing "forge-source-change"    "d93f0b" "PR modifies AgentKit Forge source files"
+    New-LabelIfMissing "needs-maintainer-review" "e4e669" "Requires maintainer review before merge"
+    New-LabelIfMissing "dependencies"           "0075ca" "Dependency updates"
+    New-LabelIfMissing "breaking-change"        "b60205" "Contains breaking changes"
+    New-LabelIfMissing "security"               "d93f0b" "Security-related changes"
+}
 
 Write-Host ""
 
