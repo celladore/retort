@@ -64,8 +64,10 @@ $Payload = @{
     required_status_checks = @{
         strict   = $true
         contexts = @(
-            "CI / test (ubuntu-latest, 24)",
-            "CI / validate",
+            "AgentKit Forge CI / Test (ubuntu-latest)",
+            "AgentKit Forge CI / Test (windows-latest)",
+            "AgentKit Forge CI / Test (macos-latest)",
+            "AgentKit Forge CI / Validate",
             "Branch Protection / branch-rules"
         )
     }

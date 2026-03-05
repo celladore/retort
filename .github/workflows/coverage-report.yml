@@ -123,6 +123,8 @@ jobs:
           fi
 
       - name: Enforce threshold
+        env:
+          COVERAGE_THRESHOLD: ${{ vars.COVERAGE_THRESHOLD }}
         run: |
           THRESHOLD="${COVERAGE_THRESHOLD:-80}"
           ACTUAL="${{ steps.coverage.outputs.lines }}"
@@ -139,4 +141,4 @@ jobs:
       - name: Report
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "_Coverage threshold: 80% (from project.yaml). Override with COVERAGE_THRESHOLD env var._" >> $GITHUB_STEP_SUMMARY
+          echo "_Coverage threshold: 80% (from project.yaml). Override with COVERAGE_THRESHOLD repository variable._" >> $GITHUB_STEP_SUMMARY
