@@ -74,11 +74,11 @@ operations
 ## Focus Areas
 
 - .env.example
-- docker-compose*.yml
-- infra/**
-- .github/workflows/**
-- scripts/setup*
-- docs/setup/**
+- docker-compose\*.yml
+- infra/\*\*
+- .github/workflows/\*\*
+- scripts/setup\*
+- docs/setup/\*\*
 
 ## Responsibilities
 

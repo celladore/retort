@@ -41,7 +41,9 @@
       "Bash(az account*)",
       "Bash(az group*)",
       "Bash(terraform *)",
-      "Bash(terragrunt *)"
+      "Bash(terragrunt *)",
+      "Bash(perl -pe 's/\\\\e\\\\[[\\\\d;]*m//g')",
+      "Read(//tmp/**)"
     ],
     "deny": [
       "Bash(rm -rf /)",

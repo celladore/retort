@@ -73,10 +73,10 @@ operations
 
 ## Focus Areas
 
-- docs/history/issues/**
-- docs/history/lessons-learned/**
+- docs/history/issues/\*\*
+- docs/history/lessons-learned/\*\*
 - docs/history/.index.json
-- docs/ai_handoffs/**
+- docs/ai_handoffs/\*\*
 
 ## Responsibilities
 

@@ -73,12 +73,12 @@ operations
 
 ## Focus Areas
 
-- auth/**
-- security/**
-- middleware/auth*
-- infra/**
-- .github/workflows/**
-- **/.env*
+- auth/\*\*
+- security/\*\*
+- middleware/auth\*
+- infra/\*\*
+- .github/workflows/\*\*
+- \*_/.env_
 
 ## Responsibilities
 

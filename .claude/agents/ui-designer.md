@@ -73,11 +73,11 @@ design
 
 ## Focus Areas
 
-- components/**
-- apps/web/src/components/**
-- styles/**
-- storybook/**
-- design/**
+- components/\*\*
+- apps/web/src/components/\*\*
+- styles/\*\*
+- storybook/\*\*
+- design/\*\*
 
 ## Responsibilities
 

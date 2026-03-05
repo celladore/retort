@@ -73,11 +73,11 @@ marketing
 
 ## Focus Areas
 
-- docs/**
-- apps/marketing/**
-- content/**
-- blog/**
-- *.md
+- docs/\*\*
+- apps/marketing/\*\*
+- content/\*\*
+- blog/\*\*
+- \*.md
 
 ## Responsibilities
 

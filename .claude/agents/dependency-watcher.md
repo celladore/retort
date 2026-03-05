@@ -78,8 +78,8 @@ operations
 - Cargo.toml
 - Cargo.lock
 - pyproject.toml
-- requirements*.txt
-- *.csproj
+- requirements\*.txt
+- \*.csproj
 - Directory.Packages.props
 
 ## Responsibilities

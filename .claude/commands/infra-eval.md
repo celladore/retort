@@ -17,4 +17,3 @@ last_updated: '2026-03-05'
 > **This command is not enabled.** To enable infrastructure evaluation, set `evaluation.infraEval: true` in your project's `.agentkit/spec/project.yaml`, then run `pnpm -C .agentkit agentkit:sync` to regenerate.
 
 Stop here. Do not proceed with the evaluation.
-

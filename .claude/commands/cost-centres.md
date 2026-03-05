@@ -17,4 +17,3 @@ last_updated: '2026-03-05'
 > **This command requires a FinOps-enabled overlay.** To enable cost centre management, add the `finops` domain to your overlay's `rules.yaml`, then run `pnpm -C .agentkit agentkit:sync`.
 
 Stop here. Do not proceed.
-

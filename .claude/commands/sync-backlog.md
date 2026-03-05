@@ -122,12 +122,12 @@ The area determines which team the item is routed to via `teams.yaml` intake rou
 
 When a backlog item originates from a bug report or incident, include a severity tag:
 
-| Severity     | Meaning                                              |
-| ------------ | ---------------------------------------------------- |
+| Severity     | Meaning                                                |
+| ------------ | ------------------------------------------------------ |
 | **critical** | Complete failure, data loss, or security vulnerability |
-| **high**     | Major functionality broken                            |
-| **medium**   | Partial functionality impaired                        |
-| **low**      | Minor issue, cosmetic or edge-case                    |
+| **high**     | Major functionality broken                             |
+| **medium**   | Partial functionality impaired                         |
+| **low**      | Minor issue, cosmetic or edge-case                     |
 
 ### Escalation Rules
 

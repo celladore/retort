@@ -36,6 +36,7 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 **MAX_HANDOFF_CHAIN_DEPTH:** 7 (configurable via `max-handoff-chain-depth` in teams.yaml, hard limit). Rationale: limits handoff chain length to avoid unbounded delegation; default balances flexibility with traceability. If `task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH`, the handoff is **blocked** (set `status` to `"input-required"`, append reason to `handoffContext`, emit events.log entry). This is a hard stop, not a warning.
 
 **MAX_TASK_TURNS:** 15 (configurable via `max-task-turns` in teams.yaml). Maximum number of agentic turns (tool calls / LLM round-trips) allowed per task execution. Track the current turn count in the task file under `_turnCount` (initialize to 0). Increment `_turnCount` before each action (file edit, tool call, command execution). If `_turnCount >= MAX_TASK_TURNS`:
+
 1. Stop work immediately.
 2. Set task status to `input-required`.
 3. Append a message: `"Turn limit reached (MAX_TASK_TURNS=15). Requesting human guidance to continue or descope."`.
@@ -43,12 +44,14 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 5. Do NOT continue working or retry — wait for human intervention.
 
 **Action Repetition Detection:** Track the last 5 actions (tool name + target file + action summary) in the task file under `_recentActions[]`. Before each action, check if the new action is substantially similar to 3 or more of the last 5 entries (same tool + same target file + similar intent). If repetition is detected:
+
 1. Stop work immediately.
 2. Set task status to `input-required`.
 3. Append a message: `"Repetition loop detected: same action attempted 3+ times without progress. Requesting human guidance."`.
 4. Emit an events.log entry: `{"eventType": "LOOP_DETECTED", "taskId": "<id>", "repeatedAction": "<summary>", "count": <N>, "timestamp": "<ISO>"}`.
 
 **Stagnation Detection:** Track the turn count at which the last meaningful progress occurred (file changed, test added, artifact produced) in `_lastProgressTurn` (set to the current `_turnCount` whenever progress occurs). If more than 10 turns have elapsed since `_lastProgressTurn` was updated (i.e., `_turnCount - _lastProgressTurn >= 10`) and no `files-changed` or `test-results` artifact has been added (configurable via `max-stagnation-turns` in teams.yaml):
+
 1. Set task status to `input-required`.
 2. Append a message: `"Stagnation detected: no measurable progress in 10 turns. Requesting human guidance."`.
 3. Emit an events.log entry: `{"eventType": "STAGNATION_DETECTED", "taskId": "<id>", "turnsSinceProgress": <N>, "timestamp": "<ISO>"}`.
@@ -145,18 +148,23 @@ Do NOT update docs for internal-only refactors.
 If this session involved **significant work** (not trivial one-line fixes), create a history document using the `/document-history` command:
 
 1. **Preview first (optional):**
+
    ```
    /document-history --auto --dry-run
    ```
+
    This shows what type and title would be auto-detected without writing files.
 
 2. **Create the document:**
+
    ```
    /document-history --auto
    ```
+
    The command auto-detects the document type (`bugfix`, `feature`, `implementation`, or `migration`) from commit messages, gathers session context, generates the file via `./scripts/create-doc.sh`, fills in all sections, and checks `docs/history/.index.json` for duplicates before creating.
 
    To override auto-detection, specify flags explicitly:
+
    ```
    /document-history --type implementation --title "My Feature"
    ```
@@ -259,9 +267,8 @@ If you were working on a delegated task from `.claude/state/tasks/`:
 
 6. If no `handoffTo` is set but you identified downstream work, set
    `handoffTo` to the appropriate team(s) from your handoff chain:
-   
+
    quality
-   
 
 ### Events and Orchestrator State
 

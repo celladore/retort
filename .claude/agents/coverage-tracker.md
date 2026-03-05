@@ -73,12 +73,12 @@ testing
 
 ## Focus Areas
 
-- coverage/**
-- **/*.test.*
-- **/*.spec.*
-- jest.config.*
-- vitest.config.*
-- .nycrc*
+- coverage/\*\*
+- \*_/_.test.\*
+- \*_/_.spec.\*
+- jest.config.\*
+- vitest.config.\*
+- .nycrc\*
 
 ## Responsibilities
 

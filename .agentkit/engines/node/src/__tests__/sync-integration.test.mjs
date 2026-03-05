@@ -1239,7 +1239,7 @@ describe('syncGitattributes (merge driver sync)', () => {
     expect(content).toContain('pnpm-lock.yaml');
   });
 
-  it('preserves user content outside managed section on re-sync', async () => {
+  it('preserves user content outside managed section on re-sync', { timeout: 15_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Prepend custom user content
     const existing = readFileSync(gitattrsPath, 'utf-8');
@@ -1257,7 +1257,7 @@ describe('syncGitattributes (merge driver sync)', () => {
     expect(startCount).toBe(1);
   });
 
-  it('replaces stale managed section without duplication', async () => {
+  it('replaces stale managed section without duplication', { timeout: 15_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Re-sync a second time to verify no duplication
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });

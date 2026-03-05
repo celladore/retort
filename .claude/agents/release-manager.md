@@ -77,9 +77,9 @@ project-management
 - package.json
 - Cargo.toml
 - pyproject.toml
-- .github/workflows/release*
-- scripts/release*
-- docs/releases/**
+- .github/workflows/release\*
+- scripts/release\*
+- docs/releases/\*\*
 
 ## Responsibilities
 

@@ -57,4 +57,3 @@ If `--range` is omitted, auto-detect via merge-base against the default branch. 
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-
