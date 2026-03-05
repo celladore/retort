@@ -5,6 +5,7 @@ import {
   resolveThemeMapping,
   validateBrandSpec,
   mergeThemeIntoSettings,
+  filterByTier,
   isValidHex,
   getNestedValue,
 } from '../brand-resolver.mjs';
@@ -401,5 +402,65 @@ describe('mergeThemeIntoSettings', () => {
     const colors = { 'titleBar.activeBackground': '#1976D2' };
     mergeThemeIntoSettings(existing, colors, null);
     expect(existing['workbench.colorCustomizations']).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// filterByTier
+// ---------------------------------------------------------------------------
+describe('filterByTier', () => {
+  const allColors = {
+    'titleBar.activeBackground': '#184A6C',
+    'titleBar.activeForeground': '#F7F9FB',
+    'activityBar.background': '#184A6C',
+    'activityBar.foreground': '#23BFAA',
+    'statusBar.background': '#1976D2',
+    'statusBar.foreground': '#F7F9FB',
+    'sideBar.background': '#23303A',
+    'sideBar.foreground': '#B4BAC2',
+    'editor.background': '#18232A',
+    'editor.foreground': '#F7F9FB',
+    'tab.activeBackground': '#23303A',
+    'tab.inactiveBackground': '#18232A',
+    'badge.background': '#23BFAA',
+    'list.activeSelectionBackground': '#FD8369',
+    'button.background': '#FD8369',
+  };
+
+  it('returns all colors for tier "full"', () => {
+    const result = filterByTier(allColors, 'full');
+    expect(result).toEqual(allColors);
+  });
+
+  it('returns all colors when tier is undefined', () => {
+    const result = filterByTier(allColors, undefined);
+    expect(result).toEqual(allColors);
+  });
+
+  it('filters to key chrome for tier "medium"', () => {
+    const result = filterByTier(allColors, 'medium');
+    expect(Object.keys(result)).toEqual([
+      'titleBar.activeBackground',
+      'titleBar.activeForeground',
+      'activityBar.background',
+      'activityBar.foreground',
+      'statusBar.background',
+      'statusBar.foreground',
+      'sideBar.background',
+      'sideBar.foreground',
+    ]);
+  });
+
+  it('filters to title bar only for tier "minimal"', () => {
+    const result = filterByTier(allColors, 'minimal');
+    expect(Object.keys(result)).toEqual([
+      'titleBar.activeBackground',
+      'titleBar.activeForeground',
+    ]);
+  });
+
+  it('returns all colors for unknown tier', () => {
+    const result = filterByTier(allColors, 'unknown');
+    expect(result).toEqual(allColors);
   });
 });

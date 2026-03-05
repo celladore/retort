@@ -6,6 +6,51 @@
 import { get } from './project-mapping.mjs';
 
 // ---------------------------------------------------------------------------
+// Brand tier definitions — which VS Code slots belong to each density tier
+// ---------------------------------------------------------------------------
+
+/**
+ * VS Code color keys grouped by brand density tier.
+ * - minimal: title bar only — one glanceable surface to identify the project
+ * - medium:  key chrome — title bar, activity bar, status bar, sidebar
+ * - full:    everything — all of the above plus editor, tabs, badges, lists, buttons
+ */
+const TIER_PREFIXES = {
+  minimal: [
+    'titleBar.',
+  ],
+  medium: [
+    'titleBar.',
+    'activityBar.',
+    'statusBar.',
+    'sideBar.',
+  ],
+  // full includes everything — no filtering needed
+};
+
+/**
+ * Filters a resolved color customizations object by brand density tier.
+ *
+ * @param {object} colorCustomizations - { "titleBar.activeBackground": "#hex", ... }
+ * @param {'full'|'medium'|'minimal'} tier - Brand density tier
+ * @returns {object} Filtered color customizations
+ */
+export function filterByTier(colorCustomizations, tier) {
+  if (!tier || tier === 'full') return colorCustomizations;
+
+  const prefixes = TIER_PREFIXES[tier];
+  if (!prefixes) return colorCustomizations;
+
+  const filtered = {};
+  for (const [key, value] of Object.entries(colorCustomizations)) {
+    if (prefixes.some(prefix => key.startsWith(prefix))) {
+      filtered[key] = value;
+    }
+  }
+  return filtered;
+}
+
+// ---------------------------------------------------------------------------
 // Color resolution
 // ---------------------------------------------------------------------------
 

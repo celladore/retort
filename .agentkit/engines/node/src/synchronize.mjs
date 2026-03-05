@@ -25,6 +25,7 @@ import {
   simpleDiff,
 } from './template-utils.mjs';
 import {
+  filterByTier,
   mergeThemeIntoSettings,
   resolveColor,
   resolveThemeMapping,
@@ -339,6 +340,8 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
 
   // Determine which mode mapping(s) to resolve
   const mode = themeSpec.mode || 'dark';
+  const scheme = themeSpec.scheme || 'dark'; // light | dark — preference when mode is 'both'
+  const tier = themeSpec.tier || 'full'; // full | medium | minimal
   let lightColors = {};
   let darkColors = {};
 
@@ -359,14 +362,25 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
     }
   }
 
-  // Build final color customizations — for 'both', dark wins on conflict
+  // Build final color customizations — scheme controls which wins on conflict
   let colorCustomizations;
   if (mode === 'both') {
-    colorCustomizations = { ...lightColors, ...darkColors };
+    // Scheme preference: the preferred scheme's colors win on conflict
+    if (scheme === 'light') {
+      colorCustomizations = { ...darkColors, ...lightColors };
+    } else {
+      colorCustomizations = { ...lightColors, ...darkColors };
+    }
   } else if (mode === 'light') {
     colorCustomizations = lightColors;
   } else {
     colorCustomizations = darkColors;
+  }
+
+  // Apply brand density tier — filter to only the configured surface level
+  colorCustomizations = filterByTier(colorCustomizations, tier);
+  if (tier !== 'full') {
+    log(`[agentkit:sync] Brand tier "${tier}" — filtered to ${Object.keys(colorCustomizations).length} color slots`);
   }
 
   if (Object.keys(colorCustomizations).length === 0) {
@@ -378,6 +392,8 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
   const meta = {
     brand: brandSpec.identity?.name || 'unknown',
     mode,
+    scheme,
+    tier,
     version: brandSpec.version || '1.0.0',
   };
 
@@ -409,6 +425,8 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
     'outputs',
     'baseTheme',
     'fontFromBrand',
+    'tier',
+    'scheme',
   ]);
 
   // Write theme into each output target

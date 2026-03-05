@@ -6,6 +6,17 @@
 # enabled: true
 # mode: dark  # light | dark | both
 
+# Brand density tier — how much of the editor chrome gets themed:
+#   full    — Everything (title bar, activity bar, status bar, sidebar, editor, tabs, badges, etc.)
+#   medium  — Key chrome (title bar, activity bar, status bar, sidebar)
+#   minimal — Title bar only (one glanceable surface to identify which project you're in)
+# tier: full
+
+# Color scheme preference:
+#   dark  — Deep muted hues with a brand accent on the title bar
+#   light — Light surfaces with the brand color on chrome elements
+# scheme: dark
+
 # Per-tool overrides — use brand token references (dot-notation paths into brand.yaml).
 # These merge on top of the base light/dark mapping for that tool only.
 # cursor:
