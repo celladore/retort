@@ -120,4 +120,4 @@ This repo protects source-of-truth paths under `.agentkit/spec`, `.agentkit/temp
 - [x] Generated command/skill artifacts are semantically aligned across supported platforms.
 - [x] Auto-import triggers on adoption when `process.intake.autoImport: true`.
 - [x] Consolidated backlog view available via `agentkit backlog` with multiple output formats.
-- [x] All 614 tests pass (including 38 new tests for normalizer and store).
+- [x] All tests pass, including dedicated coverage for the normalizer and store.
