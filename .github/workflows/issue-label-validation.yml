@@ -7,7 +7,7 @@ on:
     inputs:
       issue_number:
         description: 'Issue number to validate (dry-run)'
-        required: false
+        required: true
         type: string
 
 permissions:
@@ -21,7 +21,28 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const issue = context.payload.issue;
+            // Support both `issues` and `workflow_dispatch` events.
+            const eventName = context.eventName;
+            const isDryRun = eventName === 'workflow_dispatch';
+
+            let issue = context.payload.issue;
+
+            if (!issue) {
+              const issueNumberInput = context.payload.inputs?.issue_number;
+              if (!issueNumberInput) {
+                core.setFailed('No issue context available. For workflow_dispatch, provide the "issue_number" input.');
+                return;
+              }
+
+              const { data } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: Number(issueNumberInput),
+              });
+
+              issue = data;
+            }
+
             const body = issue.body || '';
 
             // Allowed values — must stay in sync with .github/ISSUE_TEMPLATE/*.yml
@@ -58,6 +79,15 @@ jobs:
               'specific configuration only', 'developer/CI only'
             ];
 
+            // Escape user-controlled values to prevent @mention spam and markdown injection
+            function escapeMarkdown(value) {
+              if (!value) return '';
+              return value
+                .replace(/@/g, '`@`')
+                .replace(/\[/g, '\\[')
+                .replace(/\]/g, '\\]');
+            }
+
             // Extract field values from issue body (YAML issue forms render as headings)
             function extractField(body, fieldLabel) {
               const regex = new RegExp(`### ${fieldLabel}\\s*\\n\\s*([^\\n]+)`, 'i');
@@ -73,31 +103,60 @@ jobs:
             // Validate area (required)
             const area = extractField(body, 'Area');
             if (area && !ALLOWED_AREAS.includes(area)) {
-              errors.push(`**Area** "${area}" is not a valid option. Allowed: ${ALLOWED_AREAS.join(', ')}`);
+              errors.push(`**Area** \`${escapeMarkdown(area)}\` is not a valid option. Allowed: ${ALLOWED_AREAS.join(', ')}`);
+            } else if (!area) {
+              errors.push('**Area** is required and must be set to a valid option.');
             }
 
             // Validate priority (required)
             const priority = extractField(body, 'Priority');
             if (priority && !ALLOWED_PRIORITIES.includes(priority)) {
-              errors.push(`**Priority** "${priority}" is not a valid option. Must be P0–P4.`);
+              errors.push(`**Priority** \`${escapeMarkdown(priority)}\` is not a valid option. Must be P0–P4.`);
+            } else if (!priority) {
+              errors.push('**Priority** is required and must be set to a valid option.');
             }
 
             // Validate severity (bug reports only)
             const severity = extractField(body, 'Severity');
             if (severity && !ALLOWED_SEVERITIES.includes(severity)) {
-              errors.push(`**Severity** "${severity}" is not a valid option. Allowed: critical, high, medium, low.`);
+              errors.push(`**Severity** \`${escapeMarkdown(severity)}\` is not a valid option. Allowed: critical, high, medium, low.`);
             }
 
             // Validate phase (optional)
             const phase = extractField(body, 'Phase');
             if (phase && !ALLOWED_PHASES.includes(phase)) {
-              errors.push(`**Phase** "${phase}" is not a valid option. Allowed: ${ALLOWED_PHASES.join(', ')}`);
+              errors.push(`**Phase** \`${escapeMarkdown(phase)}\` is not a valid option. Allowed: ${ALLOWED_PHASES.join(', ')}`);
             }
 
             // Validate impact (optional)
             const impact = extractField(body, 'Impact Scope');
             if (impact && !ALLOWED_IMPACTS.includes(impact)) {
-              errors.push(`**Impact Scope** "${impact}" is not a valid option.`);
+              errors.push(`**Impact Scope** \`${escapeMarkdown(impact)}\` is not a valid option.`);
+            }
+
+            if (isDryRun) {
+              core.info(`[DRY RUN] Issue #${issue.number}: ${errors.length} validation error(s)`);
+              for (const e of errors) core.info(`  - ${e}`);
+              core.info(`Area: ${area || '(missing)'}, Priority: ${priority || '(missing)'}, Severity: ${severity || '(n/a)'}`);
+              return;
+            }
+
+            // Remove stale labels before applying new ones (handles edits)
+            const currentLabels = (issue.labels || []).map(l => typeof l === 'string' ? l : l.name);
+            const staleLabels = currentLabels.filter(l =>
+              l.startsWith('area:') || l.startsWith('priority:') || l.startsWith('severity:') || l === 'invalid-fields'
+            );
+            for (const label of staleLabels) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  name: label
+                });
+              } catch (e) {
+                // Label may not exist, ignore
+              }
             }
 
             // Apply area label
