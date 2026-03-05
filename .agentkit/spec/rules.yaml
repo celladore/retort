@@ -759,7 +759,7 @@ rules:
           (Rust), pytest-benchmark (Python), or BenchmarkDotNet (.NET).
           Store benchmark results as CI artefacts for historical comparison.
         severity: warning
-        type: enforcement
+        type: advisory
         phase: validation
         autofix: false
 

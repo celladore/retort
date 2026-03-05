@@ -1058,12 +1058,12 @@ function buildAgentVars(agent, category, vars) {
   };
 }
 
-function formatConventionLine(c) {
+export function formatConventionLine(c) {
   if (typeof c === 'string') return `- ${c}`;
   const id = c.id || '';
   const rule = c.rule || '';
   const badges = [];
-  if (c.type) badges.push(c.type === 'enforcement' ? '🔒 enforcement' : '💡 advisory');
+  if (c.type) badges.push(c.type);
   if (c.phase) {
     const phases = Array.isArray(c.phase) ? c.phase : [c.phase];
     badges.push(`phase: ${phases.join(', ')}`);
@@ -1072,10 +1072,11 @@ function formatConventionLine(c) {
   return `- **[${id}]** ${rule}${suffix}`;
 }
 
-function buildRuleVars(rule, vars) {
+export function buildRuleVars(rule, vars) {
   const appliesTo = rule['applies-to'] || [];
   const conventions = rule.conventions || [];
   const enforcement = conventions.filter((c) => c.type === 'enforcement');
+  // Conventions without an explicit type default to advisory (see ADR-08)
   const advisory = conventions.filter((c) => c.type !== 'enforcement');
   return {
     ...vars,

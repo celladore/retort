@@ -16,6 +16,7 @@
 
 {{/if}}
 
+{{#if ruleConventions}}
 {{#if ruleHasEnforcement}}
 ## Enforcement Rules
 
@@ -31,6 +32,7 @@ These rules are guidance for agents — violations are flagged but do not block 
 
 {{ruleAdvisoryConventions}}
 
+{{/if}}
 {{/if}}
 {{#unless ruleConventions}}
 _No conventions defined for this domain yet. Add conventions to `.agentkit/spec/rules.yaml`

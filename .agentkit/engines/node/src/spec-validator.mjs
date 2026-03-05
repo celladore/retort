@@ -1089,4 +1089,4 @@ export function runSpecValidation(agentkitRoot) {
 }
 
 // Export validate for testing
-export { PROJECT_ENUMS, validate, validateCrossReferences, validateProjectYaml };
+export { PROJECT_ENUMS, VALID_PHASES, validate, validateCrossReferences, validateProjectYaml };
