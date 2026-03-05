@@ -16,6 +16,23 @@ enabled: true # Master toggle — set false to skip theme generation
 mode: both # light | dark | both — generate both for broad compatibility
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Brand density tier — controls how many editor surfaces are themed
+# ─────────────────────────────────────────────────────────────────────────────
+# full    — All surfaces: title bar, activity bar, status bar, sidebar,
+#           editor, tabs, badges, lists, buttons
+# medium  — Key chrome only: title bar, activity bar, status bar, sidebar
+# minimal — Title bar only — one glanceable surface to identify the project
+tier: full
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Color scheme preference — light | dark
+# ─────────────────────────────────────────────────────────────────────────────
+# Controls which mapping (light/dark) is primary when mode is 'both'.
+# In dark scheme the palette uses deep muted hues with the brand accent
+# on the title bar for instant project identification.
+scheme: dark
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Output targets — which editor config files to generate
 # ─────────────────────────────────────────────────────────────────────────────
 # Each output gets the resolved colorCustomizations merged in.

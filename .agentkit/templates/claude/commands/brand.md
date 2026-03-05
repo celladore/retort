@@ -44,6 +44,8 @@ Only run this mode if `--init` is in `$ARGUMENTS`.
    - Brand / project name
    - Primary brand color (hex)
    - Whether they want a dark-mode palette auto-generated
+   - Brand density tier: `full` (all surfaces), `medium` (key chrome), or `minimal` (title bar only for project identification)
+   - Color scheme preference: `dark` or `light`
 3. Create `.agentkit/spec/brand.yaml` with the collected values and sensible
    defaults for secondary, semantic, and neutral colors. Use the structure:
 
@@ -81,7 +83,8 @@ Only run this mode if `--init` is in `$ARGUMENTS`.
 
 4. If `.agentkit/spec/editor-theme.yaml` does not exist, scaffold a minimal
    version that maps `titleBar`, `statusBar`, `activityBar`, and `sideBar`
-   to the brand palette.
+   to the brand palette. Include the user's chosen `tier` and `scheme` values
+   (default to `tier: full` and `scheme: dark` if not specified).
 5. Print a summary of what was created and suggest running `/brand --all` to
    validate.
 
