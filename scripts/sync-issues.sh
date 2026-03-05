@@ -122,24 +122,36 @@ _Synced from \`docs/history/issues/$basename_file\`_"
     continue
   fi
 
-  # Create the GitHub Issue — stderr is discarded; gh outputs only the URL on
-  # stdout on success.
+  # Create the GitHub Issue — capture stderr separately so it can be surfaced
+  # on failure without polluting the URL on success.
   echo "Creating issue: \"$TITLE\" ..."
+  GH_STDERR_FILE="$(mktemp)"
   ISSUE_URL="$(gh issue create \
     --title "$TITLE" \
     --body "$BODY" \
-    --label "$LABELS" 2>/dev/null)" || {
+    --label "$LABELS" 2>"$GH_STDERR_FILE")" || {
     echo "  FAILED to create issue: \"$TITLE\""
+    echo "  gh stderr: $(cat "$GH_STDERR_FILE")"
+    rm -f "$GH_STDERR_FILE"
     FAILED=$((FAILED + 1))
     continue
   }
+  rm -f "$GH_STDERR_FILE"
 
   # Extract issue number from URL (https://github.com/owner/repo/issues/123)
-  ISSUE_NUMBER="$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')"
+  # Use parameter expansion with grep fallback; default to "unknown" so a
+  # parsing failure doesn't abort the script or skip the metadata stamp.
+  ISSUE_NUMBER="${ISSUE_URL##*/}"
+  if [[ ! "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
+    ISSUE_NUMBER="$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')" || true
+    [[ -z "$ISSUE_NUMBER" ]] && ISSUE_NUMBER="unknown"
+  fi
 
   echo "  Created: $ISSUE_URL (#$ISSUE_NUMBER)"
 
-  # Stamp the local file with sync metadata (portable: temp file instead of sed -i)
+  # Stamp the local file with sync metadata (portable: temp file instead of sed -i).
+  # Always runs after a successful gh issue create to prevent duplicate issues on
+  # the next sync run.
   SYNC_DATE="$(date +%Y-%m-%d)"
   TMPFILE="$(mktemp)"
   sed \

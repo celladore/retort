@@ -44,8 +44,9 @@ The script defaults to **dry-run** mode; `--apply` is required to create issues.
 
 ### When to Sync
 
-The following trigger points are under consideration. **None are implemented
-yet** — this ADR records the decision on which to adopt.
+The following trigger points are under consideration. **The manual sync script
+(Phase 1) is implemented; CI and session-hook triggers are not yet** — this ADR
+records the decision on which to adopt.
 
 | Trigger | Pros | Cons | Decision |
 |---------|------|------|----------|
@@ -55,8 +56,8 @@ yet** — this ADR records the decision on which to adopt.
 | **Pre-push git hook** — run before `git push` | Syncs at natural checkpoint | Blocks push on failure, slow for large batches | **Reject — too disruptive** |
 | **Scheduled (cron)** — run on a timer | Catches stragglers | Over-engineered for current scale | **Reject — unnecessary complexity** |
 
-**Primary flow:** CI workflow on default branch (`master`) push detects unsynced
-issue docs and runs `sync-issues.sh --apply`. If the step fails it is
+**Primary flow:** CI workflow on push to the default branch (`dev`) detects
+unsynced issue docs and runs `sync-issues.sh --apply`. If the step fails it is
 non-blocking (the push still succeeds) but emits a warning annotation.
 
 **Fallback flow:** Developer or agent manually runs `./scripts/sync-issues.sh
