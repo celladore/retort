@@ -59,7 +59,8 @@ jobs:
 
           conflict_count=0
 
-          echo "$prs" | jq -c '.[]' | while IFS= read -r pr; do
+          # Use process substitution to avoid subshell scoping issue with pipe
+          while IFS= read -r pr; do
             number=$(echo "$pr" | jq -r '.number')
             branch=$(echo "$pr" | jq -r '.headRefName')
             title=$(echo "$pr" | jq -r '.title')
@@ -67,16 +68,16 @@ jobs:
             echo ""
             echo "Checking PR #${number}: ${title} (${branch})..."
 
-            # Fetch the PR branch
-            if ! git fetch origin "$branch" 2>/dev/null; then
-              echo "  Warning: could not fetch ${branch}, skipping"
+            # Fetch PR head using pull/<number>/head to handle fork-based PRs
+            if ! git fetch origin "pull/${number}/head:pr-${number}" 2>/dev/null; then
+              echo "  Warning: could not fetch PR #${number}, skipping"
               continue
             fi
 
             # Try a test merge (without committing)
             git checkout "origin/${BASE_BRANCH}" --detach 2>/dev/null
 
-            if git merge --no-commit --no-ff "origin/${branch}" 2>/dev/null; then
+            if git merge --no-commit --no-ff "pr-${number}" 2>/dev/null; then
               echo "  OK — no conflicts"
               git merge --abort 2>/dev/null || true
             else
@@ -165,7 +166,7 @@ jobs:
 
             # Reset for next PR
             git checkout --detach "origin/${BASE_BRANCH}" 2>/dev/null || true
-          done
+          done < <(echo "$prs" | jq -c '.[]')
 
           echo ""
           echo "Done. Conflicts detected on ${conflict_count} PR(s)."

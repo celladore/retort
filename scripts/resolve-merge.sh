@@ -45,9 +45,16 @@ git fetch origin "$TARGET" 2>/dev/null || {
 CURRENT_BRANCH="$(git branch --show-current)"
 info "Merging origin/${TARGET} into ${CURRENT_BRANCH}..."
 
-if git merge "origin/${TARGET}" --no-edit 2>/dev/null; then
+merge_output=$(git merge "origin/${TARGET}" --no-edit 2>&1) && {
   ok "Merge completed cleanly — no conflicts."
   exit 0
+}
+
+# Distinguish real merge conflicts from other failures
+if ! echo "$merge_output" | grep -q "CONFLICT"; then
+  error "Merge failed for a reason other than conflicts:"
+  echo "$merge_output"
+  exit 1
 fi
 
 info "Merge conflicts detected. Applying resolution matrix..."
@@ -56,7 +63,6 @@ info "Merge conflicts detected. Applying resolution matrix..."
 # 2. Auto-resolve generated files (KEEP_THEIRS — accept upstream)
 # ---------------------------------------------------------------------------
 GENERATED_PATTERNS=(
-  '.agents/skills/*/SKILL.md'
   '.agents/skills/*/SKILL.md'
   '.github/agents/*.agent.md'
   '.github/chatmodes/*.chatmode.md'
