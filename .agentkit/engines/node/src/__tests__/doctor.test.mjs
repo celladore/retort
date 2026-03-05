@@ -291,9 +291,10 @@ stack:
   });
 
   it('should report warning when language profile is inferred heuristically', async () => {
-    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    const { validateSpec, validateMappingCoverage, validateRequiredFields } = await import('../spec-validator.mjs');
     validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
     validateMappingCoverage.mockReturnValue([]);
+    validateRequiredFields.mockReturnValue([]);
 
     vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
       if (typeof p === 'string') {
@@ -335,9 +336,10 @@ testing:
   });
 
   it('should report warning when configured and inferred language profiles diverge', async () => {
-    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    const { validateSpec, validateMappingCoverage, validateRequiredFields } = await import('../spec-validator.mjs');
     validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
     validateMappingCoverage.mockReturnValue([]);
+    validateRequiredFields.mockReturnValue([]);
 
     vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
       if (typeof p === 'string') {
@@ -379,9 +381,10 @@ testing:
   });
 
   it('should report diagnostics disabled info when language profile diagnostics are off', async () => {
-    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    const { validateSpec, validateMappingCoverage, validateRequiredFields } = await import('../spec-validator.mjs');
     validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
     validateMappingCoverage.mockReturnValue([]);
+    validateRequiredFields.mockReturnValue([]);
 
     vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
       if (typeof p === 'string') {
@@ -423,9 +426,10 @@ automation:
   });
 
   it('should warn when configured mode is set but stack.languages is empty', async () => {
-    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    const { validateSpec, validateMappingCoverage, validateRequiredFields } = await import('../spec-validator.mjs');
     validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
     validateMappingCoverage.mockReturnValue([]);
+    validateRequiredFields.mockReturnValue([]);
 
     vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
       if (typeof p === 'string') {
