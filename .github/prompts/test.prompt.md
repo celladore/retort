@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,16 @@ last_updated: '2026-03-04'
 # test
 
 Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Force a specific tech stack test command | — |
+| `--filter` | Filter tests by name or pattern | — |
+| `--coverage` | Generate coverage report | false |
+| `--watch` | Run tests in watch mode | false |
+| `--package` | Test a specific package/app in a monorepo | — |
 
 ## Instructions
 
@@ -31,6 +41,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

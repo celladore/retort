@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,16 @@ last_updated: '2026-03-04'
 # preflight
 
 Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Limit checks to a specific stack | — |
+| `--branch` | Branch to check (defaults to current branch) | — |
+| `--base` | Remote base branch used for merge-base when --range is omitted (e.g., origin/main) | — |
+| `--range` | Git range used for changelog/commit checks (auto-detect via merge-base; fallback emits warning and uses HEAD~50..HEAD) | — |
+| `--strict` | Fail on warnings | false |
 
 ## Instructions
 
@@ -31,6 +41,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

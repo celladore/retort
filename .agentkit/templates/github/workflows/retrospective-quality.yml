@@ -4,17 +4,17 @@
 #
 # Non-blocking CI job that validates retrospective records (issues and lessons).
 # This workflow is informational — it MUST NOT be added to branch protection
-# required checks. It runs on push to docs/history/issues/ and
-# docs/history/lessons-learned/ and reports quality without gating merges.
+# required checks. It runs on push to {{docsHistoryPath}}/issues/ and
+# {{docsHistoryPath}}/lessons-learned/ and reports quality without gating merges.
 
 name: Retrospective Quality
 
 on:
   push:
     paths:
-      - 'docs/history/issues/**'
-      - 'docs/history/lessons-learned/**'
-      - 'docs/history/.index.json'
+      - '{{docsHistoryPath}}/issues/**'
+      - '{{docsHistoryPath}}/lessons-learned/**'
+      - '{{docsHistoryPath}}/.index.json'
 
 jobs:
   validate-retrospective:
@@ -29,7 +29,7 @@ jobs:
 
       - name: Validate .index.json integrity
         run: |
-          INDEX_FILE="docs/history/.index.json"
+          INDEX_FILE="{{docsHistoryPath}}/.index.json"
           if [ ! -f "$INDEX_FILE" ]; then
             echo "::warning::No .index.json found — skipping validation"
             exit 0
@@ -37,7 +37,7 @@ jobs:
 
           # Validate JSON syntax
           if ! python3 -m json.tool "$INDEX_FILE" > /dev/null 2>&1; then
-            echo "::error::docs/history/.index.json is not valid JSON"
+            echo "::error::{{docsHistoryPath}}/.index.json is not valid JSON"
             exit 1
           fi
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Validate issue records
         run: |
-          ISSUES_DIR="docs/history/issues"
+          ISSUES_DIR="{{docsHistoryPath}}/issues"
           if [ ! -d "$ISSUES_DIR" ] || ! compgen -G "$ISSUES_DIR/[0-9]*.md" > /dev/null 2>&1; then
             echo "No issue records to validate"
             exit 0
@@ -82,7 +82,7 @@ jobs:
 
       - name: Validate lesson records
         run: |
-          LESSONS_DIR="docs/history/lessons-learned"
+          LESSONS_DIR="{{docsHistoryPath}}/lessons-learned"
           if [ ! -d "$LESSONS_DIR" ] || ! compgen -G "$LESSONS_DIR/[0-9]*.md" > /dev/null 2>&1; then
             echo "No lesson records to validate"
             exit 0
@@ -113,8 +113,8 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          issue_count=$(find docs/history/issues -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l || echo 0)
-          lesson_count=$(find docs/history/lessons-learned -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l || echo 0)
+          issue_count=$(find {{docsHistoryPath}}/issues -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l || echo 0)
+          lesson_count=$(find {{docsHistoryPath}}/lessons-learned -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l || echo 0)
           echo "## Retrospective Records" >> $GITHUB_STEP_SUMMARY
           echo "- Issues: $issue_count" >> $GITHUB_STEP_SUMMARY
           echo "- Lessons: $lesson_count" >> $GITHUB_STEP_SUMMARY

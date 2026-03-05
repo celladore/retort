@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,16 @@ last_updated: '2026-03-04'
 # deploy
 
 Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--environment` | Target environment: dev, staging, production | dev |
+| `--dry-run` | Simulate deployment without executing | true |
+| `--project` | Deploy a specific project or package in a monorepo | — |
+| `--skip-checks` | Skip pre-deployment quality checks (use with caution) | false |
+| `--stack` | Deploy a specific tech stack component | — |
 
 ## Instructions
 
@@ -31,6 +41,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

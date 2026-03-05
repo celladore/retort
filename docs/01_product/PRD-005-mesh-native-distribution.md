@@ -581,3 +581,8 @@ drift detection across AI tooling. This is a first-mover opportunity.
 - [ADR-03: Tooling Strategy](../03_architecture/02_decisions/03-tooling-strategy.md)
 - [Architecture Overview](../03_architecture/01_overview.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)
+- [PRD-007: Adopter Autoupdate](PRD-007-adopter-autoupdate.md) — follow-on CLI capability
+  for keeping adopter repositories current with the latest forge version;
+  builds on the npm/CLI delivery channel established by this PRD.
+  See also: [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196),
+  [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194).

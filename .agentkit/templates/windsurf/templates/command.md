@@ -21,6 +21,12 @@ This command participates in the shared workflow state. Read and update:
 - **.windsurf/state/orchestrator.json** — Phase, team status, metrics; read for context
 - **.windsurf/state/events.log** — Append a log line when completing significant actions
 
+{{#if commandFlags}}
+## Flags
+
+{{commandFlags}}
+
+{{/if}}
 ## Implementation
 
 Execute the steps defined in the corresponding command (`.windsurf/commands/{{commandName}}.md`). The full specification and allowed tools are in that file.
@@ -43,4 +49,12 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/{{co
 {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Run sync-backlog against the configured tracker with ownership-based routing and escalation.
+
+### Issue Field Routing
+
+Route issues to teams by area: {{intakeAreaRoutingTable}}
+
+**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
+**Severity (bugs):** critical · high · medium · low
+**Escalation:** severity=critical + area in [security,infra,backend] → cc {{intakeSecurityEscalationTeams}}; impact=all users + P0 → cc {{intakeBlockedEscalationTeams}}
 {{/if}}

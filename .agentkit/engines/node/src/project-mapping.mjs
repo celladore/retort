@@ -13,6 +13,8 @@ export const PROJECT_MAPPING = [
   { src: 'stack.database', dest: 'stackDatabase', type: 'array-join' },
   { src: 'stack.search', dest: 'stackSearch', type: 'string' },
   { src: 'stack.messaging', dest: 'stackMessaging', type: 'array-join' },
+  { src: 'stack.nodeVersion', dest: 'nodeVersion' },
+  { src: 'stack.pythonVersion', dest: 'pythonVersion' },
 
   // Architecture
   { src: 'architecture.pattern', dest: 'architecturePattern' },
@@ -41,6 +43,7 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.designSystemPath', dest: 'designSystemPath' },
   { src: 'documentation.storybook', dest: 'hasStorybook', type: 'boolean' },
   { src: 'documentation.designTokensPath', dest: 'designTokensPath' },
+  { src: 'documentation.historyPath', dest: 'docsHistoryPath' },
   { src: 'documentation.hasBrandGuide', dest: 'hasBrandGuide', type: 'boolean' },
   { src: 'documentation.brandGuidePath', dest: 'brandGuidePath' },
 
@@ -92,6 +95,7 @@ export const PROJECT_MAPPING = [
   { src: 'deployment.cloudProvider', dest: 'cloudProvider' },
   { src: 'deployment.containerized', dest: 'containerized', type: 'boolean' },
   { src: 'deployment.containerized', dest: 'hasContainerized', type: 'boolean' },
+  { src: 'deployment.containerRuntime', dest: 'containerRuntime', check: 'not-none' },
   { src: 'deployment.environments', dest: 'environments', type: 'array-join' },
   { src: 'deployment.iacTool', dest: 'iacTool' },
 
@@ -135,12 +139,14 @@ export const PROJECT_MAPPING = [
   { src: 'observability.tracing.samplingRate', dest: 'tracingSamplingRate', type: 'string' },
   { src: 'observability.logging.centralised', dest: 'hasCentralisedLogging', type: 'boolean' },
   { src: 'observability.logging.retentionDays', dest: 'logRetentionDays', type: 'string' },
+  { src: 'observability.logging.retentionDays', dest: 'loggingRetentionDays', type: 'string' },
 
   // Compliance
   { src: 'compliance.framework', dest: 'complianceFramework', check: 'not-none' },
   { src: 'compliance.framework', dest: 'hasCompliance', type: 'boolean', check: 'not-none' },
   { src: 'compliance.disasterRecovery.rpoHours', dest: 'drRpoHours', type: 'string' },
   { src: 'compliance.disasterRecovery.rtoHours', dest: 'drRtoHours', type: 'string' },
+  { src: 'compliance.disasterRecovery.testSchedule', dest: 'drTestSchedule', check: 'not-none' },
   {
     src: 'compliance.disasterRecovery.backupSchedule',
     dest: 'drBackupSchedule',
@@ -153,6 +159,7 @@ export const PROJECT_MAPPING = [
 
   // Process
   { src: 'process.branchStrategy', dest: 'branchStrategy' },
+  { src: 'process.protectedBranches', dest: 'protectedBranches', type: 'array-join' },
   { src: 'process.commitConvention', dest: 'commitConvention' },
   { src: 'process.codeReview', dest: 'codeReview' },
   { src: 'process.teamSize', dest: 'teamSize' },
@@ -160,6 +167,7 @@ export const PROJECT_MAPPING = [
   { src: 'process.intake.ownerTeam', dest: 'intakeOwnerTeam', check: 'not-none' },
   { src: 'process.intake.operationsTeam', dest: 'intakeOperationsTeam', check: 'not-none' },
   { src: 'process.intake.cadence', dest: 'intakeCadence', check: 'not-none' },
+  { src: 'process.intake.autoImport', dest: 'hasAutoImport', type: 'boolean' },
 
   // Testing
   { src: 'testing.unit', dest: 'testingUnit', type: 'array-join' },
@@ -191,6 +199,38 @@ export const PROJECT_MAPPING = [
   { src: 'automation.checks.codeql', dest: 'enableCodeql', type: 'boolean' },
   { src: 'automation.checks.semgrep', dest: 'enableSemgrep', type: 'boolean' },
   { src: 'automation.checks.dependencyAudit', dest: 'enableDependencyAudit', type: 'boolean' },
+  { src: 'automation.languageProfile.mode', dest: 'languageProfileMode' },
+  { src: 'automation.languageProfile.diagnostics', dest: 'languageProfileDiagnostics' },
+  {
+    src: 'automation.languageProfile.inferFrom.frameworks',
+    dest: 'languageInferenceFromFrameworks',
+    type: 'boolean',
+  },
+  {
+    src: 'automation.languageProfile.inferFrom.tests',
+    dest: 'languageInferenceFromTests',
+    type: 'boolean',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.alwaysRegenerate',
+    dest: 'languageProfileScaffoldAlwaysRegenerate',
+    type: 'array-join',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.alwaysRegenerate',
+    dest: 'hasLanguageProfileScaffoldAlwaysRegenerate',
+    type: 'boolean-array-length',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.scaffoldOnce',
+    dest: 'languageProfileScaffoldOnce',
+    type: 'array-join',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.scaffoldOnce',
+    dest: 'hasLanguageProfileScaffoldOnce',
+    type: 'boolean-array-length',
+  },
 
   // Cross-cutting (formerly flattenCrosscutting)
   // Logging

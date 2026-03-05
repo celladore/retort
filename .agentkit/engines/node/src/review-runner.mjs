@@ -17,6 +17,18 @@ import { execCommand, runInPool } from './runner.mjs';
 // Note: patterns use /g so String.prototype.match() returns all occurrences.
 // If refactoring to use .exec()/.test(), create fresh RegExp instances per call
 // to avoid stale lastIndex across files.
+/**
+ * Normalize review severity to canonical lowercase values matching
+ * the issue template and task-protocol (critical/high/medium/low).
+ * @param {string} severity - e.g. 'HIGH', 'MEDIUM', 'LOW'
+ * @returns {string} Normalized lowercase severity
+ */
+export function normalizeSeverity(severity) {
+  const s = String(severity).toLowerCase();
+  if (['critical', 'high', 'medium', 'low'].includes(s)) return s;
+  return 'medium';
+}
+
 const SECRET_PATTERNS = [
   { name: 'AWS Key', pattern: /AKIA[0-9A-Z]{16}/g },
   { name: 'Private Key', pattern: /-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----/g },
@@ -174,7 +186,7 @@ async function scanSecrets(projectRoot, files) {
         if (matches) {
           fileFindings.push({
             type: 'secret',
-            severity: 'HIGH',
+            severity: 'high',
             file,
             pattern: secret.name,
             count: matches.length,
@@ -201,7 +213,7 @@ function scanLargeFiles(projectRoot, files, threshold = 500_000) {
       if (stat.size > threshold) {
         findings.push({
           type: 'large_file',
-          severity: 'MEDIUM',
+          severity: 'medium',
           file,
           sizeBytes: stat.size,
           sizeMB: (stat.size / 1_000_000).toFixed(1),
@@ -247,7 +259,7 @@ async function scanTodos(projectRoot, files) {
         if (matches) {
           fileFindings.push({
             type: 'todo',
-            severity: 'LOW',
+            severity: 'low',
             file,
             line: i + 1,
             text:
@@ -355,7 +367,7 @@ export async function runReview({
   console.log('');
 
   // Summary
-  const hasHighSeverity = allFindings.some((f) => f.severity === 'HIGH');
+  const hasHighSeverity = allFindings.some((f) => f.severity === 'high' || f.severity === 'critical');
   const status = hasHighSeverity ? 'FAIL' : 'PASS';
 
   console.log(`=== Review: ${status} ===`);

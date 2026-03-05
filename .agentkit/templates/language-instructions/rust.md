@@ -70,5 +70,18 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
 The following conventions are enforced in **{{projectName}}** and derived from
 `.agentkit/spec/rules.yaml`:
 
-{{ruleConventions}}
+{{#if ruleHasEnforcement}}
+
+### Enforcement Rules
+
+{{ruleEnforcementConventions}}
+
+{{/if}}
+{{#if ruleHasAdvisory}}
+
+### Advisory Rules
+
+{{ruleAdvisoryConventions}}
+
+{{/if}}
 {{/if}}

@@ -125,5 +125,18 @@ Add optional tags for cost analysis, team ownership, and lifecycle tracking.
 The following conventions are enforced in **{{projectName}}** and derived from
 `.agentkit/spec/rules.yaml`:
 
-{{ruleConventions}}
+{{#if ruleHasEnforcement}}
+
+### Enforcement Rules
+
+{{ruleEnforcementConventions}}
+
+{{/if}}
+{{#if ruleHasAdvisory}}
+
+### Advisory Rules
+
+{{ruleAdvisoryConventions}}
+
+{{/if}}
 {{/if}}

@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Performs a structured review of staged changes, a specific PR, or a range of commits across 10 quality criteria: correctness, security, performance, tests, documentation, compatibility, completeness, doc gaps, bug detection, and enhancement opportunities. Delegates to specialist agents for each criterion. When --focus=retrospective, reviews the current session to extract issues and lessons learned.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,20 @@ last_updated: '2026-03-04'
 # review
 
 Performs a structured review of staged changes, a specific PR, or a range of commits across 10 quality criteria: correctness, security, performance, tests, documentation, compatibility, completeness, doc gaps, bug detection, and enhancement opportunities. Delegates to specialist agents for each criterion. When --focus=retrospective, reviews the current session to extract issues and lessons learned.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--pr` | GitHub PR number to review | — |
+| `--branch` | Branch to review (defaults to current branch). Compares against base branch to determine diff. | — |
+| `--range` | Git commit range to review (e.g., main..HEAD) | — |
+| `--file` | Review a specific file | — |
+| `--project` | Scope review to a specific project or package in a monorepo (e.g., --project=api) | — |
+| `--focus` | Focus area for the review. Code-level: security, performance, correctness, style, tests, compatibility. Higher-level: completeness, docs, bugs, enhancements. Special: retrospective. Default: all (runs criteria 1-10). | all |
+| `--severity` | Minimum severity to report: info, warning, error, critical | warning |
+| `--open-issues` | Create external issues for findings above --severity threshold (uses project.yaml issueTracker setting). Applies to retrospective, bugs, completeness, and enhancements focus modes. | false |
+| `--dry-run` | Show findings without writing files or creating issues | false |
 
 ## Instructions
 
@@ -31,6 +45,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

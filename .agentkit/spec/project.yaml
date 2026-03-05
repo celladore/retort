@@ -20,6 +20,8 @@ phase: active # greenfield | active | maintenance | legacy
 # Tech stack (auto-detected + confirmed at init)
 stack:
   languages: [javascript, yaml, markdown] # e.g. [typescript, csharp, python]
+  nodeVersion: lts/* # e.g. 22, 20, lts/* — used in CI setup-node
+  pythonVersion: '3.12' # e.g. 3.12, 3.11 — used in CI setup-python (only when python in languages)
   frameworks:
     frontend: [] # e.g. [next.js, react]
     backend: [node.js] # e.g. [asp.net-core, express]
@@ -58,6 +60,7 @@ documentation:
   designSystemPath: null # e.g. packages/ui/
   storybook: false
   designTokensPath: null # e.g. styles/tokens/
+  historyPath: docs/history # path to retrospective/issue/lesson history docs
   hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
   brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
 
@@ -82,6 +85,7 @@ externalKnowledge:
 deployment:
   cloudProvider: none # aws | azure | gcp | vercel | netlify | self-hosted | none
   containerized: false
+  containerRuntime: null # docker | podman | containerd | nerdctl | none
   environments: [local, ci] # e.g. [dev, staging, prod]
   iacTool: none # terraform | bicep | pulumi | cdk | terragrunt | none
 
@@ -120,6 +124,7 @@ compliance:
     rpoHours: null # Recovery Point Objective in hours
     rtoHours: null # Recovery Time Objective in hours
     backupSchedule: null # daily | weekly | continuous | none
+    testSchedule: null # monthly | quarterly | annually | none
     geoRedundancy: false
   audit:
     enabled: false
@@ -129,6 +134,7 @@ compliance:
 # Process & conventions
 process:
   branchStrategy: github-flow # trunk-based | github-flow | gitflow
+  protectedBranches: [main, dev] # branches used in CI triggers (pull_request.branches)
   commitConvention: conventional # conventional | semantic | none
   codeReview: required-pr # required-pr | optional | none
   teamSize: solo # solo | small | medium | large
@@ -141,6 +147,34 @@ process:
     ownerTeam: product # primary triage owner
     operationsTeam: quality # routing/hygiene executor
     cadence: daily # daily | on-demand | weekly
+    # Auto-import external issues into AGENT_BACKLOG.md during adoption (agentkit init)
+    # and when running /sync-backlog. When false, import-issues requires explicit invocation.
+    autoImport: false
+    # Map tracker labels to backlog priorities (P0–P3)
+    importLabelsMap:
+      bug: P1
+      critical: P0
+      enhancement: P2
+      documentation: P3
+      security: P0
+      feature: P2
+      chore: P3
+    # Map tracker issue states to backlog statuses
+    importStateMap:
+      open: open
+      closed: completed
+    # Map tracker labels/keywords to team assignments
+    importTeamMap:
+      backend: backend
+      frontend: frontend
+      api: backend
+      ui: frontend
+      database: data
+      infra: infra
+      ci: devops
+      test: testing
+      security: security
+      docs: docs
     escalation:
       securityCritical: [security, devops]
       blockedCrossTeam: [product]
@@ -164,6 +198,15 @@ automation:
     codeql: true
     semgrep: true
     dependencyAudit: true
+  languageProfile:
+    mode: hybrid # configured | hybrid | heuristic
+    diagnostics: verbose # off | minimal | verbose
+    inferFrom:
+      frameworks: true
+      tests: true
+    scaffoldOverrides:
+      alwaysRegenerate: [] # relative paths that must always be regenerated even if scaffold-once by default
+      scaffoldOnce: [] # relative paths that should be treated as scaffold-once
 
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:

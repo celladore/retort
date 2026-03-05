@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,15 @@ last_updated: '2026-03-04'
 # build
 
 Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Force a specific tech stack build command | — |
+| `--package` | Build a specific package/app in a monorepo | — |
+| `--production` | Build in production mode | false |
+| `--verbose` | Show verbose build output | false |
 
 ## Instructions
 
@@ -31,6 +40,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

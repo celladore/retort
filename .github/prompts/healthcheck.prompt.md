@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Performs a comprehensive health check of the repository: validates builds, runs tests, checks linting, verifies configuration files, and reports on the overall state of the codebase across all detected tech stacks.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,15 @@ last_updated: '2026-03-04'
 # healthcheck
 
 Performs a comprehensive health check of the repository: validates builds, runs tests, checks linting, verifies configuration files, and reports on the overall state of the codebase across all detected tech stacks.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Check only a specific tech stack (node, dotnet, rust, python) | — |
+| `--project` | Scope health check to a specific project or package in a monorepo | — |
+| `--fix` | Attempt to auto-fix discovered issues | false |
+| `--verbose` | Include detailed output for each check | false |
 
 ## Instructions
 
@@ -31,6 +40,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

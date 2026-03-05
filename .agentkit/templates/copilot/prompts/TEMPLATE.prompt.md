@@ -12,6 +12,12 @@ last_updated: '{{syncDate}}'
 
 {{commandDescription}}
 
+{{#if commandFlags}}
+## Flags
+
+{{commandFlags}}
+
+{{/if}}
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
@@ -27,6 +33,19 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: {{repoName}}
 - Default branch: {{defaultBranch}}
   {{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
+
+{{#if showLanguageProfileDiagnostics}}
+## Language Profile Diagnostics
+
+- Source: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
+- Configured languages present: {{#if hasConfiguredLanguages}}yes{{else}}no{{/if}}
+- JS-like: configured={{hasLanguageJsLike}}, inferred={{hasLanguageJsLikeInferred}}, effective={{hasLanguageJsLikeEffective}}
+- Python: configured={{hasLanguagePython}}, inferred={{hasLanguagePythonInferred}}, effective={{hasLanguagePythonEffective}}
+- .NET: configured={{hasLanguageDotnet}}, inferred={{hasLanguageDotnetInferred}}, effective={{hasLanguageDotnetEffective}}
+- Rust: configured={{hasLanguageRust}}, inferred={{hasLanguageRustInferred}}, effective={{hasLanguageRustEffective}}
+{{#if hasLanguageInferenceMismatch}}- Notice: configured and inferred language signals diverge; generation uses configured values.{{/if}}
+{{#if hasLanguageInferenceUsed}}- Notice: heuristics are prepopulating effective language flags because configured languages are empty.{{/if}}
+{{/if}}
 
 ## Conventions
 
@@ -56,4 +75,12 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
+
+### Issue Field Routing
+
+Route issues to teams by area: {{intakeAreaRoutingTable}}
+
+**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
+**Severity (bugs):** critical · high · medium · low
+**Escalation:** severity=critical + area in [security,infra,backend] → cc {{intakeSecurityEscalationTeams}}; impact=all users + P0 → cc {{intakeBlockedEscalationTeams}}
 {{/if}}

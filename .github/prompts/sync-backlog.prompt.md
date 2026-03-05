@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,16 @@ last_updated: '2026-03-04'
 # sync-backlog
 
 Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--tracker` | Override tracker for this run (github, linear) | — |
+| `--direction` | Sync direction: pull (from tracker), push (to tracker), or both | pull |
+| `--labels` | Filter by labels/tags (comma-separated) | — |
+| `--owner-team` | Override intake owner team for this run | — |
+| `--team` | Filter issues relevant to a specific team | — |
 
 ## Instructions
 
@@ -31,6 +41,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
@@ -59,4 +78,12 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Blocked cross-team escalation: `product`
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
+
+### Issue Field Routing
+
+Route issues to teams by area: `backend`→team-backend, `frontend`→team-frontend, `data`→team-data, `infra`→team-infra, `devops`→team-devops, `testing`→team-testing, `security`→team-security, `docs`→team-docs, `product`→team-product, `quality`→team-quality, `cli`→team-backend, `sync-engine`→team-devops
+
+**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
+**Severity (bugs):** critical · high · medium · low
+**Escalation:** severity=critical + area in [security,infra,backend] → cc security, devops; impact=all users + P0 → cc product
 

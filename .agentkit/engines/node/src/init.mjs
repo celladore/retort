@@ -651,6 +651,37 @@ async function finalizeInit({
   const { runSync } = await import('./synchronize.mjs');
   await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
 
+  // 6. Auto-import issues if enabled
+  try {
+    const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
+    if (existsSync(projectPath)) {
+      const projectYaml = yaml.load(readFileSync(projectPath, 'utf-8')) || {};
+      const autoImport = projectYaml?.process?.intake?.autoImport ?? false;
+      const tracker = projectYaml?.process?.issueTracker || 'none';
+
+      if (autoImport && tracker !== 'none') {
+        console.log(`[agentkit:init] Auto-importing issues from ${tracker}...`);
+        try {
+          const { runImportIssues } = await import('./import-issues.mjs');
+          await runImportIssues({
+            agentkitRoot,
+            projectRoot,
+            flags: { force: true },
+          });
+        } catch (importErr) {
+          console.warn(
+            `[agentkit:init] Issue import failed (non-fatal): ${importErr.message}`
+          );
+          console.warn(
+            `  You can import later with: pnpm -C .agentkit agentkit:import-issues -- --force`
+          );
+        }
+      }
+    }
+  } catch {
+    /* issue import is best-effort during init */
+  }
+
   console.log(`[agentkit:init] Done! Repo initialized as: ${repoName}`);
   console.log(`  Render targets: ${renderTargets.join(', ')}`);
   console.log(`  Tip: Run "agentkit add <tool>" to add tools later.`);

@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,17 @@ last_updated: '2026-03-04'
 # cost
 
 Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--summary` | Show recent session summary | false |
+| `--sessions` | List recent sessions | false |
+| `--report` | Generate aggregate usage report | false |
+| `--month` | Month for report (YYYY-MM format) | — |
+| `--format` | Export format: table, json, csv | table |
+| `--last` | Time period for queries (e.g. 7d, 30d) | 7d |
 
 ## Instructions
 
@@ -31,6 +42,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

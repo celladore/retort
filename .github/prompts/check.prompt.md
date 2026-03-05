@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,16 @@ last_updated: '2026-03-04'
 # check
 
 Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Check only a specific tech stack | — |
+| `--project` | Scope to a specific project or package in a monorepo (e.g., --project=api) | — |
+| `--fix` | Auto-fix issues where possible (lint, format) | false |
+| `--bail` | Stop on first failure | false |
+| `--fast` | Skip the build step; only run format + lint + typecheck + test | false |
 
 ## Instructions
 
@@ -31,6 +41,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

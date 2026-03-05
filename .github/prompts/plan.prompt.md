@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Creates a detailed implementation plan for a feature, bug fix, or refactoring task. Analyzes the codebase, identifies affected files and teams, estimates complexity, and produces a step-by-step plan with acceptance criteria.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -15,6 +15,14 @@ last_updated: '2026-03-04'
 # plan
 
 Creates a detailed implementation plan for a feature, bug fix, or refactoring task. Analyzes the codebase, identifies affected files and teams, estimates complexity, and produces a step-by-step plan with acceptance criteria.
+
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--issue` | GitHub issue number to plan for | — |
+| `--output` | Output format: markdown, yaml, or json | markdown |
+| `--depth` | Planning detail level: high, medium, low | medium |
 
 ## Instructions
 
@@ -31,6 +39,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

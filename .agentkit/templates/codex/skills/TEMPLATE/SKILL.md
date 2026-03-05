@@ -16,6 +16,12 @@ last_updated: '{{syncDate}}'
 
 Invoke this skill when you need to perform the `{{commandName}}` operation.
 
+{{#if commandFlags}}
+## Flags
+
+{{commandFlags}}
+
+{{/if}}
 ## Instructions
 
 1. Parse command arguments and identify requested scope/files
@@ -55,4 +61,12 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 For backlog sync, use tracker-neutral intake and ownership-aware routing based on configured intake values.
+
+### Issue Field Routing
+
+Route issues to teams by area: {{intakeAreaRoutingTable}}
+
+**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
+**Severity (bugs):** critical · high · medium · low
+**Escalation:** severity=critical + area in [security,infra,backend] → cc {{intakeSecurityEscalationTeams}}; impact=all users + P0 → cc {{intakeBlockedEscalationTeams}}
 {{/if}}
