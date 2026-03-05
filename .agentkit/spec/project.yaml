@@ -147,6 +147,34 @@ process:
     ownerTeam: product # primary triage owner
     operationsTeam: quality # routing/hygiene executor
     cadence: daily # daily | on-demand | weekly
+    # Auto-import external issues into AGENT_BACKLOG.md during adoption (agentkit init)
+    # and when running /sync-backlog. When false, import-issues requires explicit invocation.
+    autoImport: false
+    # Map tracker labels to backlog priorities (P0–P3)
+    importLabelsMap:
+      bug: P1
+      critical: P0
+      enhancement: P2
+      documentation: P3
+      security: P0
+      feature: P2
+      chore: P3
+    # Map tracker issue states to backlog statuses
+    importStateMap:
+      open: open
+      closed: completed
+    # Map tracker labels/keywords to team assignments
+    importTeamMap:
+      backend: backend
+      frontend: frontend
+      api: backend
+      ui: frontend
+      database: data
+      infra: infra
+      ci: devops
+      test: testing
+      security: security
+      docs: docs
     escalation:
       securityCritical: [security, devops]
       blockedCrossTeam: [product]

@@ -232,6 +232,99 @@ commands:
       - Grep
       - Bash
 
+  - name: import-issues
+    type: workflow
+    description: >
+      Imports issues from the configured external tracker (GitHub or Linear),
+      normalizes fields to the canonical backlog schema, deduplicates against
+      existing items, assigns teams via intake routing rules, and merges into
+      AGENT_BACKLOG.md and .claude/state/backlog.json. Gated behind the
+      process.intake.autoImport flag (can be overridden with --force).
+    flags:
+      - name: --tracker
+        description: 'Override tracker (github, linear)'
+        type: string
+        default: null
+        required: false
+        enum: [github, linear]
+      - name: --state
+        description: 'Import issues in this state (open, closed, all)'
+        type: string
+        default: 'open'
+        enum: [open, closed, all]
+      - name: --labels
+        description: 'Filter by labels (comma-separated)'
+        type: string
+        default: null
+        required: false
+      - name: --since
+        description: 'Only import issues updated since (ISO date)'
+        type: string
+        default: null
+        required: false
+      - name: --dry-run
+        description: 'Show what would be imported without writing'
+        type: boolean
+        default: false
+      - name: --limit
+        description: 'Maximum number of issues to import'
+        type: integer
+        default: 100
+      - name: --force
+        description: 'Run even if autoImport is disabled'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash
+
+  - name: backlog
+    type: utility
+    description: >
+      Displays a consolidated backlog view from all sources (external tracker,
+      discovery, healthcheck, code TODOs, review findings, manual entries).
+      Supports filtering and multiple output formats for CLI and future UI
+      consumption.
+    flags:
+      - name: --format
+        description: 'Output format: table, json, yaml, csv'
+        type: string
+        default: 'table'
+        enum: [table, json, yaml, csv]
+      - name: --team
+        description: 'Filter by team'
+        type: string
+        default: null
+        required: false
+      - name: --priority
+        description: 'Filter by priority (P0, P1, P2, P3)'
+        type: string
+        default: null
+        required: false
+      - name: --source
+        description: 'Filter by source (github, linear, discovery, todo, review, manual)'
+        type: string
+        default: null
+        required: false
+      - name: --status
+        description: 'Filter by status (open, in-progress, completed, blocked)'
+        type: string
+        default: null
+        required: false
+      - name: --sort
+        description: 'Sort by field (priority, team, source, updated)'
+        type: string
+        default: 'priority'
+        enum: [priority, team, source, updated]
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+
   - name: check
     type: workflow
     description: >

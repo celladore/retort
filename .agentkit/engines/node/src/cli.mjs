@@ -37,6 +37,9 @@ const VALID_COMMANDS = [
   'healthcheck',
   'cost',
   'project-review',
+  'import-issues',
+  'backlog',
+  'sync-backlog',
   'add',
   'remove',
   'list',
@@ -113,6 +116,9 @@ const VALID_FLAGS = {
     'help',
   ],
   doctor: ['verbose', 'help'],
+  'import-issues': ['tracker', 'state', 'labels', 'since', 'dry-run', 'limit', 'force', 'help'],
+  backlog: ['format', 'team', 'priority', 'source', 'status', 'sort', 'help'],
+  'sync-backlog': ['tracker', 'state', 'direction', 'labels', 'owner-team', 'team', 'since', 'limit', 'force', 'help'],
   scaffold: ['type', 'name', 'stack', 'path', 'help'],
   preflight: ['stack', 'branch', 'range', 'base', 'strict', 'help'],
   'project-review': ['scope', 'focus', 'phase', 'help'],
@@ -172,6 +178,15 @@ const FLAG_TYPES = {
   branch: 'string',
   project: 'string',
   overlay: 'string',
+  tracker: 'string',
+  state: 'string',
+  labels: 'string',
+  since: 'string',
+  limit: 'string',
+  sort: 'string',
+  direction: 'string',
+  'owner-team': 'string',
+  source: 'string',
 
   // Booleans
   force: 'boolean',
@@ -334,6 +349,33 @@ Task Delegation:
 Diagnostics:
   doctor          Run AgentKit diagnostics and setup checks
                   --verbose         Include detailed diagnostics
+
+Backlog & Issue Tracking:
+  import-issues   Import issues from external tracker into local backlog
+                  --tracker <type>    Tracker type: github, linear
+                  --state <state>     Filter: open, closed, all (default: open)
+                  --labels <csv>      Filter by labels
+                  --since <date>      Only issues updated since ISO date
+                  --limit <n>         Max issues to fetch (default: 100)
+                  --dry-run           Preview without writing
+                  --force             Override autoImport gate
+  backlog         Display consolidated backlog with filtering
+                  --format <fmt>      Output: table, json, yaml, csv
+                  --team <name>       Filter by team
+                  --priority <csv>    Filter by priority (e.g. P0,P1)
+                  --source <src>      Filter by source
+                  --status <status>   Filter by status
+                  --sort <field>      Sort: priority, team, source, updated
+  sync-backlog    Sync backlog with external tracker + local sources
+                  --tracker <type>    Tracker type: github, linear
+                  --direction <dir>   pull (default) or push
+                  --state <state>     Filter: open, closed, all
+                  --labels <csv>      Filter by labels
+                  --owner-team <t>    Override owner team
+                  --team <name>       Display filter (post-sync)
+                  --since <date>      Only issues updated since ISO date
+                  --limit <n>         Max issues to fetch
+                  --force             Override autoImport gate
 
 Utility Commands:
   cost            Session cost and usage tracking
@@ -522,6 +564,33 @@ async function main() {
           flags,
         });
         if (!result.ok) process.exit(1);
+        break;
+      }
+      case 'import-issues': {
+        const { runImportIssues } = await import('./import-issues.mjs');
+        await runImportIssues({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
+      case 'backlog': {
+        const { runBacklogViewer } = await import('./backlog-viewer.mjs');
+        await runBacklogViewer({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
+      case 'sync-backlog': {
+        const { runSyncBacklog } = await import('./sync-backlog-runner.mjs');
+        await runSyncBacklog({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
         break;
       }
       case 'tasks': {

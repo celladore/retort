@@ -472,6 +472,10 @@ const projectSchema = {
             ownerTeam: { type: 'string', minLength: 1 },
             operationsTeam: { type: 'string', minLength: 1 },
             cadence: { type: 'string', enum: PROJECT_ENUMS.intakeCadence },
+            autoImport: { type: 'boolean' },
+            importLabelsMap: { type: 'object' },
+            importStateMap: { type: 'object' },
+            importTeamMap: { type: 'object' },
             routing: { type: 'object' },
             escalation: {
               type: 'object',
@@ -616,6 +620,42 @@ function validateProjectYaml(project) {
 
   errors.push(...validate(project, projectSchema, 'project.yaml'));
 
+  // Validate intake import maps
+  const intake = project?.process?.intake;
+  if (intake) {
+    const VALID_PRIORITIES = ['P0', 'P1', 'P2', 'P3'];
+    const VALID_STATUSES = ['open', 'in-progress', 'completed', 'blocked', 'deferred'];
+
+    if (intake.importLabelsMap && typeof intake.importLabelsMap === 'object') {
+      for (const [label, priority] of Object.entries(intake.importLabelsMap)) {
+        if (!VALID_PRIORITIES.includes(priority)) {
+          errors.push(
+            `project.yaml: process.intake.importLabelsMap.${label} must be one of [${VALID_PRIORITIES.join(', ')}], got "${priority}"`
+          );
+        }
+      }
+    }
+
+    if (intake.importStateMap && typeof intake.importStateMap === 'object') {
+      for (const [state, status] of Object.entries(intake.importStateMap)) {
+        if (!VALID_STATUSES.includes(status)) {
+          errors.push(
+            `project.yaml: process.intake.importStateMap.${state} must be one of [${VALID_STATUSES.join(', ')}], got "${status}"`
+          );
+        }
+      }
+    }
+
+    if (
+      intake.autoImport === true &&
+      project?.process?.issueTracker === 'none'
+    ) {
+      warnings.push(
+        'project.yaml: process.intake.autoImport is true but issueTracker is "none" — external import will be a no-op'
+      );
+    }
+  }
+
   return { errors, warnings };
 }
 
@@ -626,7 +666,7 @@ function validateProjectYaml(project) {
 function validateCrossReferences(specs) {
   const errors = [];
 
-  const { teams, commands, agents } = specs;
+  const { teams, commands, agents, project } = specs;
 
   // Verify team commands reference valid team IDs
   const teamIds = new Set((teams?.teams || []).map((t) => t.id));
@@ -860,6 +900,18 @@ function validateCrossReferences(specs) {
     }
   }
 
+  // Validate project.yaml importTeamMap values against team IDs
+  const importTeamMap = project?.process?.intake?.importTeamMap;
+  if (importTeamMap && typeof importTeamMap === 'object' && teamIds.size > 0) {
+    for (const [mapLabel, teamId] of Object.entries(importTeamMap)) {
+      if (typeof teamId === 'string' && teamId && !teamIds.has(teamId)) {
+        errors.push(
+          `project.yaml: process.intake.importTeamMap.${mapLabel} references unknown team "${teamId}" (not defined in teams.yaml)`
+        );
+      }
+    }
+  }
+
   // Check for duplicate rule convention IDs
   const seenRuleIds = new Set();
   for (const domain of specs.rules?.rules || []) {
@@ -971,10 +1023,11 @@ export function validateSpec(agentkitRoot) {
   const docs = loadYaml('docs.yaml');
 
   // project.yaml is optional — only validate if present
+  let project = null;
   const projectPath = resolve(specDir, 'project.yaml');
   if (existsSync(projectPath)) {
     try {
-      const project = yaml.load(readFileSync(projectPath, 'utf-8'));
+      project = yaml.load(readFileSync(projectPath, 'utf-8'));
       if (project && typeof project === 'object') {
         const projectResult = validateProjectYaml(project);
         errors.push(...projectResult.errors);
@@ -1078,7 +1131,7 @@ export function validateSpec(agentkitRoot) {
 
   // Cross-spec validation
   if (teams && commands && agents && rules) {
-    errors.push(...validateCrossReferences({ teams, commands, agents, rules }));
+    errors.push(...validateCrossReferences({ teams, commands, agents, rules, project }));
   }
 
   return {

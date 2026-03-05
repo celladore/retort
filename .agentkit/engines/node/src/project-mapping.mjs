@@ -167,6 +167,7 @@ export const PROJECT_MAPPING = [
   { src: 'process.intake.ownerTeam', dest: 'intakeOwnerTeam', check: 'not-none' },
   { src: 'process.intake.operationsTeam', dest: 'intakeOperationsTeam', check: 'not-none' },
   { src: 'process.intake.cadence', dest: 'intakeCadence', check: 'not-none' },
+  { src: 'process.intake.autoImport', dest: 'hasAutoImport', type: 'boolean' },
 
   // Testing
   { src: 'testing.unit', dest: 'testingUnit', type: 'array-join' },
