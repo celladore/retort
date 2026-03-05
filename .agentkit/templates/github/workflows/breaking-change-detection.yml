@@ -10,7 +10,7 @@ name: Breaking Change Detection
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [{{protectedBranches}}]
 
 jobs:
   detect:
@@ -37,7 +37,7 @@ jobs:
 
           # Track version-bearing files that changed
           version_changed=false
-          for pattern in '(^|/)package\.json$' '(^|/)Cargo\.toml$' '(^|/)pyproject\.toml$' '\.csproj$'; do
+          for pattern in '(^|/)package\.json$'{{#if hasLanguageRust}} '(^|/)Cargo\.toml$'{{/if}}{{#if hasLanguagePython}} '(^|/)pyproject\.toml$'{{/if}}{{#if hasLanguageDotnet}} '\.csproj$'{{/if}}; do
             if grep -qE "$pattern" /tmp/diff-files.txt; then
               version_changed=true
               echo "::notice::Version file changed: $(grep -E "$pattern" /tmp/diff-files.txt | head -5 | tr '\n' ', ')"

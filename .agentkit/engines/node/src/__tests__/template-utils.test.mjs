@@ -65,16 +65,6 @@ describe('renderTemplate', () => {
 // replacePlaceholders
 // ---------------------------------------------------------------------------
 describe('replacePlaceholders', () => {
-  let origDebug;
-  beforeEach(() => {
-    origDebug = process.env.DEBUG;
-    delete process.env.DEBUG;
-  });
-  afterEach(() => {
-    if (origDebug !== undefined) process.env.DEBUG = origDebug;
-    else delete process.env.DEBUG;
-  });
-
   it('replaces simple placeholders', () => {
     expect(replacePlaceholders('Hello {{name}}!', { name: 'World' })).toBe('Hello World!');
   });
@@ -118,17 +108,16 @@ describe('replacePlaceholders', () => {
     expect(replacePlaceholders('no vars', {})).toBe('no vars');
   });
 
-  it('warns on unresolved placeholders when DEBUG is set', () => {
+  it('warns on unresolved placeholders', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    process.env.DEBUG = '1';
     replacePlaceholders('{{unknown}}', {});
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('{{unknown}}'));
     warnSpy.mockRestore();
   });
 
-  it('does not warn when DEBUG is not set', () => {
+  it('does not warn when all placeholders are resolved', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    replacePlaceholders('{{unknown}}', {});
+    replacePlaceholders('{{known}}', { known: 'value' });
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });
