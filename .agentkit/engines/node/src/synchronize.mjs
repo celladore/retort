@@ -1174,6 +1174,31 @@ function buildAgentVars(agent, category, vars) {
   };
 }
 
+/**
+ * Builds precomputed JSON strings for branch protection template variables.
+ * Filters invalid entries and returns valid JSON array literals for use in
+ * heredoc payloads sent to the GitHub API.
+ */
+export function buildBranchProtectionJson(vars) {
+  const statusChecks = vars.bpRequiredStatusChecks ?? [];
+  const statusChecksJson = JSON.stringify(
+    Array.isArray(statusChecks) ? statusChecks.filter((s) => typeof s === 'string') : []
+  );
+  const scanningToolsRaw = vars.bpCodeScanningTools ?? [];
+  const scanningTools = Array.isArray(scanningToolsRaw)
+    ? scanningToolsRaw.filter((t) => t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() !== '')
+    : [];
+  const scanningToolsJson = JSON.stringify(
+    scanningTools.map((t) => ({
+      tool: t.name.trim(),
+      security_alerts_threshold:
+        typeof t.securityAlertThreshold === 'string' ? t.securityAlertThreshold : 'none',
+      alerts_threshold: typeof t.alertThreshold === 'string' ? t.alertThreshold : 'none',
+    }))
+  );
+  return { statusChecksJson, scanningToolsJson };
+}
+
 export function formatConventionLine(c) {
   if (typeof c === 'string') return `- ${c}`;
   const id = c.id || '';
@@ -1353,22 +1378,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // Precomputed JSON strings for branch protection — avoids {{#each}} comma
   // issues inside JSON heredocs. These render as valid JSON array literals.
-  const statusChecks = vars.bpRequiredStatusChecks ?? [];
-  vars.bpRequiredStatusChecksJson = JSON.stringify(
-    Array.isArray(statusChecks) ? statusChecks.filter((s) => typeof s === 'string') : []
-  );
-  const scanningToolsRaw = vars.bpCodeScanningTools ?? [];
-  const scanningTools = Array.isArray(scanningToolsRaw)
-    ? scanningToolsRaw.filter((t) => t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() !== '')
-    : [];
-  vars.bpCodeScanningToolsJson = JSON.stringify(
-    scanningTools.map((t) => ({
-      tool: t.name.trim(),
-      security_alerts_threshold:
-        typeof t.securityAlertThreshold === 'string' ? t.securityAlertThreshold : 'none',
-      alerts_threshold: typeof t.alertThreshold === 'string' ? t.alertThreshold : 'none',
-    }))
-  );
+  const bpJson = buildBranchProtectionJson(vars);
+  vars.bpRequiredStatusChecksJson = bpJson.statusChecksJson;
+  vars.bpCodeScanningToolsJson = bpJson.scanningToolsJson;
 
   // Inject brand identity into template vars when brand guide exists
   if (vars.hasBrandGuide) {

@@ -15,9 +15,16 @@ const RAW_TEMPLATE_VARS = new Set([
   'commandFlags',
   'agentConventions',
   'agentExamples',
-  'bpRequiredStatusChecksJson',
-  'bpCodeScanningToolsJson',
 ]);
+
+/**
+ * Checks whether a template variable should bypass shell sanitization.
+ * Variables in the explicit set or ending with 'Json' are treated as raw
+ * (they contain precomputed JSON that must not be escaped).
+ */
+function isRawTemplateVar(key) {
+  return RAW_TEMPLATE_VARS.has(key) || key.endsWith('Json');
+}
 
 function isShellScriptTarget(targetPath) {
   const ext = extname(targetPath || '').toLowerCase();
@@ -76,7 +83,7 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
     const placeholder = `{{${key}}}`;
     const safeValue =
       typeof value === 'string'
-        ? sanitizeStrings && !RAW_TEMPLATE_VARS.has(key)
+        ? sanitizeStrings && !isRawTemplateVar(key)
           ? sanitizeTemplateValue(value)
           : value
         : JSON.stringify(value);
@@ -96,7 +103,7 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
       } else {
         resolved = JSON.stringify(value);
       }
-      if (sanitizeStrings && !RAW_TEMPLATE_VARS.has(key)) {
+      if (sanitizeStrings && !isRawTemplateVar(key)) {
         return sanitizeTemplateValue(resolved);
       }
       return resolved;

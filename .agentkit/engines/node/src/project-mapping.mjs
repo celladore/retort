@@ -360,7 +360,7 @@ export const PROJECT_MAPPING = [
   { src: 'branchProtection.mergeStrategies.deleteBranchOnMerge', dest: 'bpDeleteBranchOnMerge', type: 'boolean' },
   { src: 'branchProtection.mergeStrategies.allowAutoMerge', dest: 'bpAllowAutoMerge', type: 'boolean' },
   { src: 'branchProtection.mergeQueue.enabled', dest: 'bpMergeQueueEnabled', type: 'boolean' },
-  { src: 'branchProtection.mergeQueue.mergeMethod', dest: 'bpMergeQueueMethod' },
+  { src: 'branchProtection.mergeQueue.mergeMethod', dest: 'bpMergeQueueMethod', type: 'string' },
   { src: 'branchProtection.mergeQueue.minGroupSize', dest: 'bpMergeQueueMinGroupSize', type: 'string' },
   { src: 'branchProtection.mergeQueue.maxGroupSize', dest: 'bpMergeQueueMaxGroupSize', type: 'string' },
 

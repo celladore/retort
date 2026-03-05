@@ -213,7 +213,7 @@ branchProtection:
       - name: CodeQL
         # none | critical | high_or_higher | medium_or_higher | all
         securityAlertThreshold: high_or_higher
-        # none | errors | warnings | all
+        # none | errors | warnings_and_errors | all
         alertThreshold: errors
 
   # GitHub Copilot automated code review
