@@ -16,6 +16,16 @@ last_updated: '2026-03-05'
 
 Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--scope` | Limit evaluation to specific paths or modules | — |
+| `--focus` | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops | all |
+| `--output` | Output format: markdown, json, or yaml | markdown |
+| `--save` | Save evaluation report to docs/evaluations/ | true |
+| `--gates-only` | Run hard gate checks only without full dimensional scoring | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

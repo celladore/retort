@@ -16,6 +16,17 @@ last_updated: '2026-03-05'
 
 Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--summary` | Show recent session summary | false |
+| `--sessions` | List recent sessions | false |
+| `--report` | Generate aggregate usage report | false |
+| `--month` | Month for report (YYYY-MM format) | — |
+| `--format` | Export format: table, json, csv | table |
+| `--last` | Time period for queries (e.g. 7d, 30d) | 7d |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

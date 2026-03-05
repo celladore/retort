@@ -16,6 +16,14 @@ last_updated: '2026-03-05'
 
 Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Force a specific tech stack formatter | — |
+| `--check` | Check formatting without making changes | false |
+| `--path` | Format only files matching this path or glob | — |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

@@ -16,6 +16,16 @@ last_updated: '2026-03-05'
 
 Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Check only a specific tech stack | — |
+| `--project` | Scope to a specific project or package in a monorepo (e.g., --project=api) | — |
+| `--fix` | Auto-fix issues where possible (lint, format) | false |
+| `--bail` | Stop on first failure | false |
+| `--fast` | Skip the build step; only run format + lint + typecheck + test | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
