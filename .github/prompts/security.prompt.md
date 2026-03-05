@@ -36,7 +36,7 @@ Trace auth end-to-end: method, middleware, protected vs. public endpoints, token
 
 ### 4. Hardcoded Secrets Scan
 
-Search for: API keys, AWS keys, private keys, connection strings, passwords, tokens, committed .env files. Exclude test fixtures with obviously fake values.
+Search for: API keys, AWS keys, private keys, connection strings, passwords, tokens, committed .env files. Only exclude values that are clearly placeholder strings (e.g., `test-key-000`, `sk-placeholder`). Flag anything that looks like a real credential even if found in test files.
 
 ## Severity Classification
 
