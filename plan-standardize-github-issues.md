@@ -547,15 +547,15 @@ Estimated file count: ~15 new files, ~6 modified files.
 
 ## Success Criteria
 
-- [ ] `agentkit import-issues` fetches GitHub issues and writes normalized items
+- [x] `agentkit import-issues` fetches GitHub issues and writes normalized items
       to `AGENT_BACKLOG.md` and `.claude/state/backlog.json`
-- [ ] `agentkit backlog --format json` outputs all items from all sources with
+- [x] `agentkit backlog --format json` outputs all items from all sources with
       the full field set documented above
-- [ ] `agentkit backlog --team backend --priority P0,P1` filters correctly (comma-separated)
-- [ ] `agentkit init` with `autoImport: true` triggers import during adoption
-- [ ] `/sync-backlog` runtime handler combines external + local sources
-- [ ] All existing tests continue to pass
-- [ ] New tests cover normalizer, adapters, store, and viewer
-- [ ] `agentkit spec-validate` passes with new schema fields
-- [ ] `agentkit sync` + `agentkit validate` pass with new commands
-- [ ] Deterministic: running sync twice produces no diff
+- [x] `agentkit backlog --team backend --priority P0,P1` filters correctly (comma-separated)
+- [x] `agentkit init` with `autoImport: true` triggers import during adoption
+- [x] `/sync-backlog` runtime handler combines external + local sources
+- [x] All existing tests continue to pass (750 passing)
+- [x] New tests cover normalizer, adapters, store, and viewer
+- [x] `agentkit spec-validate` passes with new schema fields
+- [x] `agentkit sync` + `agentkit validate` pass with new commands
+- [x] Deterministic: running sync twice produces no diff
