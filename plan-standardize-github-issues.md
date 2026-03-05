@@ -45,7 +45,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 | Gap | Evidence | Resolution |
 |-----|----------|------------|
-| Sync-backlog runtime coverage is partial | `cli.mjs` includes `sync-backlog` in `VALID_COMMANDS` and has `case 'sync-backlog':`, but source collection coverage still needs to match this plan | Expand source collectors and complete end-to-end tests for all documented sources |
+| Sync-backlog runtime coverage is partial | `cli.mjs` now includes `sync-backlog` in `VALID_COMMANDS` with a handler, but source collection coverage still needs to match this plan | Expand source collectors and complete end-to-end tests for all documented sources |
 | No GitHub issue fetcher | `gh issue list` is in allowed-tools but no code calls it | Implement `github-adapter.mjs` that shells out to `gh` |
 | No field normalization layer | Sync-backlog template describes it as prose, not code | Implement `issue-normalizer.mjs` with canonical schema |
 | No consolidated view command | Backlog is only `AGENT_BACKLOG.md` (markdown table) | Add `backlog` CLI command with `--format` (table/json/yaml) output |
@@ -250,7 +250,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
            type: string
            default: null
          - name: --priority
-           description: 'Filter by priority (P0, P1, P2, P3)'
+           description: 'Filter by priority, comma-separated (e.g. P0,P1)'
            type: string
            default: null
          - name: --source
@@ -400,7 +400,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 15. **`.agentkit/engines/node/src/sync-backlog-runner.mjs`** — Orchestrated sync:
     - Combines all sources (calls individual collectors):
       1. External tracker (via `import-issues` logic)
-      2. Discovery findings (via `agentkit discover` results)
+      2. Discovery findings (via `agentkit discover` structured output)
       3. Healthcheck results (parse `orchestrator.json`)
       4. Code TODOs (grep codebase)
       5. Review findings (parse `events.log`)
@@ -551,7 +551,7 @@ Estimated file count: ~15 new files, ~6 modified files.
       to `AGENT_BACKLOG.md` and `.claude/state/backlog.json`
 - [ ] `agentkit backlog --format json` outputs all items from all sources with
       the full field set documented above
-- [ ] `agentkit backlog --team backend --priority P0` filters correctly
+- [ ] `agentkit backlog --team backend --priority P0,P1` filters correctly (comma-separated)
 - [ ] `agentkit init` with `autoImport: true` triggers import during adoption
 - [ ] `/sync-backlog` runtime handler combines external + local sources
 - [ ] All existing tests continue to pass

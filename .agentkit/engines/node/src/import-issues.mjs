@@ -53,7 +53,7 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
 
   // Create adapter and fetch
   const adapter = await createAdapter(tracker, projectRoot);
-  const rawIssues = adapter.fetchIssues({
+  const rawIssues = await adapter.fetchIssues({
     state: flags.state || 'open',
     labels: flags.labels || null,
     since: flags.since || null,

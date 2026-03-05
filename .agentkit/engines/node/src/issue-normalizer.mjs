@@ -171,7 +171,10 @@ export function normalizeIssue(rawIssue, config = {}) {
     typeof l === 'string' ? l : l.name || ''
   );
 
-  const externalId = source === 'github' ? `GH#${rawIssue.number}` : `LIN-${rawIssue.id}`;
+  const prefixMap = { github: 'GH', linear: 'LIN', jira: 'JIRA' };
+  const prefix = prefixMap[source] || source.toUpperCase();
+  const ref = rawIssue.number ?? rawIssue.id ?? 'unknown';
+  const externalId = `${prefix}#${ref}`;
 
   return {
     id: generateId(source, externalId),
@@ -221,10 +224,12 @@ export function deduplicateItems(existing, incoming) {
   let added = 0;
   let updated = 0;
 
+  let incomingWithoutExtId = 0;
   for (const item of incoming) {
     // Items without externalId are treated as local/manual — always append
     if (!item.externalId) {
       manualItems.push(item);
+      incomingWithoutExtId++;
       added++;
       continue;
     }
@@ -252,7 +257,7 @@ export function deduplicateItems(existing, incoming) {
     merged: [...existingByExtId.values(), ...manualItems],
     added,
     updated,
-    preserved: manualItems.length,
+    preserved: manualItems.length - incomingWithoutExtId,
   };
 }
 

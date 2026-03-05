@@ -86,7 +86,7 @@ function formatCsv(items) {
  * @param {string} opts.projectRoot
  * @param {object} opts.flags
  */
-export async function runBacklogViewer({ agentkitRoot, projectRoot, flags }) {
+export async function runBacklogViewer({ projectRoot, flags }) {
   // Read from JSON store first, fall back to markdown parse
   let items = readBacklogJson(projectRoot);
   if (!items.length) {

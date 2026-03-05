@@ -28,7 +28,7 @@ Use these values as defaults unless the command flags override them for the curr
 This command has a runtime handler. You can also run it via CLI:
 
 ```bash
-pnpm -C .agentkit agentkit:sync-backlog [--tracker github|linear] [--direction pull|push|both] [--team <team>]
+pnpm -C .agentkit agentkit:sync-backlog -- [--tracker github|linear] [--direction pull|push|both] [--team <team>]
 ```
 
 The runtime handler combines external tracker pull with local source collection

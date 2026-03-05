@@ -4,7 +4,7 @@
  */
 import { existsSync, readFileSync } from 'fs';
 import { mkdir, writeFile } from 'fs/promises';
-import { dirname, join, resolve } from 'path';
+import { dirname, resolve } from 'path';
 
 const BACKLOG_JSON_PATH = '.claude/state/backlog.json';
 const BACKLOG_MD_PATH = 'AGENT_BACKLOG.md';
@@ -70,13 +70,11 @@ export function readBacklogMarkdown(projectRoot) {
   // 7-column (current): | Priority | Team | Task | Phase | Status | Source | Notes |
   // 6-column (legacy):  | Priority | Team | Task | Phase | Status | Notes |
   const tableRow7Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|/gm;
-  const tableRow6Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|/gm;
+  const tableRow6Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|\s*$/gm;
 
   // Try 7-column format first (matches are greedy, so 7-col takes priority)
   let match;
-  const matchedLines = new Set();
   while ((match = tableRow7Regex.exec(content)) !== null) {
-    matchedLines.add(match.index);
     const [, priority, team, task, phase, status, source, notes] = match;
     items.push({
       id: null,

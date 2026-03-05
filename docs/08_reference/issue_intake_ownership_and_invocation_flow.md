@@ -82,8 +82,8 @@ When `process.intake.autoImport: true` in `project.yaml`, `agentkit init` will a
 | Sync generation        | `pnpm -C .agentkit agentkit:sync`                                                   | Completes without errors          |
 | Determinism            | `pnpm -C .agentkit agentkit:sync && git status --short`                             | No unexpected drift on second run |
 | Output validation      | `pnpm -C .agentkit agentkit:validate`                                               | Pass                              |
-| Import issues          | `pnpm -C .agentkit agentkit:import-issues --dry-run --force`                        | Lists issues without errors       |
-| Backlog view           | `pnpm -C .agentkit agentkit:backlog --format json`                                  | Valid JSON output                 |
+| Import issues          | `pnpm -C .agentkit agentkit:import-issues -- --dry-run --force`                        | Lists issues without errors       |
+| Backlog view           | `pnpm -C .agentkit agentkit:backlog -- --format json`                                  | Valid JSON output                 |
 | Claude output parity   | inspect `.claude/commands/sync-backlog.md` + `.claude/skills/sync-backlog/SKILL.md` | Intake semantics present          |
 | Copilot parity         | inspect `.github/prompts/sync-backlog.prompt.md`                                    | Intake semantics present          |
 | Cursor/Windsurf parity | inspect `.cursor/commands/sync-backlog.md` and `.windsurf/commands/sync-backlog.md` | Intake semantics present          |
@@ -120,4 +120,4 @@ This repo protects source-of-truth paths under `.agentkit/spec`, `.agentkit/temp
 - [x] Generated command/skill artifacts are semantically aligned across supported platforms.
 - [x] Auto-import triggers on adoption when `process.intake.autoImport: true`.
 - [x] Consolidated backlog view available via `agentkit backlog` with multiple output formats.
-- [x] All tests pass, including dedicated coverage for the normalizer and store.
+- [x] All tests pass, including dedicated coverage for the normalizer and store (see CI for current count).

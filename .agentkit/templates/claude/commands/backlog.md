@@ -44,7 +44,7 @@ The backlog consolidates items from:
 ## CLI Equivalent
 
 ```bash
-pnpm -C .agentkit agentkit:backlog [--format json] [--team backend] [--priority P0,P1] [--source github] [--status open] [--sort priority]
+pnpm -C .agentkit agentkit:backlog -- [--format json] [--team backend] [--priority P0,P1] [--source github] [--status open] [--sort priority]
 ```
 
 ## Fields per Item

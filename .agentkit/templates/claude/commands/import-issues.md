@@ -53,7 +53,7 @@ You are the **Issue Import Agent**. Your job is to fetch issues from the configu
 ## CLI Equivalent
 
 ```bash
-pnpm -C .agentkit agentkit:import-issues [--tracker github|linear] [--state open|closed|all] [--labels bug,security] [--since 2026-01-01] [--limit 50] [--dry-run] [--force]
+pnpm -C .agentkit agentkit:import-issues -- [--tracker github|linear] [--state open|closed|all] [--labels bug,security] [--since 2026-01-01] [--limit 50] [--dry-run] [--force]
 ```
 
 ## Rules

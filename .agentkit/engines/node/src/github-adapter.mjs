@@ -78,9 +78,7 @@ export class GitHubAdapter {
       String(limit),
     ];
 
-    if (state !== 'all') {
-      args.push('--state', state);
-    }
+    args.push('--state', state);
 
     if (labels) {
       args.push('--label', labels);

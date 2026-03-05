@@ -3,6 +3,7 @@
  * Orchestrated backlog sync combining external tracker + local sources.
  * Runtime handler for the /sync-backlog command and `agentkit sync-backlog` CLI.
  */
+import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import { appendFile, mkdir } from 'fs/promises';
 import yaml from 'js-yaml';
@@ -32,10 +33,13 @@ function collectOrchestratorItems(projectRoot) {
 
     // Risks
     if (Array.isArray(orch.risks)) {
+      const now = new Date().toISOString();
       for (const risk of orch.risks) {
+        const riskKey = risk.title || risk.description || 'risk';
+        const hash = createHash('sha256').update(`healthcheck:${riskKey}`).digest('hex').slice(0, 8);
         items.push({
-          id: null,
-          externalId: null,
+          id: `bi-healthcheck-${hash}`,
+          externalId: `HC-${hash}`,
           externalUrl: null,
           title: risk.title || risk.description || 'Risk item',
           priority: risk.severity === 'critical' ? 'P0' : risk.severity === 'high' ? 'P1' : 'P2',
@@ -50,10 +54,10 @@ function collectOrchestratorItems(projectRoot) {
           files: [],
           labels: [],
           milestone: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: now,
+          updatedAt: now,
           closedAt: null,
-          lastSyncedAt: new Date().toISOString(),
+          lastSyncedAt: now,
           dirty: false,
         });
       }
@@ -92,11 +96,12 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   }
   let allIncoming = [];
 
-  // 2. Pull from external tracker (if direction includes pull)
-  if (direction !== 'push' && tracker !== 'none') {
+  // 2. Pull from external tracker (if direction includes pull and autoImport is enabled or --force)
+  const autoImport = intake.autoImport ?? false;
+  if (direction !== 'push' && tracker !== 'none' && (autoImport || flags.force)) {
     try {
       const adapter = await createAdapter(tracker, projectRoot);
-      const rawIssues = adapter.fetchIssues({
+      const rawIssues = await adapter.fetchIssues({
         state: flags.state || 'open',
         labels: flags.labels || null,
       });
