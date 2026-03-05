@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -57,3 +57,4 @@ Generates implementation skeletons aligned with project conventions. Supports en
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

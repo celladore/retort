@@ -33,11 +33,11 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Focus Areas
 
 - .env.example
-- docker-compose\*.yml
-- infra/\*\*
-- .github/workflows/\*\*
-- scripts/setup\*
-- docs/setup/\*\*
+- docker-compose*.yml
+- infra/**
+- .github/workflows/**
+- scripts/setup*
+- docs/setup/**
 
 ## Responsibilities
 

@@ -236,6 +236,7 @@ const FLAG_TYPES = {
   sessions: 'boolean',
   report: 'boolean',
   'open-issues': 'boolean',
+  'auto-task': 'boolean',
   'process-handoffs': 'boolean',
   clean: 'boolean',
   strict: 'boolean',

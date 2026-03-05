@@ -15,7 +15,7 @@ last_updated: '2026-03-05'
 # Team: DOCUMENTATION
 
 **Focus**: Docs, ADRs, guides
-**Scope**: docs/**, docs/03_architecture/02_decisions/**, .github/\*\*, README.md, CHANGELOG.md, CONTRIBUTING.md
+**Scope**: docs/**, docs/03_architecture/02_decisions/**, .github/**, README.md, CHANGELOG.md, CONTRIBUTING.md
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: docs/**, docs/03_architecture/02_decisions/**, .github/\*\*, README.md, CHANGELOG.md, CONTRIBUTING.md
+- Own all code within scope: docs/**, docs/03_architecture/02_decisions/**, .github/**, README.md, CHANGELOG.md, CONTRIBUTING.md
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

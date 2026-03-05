@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -67,3 +67,4 @@ Produce: Quality Gate Results table (Step | Status | Duration | Details), Overal
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

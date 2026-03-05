@@ -32,14 +32,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- db/\*\*
-- migrations/\*\*
-- models/\*\*
-- prisma/\*\*
-- seeds/\*\*
-- scripts/db/\*\*
-- adx/\*\*
-- grafana/\*\*
+- db/**
+- migrations/**
+- models/**
+- prisma/**
+- seeds/**
+- scripts/db/**
+- adx/**
+- grafana/**
 
 ## Responsibilities
 
@@ -78,7 +78,6 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Safe migration skeleton
-
 ```
 -- add nullable column first
 ALTER TABLE users ADD COLUMN timezone TEXT NULL;

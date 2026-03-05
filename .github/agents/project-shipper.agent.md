@@ -32,10 +32,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/\*\*
-- .github/ISSUE_TEMPLATE/\*\*
-- .github/PULL_REQUEST_TEMPLATE/\*\*
-- docs/ai_handoffs/\*\*
+- docs/**
+- .github/ISSUE_TEMPLATE/**
+- .github/PULL_REQUEST_TEMPLATE/**
+- docs/ai_handoffs/**
 
 ## Responsibilities
 

@@ -35,15 +35,6 @@ Report: per-check pass/fail with details, overall PASS/FAIL status, list of miss
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
 
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
-
 ## Conventions
 
 - Write minimal, focused diffs — change only what is necessary
@@ -60,3 +51,4 @@ Report: per-check pass/fail with details, overall PASS/FAIL status, list of miss
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

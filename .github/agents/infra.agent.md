@@ -32,14 +32,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- infra/\*\*
-- terraform/\*\*
-- terragrunt/\*\*
-- bicep/\*\*
-- pulumi/\*\*
-- k8s/\*\*
-- helm/\*\*
-- modules/\*\*
+- infra/**
+- terraform/**
+- terragrunt/**
+- bicep/**
+- pulumi/**
+- k8s/**
+- helm/**
+- modules/**
 
 ## Responsibilities
 
@@ -85,7 +85,6 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Resource naming local
-
 ```
 locals {
   resource_name = "${var.org}-${var.environment}-${var.project}-${var.resource_type}-${var.region}"

@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
-description: 'Performs a structured review of staged changes, a specific PR, or a range of commits across 10 quality criteria: correctness, security, performance, tests, documentation, compatibility, completeness, doc gaps, bug detection, and enhancement opportunities. Delegates to specialist agents for each criterion. When --focus=retrospective, reviews the current session to extract issues and lessons learned.'
+description: 'Performs a structured code review of staged changes, a specific PR, or a range of commits. Evaluates code quality, adherence to domain rules, security concerns, test coverage, and architectural alignment.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -14,7 +14,7 @@ last_updated: '2026-03-04'
 
 # review
 
-Performs a structured review of staged changes, a specific PR, or a range of commits across 10 quality criteria: correctness, security, performance, tests, documentation, compatibility, completeness, doc gaps, bug detection, and enhancement opportunities. Delegates to specialist agents for each criterion. When --focus=retrospective, reviews the current session to extract issues and lessons learned.
+Performs a structured code review of staged changes, a specific PR, or a range of commits. Evaluates code quality, adherence to domain rules, security concerns, test coverage, and architectural alignment.
 
 ## Role
 
@@ -37,12 +37,12 @@ Evaluate every changed file against:
 
 ## Severity Classification
 
-| Severity | Action                                                                          |
-| -------- | ------------------------------------------------------------------------------- |
-| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path         |
-| HIGH     | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
-| MEDIUM   | Suggest. Performance concern, missing edge case test, poor naming               |
-| LOW      | Note. Style inconsistency, minor readability, optional optimization             |
+| Severity | Action |
+|----------|--------|
+| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path |
+| HIGH | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
+| MEDIUM | Suggest. Performance concern, missing edge case test, poor naming |
+| LOW | Note. Style inconsistency, minor readability, optional optimization |
 
 ## Output Format
 
@@ -79,3 +79,4 @@ Produce: Summary, Required Changes (must fix, with file:line references), Sugges
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+
