@@ -6,6 +6,7 @@ import {
   validateProjectYaml,
   validateMappingCoverage,
   PROJECT_ENUMS,
+  VALID_PHASES,
 } from '../spec-validator.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -944,5 +945,136 @@ describe('validateMappingCoverage', () => {
   it('should handle empty project gracefully', () => {
     const warnings = validateMappingCoverage(null, [{ src: 'a.b', dest: 'x' }]);
     expect(warnings).toHaveLength(0);
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// VALID_PHASES export
+// ---------------------------------------------------------------------------
+describe('VALID_PHASES', () => {
+  it('exports the five lifecycle phases', () => {
+    expect(VALID_PHASES).toEqual(['discovery', 'planning', 'implementation', 'validation', 'ship']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Convention type and phase validation
+// ---------------------------------------------------------------------------
+describe('convention type and phase validation', () => {
+  function makeRulesRoot(conventions) {
+    const root = mkdtempSync(resolve(tmpdir(), 'agentkit-phase-test-'));
+    const specDir = resolve(root, 'spec');
+    mkdirSync(specDir, { recursive: true });
+
+    const teams = { teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }], techStacks: [{ name: 'node', buildCommand: 'pnpm build', testCommand: 'pnpm test', detect: ['package.json'] }] };
+    const agents = { agents: { engineering: [{ id: 'backend', name: 'Backend Engineer', role: 'role', focus: ['src/**'], responsibilities: ['build'] }] } };
+    const rules = { rules: [{ domain: 'test', description: 'Test rules', 'applies-to': ['**/*.ts'], conventions }] };
+    const settings = { permissions: { allow: [], deny: [] }, hooks: {} };
+    const aliases = { aliases: {} };
+    const docs = { categories: [] };
+    const commands = { commands: [] };
+
+    writeFileSync(resolve(specDir, 'teams.yaml'), JSON.stringify(teams, null, 2));
+    writeFileSync(resolve(specDir, 'agents.yaml'), JSON.stringify(agents, null, 2));
+    writeFileSync(resolve(specDir, 'commands.yaml'), JSON.stringify(commands, null, 2));
+    writeFileSync(resolve(specDir, 'rules.yaml'), JSON.stringify(rules, null, 2));
+    writeFileSync(resolve(specDir, 'settings.yaml'), JSON.stringify(settings, null, 2));
+    writeFileSync(resolve(specDir, 'aliases.yaml'), JSON.stringify(aliases, null, 2));
+    writeFileSync(resolve(specDir, 'docs.yaml'), JSON.stringify(docs, null, 2));
+
+    return root;
+  }
+
+  it('accepts valid type: advisory', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', type: 'advisory' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts valid type: enforcement', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'error', type: 'enforcement' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects invalid type value', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'error', type: 'mandatory' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors.some((e) => e.includes('advisory, enforcement'))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts omitted type (optional)', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts valid single phase', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: 'validation' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts valid phase array', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: ['planning', 'implementation'] }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects invalid phase string', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: 'coding' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors.some((e) => e.includes('phase') && e.includes('coding'))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects invalid phase in array', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: ['validation', 'deploy'] }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors.some((e) => e.includes('phase') && e.includes('deploy'))).toBe(true);
+      // Only 'deploy' should be flagged — not 'validation'
+      expect(result.errors.some((e) => e.includes('got "validation"'))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts omitted phase (optional)', () => {
+    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning' }]);
+    try {
+      const result = validateSpec(root);
+      expect(result.errors).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
