@@ -94,7 +94,7 @@ infrastructure:
   namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}' # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
   defaultRegion: global # e.g. southafricanorth, eastus, westeurope
   org: akf # e.g. nl, contoso — the org prefix used in resource names
-  iacToolchain: [none] # e.g. [terraform, terragrunt]
+  iacToolchain: [terraform, terragrunt] # e.g. [terraform, terragrunt]
   stateBackend: none # azurerm | s3 | gcs | consul | local | none
   modulesRepo: null # e.g. git::https://github.com/org/tf-modules.git
   lockProvider: null # blob-lease | dynamodb | consul | none

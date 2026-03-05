@@ -10,7 +10,7 @@ Proposed
 
 ## Date
 
-<!-- YYYY-MM-DD -->
+{{syncDate}}
 
 ## Context
 
@@ -20,13 +20,13 @@ Baseline source for this template: the current fallback ADR from `agentkit-forge
 
 ## Decision
 
-When `<evidence_metric>` is missing for an evaluated item:
+When an evidence metric (e.g. cost evidence, telemetry confidence, quality signal confidence) is missing for an evaluated item:
 
-1. Keep current `<affected_score_or_gate>` unchanged.
+1. Keep the current score or gate result unchanged.
 2. Mark evidence status as `Not evaluated`.
 3. Do not recalculate or adjust final outputs based only on missing evidence.
 
-This fallback policy is approved by `<approver_group>` on `<approval_date>`.
+This fallback policy is approved by repository maintainers.
 
 ## Rationale
 
@@ -36,12 +36,4 @@ This fallback policy is approved by `<approver_group>` on `<approval_date>`.
 
 ## Scope
 
-Applies to `<repo_specific_scope_path_or_process>` and related calculations/workflows.
-
-## Repo-Specific Inputs
-
-- `<evidence_metric>`
-- `<affected_score_or_gate>`
-- `<repo_specific_scope_path_or_process>`
-- `<approver_group>`
-- `<approval_date>`
+Applies to `/infra-eval` scoring dimensions, `/review` quality gates, and related evaluation workflows in `{{repoName}}`.

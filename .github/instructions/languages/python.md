@@ -38,7 +38,7 @@ Apply these rules when editing `.py` files or `pyproject.toml`.
 - Use `pytest` fixtures for shared setup; use `@pytest.mark.parametrize` for
   variants.
 - Mock at IO boundaries using `pytest-mock` or `unittest.mock`.
-  - Minimum coverage: **80%** line and branch.
+- Minimum coverage: **80%** line and branch.
 
 ```python
 def test_process_invoice_raises_on_invalid_amount():
@@ -66,12 +66,18 @@ def test_process_invoice_raises_on_invalid_amount():
 The following conventions are enforced in **agentkit-forge** and derived from
 `.agentkit/spec/rules.yaml`:
 
-- **[py-lint]** All code must pass ruff check with the project configuration
-- **[py-format]** All code must be formatted with black
+### Enforcement Rules
+
+- **[py-lint]** All code must pass ruff check with the project configuration _(enforcement · phase: validation)_
+- **[py-format]** All code must be formatted with black _(enforcement · phase: validation)_
 - **[py-test-coverage]** All modules must have corresponding pytest test files. New code must include tests. Coverage must not decrease from the current baseline. Use pytest fixtures for test setup and parameterize for variant testing.
+ _(enforcement · phase: validation)_
 
-- **[py-io-boundaries]** IO operations (file system, network, database) must be isolated at module boundaries using dependency injection or explicit IO boundary patterns. Core logic must be pure and testable without mocking IO. Use protocols (typing.Protocol) to define IO interfaces.
+### Advisory Rules
+
+- **[py-io-boundaries]** IO operations (file system, network, database) must be isolated at module boundaries using dependency injection or explicit IO boundary patterns. Core logic must be pure and testable without mocking IO. Use protocols (typing.Protocol) to define IO interfaces. _(advisory · phase: planning, implementation)_
 - **[py-type-hints]** All public functions and methods must have type hints. Use typing.Protocol for structural subtyping. Run mypy in strict mode for new modules.
-
+ _(advisory · phase: implementation)_
 - **[py-docstrings]** All public modules, classes, and functions must have docstrings following Google style. Include Args, Returns, and Raises sections where applicable.
+ _(advisory · phase: implementation)_
 

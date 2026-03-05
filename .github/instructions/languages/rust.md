@@ -71,14 +71,20 @@ Apply these rules when editing `.rs` files or `Cargo.toml`.
 The following conventions are enforced in **agentkit-forge** and derived from
 `.agentkit/spec/rules.yaml`:
 
-- **[rs-error-handling]** Use explicit error handling with Result and Option types. Define custom error types using thiserror for libraries and anyhow for applications. Chain errors with context using .context() or .with_context().
-
-- **[rs-no-unwrap]** Never use .unwrap() or .expect() in non-test code. Use proper error propagation with the ? operator instead. In tests, .unwrap() is acceptable for assertions. Panicking in production code is a bug.
+### Enforcement Rules
 
 - **[rs-clippy]** All code must pass 'cargo clippy' with no warnings. Use #[allow(clippy::...)] only with an explanatory comment when a lint is genuinely inapplicable.
+ _(enforcement · phase: validation)_
+- **[rs-fmt]** All code must be formatted with 'cargo fmt' _(enforcement · phase: validation)_
 
-- **[rs-fmt]** All code must be formatted with 'cargo fmt'
+### Advisory Rules
+
+- **[rs-error-handling]** Use explicit error handling with Result and Option types. Define custom error types using thiserror for libraries and anyhow for applications. Chain errors with context using .context() or .with_context().
+ _(advisory · phase: implementation)_
+- **[rs-no-unwrap]** Never use .unwrap() or .expect() in non-test code. Use proper error propagation with the ? operator instead. In tests, .unwrap() is acceptable for assertions. Panicking in production code is a bug.
+ _(advisory · phase: implementation)_
 - **[rs-unsafe]** Minimize use of unsafe blocks. Every unsafe block must have a SAFETY comment explaining why the invariants are upheld. Prefer safe abstractions. New unsafe code requires review by a second contributor.
-
+ _(advisory · phase: implementation, validation)_
 - **[rs-documentation]** All public items must have documentation comments (///). Include examples in doc comments for complex APIs. Run 'cargo doc' with no warnings.
+ _(advisory · phase: implementation)_
 

@@ -39,7 +39,7 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
 - NUnit: `[Test]` for single-case, `[TestCase(...)]` for parameterised tests.
 - Follow Arrange-Act-Assert with blank lines separating each phase.
 - Use `Moq` or `NSubstitute` for mocking; mock interfaces, not concrete types.
-  - Minimum coverage: **80%** line and branch.
+- Minimum coverage: **80%** line and branch.
 
 ## API Compatibility
 
@@ -60,14 +60,20 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
 The following conventions are enforced in **agentkit-forge** and derived from
 `.agentkit/spec/rules.yaml`:
 
+### Enforcement Rules
+
+- **[dn-format]** All code must pass 'dotnet format' with the project editorconfig _(enforcement · phase: validation)_
+
+### Advisory Rules
+
 - **[dn-dependency-injection]** All services must use constructor-based dependency injection. Service registration must be in dedicated extension methods (e.g., AddMyFeatureServices). Never use the service locator anti-pattern.
-
+ _(advisory · phase: implementation)_
 - **[dn-clean-layering]** Follow clean architecture layering: Domain has no external dependencies, Application depends only on Domain, Infrastructure implements interfaces defined in Application, and Presentation depends on Application. No layer may bypass the layer directly above it.
-
+ _(advisory · phase: planning, implementation)_
 - **[dn-ports-adapters]** Use ports and adapters (hexagonal architecture) for all external integrations. Define port interfaces in the Application layer and implement adapters in the Infrastructure layer. This ensures external dependencies are always behind abstractions.
-
+ _(advisory · phase: planning, implementation)_
 - **[dn-backwards-compat]** Public API surfaces must maintain backwards compatibility. Breaking changes require a version bump, deprecation notice in the prior version, and migration documentation. Use API versioning for HTTP endpoints.
-
-- **[dn-format]** All code must pass 'dotnet format' with the project editorconfig
+ _(advisory · phase: implementation, validation)_
 - **[dn-nullable]** Nullable reference types must be enabled. All reference type parameters and return values must be explicitly nullable or non-nullable.
+ _(advisory · phase: implementation)_
 

@@ -40,6 +40,10 @@ Use the provided script to generate a new document from the correct template:
 
 > **Note:** Issue and lesson records are created automatically via
 > `/review --focus=retrospective`, not through the create-doc script.
+>
+> **Fallback:** When `gh` CLI is unavailable (proxy failures, air-gapped
+> environments), use `./scripts/create-doc.sh issue "Title"` to record issues
+> locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
 
 The `/review` command with `--focus=retrospective` automates issue and lesson
 creation at end-of-session (non-blocking — never gates delivery):
@@ -55,11 +59,5 @@ creation at end-of-session (non-blocking — never gates delivery):
 # PowerShell
 ./scripts/create-doc.ps1 implementation "Feature Name" <pr-number>
 ```
-
-Or use the `/document-history` slash command for auto-detection of type and title from session context.
-
-> **Fallback:** When `gh` CLI is unavailable (proxy failures, air-gapped
-> environments), use `./scripts/create-doc.sh issue "Title"` to record issues
-> locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
 
 See [docs/06_engineering/06_pr_documentation.md](../06_engineering/06_pr_documentation.md) for the full documentation strategy.
