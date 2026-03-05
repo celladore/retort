@@ -131,7 +131,7 @@ delivery channel established in
 
 ```text
 #196 (CLI toolchain) ──────────┐
-                                ├──► autoupdate issue (#258)
+                                ├──► #258 (autoupdate)
 #194 (sync enforcement) ───────┘
 ```
 
