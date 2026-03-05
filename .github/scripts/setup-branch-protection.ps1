@@ -101,6 +101,7 @@ if ($DryRun) {
 } else {
     Write-Host "Applying branch protection rules..."
     $Payload | gh api --method PUT "/repos/$Repo/branches/$Branch/protection" --input -
+    if ($LASTEXITCODE -ne 0) { throw "Failed to apply branch protection rules." }
     Write-Host "Branch protection applied."
 }
 Write-Host ""
@@ -133,6 +134,7 @@ if ($DryRun) {
 } else {
     Write-Host "Applying repository merge settings..."
     $RepoSettings | gh api --method PATCH "/repos/$Repo" --input -
+    if ($LASTEXITCODE -ne 0) { throw "Failed to apply repository settings." }
     Write-Host "Repository settings applied."
 }
 Write-Host ""
@@ -171,19 +173,19 @@ if ($DryRun) {
     Write-Host ""
 } else {
     Write-Host "Configuring code scanning ruleset..."
-    try {
-        $existingId = gh api "/repos/$Repo/rulesets" --jq '.[] | select(.name == \"code-scanning\") | .id' 2>$null
-        if ($existingId) {
-            Write-Host "  Updating existing ruleset (ID: $existingId)..."
-            $CodeScanningRuleset | gh api --method PUT "/repos/$Repo/rulesets/$existingId" --input -
-        } else {
-            Write-Host "  Creating new code scanning ruleset..."
-            $CodeScanningRuleset | gh api --method POST "/repos/$Repo/rulesets" --input -
-        }
-        Write-Host "Code scanning ruleset applied."
-    } catch {
+    $existingId = (gh api "/repos/$Repo/rulesets" --jq '[ .[] | select(.name == "code-scanning") | .id ] | first' 2>$null)
+    if ($LASTEXITCODE -ne 0) { $existingId = $null }
+    if ($existingId) {
+        Write-Host "  Updating existing ruleset (ID: $existingId)..."
+        $CodeScanningRuleset | gh api --method PUT "/repos/$Repo/rulesets/$existingId" --input -
+    } else {
+        Write-Host "  Creating new code scanning ruleset..."
+        $CodeScanningRuleset | gh api --method POST "/repos/$Repo/rulesets" --input -
+    }
+    if ($LASTEXITCODE -ne 0) {
         Write-Host "  Warning: Failed to configure code scanning ruleset. GitHub Advanced Security may not be enabled."
-        Write-Host "  Error: $_"
+    } else {
+        Write-Host "Code scanning ruleset applied."
     }
 }
 Write-Host ""
@@ -211,11 +213,11 @@ if ($DryRun) {
     Write-Host "Enabling Copilot code review..."
     # Note: Requires GitHub Copilot subscription with code review enabled for the organization.
     # Endpoint may return 404 if Copilot code review is not available for this repo.
-    try {
-        $CopilotReview | gh api --method PUT "/repos/$Repo/copilot/code_review" --input -
-        Write-Host "Copilot code review configured."
-    } catch {
+    $CopilotReview | gh api --method PUT "/repos/$Repo/copilot/code_review" --input - 2>$null
+    if ($LASTEXITCODE -ne 0) {
         Write-Host "  Note: Copilot code review requires a Copilot-enabled organization."
+    } else {
+        Write-Host "Copilot code review configured."
     }
 }
 Write-Host ""

@@ -183,7 +183,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
 else
     echo "Configuring code scanning ruleset..."
     # Check if a code-scanning ruleset already exists
-    EXISTING_RULESET_ID=$(gh api "/repos/$REPO/rulesets" --jq '.[] | select(.name == "code-scanning") | .id' 2>/dev/null || true)
+    EXISTING_RULESET_ID=$(gh api "/repos/$REPO/rulesets" --jq '[ .[] | select(.name == "code-scanning") | .id ] | first' 2>/dev/null || true)
     if [[ -n "$EXISTING_RULESET_ID" ]]; then
         echo "  Updating existing ruleset (ID: $EXISTING_RULESET_ID)..."
         if ! gh api \
