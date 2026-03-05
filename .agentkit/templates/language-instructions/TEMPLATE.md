@@ -16,10 +16,23 @@
 
 {{/if}}
 
-## Conventions
-
 {{#if ruleConventions}}
-{{ruleConventions}}
+{{#if ruleHasEnforcement}}
+## Enforcement Rules
+
+These rules are hard constraints — violations block CI or are prevented by hooks.
+
+{{ruleEnforcementConventions}}
+
+{{/if}}
+{{#if ruleHasAdvisory}}
+## Advisory Rules
+
+These rules are guidance for agents — violations are flagged but do not block CI.
+
+{{ruleAdvisoryConventions}}
+
+{{/if}}
 {{/if}}
 {{#unless ruleConventions}}
 _No conventions defined for this domain yet. Add conventions to `.agentkit/spec/rules.yaml`

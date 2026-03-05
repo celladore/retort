@@ -1,10 +1,29 @@
 # =============================================================================
 # rules.yaml — Domain-specific coding rules and standards
 # Canonical source of truth for agentkit-forge
-# Version: 0.1.0
+# Version: 0.2.0
 # =============================================================================
 # Rules are organized by domain. Each rule set defines conventions, tooling
 # requirements, and quality gates that agents must enforce.
+#
+# Convention fields:
+#   id         (required)  Unique identifier for the convention
+#   rule       (required)  Human-readable description of the convention
+#   severity   (required)  critical | error | warning | info
+#   type       (optional)  advisory | enforcement (default: advisory)
+#                          - advisory:    guidance for agents; violations are
+#                            flagged but do not block CI or tool execution
+#                          - enforcement: hard constraint; violations must block
+#                            CI, fail quality gates, or be prevented by hooks
+#   phase      (optional)  Lifecycle phase(s) where the convention applies:
+#                          discovery | planning | implementation | validation | ship
+#                          Accepts a single value or list. When omitted the
+#                          convention applies to all phases.
+#   autofix    (optional)  true | false — whether the tool can auto-remediate
+#   tool       (optional)  CLI command that checks or fixes the convention
+#   applies-to (optional)  Narrows the parent domain's file globs
+#   exceptions (optional)  File globs excluded from this convention
+#   examples   (optional)  valid/invalid usage examples
 # =============================================================================
 
 rules:
@@ -26,12 +45,16 @@ rules:
       - id: ts-lint
         rule: 'All code must pass ESLint with the project configuration'
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'eslint --fix'
 
       - id: ts-format
         rule: 'All code must be formatted with Prettier'
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'prettier --write'
 
@@ -41,6 +64,8 @@ rules:
           explicit type annotations. Inferred types are acceptable only for
           local variables and private implementation details.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: ts-no-any
@@ -48,6 +73,8 @@ rules:
           Avoid 'any' type. Use 'unknown' with type guards when the type
           is truly dynamic. Exceptions require a comment explaining why.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: ts-wcag-aa
@@ -57,6 +84,10 @@ rules:
           navigation support, sufficient color contrast (4.5:1 for normal
           text, 3:1 for large text), and screen reader compatibility.
         severity: error
+        type: advisory
+        phase:
+          - implementation
+          - validation
         autofix: false
         applies-to:
           - '**/*.tsx'
@@ -68,6 +99,8 @@ rules:
           No console.log in production code. Use the project's structured
           logger instead. console.log is acceptable in scripts/ and test files.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: ts-strict-null
@@ -75,6 +108,8 @@ rules:
           Strict null checks must be enabled. Handle null/undefined explicitly
           rather than relying on truthiness checks for non-boolean values.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
 
   # ===========================================================================
@@ -96,6 +131,8 @@ rules:
           (e.g., AddMyFeatureServices). Never use the service locator
           anti-pattern.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: dn-clean-layering
@@ -106,6 +143,10 @@ rules:
           depends on Application. No layer may bypass the layer directly
           above it.
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
       - id: dn-ports-adapters
@@ -115,6 +156,10 @@ rules:
           and implement adapters in the Infrastructure layer. This ensures
           external dependencies are always behind abstractions.
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
       - id: dn-backwards-compat
@@ -124,11 +169,17 @@ rules:
           version, and migration documentation. Use API versioning for
           HTTP endpoints.
         severity: error
+        type: advisory
+        phase:
+          - implementation
+          - validation
         autofix: false
 
       - id: dn-format
         rule: "All code must pass 'dotnet format' with the project editorconfig"
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'dotnet format'
 
@@ -138,6 +189,8 @@ rules:
           parameters and return values must be explicitly nullable or
           non-nullable.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
   # ===========================================================================
@@ -154,12 +207,16 @@ rules:
       - id: py-lint
         rule: 'All code must pass ruff check with the project configuration'
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'ruff check --fix'
 
       - id: py-format
         rule: 'All code must be formatted with black'
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'black'
 
@@ -170,12 +227,18 @@ rules:
           baseline. Use pytest fixtures for test setup and parameterize
           for variant testing.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
         tool: 'python -m pytest --cov'
 
       - id: py-io-boundaries
         rule: 'IO operations (file system, network, database) must be isolated at module boundaries using dependency injection or explicit IO boundary patterns. Core logic must be pure and testable without mocking IO. Use protocols (typing.Protocol) to define IO interfaces.'
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
       - id: py-type-hints
@@ -184,6 +247,8 @@ rules:
           typing.Protocol for structural subtyping. Run mypy in strict
           mode for new modules.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
         tool: 'mypy --strict'
 
@@ -193,6 +258,8 @@ rules:
           following Google style. Include Args, Returns, and Raises sections
           where applicable.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
   # ===========================================================================
@@ -213,6 +280,8 @@ rules:
           applications. Chain errors with context using .context() or
           .with_context().
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: rs-no-unwrap
@@ -222,6 +291,8 @@ rules:
           .unwrap() is acceptable for assertions. Panicking in production
           code is a bug.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
         exceptions:
           - '**/*.test.rs'
@@ -234,12 +305,16 @@ rules:
           #[allow(clippy::...)] only with an explanatory comment when
           a lint is genuinely inapplicable.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
         tool: 'cargo clippy -- -D warnings'
 
       - id: rs-fmt
         rule: "All code must be formatted with 'cargo fmt'"
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'cargo fmt'
 
@@ -250,6 +325,10 @@ rules:
           safe abstractions. New unsafe code requires review by a second
           contributor.
         severity: error
+        type: advisory
+        phase:
+          - implementation
+          - validation
         autofix: false
 
       - id: rs-documentation
@@ -258,6 +337,8 @@ rules:
           examples in doc comments for complex APIs. Run 'cargo doc' with
           no warnings.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
   # ===========================================================================
@@ -286,6 +367,8 @@ rules:
           YOUR_ORG, YOUR_DEFAULT_REGION. Deviations require a comment explaining
           why. Use locals blocks to compose names from variables.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: iac-toolchain
@@ -294,6 +377,8 @@ rules:
           configuration, remote state management, and environment orchestration.
           All environments must be managed through Terragrunt live configurations.
         severity: error
+        type: advisory
+        phase: planning
         autofix: false
 
       - id: iac-state-backend
@@ -302,6 +387,10 @@ rules:
           with locking enabled. Never commit .tfstate files. State backend
           configuration must be managed through Terragrunt to avoid duplication.
         severity: critical
+        type: enforcement
+        phase:
+          - implementation
+          - validation
         autofix: false
 
       - id: iac-modules
@@ -311,6 +400,10 @@ rules:
           and examples/. Pin module versions in consumers — never use unversioned
           source references.
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
       - id: iac-tagging
@@ -323,6 +416,8 @@ rules:
           infrastructure.tagging.optional are recommended for cost analysis
           and lifecycle tracking. See .claude/rules/iac.md for examples.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
 
       - id: iac-plan-before-apply
@@ -332,6 +427,8 @@ rules:
           human approval gate before apply. Never use -auto-approve in
           production environments.
         severity: critical
+        type: enforcement
+        phase: ship
         autofix: false
 
       - id: iac-no-hardcoded-secrets
@@ -341,17 +438,25 @@ rules:
           secrets via environment variables in CI. Sensitive variables must
           be marked sensitive = true.
         severity: critical
+        type: enforcement
+        phase:
+          - implementation
+          - validation
         autofix: false
 
       - id: iac-fmt
         rule: "All Terraform code must pass 'terraform fmt -check'"
         severity: error
+        type: enforcement
+        phase: validation
         autofix: true
         tool: 'terraform fmt'
 
       - id: iac-validate
         rule: "All Terraform configurations must pass 'terraform validate'"
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
         tool: 'terraform validate'
 
@@ -361,6 +466,8 @@ rules:
           modify resources managed by Terraform. If manual changes are necessary,
           import them into state immediately and update the configuration.
         severity: error
+        type: advisory
+        phase: ship
         autofix: false
 
   # ===========================================================================
@@ -380,6 +487,7 @@ rules:
           Use environment variables or secret managers. Never commit .env
           files, credentials, or private keys to version control.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: sec-least-privilege
@@ -389,6 +497,10 @@ rules:
           minimum permissions required for the operation. Document why
           each permission is needed.
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
       - id: sec-deny-by-default
@@ -398,6 +510,10 @@ rules:
           Authorization checks must be performed at the handler level,
           not middleware alone. Default to most restrictive settings.
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
       - id: sec-input-validation
@@ -406,6 +522,8 @@ rules:
           validation libraries (zod, FluentValidation, pydantic, serde)
           at system boundaries. Never trust client-side validation alone.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: sec-dependency-audit
@@ -414,6 +532,8 @@ rules:
           adoption and on a regular schedule. Pin dependency versions.
           Review transitive dependencies for supply chain risk.
         severity: warning
+        type: advisory
+        phase: validation
         autofix: false
 
       - id: sec-encryption
@@ -422,6 +542,10 @@ rules:
           TLS 1.2+ for all network communication. Use AES-256 or
           equivalent for data at rest. Never implement custom cryptography.
         severity: error
+        type: advisory
+        phase:
+          - planning
+          - implementation
         autofix: false
 
   # ===========================================================================
@@ -445,6 +569,8 @@ rules:
           Derived Addresses) for deterministic account addressing. All
           instructions must have explicit error codes and documentation.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: bc-etherlink
@@ -454,6 +580,8 @@ rules:
           Use the canonical EtherLink SDK for L1-L2 communication.
           Handle finality differences between L1 and L2 explicitly.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: bc-x402
@@ -464,6 +592,8 @@ rules:
           processing. Include receipt generation and verification.
           Handle payment timeout and retry scenarios.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: bc-gas-optimization
@@ -473,6 +603,10 @@ rules:
           for read-only function parameters. Document gas cost estimates
           for public functions.
         severity: warning
+        type: advisory
+        phase:
+          - implementation
+          - validation
         autofix: false
 
       - id: bc-audit-trail
@@ -481,6 +615,8 @@ rules:
           indexing. Include sufficient context in events for reconstruction
           of state transitions. Log transaction hashes for cross-reference.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
   # ===========================================================================
@@ -507,6 +643,8 @@ rules:
           decrease overall coverage. Enforce the threshold in CI so that
           the build fails when coverage drops below the configured minimum.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
         tool: 'vitest run --coverage'
 
@@ -518,6 +656,8 @@ rules:
           expected behaviour in plain English using the format
           "should <verb> <expected outcome>".
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: qa-aaa-pattern
@@ -527,6 +667,8 @@ rules:
           Keep each test focused on a single behaviour; split compound
           assertions into separate tests.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: qa-no-sleep
@@ -535,6 +677,8 @@ rules:
           time.sleep) in tests. Use deterministic waits, polling helpers,
           or test framework utilities (waitFor, waitUntil) instead.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: qa-mock-boundaries
@@ -544,6 +688,8 @@ rules:
           dependency injection to make units testable without patching
           module internals. Document why each mock is necessary.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: qa-no-skipped-tests
@@ -553,6 +699,8 @@ rules:
           the test or delete it. Temporary skips must have a linked
           issue and be resolved within one sprint.
         severity: warning
+        type: advisory
+        phase: validation
         autofix: false
 
       - id: qa-integration-isolation
@@ -562,6 +710,8 @@ rules:
           containers (Testcontainers / Docker Compose) per suite.
           Integration tests must be runnable in any order.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: qa-e2e-stability
@@ -571,6 +721,8 @@ rules:
           within two sprints. Use explicit waits over arbitrary delays.
           Tag smoke tests so a critical path subset can run on every deploy.
         severity: error
+        type: advisory
+        phase: validation
         autofix: false
 
       - id: qa-mutation-testing
@@ -581,6 +733,8 @@ rules:
           or mutmut (Python) as appropriate for the language. Address
           surviving mutants in the next sprint.
         severity: warning
+        type: advisory
+        phase: validation
         autofix: false
 
       - id: qa-contract-testing
@@ -591,6 +745,10 @@ rules:
           Use Pact or an equivalent framework. Never mock the wire protocol
           in integration tests — use contract stubs instead.
         severity: warning
+        type: advisory
+        phase:
+          - planning
+          - validation
         autofix: false
 
       - id: qa-performance-regression
@@ -601,6 +759,8 @@ rules:
           (Rust), pytest-benchmark (Python), or BenchmarkDotNet (.NET).
           Store benchmark results as CI artefacts for historical comparison.
         severity: warning
+        type: advisory
+        phase: validation
         autofix: false
 
   # ===========================================================================
@@ -628,6 +788,7 @@ rules:
           — users (not AI agents) may modify spec YAML files and run
           agentkit sync to regenerate output.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: tp-no-generated-edit
@@ -638,6 +799,7 @@ rules:
           only users (not AI agents) may modify spec YAML files and run
           agentkit sync to regenerate output.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: tp-change-via-pr
@@ -647,6 +809,8 @@ rules:
           PR to the agentkit-forge repository. The PR will be auto-labelled
           and require maintainer review via CODEOWNERS.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
   # ===========================================================================
@@ -665,6 +829,8 @@ rules:
           (e.g. feat/add-user-auth, fix/token-refresh, chore/update-deps).
           Use kebab-case. Never commit directly to the default branch.
         severity: error
+        type: enforcement
+        phase: implementation
         autofix: false
 
       - id: gw-conventional-commits
@@ -679,6 +845,8 @@ rules:
           titles like "Plan: Something" or "Update files" — these WILL
           fail CI. Always use: feat(scope): add something.
         severity: error
+        type: enforcement
+        phase: ship
         autofix: false
         examples:
           - valid: 'feat(auth): add OAuth2 login flow'
@@ -697,6 +865,8 @@ rules:
           alongside source changes — commit spec changes first, then
           regenerated output in a separate commit.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: gw-no-force-push
@@ -706,6 +876,7 @@ rules:
           cleanup before review. The guard-destructive-commands hook
           enforces this at runtime.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: gw-pr-title-format
@@ -718,6 +889,8 @@ rules:
           non-conforming PR titles. Example: feat(brand): add dark-mode
           token palette.
         severity: error
+        type: enforcement
+        phase: ship
         autofix: false
 
       - id: gw-pr-required
@@ -727,6 +900,8 @@ rules:
           gw-pr-title-format), a summary of changes, and a test plan. PRs
           modifying .agentkit/ require CODEOWNERS approval.
         severity: error
+        type: enforcement
+        phase: ship
         autofix: false
 
       - id: gw-sync-before-pr
@@ -738,6 +913,8 @@ rules:
           The CI drift check compares generated output against the spec
           and will fail the build if they are out of sync.
         severity: error
+        type: enforcement
+        phase: ship
         autofix: true
         tool: 'pnpm -C .agentkit agentkit:sync'
 
@@ -748,6 +925,8 @@ rules:
           '## Breaking Changes' section, an ADR reference, or a migration
           guide. CI checks for this and will block the merge if missing.
         severity: error
+        type: enforcement
+        phase: ship
         autofix: false
 
       - id: gw-squash-merge
@@ -756,6 +935,8 @@ rules:
           history clean. The squash commit message must follow Conventional
           Commits and reference the PR number.
         severity: warning
+        type: advisory
+        phase: ship
         autofix: false
 
       - id: gw-no-secrets-in-history
@@ -765,6 +946,7 @@ rules:
           immediately and use git filter-repo to remove it from history.
           The branch-protection workflow scans diffs for common patterns.
         severity: critical
+        type: enforcement
         autofix: false
 
   # ===========================================================================
@@ -792,6 +974,8 @@ rules:
           uses legacy names (e.g. 02_architecture instead of 02_specs),
           respect the existing structure rather than renaming.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: doc-adr-format
@@ -802,6 +986,8 @@ rules:
           stored in docs/03_architecture/02_decisions/ (or the repository's equivalent ADR directory). Every significant
           architectural decision must have an ADR.
         severity: error
+        type: advisory
+        phase: planning
         autofix: false
 
       - id: doc-generated-files
@@ -814,6 +1000,7 @@ rules:
           failures. After ANY change to .agentkit/spec/, you MUST run sync
           and commit the regenerated files before pushing.
         severity: critical
+        type: enforcement
         autofix: true
         tool: 'pnpm -C .agentkit agentkit:sync'
 
@@ -824,6 +1011,8 @@ rules:
           section (Added, Changed, Deprecated, Removed, Fixed, Security).
           The changelog is updated as part of the PR, not after merge.
         severity: warning
+        type: advisory
+        phase: ship
         autofix: false
 
       - id: doc-api-spec
@@ -833,6 +1022,10 @@ rules:
           request/response schema, authentication requirements, and
           example requests. Keep API docs in sync with implementation.
         severity: error
+        type: advisory
+        phase:
+          - implementation
+          - ship
         autofix: false
 
   # ===========================================================================
@@ -856,6 +1049,8 @@ rules:
           and drift check. Use the /check command to run all gates locally.
           Never skip CI checks or add [skip ci] to bypass validation.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
 
       - id: ci-no-skip-hooks
@@ -864,6 +1059,7 @@ rules:
           If a hook fails, fix the underlying issue. Hooks exist to catch
           problems early — bypassing them defeats the purpose.
         severity: error
+        type: enforcement
         autofix: false
 
       - id: ci-pin-actions
@@ -872,6 +1068,8 @@ rules:
           references. This prevents supply chain attacks via tag mutation.
           Renovate is configured to manage action version updates via PR.
         severity: error
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: ci-no-secrets-in-workflows
@@ -880,6 +1078,7 @@ rules:
           or environment-scoped secrets. Reference secrets via the
           secrets context (secrets.MY_SECRET), never as plain text.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: ci-reproducible-builds
@@ -889,6 +1088,8 @@ rules:
           other runtime versions. Do not rely on latest tags for
           base images — pin specific versions.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
 
       - id: ci-fail-fast
@@ -897,6 +1098,8 @@ rules:
           and test stages. Do not continue running expensive test suites
           after a compilation or lint failure.
         severity: warning
+        type: advisory
+        phase: validation
         autofix: false
 
   # ===========================================================================
@@ -926,6 +1129,8 @@ rules:
           version bumps via PR. Never use latest, *, or wide ranges
           like >=.
         severity: error
+        type: enforcement
+        phase: implementation
         autofix: false
 
       - id: dep-lockfile-committed
@@ -935,6 +1140,8 @@ rules:
           in CI. Never delete or regenerate lockfiles without reviewing
           the diff.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
 
       - id: dep-audit-before-adopt
@@ -945,6 +1152,8 @@ rules:
           count. Prefer well-maintained packages with small dependency
           trees.
         severity: warning
+        type: advisory
+        phase: planning
         autofix: false
 
       - id: dep-regular-audit
@@ -954,6 +1163,8 @@ rules:
           must be addressed within one sprint. Renovate vulnerability
           alerts are configured to auto-create PRs for known CVEs.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
         tool: 'npm audit'
 
@@ -964,6 +1175,8 @@ rules:
           already provides the needed functionality. Document the
           rationale for choosing between competing packages.
         severity: warning
+        type: advisory
+        phase: planning
         autofix: false
 
       - id: dep-engine-protected
@@ -973,6 +1186,7 @@ rules:
           to label these PRs with forge-source-change. Do not modify
           engine dependencies without understanding the sync pipeline.
         severity: error
+        type: enforcement
         autofix: false
 
   # ===========================================================================
@@ -993,6 +1207,8 @@ rules:
           a bug, verify the root cause before applying a fix. When
           adding a feature, understand the surrounding architecture.
         severity: error
+        type: advisory
+        phase: discovery
         autofix: false
 
       - id: ac-minimal-changes
@@ -1002,6 +1218,8 @@ rules:
           code, or "improve" unrelated logic. A bug fix should fix
           the bug, not reorganize the module.
         severity: warning
+        type: advisory
+        phase: implementation
         autofix: false
 
       - id: ac-run-checks
@@ -1011,6 +1229,8 @@ rules:
           assume code works without verification. If tests fail, fix
           them before proceeding.
         severity: error
+        type: enforcement
+        phase: validation
         autofix: false
 
       - id: ac-no-destructive-without-confirm
@@ -1020,6 +1240,7 @@ rules:
           confirmation. The guard-destructive-commands hook enforces
           this at runtime, but agents must also self-govern.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: ac-explain-trade-offs
@@ -1029,6 +1250,8 @@ rules:
           and cons rather than silently choosing one. Let the user
           make informed decisions on architecture and design.
         severity: warning
+        type: advisory
+        phase: planning
         autofix: false
 
       - id: ac-session-handoff
@@ -1038,6 +1261,8 @@ rules:
           ensures continuity when a different agent or human picks
           up the work.
         severity: warning
+        type: advisory
+        phase: ship
         autofix: false
 
       - id: ac-respect-generated-headers
@@ -1047,6 +1272,7 @@ rules:
           edit them directly. Instead, modify the upstream spec in
           .agentkit/spec/ and run agentkit sync to regenerate.
         severity: critical
+        type: enforcement
         autofix: false
 
       - id: ac-cost-awareness
@@ -1056,4 +1282,5 @@ rules:
           targeted searches (Glob, Grep) before broad exploration.
           Prefer editing existing files over creating new ones.
         severity: warning
+        type: advisory
         autofix: false

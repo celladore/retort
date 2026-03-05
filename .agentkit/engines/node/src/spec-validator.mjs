@@ -213,12 +213,15 @@ function validateCommandFlagSemantics(command, commandPath) {
 // ---------------------------------------------------------------------------
 // Schema: rules.yaml
 // ---------------------------------------------------------------------------
+const VALID_PHASES = ['discovery', 'planning', 'implementation', 'validation', 'ship'];
+
 const ruleConventionSchema = {
   type: 'object',
   properties: {
     id: { type: 'string', required: true, minLength: 1 },
     rule: { type: 'string', required: true },
     severity: { type: 'string', required: true, enum: ['critical', 'error', 'warning', 'info'] },
+    type: { type: 'string', required: false, enum: ['advisory', 'enforcement'] },
   },
 };
 
@@ -1114,6 +1117,21 @@ export function validateSpec(agentkitRoot) {
     } else {
       for (let i = 0; i < rules.rules.length; i++) {
         errors.push(...validate(rules.rules[i], ruleDomainSchema, `rules.yaml.rules[${i}]`));
+        // Validate convention-level phase fields (string or array of valid phases)
+        const conventions = rules.rules[i].conventions || [];
+        for (let j = 0; j < conventions.length; j++) {
+          const phase = conventions[j].phase;
+          if (phase !== undefined && phase !== null) {
+            const phases = Array.isArray(phase) ? phase : [phase];
+            for (const p of phases) {
+              if (!VALID_PHASES.includes(p)) {
+                errors.push(
+                  `rules.yaml.rules[${i}].conventions[${j}].phase: must be one of [${VALID_PHASES.join(', ')}], got "${p}"`,
+                );
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -1241,4 +1259,4 @@ export function validateRequiredFields(specRoot) {
 }
 
 // Export validate for testing
-export { PROJECT_ENUMS, validate, validateCrossReferences, validateProjectYaml };
+export { PROJECT_ENUMS, VALID_PHASES, validate, validateCrossReferences, validateProjectYaml };
