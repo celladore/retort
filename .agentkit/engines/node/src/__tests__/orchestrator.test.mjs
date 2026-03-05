@@ -17,6 +17,9 @@ import {
   PHASES,
   VALID_TEAM_IDS,
   getTasksSummary,
+  resolveTeamByArea,
+  computeEscalation,
+  clearTeamsSpecCache,
 } from '../orchestrator.mjs';
 
 // Use a temporary directory for tests
@@ -404,6 +407,109 @@ describe('orchestrator', () => {
       const lowPos = result.indexOf('task-low-priority');
       expect(newerPos).toBeLessThan(olderPos);
       expect(olderPos).toBeLessThan(lowPos);
+    });
+  });
+
+  describe('resolveTeamByArea()', () => {
+    const AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
+
+    beforeEach(() => {
+      clearTeamsSpecCache();
+    });
+
+    it('returns default routing for known areas without config', () => {
+      expect(resolveTeamByArea('backend')).toBe('team-backend');
+      expect(resolveTeamByArea('frontend')).toBe('team-frontend');
+      expect(resolveTeamByArea('cli')).toBe('team-backend');
+      expect(resolveTeamByArea('sync-engine')).toBe('team-devops');
+    });
+
+    it('falls back to team-quality for unknown areas', () => {
+      expect(resolveTeamByArea('unknown-area')).toBe('team-quality');
+    });
+
+    it('reads routing from teams.yaml when available', () => {
+      mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
+      writeFileSync(
+        resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'),
+        'intake:\n  routing:\n    backend: custom-backend-team\n',
+        'utf-8'
+      );
+      expect(resolveTeamByArea('backend', AGENTKIT_ROOT)).toBe('team-custom-backend-team');
+      // Other areas still use defaults
+      expect(resolveTeamByArea('frontend', AGENTKIT_ROOT)).toBe('team-frontend');
+    });
+
+    it('handles teams.yaml with team- prefix already present', () => {
+      clearTeamsSpecCache();
+      mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
+      writeFileSync(
+        resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'),
+        'intake:\n  routing:\n    data: team-analytics\n',
+        'utf-8'
+      );
+      expect(resolveTeamByArea('data', AGENTKIT_ROOT)).toBe('team-analytics');
+    });
+  });
+
+  describe('computeEscalation()', () => {
+    const AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
+
+    beforeEach(() => {
+      clearTeamsSpecCache();
+    });
+
+    it('returns empty array when no escalation rules match', () => {
+      const result = computeEscalation({ area: 'docs', priority: 'P3', severity: 'low' });
+      expect(result).toEqual([]);
+    });
+
+    it('escalates critical security issues to security teams', () => {
+      const result = computeEscalation({ area: 'security', priority: 'P0', severity: 'critical' });
+      expect(result).toContain('team-security');
+      expect(result).toContain('team-devops');
+    });
+
+    it('escalates critical backend issues to security teams', () => {
+      const result = computeEscalation({ area: 'backend', priority: 'P1', severity: 'critical' });
+      expect(result).toContain('team-security');
+    });
+
+    it('does not escalate critical docs issues to security teams', () => {
+      const result = computeEscalation({ area: 'docs', priority: 'P0', severity: 'critical' });
+      // P0 still triggers ops team, but not security escalation for docs area
+      expect(result).not.toContain('team-security');
+    });
+
+    it('escalates all-users P0 to blocked cross-team', () => {
+      const result = computeEscalation({ area: 'frontend', priority: 'P0', impact: 'all users' });
+      expect(result).toContain('team-product');
+    });
+
+    it('does not escalate P1 all-users impact', () => {
+      const result = computeEscalation({ area: 'frontend', priority: 'P1', impact: 'all users' });
+      expect(result).not.toContain('team-product');
+    });
+
+    it('notifies operations team for any P0', () => {
+      const result = computeEscalation({ area: 'docs', priority: 'P0' });
+      expect(result).toContain('team-quality');
+    });
+
+    it('reads operations team from config', () => {
+      mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
+      writeFileSync(
+        resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'),
+        'intake:\n  operationsTeam: devops\n  escalation:\n    securityCritical: [infra]\n    blockedCrossTeam: [engineering]\n',
+        'utf-8'
+      );
+      const result = computeEscalation(
+        { area: 'backend', priority: 'P0', severity: 'critical', impact: 'all users' },
+        AGENTKIT_ROOT
+      );
+      expect(result).toContain('team-devops');
+      expect(result).toContain('team-infra');
+      expect(result).toContain('team-engineering');
     });
   });
 });

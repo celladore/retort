@@ -100,6 +100,127 @@ export function ensureTeamIds(agentkitRoot) {
   }
 }
 
+/**
+ * Default area→team routing map. Used when teams.yaml intake.routing is unavailable.
+ * Matches the canonical issue template area values.
+ */
+const DEFAULT_AREA_ROUTING = {
+  backend: 'team-backend',
+  frontend: 'team-frontend',
+  data: 'team-data',
+  infra: 'team-infra',
+  devops: 'team-devops',
+  testing: 'team-testing',
+  security: 'team-security',
+  docs: 'team-docs',
+  product: 'team-product',
+  quality: 'team-quality',
+  cli: 'team-backend',
+  'sync-engine': 'team-devops',
+};
+
+/**
+ * Cache for parsed teams.yaml to avoid re-reading on every call.
+ * Keyed by resolved agentkitRoot path. Invalidated by process lifetime.
+ */
+const _teamsSpecCache = new Map();
+
+/**
+ * Load and cache teams.yaml spec from disk.
+ * @param {string} [agentkitRoot] - Path to .agentkit directory
+ * @returns {object|null} Parsed teams.yaml or null if unavailable
+ */
+function loadTeamsSpec(agentkitRoot) {
+  if (!agentkitRoot) return null;
+  const key = resolve(agentkitRoot);
+  if (_teamsSpecCache.has(key)) return _teamsSpecCache.get(key);
+  try {
+    const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
+    if (existsSync(teamsPath)) {
+      const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+      _teamsSpecCache.set(key, spec);
+      return spec;
+    }
+  } catch {
+    /* fall through */
+  }
+  _teamsSpecCache.set(key, null);
+  return null;
+}
+
+/**
+ * Clear the cached teams spec (useful for testing).
+ */
+export function clearTeamsSpecCache() {
+  _teamsSpecCache.clear();
+}
+
+/**
+ * Resolve an issue area to the assigned team ID.
+ * Reads intake.routing from teams.yaml if available, falls back to defaults.
+ * @param {string} area - One of the canonical issue area values
+ * @param {string} [agentkitRoot] - Path to .agentkit directory for reading teams.yaml
+ * @returns {string} Team ID (e.g. 'team-backend')
+ */
+export function resolveTeamByArea(area, agentkitRoot) {
+  const spec = loadTeamsSpec(agentkitRoot);
+  const routing = spec?.intake?.routing;
+  if (routing && routing[area]) {
+    const team = routing[area];
+    return team.startsWith('team-') ? team : `team-${team}`;
+  }
+  return DEFAULT_AREA_ROUTING[area] || 'team-quality';
+}
+
+/**
+ * Compute escalation teams based on issue metadata.
+ * Returns additional team IDs that should be cc'd/notified.
+ * @param {object} params
+ * @param {string} params.area - Issue area
+ * @param {string} params.priority - Priority level (P0-P4)
+ * @param {string} [params.severity] - Severity level (critical/high/medium/low)
+ * @param {string} [params.impact] - Impact scope
+ * @param {string} [agentkitRoot] - Path to .agentkit directory
+ * @returns {string[]} Additional team IDs to escalate to
+ */
+export function computeEscalation({ area, priority, severity, impact }, agentkitRoot) {
+  const escalateTeams = new Set();
+  const spec = loadTeamsSpec(agentkitRoot);
+  const esc = spec?.intake?.escalation;
+
+  let securityTeams = ['team-security', 'team-devops'];
+  let blockedTeams = ['team-product'];
+  let opsTeam = 'team-quality';
+
+  if (esc?.securityCritical) {
+    securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+  }
+  if (esc?.blockedCrossTeam) {
+    blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+  }
+  const configOps = spec?.intake?.operationsTeam;
+  if (configOps) {
+    opsTeam = configOps.startsWith('team-') ? configOps : `team-${configOps}`;
+  }
+
+  // Rule 1: Critical severity in security-sensitive areas → security escalation
+  if (severity === 'critical' && ['security', 'infra', 'backend'].includes(area)) {
+    securityTeams.forEach((t) => escalateTeams.add(t));
+  }
+
+  // Rule 2: All-users impact + P0 priority → blocked escalation
+  if (impact === 'all users' && priority === 'P0') {
+    blockedTeams.forEach((t) => escalateTeams.add(t));
+  }
+
+  // Rule 3: Any P0 → notify operations team
+  if (priority === 'P0') {
+    escalateTeams.add(opsTeam);
+  }
+
+  return [...escalateTeams];
+}
+
 // ---------------------------------------------------------------------------
 // Path helpers
 // ---------------------------------------------------------------------------

@@ -47,4 +47,12 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Keep backlog sync tracker-neutral (GitHub/Linear) and ownership-aware using the configured intake values.
+
+### Issue Field Routing
+
+Route issues to teams by area: {{intakeAreaRoutingTable}}
+
+**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
+**Severity (bugs):** critical · high · medium · low
+**Escalation:** severity=critical + area in [security,infra,backend] → cc {{intakeSecurityEscalationTeams}}; impact=all users + P0 → cc {{intakeBlockedEscalationTeams}}
 {{/if}}
