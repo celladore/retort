@@ -5,7 +5,6 @@
  */
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
-import { appendFile, mkdir } from 'fs/promises';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import {
@@ -15,6 +14,7 @@ import {
   writeBacklogMarkdown,
   sortItems,
 } from './backlog-store.mjs';
+import { emitEvent } from './event-emitter.mjs';
 import { normalizeIssue, deduplicateItems } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
 
@@ -25,7 +25,7 @@ import { createAdapter } from './tracker-adapter.mjs';
  */
 function collectOrchestratorItems(projectRoot) {
   const items = [];
-  const orchPath = resolve(projectRoot, '.claude', 'state', 'orchestrator.json');
+  const orchPath = resolve(projectRoot, '.agentkit', 'state', 'orchestrator.json');
   if (!existsSync(orchPath)) return items;
 
   try {
@@ -152,15 +152,17 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   const repoName = project?.name || '';
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
 
-  // 6. Events log
-  const eventsDir = resolve(projectRoot, '.claude', 'state');
-  await mkdir(eventsDir, { recursive: true });
-  const eventsPath = resolve(eventsDir, 'events.log');
-  const timestamp = new Date().toISOString();
+  // 6. Emit structured event
   const p0 = sorted.filter((i) => i.priority === 'P0').length;
   const p1 = sorted.filter((i) => i.priority === 'P1').length;
-  const logEntry = `[${timestamp}] [BACKLOG] [SYNC] Synced backlog. Total: ${sorted.length}. P0: ${p0}. P1: ${p1}. New: ${added}. Updated: ${updated}. Manual: ${preserved}.\n`;
-  await appendFile(eventsPath, logEntry, 'utf-8');
+  emitEvent(projectRoot, 'backlog_sync', {
+    total: sorted.length,
+    p0,
+    p1,
+    added,
+    updated,
+    preserved,
+  }, { source: 'sync-backlog' });
 
   // Apply team filter for display only (does not affect persisted data)
   let displayItems = sorted;

@@ -33,7 +33,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const requiredDirs = [
     '.claude/commands',
     '.claude/hooks',
-    '.claude/state',
+    '.agentkit/state',
     '.claude/rules',
     '.claude/agents',
     '.cursor/rules',
@@ -54,7 +54,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 3: Validate JSON files ──────────────────────────────────────
   console.log('\n  --- JSON Files ---');
-  const jsonFiles = ['.claude/settings.json', '.claude/state/schema.json'];
+  const jsonFiles = ['.claude/settings.json', '.agentkit/state/schema.json'];
 
   for (const file of jsonFiles) {
     const fullPath = resolve(projectRoot, file);

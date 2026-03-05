@@ -10,7 +10,7 @@ function makeTempDirs() {
   const projectRoot = resolve(tmpdir(), `agentkit-import-test-${id}`);
   const agentkitRoot = resolve(projectRoot, '.agentkit');
   const specDir = resolve(agentkitRoot, 'spec');
-  const stateDir = resolve(projectRoot, '.claude', 'state');
+  const stateDir = resolve(projectRoot, '.agentkit', 'state');
   mkdirSync(specDir, { recursive: true });
   mkdirSync(stateDir, { recursive: true });
   return { projectRoot, agentkitRoot, specDir, stateDir };
@@ -101,7 +101,7 @@ describe('runImportIssues', () => {
       flags: {},
     });
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     expect(existsSync(jsonPath)).toBe(true);
     const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(jsonData.items).toHaveLength(2);
@@ -130,9 +130,11 @@ describe('runImportIssues', () => {
 
     const eventsPath = resolve(dirs.stateDir, 'events.log');
     expect(existsSync(eventsPath)).toBe(true);
-    const log = readFileSync(eventsPath, 'utf-8');
-    expect(log).toContain('[IMPORT]');
-    expect(log).toContain('[GITHUB]');
+    const log = readFileSync(eventsPath, 'utf-8').trim();
+    const event = JSON.parse(log);
+    expect(event.action).toBe('import_issues');
+    expect(event.tracker).toBe('GITHUB');
+    expect(event.source).toBe('import-issues');
   });
 
   it('dry-run does not write files', async () => {
@@ -151,7 +153,7 @@ describe('runImportIssues', () => {
     });
 
     expect(result.dryRun).toBe(true);
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     expect(existsSync(jsonPath)).toBe(false);
   });
 
@@ -182,7 +184,7 @@ describe('runImportIssues', () => {
     expect(result.preserved).toBe(1);
     expect(result.imported).toBe(1);
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(jsonData.items.length).toBeGreaterThanOrEqual(2);
     expect(jsonData.items.some((i) => i.title === 'Manual task')).toBe(true);
@@ -217,7 +219,7 @@ describe('runImportIssues', () => {
     expect(result.updated).toBe(1);
     expect(result.imported).toBe(0);
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(jsonData.items).toHaveLength(1);
     expect(jsonData.items[0].title).toBe('Bug v2');

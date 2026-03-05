@@ -1517,7 +1517,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           vars.overlayTemplatesDir,
           'claude/state',
           tmpDir,
-          '.claude/state',
+          '.agentkit/state',
           vars,
           version,
           headerRepoName

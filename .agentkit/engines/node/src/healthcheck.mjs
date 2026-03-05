@@ -71,7 +71,7 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
   // --- Step 2: Check AgentKit setup ---
   console.log('--- AgentKit Setup ---');
   const hasMarker = existsSync(resolve(projectRoot, '.agentkit-repo'));
-  const hasState = existsSync(resolve(projectRoot, '.claude', 'state', 'orchestrator.json'));
+  const hasState = existsSync(resolve(projectRoot, '.agentkit', 'state', 'orchestrator.json'));
   const hasCommands = existsSync(resolve(projectRoot, '.claude', 'commands'));
   const hasHooks = existsSync(resolve(projectRoot, '.claude', 'hooks'));
 

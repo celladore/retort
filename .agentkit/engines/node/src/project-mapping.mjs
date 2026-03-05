@@ -375,6 +375,9 @@ export const PROJECT_MAPPING = [
   { src: 'evaluation.weights.code', dest: 'evalWeightCode', type: 'string' },
   { src: 'evaluation.weights.ops', dest: 'evalWeightOps', type: 'string' },
   { src: 'evaluation.customGates', dest: 'evalCustomGates', check: 'not-none' },
+
+  // Scoring
+  { src: 'scoring.enabled', dest: 'hasScoringEnabled', type: 'boolean' },
 ];
 
 /**

@@ -6,7 +6,7 @@ import { existsSync, readFileSync } from 'fs';
 import { mkdir, writeFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
 
-const BACKLOG_JSON_PATH = '.claude/state/backlog.json';
+const BACKLOG_JSON_PATH = '.agentkit/state/backlog.json';
 const BACKLOG_MD_PATH = 'AGENT_BACKLOG.md';
 
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
@@ -259,6 +259,8 @@ export function sortItems(items, sortBy = 'priority') {
       return copy.sort(
         (a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
       );
+    case 'score':
+      return copy.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
     default:
       return copy;
   }

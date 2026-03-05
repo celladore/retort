@@ -84,7 +84,7 @@ describe('suggestion-store operations', () => {
     expect(result.count).toBe(2);
 
     // Files should be namespaced by timestamp, not bare SUG-NNN
-    const dir = resolve(tempRoot, '.claude', 'state', 'suggestions');
+    const dir = resolve(tempRoot, '.agentkit', 'state', 'suggestions');
     const entries = await readdir(dir);
     const suggestionFiles = entries.filter((e) => e.includes('_SUG-') && e.endsWith('.yaml'));
     expect(suggestionFiles.length).toBe(2);

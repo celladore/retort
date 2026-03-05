@@ -5,7 +5,6 @@
  */
 import { execFileSync } from 'child_process';
 import {
-  appendFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -25,6 +24,7 @@ import {
   processHandoffs,
   TERMINAL_STATES,
 } from './task-protocol.mjs';
+import { emitEvent, readEvents as readEventsFiltered } from './event-emitter.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -226,7 +226,7 @@ export function computeEscalation({ area, priority, severity, impact }, agentkit
 // ---------------------------------------------------------------------------
 
 function stateDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state');
+  return resolve(projectRoot, '.agentkit', 'state');
 }
 
 function statePath(projectRoot) {
@@ -239,6 +239,41 @@ function eventsPath(projectRoot) {
 
 function lockPath(projectRoot) {
   return resolve(stateDir(projectRoot), 'orchestrator.lock');
+}
+
+// ---------------------------------------------------------------------------
+// State directory migration (.claude/state → .agentkit/state)
+// ---------------------------------------------------------------------------
+
+const _migrated = new Set();
+
+/**
+ * Migrate state from legacy `.claude/state/` to `.agentkit/state/` if needed.
+ * Copies files to the new location and leaves the old directory intact for one
+ * release (deprecation period). Only runs once per projectRoot per process.
+ * @param {string} projectRoot
+ */
+function migrateStateDirIfNeeded(projectRoot) {
+  if (_migrated.has(projectRoot)) return;
+  _migrated.add(projectRoot);
+
+  const oldDir = resolve(projectRoot, '.claude', 'state');
+  const newDir = stateDir(projectRoot);
+
+  if (!existsSync(oldDir) || existsSync(newDir)) return;
+
+  try {
+    // Recursively copy old → new
+    const { cpSync } = require('fs');
+    cpSync(oldDir, newDir, { recursive: true });
+    console.warn(
+      '[agentkit] Migrated state from .claude/state/ to .agentkit/state/. ' +
+        'The old directory is preserved for backward compatibility and can be removed in a future release.'
+    );
+  } catch (err) {
+    console.warn(`[agentkit] State migration failed: ${err.message}. Falling back to new directory.`);
+    mkdirSync(newDir, { recursive: true });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -295,6 +330,7 @@ function createDefaultState(projectRoot) {
  * @returns {object} state
  */
 export function loadState(projectRoot) {
+  migrateStateDirIfNeeded(projectRoot);
   const path = statePath(projectRoot);
   if (existsSync(path)) {
     try {
@@ -475,16 +511,7 @@ export function checkLock(projectRoot) {
  * @param {object} data - Event data
  */
 export function appendEvent(projectRoot, action, data = {}) {
-  const dir = stateDir(projectRoot);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  const event = {
-    timestamp: new Date().toISOString(),
-    action,
-    ...data,
-  };
-  appendFileSync(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
+  emitEvent(projectRoot, action, data, { source: 'orchestrator' });
 }
 
 /**
@@ -494,19 +521,7 @@ export function appendEvent(projectRoot, action, data = {}) {
  * @returns {object[]}
  */
 export function readEvents(projectRoot, limit = 20) {
-  const path = eventsPath(projectRoot);
-  if (!existsSync(path)) return [];
-  const lines = readFileSync(path, 'utf-8').trim().split('\n').filter(Boolean);
-  const events = lines
-    .map((line) => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-  return events.slice(-limit);
+  return readEventsFiltered(projectRoot, { limit });
 }
 
 // ---------------------------------------------------------------------------
@@ -846,7 +861,7 @@ export async function orchestratorProcessHandoffs(projectRoot, state) {
  * @returns {string}
  */
 export function getTasksSummary(projectRoot) {
-  const dir = resolve(projectRoot, '.claude', 'state', 'tasks');
+  const dir = resolve(projectRoot, '.agentkit', 'state', 'tasks');
   if (!existsSync(dir)) return 'No tasks in the task queue.';
 
   let files;
@@ -927,6 +942,10 @@ export async function getTasksSummaryAsync(projectRoot) {
  * @param {object} opts.flags
  */
 export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
+  const userContext = Array.isArray(flags._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
+
   // Load team IDs from spec if available (overrides hardcoded defaults)
   loadTeamIdsFromSpec(agentkitRoot);
 
@@ -991,6 +1010,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
     appendEvent(projectRoot, 'orchestrate_invoked', {
       phase: state.current_phase,
       phase_name: state.phase_name,
+      ...(userContext ? { userContext } : {}),
     });
   } finally {
     releaseLock(projectRoot);

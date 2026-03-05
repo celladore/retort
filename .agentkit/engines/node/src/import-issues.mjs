@@ -4,7 +4,6 @@
  * merges into the local backlog.
  */
 import { existsSync, readFileSync } from 'fs';
-import { appendFile, mkdir } from 'fs/promises';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import {
@@ -14,6 +13,7 @@ import {
   writeBacklogMarkdown,
   sortItems,
 } from './backlog-store.mjs';
+import { emitEvent } from './event-emitter.mjs';
 import { normalizeIssue, deduplicateItems } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
 
@@ -102,13 +102,14 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
   const repoName = project?.name || '';
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
 
-  // Append to events.log
-  const eventsDir = resolve(projectRoot, '.claude', 'state');
-  await mkdir(eventsDir, { recursive: true });
-  const eventsPath = resolve(eventsDir, 'events.log');
-  const timestamp = new Date().toISOString();
-  const logEntry = `[${timestamp}] [IMPORT] [${tracker.toUpperCase()}] Imported ${added} new, updated ${updated}, preserved ${preserved} manual items. Total: ${sorted.length}.\n`;
-  await appendFile(eventsPath, logEntry, 'utf-8');
+  // Emit structured event
+  emitEvent(projectRoot, 'import_issues', {
+    tracker: tracker.toUpperCase(),
+    added,
+    updated,
+    preserved,
+    total: sorted.length,
+  }, { source: 'import-issues' });
 
   console.log(`[agentkit:import-issues] Done.`);
   console.log(`  Added:     ${added}`);
