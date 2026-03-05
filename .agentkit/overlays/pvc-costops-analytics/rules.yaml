@@ -1,26 +1,2 @@
 # pvc-costops-analytics rule overrides
-# Enables FinOps rules for cloud cost visibility, tagging, and budget governance.
-# Implementation artifacts (KQL, Grafana, scripts) live in this repo;
-# methodology and spec come from agentkit-forge (finops rule domain).
-
-domains:
-  - finops
-
-overrides:
-  # This repo is the primary FinOps implementation — enforce all rules strictly
-  finops-phased-delivery:
-    severity: error
-  finops-tag-safety:
-    severity: critical
-  finops-audit-reversibility:
-    severity: critical
-
-  # ADX alternatives: this repo supports both ADX and Log Analytics backends.
-  # When ADX is too expensive, the same logical functions are implemented
-  # against Log Analytics workspace. See docs/adx-cost-assessment.md for
-  # the decision framework and docs/cost-analysis-guide.md for backend config.
-  finops-adx-alternatives:
-    severity: error
-    note: >
-      pvc-costops-analytics must maintain both ADX and Log Analytics
-      implementations for cost functions. See docs/adx-cost-assessment.md.
+# Add repo-specific coding rule customisations below.

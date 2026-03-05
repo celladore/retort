@@ -1,10 +1,2 @@
 # pvc-costops-analytics command overrides
-# Enables cost-centre management and infrastructure evaluation for this repo.
-
-commands:
-  cost-centres:
-    enabled: true
-  infra-eval:
-    enabled: true
-    defaults:
-      focus: cost
+# Add repo-specific command customisations below.
