@@ -274,7 +274,7 @@ agentkit-forge update --check
 
 - Detects new forge versions vs. adopter repo's pinned version.
 - Opens a PR with version bump, re-synced outputs, and changelog in body.
-- PR targets the adopter repo's `dev` branch (aligned with #173 governance).
+- PR targets the adopter repo's `dev` branch (aligned with the adopter governance workflow).
 - Optionally blocks PR merge on adopter repo until forge version is current
   (configurable opt-in via `settings.yaml`).
 

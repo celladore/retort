@@ -27,14 +27,14 @@ repositories that have integrated AgentKit Forge.
 > - Cross-reference comments added on [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)
 >   and [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194)
 
-## Cross-References (Issue Updates Required)
+## Cross-References (Issue Updates Applied)
 
 The following updates were applied to GitHub issues after autoupdate issue
 #258 was assigned:
 
 ### Issue #196 — adoption/startup-hooks: enforce required CLI toolchain
 
-Add the following cross-reference section to the issue body or as a comment:
+Template that was added to the issue body/comment:
 
 ```markdown
 ## Related
@@ -46,7 +46,7 @@ Add the following cross-reference section to the issue body or as a comment:
 
 ### Issue #194 — governance: enforce agentkit sync pre-PR for adopters
 
-Add the following cross-reference section to the issue body or as a comment:
+Template that was added to the issue body/comment:
 
 ```markdown
 ## Related
@@ -86,10 +86,10 @@ adopter repos accumulate version drift, triggering avoidable CI failures when
 new forge versions introduce breaking template changes.
 
 This issue tracks delivery of the autoupdate capability as described in
-[PRD-007](docs/01_product/PRD-007-adopter-autoupdate.md), building on the
+[PRD-007](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-007-adopter-autoupdate.md), building on the
 delivery channel established in
-[ADR-07](docs/03_architecture/02_decisions/07-delivery-strategy.md) and
-[PRD-005](docs/01_product/PRD-005-mesh-native-distribution.md).
+[ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/03_architecture/02_decisions/07-delivery-strategy.md) and
+[PRD-005](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-005-mesh-native-distribution.md).
 
 ## Scope
 
@@ -120,8 +120,8 @@ delivery channel established in
 
 - Prereq: #196 — CLI toolchain enforcement (preflight check dependency)
 - Prereq: #194 — agentkit sync pre-PR enforcement (sync gate dependency)
-- Parent PRD: [PRD-007: Adopter Autoupdate](docs/01_product/PRD-007-adopter-autoupdate.md)
-- Delivery strategy: [ADR-07](docs/03_architecture/02_decisions/07-delivery-strategy.md)
+- Parent PRD: [PRD-007: Adopter Autoupdate](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-007-adopter-autoupdate.md)
+- Delivery strategy: [ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/03_architecture/02_decisions/07-delivery-strategy.md)
 - Analytics: #241 (telemetry events for version tracking)
 ```
 
@@ -131,7 +131,7 @@ delivery channel established in
 
 ```text
 #196 (CLI toolchain) ──────────┐
-                                ├──► autoupdate issue (TBD)
+                                ├──► autoupdate issue (#258)
 #194 (sync enforcement) ───────┘
 ```
 
