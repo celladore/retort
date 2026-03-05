@@ -69,7 +69,9 @@ export function readBacklogMarkdown(projectRoot) {
   // Match table rows in both formats:
   // 7-column (current): | Priority | Team | Task | Phase | Status | Source | Notes |
   // 6-column (legacy):  | Priority | Team | Task | Phase | Status | Notes |
-  const tableRow7Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|/gm;
+  // The 7-column regex requires the 6th group (Source) to be non-whitespace-only,
+  // preventing greedy consumption of 6-column rows where Notes would fill Source.
+  const tableRow7Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*(\S[^|]*)\|\s*([^|]*)\|/gm;
   const tableRow6Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|\s*$/gm;
 
   // Try 7-column format first (matches are greedy, so 7-col takes priority)
@@ -168,6 +170,9 @@ export async function writeBacklogMarkdown(projectRoot, items, repoName = '') {
 
   const totalOpen = items.length - completed.length;
 
+  // Escape pipe characters in table cell values to prevent markdown corruption
+  const escapeCell = (val) => String(val ?? '').replace(/\|/g, '\\|');
+
   function renderTable(groupItems) {
     if (!groupItems.length) return '_None_\n';
     const lines = [
@@ -175,11 +180,11 @@ export async function writeBacklogMarkdown(projectRoot, items, repoName = '') {
       '| -------- | ---- | ---- | ----- | ------ | ------ | ----- |',
     ];
     for (const item of groupItems) {
-      const extRef = item.externalId ? ` [${item.externalId}]` : '';
+      const extRef = item.externalId ? ` [${escapeCell(item.externalId)}]` : '';
       const statusDisplay = (item.status || 'open').replace(/-/g, ' ');
       const statusCap = statusDisplay.charAt(0).toUpperCase() + statusDisplay.slice(1);
       lines.push(
-        `| ${item.priority} | ${item.team} | ${item.title}${extRef} | ${item.phase || 'Planning'} | ${statusCap} | ${item.source || 'manual'} | ${item.what?.slice(0, 80) || ''} |`
+        `| ${escapeCell(item.priority)} | ${escapeCell(item.team)} | ${escapeCell(item.title)}${extRef} | ${escapeCell(item.phase || 'Planning')} | ${escapeCell(statusCap)} | ${escapeCell(item.source || 'manual')} | ${escapeCell(item.what?.slice(0, 80) || '')} |`
       );
     }
     return lines.join('\n') + '\n';

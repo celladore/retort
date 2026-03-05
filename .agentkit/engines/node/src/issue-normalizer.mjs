@@ -212,12 +212,15 @@ export function normalizeIssue(rawIssue, config = {}) {
 export function deduplicateItems(existing, incoming) {
   const existingByExtId = new Map();
   const manualItems = [];
+  // Track manual items by title to prevent duplication on repeated imports
+  const manualTitles = new Set();
 
   for (const item of existing) {
     if (item.externalId) {
       existingByExtId.set(item.externalId, item);
     } else {
       manualItems.push(item);
+      if (item.title) manualTitles.add(item.title);
     }
   }
 
@@ -226,9 +229,15 @@ export function deduplicateItems(existing, incoming) {
 
   let incomingWithoutExtId = 0;
   for (const item of incoming) {
-    // Items without externalId are treated as local/manual — always append
+    // Items without externalId are treated as local/manual
     if (!item.externalId) {
+      // Deduplicate manual items by title to prevent re-appending on repeated imports
+      if (item.title && manualTitles.has(item.title)) {
+        // Skip — already exists as a manual item
+        continue;
+      }
       manualItems.push(item);
+      if (item.title) manualTitles.add(item.title);
       incomingWithoutExtId++;
       added++;
       continue;

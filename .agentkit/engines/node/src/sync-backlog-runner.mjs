@@ -89,10 +89,22 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
 
   console.log(`[agentkit:sync-backlog] Starting backlog sync (tracker: ${tracker}, direction: ${direction})...`);
 
+  if (direction === 'push') {
+    console.warn(
+      '[agentkit:sync-backlog] Warning: --direction push is not yet implemented. ' +
+        'Only local sources will be collected. Use --direction pull (default) to fetch from tracker.'
+    );
+  }
+
   // 1. Read existing backlog (fall back to markdown if JSON store is empty/missing)
   let existing = readBacklogJson(projectRoot);
   if (!existing.length) {
     existing = readBacklogMarkdown(projectRoot);
+    if (existing.length) {
+      console.warn(
+        '  [agentkit:sync-backlog] Warning: JSON store empty, fell back to markdown parse.'
+      );
+    }
   }
   let allIncoming = [];
 
@@ -104,6 +116,8 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
       const rawIssues = await adapter.fetchIssues({
         state: flags.state || 'open',
         labels: flags.labels || null,
+        since: flags.since || null,
+        limit: flags.limit ? Number(flags.limit) : 100,
       });
 
       const config = {

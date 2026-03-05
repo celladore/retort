@@ -115,6 +115,62 @@ describe('backlog-store', () => {
       expect(content).toContain('## P2 — Medium Priority');
       expect(content).toContain('Add dashboard');
     });
+
+    it('escapes pipe characters in table fields', async () => {
+      const itemsWithPipe = [
+        {
+          ...sampleItems[0],
+          title: 'Fix auth | token bug',
+          what: 'Token has | in it',
+        },
+      ];
+      await writeBacklogMarkdown(tempDir, itemsWithPipe, 'test-repo');
+
+      const content = readFileSync(resolve(tempDir, 'AGENT_BACKLOG.md'), 'utf-8');
+      expect(content).toContain('Fix auth \\| token bug');
+      expect(content).toContain('Token has \\| in it');
+    });
+
+    it('parses 7-column markdown table rows', () => {
+      const md = `# Backlog
+| Priority | Team | Task | Phase | Status | Source | Notes |
+| -------- | ---- | ---- | ----- | ------ | ------ | ----- |
+| P1 | backend | Fix auth bug | Planning | Open | github | Auth tokens expire |
+`;
+      writeFileSync(resolve(tempDir, 'AGENT_BACKLOG.md'), md, 'utf-8');
+      const items = readBacklogMarkdown(tempDir);
+      expect(items).toHaveLength(1);
+      expect(items[0].title).toBe('Fix auth bug');
+      expect(items[0].source).toBe('github');
+    });
+
+    it('parses 6-column markdown table rows (legacy)', () => {
+      const md = `# Backlog
+| Priority | Team | Task | Phase | Status | Notes |
+| -------- | ---- | ---- | ----- | ------ | ----- |
+| P2 | frontend | Add dashboard | Discovery | Open | New page |
+`;
+      writeFileSync(resolve(tempDir, 'AGENT_BACKLOG.md'), md, 'utf-8');
+      const items = readBacklogMarkdown(tempDir);
+      expect(items).toHaveLength(1);
+      expect(items[0].title).toBe('Add dashboard');
+      expect(items[0].source).toBe('manual');
+    });
+
+    it('does not match 6-column rows as 7-column', () => {
+      // A 6-column row should NOT be matched by the 7-column regex
+      // (which would incorrectly put notes in source)
+      const md = `# Backlog
+| Priority | Team | Task | Phase | Status | Notes |
+| -------- | ---- | ---- | ----- | ------ | ----- |
+| P1 | backend | Fix bug | Planning | Open | Important note |
+`;
+      writeFileSync(resolve(tempDir, 'AGENT_BACKLOG.md'), md, 'utf-8');
+      const items = readBacklogMarkdown(tempDir);
+      expect(items).toHaveLength(1);
+      // Source should be 'manual' (from 6-column parse), not 'important note'
+      expect(items[0].source).toBe('manual');
+    });
   });
 
   describe('filterItems', () => {

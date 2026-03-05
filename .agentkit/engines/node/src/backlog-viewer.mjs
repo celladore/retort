@@ -91,6 +91,12 @@ export async function runBacklogViewer({ projectRoot, flags }) {
   let items = readBacklogJson(projectRoot);
   if (!items.length) {
     items = readBacklogMarkdown(projectRoot);
+    if (items.length) {
+      console.warn(
+        '[agentkit:backlog] Warning: JSON store empty, fell back to markdown parse. ' +
+          'Some fields may be missing.'
+      );
+    }
   }
 
   // Apply filters

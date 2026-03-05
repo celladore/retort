@@ -212,4 +212,30 @@ describe('deduplicateItems', () => {
     expect(result.merged[0].priority).toBe('P0');
     expect(result.merged[0].title).toBe('Updated');
   });
+
+  it('deduplicates manual items by title on repeated imports', () => {
+    const existing = [
+      { externalId: null, title: 'Manual task', dirty: false },
+    ];
+    const incoming = [
+      { externalId: null, title: 'Manual task', dirty: false },
+    ];
+    const result = deduplicateItems(existing, incoming);
+    // Should not duplicate the manual item
+    const manuals = result.merged.filter((i) => !i.externalId);
+    expect(manuals).toHaveLength(1);
+  });
+
+  it('allows different-titled manual items from incoming', () => {
+    const existing = [
+      { externalId: null, title: 'Existing manual', dirty: false },
+    ];
+    const incoming = [
+      { externalId: null, title: 'New manual', dirty: false },
+    ];
+    const result = deduplicateItems(existing, incoming);
+    const manuals = result.merged.filter((i) => !i.externalId);
+    expect(manuals).toHaveLength(2);
+    expect(result.added).toBe(1);
+  });
 });

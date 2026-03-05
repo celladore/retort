@@ -87,6 +87,12 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
   let existing = readBacklogJson(projectRoot);
   if (!existing.length) {
     existing = readBacklogMarkdown(projectRoot);
+    if (existing.length) {
+      console.warn(
+        '  [agentkit:import-issues] Warning: JSON store empty, fell back to markdown parse. ' +
+          'Some fields (labels, acceptance, files) may be missing.'
+      );
+    }
   }
   const { merged, added, updated, preserved } = deduplicateItems(existing, normalized);
   const sorted = sortItems(merged, 'priority');

@@ -48,6 +48,14 @@ export class GitHubAdapter {
    * @returns {object[]} Array of raw GitHub issue objects
    */
   fetchIssues({ state = 'open', labels = null, since = null, limit = 100 } = {}) {
+    // Validate state parameter
+    const validStates = ['open', 'closed', 'all'];
+    if (!validStates.includes(state)) {
+      throw new Error(
+        `Invalid state "${state}". Must be one of: ${validStates.join(', ')}`
+      );
+    }
+
     // Clamp limit to prevent excessive API calls
     limit = Math.min(Math.max(1, Number(limit) || 100), 1000);
     const auth = this.checkAuth();
@@ -81,6 +89,10 @@ export class GitHubAdapter {
     args.push('--state', state);
 
     if (labels) {
+      // Validate labels is a string (prevent injection via non-string types)
+      if (typeof labels !== 'string') {
+        throw new Error('labels must be a string');
+      }
       args.push('--label', labels);
     }
 
@@ -92,7 +104,12 @@ export class GitHubAdapter {
         timeout: 30_000,
       });
 
-      const issues = JSON.parse(stdout);
+      const parsed = JSON.parse(stdout);
+      if (!Array.isArray(parsed)) {
+        throw new Error(
+          `Unexpected gh output: expected JSON array, got ${typeof parsed}`
+        );
+      }
 
       // Client-side filter by --since (gh doesn't support this natively on issue list)
       if (since) {
@@ -102,12 +119,13 @@ export class GitHubAdapter {
             `Invalid "since" value: ${since}. Expected ISO 8601 date, e.g. "2024-01-31T00:00:00Z".`
           );
         }
-        return issues.filter((issue) => new Date(issue.updatedAt) >= sinceDate);
+        return parsed.filter((issue) => new Date(issue.updatedAt) >= sinceDate);
       }
 
-      return issues;
+      return parsed;
     } catch (err) {
-      if (err.killed) {
+      // execFileSync sets err.signal on timeout (works cross-platform including Windows)
+      if (err.killed || err.signal === 'SIGTERM') {
         throw new Error('gh issue list timed out after 30s');
       }
       const stderr = err.stderr || '';
