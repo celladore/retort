@@ -85,6 +85,7 @@ externalKnowledge:
 deployment:
   cloudProvider: none # aws | azure | gcp | vercel | netlify | self-hosted | none
   containerized: false
+  containerRuntime: null # docker | podman | containerd | nerdctl | none
   environments: [local, ci] # e.g. [dev, staging, prod]
   iacTool: none # terraform | bicep | pulumi | cdk | terragrunt | none
 
@@ -123,6 +124,7 @@ compliance:
     rpoHours: null # Recovery Point Objective in hours
     rtoHours: null # Recovery Time Objective in hours
     backupSchedule: null # daily | weekly | continuous | none
+    testSchedule: null # monthly | quarterly | annually | none
     geoRedundancy: false
   audit:
     enabled: false
