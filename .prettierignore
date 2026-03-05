@@ -16,6 +16,8 @@ COMMAND_GUIDE.md
 # Template files — contain Handlebars syntax that Prettier may reformat
 .agentkit/templates/**/*.md
 .agentkit/templates/**/*.mdc
+.agentkit/templates/**/*.yml
+.agentkit/templates/**/*.yaml
 
 # Test scratch directories
 .test-validate

@@ -288,7 +288,21 @@ commands:
         type: string
         default: 'all'
         required: false
-        enum: [security, performance, correctness, style, tests, compatibility, completeness, docs, bugs, enhancements, retrospective, all]
+        enum:
+          [
+            security,
+            performance,
+            correctness,
+            style,
+            tests,
+            compatibility,
+            completeness,
+            docs,
+            bugs,
+            enhancements,
+            retrospective,
+            all,
+          ]
       - name: --severity
         description: 'Minimum severity to report: info, warning, error, critical'
         type: string
@@ -1196,6 +1210,7 @@ commands:
         description: 'Feature ID to trace (e.g., team-orchestration, quality-gates)'
         type: string
         required: true
+        default: ''
       - name: --show-templates
         description: 'Show the raw template content that uses this feature'
         type: boolean

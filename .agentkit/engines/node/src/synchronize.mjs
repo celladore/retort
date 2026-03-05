@@ -465,7 +465,9 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
   // Apply brand density tier — filter to only the configured surface level
   colorCustomizations = filterByTier(colorCustomizations, tier);
   if (tier !== 'full') {
-    log(`[agentkit:sync] Brand tier "${tier}" — filtered to ${Object.keys(colorCustomizations).length} color slots`);
+    log(
+      `[agentkit:sync] Brand tier "${tier}" — filtered to ${Object.keys(colorCustomizations).length} color slots`
+    );
   }
 
   if (Object.keys(colorCustomizations).length === 0) {
@@ -798,7 +800,7 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
     if (!isItemFeatureEnabled(cmd, vars)) continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.cursor/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.cursor', 'commands', `${cmd.name}.md`), withHeader);
@@ -845,7 +847,7 @@ async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoNam
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
     if (!isItemFeatureEnabled(cmd, vars)) continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.windsurf/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.windsurf', 'commands', `${cmd.name}.md`), withHeader);
@@ -892,7 +894,7 @@ async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName,
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
     if (!isItemFeatureEnabled(cmd, vars)) continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.github/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`), withHeader);
@@ -1079,7 +1081,7 @@ async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, co
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
     if (!isItemFeatureEnabled(cmd, vars)) continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.agents/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.agents', 'skills', cmd.name, 'SKILL.md'), withHeader);
@@ -1257,9 +1259,12 @@ function buildTeamVars(team, vars, teamsSpec) {
     teamFocus: team.focus || '',
     teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
     teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
-    teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' → ') : team['handoff-chain'] || '',
+    teamHandoffChain: Array.isArray(team['handoff-chain'])
+      ? team['handoff-chain'].join(' → ')
+      : team['handoff-chain'] || '',
     maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
-    maxHandoffChainDepth: team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
+    maxHandoffChainDepth:
+      team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
     maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
   };
 }
@@ -1270,10 +1275,18 @@ function buildTeamVars(team, vars, teamsSpec) {
  */
 function buildAreaRoutingTable(teamsIntake) {
   const defaultRouting = {
-    backend: 'team-backend', frontend: 'team-frontend', data: 'team-data',
-    infra: 'team-infra', devops: 'team-devops', testing: 'team-testing',
-    security: 'team-security', docs: 'team-docs', product: 'team-product',
-    quality: 'team-quality', cli: 'team-backend', 'sync-engine': 'team-devops',
+    backend: 'team-backend',
+    frontend: 'team-frontend',
+    data: 'team-data',
+    infra: 'team-infra',
+    devops: 'team-devops',
+    testing: 'team-testing',
+    security: 'team-security',
+    docs: 'team-docs',
+    product: 'team-product',
+    quality: 'team-quality',
+    cli: 'team-backend',
+    'sync-engine': 'team-devops',
   };
   const routing = teamsIntake?.routing || {};
   const merged = { ...defaultRouting };
@@ -1365,7 +1378,9 @@ export function buildBranchProtectionJson(vars) {
   );
   const scanningToolsRaw = vars.bpCodeScanningTools ?? [];
   const scanningTools = Array.isArray(scanningToolsRaw)
-    ? scanningToolsRaw.filter((t) => t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() !== '')
+    ? scanningToolsRaw.filter(
+        (t) => t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() !== ''
+      )
     : [];
   const scanningToolsJson = JSON.stringify(
     scanningTools.map((t) => ({
@@ -1487,9 +1502,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     log('[agentkit:sync] Features: spec not found, all features assumed enabled');
   }
 
-  const vars = {
-    ...projectVars,
-    ...featureVars,
   const teamsIntake = teamsSpec?.intake || {};
   const processIntake = projectSpec?.process?.intake || {};
   const intakeEscalation = processIntake.escalation || teamsIntake.escalation || {};
@@ -1518,7 +1530,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   const vars = {
     ...mergedDefaults,
-    intakeOwnerTeam: projectVars.intakeOwnerTeam || processIntake.ownerTeam || teamsIntake.ownerTeam || 'product',
+    ...featureVars,
+    intakeOwnerTeam:
+      projectVars.intakeOwnerTeam || processIntake.ownerTeam || teamsIntake.ownerTeam || 'product',
     intakeOperationsTeam:
       projectVars.intakeOperationsTeam ||
       processIntake.operationsTeam ||
@@ -1578,7 +1592,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const bpJson = buildBranchProtectionJson(vars);
   vars.bpRequiredStatusChecksJson = bpJson.statusChecksJson;
   vars.bpCodeScanningToolsJson = bpJson.scanningToolsJson;
-
 
   // Inject brand identity into template vars when brand guide exists
   if (vars.hasBrandGuide) {

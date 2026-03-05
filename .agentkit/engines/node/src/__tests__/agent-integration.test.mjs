@@ -33,7 +33,7 @@ function makeTmpDir() {
 }
 
 function setupTaskDir(projectRoot) {
-  const dir = resolve(projectRoot, '.claude', 'state', 'tasks');
+  const dir = resolve(projectRoot, '.agentkit', 'state', 'tasks');
   mkdirSync(dir, { recursive: true });
   return dir;
 }
