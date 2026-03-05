@@ -574,13 +574,14 @@ commands:
       - Bash
 
   - name: expand
-    type: workflow
+    type: utility
     description: >
       Runs the expansion analyzer to identify gaps, missing capabilities,
       undocumented decisions, and improvement opportunities in the codebase.
       Produces a ranked list of suggestions with rationale, impact scores,
-      and effort estimates. Never writes files or creates tasks in analysis
-      mode — all suggestions require explicit human approval.
+      and effort estimates. Never creates tasks in analysis mode — all
+      suggestions require explicit human approval. Use --save to persist
+      suggestions to disk for later review.
     flags:
       - name: --category
         description: 'Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature'
@@ -609,6 +610,7 @@ commands:
         default: false
     allowed-tools:
       - Read
+      - Write
       - Glob
       - Grep
 

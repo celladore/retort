@@ -8,9 +8,9 @@
  */
 import { existsSync, promises as fsPromises } from 'fs';
 import yaml from 'js-yaml';
-import { basename, join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
-const { readdir, readFile, stat } = fsPromises;
+const { readdir, readFile } = fsPromises;
 
 // ---------------------------------------------------------------------------
 // Suggestion categories
@@ -82,8 +82,8 @@ export async function runExpansionAnalysis({
   const categories = flags.category
     ? flags.category.split(',').map((c) => c.trim())
     : SUGGESTION_CATEGORIES;
-  const maxSuggestions = flags.maxSuggestions || 10;
-  const minImpact = flags.minImpact || 'low';
+  const maxSuggestions = flags.maxSuggestions ?? 10;
+  const minImpact = flags.minImpact ?? 'low';
 
   // Load project metadata
   const projectSpec = await loadProjectSpec(effectiveAgentkitRoot);
@@ -318,15 +318,6 @@ async function analyzeAdrGaps(context) {
       suggestedArtifacts: [{ type: 'ADR', path: adrPath }],
     });
     return suggestions;
-  }
-
-  // Count existing ADRs
-  let adrCount = 0;
-  try {
-    const entries = await readdir(adrDir);
-    adrCount = entries.filter((e) => e.endsWith('.md') && e !== 'README.md').length;
-  } catch {
-    /* ignore */
   }
 
   // Known architectural patterns that typically deserve ADRs
@@ -634,10 +625,15 @@ async function analyzeOpsGaps(context) {
     });
   }
 
-  // Check for health check endpoint documentation
+  // Check for operations documentation — derive path from docsSpec
+  const opsCategory = context.docsSpec?.categories?.find(
+    (c) => c.id?.includes('operations') || c.name?.toLowerCase() === 'operations',
+  );
+  const opsPath = opsCategory?.path || 'docs/07_operations/';
+
   if (
     discoveryReport?.frameworks?.backend?.length > 0 &&
-    !existsSync(resolve(projectRoot, 'docs/05_operations'))
+    !existsSync(resolve(projectRoot, opsPath))
   ) {
     suggestions.push({
       category: 'operations',
@@ -648,7 +644,7 @@ async function analyzeOpsGaps(context) {
       effort: 'M',
       riskIfSkipped: 'medium',
       alignment: 'high',
-      suggestedArtifacts: [{ type: 'docs', path: 'docs/05_operations/' }],
+      suggestedArtifacts: [{ type: 'docs', path: opsPath }],
     });
   }
 

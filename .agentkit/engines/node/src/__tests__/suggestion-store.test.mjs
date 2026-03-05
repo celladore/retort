@@ -12,7 +12,7 @@ import { existsSync, promises as fsPromises } from 'fs';
 import { resolve } from 'path';
 import { tmpdir } from 'os';
 
-const { mkdtemp, rm } = fsPromises;
+const { mkdtemp, readdir, rm } = fsPromises;
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -78,19 +78,24 @@ describe('suggestion-store operations', () => {
     ],
   };
 
-  it('saves suggestions and creates files', async () => {
+  it('saves suggestions with namespaced filenames to avoid ID collisions', async () => {
     const result = await saveSuggestions(tempRoot, sampleReport);
 
     expect(result.count).toBe(2);
-    expect(existsSync(resolve(tempRoot, '.claude', 'state', 'suggestions', 'SUG-001.yaml'))).toBe(
-      true,
-    );
-    expect(existsSync(resolve(tempRoot, '.claude', 'state', 'suggestions', 'SUG-002.yaml'))).toBe(
-      true,
-    );
+
+    // Files should be namespaced by timestamp, not bare SUG-NNN
+    const dir = resolve(tempRoot, '.claude', 'state', 'suggestions');
+    const entries = await readdir(dir);
+    const suggestionFiles = entries.filter((e) => e.includes('_SUG-') && e.endsWith('.yaml'));
+    expect(suggestionFiles.length).toBe(2);
+
+    // Verify namespacing pattern: timestamp_SUG-NNN.yaml
+    for (const file of suggestionFiles) {
+      expect(file).toMatch(/_SUG-\d{3}\.yaml$/);
+    }
   });
 
-  it('loads a saved suggestion', async () => {
+  it('loads a saved suggestion by bare ID (most recent match)', async () => {
     await saveSuggestions(tempRoot, sampleReport);
     const suggestion = await loadSuggestion(tempRoot, 'SUG-001');
 
@@ -98,6 +103,7 @@ describe('suggestion-store operations', () => {
     expect(suggestion.title).toBe('Create README');
     expect(suggestion.status).toBe('pending_review');
     expect(suggestion.category).toBe('documentation');
+    expect(suggestion).toHaveProperty('namespacedId');
   });
 
   it('returns null for non-existent suggestion', async () => {
@@ -105,13 +111,24 @@ describe('suggestion-store operations', () => {
     expect(suggestion).toBeNull();
   });
 
-  it('lists saved suggestions', async () => {
+  it('rejects invalid suggestion IDs (path traversal prevention)', async () => {
+    await expect(loadSuggestion(tempRoot, '../../../etc/passwd')).rejects.toThrow(
+      'Invalid suggestion ID',
+    );
+    await expect(loadSuggestion(tempRoot, 'SUG-001; rm -rf /')).rejects.toThrow(
+      'Invalid suggestion ID',
+    );
+    await expect(loadSuggestion(tempRoot, '')).rejects.toThrow('Invalid suggestion ID');
+  });
+
+  it('lists saved suggestions with namespaced IDs', async () => {
     await saveSuggestions(tempRoot, sampleReport);
     const ids = await listSuggestions(tempRoot);
 
-    expect(ids).toContain('SUG-001');
-    expect(ids).toContain('SUG-002');
     expect(ids.length).toBe(2);
+    for (const id of ids) {
+      expect(id).toMatch(/_SUG-\d{3}$/);
+    }
   });
 
   it('returns empty list when no suggestions exist', async () => {
@@ -156,6 +173,12 @@ describe('suggestion-store operations', () => {
     await expect(
       updateSuggestionStatus(tempRoot, 'SUG-999', 'approved'),
     ).rejects.toThrow('Suggestion not found');
+  });
+
+  it('rejects updates with invalid IDs (path traversal prevention)', async () => {
+    await expect(
+      updateSuggestionStatus(tempRoot, '../secret', 'approved'),
+    ).rejects.toThrow('Invalid suggestion ID');
   });
 
   it('prevents updates to terminal-state suggestions', async () => {
