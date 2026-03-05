@@ -201,7 +201,7 @@ Secondary scope is config only. Agents don't carry instructions about when to us
 
 ### Functional Requirements
 
-**FR-015.1**: Two agents SHALL be able to collaborate on the same task simultaneously.
+**FR-015.1**: Two agents SHALL be able to collaborate on the same task using a rapid sequential review model (see TR-015.3). The driver implements a small chunk; the navigator reviews it immediately before the next chunk begins.
 
 **FR-015.2**: Roles: Driver (writes code) and Navigator (reviews in real-time, catches issues).
 

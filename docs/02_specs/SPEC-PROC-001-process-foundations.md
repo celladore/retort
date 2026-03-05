@@ -299,6 +299,8 @@ Retro generation runs as a script analyzing `events.log`. Agents don't carry ret
 | Priority | Team | Task | Phase | Status | Estimate | Actual | Notes |
 ```
 
+**TR-005.1a — Backlog Parser Migration**: `.agentkit/engines/node/src/backlog-store.mjs` regex parser and table renderer must be updated to recognise the new `Estimate` and `Actual` columns. This is a prerequisite for TR-005.1; without it, existing markdown ingestion/output will break. Add to Phase 1 implementation manifest.
+
 **TR-005.2 — Validation**: DOR validation (`scripts/validate-dor.mjs`) checks:
 - `estimated` field is populated
 - Value is in allowed set: `[1, 2, 3, 5, 8]`

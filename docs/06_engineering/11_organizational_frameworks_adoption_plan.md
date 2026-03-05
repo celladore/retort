@@ -225,7 +225,7 @@ Grouping all adoptable principles into concrete implementation items, deduplicat
 | # | Item | Source Framework(s) | Description |
 |---|------|-------------------|-------------|
 | B1 | **Stop-the-line (Jidoka)** | TPS | If any agent discovers a broken build, security vulnerability, or data corruption: ALL work pauses. Fix the defect first. No new work until green |
-| B2 | **Andon alert system** | TPS | Any agent can raise an alert in `AGENT_BACKLOG.md` or `STANDUP.md` that triggers orchestrator attention. Format: `ANDON: [team] — [issue] — [severity]` |
+| B2 | **Andon alert system** | TPS | Any agent can raise an alert via `scripts/andon.mjs` which writes to `alerts.json` and notifies the orchestrator. Legacy `ANDON:` markers in `AGENT_BACKLOG.md` are deprecated in favour of the spec-based `alerts.json` mechanism (see SPEC-PROC-004b). |
 | B3 | **Poka-yoke expansion** | TPS, Six Sigma | Audit where defects recur. For each recurring defect type, add a prevention mechanism (linter rule, pre-commit check, DOR criterion) |
 | B4 | **Test-first development** | XP | Agents write the test that proves acceptance criteria, then implement to pass it. Enforced in DoD |
 | B5 | **10-minute build budget** | XP | Set a ceiling on CI time. If build + test exceeds 10 minutes, it becomes a P1 tech debt item |
