@@ -2,6 +2,7 @@
  * AgentKit Forge — Doctor
  * Repository diagnostics and setup checks.
  */
+import { execSync } from 'child_process';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { resolve } from 'path';
@@ -303,7 +304,64 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
     findings.push({ severity: 'warning', message: `project.yaml not found at ${projectPath}` });
   }
 
-  // 4) Template hygiene — detect hardcoded values that should use template vars
+  // 4) Merge driver health
+  const gitattrsPath = resolve(projectRoot, '.gitattributes');
+  if (existsSync(gitattrsPath)) {
+    const gitattrs = readFileSync(gitattrsPath, 'utf-8');
+    const hasMarkers =
+      gitattrs.includes('# >>> AgentKit Forge merge drivers') &&
+      gitattrs.includes('# <<< AgentKit Forge merge drivers');
+    const hasMergeRules = gitattrs.includes('merge=agentkit-generated');
+
+    if (!hasMergeRules) {
+      findings.push({
+        severity: 'error',
+        message:
+          '.gitattributes is missing merge=agentkit-generated rules. Run sync to generate them.',
+      });
+    } else if (!hasMarkers) {
+      findings.push({
+        severity: 'warning',
+        message:
+          '.gitattributes has merge rules but missing managed-section markers. Run sync to update.',
+      });
+    } else {
+      findings.push({
+        severity: 'info',
+        message: '.gitattributes merge driver section is present with managed markers.',
+      });
+    }
+
+    // Check local git config for the merge driver
+    if (hasMergeRules) {
+      try {
+        const driver = execSync('git config merge.agentkit-generated.driver', {
+          cwd: projectRoot,
+          encoding: 'utf-8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        }).trim();
+        if (driver) {
+          findings.push({
+            severity: 'info',
+            message: `Merge driver active locally: ${driver}`,
+          });
+        }
+      } catch {
+        findings.push({
+          severity: 'warning',
+          message:
+            'Merge driver "agentkit-generated" not configured locally. Run: git config merge.agentkit-generated.name "Accept upstream for generated files" && git config merge.agentkit-generated.driver "cp %B %A"',
+        });
+      }
+    }
+  } else {
+    findings.push({
+      severity: 'error',
+      message: '.gitattributes not found. Run sync to generate merge driver configuration.',
+    });
+  }
+
+  // 5) Template hygiene — detect hardcoded values that should use template vars
   const hygieneFindings = checkTemplateHygiene(agentkitRoot);
   if (hygieneFindings.length === 0) {
     findings.push({

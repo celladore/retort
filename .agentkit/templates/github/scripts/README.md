@@ -57,6 +57,46 @@ Configures branch protection rules for `{{defaultBranch}}` using the GitHub CLI.
 Run once after initial `agentkit sync`. The script is idempotent — running
 it again will overwrite existing protection rules with the standard config.
 
+### resolve-merge
+
+Resolves merge conflicts automatically for generated/framework-managed files
+using the AgentKit merge resolution matrix. Files requiring semantic understanding
+(engine source, spec files) are flagged for manual resolution.
+
+**What it does:**
+
+- Auto-resolves generated files (skills, agents, prompts, chatmodes, doc indexes) by accepting upstream
+- Auto-resolves lockfiles by accepting upstream (with a reminder to regenerate)
+- Auto-resolves generated configs (.gemini/config.yaml) by accepting upstream
+- Lists remaining conflicts categorised by type (engine, spec, source)
+- Commits the merge if all conflicts were auto-resolved
+
+**Usage:**
+
+```bash
+# Resolve conflicts with default branch ({{defaultBranch}})
+.github/scripts/resolve-merge.sh
+
+# Resolve conflicts with a specific branch
+.github/scripts/resolve-merge.sh main
+```
+
+**PowerShell:**
+
+```powershell
+# Default branch
+.github\scripts\resolve-merge.ps1
+
+# Specific branch
+.github\scripts\resolve-merge.ps1 -Target main
+```
+
+**When to run:**
+
+Run when your feature branch has merge conflicts with the target branch.
+The merge conflict detection workflow will post a PR comment with instructions
+when conflicts are detected.
+
 ## Customization
 
 The status check names in the script reference CI workflow job names. If your

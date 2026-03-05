@@ -1258,5 +1258,6 @@ export function validateRequiredFields(specRoot) {
   return warnings;
 }
 
+
 // Export validate for testing
 export { PROJECT_ENUMS, VALID_PHASES, validate, validateCrossReferences, validateProjectYaml };

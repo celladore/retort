@@ -82,6 +82,18 @@ jobs:
         run: node engines/node/src/cli.mjs discover --output json
         working-directory: .agentkit
 
+      - name: Validate merge driver configuration
+        run: |
+          if ! grep -q 'merge=agentkit-generated' .gitattributes 2>/dev/null; then
+            echo "::error::.gitattributes is missing merge=agentkit-generated rules. Run sync to generate them."
+            exit 1
+          fi
+          echo "✓ .gitattributes merge driver rules present"
+
+      - name: Run doctor diagnostics
+        run: node engines/node/src/cli.mjs doctor
+        working-directory: .agentkit
+
       - name: Check for drift
         run: |
           if ! git diff --quiet; then

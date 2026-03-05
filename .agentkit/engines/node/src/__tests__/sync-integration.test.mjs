@@ -1206,3 +1206,66 @@ describe('syncEditorTheme — pre-existing settings.json merge', () => {
     expect(settings['files.eol']).toBe('\n');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests: syncGitattributes (merge driver section management)
+// ---------------------------------------------------------------------------
+describe('syncGitattributes (merge driver sync)', () => {
+  let projectRoot;
+
+  beforeAll(async () => {
+    projectRoot = makeTmpProject();
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+  });
+  afterAll(() => {
+    rmSync(projectRoot, { recursive: true, force: true });
+  });
+
+  it('generates .gitattributes with merge driver section', () => {
+    const gitattrsPath = resolve(projectRoot, '.gitattributes');
+    expect(existsSync(gitattrsPath)).toBe(true);
+    const content = readFileSync(gitattrsPath, 'utf-8');
+    expect(content).toContain('# >>> AgentKit Forge merge drivers');
+    expect(content).toContain('# <<< AgentKit Forge merge drivers');
+    expect(content).toContain('merge=agentkit-generated');
+  });
+
+  it('includes expected file patterns in merge rules', () => {
+    const content = readFileSync(resolve(projectRoot, '.gitattributes'), 'utf-8');
+    expect(content).toContain('.agents/skills/**/SKILL.md');
+    expect(content).toContain('.github/agents/*.agent.md');
+    expect(content).toContain('.github/chatmodes/*.chatmode.md');
+    expect(content).toContain('.github/prompts/*.prompt.md');
+    expect(content).toContain('pnpm-lock.yaml');
+  });
+
+  it('preserves user content outside managed section on re-sync', async () => {
+    const gitattrsPath = resolve(projectRoot, '.gitattributes');
+    // Prepend custom user content
+    const existing = readFileSync(gitattrsPath, 'utf-8');
+    writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
+
+    // Re-sync
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+
+    const updated = readFileSync(gitattrsPath, 'utf-8');
+    expect(updated).toContain('# My custom rules');
+    expect(updated).toContain('*.pdf binary');
+    expect(updated).toContain('merge=agentkit-generated');
+    // Should have exactly one managed section (not duplicated)
+    const startCount = (updated.match(/# >>> AgentKit Forge merge drivers/g) || []).length;
+    expect(startCount).toBe(1);
+  });
+
+  it('replaces stale managed section without duplication', async () => {
+    const gitattrsPath = resolve(projectRoot, '.gitattributes');
+    // Re-sync a second time to verify no duplication
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+
+    const content = readFileSync(gitattrsPath, 'utf-8');
+    const startCount = (content.match(/# >>> AgentKit Forge merge drivers/g) || []).length;
+    const endCount = (content.match(/# <<< AgentKit Forge merge drivers/g) || []).length;
+    expect(startCount).toBe(1);
+    expect(endCount).toBe(1);
+  });
+});
