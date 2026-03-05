@@ -8,16 +8,30 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      administration: write
+      checks: write
     steps:
-      - name: Create tracking issue
+      - name: Create tracking issue (if not already open)
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
+            const title = 'fix(ci): branch protection checks stuck — status check name mismatch';
+
+            // Check for existing open issue with same title
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            if (existing.some(i => i.title === title)) {
+              core.info('Issue already exists, skipping creation.');
+              return;
+            }
+
             const { data: issue } = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: 'fix(ci): branch protection checks stuck — status check name mismatch',
+              title,
               body: [
                 '## Problem',
                 '',
@@ -51,7 +65,7 @@ jobs:
             core.info(`Created issue #${issue.number}: ${issue.html_url}`);
             core.setOutput('issue_number', issue.number);
 
-      - name: Fix branch protection check names for dev
+      - name: Fix branch protection check names
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         continue-on-error: true
         with:
@@ -68,30 +82,18 @@ jobs:
 
             for (const branch of ['dev', 'main']) {
               try {
-                // Get current protection settings
                 const { data: protection } = await github.rest.repos.getBranchProtection({
                   owner, repo, branch,
                 });
 
-                // Update required status checks
-                await github.rest.repos.updateBranchProtection({
+                // Only update the status checks — leave all other protection settings untouched
+                await github.rest.repos.updateStatusCheckProtection({
                   owner, repo, branch,
-                  required_status_checks: {
-                    strict: protection.required_status_checks?.strict ?? true,
-                    contexts: correctChecks,
-                  },
-                  enforce_admins: protection.enforce_admins?.enabled ?? false,
-                  required_pull_request_reviews: protection.required_pull_request_reviews ? {
-                    required_approving_review_count: protection.required_pull_request_reviews.required_approving_review_count,
-                    dismiss_stale_reviews: protection.required_pull_request_reviews.dismiss_stale_reviews,
-                  } : null,
-                  restrictions: protection.restrictions ? {
-                    users: protection.restrictions.users.map(u => u.login),
-                    teams: protection.restrictions.teams.map(t => t.slug),
-                  } : null,
+                  strict: protection.required_status_checks?.strict ?? true,
+                  contexts: correctChecks,
                 });
 
-                core.info(`Updated branch protection for ${branch}`);
+                core.info(`Updated required status checks for ${branch}`);
               } catch (err) {
                 core.warning(`Could not update ${branch}: ${err.message}. Manual update may be needed (requires admin permission).`);
               }
