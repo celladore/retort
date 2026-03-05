@@ -22,11 +22,17 @@ const TIER_PREFIXES = {
   medium: [
     'titleBar.',
     'activityBar.',
+    'activityBarBadge.',
     'statusBar.',
+    'statusBarItem.',
     'sideBar.',
+    'sideBarSectionHeader.',
   ],
   // full includes everything — no filtering needed
 };
+
+const VALID_TIERS = new Set(['full', 'medium', 'minimal']);
+const VALID_SCHEMES = new Set(['dark', 'light']);
 
 /**
  * Filters a resolved color customizations object by brand density tier.
@@ -48,6 +54,25 @@ export function filterByTier(colorCustomizations, tier) {
     }
   }
   return filtered;
+}
+
+/**
+ * Validates editor-theme.yaml tier and scheme values.
+ *
+ * @param {object} themeSpec - The parsed editor-theme.yaml object
+ * @returns {{ warnings: string[] }}
+ */
+export function validateThemeSpec(themeSpec) {
+  const warnings = [];
+  if (!themeSpec || typeof themeSpec !== 'object') return { warnings };
+
+  if (themeSpec.tier && !VALID_TIERS.has(themeSpec.tier)) {
+    warnings.push(`tier "${themeSpec.tier}" is not valid — expected one of: full, medium, minimal (defaulting to full)`);
+  }
+  if (themeSpec.scheme && !VALID_SCHEMES.has(themeSpec.scheme)) {
+    warnings.push(`scheme "${themeSpec.scheme}" is not valid — expected one of: dark, light (defaulting to dark)`);
+  }
+  return { warnings };
 }
 
 // ---------------------------------------------------------------------------

@@ -30,6 +30,7 @@ import {
   resolveColor,
   resolveThemeMapping,
   validateBrandSpec,
+  validateThemeSpec,
 } from './brand-resolver.mjs';
 
 // ---------------------------------------------------------------------------
@@ -336,6 +337,12 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
   if (!themeSpec || !themeSpec.enabled) {
     log('[agentkit:sync] Editor theme spec not found or disabled — skipping');
     return;
+  }
+
+  // Validate tier/scheme values
+  const themeValidation = validateThemeSpec(themeSpec);
+  for (const warn of themeValidation.warnings) {
+    log(`[agentkit:sync] Theme config warning: ${warn}`);
   }
 
   // Determine which mode mapping(s) to resolve

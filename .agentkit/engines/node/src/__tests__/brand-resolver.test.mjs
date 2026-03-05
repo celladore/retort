@@ -4,6 +4,7 @@ import {
   resolveBrandColor,
   resolveThemeMapping,
   validateBrandSpec,
+  validateThemeSpec,
   mergeThemeIntoSettings,
   filterByTier,
   isValidHex,
@@ -414,10 +415,13 @@ describe('filterByTier', () => {
     'titleBar.activeForeground': '#F7F9FB',
     'activityBar.background': '#184A6C',
     'activityBar.foreground': '#23BFAA',
+    'activityBarBadge.background': '#FD8369',
     'statusBar.background': '#1976D2',
     'statusBar.foreground': '#F7F9FB',
+    'statusBarItem.hoverBackground': '#2A4A6C',
     'sideBar.background': '#23303A',
     'sideBar.foreground': '#B4BAC2',
+    'sideBarSectionHeader.background': '#1A2730',
     'editor.background': '#18232A',
     'editor.foreground': '#F7F9FB',
     'tab.activeBackground': '#23303A',
@@ -444,10 +448,13 @@ describe('filterByTier', () => {
       'titleBar.activeForeground',
       'activityBar.background',
       'activityBar.foreground',
+      'activityBarBadge.background',
       'statusBar.background',
       'statusBar.foreground',
+      'statusBarItem.hoverBackground',
       'sideBar.background',
       'sideBar.foreground',
+      'sideBarSectionHeader.background',
     ]);
   });
 
@@ -462,5 +469,44 @@ describe('filterByTier', () => {
   it('returns all colors for unknown tier', () => {
     const result = filterByTier(allColors, 'unknown');
     expect(result).toEqual(allColors);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateThemeSpec
+// ---------------------------------------------------------------------------
+describe('validateThemeSpec', () => {
+  it('returns no warnings for valid spec', () => {
+    const { warnings } = validateThemeSpec({ tier: 'medium', scheme: 'dark' });
+    expect(warnings).toHaveLength(0);
+  });
+
+  it('returns no warnings when tier/scheme are absent', () => {
+    const { warnings } = validateThemeSpec({ enabled: true });
+    expect(warnings).toHaveLength(0);
+  });
+
+  it('warns on invalid tier', () => {
+    const { warnings } = validateThemeSpec({ tier: 'extreme' });
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('"extreme"');
+    expect(warnings[0]).toContain('full, medium, minimal');
+  });
+
+  it('warns on invalid scheme', () => {
+    const { warnings } = validateThemeSpec({ scheme: 'neon' });
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('"neon"');
+    expect(warnings[0]).toContain('dark, light');
+  });
+
+  it('warns on both invalid tier and scheme', () => {
+    const { warnings } = validateThemeSpec({ tier: 'max', scheme: 'rainbow' });
+    expect(warnings).toHaveLength(2);
+  });
+
+  it('handles null/undefined input', () => {
+    expect(validateThemeSpec(null).warnings).toHaveLength(0);
+    expect(validateThemeSpec(undefined).warnings).toHaveLength(0);
   });
 });
