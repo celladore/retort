@@ -21,18 +21,13 @@ platform:
 
 ## Active Languages
 
-| File                          | Language                           | Applies to              |
-| ----------------------------- | ---------------------------------- | ----------------------- | -------------------------------- |
-| {{#if hasLanguageTypeScript}} | [`typescript.md`](./typescript.md) | TypeScript / JavaScript | `*.ts`, `*.tsx`, `*.js`, `*.mjs` |
-
-{{/if}}
-{{#if hasLanguagePythonEffective}}| [`python.md`](./python.md) | Python | `*.py`, `pyproject.toml` |
-{{/if}}
-{{#if hasLanguageRustEffective}}| [`rust.md`](./rust.md) | Rust | `*.rs`, `Cargo.toml` |
-{{/if}}
-{{#if hasLanguageDotnetEffective}}| [`dotnet.md`](./dotnet.md) | .NET / C# | `*.cs`, `*.csproj`, `*.sln` |
-{{/if}}
-{{#if hasLanguageBlockchain}}| [`blockchain.md`](./blockchain.md) | Blockchain / Smart Contracts | `*.sol`, `contracts/**` |
+| File | Language | Applies to | Globs |
+| --- | --- | --- | --- |
+{{#if hasLanguageTypeScript}}| [`typescript.md`](./typescript.md) | TypeScript / JavaScript | `*.ts`, `*.tsx`, `*.js`, `*.mjs` |
+{{/if}}{{#if hasLanguagePythonEffective}}| [`python.md`](./python.md) | Python | `*.py`, `pyproject.toml` |
+{{/if}}{{#if hasLanguageRustEffective}}| [`rust.md`](./rust.md) | Rust | `*.rs`, `Cargo.toml` |
+{{/if}}{{#if hasLanguageDotnetEffective}}| [`dotnet.md`](./dotnet.md) | .NET / C\# | `*.cs`, `*.csproj`, `*.sln` |
+{{/if}}{{#if hasLanguageBlockchain}}| [`blockchain.md`](./blockchain.md) | Blockchain / Smart Contracts | `*.sol`, `contracts/**` |
 {{/if}}
 
 ## How It Works
