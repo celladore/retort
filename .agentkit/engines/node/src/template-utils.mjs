@@ -11,7 +11,13 @@ import { computeProjectCompleteness as computeProjectCompletenessBase } from './
 // Template rendering
 // ---------------------------------------------------------------------------
 
-const RAW_TEMPLATE_VARS = new Set(['commandFlags', 'agentConventions', 'agentExamples']);
+const RAW_TEMPLATE_VARS = new Set([
+  'commandFlags',
+  'agentConventions',
+  'agentExamples',
+  'bpRequiredStatusChecksJson',
+  'bpCodeScanningToolsJson',
+]);
 
 function isShellScriptTarget(targetPath) {
   const ext = extname(targetPath || '').toLowerCase();
