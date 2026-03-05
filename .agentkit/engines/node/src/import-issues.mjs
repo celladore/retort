@@ -9,6 +9,7 @@ import yaml from 'js-yaml';
 import { resolve } from 'path';
 import {
   readBacklogJson,
+  readBacklogMarkdown,
   writeBacklogJson,
   writeBacklogMarkdown,
   sortItems,
@@ -82,8 +83,11 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
     return { imported: normalized.length, skipped: 0, dryRun: true };
   }
 
-  // Merge with existing backlog
-  const existing = readBacklogJson(projectRoot);
+  // Merge with existing backlog (fall back to markdown if JSON store is empty/missing)
+  let existing = readBacklogJson(projectRoot);
+  if (!existing.length) {
+    existing = readBacklogMarkdown(projectRoot);
+  }
   const { merged, added, updated, preserved } = deduplicateItems(existing, normalized);
   const sorted = sortItems(merged, 'priority');
 

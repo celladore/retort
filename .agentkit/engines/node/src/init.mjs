@@ -673,7 +673,7 @@ async function finalizeInit({
             `[agentkit:init] Issue import failed (non-fatal): ${importErr.message}`
           );
           console.warn(
-            `  You can import later with: agentkit import-issues --force`
+            `  You can import later with: pnpm -C .agentkit agentkit:import-issues -- --force`
           );
         }
       }

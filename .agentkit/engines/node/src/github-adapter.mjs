@@ -99,6 +99,11 @@ export class GitHubAdapter {
       // Client-side filter by --since (gh doesn't support this natively on issue list)
       if (since) {
         const sinceDate = new Date(since);
+        if (Number.isNaN(sinceDate.getTime())) {
+          throw new Error(
+            `Invalid "since" value: ${since}. Expected ISO 8601 date, e.g. "2024-01-31T00:00:00Z".`
+          );
+        }
         return issues.filter((issue) => new Date(issue.updatedAt) >= sinceDate);
       }
 

@@ -66,11 +66,18 @@ export function readBacklogMarkdown(projectRoot) {
   const content = readFileSync(filePath, 'utf-8');
   const items = [];
 
-  // Match table rows: | Priority | Team | Task | Phase | Status | Notes |
-  const tableRowRegex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|/gm;
+  // Match table rows in both formats:
+  // 7-column (current): | Priority | Team | Task | Phase | Status | Source | Notes |
+  // 6-column (legacy):  | Priority | Team | Task | Phase | Status | Notes |
+  const tableRow7Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|/gm;
+  const tableRow6Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|/gm;
+
+  // Try 7-column format first (matches are greedy, so 7-col takes priority)
   let match;
-  while ((match = tableRowRegex.exec(content)) !== null) {
-    const [, priority, team, task, phase, status, notes] = match;
+  const matchedLines = new Set();
+  while ((match = tableRow7Regex.exec(content)) !== null) {
+    matchedLines.add(match.index);
+    const [, priority, team, task, phase, status, source, notes] = match;
     items.push({
       id: null,
       externalId: null,
@@ -81,7 +88,7 @@ export function readBacklogMarkdown(projectRoot) {
       phase: phase.trim(),
       team: team.trim().toLowerCase().replace(/^t\d+-/i, ''),
       assignee: null,
-      source: 'manual',
+      source: source.trim().toLowerCase() || 'manual',
       what: notes.trim(),
       why: '',
       acceptance: [],
@@ -94,6 +101,36 @@ export function readBacklogMarkdown(projectRoot) {
       lastSyncedAt: null,
       dirty: false,
     });
+  }
+
+  // Fall back to 6-column format for rows not already matched
+  if (!items.length) {
+    while ((match = tableRow6Regex.exec(content)) !== null) {
+      const [, priority, team, task, phase, status, notes] = match;
+      items.push({
+        id: null,
+        externalId: null,
+        externalUrl: null,
+        title: task.trim(),
+        priority: priority.trim(),
+        status: status.trim().toLowerCase().replace(/\s+/g, '-'),
+        phase: phase.trim(),
+        team: team.trim().toLowerCase().replace(/^t\d+-/i, ''),
+        assignee: null,
+        source: 'manual',
+        what: notes.trim(),
+        why: '',
+        acceptance: [],
+        files: [],
+        labels: [],
+        milestone: null,
+        createdAt: null,
+        updatedAt: null,
+        closedAt: null,
+        lastSyncedAt: null,
+        dirty: false,
+      });
+    }
   }
 
   return items;

@@ -9,6 +9,7 @@ import yaml from 'js-yaml';
 import { resolve } from 'path';
 import {
   readBacklogJson,
+  readBacklogMarkdown,
   writeBacklogJson,
   writeBacklogMarkdown,
   sortItems,
@@ -84,8 +85,11 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
 
   console.log(`[agentkit:sync-backlog] Starting backlog sync (tracker: ${tracker}, direction: ${direction})...`);
 
-  // 1. Read existing backlog
-  const existing = readBacklogJson(projectRoot);
+  // 1. Read existing backlog (fall back to markdown if JSON store is empty/missing)
+  let existing = readBacklogJson(projectRoot);
+  if (!existing.length) {
+    existing = readBacklogMarkdown(projectRoot);
+  }
   let allIncoming = [];
 
   // 2. Pull from external tracker (if direction includes pull)

@@ -661,7 +661,7 @@ function validateProjectYaml(project) {
 function validateCrossReferences(specs) {
   const errors = [];
 
-  const { teams, commands, agents } = specs;
+  const { teams, commands, agents, project } = specs;
 
   // Verify team commands reference valid team IDs
   const teamIds = new Set((teams?.teams || []).map((t) => t.id));
@@ -895,6 +895,18 @@ function validateCrossReferences(specs) {
     }
   }
 
+  // Validate project.yaml importTeamMap values against team IDs
+  const importTeamMap = project?.process?.intake?.importTeamMap;
+  if (importTeamMap && typeof importTeamMap === 'object' && teamIds.size > 0) {
+    for (const [mapLabel, teamId] of Object.entries(importTeamMap)) {
+      if (typeof teamId === 'string' && teamId && !teamIds.has(teamId)) {
+        errors.push(
+          `project.yaml: process.intake.importTeamMap.${mapLabel} references unknown team "${teamId}" (not defined in teams.yaml)`
+        );
+      }
+    }
+  }
+
   // Check for duplicate rule convention IDs
   const seenRuleIds = new Set();
   for (const domain of specs.rules?.rules || []) {
@@ -1006,10 +1018,11 @@ export function validateSpec(agentkitRoot) {
   const docs = loadYaml('docs.yaml');
 
   // project.yaml is optional — only validate if present
+  let project = null;
   const projectPath = resolve(specDir, 'project.yaml');
   if (existsSync(projectPath)) {
     try {
-      const project = yaml.load(readFileSync(projectPath, 'utf-8'));
+      project = yaml.load(readFileSync(projectPath, 'utf-8'));
       if (project && typeof project === 'object') {
         const projectResult = validateProjectYaml(project);
         errors.push(...projectResult.errors);
@@ -1113,7 +1126,7 @@ export function validateSpec(agentkitRoot) {
 
   // Cross-spec validation
   if (teams && commands && agents && rules) {
-    errors.push(...validateCrossReferences({ teams, commands, agents, rules }));
+    errors.push(...validateCrossReferences({ teams, commands, agents, rules, project }));
   }
 
   return {

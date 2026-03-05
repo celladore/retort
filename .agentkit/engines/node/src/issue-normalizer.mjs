@@ -222,6 +222,12 @@ export function deduplicateItems(existing, incoming) {
   let updated = 0;
 
   for (const item of incoming) {
+    // Items without externalId are treated as local/manual — always append
+    if (!item.externalId) {
+      manualItems.push(item);
+      added++;
+      continue;
+    }
     if (existingByExtId.has(item.externalId)) {
       // Update existing — preserve local overrides for team/priority if dirty
       const prev = existingByExtId.get(item.externalId);
