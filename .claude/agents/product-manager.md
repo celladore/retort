@@ -73,10 +73,10 @@ product
 
 ## Focus Areas
 
-- docs/01_product/\*\*
-- docs/prd/\*\*
-- docs/roadmap/\*\*
-- docs/features/\*\*
+- docs/01_product/**
+- docs/prd/**
+- docs/roadmap/**
+- docs/features/**
 
 ## Responsibilities
 

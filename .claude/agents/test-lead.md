@@ -73,14 +73,14 @@ testing
 
 ## Focus Areas
 
-- \*_/_.test.\*
-- \*_/_.spec.\*
-- tests/\*\*
-- e2e/\*\*
-- playwright/\*\*
-- jest.config.\*
-- vitest.config.\*
-- playwright.config.\*
+- **/*.test.*
+- **/*.spec.*
+- tests/**
+- e2e/**
+- playwright/**
+- jest.config.*
+- vitest.config.*
+- playwright.config.*
 
 ## Responsibilities
 

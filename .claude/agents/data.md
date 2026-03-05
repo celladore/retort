@@ -73,14 +73,14 @@ engineering
 
 ## Focus Areas
 
-- db/\*\*
-- migrations/\*\*
-- models/\*\*
-- prisma/\*\*
-- seeds/\*\*
-- scripts/db/\*\*
-- adx/\*\*
-- grafana/\*\*
+- db/**
+- migrations/**
+- models/**
+- prisma/**
+- seeds/**
+- scripts/db/**
+- adx/**
+- grafana/**
 
 ## Responsibilities
 
@@ -119,7 +119,6 @@ engineering
 ## Examples
 
 ### Safe migration skeleton
-
 ```
 -- add nullable column first
 ALTER TABLE users ADD COLUMN timezone TEXT NULL;

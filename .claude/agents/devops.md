@@ -73,12 +73,12 @@ engineering
 
 ## Focus Areas
 
-- .github/workflows/\*\*
-- scripts/\*\*
-- docker/\*\*
-- Dockerfile\*
+- .github/workflows/**
+- scripts/**
+- docker/**
+- Dockerfile*
 - .dockerignore
-- docker-compose\*.yml
+- docker-compose*.yml
 
 ## Responsibilities
 

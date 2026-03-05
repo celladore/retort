@@ -73,10 +73,10 @@ marketing
 
 ## Focus Areas
 
-- docs/01_product/\*\*
-- analytics/\*\*
-- apps/marketing/\*\*
-- docs/metrics/\*\*
+- docs/01_product/**
+- analytics/**
+- apps/marketing/**
+- docs/metrics/**
 
 ## Responsibilities
 

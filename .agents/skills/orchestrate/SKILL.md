@@ -66,3 +66,4 @@ Produce a summary with: Actions Taken, Files Changed, Validation Commands, Updat
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

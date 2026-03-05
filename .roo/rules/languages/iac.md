@@ -12,6 +12,10 @@ files in `infra/`, `terraform/`, `terragrunt/`, or `modules/` directories.
 ## Toolchain
 
 - **IaC tools**: terraform, terragrunt
+  
+  
+  
+  
 
 ## Resource Naming
 
@@ -86,6 +90,8 @@ resource "azurerm_resource_group" "example" {
 > **Note**: The `azurerm` provider does not support `default_tags`. Set tags
 > per-resource using `merge(local.mandatory_tags, local.optional_tags)` or
 > use Terragrunt `inputs` to enforce consistent tagging across all resources.
+> 
+> 
 
 ### Optional Tags (recommended)
 
@@ -119,23 +125,24 @@ The following conventions are enforced in **agentkit-forge** and derived from
 ### Enforcement Rules
 
 - **[iac-state-backend]** Terraform state must be stored remotely (Azure Storage / S3 / GCS) with locking enabled. Never commit .tfstate files. State backend configuration must be managed through Terragrunt to avoid duplication.
-  _(enforcement · phase: implementation, validation)_
-- **[iac-tagging]** All taggable resources must include the mandatory tags defined in project.yaml (infrastructure.tagging.mandatory). Use a shared locals block, Terragrunt inputs, or provider default*tags to enforce consistent tagging across all resources. Missing mandatory tags will block PR review. Optional tags from infrastructure.tagging.optional are recommended for cost analysis and lifecycle tracking. See .claude/rules/iac.md for examples.
-  *(enforcement · phase: validation)\_
+ _(enforcement · phase: implementation, validation)_
+- **[iac-tagging]** All taggable resources must include the mandatory tags defined in project.yaml (infrastructure.tagging.mandatory). Use a shared locals block, Terragrunt inputs, or provider default_tags to enforce consistent tagging across all resources. Missing mandatory tags will block PR review. Optional tags from infrastructure.tagging.optional are recommended for cost analysis and lifecycle tracking. See .claude/rules/iac.md for examples.
+ _(enforcement · phase: validation)_
 - **[iac-plan-before-apply]** Always run 'terraform plan' (or 'terragrunt plan') and review the diff before applying. CI pipelines must include a plan stage with human approval gate before apply. Never use -auto-approve in production environments.
-  _(enforcement · phase: ship)_
+ _(enforcement · phase: ship)_
 - **[iac-no-hardcoded-secrets]** Never hardcode secrets, connection strings, or credentials in .tf or .hcl files. Use Key Vault / Secrets Manager references, or pass secrets via environment variables in CI. Sensitive variables must be marked sensitive = true.
-  _(enforcement · phase: implementation, validation)_
+ _(enforcement · phase: implementation, validation)_
 - **[iac-fmt]** All Terraform code must pass 'terraform fmt -check' _(enforcement · phase: validation)_
 - **[iac-validate]** All Terraform configurations must pass 'terraform validate' _(enforcement · phase: validation)_
 
 ### Advisory Rules
 
-- **[iac-naming-convention]** All cloud resources must follow the naming convention {org}-{env}-{project}-{resourcetype}-{region}. Configure org and region in project.yaml (infrastructure.org, infrastructure.defaultRegion) or use Terraform variables — do not hardcode. Example placeholders: YOUR*ORG, YOUR_DEFAULT_REGION. Deviations require a comment explaining why. Use locals blocks to compose names from variables.
-  *(advisory · phase: implementation)\_
+- **[iac-naming-convention]** All cloud resources must follow the naming convention {org}-{env}-{project}-{resourcetype}-{region}. Configure org and region in project.yaml (infrastructure.org, infrastructure.defaultRegion) or use Terraform variables — do not hardcode. Example placeholders: YOUR_ORG, YOUR_DEFAULT_REGION. Deviations require a comment explaining why. Use locals blocks to compose names from variables.
+ _(advisory · phase: implementation)_
 - **[iac-toolchain]** Use Terraform for resource definitions and Terragrunt for DRY configuration, remote state management, and environment orchestration. All environments must be managed through Terragrunt live configurations.
-  _(advisory · phase: planning)_
+ _(advisory · phase: planning)_
 - **[iac-modules]** Reusable infrastructure must be extracted into versioned Terraform modules. Modules must have README.md, variables.tf, outputs.tf, and examples/. Pin module versions in consumers — never use unversioned source references.
-  _(advisory · phase: planning, implementation)_
+ _(advisory · phase: planning, implementation)_
 - **[iac-drift-detection]** Infrastructure drift must be detected and corrected. Do not manually modify resources managed by Terraform. If manual changes are necessary, import them into state immediately and update the configuration.
-  _(advisory · phase: ship)_
+ _(advisory · phase: ship)_
+

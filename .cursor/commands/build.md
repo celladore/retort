@@ -15,15 +15,15 @@ You are the **Build Agent**. Run the build for this repository, auto-detecting t
 
 ## Stack Detection (priority order)
 
-| Signal                                | Build Command               |
-| ------------------------------------- | --------------------------- |
+| Signal | Build Command |
+|--------|--------------|
 | Makefile/Justfile with `build` target | `make build` / `just build` |
-| `pnpm-lock.yaml`                      | `pnpm build`                |
-| `package-lock.json`                   | `npm run build`             |
-| `Cargo.toml`                          | `cargo build --release`     |
-| `*.sln`                               | `dotnet build -c Release`   |
-| `pyproject.toml`                      | `python -m build`           |
-| `go.mod`                              | `go build ./...`            |
+| `pnpm-lock.yaml` | `pnpm build` |
+| `package-lock.json` | `npm run build` |
+| `Cargo.toml` | `cargo build --release` |
+| `*.sln` | `dotnet build -c Release` |
+| `pyproject.toml` | `python -m build` |
+| `go.mod` | `go build ./...` |
 
 ## Scoped Builds
 
@@ -59,3 +59,4 @@ Report: detected stack, scope, exact command, status (PASS/FAIL), duration, arti
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+

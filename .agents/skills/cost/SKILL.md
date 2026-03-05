@@ -29,12 +29,12 @@ Invoke this skill when you need to perform the `cost` operation.
 
 ## Available Views
 
-| Command                    | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
-| `--summary`                | Recent session overview with durations and file counts |
-| `--sessions`               | List all recent sessions                               |
-| `--report --month YYYY-MM` | Monthly aggregate report                               |
-| `--report --format json`   | Export report as JSON                                  |
+| Command | Description |
+|---------|-------------|
+| `--summary` | Recent session overview with durations and file counts |
+| `--sessions` | List all recent sessions |
+| `--report --month YYYY-MM` | Monthly aggregate report |
+| `--report --format json` | Export report as JSON |
 
 ## Notes
 
@@ -55,3 +55,4 @@ Invoke this skill when you need to perform the `cost` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

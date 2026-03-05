@@ -32,6 +32,7 @@ When `--all` is given, run `--validate` + `--palette` + `--theme` + `--contrast`
 
 - **Brand Name**: AgentKit Forge
 - **Primary Color**: `#1976D2`
+  
   - **Editor Theme**: `.agentkit/spec/editor-theme.yaml` (enabled, source: brand)
 
 ---

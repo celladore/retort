@@ -73,10 +73,10 @@ project-management
 
 ## Focus Areas
 
-- docs/\*\*
-- .github/ISSUE_TEMPLATE/\*\*
-- .github/PULL_REQUEST_TEMPLATE/\*\*
-- docs/ai_handoffs/\*\*
+- docs/**
+- .github/ISSUE_TEMPLATE/**
+- .github/PULL_REQUEST_TEMPLATE/**
+- docs/ai_handoffs/**
 
 ## Responsibilities
 

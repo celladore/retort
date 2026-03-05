@@ -26,15 +26,15 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag        | Description                                     | Default |
-| ----------- | ----------------------------------------------- | ------- |
-| `--tracker` | Override tracker (github, linear)               | —       |
-| `--state`   | Import issues in this state (open, closed, all) | open    |
-| `--labels`  | Filter by labels (comma-separated)              | —       |
-| `--since`   | Only import issues updated since (ISO date)     | —       |
-| `--dry-run` | Show what would be imported without writing     | false   |
-| `--limit`   | Maximum number of issues to import              | 100     |
-| `--force`   | Run even if autoImport is disabled              | false   |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--tracker` | Override tracker (github, linear) | — |
+| `--state` | Import issues in this state (open, closed, all) | open |
+| `--labels` | Filter by labels (comma-separated) | — |
+| `--since` | Only import issues updated since (ISO date) | — |
+| `--dry-run` | Show what would be imported without writing | false |
+| `--limit` | Maximum number of issues to import | 100 |
+| `--force` | Run even if autoImport is disabled | false |
 
 ## Implementation
 
@@ -46,3 +46,4 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/impo
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
+

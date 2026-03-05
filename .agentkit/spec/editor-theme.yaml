@@ -88,36 +88,99 @@ dark:
   titleBar.activeBackground: colors.primary.dark
   titleBar.activeForeground: colors.darkMode.textPrimary
   titleBar.inactiveBackground: colors.darkMode.surface
+  titleBar.border: colors.darkMode.background
   # Activity bar
   activityBar.background: colors.primary.dark
   activityBar.foreground: colors.primary.teal
   activityBar.activeBorder: colors.primary.brand
+  activityBar.border: colors.darkMode.background
   # Status bar
   statusBar.background: colors.primary.brand
   statusBar.foreground: colors.darkMode.textPrimary
   statusBar.debuggingBackground: colors.semantic.warning
   statusBar.noFolderBackground: colors.neutral.900
+  statusBar.border: colors.darkMode.background
   # Sidebar
   sideBar.background: colors.darkMode.surface
   sideBar.foreground: colors.darkMode.textSecondary
+  sideBar.border: colors.darkMode.background
+  sideBarSectionHeader.background: colors.darkMode.background
+  sideBarSectionHeader.foreground: colors.darkMode.textPrimary
   # Editor
   editor.background: colors.darkMode.background
   editor.foreground: colors.darkMode.textPrimary
   editorLineNumber.foreground: colors.darkMode.textSecondary
+  editorGroupHeader.tabsBackground: colors.darkMode.background
+  editorWidget.background: colors.darkMode.surface
+  editorWidget.foreground: colors.darkMode.textPrimary
+  editorWidget.border: colors.primary.dark
   # Tabs
   tab.activeBackground: colors.darkMode.surface
   tab.inactiveBackground: colors.darkMode.background
   tab.activeForeground: colors.primary.brand
   tab.inactiveForeground: colors.darkMode.textSecondary
+  tab.border: colors.darkMode.background
+  tab.activeBorderTop: colors.primary.brand
   # Badges
   badge.background: colors.primary.teal
   badge.foreground: colors.darkMode.textPrimary
   # Lists
   list.activeSelectionBackground: colors.primary.coral
+  list.activeSelectionForeground: colors.darkMode.textPrimary
   list.inactiveSelectionBackground: colors.darkMode.surface
+  list.hoverBackground: colors.darkMode.surface
+  list.focusBackground: colors.darkMode.surface
   # Buttons
   button.background: colors.primary.coral
   button.foreground: colors.darkMode.textPrimary
+  button.hoverBackground: colors.primary.brand
+  # Panel (terminal area)
+  panel.background: colors.darkMode.background
+  panel.border: colors.darkMode.surface
+  panelTitle.activeBorder: colors.primary.brand
+  panelTitle.activeForeground: colors.darkMode.textPrimary
+  panelTitle.inactiveForeground: colors.darkMode.textSecondary
+  # Terminal
+  terminal.background: colors.darkMode.background
+  terminal.foreground: colors.darkMode.textPrimary
+  # Input fields
+  input.background: colors.darkMode.background
+  input.foreground: colors.darkMode.textPrimary
+  input.border: colors.darkMode.surface
+  input.placeholderForeground: colors.darkMode.textSecondary
+  # Dropdowns
+  dropdown.background: colors.darkMode.background
+  dropdown.foreground: colors.darkMode.textPrimary
+  dropdown.border: colors.darkMode.surface
+  # Breadcrumbs
+  breadcrumb.foreground: colors.darkMode.textSecondary
+  breadcrumb.focusForeground: colors.darkMode.textPrimary
+  breadcrumb.activeSelectionForeground: colors.darkMode.textPrimary
+  # Scrollbar
+  scrollbarSlider.background: colors.darkMode.surface
+  scrollbarSlider.hoverBackground: colors.neutral.700
+  scrollbarSlider.activeBackground: colors.neutral.700
+  # Notifications
+  notifications.background: colors.darkMode.surface
+  notifications.foreground: colors.darkMode.textPrimary
+  notificationCenterHeader.background: colors.darkMode.background
+  # Quick input (command palette)
+  quickInput.background: colors.darkMode.surface
+  quickInput.foreground: colors.darkMode.textPrimary
+  quickInputTitle.background: colors.darkMode.background
+  # Peek view
+  peekViewEditor.background: colors.darkMode.background
+  peekViewResult.background: colors.darkMode.surface
+  peekViewTitle.background: colors.primary.dark
+  peekView.border: colors.primary.brand
+  # Minimap
+  minimap.background: colors.darkMode.background
+  # Menu
+  menu.background: colors.darkMode.surface
+  menu.foreground: colors.darkMode.textPrimary
+  menu.selectionBackground: colors.primary.dark
+  menu.selectionForeground: colors.darkMode.textPrimary
+  menu.separatorBackground: colors.darkMode.background
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Base themes — set VS Code color theme per workspace per mode

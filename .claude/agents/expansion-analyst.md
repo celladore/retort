@@ -73,7 +73,7 @@ product
 
 ## Focus Areas
 
-- \*_/_
+- **/*
 
 ## Responsibilities
 
