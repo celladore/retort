@@ -351,7 +351,66 @@ Expansion Agent generates:
 - Add event logging and backlog sync
 - Add to orchestrator Phase 1 as optional step
 
-### 8.2 New Files and Spec Additions
+### 8.2 Phase Gates — When to Proceed
+
+Each phase has explicit go/no-go criteria. Do not begin a phase until the
+previous phase's gate conditions are met.
+
+#### Gate 1: Phase 1 → Phase 2 (Analysis → Suggestion Store)
+
+Run the analysis engine against **3+ real repositories** and validate:
+
+- **Signal-to-noise ≥ 70%** — At least 70% of suggestions rated "useful" by a
+  human reviewer. Below 50% means the analyzer design needs rework.
+- **Category spread ≥ 3/6** — Suggestions cover at least 3 of the 6 categories
+  (documentation, feature, architecture, security, testing, ops).
+- **Dedup accuracy < 10% overlap** — Less than 10% of suggestions duplicate
+  existing backlog items or each other.
+- **Scoring matches intuition** — Top-3 ranked suggestions align with what a
+  developer would independently identify as highest-impact gaps.
+- **False positive rate < 20%** — Less than 20% of identified "gaps" aren't
+  actually gaps.
+- **Performance < 60s** — Analysis completes in under 60 seconds for a 10K-file
+  repository.
+
+#### Gate 2: Phase 2 → Phase 3 (Suggestion Store → Spec Generation)
+
+Use the approval workflow for **2+ review cycles** and validate:
+
+- **Approval rate ≥ 40%** — At least 40% of suggestions are approved (not
+  rejected or deferred). Below 25% signals analysis quality problems.
+- **Rejection memory works** — Zero re-surfaced rejected suggestions unless the
+  codebase changed in the relevant area.
+- **Workflow friction < 5 min** — Reviewing and approving/rejecting 10
+  suggestions takes less than 5 minutes.
+- **Downstream utility ≥ 2** — At least 2 approved suggestions have been
+  manually converted into tasks or documents (proving the suggestions lead to
+  real work).
+
+#### Gate 3: Phase 3 → Phase 4 (Spec Generation → Full Integration)
+
+Generate **5+ draft documents** from approved suggestions and validate:
+
+- **Draft quality ≥ 60% minor-edit** — At least 60% of generated drafts need
+  only minor edits, not complete rewrites.
+- **Template fitness** — Generated docs land in correct paths with correct
+  naming per docs.yaml conventions.
+- **Hallucination rate < 10%** — Less than 10% of generated content contains
+  fabricated requirements or wrong cross-references.
+- **Review gate pass rate ≥ 50%** — At least half of generated specs pass the
+  existing review-runner on first submission.
+- **No orphan docs** — Generated documents don't go stale within 30 days.
+
+#### Stopping Conditions (Abandon Further Phases)
+
+Stop investment entirely if:
+
+- Signal-to-noise stays below 50% after two rounds of analyzer tuning
+- Developers don't voluntarily use `/expand` after the trial period
+- Approval rate stays below 15% (suggestion fatigue)
+- Time reviewing suggestions exceeds time saved by automated identification
+
+### 8.3 New Files and Spec Additions (unchanged)
 
 ```
 New modules:
@@ -374,7 +433,7 @@ Test additions:
   .agentkit/engines/node/src/__tests__/spec-generator.test.mjs
 ```
 
-### 8.3 Agent Definition (Draft)
+### 8.4 Agent Definition (Draft)
 
 ```yaml
 - id: expansion-analyst

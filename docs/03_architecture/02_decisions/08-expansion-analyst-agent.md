@@ -63,6 +63,75 @@ We will introduce an **Expansion Analyst** agent, implemented in four phases:
 - **Configurable thresholds**: Maximum suggestion count, minimum impact level,
   and category filters are all configurable per invocation.
 
+## Phase Gates
+
+Each phase requires explicit validation before proceeding to the next. These
+gates prevent over-investment in infrastructure before the core analysis quality
+is proven.
+
+### Gate 1 → Phase 2 (Suggestion Storage & Approval)
+
+**Trigger**: Phase 1 analysis engine has been run against **3+ real repositories**
+and the following criteria are met:
+
+| Criterion | Threshold | How to Measure |
+|---|---|---|
+| **Signal-to-noise ratio** | ≥ 70% of suggestions rated "useful" by a human reviewer | Run analysis, have a developer rate each suggestion as useful/noise |
+| **Category coverage** | Suggestions span ≥ 3 of 6 categories (documentation, feature, architecture, security, testing, ops) | Check category distribution in output |
+| **Deduplication accuracy** | < 10% of suggestions duplicate existing backlog items or each other | Cross-reference output against AGENT_BACKLOG.md |
+| **Scoring coherence** | Top-3 ranked suggestions match human intuition about highest-impact gaps | Compare agent ranking to developer ranking |
+| **False positive rate** | < 20% of suggestions identify "gaps" that aren't actually gaps | Developer review flags false positives |
+| **Performance** | Analysis completes in < 60 seconds for a 10K-file repo | Time the run |
+
+**Decision**: If these thresholds are met, proceed to Phase 2. If signal-to-noise
+is below 50%, revisit the analyzer design before continuing.
+
+### Gate 2 → Phase 3 (Spec Generation)
+
+**Trigger**: Phase 2 suggestion store has been used for **2+ approval cycles**
+and the following criteria are met:
+
+| Criterion | Threshold | How to Measure |
+|---|---|---|
+| **Approval rate** | ≥ 40% of suggestions are approved (not rejected/deferred) | Track approve/reject/defer counts in suggestion store |
+| **Rejection memory works** | 0 re-surfaced previously-rejected suggestions (unless codebase changed in relevant area) | Check rejected/ directory fingerprints against new suggestions |
+| **Workflow friction** | Approval workflow completes in < 5 minutes for a batch of 10 suggestions | Time the review cycle |
+| **Downstream utility** | ≥ 2 approved suggestions have been manually converted to tasks or documents | Track whether approvals lead to actual work |
+
+**Decision**: If approved suggestions are consistently leading to real work,
+the spec generation layer adds value. If approval rate is below 25%, the
+analysis quality needs improvement — return to Phase 1 tuning.
+
+### Gate 3 → Phase 4 (Full Integration)
+
+**Trigger**: Phase 3 spec generation has produced **5+ draft documents** and
+the following criteria are met:
+
+| Criterion | Threshold | How to Measure |
+|---|---|---|
+| **Draft quality** | ≥ 60% of generated drafts require only minor edits (not rewrites) | Human reviewer rates each draft as minor-edit / major-rewrite / unusable |
+| **Template fitness** | Generated docs follow docs.yaml conventions (correct paths, naming, numbering) | Automated validation against docs.yaml |
+| **No hallucinated requirements** | < 10% of generated content contains fabricated requirements or incorrect cross-references | Human review flags hallucinations |
+| **Review gate pass rate** | ≥ 50% of generated specs pass existing review gates on first submission | Track review-runner results |
+| **Maintenance cost** | Generated docs don't create orphan/stale documents within 30 days | Check for staleness after one month |
+
+**Decision**: If generated specs are consistently useful and pass review gates,
+full integration with task protocol and orchestrator is justified. If draft
+quality is below 40%, the generation templates need rework — stay in Phase 3.
+
+### Stopping Conditions
+
+Development should **stop entirely** if any of the following are observed:
+
+- **Analysis produces mostly noise**: Signal-to-noise ratio stays below 50% after
+  two rounds of analyzer tuning
+- **No one uses it**: The `/expand` command is not invoked voluntarily by
+  developers after the initial trial period
+- **Suggestion fatigue**: Developers consistently defer or ignore suggestions
+  rather than engaging with them (approval rate stays below 15%)
+- **Negative ROI**: Time spent reviewing suggestions exceeds time saved by
+  having them identified automatically
+
 ## Consequences
 
 ### Positive
