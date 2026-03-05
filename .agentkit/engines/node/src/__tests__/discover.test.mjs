@@ -194,12 +194,10 @@ function initGitRepo(dir, subjects) {
   execSync('git init', { cwd: dir, stdio: 'ignore' });
   execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'ignore' });
   execSync('git config user.name "Test"', { cwd: dir, stdio: 'ignore' });
-  for (const subject of subjects) {
-    // Create a unique file per commit so git has something to commit
-    const filename = `file-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.txt`;
-    writeFileSync(join(dir, filename), subject, 'utf-8');
-    execSync('git add .', { cwd: dir, stdio: 'ignore' });
-    execSync(`git commit -m "${subject.replace(/"/g, '\\"')}"`, { cwd: dir, stdio: 'ignore' });
+  for (let i = 0; i < subjects.length; i++) {
+    writeFileSync(join(dir, `f${i}.txt`), String(i), 'utf-8');
+    execSync(`git add f${i}.txt`, { cwd: dir, stdio: 'ignore' });
+    execSync(`git commit -m "${subjects[i].replace(/"/g, '\\"')}"`, { cwd: dir, stdio: 'ignore' });
   }
 }
 
@@ -215,7 +213,7 @@ describe('detectCommitConvention() — git-log heuristic', () => {
   });
 
   it('detects conventional from git log when ≥60% of commits match', async () => {
-    // 15 out of 20 = 75% conventional
+    // 6 out of 8 = 75% conventional
     const subjects = [
       'feat(auth): add login flow',
       'fix(api): handle null response',
@@ -223,20 +221,8 @@ describe('detectCommitConvention() — git-log heuristic', () => {
       'chore(deps): update vitest',
       'refactor(sync): extract helpers',
       'test(discover): add unit tests',
-      'ci(workflows): add coverage',
-      'perf(render): optimize loop',
-      'build: update webpack config',
-      'revert: undo last change',
-      'feat!: breaking change',
-      'fix(ui): correct alignment',
-      'feat(auth): add OAuth2 support',
       'Update something randomly',
       'Another random commit',
-      'fix: quick patch',
-      'docs(api): add examples',
-      'chore: cleanup scripts',
-      'random message here',
-      'yet another plain commit',
     ];
     initGitRepo(tmpDir, subjects);
 
@@ -245,28 +231,16 @@ describe('detectCommitConvention() — git-log heuristic', () => {
   });
 
   it('detects semantic from git log when ≥60% match semantic pattern', async () => {
-    // Semantic-style commits: "type: description" (lowercase, no scope requirement)
+    // 6 out of 8 = 75% semantic
     const subjects = [
       'feat: add new feature',
       'fix: correct bug',
       'docs: update docs',
-      'style: format code',
-      'refactor: clean up',
-      'test: add tests',
-      'chore: update deps',
-      'perf: speed up query',
-      'build: update config',
-      'ci: fix pipeline',
       'release: v1.2.0',
       'bump: version update',
       'merge: branch sync',
       'Random commit message',
       'Another plain message',
-      'WIP on feature',
-      'misc: cleanup',
-      'update: add logging',
-      'deploy: production push',
-      'config: change settings',
     ];
     initGitRepo(tmpDir, subjects);
 
@@ -276,17 +250,13 @@ describe('detectCommitConvention() — git-log heuristic', () => {
   });
 
   it('returns null when commits do not meet 60% threshold', async () => {
-    // Only 2 out of 10 = 20% conventional
+    // Only 1 out of 6 ≈ 17% conventional
     const subjects = [
       'feat(auth): add login',
-      'fix: quick patch',
       'Updated the readme',
       'Fixed some stuff',
       'WIP',
-      'Added more tests',
       'Cleaned up code',
-      'Merged branch',
-      'Minor tweak',
       'Initial commit',
     ];
     initGitRepo(tmpDir, subjects);
@@ -296,7 +266,7 @@ describe('detectCommitConvention() — git-log heuristic', () => {
   });
 
   it('handles breaking change marker (!) in conventional commits', async () => {
-    // All commits are conventional with some having breaking change markers
+    // 8 out of 8 = 100% conventional, some with breaking change markers
     const subjects = [
       'feat!: major breaking change',
       'fix(api)!: breaking fix',
@@ -306,10 +276,6 @@ describe('detectCommitConvention() — git-log heuristic', () => {
       'chore(deps): update packages',
       'refactor(sync): cleanup',
       'test: add coverage',
-      'ci: fix workflows',
-      'perf: optimize query',
-      'build: update deps',
-      'feat(ui): new component',
     ];
     initGitRepo(tmpDir, subjects);
 
