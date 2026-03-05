@@ -1,9 +1,0 @@
-{"timestamp":"2026-03-05T10:51:29.260Z","action":"discover_completed","source":"discover","stacksDetected":1,"primaryStack":"node","frameworkCount":0}
-{"timestamp":"2026-03-05T10:51:30.684Z","action":"discover_completed","source":"discover","stacksDetected":1,"primaryStack":"node","frameworkCount":0}
-{"timestamp":"2026-03-05T10:51:31.631Z","action":"validate_completed","source":"validate","errors":2,"warnings":0,"passed":false}
-{"timestamp":"2026-03-05T10:55:16.344Z","action":"validate_completed","source":"validate","errors":1,"warnings":0,"passed":false}
-{"timestamp":"2026-03-05T10:55:16.613Z","action":"discover_completed","source":"discover","stacksDetected":1,"primaryStack":"node","frameworkCount":0}
-{"timestamp":"2026-03-05T10:55:17.944Z","action":"discover_completed","source":"discover","stacksDetected":1,"primaryStack":"node","frameworkCount":0}
-{"stacksDetected":1,"primaryStack":"node","frameworkCount":0,"timestamp":"2026-03-05T11:30:24.566Z","action":"discover_completed","source":"discover"}
-{"stacksDetected":1,"primaryStack":"node","frameworkCount":0,"timestamp":"2026-03-05T11:30:25.753Z","action":"discover_completed","source":"discover"}
-{"errors":1,"warnings":0,"passed":false,"timestamp":"2026-03-05T11:30:28.098Z","action":"validate_completed","source":"validate"}

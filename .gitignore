@@ -78,6 +78,8 @@ Thumbs.db
 # Runtime state (generated at runtime, not by sync)
 # =============================================================================
 .claude-state/
+.agentkit/state/
+.agentkit/.agentkit/
 
 # =============================================================================
 # AgentKit internal generated files
