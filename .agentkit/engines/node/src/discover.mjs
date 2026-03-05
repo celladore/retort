@@ -764,6 +764,111 @@ async function detectFromList(
 }
 
 // ---------------------------------------------------------------------------
+// Commit convention detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Detects the project's commit convention from filesystem artifacts and git-log
+ * heuristics.
+ *
+ * Priority order:
+ * 1. commitlint config files → 'conventional'
+ * 2. semantic-release config files → 'semantic'
+ * 3. package.json keys (commitlint, standard-version, release) → convention
+ * 4. Git log heuristic (≥60% of last 20 commits match pattern) → convention
+ * 5. No match → null (preserve existing)
+ *
+ * @param {string} projectRoot
+ * @param {{ currentConvention?: string }} [options]
+ * @returns {Promise<string|null>}
+ */
+export async function detectCommitConvention(projectRoot, { currentConvention } = {}) {
+  // Respect explicit 'none' — never override a project that has opted out
+  if (currentConvention === 'none') return 'none';
+  const COMMITLINT_FILES = [
+    '.commitlintrc',
+    '.commitlintrc.json',
+    '.commitlintrc.yaml',
+    '.commitlintrc.yml',
+    '.commitlintrc.js',
+    '.commitlintrc.cjs',
+    '.commitlintrc.mjs',
+    '.commitlintrc.ts',
+    'commitlint.config.js',
+    'commitlint.config.cjs',
+    'commitlint.config.mjs',
+    'commitlint.config.ts',
+  ];
+  const RELEASERC_FILES = [
+    '.releaserc',
+    '.releaserc.json',
+    '.releaserc.yaml',
+    '.releaserc.yml',
+    '.releaserc.js',
+    '.releaserc.cjs',
+    'release.config.js',
+    'release.config.cjs',
+    'release.config.mjs',
+    'release.config.ts',
+  ];
+
+  // 1. commitlint config → 'conventional'
+  const commitlintChecks = await Promise.all(
+    COMMITLINT_FILES.map((f) => fileExists(projectRoot, f))
+  );
+  if (commitlintChecks.some(Boolean)) return 'conventional';
+
+  // 2. semantic-release config → 'semantic'
+  const releasercChecks = await Promise.all(
+    RELEASERC_FILES.map((f) => fileExists(projectRoot, f))
+  );
+  if (releasercChecks.some(Boolean)) return 'semantic';
+
+  // 3. package.json keys
+  try {
+    const pkgRaw = await readFile(resolve(projectRoot, 'package.json'), 'utf-8');
+    const pkg = JSON.parse(pkgRaw);
+    if (pkg.commitlint) return 'conventional';
+    if (pkg['standard-version'] || pkg['release']) return 'semantic';
+  } catch {
+    /* no package.json or parse error */
+  }
+
+  // 4. Git log heuristic — inspect last 20 commits
+  try {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const execFileAsync = promisify(execFile);
+    const { stdout } = await execFileAsync(
+      'git',
+      ['log', '--pretty=format:%s', '-20'],
+      { cwd: projectRoot }
+    );
+    const subjects = stdout
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (subjects.length > 0) {
+      // Conventional Commits: type(scope)?: description (! marks breaking change)
+      const conventionalRe = /^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?(!)?: .+/;
+      // Semantic: simple type prefix — type: description (no scope required)
+      const semanticRe = /^[a-z]+: .+/;
+
+      const conventionalMatches = subjects.filter((s) => conventionalRe.test(s)).length;
+      const semanticMatches = subjects.filter((s) => semanticRe.test(s)).length;
+      const threshold = 0.6;
+
+      if (conventionalMatches / subjects.length >= threshold) return 'conventional';
+      if (semanticMatches / subjects.length >= threshold) return 'semantic';
+    }
+  } catch {
+    /* git not available or not a git repo */
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Core discovery logic
 // ---------------------------------------------------------------------------
 
@@ -792,6 +897,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
     monorepo: { detected: false, tools: [] },
     structure: { topLevelDirs: [], estimatedFileCount: {} },
     recommendations: [],
+    commitConvention: null,
   };
 
   // --- Repository info ---
@@ -987,6 +1093,22 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
       'No testing frameworks detected. Consider adding tests with vitest, jest, pytest, or xUnit.'
     );
   }
+
+  // --- Commit convention detection ---
+  // Read existing commitConvention from project.yaml so we respect explicit 'none'
+  let currentConvention;
+  if (agentkitRoot) {
+    try {
+      const projPath = resolve(agentkitRoot, 'spec', 'project.yaml');
+      const projRaw = existsSync(projPath)
+        ? yaml.load(await readFile(projPath, 'utf-8'))
+        : null;
+      currentConvention = projRaw?.process?.commitConvention;
+    } catch {
+      /* ignore read errors */
+    }
+  }
+  report.commitConvention = await detectCommitConvention(projectRoot, { currentConvention });
 
   // --- Output ---
   const format = flags?.output || 'yaml';
