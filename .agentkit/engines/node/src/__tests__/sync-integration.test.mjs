@@ -914,6 +914,20 @@ describe('syncLanguageInstructions — generic, multi-platform dynamic generatio
     expect(content).toContain('Project Conventions');
   });
 
+  it('domain-specific templates render enforcement/advisory sections', () => {
+    const content = readFileSync(
+      resolve(projectRoot, '.github', 'instructions', 'languages', 'typescript.md'),
+      'utf-8'
+    );
+    // TypeScript rules.yaml has both enforcement (ts-lint, ts-format) and advisory (ts-explicit-types) conventions
+    expect(content).toContain('Enforcement Rules');
+    expect(content).toContain('Advisory Rules');
+    // Enforcement conventions should include type badge
+    expect(content).toMatch(/\(enforcement/);
+    // Advisory conventions should include type badge
+    expect(content).toMatch(/\(advisory/);
+  });
+
   it('security.md uses generic TEMPLATE.md fallback (no domain-specific template)', () => {
     const content = readFileSync(
       resolve(projectRoot, '.github', 'instructions', 'languages', 'security.md'),
