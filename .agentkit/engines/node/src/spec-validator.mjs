@@ -86,9 +86,9 @@ const teamSchema = {
     scope: { type: 'array', required: true, items: { type: 'string' } },
     accepts: { type: 'array', items: { type: 'string' } },
     'handoff-chain': { type: 'array', items: { type: 'string' } },
-    'max-task-turns': { type: 'number', minimum: 1 },
-    'max-handoff-chain-depth': { type: 'number', minimum: 1 },
-    'max-stagnation-turns': { type: 'number', minimum: 1 },
+    'max-task-turns': { type: 'number', min: 1 },
+    'max-handoff-chain-depth': { type: 'number', min: 1 },
+    'max-stagnation-turns': { type: 'number', min: 1 },
   },
 };
 

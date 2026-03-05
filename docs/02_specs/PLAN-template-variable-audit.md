@@ -12,7 +12,7 @@ spec/*.yaml → project-mapping.mjs → synchronize.mjs (vars) → renderTemplat
 
 ### Key behaviors
 - **Unresolved placeholders are left intact** — `{{unknown}}` stays as literal text in output
-- **No `{{var|default}}` syntax** — defaults must be applied in code (`??`, `||`) or guarded by `{{#if}}`
+- **`{{var|default}}` syntax is supported** — pipe defaults are applied at render time; code-level defaults (`??`, `||`) or `{{#if}}` guards are still recommended where appropriate
 - **DEBUG-only warnings** (on `dev`) — unresolved placeholders only warn when `DEBUG=1` is set
 - **PR `fix-ci-naming` changes this** — makes warnings always-on (removes DEBUG gate)
 
@@ -29,9 +29,9 @@ spec/*.yaml → project-mapping.mjs → synchronize.mjs (vars) → renderTemplat
 | ~~`maxTaskTurns`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
 | ~~`maxHandoffChainDepth`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
 | ~~`maxStagnationTurns`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
-| `containerRuntime` | copilot-instructions.md | **Not wired** | Needs mapping |
-| `drTestSchedule` | some platform templates | **Not wired** | Needs mapping |
-| `loggingRetentionDays` | some platform templates | **Not wired** | Needs mapping |
+| `containerRuntime` | copilot-instructions.md | **Fixed** in this branch | ✅ |
+| `drTestSchedule` | some platform templates | **Fixed** in this branch | ✅ |
+| `loggingRetentionDays` | some platform templates | **Fixed** in this branch | ✅ |
 | `isSyncBacklog` | sync-backlog template | **Not wired** | Needs mapping |
 | `placeholder` / `placeholders` | init templates | Context-specific | May be intentional |
 

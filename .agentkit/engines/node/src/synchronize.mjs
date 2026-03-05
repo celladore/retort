@@ -505,18 +505,7 @@ async function syncClaudeCommands(
   if (!existsSync(teamTemplatePath)) return;
   const teamTemplate = await readTemplateText(teamTemplatePath);
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
-      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
-      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' → ') : team['handoff-chain'] || '',
-      maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
-      maxHandoffChainDepth: team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
-      maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, teamTemplatePath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.claude', 'commands', `team-${team.id}.md`), withHeader);
@@ -608,18 +597,7 @@ Scope all operations to the team's owned paths.
 `;
   const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
-      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
-      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' → ') : team['handoff-chain'] || '',
-      maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
-      maxHandoffChainDepth: team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
-      maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.mdc', version, repoName);
     await writeOutput(join(tmpDir, '.cursor', 'rules', `team-${team.id}.mdc`), withHeader);
@@ -664,18 +642,7 @@ Scope all operations to the team's owned paths.
 `;
   const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
-      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
-      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' → ') : team['handoff-chain'] || '',
-      maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
-      maxHandoffChainDepth: team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
-      maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.windsurf', 'rules', `team-${team.id}.md`), withHeader);
@@ -780,18 +747,7 @@ async function syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoNam
   const template = await readTemplateText(tplPath);
 
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
-      teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
-      teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' → ') : team['handoff-chain'] || '',
-      maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
-      maxHandoffChainDepth: team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
-      maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(template, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(
@@ -1034,7 +990,6 @@ async function syncA2aConfig(
 }
 
 // ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
 // Heuristic defaults — infer sensible values from project/team context
 // ---------------------------------------------------------------------------
 
@@ -1103,6 +1058,21 @@ function inferTestingCoverage(projectPhase) {
 
 // Variable builder helpers (private — used by tool-specific sync functions)
 // ---------------------------------------------------------------------------
+
+function buildTeamVars(team, vars, teamsSpec) {
+  return {
+    ...vars,
+    teamName: team.name || team.id,
+    teamId: team.id,
+    teamFocus: team.focus || '',
+    teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
+    teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
+    teamHandoffChain: Array.isArray(team['handoff-chain']) ? team['handoff-chain'].join(' → ') : team['handoff-chain'] || '',
+    maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
+    maxHandoffChainDepth: team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
+    maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
+  };
+}
 
 function buildCommandVars(cmd, vars) {
   return {
