@@ -26,7 +26,7 @@
 
 [Observable symptoms — error messages, unexpected behaviour, failures]
 
-```text
+```
 [Relevant error output or logs, if any]
 ```
 
