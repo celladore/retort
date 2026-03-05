@@ -16,6 +16,15 @@ last_updated: '2026-03-05'
 
 Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Force a specific tech stack build command | — |
+| `--package` | Build a specific package/app in a monorepo | — |
+| `--production` | Build in production mode | false |
+| `--verbose` | Show verbose build output | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

@@ -16,6 +16,20 @@ last_updated: '2026-03-05'
 
 Performs a structured review of staged changes, a specific PR, or a range of commits across 10 quality criteria: correctness, security, performance, tests, documentation, compatibility, completeness, doc gaps, bug detection, and enhancement opportunities. Delegates to specialist agents for each criterion. When --focus=retrospective, reviews the current session to extract issues and lessons learned.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--pr` | GitHub PR number to review | — |
+| `--branch` | Branch to review (defaults to current branch). Compares against base branch to determine diff. | — |
+| `--range` | Git commit range to review (e.g., main..HEAD) | — |
+| `--file` | Review a specific file | — |
+| `--project` | Scope review to a specific project or package in a monorepo (e.g., --project=api) | — |
+| `--focus` | Focus area for the review. Code-level: security, performance, correctness, style, tests, compatibility. Higher-level: completeness, docs, bugs, enhancements. Special: retrospective. Default: all (runs criteria 1-10). | all |
+| `--severity` | Minimum severity to report: info, warning, error, critical | warning |
+| `--open-issues` | Create external issues for findings above --severity threshold (uses project.yaml issueTracker setting). Applies to retrospective, bugs, completeness, and enhancements focus modes. | false |
+| `--dry-run` | Show findings without writing files or creating issues | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

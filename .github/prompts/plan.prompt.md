@@ -16,6 +16,14 @@ last_updated: '2026-03-05'
 
 Creates a detailed implementation plan for a feature, bug fix, or refactoring task. Analyzes the codebase, identifies affected files and teams, estimates complexity, and produces a step-by-step plan with acceptance criteria.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--issue` | GitHub issue number to plan for | — |
+| `--output` | Output format: markdown, yaml, or json | markdown |
+| `--depth` | Planning detail level: high, medium, low | medium |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

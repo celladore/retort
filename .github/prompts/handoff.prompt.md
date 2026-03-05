@@ -16,6 +16,15 @@ last_updated: '2026-03-05'
 
 Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--format` | Output format: markdown or yaml | markdown |
+| `--include-diff` | Include a summary of all file changes in the handoff | true |
+| `--tag` | Tag for categorizing the handoff (e.g., feature, bugfix, spike) | — |
+| `--save` | Save the handoff document to docs/ai_handoffs/ | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

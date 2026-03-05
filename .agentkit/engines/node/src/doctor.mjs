@@ -245,7 +245,6 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
         }
       }
 
-
       const vars = flattenProjectYaml(project);
       if (vars.languageProfileMode === 'configured' && !vars.hasConfiguredLanguages) {
         findings.push({

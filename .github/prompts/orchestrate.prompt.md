@@ -16,6 +16,18 @@ last_updated: '2026-03-05'
 
 Top-level orchestration command. Assesses the current repository state, identifies work to be done, delegates to appropriate team agents, and synthesizes results. The primary entry point for multi-step workflows.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--assess-only` | Run assessment phase only; do not execute changes | false |
+| `--scope` | Limit orchestration to specific file paths or glob patterns | — |
+| `--dry-run` | Show planned actions without executing them | false |
+| `--team` | Delegate to a specific team instead of auto-routing | — |
+| `--phase` | Jump to a specific phase (1-5) | — |
+| `--status` | Show current orchestrator state without executing | false |
+| `--force-unlock` | Clear a stale session lock | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
