@@ -3,7 +3,7 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as orchestrator from '../orchestrator.mjs';
-import { runReview } from '../review-runner.mjs';
+import { runReview, normalizeSeverity } from '../review-runner.mjs';
 import * as runner from '../runner.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -372,6 +372,31 @@ describe('review-runner', () => {
       });
 
       expect(result.todos).toBe(2);
+    });
+  });
+
+  describe('normalizeSeverity()', () => {
+    it('normalizes uppercase to lowercase', () => {
+      expect(normalizeSeverity('CRITICAL')).toBe('critical');
+      expect(normalizeSeverity('HIGH')).toBe('high');
+      expect(normalizeSeverity('MEDIUM')).toBe('medium');
+      expect(normalizeSeverity('LOW')).toBe('low');
+    });
+
+    it('passes through already-lowercase values', () => {
+      expect(normalizeSeverity('critical')).toBe('critical');
+      expect(normalizeSeverity('high')).toBe('high');
+    });
+
+    it('handles mixed case', () => {
+      expect(normalizeSeverity('High')).toBe('high');
+      expect(normalizeSeverity('Critical')).toBe('critical');
+    });
+
+    it('defaults to medium for unknown values', () => {
+      expect(normalizeSeverity('unknown')).toBe('medium');
+      expect(normalizeSeverity('')).toBe('medium');
+      expect(normalizeSeverity(42)).toBe('medium');
     });
   });
 

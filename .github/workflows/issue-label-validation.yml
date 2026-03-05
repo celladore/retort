@@ -1,0 +1,181 @@
+name: Issue Field Validation
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to validate (dry-run)'
+        required: false
+        type: string
+
+permissions:
+  issues: write
+
+jobs:
+  validate-issue-fields:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate issue fields
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+
+            // Allowed values — must stay in sync with .github/ISSUE_TEMPLATE/*.yml
+            const ALLOWED_AREAS = [
+              'backend', 'frontend', 'data', 'infra', 'devops',
+              'testing', 'security', 'docs', 'product', 'quality',
+              'cli', 'sync-engine'
+            ];
+
+            const ALLOWED_PRIORITIES = [
+              'P0 — Critical (system down, data loss)',
+              'P0 — Critical (blocking other work)',
+              'P1 — High (major feature broken, no workaround)',
+              'P1 — High (key feature, needed soon)',
+              'P2 — Medium (feature impaired, workaround exists)',
+              'P2 — Medium (valuable but not urgent)',
+              'P3 — Low (minor inconvenience)',
+              'P3 — Low (nice-to-have)',
+              'P4 — Trivial (cosmetic, nice-to-have)',
+              'P4 — Trivial (cosmetic, polish)'
+            ];
+
+            const ALLOWED_SEVERITIES = [
+              'critical — complete failure, data loss, or security vulnerability',
+              'high — major functionality broken',
+              'medium — partial functionality impaired',
+              'low — minor issue, cosmetic or edge-case'
+            ];
+
+            const ALLOWED_PHASES = ['greenfield', 'active', 'maintenance', 'legacy'];
+
+            const ALLOWED_IMPACTS = [
+              'all users', 'most users', 'some users',
+              'specific configuration only', 'developer/CI only'
+            ];
+
+            // Extract field values from issue body (YAML issue forms render as headings)
+            function extractField(body, fieldLabel) {
+              const regex = new RegExp(`### ${fieldLabel}\\s*\\n\\s*([^\\n]+)`, 'i');
+              const match = body.match(regex);
+              if (!match) return null;
+              const value = match[1].trim();
+              if (value === '_No response_' || value === 'None') return null;
+              return value;
+            }
+
+            const errors = [];
+
+            // Validate area (required)
+            const area = extractField(body, 'Area');
+            if (area && !ALLOWED_AREAS.includes(area)) {
+              errors.push(`**Area** "${area}" is not a valid option. Allowed: ${ALLOWED_AREAS.join(', ')}`);
+            }
+
+            // Validate priority (required)
+            const priority = extractField(body, 'Priority');
+            if (priority && !ALLOWED_PRIORITIES.includes(priority)) {
+              errors.push(`**Priority** "${priority}" is not a valid option. Must be P0–P4.`);
+            }
+
+            // Validate severity (bug reports only)
+            const severity = extractField(body, 'Severity');
+            if (severity && !ALLOWED_SEVERITIES.includes(severity)) {
+              errors.push(`**Severity** "${severity}" is not a valid option. Allowed: critical, high, medium, low.`);
+            }
+
+            // Validate phase (optional)
+            const phase = extractField(body, 'Phase');
+            if (phase && !ALLOWED_PHASES.includes(phase)) {
+              errors.push(`**Phase** "${phase}" is not a valid option. Allowed: ${ALLOWED_PHASES.join(', ')}`);
+            }
+
+            // Validate impact (optional)
+            const impact = extractField(body, 'Impact Scope');
+            if (impact && !ALLOWED_IMPACTS.includes(impact)) {
+              errors.push(`**Impact Scope** "${impact}" is not a valid option.`);
+            }
+
+            // Apply area label
+            if (area && ALLOWED_AREAS.includes(area)) {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: [`area:${area}`]
+                });
+              } catch (e) {
+                core.warning(`Could not add label area:${area} — ${e.message}`);
+              }
+            }
+
+            // Apply priority label
+            if (priority) {
+              const prioMatch = priority.match(/^(P\d)/);
+              if (prioMatch) {
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    labels: [`priority:${prioMatch[1].toLowerCase()}`]
+                  });
+                } catch (e) {
+                  core.warning(`Could not add priority label — ${e.message}`);
+                }
+              }
+            }
+
+            // Apply severity label (bug reports)
+            if (severity) {
+              const sevLevel = severity.split(' — ')[0];
+              if (sevLevel) {
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    labels: [`severity:${sevLevel}`]
+                  });
+                } catch (e) {
+                  core.warning(`Could not add severity label — ${e.message}`);
+                }
+              }
+            }
+
+            // Post validation comment if errors found
+            if (errors.length > 0) {
+              const comment = [
+                '## Issue Field Validation Failed',
+                '',
+                'The following fields have invalid values:',
+                '',
+                ...errors.map(e => `- ${e}`),
+                '',
+                'Please edit this issue and select valid options from the dropdowns.',
+                '',
+                '---',
+                '*This check is automated by AgentKit Forge issue field validation.*'
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['invalid-fields']
+              });
+
+              core.setFailed(`Issue #${issue.number} has invalid field values`);
+            }

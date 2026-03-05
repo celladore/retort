@@ -324,6 +324,18 @@ const PROJECT_ENUMS = {
   complianceFramework: ['soc2', 'iso27001', 'pci-dss', 'hipaa', 'gdpr', 'internal', 'none'],
   backupSchedule: ['daily', 'weekly', 'continuous', 'none'],
   auditEventBus: ['service-bus', 'event-hub', 'sns', 'none'],
+  // Issue template fields — canonical allowed values for issue forms and validation
+  issueArea: [
+    'backend', 'frontend', 'data', 'infra', 'devops',
+    'testing', 'security', 'docs', 'product', 'quality',
+    'cli', 'sync-engine',
+  ],
+  issuePriority: ['P0', 'P1', 'P2', 'P3', 'P4'],
+  issueSeverity: ['critical', 'high', 'medium', 'low'],
+  issueImpact: [
+    'all users', 'most users', 'some users',
+    'specific configuration only', 'developer/CI only',
+  ],
 };
 
 const teamsIntakeSchema = {
