@@ -12,6 +12,12 @@ import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 import {
+  buildFeatureVars,
+  buildHookFeatureMap,
+  loadFeatureSpec,
+  resolveFeatures,
+} from './feature-manager.mjs';
+import {
   categorizeFile,
   computeProjectCompleteness,
   flattenProjectYaml,
@@ -278,7 +284,7 @@ async function syncGitHub(templatesDir, tmpDir, vars, version, repoName) {
 }
 
 /**
- * Copies templates/renovate to tmpDir root.
+ * Copies templates/renovate to tmpDir root (renovate.json) and other editor configs.
  */
 async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) {
   await syncDirectCopy(
@@ -610,6 +616,33 @@ async function syncClaudeSettings(
 }
 
 /**
+ * Copies hook files from templates/claude/hooks, skipping hooks whose
+ * owning feature is disabled. The hook→feature mapping is derived from
+ * features.yaml affectsTemplates via buildHookFeatureMap().
+ */
+async function syncClaudeHooks(templatesDir, tmpDir, vars, version, repoName, hookFeatureMap) {
+  const hooksDir = join(templatesDir, 'claude', 'hooks');
+  if (!existsSync(hooksDir)) return;
+
+  const { specific, defaultFeature } = hookFeatureMap;
+
+  for await (const srcFile of walkDir(hooksDir)) {
+    const fname = basename(srcFile);
+    // Strip extension(s) to get the hook name stem (e.g. 'protect-sensitive' from 'protect-sensitive.sh')
+    const stem = fname.replace(/\.(sh|ps1)$/i, '');
+    // Check specific mapping first, then fall back to directory-level default feature
+    const requiredFeature = specific[stem] || defaultFeature;
+    if (requiredFeature && !isFeatureEnabled(requiredFeature, vars)) continue;
+
+    const ext = extname(srcFile).toLowerCase();
+    const content = await readTemplateText(srcFile);
+    const rendered = renderTemplate(content, vars, srcFile);
+    const withHeader = insertHeader(rendered, ext, version, repoName);
+    await writeOutput(join(tmpDir, '.claude', 'hooks', fname), withHeader);
+  }
+}
+
+/**
  * Copies individual command templates and generates team commands.
  * Skips team-TEMPLATE.md; uses it as the generator for team commands.
  */
@@ -625,10 +658,20 @@ async function syncClaudeCommands(
   const commandsDir = join(templatesDir, 'claude', 'commands');
   if (!existsSync(commandsDir)) return;
 
-  // Copy non-template command files
+  // Build lookup: command-name → command spec (for requiredFeature gating)
+  const cmdByName = new Map();
+  for (const cmd of commandsSpec?.commands || []) {
+    cmdByName.set(cmd.name, cmd);
+  }
+
+  // Copy non-template command files, skipping feature-gated commands
   for await (const srcFile of walkDir(commandsDir)) {
     const fname = basename(srcFile);
     if (fname === 'team-TEMPLATE.md') continue; // skip template
+    // Check if this file corresponds to a feature-gated command
+    const cmdName = fname.replace(/\.md$/i, '');
+    const cmdSpec = cmdByName.get(cmdName);
+    if (cmdSpec && !isItemFeatureEnabled(cmdSpec, vars)) continue;
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
@@ -636,7 +679,8 @@ async function syncClaudeCommands(
     await writeOutput(join(tmpDir, '.claude', 'commands', fname), withHeader);
   }
 
-  // Generate team commands from team-TEMPLATE.md
+  // Generate team commands from team-TEMPLATE.md (gated by team-orchestration)
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const teamTemplatePath = join(commandsDir, 'team-TEMPLATE.md');
   if (!existsSync(teamTemplatePath)) return;
   const teamTemplate = await readTemplateText(teamTemplatePath);
@@ -660,6 +704,7 @@ async function syncClaudeAgents(
   agentsSpec,
   _rulesSpec
 ) {
+  if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'claude', 'agents', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -696,6 +741,7 @@ async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, c
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -711,6 +757,7 @@ async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, c
  * Generates .cursor/rules/team-<id>.mdc for each team.
  */
 async function syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'cursor', 'teams', 'TEMPLATE.mdc');
   const fallbackTemplate = `---
 description: "Team {{teamName}} — {{teamFocus}}"
@@ -750,6 +797,7 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -765,6 +813,7 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
  * Generates .windsurf/rules/team-<id>.md for each team.
  */
 async function syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'windsurf', 'teams', 'TEMPLATE.md');
   const fallbackTemplate = `# Team: {{teamName}}
 
@@ -795,6 +844,7 @@ async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoNam
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -841,6 +891,7 @@ async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName,
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -860,6 +911,7 @@ async function syncCopilotAgents(
   agentsSpec,
   _rulesSpec
 ) {
+  if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'agents', 'TEMPLATE.agent.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -878,6 +930,7 @@ async function syncCopilotAgents(
  * Generates .github/chatmodes/team-<id>.chatmode.md for each team.
  */
 async function syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'chatmodes', 'TEMPLATE.chatmode.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -1025,6 +1078,7 @@ async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, co
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -1231,6 +1285,28 @@ function buildAreaRoutingTable(teamsIntake) {
     .join(', ');
 }
 
+/**
+ * Returns true if the item's requiredFeature is enabled (or if it has no requiredFeature).
+ * Items without a requiredFeature are always enabled.
+ */
+function isItemFeatureEnabled(item, vars) {
+  if (!item.requiredFeature) return true;
+  return isFeatureEnabled(item.requiredFeature, vars);
+}
+
+/**
+ * Returns true if a feature is enabled (or if feature vars are not loaded).
+ * Uses the canonical `feature_<id>` var. Missing vars default to enabled
+ * (graceful degradation for repos without features.yaml).
+ */
+function isFeatureEnabled(featureId, vars) {
+  const featureVar = `feature_${featureId.replace(/-/g, '_')}`;
+  return vars[featureVar] !== false;
+}
+
+// HOOK_FEATURE_MAP is derived at sync time from features.yaml affectsTemplates
+// via buildHookFeatureMap(). See syncClaudeHooks() for usage.
+
 function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
   let prompt = typeof cmd.prompt === 'string' ? cmd.prompt.trim() : '';
   if (prompt) {
@@ -1396,6 +1472,24 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // Template variables — start with project.yaml flat vars, then overlay with core vars
   const projectVars = projectSpec ? flattenProjectYaml(projectSpec, docsSpec) : {};
+
+  // Resolve enabled features from spec + overlay settings
+  let featureVars = {};
+  let hookFeatureMap = { specific: {}, defaultFeature: null };
+  try {
+    const { features, presets } = loadFeatureSpec(agentkitRoot, { log });
+    const enabledFeatures = resolveFeatures(features, overlaySettings, presets, { log });
+    featureVars = buildFeatureVars(features, enabledFeatures);
+    hookFeatureMap = buildHookFeatureMap(features);
+    log(`[agentkit:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
+  } catch {
+    // features.yaml may not exist yet in older repos — degrade gracefully
+    log('[agentkit:sync] Features: spec not found, all features assumed enabled');
+  }
+
+  const vars = {
+    ...projectVars,
+    ...featureVars,
   const teamsIntake = teamsSpec?.intake || {};
   const processIntake = projectSpec?.process?.intake || {};
   const intakeEscalation = processIntake.escalation || teamsIntake.escalation || {};
@@ -1516,24 +1610,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     // --- Always-on outputs (not gated by renderTargets) ---
     // These run even with --only because they're framework-level infrastructure:
-    // - AGENTS.md, root docs, .github/ — always needed regardless of tool target
+    // - AGENTS.md, root docs — always needed regardless of tool target
     // - .gitattributes merge drivers — repo-wide, not tool-specific
     // - .vscode/settings.json, editor configs — workspace-level, not tool-specific
-    await Promise.all([
+    const alwaysOnTasks = [
       syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
       syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
-      syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
       syncGitattributes(tmpDir, projectRoot, version),
-      syncDirectCopy(
-        templatesDir,
-        vars.overlayTemplatesDir,
-        'docs',
-        tmpDir,
-        'docs',
-        vars,
-        version,
-        headerRepoName
-      ),
       syncDirectCopy(
         templatesDir,
         vars.overlayTemplatesDir,
@@ -1544,8 +1627,31 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         version,
         headerRepoName
       ),
-      syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName),
-    ]);
+    ];
+
+    // Feature-gated always-on outputs (no render-target gate, but feature-gated)
+    if (isFeatureEnabled('ci-automation', vars)) {
+      alwaysOnTasks.push(syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+    if (isFeatureEnabled('doc-scaffolding', vars)) {
+      alwaysOnTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'docs',
+          tmpDir,
+          'docs',
+          vars,
+          version,
+          headerRepoName
+        )
+      );
+    }
+    if (isFeatureEnabled('dependency-management', vars)) {
+      alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+
+    await Promise.all(alwaysOnTasks);
 
     // --- Editor theme (must run after vscode template copy to merge into settings) ---
     // Scaffold-once: per-output target — only skip targets that already exist in projectRoot
@@ -1575,16 +1681,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     if (targets.has('claude')) {
       gatedTasks.push(
-        syncDirectCopy(
-          templatesDir,
-          vars.overlayTemplatesDir,
-          'claude/hooks',
-          tmpDir,
-          '.claude/hooks',
-          vars,
-          version,
-          headerRepoName
-        ),
+        syncClaudeHooks(templatesDir, tmpDir, vars, version, headerRepoName, hookFeatureMap),
         syncClaudeSettings(
           templatesDir,
           tmpDir,
@@ -1614,16 +1711,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         syncDirectCopy(
           templatesDir,
           vars.overlayTemplatesDir,
-          'claude/rules',
-          tmpDir,
-          '.claude/rules',
-          vars,
-          version,
-          headerRepoName
-        ),
-        syncDirectCopy(
-          templatesDir,
-          vars.overlayTemplatesDir,
           'claude/state',
           tmpDir,
           '.agentkit/state',
@@ -1632,59 +1719,67 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           headerRepoName
         ),
         syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
-        syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-        syncLanguageInstructions(
-          templatesDir,
-          tmpDir,
-          vars,
-          version,
-          headerRepoName,
-          rulesSpec,
-          '.claude/rules/languages',
-          'claude'
-        )
+        syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
       );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncDirectCopy(
+            templatesDir,
+            vars.overlayTemplatesDir,
+            'claude/rules',
+            tmpDir,
+            '.claude/rules',
+            vars,
+            version,
+            headerRepoName
+          ),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.claude/rules/languages',
+            'claude'
+          )
+        );
+      }
     }
 
     if (targets.has('cursor')) {
       gatedTasks.push(
-        syncDirectCopy(
-          templatesDir,
-          vars.overlayTemplatesDir,
-          'cursor/rules',
-          tmpDir,
-          '.cursor/rules',
-          vars,
-          version,
-          headerRepoName
-        ),
         syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-        syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-        syncLanguageInstructions(
-          templatesDir,
-          tmpDir,
-          vars,
-          version,
-          headerRepoName,
-          rulesSpec,
-          '.cursor/rules/languages',
-          'cursor'
-        )
+        syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
       );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncDirectCopy(
+            templatesDir,
+            vars.overlayTemplatesDir,
+            'cursor/rules',
+            tmpDir,
+            '.cursor/rules',
+            vars,
+            version,
+            headerRepoName
+          ),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.cursor/rules/languages',
+            'cursor'
+          )
+        );
+      }
     }
 
     if (targets.has('windsurf')) {
       gatedTasks.push(
-        syncDirectCopy(
-          templatesDir,
-          vars.overlayTemplatesDir,
-          'windsurf/rules',
-          tmpDir,
-          '.windsurf/rules',
-          vars,
-          version,
-          headerRepoName
-        ),
         syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
         syncDirectCopy(
           templatesDir,
@@ -1696,18 +1791,32 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           version,
           headerRepoName
         ),
-        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-        syncLanguageInstructions(
-          templatesDir,
-          tmpDir,
-          vars,
-          version,
-          headerRepoName,
-          rulesSpec,
-          '.windsurf/rules/languages',
-          'windsurf'
-        )
+        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
       );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncDirectCopy(
+            templatesDir,
+            vars.overlayTemplatesDir,
+            'windsurf/rules',
+            tmpDir,
+            '.windsurf/rules',
+            vars,
+            version,
+            headerRepoName
+          ),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.windsurf/rules/languages',
+            'windsurf'
+          )
+        );
+      }
     }
 
     if (targets.has('ai')) {
@@ -1738,18 +1847,22 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           agentsSpec,
           rulesSpec
         ),
-        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-        syncLanguageInstructions(
-          templatesDir,
-          tmpDir,
-          vars,
-          version,
-          headerRepoName,
-          rulesSpec,
-          '.github/instructions/languages',
-          'copilot'
-        )
+        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
       );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.github/instructions/languages',
+            'copilot'
+          )
+        );
+      }
     }
 
     if (targets.has('gemini')) {
@@ -1767,38 +1880,42 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
 
     if (targets.has('cline')) {
-      gatedTasks.push(
-        syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-        syncLanguageInstructions(
-          templatesDir,
-          tmpDir,
-          vars,
-          version,
-          headerRepoName,
-          rulesSpec,
-          '.clinerules/languages',
-          'cline'
-        )
-      );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.clinerules/languages',
+            'cline'
+          )
+        );
+      }
     }
 
     if (targets.has('roo')) {
-      gatedTasks.push(
-        syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-        syncLanguageInstructions(
-          templatesDir,
-          tmpDir,
-          vars,
-          version,
-          headerRepoName,
-          rulesSpec,
-          '.roo/rules/languages',
-          'roo'
-        )
-      );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.roo/rules/languages',
+            'roo'
+          )
+        );
+      }
     }
 
-    if (targets.has('mcp')) {
+    if (targets.has('mcp') && isFeatureEnabled('mcp-integration', vars)) {
       gatedTasks.push(
         syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir)
       );

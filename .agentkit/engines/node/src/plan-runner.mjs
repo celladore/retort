@@ -5,7 +5,8 @@
  */
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { appendEvent, loadState, readEvents } from './orchestrator.mjs';
+import { appendEvent, readEvents } from './events.mjs';
+import { loadState } from './orchestrator.mjs';
 import { formatTimestamp } from './runner.mjs';
 
 // ---------------------------------------------------------------------------

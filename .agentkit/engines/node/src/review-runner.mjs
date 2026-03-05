@@ -4,12 +4,18 @@
  * TODO/FIXME scanning, and lint on changed files.
  * This is NOT the AI review — that's the /review slash command.
  */
-import { promises as fsPromises, realpathSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, promises as fsPromises, realpathSync, statSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
+import yaml from 'js-yaml';
 import { emitEvent, readEvents } from './event-emitter.mjs';
 import { appendEvent } from './orchestrator.mjs';
 import { execCommand, runInPool } from './runner.mjs';
 import { addTaskArtifact, createTask } from './task-protocol.mjs';
+import {
+  getIncrementalTestCommands,
+  resolveCoverageCommand,
+  parseCoveragePercentage,
+} from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Secret patterns — compiled once at module level to avoid per-call overhead.
@@ -477,13 +483,61 @@ export async function runReview({
   }
   console.log('');
 
+  // --- Test Coverage Delta ---
+  let coverageDelta = null;
+  if (flags.coverage === true) {
+    console.log('--- Test Coverage Check ---');
+    try {
+      const teamsPath = resolve(projectRoot, '.agentkit', 'spec', 'teams.yaml');
+      if (existsSync(teamsPath)) {
+        const teamsSpec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+        const techStacks = teamsSpec?.techStacks || [];
+        const testCommands = getIncrementalTestCommands(changedFiles, techStacks);
+
+        if (testCommands.length > 0) {
+          for (const { stack, command } of testCommands) {
+            const covCmd = resolveCoverageCommand({ testCommand: command });
+            if (covCmd.command) {
+              const covResult = execCommand(covCmd.command, { cwd: projectRoot });
+              const percentage = parseCoveragePercentage(
+                covResult.stdout + '\n' + covResult.stderr,
+                covCmd.parser
+              );
+
+              if (percentage != null) {
+                coverageDelta = { stack, percentage, command: covCmd.command };
+                allFindings.push({
+                  type: 'coverage',
+                  severity: percentage < 50 ? 'MEDIUM' : 'LOW',
+                  stack,
+                  percentage,
+                });
+                console.log(`  ${stack}: ${percentage.toFixed(1)}% coverage on changed files`);
+              } else {
+                console.log(`  ${stack}: coverage data not parseable`);
+              }
+              break; // Only run coverage for the first matching stack
+            }
+          }
+        } else {
+          console.log('  No matching test commands for changed files');
+        }
+      } else {
+        console.log('  Skipped (no teams.yaml)');
+      }
+    } catch (err) {
+      console.log(`  Skipped (${err?.message ?? 'error'})`);
+    }
+    console.log('');
+  }
+
   // Summary
   const hasHighSeverity = allFindings.some((f) => f.severity === 'high' || f.severity === 'critical');
   const status = hasHighSeverity ? 'FAIL' : 'PASS';
 
   console.log(`=== Review: ${status} ===`);
   console.log(
-    `Files: ${changedFiles.length} | Findings: ${allFindings.length} (${secrets.length} secrets, ${largeFiles.length} large files, ${todos.length} TODOs)`
+    `Files: ${changedFiles.length} | Findings: ${allFindings.length} (${secrets.length} secrets, ${largeFiles.length} large files, ${todos.length} TODOs${coverageDelta ? `, coverage: ${coverageDelta.percentage.toFixed(1)}%` : ''})`
   );
 
   // Track unfixed findings (compare with previous review)
@@ -498,6 +552,7 @@ export async function runReview({
       filesReviewed: changedFiles.length,
       totalFindings: allFindings.length,
       secretFindings: secrets.length,
+      coverage: coverageDelta,
       status,
       ...(userContext ? { userContext } : {}),
       findingDetails: allFindings.map((f) => ({
@@ -538,6 +593,7 @@ export async function runReview({
     secrets: secrets.length,
     largeFiles: largeFiles.length,
     todos: todos.length,
+    coverage: coverageDelta,
     status,
     unfixedFindings: unfixed.length,
     createdTasks: createdTasks.length,

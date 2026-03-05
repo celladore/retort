@@ -5,6 +5,11 @@
 # =============================================================================
 # Each command defines: name, description, type, flags, and allowed-tools.
 # Types: workflow (multi-step orchestration), team (team-scoped), utility (single action)
+#
+# Optional field: requiredFeature
+#   If set, this command is only generated when the specified feature is enabled.
+#   If null or omitted, the command is always generated.
+#   Example: requiredFeature: quality-gates  → only generated if quality-gates is enabled.
 # =============================================================================
 
 commands:
@@ -14,6 +19,7 @@ commands:
 
   - name: orchestrate
     type: workflow
+    requiredFeature: team-orchestration
     description: >
       Top-level orchestration command. Assesses the current repository state,
       identifies work to be done, delegates to appropriate team agents, and
@@ -147,6 +153,7 @@ commands:
 
   - name: healthcheck
     type: workflow
+    requiredFeature: healthcheck
     description: >
       Performs a comprehensive health check of the repository: validates builds,
       runs tests, checks linting, verifies configuration files, and reports on
@@ -204,6 +211,7 @@ commands:
 
   - name: review
     type: workflow
+    requiredFeature: code-review
     description: >
       Performs a structured code review of staged changes, a specific PR, or a
       range of commits. Evaluates code quality, adherence to domain rules,
@@ -488,6 +496,7 @@ commands:
 
   - name: check
     type: workflow
+    requiredFeature: quality-gates
     description: >
       Runs all quality checks for the repository: type checking, linting,
       formatting validation, and test suites. Returns a unified pass/fail
@@ -600,6 +609,7 @@ commands:
 
   - name: handoff
     type: workflow
+    requiredFeature: session-handoff
     description: >
       Generates a structured handoff document for the current session. Captures
       what was accomplished, what remains, open questions, and context needed
@@ -660,6 +670,7 @@ commands:
 
   - name: project-review
     type: workflow
+    requiredFeature: project-review
     description: >
       Comprehensive production-grade project review and assessment. Systematically
       analyzes code quality, architecture, security, UX, performance, documentation,
@@ -759,6 +770,7 @@ commands:
 
   - name: scaffold
     type: workflow
+    requiredFeature: doc-scaffolding
     description: >
       Generates implementation skeletons aligned with project conventions.
       Supports endpoints, UI components, IaC modules, migrations, tests,
@@ -1110,6 +1122,94 @@ commands:
       - Write
       - Glob
       - Grep
+
+  # ===========================================================================
+  # Feature Management Commands — Inspect and operate on kit features
+  # ===========================================================================
+
+  - name: feature-review
+    type: workflow
+    description: >
+      Reviews the current feature configuration for the repo. Analyzes which
+      features are enabled/disabled, checks for misconfigured dependencies,
+      identifies unused features (enabled but no matching code patterns),
+      and recommends features to enable based on codebase analysis.
+    flags:
+      - name: --recommend
+        description: 'Analyze codebase and recommend features to enable or disable'
+        type: boolean
+        default: false
+      - name: --audit
+        description: 'Audit feature usage — find enabled features with no matching code patterns'
+        type: boolean
+        default: false
+      - name: --verbose
+        description: 'Show detailed feature metadata including template vars and affected templates'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+    requiredFeature: null
+
+  - name: feature-configure
+    type: workflow
+    description: >
+      Interactive feature configuration workflow. Walks through each feature
+      category, explains what each feature provides, shows current status,
+      and applies changes via the overlay settings.yaml. Triggers a sync
+      after changes are applied.
+    flags:
+      - name: --category
+        description: 'Configure only features in a specific category'
+        type: string
+        default: null
+        required: false
+        enum: [workflow, quality, docs, security, infra, advanced]
+      - name: --preset
+        description: 'Apply a named feature preset instead of interactive selection'
+        type: string
+        default: null
+        required: false
+        enum: [minimal, lean, standard, full]
+      - name: --dry-run
+        description: 'Show what would change without applying'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Write
+      - Glob
+      - Bash
+    requiredFeature: null
+
+  - name: feature-flow
+    type: workflow
+    description: >
+      Traces a specific feature end-to-end through the kit: shows which spec
+      files define it, which template vars it injects, which templates consume
+      those vars, what generated output it produces, and what overlay settings
+      control it. Use this to understand or debug a feature's behavior.
+    flags:
+      - name: --feature
+        description: 'Feature ID to trace (e.g., team-orchestration, quality-gates)'
+        type: string
+        default: null
+        required: true
+      - name: --show-templates
+        description: 'Show the raw template content that uses this feature'
+        type: boolean
+        default: false
+      - name: --show-output
+        description: 'Show the rendered output for this feature'
+        type: boolean
+        default: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+    requiredFeature: null
 
   # ===========================================================================
   # Framework Commands — AgentKit Forge internal tooling

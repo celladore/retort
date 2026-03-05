@@ -98,6 +98,7 @@ Always run the full test suite before creating a pull request. Never disable or 
 Treat external service boundaries carefully. Mock integrations in tests. Handle failures gracefully with retries and circuit breakers where appropriate.
 {{/if}}
 
+{{#if hasDocScaffolding}}
 ## Documentation
 
 {{#if hasPrd}}- **PRDs**: `{{prdPath}}`{{/if}}
@@ -107,21 +108,23 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
 {{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 {{#if hasStorybook}}- **Storybook** available for component preview{{/if}}
-
-- **Quality Gates**: `QUALITY_GATES.md`
+{{#if hasQualityGates}}- **Quality Gates**: `QUALITY_GATES.md`{{/if}}
 - **Runbook**: `RUNBOOK_AI.md`
+{{/if}}
 
+{{#if hasTeamOrchestration}}
 ## Agent Teams
 
 This project uses a multi-team orchestration model. Teams are specialized by domain:
 
 - Start with `/orchestrate` to assess the current state and coordinate work.
 - Use `/plan` to create structured implementation plans before coding.
-- Run `/check` to verify quality gates (lint, test, build) before committing.
-- Use `/handoff` to document session state for continuity.
+{{#if hasQualityGates}}- Run `/check` to verify quality gates (lint, test, build) before committing.{{/if}}
+{{#if hasSessionHandoff}}- Use `/handoff` to document session state for continuity.{{/if}}
 
 See `UNIFIED_AGENT_TEAMS.md` for full team definitions and workflow phases.
 See `COMMAND_GUIDE.md` for when to choose `/orchestrate`, `/plan`, `/project-review`, and other commands.
+{{/if}}
 
 {{#if hasFeatureFlags}}
 
