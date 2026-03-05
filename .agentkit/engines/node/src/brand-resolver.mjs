@@ -67,10 +67,10 @@ export function validateThemeSpec(themeSpec) {
   if (!themeSpec || typeof themeSpec !== 'object') return { warnings };
 
   if (themeSpec.tier && !VALID_TIERS.has(themeSpec.tier)) {
-    warnings.push(`tier "${themeSpec.tier}" is not valid — expected one of: full, medium, minimal (defaulting to full)`);
+    warnings.push(`tier "${themeSpec.tier}" is not valid — expected one of: full, medium, minimal`);
   }
   if (themeSpec.scheme && !VALID_SCHEMES.has(themeSpec.scheme)) {
-    warnings.push(`scheme "${themeSpec.scheme}" is not valid — expected one of: dark, light (defaulting to dark)`);
+    warnings.push(`scheme "${themeSpec.scheme}" is not valid — expected one of: dark, light`);
   }
   return { warnings };
 }
@@ -242,6 +242,8 @@ export function mergeThemeIntoSettings(existingSettings, colorCustomizations, me
     settings['_agentkit_theme'] = {
       brand: meta.brand || 'unknown',
       mode: meta.mode || 'dark',
+      scheme: meta.scheme || 'dark',
+      tier: meta.tier || 'minimal',
       version: meta.version || '1.0.0',
     };
   }

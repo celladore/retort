@@ -348,7 +348,7 @@ describe('mergeThemeIntoSettings', () => {
       'titleBar.activeBackground': '#184A6C',
       'statusBar.background': '#1976D2',
     };
-    const meta = { brand: 'AgentKit Forge', mode: 'dark', version: '1.0.0' };
+    const meta = { brand: 'AgentKit Forge', mode: 'dark', scheme: 'dark', tier: 'full', version: '1.0.0' };
 
     const result = mergeThemeIntoSettings(existing, colors, meta);
 

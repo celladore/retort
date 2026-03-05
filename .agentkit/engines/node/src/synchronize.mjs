@@ -406,7 +406,8 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
 
   // Honor baseTheme — sets workbench.colorTheme per workspace
   if (themeSpec.baseTheme) {
-    const baseThemeValue = mode === 'light' ? themeSpec.baseTheme.light : themeSpec.baseTheme.dark;
+    const preferLight = mode === 'light' || (mode === 'both' && scheme === 'light');
+    const baseThemeValue = preferLight ? themeSpec.baseTheme.light : themeSpec.baseTheme.dark;
     if (baseThemeValue) {
       meta.baseTheme = baseThemeValue;
     }
