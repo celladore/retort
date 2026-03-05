@@ -3,7 +3,8 @@
 # Pure AI tool configs. Regenerated every sync, never edit directly.
 # Edit .agentkit/spec/ or .agentkit/overlays/ instead.
 # =============================================================================
-/.claude/
+# Claude Code — track commands, hooks, rules, agents, settings; ignore state
+/.claude/state/
 /.cursor/
 /.windsurf/
 /.ai/
