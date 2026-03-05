@@ -3,8 +3,8 @@
 # Regenerate: pnpm -C .agentkit agentkit:sync
 name: Feature Request
 description: Suggest a new feature or enhancement
-title: "[FEATURE] "
-labels: ["enhancement", "triage"]
+title: '[FEATURE] '
+labels: ['enhancement', 'triage']
 assignees: []
 
 body:
@@ -40,11 +40,11 @@ body:
       label: Priority
       description: How important is this feature?
       options:
-        - "P0 — Critical (blocking other work)"
-        - "P1 — High (key feature, needed soon)"
-        - "P2 — Medium (valuable but not urgent)"
-        - "P3 — Low (nice-to-have)"
-        - "P4 — Trivial (cosmetic, polish)"
+        - 'P0 — Critical (blocking other work)'
+        - 'P1 — High (key feature, needed soon)'
+        - 'P2 — Medium (valuable but not urgent)'
+        - 'P3 — Low (nice-to-have)'
+        - 'P4 — Trivial (cosmetic, polish)'
     validations:
       required: true
 
@@ -67,11 +67,11 @@ body:
       label: Impact Scope
       description: How broadly will this feature affect users?
       options:
-        - "all users"
-        - "most users"
-        - "some users"
-        - "specific configuration only"
-        - "developer/CI only"
+        - 'all users'
+        - 'most users'
+        - 'some users'
+        - 'specific configuration only'
+        - 'developer/CI only'
     validations:
       required: false
 

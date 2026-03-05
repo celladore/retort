@@ -10,6 +10,7 @@
 ## Design Principle: Code Over Context
 
 Phase 3 introduces the most complex behaviors. The temptation is to describe these in agent instructions. Resist that. Every practice here is implemented as either:
+
 1. **Config** in `teams.yaml` (read once by orchestrator)
 2. **Scripts** that run at defined checkpoints
 3. **Generated artifacts** that agents read only when relevant
@@ -33,20 +34,22 @@ Phase 3 introduces the most complex behaviors. The temptation is to describe the
 ### Technical Requirements
 
 **TR-012.1 — teams.yaml Config**:
+
 ```yaml
 process:
   sprint:
     duration-sessions: 5
-    duration-calendar-days: 7    # Whichever hits first
+    duration-calendar-days: 7 # Whichever hits first
     ceremonies:
       planning: sprint-start
       sync: session-start
       review: sprint-end
       retro: sprint-end
-    scope-change-approval: product   # PO must approve mid-sprint additions
+    scope-change-approval: product # PO must approve mid-sprint additions
 ```
 
 **TR-012.2 — Sprint State**: `.claude/state/orchestrator.json` tracks:
+
 ```json
 {
   "sprint": {
@@ -63,6 +66,7 @@ process:
 ```
 
 **TR-012.3 — Sprint Boundary Script**: `scripts/sprint-lifecycle.mjs`
+
 ```
 Commands:
   sprint start --goal <goal> --capacity <pts>
@@ -72,6 +76,7 @@ Commands:
 ```
 
 **TR-012.4 — Orchestrator Integration**:
+
 - `/orchestrate` checks `sprint.session_count` against `sprint.max_sessions`
 - At boundary: "Sprint 2 has used 5/5 sessions. Trigger sprint end? (review → retro → planning)"
 - Mid-sprint: scope change detection logs `po-decision` event
@@ -89,6 +94,7 @@ Sprint state lives in `orchestrator.json`. Agents don't track sprint boundaries 
 **FR-013.1**: At sprint end, a review summary SHALL be auto-generated.
 
 **FR-013.2**: The review SHALL include:
+
 - Sprint Goal and achievement status
 - Completed items with PR links and changed files
 - Carried-over items with reasons
@@ -100,6 +106,7 @@ Sprint state lives in `orchestrator.json`. Agents don't track sprint boundaries 
 ### Technical Requirements
 
 **TR-013.1 — Generation Script**: `scripts/generate-review.mjs`
+
 ```
 Input:  sprint number
 Action:
@@ -113,27 +120,34 @@ Output: docs/history/sprint-reviews/sprint-N-review.md
 ```
 
 **TR-013.2 — Review Template**:
+
 ```markdown
 # Sprint N Review — [Date]
 
 ## Sprint Goal
+
 [Goal statement] — **[Achieved / Partially Achieved / Not Achieved]**
 
 ## Completed Items
-| Task | Team | Points | PR | Key Files |
-|------|------|--------|----|-----------|
+
+| Task | Team | Points | PR  | Key Files |
+| ---- | ---- | ------ | --- | --------- |
 
 ## Carried Over
+
 | Task | Team | Points | Reason |
-|------|------|--------|--------|
+| ---- | ---- | ------ | ------ |
 
 ## Key Decisions
+
 - [Decision from events.log]
 
 ## Stakeholder Notes
+
 _[To be added by Product Owner]_
 
 ## Metrics Summary
+
 _[Auto-linked from metrics/sprint-N.md]_
 ```
 
@@ -150,6 +164,7 @@ Pure script output. No agent involvement in generation. PO annotates the file di
 **FR-014.1**: Teams SHALL have optional secondary scopes — file areas they can work in when their primary expertise is needed elsewhere.
 
 **FR-014.2**: Secondary scope work SHALL only be assigned when:
+
 1. The primary-scope team is at WIP limit, OR
 2. Swarming is triggered, OR
 3. The orchestrator explicitly assigns cross-team work
@@ -159,36 +174,46 @@ Pure script output. No agent involvement in generation. PO annotates the file di
 ### Technical Requirements
 
 **TR-014.1 — teams.yaml Schema**:
+
 ```yaml
 teams:
   - id: backend
     name: BACKEND
     scope: ['apps/api/**', 'services/**', 'src/server/**', 'controllers/**']
-    secondary-scope: ['**/*.test.*']        # Can write tests
-    secondary-requires-review-from: testing  # Testing must review
+    secondary-scope: ['**/*.test.*'] # Can write tests
+    secondary-requires-review-from: testing # Testing must review
 
   - id: testing
     name: TESTING
     scope: ['**/*.test.*', 'tests/**', 'e2e/**']
-    secondary-scope: ['apps/api/**']        # Can read/understand API code for test writing
+    secondary-scope: ['apps/api/**'] # Can read/understand API code for test writing
     secondary-requires-review-from: backend
 
   - id: frontend
     name: FRONTEND
     scope: ['apps/web/**', 'components/**']
-    secondary-scope: ['docs/01_product/**']  # Can contribute to product docs
+    secondary-scope: ['docs/01_product/**'] # Can contribute to product docs
     secondary-requires-review-from: docs
 ```
 
 **TR-014.2 — Orchestrator Logic**:
 When assigning work and primary team is at WIP limit:
+
 1. Check `secondary-scope` of available teams
 2. If a match exists and that team is below WIP limit, assign with flag `cross-team: true`
 3. Auto-create a review task for the `secondary-requires-review-from` team
 
 **TR-014.3 — Events Log**:
+
 ```json
-{"type": "cross-team-assignment", "task": "...", "primary_team": "testing", "assigned_to": "backend", "scope_type": "secondary", "review_by": "testing"}
+{
+  "type": "cross-team-assignment",
+  "task": "...",
+  "primary_team": "testing",
+  "assigned_to": "backend",
+  "scope_type": "secondary",
+  "review_by": "testing"
+}
 ```
 
 ### Context Bloat Mitigation
@@ -206,6 +231,7 @@ Secondary scope is config only. Agents don't carry instructions about when to us
 **FR-015.2**: Roles: Driver (writes code) and Navigator (reviews in real-time, catches issues).
 
 **FR-015.3**: Pair programming SHALL be reserved for:
+
 - P0/P1 items with complexity >= 5 points
 - Security-sensitive code
 - Cross-team integration points
@@ -215,6 +241,7 @@ Secondary scope is config only. Agents don't carry instructions about when to us
 ### Technical Requirements
 
 **TR-015.1 — teams.yaml Config**:
+
 ```yaml
 process:
   pair-programming:
@@ -224,13 +251,14 @@ process:
         min-complexity: 5
       - scope: ['auth/**', 'security/**']
       - type: cross-team-integration
-    cost-multiplier: 2.0          # Token budget impact
+    cost-multiplier: 2.0 # Token budget impact
 ```
 
 **TR-015.2 — Invocation**: `/delegate --pair <team-a> <team-b> --task <id>`
 
 **TR-015.3 — Implementation Approach**:
 Rather than two simultaneous agents (which is expensive and complex), implement as **rapid sequential review**:
+
 1. Driver agent implements a small chunk (one function, one module)
 2. Navigator agent immediately reviews that chunk
 3. Driver incorporates feedback
@@ -239,6 +267,7 @@ Rather than two simultaneous agents (which is expensive and complex), implement 
 This achieves 80% of pair programming's value at ~1.3x cost instead of 2x.
 
 **TR-015.4 — Task Protocol**:
+
 ```json
 {
   "type": "pair",
@@ -246,8 +275,8 @@ This achieves 80% of pair programming's value at ~1.3x cost instead of 2x.
   "navigator": "security",
   "task": "P0-T5-001",
   "chunks": [
-    {"file": "auth/oauth.ts", "driver_done": true, "navigator_reviewed": true, "issues": 0},
-    {"file": "auth/tokens.ts", "driver_done": true, "navigator_reviewed": false}
+    { "file": "auth/oauth.ts", "driver_done": true, "navigator_reviewed": true, "issues": 0 },
+    { "file": "auth/tokens.ts", "driver_done": true, "navigator_reviewed": false }
   ]
 }
 ```
@@ -271,20 +300,22 @@ Pair mode is orchestrator-managed. The driver gets a normal task. The navigator 
 ### Technical Requirements
 
 **TR-016.1 — Burndown in AGENT_BACKLOG.md**:
+
 ```markdown
 ## Burndown — Sprint 2
 
 **Total**: 21 pts | **Completed**: 8 pts | **Remaining**: 13 pts
 
-| Session | Remaining | Delta | Notes |
-|---------|-----------|-------|-------|
-| 1       | 21        | —     | Sprint start |
-| 2       | 18        | -3    | |
-| 3       | 15        | -3    | |
+| Session | Remaining | Delta | Notes               |
+| ------- | --------- | ----- | ------------------- |
+| 1       | 21        | —     | Sprint start        |
+| 2       | 18        | -3    |                     |
+| 3       | 15        | -3    |                     |
 | 4       | 13        | -2    | +2 pts scope change |
 ```
 
 **TR-016.2 — Burndown Update Script**: `scripts/burndown-update.mjs`
+
 ```
 Input:  none (reads AGENT_BACKLOG.md current state)
 Action:
@@ -311,6 +342,7 @@ Burndown is a script that updates a markdown table. Agents don't calculate burnd
 **FR-017.1**: A refinement pass SHALL occur before sprint planning.
 
 **FR-017.2**: Refinement activities:
+
 1. DOR check on all candidate items
 2. Estimate unestimated items
 3. Decompose items > 8 points
@@ -322,6 +354,7 @@ Burndown is a script that updates a markdown table. Agents don't calculate burnd
 ### Technical Requirements
 
 **TR-017.1 — Refinement Script**: `scripts/backlog-refine.mjs`
+
 ```
 Input:  none (reads AGENT_BACKLOG.md Backlog section)
 Action:
@@ -366,11 +399,13 @@ Refinement is a script run. Agents are asked to estimate specific items ("Estima
 ### Technical Requirements
 
 **TR-018.1 — Backlog Schema**: Add `Type` column to `AGENT_BACKLOG.md`:
+
 ```markdown
 | Priority | Team | Task | Type | Phase | Status | Estimate | Notes |
 ```
 
 **TR-018.2 — Capacity Allocation Script**: `scripts/sprint-metrics.mjs` extended:
+
 ```
 When calculating sprint capacity:
   total_capacity = rolling_avg + buffer
@@ -381,6 +416,7 @@ Sprint planning must include at least tech_debt_budget points of type: tech-debt
 ```
 
 **TR-018.3 — Tech Debt Threshold**: `scripts/backlog-health.mjs`
+
 ```
 Input: AGENT_BACKLOG.md
 Action:
@@ -389,12 +425,13 @@ Action:
 ```
 
 **TR-018.4 — Tech Debt Register**: `docs/06_engineering/tech-debt-register.md`
+
 ```markdown
 # Tech Debt Register
 
-| ID | Description | Severity | Impact | Introduced | Team | Status |
-|----|-------------|----------|--------|------------|------|--------|
-| TD-001 | Express router middleware ordering fragile | High | New routes may break existing auth | Sprint 1 | backend | Open |
+| ID     | Description                                | Severity | Impact                             | Introduced | Team    | Status |
+| ------ | ------------------------------------------ | -------- | ---------------------------------- | ---------- | ------- | ------ |
+| TD-001 | Express router middleware ordering fragile | High     | New routes may break existing auth | Sprint 1   | backend | Open   |
 ```
 
 ### Context Bloat Mitigation
@@ -416,12 +453,14 @@ Type field is metadata in the backlog. Agents don't carry tech debt policies. Th
 ### Technical Requirements
 
 **TR-019.1 — Generation Script**: `scripts/generate-status.mjs`
+
 ```
 Input: AGENT_BACKLOG.md, orchestrator.json, sync.json, teams.yaml
 Output: STATUS.md
 ```
 
 **TR-019.2 — Format**:
+
 ```markdown
 # Project Status — Auto-generated [timestamp]
 
@@ -429,15 +468,18 @@ Output: STATUS.md
 **Velocity** (3-sprint avg): 17 pts | **This sprint**: 8/18 pts (session 3/5)
 
 ## Team Status
-| Team | WIP | Current Task | Status |
-|------|-----|--------------|--------|
-| Backend | 2/2 | API routes, Auth middleware | On track |
-| Data | 0/1 | — | Available |
+
+| Team    | WIP | Current Task                | Status    |
+| ------- | --- | --------------------------- | --------- |
+| Backend | 2/2 | API routes, Auth middleware | On track  |
+| Data    | 0/1 | —                           | Available |
 
 ## Active Blockers
+
 - [P1-T1-001] Auth middleware — blocked 1 session — Owner: Backend
 
 ## Recent Completions (last 2 sessions)
+
 - [P1-T8-001] Linting config — DevEx — Sprint 1
 ```
 
@@ -464,6 +506,7 @@ STATUS.md is for human consumption and orchestrator quick-reference. Agents don'
 ### Technical Requirements
 
 **TR-020.1 — Template Extension**: Add to `TEMPLATE-lesson.md`:
+
 ```markdown
 ## Root Cause Analysis (5 Whys)
 
@@ -485,13 +528,21 @@ _Required for P0 incidents and sprint goal misses._
 ```
 
 **TR-020.2 — Trigger**: Quality team generates RCA when:
+
 - events.log contains `type: "incident"` with `severity: P0`
 - Sprint review shows goal `Not Achieved`
 - DOD violation count exceeds 3 in a sprint
 
 **TR-020.3 — Events Log**:
+
 ```json
-{"type": "rca-created", "trigger": "sprint-goal-missed", "sprint": 2, "systemic_fix": "...", "backlog_item": "P2-Q-001"}
+{
+  "type": "rca-created",
+  "trigger": "sprint-goal-missed",
+  "sprint": 2,
+  "systemic_fix": "...",
+  "backlog_item": "P2-Q-001"
+}
 ```
 
 ### Context Bloat Mitigation
@@ -513,6 +564,7 @@ RCA is a template that quality team fills out. The template lives in `docs/histo
 ### Technical Requirements
 
 **TR-021.1 — Ownership Tracking Script**: `scripts/code-ownership.mjs`
+
 ```
 Input: git log (last N sprints), teams.yaml (team scopes)
 Action:
@@ -534,18 +586,21 @@ Output:
 ```
 
 **TR-021.2 — Risk Report**: `scripts/code-ownership.mjs report` generates:
+
 ```markdown
 # Code Ownership Report — [Date]
 
 ## High Risk (Bus Factor = 1)
-| Module | Solo Team | Last Modified | Recommended Secondary |
-|--------|-----------|--------------|----------------------|
-| apps/api/auth/ | backend | 2 sprints ago | security |
-| db/migrations/ | data | 1 sprint ago | backend |
+
+| Module         | Solo Team | Last Modified | Recommended Secondary |
+| -------------- | --------- | ------------- | --------------------- |
+| apps/api/auth/ | backend   | 2 sprints ago | security              |
+| db/migrations/ | data      | 1 sprint ago  | backend               |
 
 ## Healthy (Bus Factor >= 2)
-| Module | Teams | Last Modified |
-|--------|-------|--------------|
+
+| Module           | Teams            | Last Modified  |
+| ---------------- | ---------------- | -------------- |
 | apps/api/routes/ | backend, testing | current sprint |
 ```
 
@@ -560,6 +615,7 @@ Pure script + git log analysis. Zero agent context. The orchestrator reads the r
 ## File Manifest
 
 Files to create:
+
 ```
 scripts/sprint-lifecycle.mjs     # Sprint boundary management
 scripts/generate-review.mjs      # Sprint review auto-generation
@@ -574,6 +630,7 @@ docs/history/sprint-reviews/     # Directory for sprint reviews
 ```
 
 Files to modify:
+
 ```
 .agentkit/spec/teams.yaml        # Add secondary-scope, pair-programming config, sprint config
 AGENT_BACKLOG.md                 # Add Type column, Burndown section, refined tags
@@ -604,15 +661,15 @@ F-012 → F-016 → F-017 → F-013 → F-018 → F-019 → F-014 → F-021 → 
 
 ## Acceptance Criteria
 
-| Item | Acceptance Criteria |
-|------|-------------------|
-| F-012 Time-boxed | Sprint start/end tracked. Session counter works. Scope change requires PO approval |
-| F-013 Review | Auto-generated review includes completed items, carried-over items, goal status |
-| F-014 Cross-train | Secondary scope assignments work. Review auto-created for primary team |
-| F-015 Pair | Pair tasks created with driver/navigator roles. Sequential review mode works |
-| F-016 Burndown | Burndown table updates per session. At-risk warning triggers at 30% deviation |
-| F-017 Refinement | Refinement script identifies unestimated, oversized, and unready items. Refined tag gates sprint planning |
-| F-018 Tech Debt | Type column exists. 20% reservation enforced. 30% threshold warning triggers |
-| F-019 Status | STATUS.md auto-generated with team WIP, blockers, recent completions |
-| F-020 RCA | 5 Whys template works. Systemic fixes added to backlog. Triggers fire on P0/goal miss |
-| F-021 Ownership | Bus factor report generated from git log. Single-team modules flagged |
+| Item              | Acceptance Criteria                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------- |
+| F-012 Time-boxed  | Sprint start/end tracked. Session counter works. Scope change requires PO approval                        |
+| F-013 Review      | Auto-generated review includes completed items, carried-over items, goal status                           |
+| F-014 Cross-train | Secondary scope assignments work. Review auto-created for primary team                                    |
+| F-015 Pair        | Pair tasks created with driver/navigator roles. Sequential review mode works                              |
+| F-016 Burndown    | Burndown table updates per session. At-risk warning triggers at 30% deviation                             |
+| F-017 Refinement  | Refinement script identifies unestimated, oversized, and unready items. Refined tag gates sprint planning |
+| F-018 Tech Debt   | Type column exists. 20% reservation enforced. 30% threshold warning triggers                              |
+| F-019 Status      | STATUS.md auto-generated with team WIP, blockers, recent completions                                      |
+| F-020 RCA         | 5 Whys template works. Systemic fixes added to backlog. Triggers fire on P0/goal miss                     |
+| F-021 Ownership   | Bus factor report generated from git log. Single-team modules flagged                                     |

@@ -32,28 +32,31 @@ The `--budget` flag was added to the command spec but the template is a protecte
 **2. Add budget command to the Available Commands table**:
 
 ```markdown
-| `cost --budget`                 | Budget enforcement status and utilization              |
+| `cost --budget` | Budget enforcement status and utilization |
 ```
 
 **3. Add a Budget Enforcement section** explaining what it shows:
 
-```markdown
+````markdown
 ## Budget Enforcement
 
 When `--budget` is passed, the agent runs the budget-guard status check:
 
-   ```bash
-   node .agentkit/engines/node/src/cli.mjs cost --budget
-   ```
+```bash
+node .agentkit/engines/node/src/cli.mjs cost --budget
+```
+````
 
 This shows:
+
 - **Enforcement mode**: `warn`, `enforce`, or `off` (from `settings.yaml` → `budgetPolicy.enforcement`)
 - **Session limits**: duration, commands, files modified — current vs max, with % utilization
 - **Daily limits**: sessions, total duration, total commands — current vs max
 - **Warning thresholds**: configurable via `warnAtPercent` (default 80%)
 
 If budget is exceeded and enforcement is `enforce`, the PreToolUse hook (`budget-guard-check.sh`) will block tool calls. In `warn` mode, it injects a warning into context.
-```
+
+````
 
 **4. Add a note** distinguishing `/cost --budget` from `/cost-centres`:
 
@@ -61,7 +64,7 @@ If budget is exceeded and enforcement is `enforce`, the PreToolUse hook (`budget
 > **Note**: `/cost --budget` shows the local session/daily circuit breaker status.
 > For cloud infrastructure budget governance (Azure consumption budgets, cost centres),
 > use `/cost-centres` instead.
-```
+````
 
 ### After editing the template
 

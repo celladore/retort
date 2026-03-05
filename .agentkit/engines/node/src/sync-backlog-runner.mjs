@@ -37,7 +37,10 @@ function collectOrchestratorItems(projectRoot) {
       const now = new Date().toISOString();
       for (const risk of orch.risks) {
         const riskKey = risk.title || risk.description || 'risk';
-        const hash = createHash('sha256').update(`healthcheck:${riskKey}`).digest('hex').slice(0, 8);
+        const hash = createHash('sha256')
+          .update(`healthcheck:${riskKey}`)
+          .digest('hex')
+          .slice(0, 8);
         items.push({
           id: `bi-healthcheck-${hash}`,
           externalId: `HC-${hash}`,
@@ -77,9 +80,8 @@ function collectOrchestratorItems(projectRoot) {
  * @param {object} opts.flags
  */
 export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
-  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   if (userContext) {
     console.log(`[agentkit:sync-backlog] Context: ${userContext}`);
   }
@@ -94,7 +96,9 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   const tracker = flags.tracker || project?.process?.issueTracker || 'none';
   const direction = flags.direction || 'pull';
 
-  console.log(`[agentkit:sync-backlog] Starting backlog sync (tracker: ${tracker}, direction: ${direction})...`);
+  console.log(
+    `[agentkit:sync-backlog] Starting backlog sync (tracker: ${tracker}, direction: ${direction})...`
+  );
 
   if (direction === 'push') {
     console.warn(
@@ -174,15 +178,20 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   // 6. Emit structured event
   const p0 = sorted.filter((i) => i.priority === 'P0').length;
   const p1 = sorted.filter((i) => i.priority === 'P1').length;
-  emitEvent(projectRoot, 'backlog_sync', {
-    total: sorted.length,
-    p0,
-    p1,
-    added,
-    updated,
-    preserved,
-    ...(userContext ? { userContext } : {}),
-  }, { source: 'sync-backlog' });
+  emitEvent(
+    projectRoot,
+    'backlog_sync',
+    {
+      total: sorted.length,
+      p0,
+      p1,
+      added,
+      updated,
+      preserved,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'sync-backlog' }
+  );
 
   // Apply team filter for display only (does not affect persisted data)
   let displayItems = sorted;
@@ -192,7 +201,9 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   }
 
   console.log(`[agentkit:sync-backlog] Done.`);
-  console.log(`  Total: ${sorted.length} | Added: ${added} | Updated: ${updated} | Manual: ${preserved}`);
+  console.log(
+    `  Total: ${sorted.length} | Added: ${added} | Updated: ${updated} | Manual: ${preserved}`
+  );
   if (flags.team) {
     console.log(`  Showing: ${displayItems.length} items for team "${flags.team}"`);
   }

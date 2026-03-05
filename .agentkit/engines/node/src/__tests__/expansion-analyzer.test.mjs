@@ -137,9 +137,7 @@ describe('runExpansionAnalysis', () => {
     });
 
     for (let i = 1; i < report.suggestions.length; i++) {
-      expect(report.suggestions[i - 1].score).toBeGreaterThanOrEqual(
-        report.suggestions[i].score,
-      );
+      expect(report.suggestions[i - 1].score).toBeGreaterThanOrEqual(report.suggestions[i].score);
     }
   });
 

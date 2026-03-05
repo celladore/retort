@@ -8,23 +8,24 @@
 A concern was raised that `.claude/rules/languages/finops.md` contains blockchain rules instead of finops content. **Investigation shows the current content is correct** — all 7 conventions are finops-specific (phased-delivery, reference-tables, tag-safety, audit-reversibility, cost-centre-governance, adx-alternatives, budget-approval).
 
 However, this warrants a verification pass to ensure:
+
 1. The issue was a stale-state observation (previous sync produced wrong output, since corrected)
 2. All 8 platform outputs for `finops.md` contain correct finops content
 3. The sync engine correctly maps the `finops` rule domain to the finops language template (not blockchain)
 
 ## Verification Results (current state)
 
-| Platform | File | Content Correct? |
-|---|---|---|
-| Claude | `.claude/rules/languages/finops.md` | **YES** — 7 finops conventions |
-| Claude | `.claude/rules/finops.md` | Does not exist (only `languages/` version) |
-| GitHub Copilot | `.github/instructions/languages/finops.md` | **YES** |
-| Cline | `.clinerules/finops.md` | **YES** |
-| Cline | `.clinerules/languages/finops.md` | **YES** |
-| Cursor | `.cursor/rules/languages/finops.md` | **YES** |
-| Roo | `.roo/rules/finops.md` | **YES** |
-| Roo | `.roo/rules/languages/finops.md` | **YES** |
-| Windsurf | `.windsurf/rules/languages/finops.md` | **YES** |
+| Platform       | File                                       | Content Correct?                           |
+| -------------- | ------------------------------------------ | ------------------------------------------ |
+| Claude         | `.claude/rules/languages/finops.md`        | **YES** — 7 finops conventions             |
+| Claude         | `.claude/rules/finops.md`                  | Does not exist (only `languages/` version) |
+| GitHub Copilot | `.github/instructions/languages/finops.md` | **YES**                                    |
+| Cline          | `.clinerules/finops.md`                    | **YES**                                    |
+| Cline          | `.clinerules/languages/finops.md`          | **YES**                                    |
+| Cursor         | `.cursor/rules/languages/finops.md`        | **YES**                                    |
+| Roo            | `.roo/rules/finops.md`                     | **YES**                                    |
+| Roo            | `.roo/rules/languages/finops.md`           | **YES**                                    |
+| Windsurf       | `.windsurf/rules/languages/finops.md`      | **YES**                                    |
 
 All files have the correct header `# Instructions — finops` and contain the 7 finops conventions.
 
@@ -60,6 +61,7 @@ In `.agentkit/engines/node/src/synchronize.mjs`, verify that template rendering 
 ### 4. Add regression test
 
 Add a test to the sync engine test suite that verifies each generated `finops.md` file:
+
 - Contains the string "finops" in the title
 - Contains at least one `[finops-` convention ID
 - Does NOT contain `[bc-` (blockchain convention IDs)

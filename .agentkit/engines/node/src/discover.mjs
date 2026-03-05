@@ -820,9 +820,7 @@ export async function detectCommitConvention(projectRoot, { currentConvention } 
   if (commitlintChecks.some(Boolean)) return 'conventional';
 
   // 2. semantic-release config → 'semantic'
-  const releasercChecks = await Promise.all(
-    RELEASERC_FILES.map((f) => fileExists(projectRoot, f))
-  );
+  const releasercChecks = await Promise.all(RELEASERC_FILES.map((f) => fileExists(projectRoot, f)));
   if (releasercChecks.some(Boolean)) return 'semantic';
 
   // 3. package.json keys
@@ -840,18 +838,17 @@ export async function detectCommitConvention(projectRoot, { currentConvention } 
     const { execFile } = await import('node:child_process');
     const { promisify } = await import('node:util');
     const execFileAsync = promisify(execFile);
-    const { stdout } = await execFileAsync(
-      'git',
-      ['log', '--pretty=format:%s', '-20'],
-      { cwd: projectRoot }
-    );
+    const { stdout } = await execFileAsync('git', ['log', '--pretty=format:%s', '-20'], {
+      cwd: projectRoot,
+    });
     const subjects = stdout
       .split('\n')
       .map((s) => s.trim())
       .filter(Boolean);
     if (subjects.length > 0) {
       // Conventional Commits: type(scope)?: description (! marks breaking change)
-      const conventionalRe = /^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?(!)?: .+/;
+      const conventionalRe =
+        /^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?(!)?: .+/;
       // Semantic: simple type prefix — type: description (no scope required)
       const semanticRe = /^[a-z]+: .+/;
 
@@ -874,9 +871,8 @@ export async function detectCommitConvention(projectRoot, { currentConvention } 
 // ---------------------------------------------------------------------------
 
 export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
-  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   console.log('[agentkit:discover] Scanning repository...');
   if (userContext) {
     console.log(`[agentkit:discover] Context: ${userContext}`);
@@ -1107,9 +1103,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   if (agentkitRoot) {
     try {
       const projPath = resolve(agentkitRoot, 'spec', 'project.yaml');
-      const projRaw = existsSync(projPath)
-        ? yaml.load(await readFile(projPath, 'utf-8'))
-        : null;
+      const projRaw = existsSync(projPath) ? yaml.load(await readFile(projPath, 'utf-8')) : null;
       currentConvention = projRaw?.process?.commitConvention;
     } catch {
       /* ignore read errors */
@@ -1136,12 +1130,17 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   );
 
   const fwCountForEvent = Object.values(report.frameworks).flat().length;
-  emitEvent(projectRoot, 'discover_completed', {
-    stacksDetected: report.techStacks.length,
-    primaryStack: report.techStacks[0]?.name || null,
-    frameworkCount: fwCountForEvent,
-    ...(userContext ? { userContext } : {}),
-  }, { source: 'discover' });
+  emitEvent(
+    projectRoot,
+    'discover_completed',
+    {
+      stacksDetected: report.techStacks.length,
+      primaryStack: report.techStacks[0]?.name || null,
+      frameworkCount: fwCountForEvent,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'discover' }
+  );
 
   return report;
 }

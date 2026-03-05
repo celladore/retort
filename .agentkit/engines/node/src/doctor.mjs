@@ -6,7 +6,11 @@ import { execSync } from 'child_process';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { resolve } from 'path';
-import { validateSpec, validateMappingCoverage, validateRequiredFields } from './spec-validator.mjs';
+import {
+  validateSpec,
+  validateMappingCoverage,
+  validateRequiredFields,
+} from './spec-validator.mjs';
 import { computeProjectCompleteness } from './project-completeness.mjs';
 import { PROJECT_MAPPING } from './project-mapping.mjs';
 import { flattenProjectYaml } from './template-utils.mjs';
@@ -160,9 +164,8 @@ export function checkTemplateHygiene(agentkitRoot) {
 }
 
 export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
-  const userContext = Array.isArray(flags._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   if (userContext) {
     console.log(`[agentkit:doctor] Context: ${userContext}`);
   }
@@ -405,12 +408,17 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
     }
   }
 
-  emitEvent(projectRoot, 'doctor_completed', {
-    status,
-    errorCount: findings.filter((f) => f.severity === 'error').length,
-    warningCount: findings.filter((f) => f.severity === 'warning').length,
-    ...(userContext ? { userContext } : {}),
-  }, { source: 'doctor' });
+  emitEvent(
+    projectRoot,
+    'doctor_completed',
+    {
+      status,
+      errorCount: findings.filter((f) => f.severity === 'error').length,
+      warningCount: findings.filter((f) => f.severity === 'warning').length,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'doctor' }
+  );
 
   return { ok: !hasErrors, status, findings };
 }

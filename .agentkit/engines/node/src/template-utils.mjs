@@ -11,11 +11,7 @@ import { computeProjectCompleteness as computeProjectCompletenessBase } from './
 // Template rendering
 // ---------------------------------------------------------------------------
 
-const RAW_TEMPLATE_VARS = new Set([
-  'commandFlags',
-  'agentConventions',
-  'agentExamples',
-]);
+const RAW_TEMPLATE_VARS = new Set(['commandFlags', 'agentConventions', 'agentExamples']);
 
 /**
  * Checks whether a template variable should bypass shell sanitization.
@@ -91,24 +87,21 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
   }
 
   // Resolve {{var|default}} pipe syntax — uses the default value when var is unresolved
-  result = result.replace(
-    /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\|([^}]*)\}\}/g,
-    (_match, key, fallback) => {
-      const value = vars[key];
-      let resolved;
-      if (value === undefined || value === null) {
-        resolved = fallback;
-      } else if (typeof value === 'string') {
-        resolved = value;
-      } else {
-        resolved = JSON.stringify(value);
-      }
-      if (sanitizeStrings && !isRawTemplateVar(key)) {
-        return sanitizeTemplateValue(resolved);
-      }
-      return resolved;
+  result = result.replace(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\|([^}]*)\}\}/g, (_match, key, fallback) => {
+    const value = vars[key];
+    let resolved;
+    if (value === undefined || value === null) {
+      resolved = fallback;
+    } else if (typeof value === 'string') {
+      resolved = value;
+    } else {
+      resolved = JSON.stringify(value);
     }
-  );
+    if (sanitizeStrings && !isRawTemplateVar(key)) {
+      return sanitizeTemplateValue(resolved);
+    }
+    return resolved;
+  });
 
   // Warn about unresolved placeholders (ignore block syntax remnants, including {{else}})
   const unresolved = result.match(/\{\{(?!#|\/|else\}\})([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g);
@@ -332,9 +325,7 @@ export function flattenProjectYaml(project, docsSpec = null) {
         .map((f) => f.trim().toLowerCase())
     : [];
   const unitTestTools = Array.isArray(project?.testing?.unit)
-    ? project.testing.unit
-        .filter((t) => typeof t === 'string')
-        .map((t) => t.trim().toLowerCase())
+    ? project.testing.unit.filter((t) => typeof t === 'string').map((t) => t.trim().toLowerCase())
     : [];
 
   vars.hasLanguageTypeScript = langs.some((l) => l === 'typescript' || l === 'ts');
@@ -354,7 +345,9 @@ export function flattenProjectYaml(project, docsSpec = null) {
     ? languageProfileMode
     : 'hybrid';
 
-  const languageProfileDiagnostics = (project?.automation?.languageProfile?.diagnostics || 'verbose')
+  const languageProfileDiagnostics = (
+    project?.automation?.languageProfile?.diagnostics || 'verbose'
+  )
     .trim()
     .toLowerCase();
   vars.languageProfileDiagnostics = ['off', 'minimal', 'verbose'].includes(
@@ -367,7 +360,8 @@ export function flattenProjectYaml(project, docsSpec = null) {
 
   vars.languageInferenceFromFrameworks =
     project?.automation?.languageProfile?.inferFrom?.frameworks !== false;
-  vars.languageInferenceFromTests = project?.automation?.languageProfile?.inferFrom?.tests !== false;
+  vars.languageInferenceFromTests =
+    project?.automation?.languageProfile?.inferFrom?.tests !== false;
   vars.hasLanguageInferenceSignalsEnabled =
     vars.languageInferenceFromFrameworks || vars.languageInferenceFromTests;
 
@@ -413,14 +407,12 @@ export function flattenProjectYaml(project, docsSpec = null) {
   );
   const hasRustTestSignalRaw = unitTestTools.some((t) => ['cargo-test'].includes(t));
 
-  const hasNodeFrameworkSignal =
-    vars.languageInferenceFromFrameworks && hasNodeFrameworkSignalRaw;
+  const hasNodeFrameworkSignal = vars.languageInferenceFromFrameworks && hasNodeFrameworkSignalRaw;
   const hasPythonFrameworkSignal =
     vars.languageInferenceFromFrameworks && hasPythonFrameworkSignalRaw;
   const hasDotnetFrameworkSignal =
     vars.languageInferenceFromFrameworks && hasDotnetFrameworkSignalRaw;
-  const hasRustFrameworkSignal =
-    vars.languageInferenceFromFrameworks && hasRustFrameworkSignalRaw;
+  const hasRustFrameworkSignal = vars.languageInferenceFromFrameworks && hasRustFrameworkSignalRaw;
 
   const hasJsTestSignal = vars.languageInferenceFromTests && hasJsTestSignalRaw;
   const hasPythonTestSignal = vars.languageInferenceFromTests && hasPythonTestSignalRaw;
@@ -668,9 +660,7 @@ const SCAFFOLD_ONCE_DIRS = [
 ];
 
 // GitHub root files that are scaffold-once (matched by full relative path)
-const SCAFFOLD_ONCE_GITHUB_FILES = new Set([
-  '.github/PULL_REQUEST_TEMPLATE.md',
-]);
+const SCAFFOLD_ONCE_GITHUB_FILES = new Set(['.github/PULL_REQUEST_TEMPLATE.md']);
 
 /**
  * Check if a relative path is a scaffold-once file (project-owned content).

@@ -64,11 +64,11 @@ Selection is repository-configurable and must not require template edits.
 
 ## Runtime Commands
 
-| Command | CLI | Slash | Description |
-| ------- | --- | ----- | ----------- |
+| Command         | CLI                                        | Slash            | Description                                          |
+| --------------- | ------------------------------------------ | ---------------- | ---------------------------------------------------- |
 | `import-issues` | `pnpm -C .agentkit agentkit:import-issues` | `/import-issues` | One-time or incremental import from external tracker |
-| `backlog` | `pnpm -C .agentkit agentkit:backlog` | `/backlog` | Consolidated view with filters and output formats |
-| `sync-backlog` | `pnpm -C .agentkit agentkit:sync-backlog` | `/sync-backlog` | Full orchestrated sync (external + local sources) |
+| `backlog`       | `pnpm -C .agentkit agentkit:backlog`       | `/backlog`       | Consolidated view with filters and output formats    |
+| `sync-backlog`  | `pnpm -C .agentkit agentkit:sync-backlog`  | `/sync-backlog`  | Full orchestrated sync (external + local sources)    |
 
 ## Auto-Import on Adoption
 
@@ -82,8 +82,8 @@ When `process.intake.autoImport: true` in `project.yaml`, `agentkit init` will a
 | Sync generation        | `pnpm -C .agentkit agentkit:sync`                                                   | Completes without errors          |
 | Determinism            | `pnpm -C .agentkit agentkit:sync && git status --short`                             | No unexpected drift on second run |
 | Output validation      | `pnpm -C .agentkit agentkit:validate`                                               | Pass                              |
-| Import issues          | `pnpm -C .agentkit agentkit:import-issues -- --dry-run --force`                        | Lists issues without errors       |
-| Backlog view           | `pnpm -C .agentkit agentkit:backlog -- --format json`                                  | Valid JSON output                 |
+| Import issues          | `pnpm -C .agentkit agentkit:import-issues -- --dry-run --force`                     | Lists issues without errors       |
+| Backlog view           | `pnpm -C .agentkit agentkit:backlog -- --format json`                               | Valid JSON output                 |
 | Claude output parity   | inspect `.claude/commands/sync-backlog.md` + `.claude/skills/sync-backlog/SKILL.md` | Intake semantics present          |
 | Copilot parity         | inspect `.github/prompts/sync-backlog.prompt.md`                                    | Intake semantics present          |
 | Cursor/Windsurf parity | inspect `.cursor/commands/sync-backlog.md` and `.windsurf/commands/sync-backlog.md` | Intake semantics present          |

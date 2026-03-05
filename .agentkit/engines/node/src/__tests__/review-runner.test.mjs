@@ -3,7 +3,12 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as orchestrator from '../orchestrator.mjs';
-import { runReview, normalizeSeverity, convertFindingsToTasks, trackUnfixedFindings } from '../review-runner.mjs';
+import {
+  runReview,
+  normalizeSeverity,
+  convertFindingsToTasks,
+  trackUnfixedFindings,
+} from '../review-runner.mjs';
 import * as eventEmitter from '../event-emitter.mjs';
 import * as runner from '../runner.mjs';
 
@@ -493,13 +498,15 @@ describe('review-runner', () => {
 
     it('detects unfixed findings from previous review', async () => {
       setupTestRepo();
-      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([{
-        action: 'review_completed',
-        findingDetails: [
-          { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
-          { type: 'todo', severity: 'low', file: 'old.js', pattern: null },
-        ],
-      }]);
+      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([
+        {
+          action: 'review_completed',
+          findingDetails: [
+            { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
+            { type: 'todo', severity: 'low', file: 'old.js', pattern: null },
+          ],
+        },
+      ]);
       vi.spyOn(eventEmitter, 'emitEvent').mockImplementation(() => {});
 
       const currentFindings = [
@@ -516,12 +523,14 @@ describe('review-runner', () => {
 
     it('emits event when unfixed findings are found', async () => {
       setupTestRepo();
-      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([{
-        action: 'review_completed',
-        findingDetails: [
-          { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
-        ],
-      }]);
+      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([
+        {
+          action: 'review_completed',
+          findingDetails: [
+            { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
+          ],
+        },
+      ]);
       const emitSpy = vi.spyOn(eventEmitter, 'emitEvent').mockImplementation(() => {});
 
       await trackUnfixedFindings(TEST_ROOT, [
@@ -532,7 +541,7 @@ describe('review-runner', () => {
         TEST_ROOT,
         'review_unfixed_findings',
         expect.objectContaining({ count: 1 }),
-        expect.objectContaining({ source: 'review-runner' }),
+        expect.objectContaining({ source: 'review-runner' })
       );
     });
   });

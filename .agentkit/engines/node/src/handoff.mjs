@@ -165,9 +165,8 @@ function generateHandoffDoc(git, state, events, timestamp) {
  * @returns {object}
  */
 export async function runHandoff({ agentkitRoot, projectRoot, flags = {} }) {
-  const userContext = Array.isArray(flags._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
 
   console.log('[agentkit:handoff] Generating session handoff...');
   if (userContext) {

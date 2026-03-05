@@ -168,21 +168,15 @@ describe('normalizeIssue', () => {
 describe('deduplicateItems', () => {
   it('adds new items', () => {
     const existing = [];
-    const incoming = [
-      { externalId: 'GH#1', title: 'Issue 1', dirty: false },
-    ];
+    const incoming = [{ externalId: 'GH#1', title: 'Issue 1', dirty: false }];
     const result = deduplicateItems(existing, incoming);
     expect(result.added).toBe(1);
     expect(result.merged).toHaveLength(1);
   });
 
   it('updates existing items by externalId', () => {
-    const existing = [
-      { externalId: 'GH#1', title: 'Old title', dirty: false },
-    ];
-    const incoming = [
-      { externalId: 'GH#1', title: 'New title', dirty: false },
-    ];
+    const existing = [{ externalId: 'GH#1', title: 'Old title', dirty: false }];
+    const incoming = [{ externalId: 'GH#1', title: 'New title', dirty: false }];
     const result = deduplicateItems(existing, incoming);
     expect(result.updated).toBe(1);
     expect(result.added).toBe(0);
@@ -190,12 +184,8 @@ describe('deduplicateItems', () => {
   });
 
   it('preserves manual items without externalId', () => {
-    const existing = [
-      { externalId: null, title: 'Manual item', dirty: false },
-    ];
-    const incoming = [
-      { externalId: 'GH#1', title: 'New issue', dirty: false },
-    ];
+    const existing = [{ externalId: null, title: 'Manual item', dirty: false }];
+    const incoming = [{ externalId: 'GH#1', title: 'New issue', dirty: false }];
     const result = deduplicateItems(existing, incoming);
     expect(result.preserved).toBe(1);
     expect(result.merged).toHaveLength(2);
@@ -215,12 +205,8 @@ describe('deduplicateItems', () => {
   });
 
   it('deduplicates manual items by title on repeated imports', () => {
-    const existing = [
-      { externalId: null, title: 'Manual task', dirty: false },
-    ];
-    const incoming = [
-      { externalId: null, title: 'Manual task', dirty: false },
-    ];
+    const existing = [{ externalId: null, title: 'Manual task', dirty: false }];
+    const incoming = [{ externalId: null, title: 'Manual task', dirty: false }];
     const result = deduplicateItems(existing, incoming);
     // Should not duplicate the manual item
     const manuals = result.merged.filter((i) => !i.externalId);
@@ -228,12 +214,8 @@ describe('deduplicateItems', () => {
   });
 
   it('allows different-titled manual items from incoming', () => {
-    const existing = [
-      { externalId: null, title: 'Existing manual', dirty: false },
-    ];
-    const incoming = [
-      { externalId: null, title: 'New manual', dirty: false },
-    ];
+    const existing = [{ externalId: null, title: 'Existing manual', dirty: false }];
+    const incoming = [{ externalId: null, title: 'New manual', dirty: false }];
     const result = deduplicateItems(existing, incoming);
     const manuals = result.merged.filter((i) => !i.externalId);
     expect(manuals).toHaveLength(2);

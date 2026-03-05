@@ -17,9 +17,9 @@ organises the remediation into four phases, ordered by risk and dependency.
 
 The two primary files requiring changes live in protected directories:
 
-| File | Directory | Protection |
-|------|-----------|------------|
-| `budget-guard.mjs` | `.agentkit/engines/node/src/` | PreToolUse hook blocks AI edits |
+| File                    | Directory                           | Protection                      |
+| ----------------------- | ----------------------------------- | ------------------------------- |
+| `budget-guard.mjs`      | `.agentkit/engines/node/src/`       | PreToolUse hook blocks AI edits |
 | `budget-guard-check.sh` | `.agentkit/templates/claude/hooks/` | PreToolUse hook blocks AI edits |
 
 These must be edited by a human contributor or with the template-protection hook
@@ -158,12 +158,12 @@ function extractBudgetPolicyRegex(content) {
 
 ### Phase 1 Tests to Add
 
-| Test | File |
-|------|------|
-| Policy with `maxCommands: 0` respects the zero value | `budget-guard.test.mjs` |
-| Policy with `warnAtPercent: 0` disables warnings | `budget-guard.test.mjs` |
+| Test                                                                                               | File                    |
+| -------------------------------------------------------------------------------------------------- | ----------------------- |
+| Policy with `maxCommands: 0` respects the zero value                                               | `budget-guard.test.mjs` |
+| Policy with `warnAtPercent: 0` disables warnings                                                   | `budget-guard.test.mjs` |
 | Regex extraction returns correct `daily.warnAtPercent` when different from `session.warnAtPercent` | `budget-guard.test.mjs` |
-| deepMerge preserves `0` values (does not treat as null) | `budget-guard.test.mjs` |
+| deepMerge preserves `0` values (does not treat as null)                                            | `budget-guard.test.mjs` |
 
 ### Phase 1 Validation
 
@@ -256,12 +256,12 @@ function deepMerge(defaults, overrides) {
 
 ### Phase 2 Tests to Add
 
-| Test | File |
-|------|------|
+| Test                                                               | File                    |
+| ------------------------------------------------------------------ | ----------------------- |
 | Duration rounding: 10 sessions of 90s each = 15 min (not 10 or 20) | `budget-guard.test.mjs` |
-| `getTodaySessions` with mixed today/yesterday sessions | `budget-guard.test.mjs` |
-| `deepMerge` rejects `__proto__` keys | `budget-guard.test.mjs` |
-| Malformed session JSON is skipped without crashing | `budget-guard.test.mjs` |
+| `getTodaySessions` with mixed today/yesterday sessions             | `budget-guard.test.mjs` |
+| `deepMerge` rejects `__proto__` keys                               | `budget-guard.test.mjs` |
+| Malformed session JSON is skipped without crashing                 | `budget-guard.test.mjs` |
 
 ---
 
@@ -282,8 +282,7 @@ filters by date. For long-running projects this is O(N) on all historical sessio
 ```javascript
 const todayPrefix = todayStr.replace(/-/g, '');
 const files = readdirSync(sessDir).filter(
-  (f) => f.startsWith('session-') && f.endsWith('.json') &&
-         f.includes(todayPrefix)  // filename pre-filter
+  (f) => f.startsWith('session-') && f.endsWith('.json') && f.includes(todayPrefix) // filename pre-filter
 );
 ```
 
@@ -298,6 +297,7 @@ but this eliminates the majority of reads for historical sessions.
 overhead). For a typical session with hundreds of tool calls, this adds up.
 
 **Options** (for future consideration):
+
 1. Cache the result for N seconds (e.g., write a timestamp + result file, skip
    re-evaluation if < 30s old)
 2. Move to a long-running sidecar process
@@ -308,14 +308,14 @@ If `.agentkit/logs/.budget-cache` exists and is < 30s old, echo its content and 
 
 ### 3.3 Test gaps to fill
 
-| Test | Priority |
-|------|----------|
-| Corrupt/truncated session JSON is handled gracefully | P2 |
-| Empty session directory returns empty array | P2 |
-| `runBudgetStatus` output includes correct metric values | P2 |
-| Session with `commandsRun: null` (not array) is handled | P3 |
-| Session with missing `startTime` is handled | P3 |
-| `logBudgetEvent` creates directory if missing | P3 |
+| Test                                                    | Priority |
+| ------------------------------------------------------- | -------- |
+| Corrupt/truncated session JSON is handled gracefully    | P2       |
+| Empty session directory returns empty array             | P2       |
+| `runBudgetStatus` output includes correct metric values | P2       |
+| Session with `commandsRun: null` (not array) is handled | P3       |
+| Session with missing `startTime` is handled             | P3       |
+| `logBudgetEvent` creates directory if missing           | P3       |
 
 ---
 
@@ -363,15 +363,15 @@ Phase 1 ──> Phase 2 ──> Phase 3 ──> Phase 4
 
 ## Files Modified Summary
 
-| Phase | File | Lines Changed (est.) |
-|-------|------|---------------------|
-| 1 | `.agentkit/templates/claude/hooks/budget-guard-check.sh` | ~15 |
-| 1 | `.agentkit/engines/node/src/budget-guard.mjs` | ~15 |
-| 1-3 | `.agentkit/engines/node/src/__tests__/budget-guard.test.mjs` | ~80 |
-| 2 | `.agentkit/engines/node/src/budget-guard.mjs` | ~20 |
-| 3 | `.agentkit/engines/node/src/budget-guard.mjs` | ~10 |
-| 3 | `.agentkit/templates/claude/hooks/budget-guard-check.sh` | ~10 |
-| 4 | `docs/issues/*.md` | documentation only |
+| Phase | File                                                         | Lines Changed (est.) |
+| ----- | ------------------------------------------------------------ | -------------------- |
+| 1     | `.agentkit/templates/claude/hooks/budget-guard-check.sh`     | ~15                  |
+| 1     | `.agentkit/engines/node/src/budget-guard.mjs`                | ~15                  |
+| 1-3   | `.agentkit/engines/node/src/__tests__/budget-guard.test.mjs` | ~80                  |
+| 2     | `.agentkit/engines/node/src/budget-guard.mjs`                | ~20                  |
+| 3     | `.agentkit/engines/node/src/budget-guard.mjs`                | ~10                  |
+| 3     | `.agentkit/templates/claude/hooks/budget-guard-check.sh`     | ~10                  |
+| 4     | `docs/issues/*.md`                                           | documentation only   |
 
 ## Post-Fix Validation
 

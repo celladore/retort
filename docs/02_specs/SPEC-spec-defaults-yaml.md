@@ -15,13 +15,14 @@
 
 Template variable defaults are currently scattered across three locations:
 
-| Location | Mechanism | Example |
-|---|---|---|
-| `synchronize.mjs` | `vars.x = vars.x \|\| fallback` | `issueTracker: 'github'` |
-| `template-utils.mjs` | `{{var\|default}}` pipe syntax | `{{testingCoverage\|80}}` |
-| `project-mapping.mjs` | Inline heuristic functions | `inferMaxTaskTurns(teamSize)` |
+| Location              | Mechanism                       | Example                       |
+| --------------------- | ------------------------------- | ----------------------------- |
+| `synchronize.mjs`     | `vars.x = vars.x \|\| fallback` | `issueTracker: 'github'`      |
+| `template-utils.mjs`  | `{{var\|default}}` pipe syntax  | `{{testingCoverage\|80}}`     |
+| `project-mapping.mjs` | Inline heuristic functions      | `inferMaxTaskTurns(teamSize)` |
 
 This fragmentation means:
+
 - Adding a new default requires touching engine code and re-testing.
 - Non-developer maintainers can't adjust defaults without modifying JS.
 - There's no single inventory of "what defaults are in play."
@@ -36,6 +37,7 @@ after project-mapping.
 ### 1.3 User Flow
 
 1. Maintainer edits `.agentkit/spec/spec-defaults.yaml`:
+
    ```yaml
    # Static defaults — applied when project.yaml doesn't set a value
    issueTracker: github
@@ -113,14 +115,14 @@ after project-mapping.
 
 ### 2.1 Affected Files
 
-| File | Change |
-|---|---|
-| `.agentkit/spec/spec-defaults.yaml` | **New file** — default values |
-| `.agentkit/engines/node/src/synchronize.mjs` | Load + merge spec-defaults |
-| `.agentkit/engines/node/src/template-utils.mjs` | (No change — pipe syntax already exists) |
-| `.agentkit/engines/node/src/check.mjs` | Add unresolved-variable audit |
-| `.agentkit/engines/node/src/__tests__/spec-defaults.test.mjs` | **New file** — unit tests |
-| `.agentkit/engines/node/src/__tests__/sync-integration.test.mjs` | Integration tests |
+| File                                                             | Change                                   |
+| ---------------------------------------------------------------- | ---------------------------------------- |
+| `.agentkit/spec/spec-defaults.yaml`                              | **New file** — default values            |
+| `.agentkit/engines/node/src/synchronize.mjs`                     | Load + merge spec-defaults               |
+| `.agentkit/engines/node/src/template-utils.mjs`                  | (No change — pipe syntax already exists) |
+| `.agentkit/engines/node/src/check.mjs`                           | Add unresolved-variable audit            |
+| `.agentkit/engines/node/src/__tests__/spec-defaults.test.mjs`    | **New file** — unit tests                |
+| `.agentkit/engines/node/src/__tests__/sync-integration.test.mjs` | Integration tests                        |
 
 ### 2.2 Schema: `spec-defaults.yaml`
 
@@ -128,22 +130,22 @@ after project-mapping.
 # Top-level keys are variable names → static default values
 # Except reserved keys: "phase", "teamSize", "teamCount"
 
-<variableName>: <value>          # static default
+<variableName>: <value> # static default
 
 phase:
-  <phaseName>:                   # greenfield | active | maintenance | legacy
+  <phaseName>: # greenfield | active | maintenance | legacy
     <variableName>: <value>
 
 teamSize:
-  <sizeName>:                    # solo | small | medium | large
+  <sizeName>: # solo | small | medium | large
     <variableName>: <value>
 
-teamCount:                       # ranges keyed by threshold
-  "<=3":
+teamCount: # ranges keyed by threshold
+  '<=3':
     maxHandoffChainDepth: 3
-  "<=6":
+  '<=6':
     maxHandoffChainDepth: 5
-  ">6":
+  '>6':
     maxHandoffChainDepth: 7
 ```
 
@@ -197,13 +199,19 @@ function matchesRange(rangeKey, value) {
   const [, op, num] = m;
   const n = parseInt(num, 10);
   switch (op) {
-    case '<=': return value <= n;
-    case '<':  return value < n;
-    case '>=': return value >= n;
-    case '>':  return value > n;
+    case '<=':
+      return value <= n;
+    case '<':
+      return value < n;
+    case '>=':
+      return value >= n;
+    case '>':
+      return value > n;
     case '=':
-    case '==': return value === n;
-    default:   return false;
+    case '==':
+      return value === n;
+    default:
+      return false;
   }
 }
 ```
@@ -278,16 +286,16 @@ making them always visible. This is a prerequisite because:
 
 ### 2.5 Testing Strategy
 
-| Test Case | Setup | Expected |
-|---|---|---|
-| Static defaults applied | spec-defaults.yaml with `issueTracker: github`, no project.yaml value | `vars.issueTracker === 'github'` |
-| project.yaml wins over defaults | Both set `testingCoverage` | project.yaml value used |
-| Phase-conditional applied | phase=greenfield, default coverage=60 | `vars.testingCoverage === '60'` |
-| TeamSize-conditional applied | teamSize=solo, default turns=15 | `vars.maxTaskTurns === 15` |
-| TeamCount range matching | teamCount=4, range `<=6` | `vars.maxHandoffChainDepth === 5` |
-| Missing file | No spec-defaults.yaml | Sync succeeds, no defaults applied |
-| Empty file | Empty spec-defaults.yaml | Sync succeeds, no defaults applied |
-| Unknown phase | phase=`alpha` | Static defaults only |
+| Test Case                       | Setup                                                                 | Expected                           |
+| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------- |
+| Static defaults applied         | spec-defaults.yaml with `issueTracker: github`, no project.yaml value | `vars.issueTracker === 'github'`   |
+| project.yaml wins over defaults | Both set `testingCoverage`                                            | project.yaml value used            |
+| Phase-conditional applied       | phase=greenfield, default coverage=60                                 | `vars.testingCoverage === '60'`    |
+| TeamSize-conditional applied    | teamSize=solo, default turns=15                                       | `vars.maxTaskTurns === 15`         |
+| TeamCount range matching        | teamCount=4, range `<=6`                                              | `vars.maxHandoffChainDepth === 5`  |
+| Missing file                    | No spec-defaults.yaml                                                 | Sync succeeds, no defaults applied |
+| Empty file                      | Empty spec-defaults.yaml                                              | Sync succeeds, no defaults applied |
+| Unknown phase                   | phase=`alpha`                                                         | Static defaults only               |
 
 ### 2.6 Rollout Plan
 

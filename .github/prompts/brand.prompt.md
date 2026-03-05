@@ -18,15 +18,15 @@ Manage the project brand spec (brand.yaml) and editor theme. Supports validation
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--validate` | Validate brand.yaml and report errors/warnings (runs implicitly when no other flags are given) | false |
-| `--palette` | Show the resolved color palette with hex values | false |
-| `--theme` | Show the resolved editor theme mapping (VS Code color slots → hex values) | false |
-| `--contrast` | Check foreground/background contrast ratios against WCAG thresholds | false |
-| `--init` | Scaffold a brand.yaml with sensible defaults (interactive prompts for name, colors) | false |
-| `--generate` | Regenerate editor theme settings from brand.yaml + editor-theme.yaml (re-runs syncEditorTheme) | false |
-| `--all` | Run all audit steps: validate + palette + theme + contrast | false |
+| Flag         | Description                                                                                    | Default |
+| ------------ | ---------------------------------------------------------------------------------------------- | ------- |
+| `--validate` | Validate brand.yaml and report errors/warnings (runs implicitly when no other flags are given) | false   |
+| `--palette`  | Show the resolved color palette with hex values                                                | false   |
+| `--theme`    | Show the resolved editor theme mapping (VS Code color slots → hex values)                      | false   |
+| `--contrast` | Check foreground/background contrast ratios against WCAG thresholds                            | false   |
+| `--init`     | Scaffold a brand.yaml with sensible defaults (interactive prompts for name, colors)            | false   |
+| `--generate` | Regenerate editor theme settings from brand.yaml + editor-theme.yaml (re-runs syncEditorTheme) | false   |
+| `--all`      | Run all audit steps: validate + palette + theme + contrast                                     | false   |
 
 ## Instructions
 
@@ -69,4 +69,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

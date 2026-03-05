@@ -69,9 +69,11 @@ describe('runImportIssues', () => {
   it('imports when --force is set even with autoImport false', async () => {
     writeProjectYaml(dirs.specDir, { autoImport: false });
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Test bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([
+          { number: 1, title: 'Test bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
+        ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -90,7 +92,13 @@ describe('runImportIssues', () => {
     const mockAdapter = {
       fetchIssues: vi.fn().mockReturnValue([
         { number: 10, title: 'Fix auth', state: 'open', labels: [{ name: 'bug' }], body: '' },
-        { number: 11, title: 'Add feature', state: 'open', labels: [{ name: 'enhancement' }], body: '' },
+        {
+          number: 11,
+          title: 'Add feature',
+          state: 'open',
+          labels: [{ name: 'enhancement' }],
+          body: '',
+        },
       ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
@@ -116,9 +124,9 @@ describe('runImportIssues', () => {
   it('appends to events.log', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -140,9 +148,9 @@ describe('runImportIssues', () => {
   it('dry-run does not write files', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -162,16 +170,20 @@ describe('runImportIssues', () => {
 
     // Write a legacy markdown backlog with a manual item
     const mdPath = resolve(dirs.projectRoot, 'AGENT_BACKLOG.md');
-    writeFileSync(mdPath, `# Backlog
+    writeFileSync(
+      mdPath,
+      `# Backlog
 | Priority | Team | Task | Phase | Status | Notes |
 | -------- | ---- | ---- | ----- | ------ | ----- |
 | P1 | backend | Manual task | Planning | Open | Important |
-`, 'utf-8');
+`,
+      'utf-8'
+    );
 
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 5, title: 'New issue', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 5, title: 'New issue', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -193,9 +205,9 @@ describe('runImportIssues', () => {
   it('deduplicates on subsequent imports', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug v1', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug v1', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -229,7 +241,13 @@ describe('runImportIssues', () => {
     writeProjectYaml(dirs.specDir, { scoring: { enabled: true } });
     const mockAdapter = {
       fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Critical bug', state: 'open', labels: [{ name: 'critical' }], body: '' },
+        {
+          number: 1,
+          title: 'Critical bug',
+          state: 'open',
+          labels: [{ name: 'critical' }],
+          body: '',
+        },
       ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
@@ -251,9 +269,9 @@ describe('runImportIssues', () => {
   it('skips scoring when intake.scoring.enabled is not set', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 

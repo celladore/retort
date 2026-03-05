@@ -128,7 +128,7 @@ The `sync` command generated several directories and files in your repository ro
 
 | Path         | Purpose                                                                                                                                                                                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.          |
+| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.                 |
 | `.cursor/`   | **Cursor AI rules** -- Rules files in `.mdc` format that Cursor uses for context-aware code generation.                                                                                                |
 | `.windsurf/` | **Windsurf AI rules and workflows** -- Rules and workflow definitions for Windsurf's AI assistant.                                                                                                     |
 | `.ai/`       | **Portable rules** -- A tool-agnostic rules format compatible with Continue and other AI tools that support the `.ai/` convention.                                                                     |
@@ -310,24 +310,24 @@ These commands activate specialized agent teams for focused work.
 
 ### Task Management & Diagnostics
 
-| Command     | Purpose                                           |
-| ----------- | ------------------------------------------------- |
-| `/tasks`    | List, filter, and inspect delegated tasks         |
-| `/delegate` | Create a delegated task and assign it to a team   |
-| `/doctor`   | Run diagnostics on your AgentKit Forge setup      |
+| Command     | Purpose                                         |
+| ----------- | ----------------------------------------------- |
+| `/tasks`    | List, filter, and inspect delegated tasks       |
+| `/delegate` | Create a delegated task and assign it to a team |
+| `/doctor`   | Run diagnostics on your AgentKit Forge setup    |
 
 ### Coming Soon (In-Flight Branches)
 
 The following commands are in active development. See [COMMAND_REFERENCE.md — Incoming Commands](./COMMAND_REFERENCE.md#incoming-commands-in-flight-branches) for full details.
 
-| Command              | Purpose                                                         | Branch                          |
-| -------------------- | --------------------------------------------------------------- | ------------------------------- |
-| `/infra-eval`        | Infrastructure fitness evaluation (8 dimensions, hard gates)    | `agentforge-template-integration` |
-| `/brand`             | Brand identity management and editor theme generation           | `repo-specific-editor-theme`    |
-| `/feature-configure` | Interactive feature preset and toggle management                | `feature-management-strategy`   |
-| `/feature-flow`      | End-to-end feature tracing from spec to output                  | `feature-management-strategy`   |
-| `/feature-review`    | Feature configuration audit and recommendations                 | `feature-management-strategy`   |
-| `/review --focus=retrospective` | Session retrospective for issue/lesson capture       | `elegant-knuth`                 |
+| Command                         | Purpose                                                      | Branch                            |
+| ------------------------------- | ------------------------------------------------------------ | --------------------------------- |
+| `/infra-eval`                   | Infrastructure fitness evaluation (8 dimensions, hard gates) | `agentforge-template-integration` |
+| `/brand`                        | Brand identity management and editor theme generation        | `repo-specific-editor-theme`      |
+| `/feature-configure`            | Interactive feature preset and toggle management             | `feature-management-strategy`     |
+| `/feature-flow`                 | End-to-end feature tracing from spec to output               | `feature-management-strategy`     |
+| `/feature-review`               | Feature configuration audit and recommendations              | `feature-management-strategy`     |
+| `/review --focus=retrospective` | Session retrospective for issue/lesson capture               | `elegant-knuth`                   |
 
 ---
 

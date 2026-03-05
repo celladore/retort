@@ -174,9 +174,7 @@ describe('buildRuleVars()', () => {
       domain: 'ci',
       description: 'CI rules',
       'applies-to': ['**/*'],
-      conventions: [
-        { id: 'ci-1', rule: 'Must pass', severity: 'error', type: 'enforcement' },
-      ],
+      conventions: [{ id: 'ci-1', rule: 'Must pass', severity: 'error', type: 'enforcement' }],
     };
     const vars = buildRuleVars(rule, baseVars);
 

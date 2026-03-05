@@ -155,7 +155,6 @@
 schemaVersion: 1
 
 features:
-
   # ---------------------------------------------------------------------------
   # Core — Always enabled, cannot be disabled
   # ---------------------------------------------------------------------------
@@ -492,7 +491,6 @@ features:
 # Note: Core features (spec-sync, project-context) are always-on in all presets.
 
 presets:
-
   # MINIMAL — 3 features + 2 core = 5 total
   # Use-case: You only want the sync engine to generate AI tool configs.
   # No team orchestration, no docs scaffolding, no CI. Just quality checks

@@ -16,63 +16,63 @@ Real scrum teams bring battle-tested practices that improve delivery, quality, a
 
 ### A. Ceremonies & Rituals
 
-| # | Practice | Value Delivered |
-|---|----------|-----------------|
-| 1 | Sprint Planning | Shared scope understanding, capacity-based commitment, team alignment |
-| 2 | Daily Standup | Early blocker detection, coordination across agents, visibility into what others are doing |
-| 3 | Sprint Review / Demo | Stakeholder feedback loop, course correction, celebration of done work |
-| 4 | Sprint Retrospective | Continuous process improvement, team learning, systemic fixes |
-| 5 | Backlog Refinement | Requirements clarity before work starts, shared understanding, right-sizing |
+| #   | Practice             | Value Delivered                                                                            |
+| --- | -------------------- | ------------------------------------------------------------------------------------------ |
+| 1   | Sprint Planning      | Shared scope understanding, capacity-based commitment, team alignment                      |
+| 2   | Daily Standup        | Early blocker detection, coordination across agents, visibility into what others are doing |
+| 3   | Sprint Review / Demo | Stakeholder feedback loop, course correction, celebration of done work                     |
+| 4   | Sprint Retrospective | Continuous process improvement, team learning, systemic fixes                              |
+| 5   | Backlog Refinement   | Requirements clarity before work starts, shared understanding, right-sizing                |
 
 ### B. Roles & Accountability
 
-| # | Practice | Value Delivered |
-|---|----------|-----------------|
-| 6 | Product Owner | Single source of priority, stakeholder proxy, value maximization |
-| 7 | Scrum Master | Process facilitation, impediment removal, shield from noise |
-| 8 | Cross-functional team | End-to-end delivery without external dependencies |
-| 9 | Collective code ownership | No knowledge silos, anyone can contribute anywhere |
-| 10 | Stable team composition | Trust, velocity predictability, deep domain knowledge |
+| #   | Practice                  | Value Delivered                                                  |
+| --- | ------------------------- | ---------------------------------------------------------------- |
+| 6   | Product Owner             | Single source of priority, stakeholder proxy, value maximization |
+| 7   | Scrum Master              | Process facilitation, impediment removal, shield from noise      |
+| 8   | Cross-functional team     | End-to-end delivery without external dependencies                |
+| 9   | Collective code ownership | No knowledge silos, anyone can contribute anywhere               |
+| 10  | Stable team composition   | Trust, velocity predictability, deep domain knowledge            |
 
 ### C. Planning & Estimation
 
-| # | Practice | Value Delivered |
-|---|----------|-----------------|
-| 11 | Story points / relative estimation | Calibrated effort awareness — agents don't know upfront how complex something is |
-| 12 | Definition of Ready (DoR) | Work doesn't start until it's clear and actionable |
-| 13 | Definition of Done (DoD) | Consistent quality bar, no "almost done" drift |
-| 14 | Sprint Goal | Focus and alignment — a north star for the iteration |
-| 15 | Velocity tracking | Predictability, evidence-based planning |
+| #   | Practice                           | Value Delivered                                                                  |
+| --- | ---------------------------------- | -------------------------------------------------------------------------------- |
+| 11  | Story points / relative estimation | Calibrated effort awareness — agents don't know upfront how complex something is |
+| 12  | Definition of Ready (DoR)          | Work doesn't start until it's clear and actionable                               |
+| 13  | Definition of Done (DoD)           | Consistent quality bar, no "almost done" drift                                   |
+| 14  | Sprint Goal                        | Focus and alignment — a north star for the iteration                             |
+| 15  | Velocity tracking                  | Predictability, evidence-based planning                                          |
 
 ### D. Quality & Engineering
 
-| # | Practice | Value Delivered |
-|---|----------|-----------------|
-| 16 | Peer code review | Defect reduction, knowledge sharing, standard enforcement |
-| 17 | Pair/mob programming | Real-time collaboration, fewer defects, mentoring |
-| 18 | Test-driven development | Design pressure, regression safety, living documentation |
-| 19 | CI/CD with quality gates | Fast feedback, never ship broken code |
-| 20 | Technical debt management | Explicit allocation prevents codebase rot |
+| #   | Practice                  | Value Delivered                                           |
+| --- | ------------------------- | --------------------------------------------------------- |
+| 16  | Peer code review          | Defect reduction, knowledge sharing, standard enforcement |
+| 17  | Pair/mob programming      | Real-time collaboration, fewer defects, mentoring         |
+| 18  | Test-driven development   | Design pressure, regression safety, living documentation  |
+| 19  | CI/CD with quality gates  | Fast feedback, never ship broken code                     |
+| 20  | Technical debt management | Explicit allocation prevents codebase rot                 |
 
 ### E. Communication & Knowledge
 
-| # | Practice | Value Delivered |
-|---|----------|-----------------|
-| 21 | Daily Standup (sync) | An agent can be off working on something for a long time with no other agent aware of what it's doing or what it found |
-| 22 | Information radiators | Transparent status without querying anyone |
-| 23 | Handoff documentation | Continuity when agents rotate or sessions end |
-| 24 | Cross-training | Resilience, bus-factor reduction across agent specializations |
-| 25 | Swarming on blockers | Multiple agents attack the hardest problem to unblock flow |
+| #   | Practice              | Value Delivered                                                                                                        |
+| --- | --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 21  | Daily Standup (sync)  | An agent can be off working on something for a long time with no other agent aware of what it's doing or what it found |
+| 22  | Information radiators | Transparent status without querying anyone                                                                             |
+| 23  | Handoff documentation | Continuity when agents rotate or sessions end                                                                          |
+| 24  | Cross-training        | Resilience, bus-factor reduction across agent specializations                                                          |
+| 25  | Swarming on blockers  | Multiple agents attack the hardest problem to unblock flow                                                             |
 
 ### F. Continuous Improvement
 
-| # | Practice | Value Delivered |
-|---|----------|-----------------|
-| 26 | Inspect and adapt | Evidence-based process tuning every sprint |
-| 27 | Root cause analysis | Fix the system, not just the symptom |
-| 28 | Experiment-driven improvement | Try small changes, measure, keep or discard |
-| 29 | WIP limits | Focus, finish what you start, reduce context switching |
-| 30 | Burndown/burnup visibility | Early warning when a sprint is going off-track |
+| #   | Practice                      | Value Delivered                                        |
+| --- | ----------------------------- | ------------------------------------------------------ |
+| 26  | Inspect and adapt             | Evidence-based process tuning every sprint             |
+| 27  | Root cause analysis           | Fix the system, not just the symptom                   |
+| 28  | Experiment-driven improvement | Try small changes, measure, keep or discard            |
+| 29  | WIP limits                    | Focus, finish what you start, reduce context switching |
+| 30  | Burndown/burnup visibility    | Early warning when a sprint is going off-track         |
 
 ---
 
@@ -80,25 +80,25 @@ Real scrum teams bring battle-tested practices that improve delivery, quality, a
 
 ### What We Already Have
 
-| Practice | Current Implementation | Gap |
-|---|---|---|
-| Cross-functional teams | 10 specialized teams in `teams.yaml` | Teams are siloed specialists, not cross-functional |
-| Sprint Goal / Planning | `/orchestrate` and `/plan` commands | Ad-hoc, not time-boxed, no explicit goal statement |
-| Code review | `accepts: [review]` on most agents, required PRs | Present and working |
-| Quality gates / CI | Quality team, CI checks (CodeQL, Semgrep), 80% coverage | Present and working |
-| Handoff documentation | `/handoff` command, `handoff-chain` in `teams.yaml` | Present and working |
-| Backlog | `AGENT_BACKLOG.md` with sprint structure | Present — good foundation to build on |
-| Retrospective templates | `docs/history/lessons-learned/TEMPLATE-lesson.md` | Template exists but no ceremony trigger |
-| Roles (PO/SM) | `product` team as owner, `quality` team as operations | Implicit — not formalized with authority |
-| Estimation / Velocity | Not present | Full gap |
-| WIP Limits | Not present | Full gap |
-| Daily Standup / Sync | Not present | Full gap — agents work in isolation with no broadcast |
-| Sprint Review / Demo | Not present | Full gap |
-| Definition of Ready | Not present | Full gap |
-| Definition of Done | Implicit in quality gates | Needs formalization |
-| Story Points | Not present | Full gap — agents can't gauge complexity upfront |
-| Swarming | Not present | handoff-chain exists but only sequential |
-| Burndown visibility | Not present | Full gap |
+| Practice                | Current Implementation                                  | Gap                                                   |
+| ----------------------- | ------------------------------------------------------- | ----------------------------------------------------- |
+| Cross-functional teams  | 10 specialized teams in `teams.yaml`                    | Teams are siloed specialists, not cross-functional    |
+| Sprint Goal / Planning  | `/orchestrate` and `/plan` commands                     | Ad-hoc, not time-boxed, no explicit goal statement    |
+| Code review             | `accepts: [review]` on most agents, required PRs        | Present and working                                   |
+| Quality gates / CI      | Quality team, CI checks (CodeQL, Semgrep), 80% coverage | Present and working                                   |
+| Handoff documentation   | `/handoff` command, `handoff-chain` in `teams.yaml`     | Present and working                                   |
+| Backlog                 | `AGENT_BACKLOG.md` with sprint structure                | Present — good foundation to build on                 |
+| Retrospective templates | `docs/history/lessons-learned/TEMPLATE-lesson.md`       | Template exists but no ceremony trigger               |
+| Roles (PO/SM)           | `product` team as owner, `quality` team as operations   | Implicit — not formalized with authority              |
+| Estimation / Velocity   | Not present                                             | Full gap                                              |
+| WIP Limits              | Not present                                             | Full gap                                              |
+| Daily Standup / Sync    | Not present                                             | Full gap — agents work in isolation with no broadcast |
+| Sprint Review / Demo    | Not present                                             | Full gap                                              |
+| Definition of Ready     | Not present                                             | Full gap                                              |
+| Definition of Done      | Implicit in quality gates                               | Needs formalization                                   |
+| Story Points            | Not present                                             | Full gap — agents can't gauge complexity upfront      |
+| Swarming                | Not present                                             | handoff-chain exists but only sequential              |
+| Burndown visibility     | Not present                                             | Full gap                                              |
 
 ---
 
@@ -111,12 +111,14 @@ Real scrum teams bring battle-tested practices that improve delivery, quality, a
 **What**: Standalone `DOD.md` at repo root. Generated from spec, referenced by all agents and quality gates.
 
 **Content structure**:
+
 ```markdown
 # Definition of Done
 
 A work item is "Done" when ALL of the following are true:
 
 ## Code Quality
+
 - [ ] Code compiles/builds without errors
 - [ ] All existing tests pass
 - [ ] New/changed code has tests (coverage >= 80%)
@@ -124,25 +126,30 @@ A work item is "Done" when ALL of the following are true:
 - [ ] No new security vulnerabilities introduced
 
 ## Review
+
 - [ ] Code review completed by at least one other agent/team
 - [ ] Review comments addressed or explicitly deferred with justification
 
 ## Documentation
+
 - [ ] Public API changes documented
 - [ ] ADR written for architectural decisions
 - [ ] CHANGELOG.md updated for user-facing changes
 
 ## Integration
+
 - [ ] CI pipeline passes all checks
 - [ ] No regressions in existing functionality
 - [ ] Handoff notes written if work continues in another session
 
 ## Verification
+
 - [ ] Acceptance criteria from the task/story are met
 - [ ] Quality team sign-off (for P0/P1 items)
 ```
 
 **Implementation**:
+
 - Create `DOD.md` at repo root
 - Add `definition-of-done: DOD.md` reference in `teams.yaml` under a new `process:` section
 - Quality team agent checks DoD before marking items as "Done" in `AGENT_BACKLOG.md`
@@ -153,32 +160,38 @@ A work item is "Done" when ALL of the following are true:
 **What**: Standalone `DOR.md` at repo root. Gate before any work item enters active sprint.
 
 **Content structure**:
+
 ```markdown
 # Definition of Ready
 
 A work item is "Ready" for sprint inclusion when ALL of the following are true:
 
 ## Clarity
+
 - [ ] Task has a clear, one-sentence description of what "done" looks like
 - [ ] Acceptance criteria are defined (testable, observable outcomes)
 - [ ] Scope is bounded — no open questions that block starting
 
 ## Dependencies
+
 - [ ] All upstream dependencies identified
 - [ ] Blocking dependencies resolved OR explicit plan to unblock
 - [ ] Required team(s) identified and available
 
 ## Sizing
+
 - [ ] Story points estimated (relative complexity)
 - [ ] Task fits within a single sprint (if not, decompose further)
 - [ ] Required files/modules identified in scope
 
 ## Context
+
 - [ ] Related PRDs, specs, or ADRs linked
 - [ ] If this continues prior work, handoff notes from previous session reviewed
 ```
 
 **Implementation**:
+
 - Create `DOR.md` at repo root
 - Add `definition-of-ready: DOR.md` reference in `teams.yaml` under `process:` section
 - `/orchestrate` validates DOR before promoting items from Backlog to Active Sprint
@@ -189,6 +202,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **What**: Every sprint (or orchestrated session) declares a single, explicit goal.
 
 **Implementation**:
+
 - Add `sprint-goal:` field to `AGENT_BACKLOG.md` Active Sprint section header
 - Format: `**Sprint Goal**: [One sentence describing the most important outcome]`
 - `/orchestrate` must set or confirm a sprint goal before assigning work
@@ -196,6 +210,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 - Sprint review evaluates: "Did we achieve the sprint goal? Yes/No/Partial"
 
 **Example**:
+
 ```markdown
 ## Active Sprint
 
@@ -207,6 +222,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **What**: Formalized retrospective triggered at session/sprint end.
 
 **Implementation**:
+
 - `/handoff` auto-generates a retrospective entry using `TEMPLATE-lesson.md`
 - Add a `## Retrospective` section to session handoff output
 - Minimum required fields:
@@ -221,6 +237,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **What**: Agents estimate relative complexity before starting work, because they genuinely don't know how hard something will be until they dig in.
 
 **Implementation**:
+
 - Add `estimate:` column to `AGENT_BACKLOG.md` task tables
 - Scale: 1 (trivial), 2 (small), 3 (medium), 5 (large), 8 (very large), 13 (epic — must decompose)
 - Estimation happens at sprint planning / backlog refinement
@@ -235,6 +252,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **What**: Periodic sync mechanism so agents know what other agents are doing, found, or are blocked by.
 
 **Implementation**:
+
 - Add `STANDUP.md` or a `## Daily Sync` section in `AGENT_BACKLOG.md`
 - At the start of each session or at regular intervals during long sessions, each active agent reports:
   - **Working on**: Current task and status
@@ -249,16 +267,19 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **Why this matters for agents**: Agent A might spend an entire session refactoring the auth module while Agent B is building a feature that depends on the old auth interface. Without a sync point, this collision is discovered only at merge time.
 
 **Format**:
+
 ```markdown
 ## Agent Sync — [Date/Session]
 
 ### T1-Backend
+
 - **Working on**: API route structure (P1)
 - **Found**: Express router needs middleware refactor for nested routes
 - **Blocked by**: Nothing
 - **Need from**: T3-Data — schema for user model
 
 ### T3-Data
+
 - **Working on**: Database schema design (P1)
 - **Found**: Prisma doesn't support the composite key pattern we planned
 - **Blocked by**: Nothing
@@ -274,6 +295,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **What**: Maximum concurrent tasks per team, enforced by orchestrator.
 
 **Implementation**:
+
 - Add `max-wip: N` to each team in `teams.yaml`:
   ```yaml
   - id: backend
@@ -308,6 +330,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 **What**: When a task is blocked beyond a threshold, agents from the `handoff-chain` proactively join to help unblock.
 
 **Implementation**:
+
 - Add `swarm-threshold: N` to `teams.yaml` process config (e.g., `swarm-threshold: 2` = blocked for 2 sync cycles)
 - When threshold hit:
   1. Orchestrator identifies agents in `handoff-chain` with capacity (below WIP limit)
@@ -317,6 +340,7 @@ A work item is "Ready" for sprint inclusion when ALL of the following are true:
 - Track swarming events in retro data (how often, which teams, resolution time)
 
 **Example flow**:
+
 ```
 T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 → 2 sync cycles pass, still blocked
@@ -330,34 +354,41 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Track what gets done per sprint/session to enable evidence-based planning.
 
 **Implementation**:
+
 - Create `metrics/` directory at repo root
 - After each sprint, generate `metrics/sprint-N.md`:
+
   ```markdown
   # Sprint N Metrics — [Date Range]
 
   ## Velocity
+
   - Stories completed: N
   - Story points completed: N
   - Story points planned: N
   - Completion rate: N%
 
   ## Estimation Accuracy
+
   - Average estimate vs actual: +/- N points
   - Items that exceeded estimate: N (list)
   - Items that were easier than estimated: N (list)
 
   ## Flow
+
   - Items carried over from previous sprint: N
   - Items added mid-sprint: N
   - Items blocked during sprint: N
   - Swarm events triggered: N
 
   ## Quality
+
   - DoD violations caught: N
   - Items sent back for rework: N
   - Retro action items generated: N
   - Retro action items completed from previous: N/N
   ```
+
 - Quality team generates this at sprint close
 - Use 3-sprint rolling average for planning capacity
 
@@ -366,6 +397,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Explicit process enforcement agent with authority to block non-compliant work.
 
 **Implementation**:
+
 - Add to `agents.yaml`:
   ```yaml
   - id: scrum-master
@@ -401,6 +433,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Strengthen the product team's explicit authority over priority and value decisions.
 
 **Implementation**:
+
 - Update `product` agent in `agents.yaml` to explicitly include:
   ```yaml
   authority:
@@ -421,6 +454,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Define "sprint" as a fixed window with start/end ceremonies.
 
 **Implementation**:
+
 - Sprint = N sessions or a calendar window (recommend: 1 week or 5 sessions, whichever comes first)
 - Sprint lifecycle:
   ```
@@ -444,29 +478,37 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: At sprint end, auto-generate a summary of everything completed.
 
 **Implementation**:
+
 - Generate `docs/history/sprint-reviews/sprint-N-review.md`:
+
   ```markdown
   # Sprint N Review — [Date]
 
   ## Sprint Goal
+
   [Goal statement] — **Achieved / Partially Achieved / Not Achieved**
 
   ## Completed Items
+
   | Task | Team | Points | PR(s) | Key Files Changed |
-  |------|------|--------|-------|-------------------|
+  | ---- | ---- | ------ | ----- | ----------------- |
   | ...  | ...  | ...    | ...   | ...               |
 
   ## Carried Over
+
   | Task | Team | Points | Reason |
-  |------|------|--------|--------|
+  | ---- | ---- | ------ | ------ |
   | ...  | ...  | ...    | ...    |
 
   ## Key Decisions Made
+
   - [Decision and rationale]
 
   ## Stakeholder Notes
+
   - [Feedback or observations for human review]
   ```
+
 - Pull data from `AGENT_BACKLOG.md` completed section + git log
 - Product Owner reviews and adds stakeholder notes
 
@@ -475,20 +517,23 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Allow agents to contribute outside their primary scope to reduce bottlenecks.
 
 **Implementation**:
+
 - Add `secondary-scope` to `teams.yaml`:
+
   ```yaml
   - id: backend
     name: BACKEND
     scope: ['apps/api/**', 'services/**']
-    secondary-scope: ['**/*.test.*']  # Can write tests
+    secondary-scope: ['**/*.test.*'] # Can write tests
     # ...
 
   - id: testing
     name: TESTING
     scope: ['**/*.test.*', 'tests/**']
-    secondary-scope: ['apps/api/**']  # Can read/understand API code
+    secondary-scope: ['apps/api/**'] # Can read/understand API code
     # ...
   ```
+
 - Agents only use secondary scope when:
   1. Primary-scope team is at WIP limit
   2. Swarming is triggered
@@ -500,6 +545,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Two agents collaborate on the same task simultaneously.
 
 **Implementation**:
+
 - Invocation: `/pair <agent-1> <agent-2> <task>`
 - Roles:
   - **Driver**: Writes the code
@@ -517,18 +563,21 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Running burndown chart updated after each task completion.
 
 **Implementation**:
+
 - Add `## Burndown` section to `AGENT_BACKLOG.md`:
+
   ```markdown
   ## Burndown — Sprint N
 
   Total points: 21 | Completed: 8 | Remaining: 13
 
-  | Session | Points Remaining | Notes |
-  |---------|-----------------|-------|
-  | 1       | 21              | Sprint start |
-  | 2       | 18              | 3 pts completed |
-  | 3       | 13              | 5 pts completed, 2 pts added (scope change) |
+  | Session | Points Remaining | Notes                                       |
+  | ------- | ---------------- | ------------------------------------------- |
+  | 1       | 21               | Sprint start                                |
+  | 2       | 18               | 3 pts completed                             |
+  | 3       | 13               | 5 pts completed, 2 pts added (scope change) |
   ```
+
 - Updated by orchestrator after each session
 - If remaining points trend shows sprint goal at risk, trigger:
   1. Scope negotiation with Product Owner
@@ -540,6 +589,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Dedicated refinement pass before sprint planning.
 
 **Implementation**:
+
 - Run refinement 1 session before sprint planning
 - Activities:
   1. Review all Backlog items for clarity (DOR check)
@@ -555,6 +605,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Explicit allocation of sprint capacity for tech debt reduction.
 
 **Implementation**:
+
 - Reserve 20% of sprint capacity for tech debt items
 - Add `type:` column to `AGENT_BACKLOG.md`: `feature | bugfix | tech-debt | process`
 - Track tech debt ratio in sprint metrics
@@ -566,7 +617,9 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Auto-generated dashboard summarizing team status at a glance.
 
 **Implementation**:
+
 - Generate `STATUS.md` at repo root, updated by orchestrator:
+
   ```markdown
   # Project Status — Auto-generated
 
@@ -574,16 +627,19 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
   **Velocity** (3-sprint avg): N pts | **This sprint**: N/N pts
 
   ## Team Status
-  | Team | WIP | Capacity | Current Task | Status |
-  |------|-----|----------|--------------|--------|
-  | Backend | 2/2 | Full | API routes | On track |
-  | Data | 0/1 | Available | — | Idle |
-  | ...  | ... | ... | ... | ... |
+
+  | Team    | WIP | Capacity  | Current Task | Status   |
+  | ------- | --- | --------- | ------------ | -------- |
+  | Backend | 2/2 | Full      | API routes   | On track |
+  | Data    | 0/1 | Available | —            | Idle     |
+  | ...     | ... | ...       | ...          | ...      |
 
   ## Blockers
+
   - [Blocker description] — Owner: [team] — Age: [N sessions]
 
   ## Recent Completions
+
   - [Task] by [team] — [date]
   ```
 
@@ -592,10 +648,13 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: When things go wrong, investigate systemically rather than patching symptoms.
 
 **Implementation**:
+
 - For any P0 bug or sprint goal miss, require a "5 Whys" entry in lessons learned
 - Template addition to `TEMPLATE-lesson.md`:
+
   ```markdown
   ## Root Cause Analysis (5 Whys)
+
   1. Why did [problem] happen? → [answer]
   2. Why did [answer 1] happen? → [answer]
   3. Why did [answer 2] happen? → [answer]
@@ -610,6 +669,7 @@ T1-Backend blocked on "auth middleware interface" (needs T5-Auth)
 **What**: Reduce knowledge silos by ensuring multiple teams can work on any area.
 
 **Implementation**:
+
 - Track "code familiarity" per team: which files/modules each team has touched
 - Flag modules only one team has ever worked on (bus factor = 1)
 - During cross-training opportunities, deliberately assign secondary teams to these modules
@@ -674,15 +734,15 @@ Product Owner (2.5) ───────► Owns 1.3 (sprint goal), 3.2 (review
 
 How we know this is working:
 
-| Metric | Baseline (Current) | Target (After Phase 2) | Target (After Phase 3) |
-|--------|-------------------|----------------------|----------------------|
-| Items marked "Done" that actually meet quality bar | Unknown | 90%+ (DoD enforced) | 95%+ |
-| Items entering sprint that are well-defined | Unknown | 80%+ (DoR enforced) | 95%+ |
-| Sprint goal achievement rate | Not tracked | 70%+ | 85%+ |
-| Estimation accuracy (estimate vs actual) | Not tracked | Within +/- 3 points | Within +/- 2 points |
-| Blockers detected early (via sync) | 0 (no sync exists) | 60%+ caught in sync | 80%+ |
-| Retro action items completed | Not tracked | 50%+ per sprint | 75%+ |
-| Tech debt ratio | Unknown | Measured | < 30% of backlog |
+| Metric                                             | Baseline (Current) | Target (After Phase 2) | Target (After Phase 3) |
+| -------------------------------------------------- | ------------------ | ---------------------- | ---------------------- |
+| Items marked "Done" that actually meet quality bar | Unknown            | 90%+ (DoD enforced)    | 95%+                   |
+| Items entering sprint that are well-defined        | Unknown            | 80%+ (DoR enforced)    | 95%+                   |
+| Sprint goal achievement rate                       | Not tracked        | 70%+                   | 85%+                   |
+| Estimation accuracy (estimate vs actual)           | Not tracked        | Within +/- 3 points    | Within +/- 2 points    |
+| Blockers detected early (via sync)                 | 0 (no sync exists) | 60%+ caught in sync    | 80%+                   |
+| Retro action items completed                       | Not tracked        | 50%+ per sprint        | 75%+                   |
+| Tech debt ratio                                    | Unknown            | Measured               | < 30% of backlog       |
 
 ---
 

@@ -12,26 +12,26 @@ Analysis of the agent and team definitions reveals structural gaps: two teams ha
 
 ### Teams (10 defined in `teams.yaml`)
 
-| Team | ID | Dedicated Agent(s) | Status |
-|---|---|---|---|
-| Backend | T1 | backend | OK |
-| Frontend | T2 | frontend | OK |
-| Data | T3 | data | OK |
-| Infrastructure | T4 | infra | OK |
-| DevOps | T5 | devops | OK |
-| Testing | T6 | test-lead, coverage-tracker, integration-tester | Strong (3 agents) |
-| Security | T7 | security-auditor | OK |
-| Documentation | T8 | **None** | **GAP** |
-| Product | T9 | product-manager, roadmap-tracker | OK |
-| Quality | T10 | **None** | **GAP** |
+| Team           | ID  | Dedicated Agent(s)                              | Status            |
+| -------------- | --- | ----------------------------------------------- | ----------------- |
+| Backend        | T1  | backend                                         | OK                |
+| Frontend       | T2  | frontend                                        | OK                |
+| Data           | T3  | data                                            | OK                |
+| Infrastructure | T4  | infra                                           | OK                |
+| DevOps         | T5  | devops                                          | OK                |
+| Testing        | T6  | test-lead, coverage-tracker, integration-tester | Strong (3 agents) |
+| Security       | T7  | security-auditor                                | OK                |
+| Documentation  | T8  | **None**                                        | **GAP**           |
+| Product        | T9  | product-manager, roadmap-tracker                | OK                |
+| Quality        | T10 | **None**                                        | **GAP**           |
 
 ### Agents Without Teams (3 categories)
 
-| Agent Category | Agents | Matching Team | Status |
-|---|---|---|---|
-| Design | brand-guardian, ui-designer | **No team** | **GAP** — agents exist but can't be routed via team delegation |
-| Marketing | content-strategist, growth-analyst | **No team** | **GAP** — partially covered by docs/product but no direct routing |
-| Operations | dependency-watcher, environment-manager, retrospective-analyst | **No team** | **GAP** — security-auditor routes via Security team, but other ops agents are orphaned |
+| Agent Category | Agents                                                         | Matching Team | Status                                                                                 |
+| -------------- | -------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------- |
+| Design         | brand-guardian, ui-designer                                    | **No team**   | **GAP** — agents exist but can't be routed via team delegation                         |
+| Marketing      | content-strategist, growth-analyst                             | **No team**   | **GAP** — partially covered by docs/product but no direct routing                      |
+| Operations     | dependency-watcher, environment-manager, retrospective-analyst | **No team**   | **GAP** — security-auditor routes via Security team, but other ops agents are orphaned |
 
 ### Handoff Chain Gaps
 
@@ -51,6 +51,7 @@ quality      → []
 ```
 
 **Missing gates:**
+
 - No **cost/FinOps review** in any chain (see `finops-specialist-agent-consideration.md`)
 - No **design review** gate for frontend work
 - No **architecture review** gate for cross-cutting changes
@@ -68,7 +69,7 @@ Create a `docs-writer` agent in the `operations` or new `documentation` category
 
 ```yaml
 - id: docs-writer
-  category: operations  # or new 'documentation' category
+  category: operations # or new 'documentation' category
   name: Documentation Writer
   role: >
     Technical documentation specialist responsible for maintaining project docs,
@@ -110,7 +111,7 @@ Create a `quality-reviewer` agent:
 
 ```yaml
 - id: quality-reviewer
-  category: operations  # or new 'quality' category
+  category: operations # or new 'quality' category
   name: Quality Reviewer
   role: >
     Code quality and architecture review specialist responsible for cross-cutting
@@ -143,6 +144,7 @@ Create a `quality-reviewer` agent:
 ### Problem
 
 Five agents exist without team routing:
+
 - **brand-guardian**: Brand consistency, design tokens, visual identity
 - **ui-designer**: UI/UX design, component design, accessibility
 - **content-strategist**: Messaging, copy, documentation voice
@@ -220,23 +222,23 @@ operations   → [devops, security]        # NEW
 
 ## Implementation Order
 
-| Step | Change | Priority | Dependencies |
-|---|---|---|---|
-| 1 | Create `quality-reviewer` agent | P2 | None — highest impact gap |
-| 2 | Create `docs-writer` agent | P2 | None |
-| 3 | Add `design` team definition | P3 | None |
-| 4 | Add `operations` team definition | P3 | Decide on marketing consolidation |
-| 5 | Update handoff chains | P3 | Steps 1-4 |
-| 6 | Run `agentkit:sync` and verify | P2 | Steps 1-5 |
+| Step | Change                           | Priority | Dependencies                      |
+| ---- | -------------------------------- | -------- | --------------------------------- |
+| 1    | Create `quality-reviewer` agent  | P2       | None — highest impact gap         |
+| 2    | Create `docs-writer` agent       | P2       | None                              |
+| 3    | Add `design` team definition     | P3       | None                              |
+| 4    | Add `operations` team definition | P3       | Decide on marketing consolidation |
+| 5    | Update handoff chains            | P3       | Steps 1-4                         |
+| 6    | Run `agentkit:sync` and verify   | P2       | Steps 1-5                         |
 
 ## Risk Assessment
 
-| Risk | Mitigation |
-|---|---|
-| Agent sprawl — too many agents creates routing confusion | Only add agents where teams exist without them; consolidate where possible |
-| Handoff chain complexity — more teams = more handoff paths | Keep chains short (max 2-3 downstream); use parallel review gates |
-| Scope overlap — new agents conflict with existing ones | Define clear `accepts` types; quality-reviewer = review only, not implement |
-| Sync output bloat — more agents = more generated files | Acceptable tradeoff; sync pipeline handles this well |
+| Risk                                                       | Mitigation                                                                  |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Agent sprawl — too many agents creates routing confusion   | Only add agents where teams exist without them; consolidate where possible  |
+| Handoff chain complexity — more teams = more handoff paths | Keep chains short (max 2-3 downstream); use parallel review gates           |
+| Scope overlap — new agents conflict with existing ones     | Define clear `accepts` types; quality-reviewer = review only, not implement |
+| Sync output bloat — more agents = more generated files     | Acceptable tradeoff; sync pipeline handles this well                        |
 
 ## Acceptance Criteria
 

@@ -44,7 +44,7 @@ When the Infra Engineer provisions a new resource group, consumption budget, or 
 
 # Proposed
 - id: infra
-  handoff-chain: [devops, security, data]  # data owns cost analytics (until finops-specialist exists)
+  handoff-chain: [devops, security, data] # data owns cost analytics (until finops-specialist exists)
 ```
 
 **Rationale**: The Data Engineer currently owns cost attribution dashboards and cost-centre reporting (agents.yaml lines 165-167). Adding `data` to infra's handoff ensures cost impact is reviewed.
@@ -54,7 +54,7 @@ When the Infra Engineer provisions a new resource group, consumption budget, or 
 ```yaml
 # Future state (after finops-specialist is created)
 - id: infra
-  handoff-chain: [devops, security, finops]  # dedicated cost review
+  handoff-chain: [devops, security, finops] # dedicated cost review
 ```
 
 ### Additional chain updates
@@ -62,11 +62,11 @@ When the Infra Engineer provisions a new resource group, consumption budget, or 
 ```yaml
 # Data team should also route through cost review for schema changes that affect data costs
 - id: data
-  handoff-chain: [backend, testing]  # No change needed — data IS the cost reviewer for now
+  handoff-chain: [backend, testing] # No change needed — data IS the cost reviewer for now
 
 # DevOps should consider cost impact of CI/CD infrastructure
 - id: devops
-  handoff-chain: [testing, security]  # Consider adding data/finops in future
+  handoff-chain: [testing, security] # Consider adding data/finops in future
 ```
 
 ## Implementation
@@ -81,7 +81,7 @@ In `.agentkit/spec/teams.yaml`, update the infra team's handoff chain:
   focus: 'IaC, cloud, Terraform/Bicep'
   scope: ['infra/**', 'terraform/**', 'bicep/**', 'pulumi/**']
   accepts: [implement, review, plan, investigate]
-  handoff-chain: [devops, security, data]  # ADD data for cost review
+  handoff-chain: [devops, security, data] # ADD data for cost review
 ```
 
 ### Step 2: Add cost review convention to infra agent
@@ -91,7 +91,7 @@ Add to Infrastructure Engineer's domain-rules in `agents.yaml`:
 ```yaml
 domain-rules:
   # ... existing rules ...
-  - "Follow finops domain rules [finops-cost-centre-governance, finops-tag-safety] — ensure cost attribution and budget compliance"
+  - 'Follow finops domain rules [finops-cost-centre-governance, finops-tag-safety] — ensure cost attribution and budget compliance'
 ```
 
 ### Step 3: Re-sync
@@ -106,10 +106,10 @@ Confirm the orchestrator processes the updated chain correctly when delegating i
 
 ## Risk Assessment
 
-| Risk | Mitigation |
-|---|---|
-| Data team overloaded with cost reviews | Data only reviews cost-impacting infra changes, not all infra work |
-| Handoff chain becomes too long (3 downstream) | Parallel handoff — devops, security, data can review concurrently |
+| Risk                                                   | Mitigation                                                                             |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Data team overloaded with cost reviews                 | Data only reviews cost-impacting infra changes, not all infra work                     |
+| Handoff chain becomes too long (3 downstream)          | Parallel handoff — devops, security, data can review concurrently                      |
 | Data team may not have context for IaC cost assessment | Document which cost conventions data should check (tag compliance, budget association) |
 
 ## Acceptance Criteria

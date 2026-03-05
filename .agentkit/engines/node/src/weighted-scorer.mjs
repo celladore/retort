@@ -67,10 +67,7 @@ export function calculateScore(categoryScores, opts = {}) {
   }
 
   // Calculate the sum of absolute weight values for normalization
-  const absWeightSum = Object.values(adjustedWeights).reduce(
-    (sum, w) => sum + Math.abs(w),
-    0
-  );
+  const absWeightSum = Object.values(adjustedWeights).reduce((sum, w) => sum + Math.abs(w), 0);
 
   if (absWeightSum === 0) {
     return { score: 0, priority: 'P3', breakdown: {} };

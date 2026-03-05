@@ -311,9 +311,7 @@ function inferAreaFromFinding(finding) {
  * @returns {Promise<object[]>} Created tasks
  */
 export async function convertFindingsToTasks(projectRoot, findings) {
-  const actionable = findings.filter(
-    (f) => f.severity === 'critical' || f.severity === 'high'
-  );
+  const actionable = findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
   if (!actionable.length) return [];
 
   const created = [];
@@ -345,7 +343,9 @@ export async function convertFindingsToTasks(projectRoot, findings) {
       });
       created.push(result.task);
     } else if (result.error) {
-      console.warn(`[agentkit:review] Failed to create task for ${finding.type} in ${finding.file}: ${result.error}`);
+      console.warn(
+        `[agentkit:review] Failed to create task for ${finding.type} in ${finding.file}: ${result.error}`
+      );
     }
   }
 
@@ -376,15 +376,20 @@ export async function trackUnfixedFindings(projectRoot, currentFindings) {
   const unfixed = currentFindings.filter((f) => prevSet.has(fingerprint(f)));
 
   if (unfixed.length > 0) {
-    emitEvent(projectRoot, 'review_unfixed_findings', {
-      count: unfixed.length,
-      findings: unfixed.map((f) => ({
-        type: f.type,
-        severity: f.severity,
-        file: f.file,
-        pattern: f.pattern || null,
-      })),
-    }, { source: 'review-runner' });
+    emitEvent(
+      projectRoot,
+      'review_unfixed_findings',
+      {
+        count: unfixed.length,
+        findings: unfixed.map((f) => ({
+          type: f.type,
+          severity: f.severity,
+          file: f.file,
+          pattern: f.pattern || null,
+        })),
+      },
+      { source: 'review-runner' }
+    );
   }
 
   return { unfixed, isFirstRun: false };
@@ -407,9 +412,8 @@ export async function runReview({
   projectRoot,
   flags = {},
 }) {
-  const userContext = Array.isArray(flags._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
 
   console.log('[agentkit:review] Running automated review checks...');
   if (userContext) {
@@ -532,7 +536,9 @@ export async function runReview({
   }
 
   // Summary
-  const hasHighSeverity = allFindings.some((f) => f.severity === 'high' || f.severity === 'critical');
+  const hasHighSeverity = allFindings.some(
+    (f) => f.severity === 'high' || f.severity === 'critical'
+  );
   const status = hasHighSeverity ? 'FAIL' : 'PASS';
 
   console.log(`=== Review: ${status} ===`);
@@ -575,11 +581,16 @@ export async function runReview({
         console.log(`\n[agentkit:review] Created ${createdTasks.length} task(s) from findings`);
         for (const task of createdTasks) {
           console.log(`  → ${task.id}: ${task.title}`);
-          emitEvent(projectRoot, 'review_auto_task', {
-            taskId: task.id,
-            findingType: task.artifacts?.[0]?.finding?.type,
-            severity: task.severity,
-          }, { source: 'review-runner' });
+          emitEvent(
+            projectRoot,
+            'review_auto_task',
+            {
+              taskId: task.id,
+              findingType: task.artifacts?.[0]?.finding?.type,
+              severity: task.severity,
+            },
+            { source: 'review-runner' }
+          );
         }
       }
     } catch (err) {

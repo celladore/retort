@@ -36,6 +36,7 @@ Many items here overlap with or extend SPEC-PROC-001/002/003 features. Where ove
 #### Technical Requirements
 
 **TR-022.1 — Backlog Restructure**:
+
 ```markdown
 ## Active Sprint
 
@@ -43,27 +44,32 @@ Many items here overlap with or extend SPEC-PROC-001/002/003 features. Where ove
 **Sprint**: 2 | **Capacity**: 18 pts | **Buffer**: 3 pts
 
 ### Ready
-| Priority | Team | Task | Type | Estimate | Notes |
-|----------|------|------|------|----------|-------|
-| P1 | T3-Data | Design database schema | feature | 3 | Waiting on API contract |
+
+| Priority | Team    | Task                   | Type    | Estimate | Notes                   |
+| -------- | ------- | ---------------------- | ------- | -------- | ----------------------- |
+| P1       | T3-Data | Design database schema | feature | 3        | Waiting on API contract |
 
 ### In Progress
-| Priority | Team | Task | Type | Estimate | Started | Notes |
-|----------|------|------|------|----------|---------|-------|
-| P1 | T1-Backend | API route structure | feature | 5 | Session 1 | |
+
+| Priority | Team       | Task                | Type    | Estimate | Started   | Notes |
+| -------- | ---------- | ------------------- | ------- | -------- | --------- | ----- |
+| P1       | T1-Backend | API route structure | feature | 5        | Session 1 |       |
 
 ### In Review
-| Priority | Team | Task | Type | Estimate | Reviewer | Notes |
-|----------|------|------|------|----------|----------|-------|
-| P1 | T8-DevEx | Lint config | tech-debt | 2 | T10-Quality | |
+
+| Priority | Team     | Task        | Type      | Estimate | Reviewer    | Notes |
+| -------- | -------- | ----------- | --------- | -------- | ----------- | ----- |
+| P1       | T8-DevEx | Lint config | tech-debt | 2        | T10-Quality |       |
 
 ### Done
-| Priority | Team | Task | Type | Estimate | Actual | Completed | Notes |
-|----------|------|------|------|----------|--------|-----------|-------|
-| P0 | T4-Infra | CI pipeline | feature | 5 | 5 | Session 2 | |
+
+| Priority | Team     | Task        | Type    | Estimate | Actual | Completed | Notes |
+| -------- | -------- | ----------- | ------- | -------- | ------ | --------- | ----- |
+| P0       | T4-Infra | CI pipeline | feature | 5        | 5      | Session 2 |       |
 ```
 
 **TR-022.2 — State Transition Script**: `scripts/backlog-transition.mjs`
+
 ```
 Commands:
   transition <item-id> --to <ready|in-progress|in-review|done>
@@ -99,6 +105,7 @@ Agents work on tasks regardless of which section they're in. The transition scri
 **TR-023.1 — Timestamp Tracking**: State transitions (F-022) already log timestamps in events.log. Cycle time = `done_timestamp - in_progress_timestamp`. Lead time = `done_timestamp - created_timestamp`.
 
 **TR-023.2 — Metrics Extension**: Extend `scripts/sprint-metrics.mjs`:
+
 ```
 ## Cycle Time
 - Average cycle time: 1.8 sessions
@@ -129,6 +136,7 @@ No new scripts needed — extends existing metrics script using existing event d
 #### Technical Requirements
 
 **TR-024.1 — Bottleneck Detection**: Extend `scripts/sprint-metrics.mjs`:
+
 ```
 Bottleneck heuristic:
   For each team:
@@ -141,6 +149,7 @@ Bottleneck heuristic:
 ```
 
 **TR-024.2 — Orchestrator Action**:
+
 ```
 If bottleneck detected:
   1. Log: {"type": "bottleneck-identified", "team": "backend", "queue_depth": 4, "throughput": 1.5}
@@ -159,6 +168,7 @@ Bottleneck detection is a metric calculation. Agents don't know about TOC. The o
 #### Functional Requirements
 
 **FR-025.1**: Work items SHALL be classified into service classes with different handling policies:
+
 - **Expedite**: P0 — drops everything, WIP limit override allowed, single item only
 - **Standard**: P1-P2 — normal flow, WIP limits enforced
 - **Tech Debt**: Reserved capacity (20%), lower urgency
@@ -169,6 +179,7 @@ Bottleneck detection is a metric calculation. Agents don't know about TOC. The o
 #### Technical Requirements
 
 **TR-025.1 — Backlog Schema**: The `Type` column (from F-018) combined with `Priority` determines the class of service. No new column needed — derive from existing fields:
+
 ```
 class_of_service = function(priority, type):
   if priority == "P0": return "expedite"
@@ -178,6 +189,7 @@ class_of_service = function(priority, type):
 ```
 
 **TR-025.2 — Policy Enforcement**: `scripts/wip-check.mjs` extended:
+
 ```
 If class == "expedite":
   - WIP limit override: team can exceed max-wip by 1 for this item
@@ -207,6 +219,7 @@ Classes of service are derived from existing fields. No new agent instructions. 
 #### Technical Requirements
 
 **TR-026.1 — Leveling Check**: Extend `scripts/sprint-metrics.mjs`:
+
 ```
 For each team:
   committed_ratio = team_committed_pts / avg_committed_pts
@@ -233,6 +246,7 @@ For each team:
 #### Technical Requirements
 
 **TR-027.1 — Stop-the-Line State**: `.claude/state/orchestrator.json`:
+
 ```json
 {
   "stop_the_line": {
@@ -246,6 +260,7 @@ For each team:
 ```
 
 **TR-027.2 — Trigger Mechanisms**:
+
 - CI failure on main → auto-set `stop_the_line.active = true`
 - Agent discovers security issue → `scripts/andon.mjs trigger --severity critical --description "..."`
 - `/healthcheck` failure → prompt orchestrator to trigger
@@ -253,8 +268,9 @@ For each team:
 **TR-027.3 — Enforcement**: `/orchestrate` and `/delegate` check `stop_the_line.active` before any new assignment. If active: "STOP THE LINE: [description]. No new work until resolved. Assigned to: [team]."
 
 **TR-027.4 — Resolution**: `scripts/andon.mjs resolve` clears the state and logs:
+
 ```json
-{"type": "stop-the-line-resolved", "duration": "2 hours", "fix": "...", "rca_required": true}
+{ "type": "stop-the-line-resolved", "duration": "2 hours", "fix": "...", "rca_required": true }
 ```
 
 ### Context Bloat Mitigation
@@ -274,6 +290,7 @@ Stop-the-line is a boolean in orchestrator state. No agent carries stop-the-line
 #### Technical Requirements
 
 **TR-028.1 — Alert Script**: `scripts/andon.mjs`
+
 ```
 Commands:
   andon trigger --severity <critical|warning|info> --team <id> --description <text>
@@ -282,6 +299,7 @@ Commands:
 ```
 
 **TR-028.2 — Alert State**: `.claude/state/alerts.json`:
+
 ```json
 {
   "alerts": [
@@ -298,6 +316,7 @@ Commands:
 ```
 
 **TR-028.3 — Orchestrator Integration**:
+
 - `/orchestrate` reads alerts.json at session start
 - Critical alerts block new work (stop-the-line)
 - Warning alerts display: "WARNINGS: [count] open alerts. Review with `andon list`."
@@ -322,20 +341,22 @@ Agents raise alerts via script call (one command). They don't carry alert system
 #### Technical Requirements
 
 **TR-029.1 — Registry**: `docs/06_engineering/poka-yoke-registry.md`:
+
 ```markdown
 # Poka-yoke Registry
 
-| ID | Defect Type | Prevention Mechanism | Added | Status |
-|----|-------------|---------------------|-------|--------|
-| PY-001 | Missing tests for new code | Coverage threshold in CI (80%) | Sprint 0 | Active |
-| PY-002 | Secrets in commits | .gitignore + secret scanning in CI | Sprint 0 | Active |
-| PY-003 | Broken conventional commits | commitlint pre-commit hook | Sprint 1 | Active |
-| PY-004 | Missing changelog entry | DOD validation script check | Sprint 2 | Planned |
+| ID     | Defect Type                 | Prevention Mechanism               | Added    | Status  |
+| ------ | --------------------------- | ---------------------------------- | -------- | ------- |
+| PY-001 | Missing tests for new code  | Coverage threshold in CI (80%)     | Sprint 0 | Active  |
+| PY-002 | Secrets in commits          | .gitignore + secret scanning in CI | Sprint 0 | Active  |
+| PY-003 | Broken conventional commits | commitlint pre-commit hook         | Sprint 1 | Active  |
+| PY-004 | Missing changelog entry     | DOD validation script check        | Sprint 2 | Planned |
 ```
 
 **TR-029.2 — Defect Pattern Analysis**: Extend `scripts/sprint-metrics.mjs` to track DOD failure reasons. If the same reason appears 3+ times across sprints, auto-suggest a poka-yoke: "Recurring defect: 'missing tests' (4 times in 3 sprints). Recommend: add pre-merge test coverage check."
 
 **TR-029.3 — Action Flow**:
+
 ```
 Defect recurs 3+ times → Metrics script flags it → Retro action item created →
 Team implements prevention (linter rule, CI check, hook) → Registry updated → Agent instructions unchanged
@@ -360,11 +381,13 @@ This is the essence of code-over-context. Every poka-yoke is a tool (linter, hoo
 #### Technical Requirements
 
 **TR-030.1 — DOD Addition**: Add to `DOD.md` under `## code-quality`:
+
 ```markdown
 - [ ] `test-first`: For features/bugfixes, test file exists with at least one test case for the changed behavior
 ```
 
 **TR-030.2 — Validation**: Extend `scripts/validate-dod.mjs`:
+
 ```
 For items with type in [feature, bugfix]:
   Check git diff for test files (*.test.*, *.spec.*)
@@ -391,12 +414,14 @@ Test-first is a DOD criterion, checked by the DOD script. Agents don't carry "re
 #### Technical Requirements
 
 **TR-031.1 — teams.yaml Config**:
+
 ```yaml
 process:
   build-time-budget-seconds: 600
 ```
 
 **TR-031.2 — Monitoring**: Extend `/healthcheck` to time the full cycle:
+
 ```
 start = now()
 run build, test, lint
@@ -425,6 +450,7 @@ A timer around existing CI commands. No agent involvement.
 #### Technical Requirements
 
 **TR-032.1 — Extend `scripts/sprint-metrics.mjs`**:
+
 ```
 Change Failure Rate:
   reverts = count events where type == "revert" in sprint
@@ -441,8 +467,10 @@ MTTR:
 ```
 
 **TR-032.2 — Sprint Metrics Addition**:
+
 ```markdown
 ## DORA Metrics
+
 - Change Failure Rate: 12% (target: < 15%)
 - Mean Time to Recovery: 0.8 sessions (target: < 1 session for P0/P1)
 - Deployment Frequency: 4 merges/sprint
@@ -469,6 +497,7 @@ Pure metrics calculation from events.log. No agent awareness needed.
 #### Technical Requirements
 
 **TR-033.1 — Task Template**: Modify `/delegate` to enforce intent-based format:
+
 ```json
 {
   "title": "Users can reset their password",
@@ -486,11 +515,13 @@ Pure metrics calculation from events.log. No agent awareness needed.
 ```
 
 **TR-033.2 — Orchestrator Validation**: When `/delegate` creates a task, check description against patterns:
+
 - Contains specific file paths → warning: "Task description is prescriptive. Consider intent-based format."
 - Contains function names → warning (same)
 - These are warnings, not blocks — sometimes specificity is needed
 
 **TR-033.3 — Prescriptive Pattern Detection**: The orchestrator checks task descriptions for these patterns:
+
 - File path literals (e.g., `src/auth/reset.ts`, `controllers/user.js`)
 - Function/method declarations (e.g., `function resetPassword`, `class AuthService`)
 - Library-specific API calls (e.g., `bcrypt.hash()`, `jwt.sign()`)
@@ -498,6 +529,7 @@ Pure metrics calculation from events.log. No agent awareness needed.
 If 2+ patterns detected, emit a `delegation-style-warning` event. If 0 patterns, emit `delegation-style: intent-based`.
 
 **TR-033.4 — Events Log**:
+
 ```json
 {"type": "delegation-style", "task": "...", "format": "intent-based"}
 {"type": "delegation-style-warning", "task": "...", "issue": "prescriptive: contains file path"}
@@ -524,6 +556,7 @@ This REDUCES context. Intent-based tasks are shorter than prescriptive ones. "Us
 #### Technical Requirements
 
 **TR-034.1 — teams.yaml Authority**:
+
 ```yaml
 teams:
   - id: backend
@@ -556,6 +589,7 @@ Autonomy reduces context. If agents don't need permission for routine decisions,
 **FR-035.1**: Every backlog item SHALL be tagged with a complexity domain: `clear`, `complicated`, `complex`, `chaotic`.
 
 **FR-035.2**: The domain determines the approach:
+
 - **Clear**: Execute directly. No spike needed. Low estimation uncertainty.
 - **Complicated**: Analyze first, then execute. Expert agent assigned.
 - **Complex**: Spike required before estimation. Probe-sense-respond.
@@ -566,17 +600,20 @@ Autonomy reduces context. If agents don't need permission for routine decisions,
 #### Technical Requirements
 
 **TR-035.1 — Backlog Schema**: Add `Complexity` column:
+
 ```markdown
 | Priority | Team | Task | Type | Complexity | Estimate | Notes |
 ```
 
 **TR-035.2 — DOR Extension**: `scripts/validate-dor.mjs` extended:
+
 ```
 If complexity == "complex" and no linked spike task completed:
   fail "DOR: Complex item requires completed spike before sprint entry"
 ```
 
 **TR-035.3 — Approach Mapping** (in `teams.yaml`, read by orchestrator):
+
 ```yaml
 process:
   cynefin:
@@ -620,6 +657,7 @@ Cynefin classification is metadata on the backlog item. The orchestrator reads t
 #### Technical Requirements
 
 **TR-036.1 — Spike Task Template**:
+
 ```json
 {
   "type": "spike",
@@ -655,11 +693,13 @@ Cynefin classification is metadata on the backlog item. The orchestrator reads t
 #### Technical Requirements
 
 **TR-037.1 — Backlog Schema**: Add optional `Appetite` to Notes or as a field:
+
 ```markdown
 | Priority | Team | Task | Type | Complexity | Estimate | Appetite | Notes |
 ```
 
 **TR-037.2 — Appetite is distinct from estimate**:
+
 - **Estimate**: How complex do we think this is? (story points)
 - **Appetite**: How much are we willing to invest? (sessions)
 - A 5-point item with appetite of 1 session means: "We think it's medium complexity but we're only willing to spend 1 session. Scope accordingly."
@@ -679,6 +719,7 @@ Cynefin classification is metadata on the backlog item. The orchestrator reads t
 #### Technical Requirements
 
 **TR-038.1 — Enforcement**: Extend orchestrator session tracking:
+
 ```
 For each in-progress item with appetite set:
   sessions_spent = count sessions where item was in-progress
@@ -689,6 +730,7 @@ For each in-progress item with appetite set:
 ```
 
 **TR-038.2 — PO Resolution Options**:
+
 1. **Re-scope**: Reduce scope, reset appetite, continue
 2. **Extend**: Increase appetite (must justify — logged as scope change)
 3. **Kill**: Move to backlog with note "Killed: exceeded appetite"
@@ -822,7 +864,16 @@ process:
 
   # Scrum Master (orchestrator behavior, not an agent)
   scrum-master:
-    authority: [enforce-dor, enforce-dod, enforce-wip, trigger-swarm, generate-retro, generate-metrics, track-actions]
+    authority:
+      [
+        enforce-dor,
+        enforce-dod,
+        enforce-wip,
+        trigger-swarm,
+        generate-retro,
+        generate-metrics,
+        track-actions,
+      ]
     cannot: [set-priority, implement-code, approve-scope]
 
   # Pair programming
@@ -840,10 +891,10 @@ process:
 
 _Combined impact for SPEC-PROC-004a and SPEC-PROC-004b._
 
-| Change | Words added to agent context |
-|--------|---------------------------|
-| New rules in rules.yaml (`ac-verify-state`, `ac-just-in-time`) | ~55 words total, applied globally |
-| Everything else | 0 — enforced via scripts and orchestrator |
+| Change                                                         | Words added to agent context              |
+| -------------------------------------------------------------- | ----------------------------------------- |
+| New rules in rules.yaml (`ac-verify-state`, `ac-just-in-time`) | ~55 words total, applied globally         |
+| Everything else                                                | 0 — enforced via scripts and orchestrator |
 
 **Total new agent context cost**: ~55 words across ALL 37 features.
 

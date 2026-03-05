@@ -10,15 +10,16 @@ Wire together the three enforcement layers (session budget guard → gateway spe
 
 ## Decision Context
 
-| # | Decision | Chosen | Rationale |
-|---|---|---|---|
-| 7 | Budget approval workflow | GitHub Issues | Keeps everything in-repo, uses existing PR/issue infrastructure |
+| #   | Decision                 | Chosen        | Rationale                                                       |
+| --- | ------------------------ | ------------- | --------------------------------------------------------------- |
+| 7   | Budget approval workflow | GitHub Issues | Keeps everything in-repo, uses existing PR/issue infrastructure |
 
 ## Deliverables
 
 ### 5.1 End-to-End Telemetry Pipeline
 
 **Data flow**:
+
 ```
 Agent session (agentkit-forge)
   → cost-tracker.mjs logs to JSONL
@@ -36,6 +37,7 @@ Cost analytics (pvc-costops-analytics)
 ```
 
 **Integration points**:
+
 - Define a shared telemetry schema version contract between repos
 - Align event families: `session_*`, `gateway_*`, `azure_cost_*`
 - Ensure timestamp alignment (all UTC, RFC3339)
@@ -45,6 +47,7 @@ Cost analytics (pvc-costops-analytics)
 **Repo**: `pvc-costops-analytics`
 
 Set up Azure Monitor Action Groups that:
+
 1. Fire on budget threshold breach (80%, 100%, 120%)
 2. Send webhook to a lightweight relay (Azure Function or Logic App)
 3. Relay formats and posts to Slack channel / Teams webhook
@@ -55,6 +58,7 @@ Set up Azure Monitor Action Groups that:
 **Repo**: `pvc-costops-analytics`
 
 GitHub Actions cron job (monthly, 1st of month):
+
 1. Query cost data for previous month via Azure Cost Management API
 2. Generate budget utilization report per cost centre
 3. Flag anomalies and budget overages
@@ -68,6 +72,7 @@ GitHub Actions cron job (monthly, 1st of month):
 Flesh out the budget approval process:
 
 **Issue template** (`.github/ISSUE_TEMPLATE/budget-change.md`):
+
 ```yaml
 name: Budget Change Request
 about: Request a new cost centre or budget increase
@@ -107,6 +112,7 @@ body:
 ```
 
 **Approval process**:
+
 1. Issue created with `finops-approval` label
 2. Auto-assign to designated budget approver (CODEOWNERS-like)
 3. Approver reviews justification and spend data
@@ -119,6 +125,7 @@ body:
 **Repo**: `pvc-costops-analytics`
 
 Create `docs/cost-governance-runbook.md`:
+
 - How to create a new cost centre (step-by-step)
 - How to request a budget increase
 - How to respond to budget alerts
@@ -133,6 +140,7 @@ Create `docs/cost-governance-runbook.md`:
 **Repo**: `pvc-costops-analytics`
 
 Unified Grafana dashboard combining:
+
 - Agent session metrics (from agentkit JSONL logs)
 - Gateway usage metrics (from usage_tracker telemetry)
 - Azure infrastructure costs (from Cost Management API)

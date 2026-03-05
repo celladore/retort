@@ -11,41 +11,41 @@
 Add the following entry under the **Workflow Commands** section (after `project-review`):
 
 ```yaml
-  - name: doc-audit
-    type: workflow
-    description: >
-      Audits project documentation for completeness, accuracy, and internal
-      consistency. Scans the 8-category docs structure, cross-references
-      commands.yaml/agents.yaml/teams.yaml against published docs, detects
-      broken internal links, stale content, and undocumented features.
-      Produces a structured gap report with prioritized remediation items.
-    flags:
-      - name: --scope
-        description: 'Limit audit to specific doc categories (e.g., 04_api, 03_architecture)'
-        type: string
-        default: null
-        required: false
-      - name: --fix
-        description: 'Auto-fix simple issues (broken links, stale counts) in place'
-        type: boolean
-        default: false
-      - name: --output
-        description: 'Output format for the audit report'
-        type: string
-        default: 'markdown'
-        required: false
-        enum: [markdown, json]
-      - name: --save
-        description: 'Save report to .agentkit/docs/DOCUMENTATION_AUDIT.md'
-        type: boolean
-        default: true
-    allowed-tools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+- name: doc-audit
+  type: workflow
+  description: >
+    Audits project documentation for completeness, accuracy, and internal
+    consistency. Scans the 8-category docs structure, cross-references
+    commands.yaml/agents.yaml/teams.yaml against published docs, detects
+    broken internal links, stale content, and undocumented features.
+    Produces a structured gap report with prioritized remediation items.
+  flags:
+    - name: --scope
+      description: 'Limit audit to specific doc categories (e.g., 04_api, 03_architecture)'
+      type: string
+      default: null
+      required: false
+    - name: --fix
+      description: 'Auto-fix simple issues (broken links, stale counts) in place'
+      type: boolean
+      default: false
+    - name: --output
+      description: 'Output format for the audit report'
+      type: string
+      default: 'markdown'
+      required: false
+      enum: [markdown, json]
+    - name: --save
+      description: 'Save report to .agentkit/docs/DOCUMENTATION_AUDIT.md'
+      type: boolean
+      default: true
+  allowed-tools:
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
 ```
 
 ---
@@ -84,9 +84,10 @@ You are a documentation specialist performing a **systematic audit** of this pro
 Scan the docs/ directory and all top-level markdown files. Build an inventory:
 
 | Category | File Count | Last Modified | Status |
-|----------|-----------|---------------|--------|
+| -------- | ---------- | ------------- | ------ |
 
 Check:
+
 - [ ] All 8 doc categories exist under `docs/`
 - [ ] Each category has at least one substantive file (not just a placeholder)
 - [ ] Top-level files exist: README.md, CONTRIBUTING.md, CHANGELOG.md, AGENTS.md
@@ -94,7 +95,9 @@ Check:
 ## Phase 2: Spec–Doc Cross-Reference
 
 ### 2a: Commands
+
 Read `.agentkit/spec/commands.yaml` and compare every command against:
+
 - `COMMAND_REFERENCE.md` — is it listed with correct flags?
 - `QUICK_START.md` — is it mentioned appropriately?
 - `CLAUDE.md` Quick Reference table — is it present?
@@ -102,14 +105,18 @@ Read `.agentkit/spec/commands.yaml` and compare every command against:
 Flag: `DOC-DRIFT-CMD-*` for mismatches, `DOC-GAP-CMD-*` for missing entries.
 
 ### 2b: Agents
+
 Read `.agentkit/spec/agents.yaml` and compare every agent against:
+
 - `AGENTS.md` — correct count, all agents listed?
 - Any agent reference docs under `docs/`
 
 Flag: `DOC-DRIFT-AGT-*` for mismatches, `DOC-GAP-AGT-*` for missing entries.
 
 ### 2c: Teams
+
 Read `.agentkit/spec/teams.yaml` and compare every team against:
+
 - `UNIFIED_AGENT_TEAMS.md` — all teams listed with correct scope?
 - `CLAUDE.md` Team Commands table — complete?
 
@@ -118,6 +125,7 @@ Flag: `DOC-DRIFT-TEAM-*` for mismatches, `DOC-GAP-TEAM-*` for missing entries.
 ## Phase 3: Link & Reference Integrity
 
 For all markdown files:
+
 - Check internal links `[text](./path)` resolve to existing files
 - Check anchor links `[text](#heading)` resolve to headings in the target
 - Check cross-document references (e.g., "see COMMAND_REFERENCE.md") are valid
@@ -128,6 +136,7 @@ Flag: `DOC-LINK-*` for each broken reference.
 ## Phase 4: Content Freshness
 
 For each documentation file, check:
+
 - Does it reference commands/features that no longer exist?
 - Does it cite version numbers that are outdated?
 - Are "coming soon" or "TODO" markers older than 30 days?
@@ -138,6 +147,7 @@ Flag: `DOC-STALE-*` for each outdated item.
 ## Phase 5: Quality Assessment
 
 Evaluate:
+
 - **Completeness**: Are all public APIs documented in `docs/04_api/`?
 - **ADR coverage**: Do significant architecture decisions have ADRs in `docs/03_architecture/02_decisions/`?
 - **Onboarding path**: Can a new developer follow QUICK_START → setup → first contribution?
@@ -191,18 +201,21 @@ Save the report to `.agentkit/docs/DOCUMENTATION_AUDIT.md`.
 {{/if}}
 
 {{#if flags.fix}}
+
 ## Phase 7: Auto-Fix (--fix mode)
 
 For findings that are safe to auto-fix:
+
 - Update command/agent/team counts to match spec
 - Fix broken relative links where the target file clearly exists at a different path
 - Remove stale "coming soon" markers for features that now exist
 
 **Do NOT auto-fix:**
+
 - Content that requires human judgment
 - Generated files (flag them for re-sync instead)
 - Anything in `.agentkit/spec/` or `.agentkit/templates/`
-{{/if}}
+  {{/if}}
 ````
 
 ---
@@ -221,12 +234,12 @@ This will generate `.claude/commands/doc-audit.md` (and equivalents for other pl
 
 ## 4. Why This Is Better Than `/project-review --focus docs`
 
-| Aspect | `/project-review --focus docs` | `/doc-audit` |
-|--------|-------------------------------|--------------|
-| **Scope** | Phase 4 of a broader review; docs are one of 7+ categories | Dedicated, thorough, docs-only |
-| **Spec cross-ref** | No — doesn't compare spec YAML against docs | Yes — Phase 2 systematically cross-references |
-| **Link checking** | No | Yes — Phase 3 |
-| **Counts validation** | No | Yes — Phase 4 checks command/agent/team counts |
-| **Auto-fix** | No | Yes — `--fix` flag for safe corrections |
-| **Repeatable report** | Embedded in larger review output | Standalone `DOCUMENTATION_AUDIT.md` |
-| **Finding IDs** | Uses generic `DOC-*` | Uses specific `DOC-GAP-*`, `DOC-DRIFT-*`, `DOC-LINK-*`, `DOC-STALE-*` |
+| Aspect                | `/project-review --focus docs`                             | `/doc-audit`                                                          |
+| --------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Scope**             | Phase 4 of a broader review; docs are one of 7+ categories | Dedicated, thorough, docs-only                                        |
+| **Spec cross-ref**    | No — doesn't compare spec YAML against docs                | Yes — Phase 2 systematically cross-references                         |
+| **Link checking**     | No                                                         | Yes — Phase 3                                                         |
+| **Counts validation** | No                                                         | Yes — Phase 4 checks command/agent/team counts                        |
+| **Auto-fix**          | No                                                         | Yes — `--fix` flag for safe corrections                               |
+| **Repeatable report** | Embedded in larger review output                           | Standalone `DOCUMENTATION_AUDIT.md`                                   |
+| **Finding IDs**       | Uses generic `DOC-*`                                       | Uses specific `DOC-GAP-*`, `DOC-DRIFT-*`, `DOC-LINK-*`, `DOC-STALE-*` |

@@ -163,7 +163,8 @@ function scoreSuggestion(suggestion) {
   const impactScore = IMPACT_SCORES[suggestion.impact] || 1;
   const riskScore = IMPACT_SCORES[suggestion.riskIfSkipped] || 1;
   const effortScore = EFFORT_SCORES[suggestion.effort] || 3;
-  const alignmentScore = suggestion.alignment === 'high' ? 3 : suggestion.alignment === 'medium' ? 2 : 1;
+  const alignmentScore =
+    suggestion.alignment === 'high' ? 3 : suggestion.alignment === 'medium' ? 2 : 1;
 
   const score =
     DEFAULT_WEIGHTS.impact * impactScore +
@@ -186,9 +187,7 @@ function deduplicateAgainstBacklog(suggestions, backlogItems) {
   return suggestions.filter((s) => {
     const titleLower = s.title.toLowerCase();
     // Simple substring matching — future phases can use embeddings
-    return !backlogLower.some(
-      (item) => item.includes(titleLower) || titleLower.includes(item),
-    );
+    return !backlogLower.some((item) => item.includes(titleLower) || titleLower.includes(item));
   });
 }
 
@@ -221,9 +220,7 @@ async function analyzeDocumentationGaps(context) {
         // Check if the directory is empty
         try {
           const entries = await readdir(catPath);
-          const contentFiles = entries.filter(
-            (e) => !e.startsWith('.') && e !== 'README.md',
-          );
+          const contentFiles = entries.filter((e) => !e.startsWith('.') && e !== 'README.md');
           if (contentFiles.length === 0) {
             suggestions.push({
               category: 'documentation',
@@ -359,8 +356,8 @@ async function analyzeAdrGaps(context) {
   for (const concern of architecturalConcerns) {
     if (!concern.check()) continue;
 
-    const alreadyDocumented = existingAdrTitles.some(
-      (title) => title.includes(concern.concern.replace(/\s+/g, '-')),
+    const alreadyDocumented = existingAdrTitles.some((title) =>
+      title.includes(concern.concern.replace(/\s+/g, '-'))
     );
 
     if (!alreadyDocumented) {
@@ -413,8 +410,7 @@ async function analyzeTestingGaps(context) {
 
   if (!hasE2e) {
     // Only suggest E2E if there's a frontend framework detected
-    const hasFrontend =
-      discoveryReport?.frameworks?.frontend?.length > 0;
+    const hasFrontend = discoveryReport?.frameworks?.frontend?.length > 0;
     if (hasFrontend) {
       suggestions.push({
         category: 'testing',
@@ -519,9 +515,7 @@ async function analyzeSecurityGaps(context) {
         effort: 'XS',
         riskIfSkipped: 'medium',
         alignment: 'high',
-        suggestedArtifacts: [
-          { type: 'config', path: '.github/dependabot.yml' },
-        ],
+        suggestedArtifacts: [{ type: 'config', path: '.github/dependabot.yml' }],
       });
     }
   }
@@ -549,9 +543,7 @@ async function analyzeSecurityGaps(context) {
     try {
       const gitignore = await readFile(gitignorePath, 'utf-8');
       const sensitivePatterns = ['.env', '.env.local', '*.pem', '*.key'];
-      const missing = sensitivePatterns.filter(
-        (p) => !gitignore.includes(p),
-      );
+      const missing = sensitivePatterns.filter((p) => !gitignore.includes(p));
       if (missing.length > 0) {
         suggestions.push({
           category: 'security',
@@ -608,10 +600,7 @@ async function analyzeOpsGaps(context) {
     existsSync(resolve(projectRoot, 'docker-compose.yaml'));
 
   // Only suggest Docker if the project seems non-trivial (has a backend framework)
-  if (
-    !hasDocker &&
-    discoveryReport?.frameworks?.backend?.length > 0
-  ) {
+  if (!hasDocker && discoveryReport?.frameworks?.backend?.length > 0) {
     suggestions.push({
       category: 'operations',
       title: 'Add containerization (Dockerfile)',
@@ -627,7 +616,7 @@ async function analyzeOpsGaps(context) {
 
   // Check for operations documentation — derive path from docsSpec
   const opsCategory = context.docsSpec?.categories?.find(
-    (c) => c.id?.includes('operations') || c.name?.toLowerCase() === 'operations',
+    (c) => c.id?.includes('operations') || c.name?.toLowerCase() === 'operations'
   );
   const opsPath = opsCategory?.path || 'docs/07_operations/';
 
@@ -671,9 +660,7 @@ async function analyzeArchitectureGaps(context) {
       effort: 'M',
       riskIfSkipped: 'medium',
       alignment: 'high',
-      suggestedArtifacts: [
-        { type: 'docs', path: 'docs/03_architecture/01_overview.md' },
-      ],
+      suggestedArtifacts: [{ type: 'docs', path: 'docs/03_architecture/01_overview.md' }],
     });
   }
 
@@ -717,9 +704,7 @@ async function analyzeArchitectureGaps(context) {
       effort: 'M',
       riskIfSkipped: 'low',
       alignment: 'medium',
-      suggestedArtifacts: [
-        { type: 'docs', path: 'docs/03_architecture/01_diagrams/' },
-      ],
+      suggestedArtifacts: [{ type: 'docs', path: 'docs/03_architecture/01_diagrams/' }],
     });
   }
 
@@ -788,7 +773,7 @@ export function formatReportAsMarkdown(report) {
   lines.push(`**Generated**: ${report.generatedAt}`);
   lines.push(`**Categories analyzed**: ${report.categoriesAnalyzed.join(', ')}`);
   lines.push(
-    `**Suggestions**: ${report.suggestions.length} (from ${report.totalRawSuggestions} raw, ${report.totalAfterDedup} after dedup)`,
+    `**Suggestions**: ${report.suggestions.length} (from ${report.totalRawSuggestions} raw, ${report.totalAfterDedup} after dedup)`
   );
   lines.push('');
 
@@ -803,9 +788,7 @@ export function formatReportAsMarkdown(report) {
   lines.push('|---|----------|-------|--------|--------|-------|');
 
   for (const s of report.suggestions) {
-    lines.push(
-      `| ${s.id} | ${s.category} | ${s.title} | ${s.impact} | ${s.effort} | ${s.score} |`,
-    );
+    lines.push(`| ${s.id} | ${s.category} | ${s.title} | ${s.impact} | ${s.effort} | ${s.score} |`);
   }
 
   lines.push('');
@@ -815,7 +798,9 @@ export function formatReportAsMarkdown(report) {
   for (const s of report.suggestions) {
     lines.push(`### ${s.id}: ${s.title}`);
     lines.push('');
-    lines.push(`**Category**: ${s.category} | **Impact**: ${s.impact} | **Effort**: ${s.effort} | **Risk if skipped**: ${s.riskIfSkipped} | **Score**: ${s.score}`);
+    lines.push(
+      `**Category**: ${s.category} | **Impact**: ${s.impact} | **Effort**: ${s.effort} | **Risk if skipped**: ${s.riskIfSkipped} | **Score**: ${s.score}`
+    );
     lines.push('');
     lines.push(s.rationale);
     lines.push('');

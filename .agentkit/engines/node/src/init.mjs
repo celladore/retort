@@ -661,7 +661,16 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Phase 7: Write & Sync ---
   clack.outro('Configuration complete — writing files...');
 
-  return await finalizeInit({ agentkitRoot, projectRoot, repoName, project, renderTargets, featurePreset, enabledFeatures, force });
+  return await finalizeInit({
+    agentkitRoot,
+    projectRoot,
+    repoName,
+    project,
+    renderTargets,
+    featurePreset,
+    enabledFeatures,
+    force,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -754,9 +763,7 @@ async function finalizeInit({
             flags: { force: true },
           });
         } catch (importErr) {
-          console.warn(
-            `[agentkit:init] Issue import failed (non-fatal): ${importErr.message}`
-          );
+          console.warn(`[agentkit:init] Issue import failed (non-fatal): ${importErr.message}`);
           console.warn(
             `  You can import later with: pnpm -C .agentkit agentkit:import-issues -- --force`
           );

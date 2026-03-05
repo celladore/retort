@@ -891,13 +891,19 @@ export function validateOverlayFeatures(overlaySettings, features, presets) {
   }
 
   // Reject non-array feature lists early
-  if (overlaySettings.enabledFeatures !== undefined && !Array.isArray(overlaySettings.enabledFeatures)) {
+  if (
+    overlaySettings.enabledFeatures !== undefined &&
+    !Array.isArray(overlaySettings.enabledFeatures)
+  ) {
     errors.push(
       `overlay settings.yaml: "enabledFeatures" must be an array, got ${typeof overlaySettings.enabledFeatures}`
     );
     return { errors, warnings };
   }
-  if (overlaySettings.disabledFeatures !== undefined && !Array.isArray(overlaySettings.disabledFeatures)) {
+  if (
+    overlaySettings.disabledFeatures !== undefined &&
+    !Array.isArray(overlaySettings.disabledFeatures)
+  ) {
     errors.push(
       `overlay settings.yaml: "disabledFeatures" must be an array, got ${typeof overlaySettings.disabledFeatures}`
     );

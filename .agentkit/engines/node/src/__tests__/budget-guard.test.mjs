@@ -15,16 +15,7 @@ import {
 } from '../budget-guard.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_ROOT = resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  '..',
-  '..',
-  '.test-tmp',
-  'budget-guard'
-);
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'budget-guard');
 const TEST_AGENTKIT = resolve(TEST_ROOT, 'agentkit');
 
 function setupTestDirs() {
@@ -58,11 +49,7 @@ function writeActiveSession(overrides = {}) {
   );
 
   // Write active-session-id pointer
-  writeFileSync(
-    resolve(TEST_AGENTKIT, 'logs', 'active-session-id'),
-    sessionId,
-    'utf-8'
-  );
+  writeFileSync(resolve(TEST_AGENTKIT, 'logs', 'active-session-id'), sessionId, 'utf-8');
 
   return session;
 }
@@ -87,10 +74,7 @@ describe('budget-guard', () => {
   // -------------------------------------------------------------------------
   describe('deepMerge', () => {
     it('should merge nested objects', () => {
-      const result = deepMerge(
-        { a: { b: 1, c: 2 }, d: 3 },
-        { a: { b: 10 } }
-      );
+      const result = deepMerge({ a: { b: 1, c: 2 }, d: 3 }, { a: { b: 10 } });
       expect(result).toEqual({ a: { b: 10, c: 2 }, d: 3 });
     });
 

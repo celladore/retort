@@ -11,9 +11,8 @@ import { emitEvent } from './event-emitter.mjs';
 import { createTask } from './task-protocol.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
-  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   console.log('[agentkit:validate] Validating generated outputs...');
   if (userContext) {
     console.log(`[agentkit:validate] Context: ${userContext}`);
@@ -307,12 +306,17 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   }
 
   // ─── Event + Summary ────────────────────────────────────────────────────
-  emitEvent(projectRoot, 'validate_completed', {
-    errors,
-    warnings,
-    passed: errors === 0,
-    ...(userContext ? { userContext } : {}),
-  }, { source: 'validate' });
+  emitEvent(
+    projectRoot,
+    'validate_completed',
+    {
+      errors,
+      warnings,
+      passed: errors === 0,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'validate' }
+  );
 
   // Auto-create task for validation failures
   if (flags['auto-task'] && errors > 0) {

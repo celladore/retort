@@ -16,9 +16,7 @@ import { get } from './project-mapping.mjs';
  * - full:    everything — all of the above plus editor, tabs, badges, lists, buttons
  */
 const TIER_PREFIXES = {
-  minimal: [
-    'titleBar.',
-  ],
+  minimal: ['titleBar.'],
   medium: [
     'titleBar.',
     'activityBar.',
@@ -49,7 +47,7 @@ export function filterByTier(colorCustomizations, tier) {
 
   const filtered = {};
   for (const [key, value] of Object.entries(colorCustomizations)) {
-    if (prefixes.some(prefix => key.startsWith(prefix))) {
+    if (prefixes.some((prefix) => key.startsWith(prefix))) {
       filtered[key] = value;
     }
   }

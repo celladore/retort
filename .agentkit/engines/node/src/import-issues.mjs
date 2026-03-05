@@ -25,9 +25,8 @@ import { calculateScore } from './weighted-scorer.mjs';
  * @param {object} opts.flags
  */
 export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
-  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   if (userContext) {
     console.log(`[agentkit:import-issues] Context: ${userContext}`);
   }
@@ -93,11 +92,11 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
 
   // Dry-run
   if (flags['dry-run']) {
-    console.log(`\n[agentkit:import-issues] DRY RUN — ${normalized.length} items would be imported:\n`);
+    console.log(
+      `\n[agentkit:import-issues] DRY RUN — ${normalized.length} items would be imported:\n`
+    );
     for (const item of normalized) {
-      console.log(
-        `  ${item.priority} | ${item.team} | ${item.title} [${item.externalId}]`
-      );
+      console.log(`  ${item.priority} | ${item.team} | ${item.title} [${item.externalId}]`);
     }
     return { imported: normalized.length, skipped: 0, dryRun: true };
   }
@@ -122,14 +121,19 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
 
   // Emit structured event
-  emitEvent(projectRoot, 'import_issues', {
-    tracker: tracker.toUpperCase(),
-    added,
-    updated,
-    preserved,
-    total: sorted.length,
-    ...(userContext ? { userContext } : {}),
-  }, { source: 'import-issues' });
+  emitEvent(
+    projectRoot,
+    'import_issues',
+    {
+      tracker: tracker.toUpperCase(),
+      added,
+      updated,
+      preserved,
+      total: sorted.length,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'import-issues' }
+  );
 
   console.log(`[agentkit:import-issues] Done.`);
   console.log(`  Added:     ${added}`);

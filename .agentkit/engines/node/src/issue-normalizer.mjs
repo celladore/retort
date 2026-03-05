@@ -15,10 +15,7 @@ const DEFAULT_STATUS = 'open';
  * @returns {string}
  */
 function generateId(source, externalId) {
-  const hash = createHash('sha256')
-    .update(`${source}:${externalId}`)
-    .digest('hex')
-    .slice(0, 8);
+  const hash = createHash('sha256').update(`${source}:${externalId}`).digest('hex').slice(0, 8);
   return `bi-${source}-${hash}`;
 }
 
@@ -167,9 +164,7 @@ export function normalizeIssue(rawIssue, config = {}) {
     source = 'github',
   } = config;
 
-  const labelNames = (rawIssue.labels || []).map((l) =>
-    typeof l === 'string' ? l : l.name || ''
-  );
+  const labelNames = (rawIssue.labels || []).map((l) => (typeof l === 'string' ? l : l.name || ''));
 
   const prefixMap = { github: 'GH', linear: 'LIN', jira: 'JIRA' };
   const prefix = prefixMap[source] || source.toUpperCase();

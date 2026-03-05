@@ -169,10 +169,7 @@ describe('calculateScore', () => {
   });
 
   it('handles zero-sum weights gracefully', () => {
-    const { score, priority } = calculateScore(
-      { severity: 10 },
-      { weights: {} }
-    );
+    const { score, priority } = calculateScore({ severity: 10 }, { weights: {} });
     expect(score).toBe(0);
     expect(priority).toBe('P3');
   });

@@ -7,7 +7,14 @@
  * Designed to prevent runaway agent sessions by acting as a circuit breaker.
  * Integrates as a PreToolUse hook and via CLI checks.
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'fs';
 import { createRequire } from 'module';
 import { resolve } from 'path';
 
@@ -182,9 +189,7 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
     const maxMin = policy.session?.maxDurationMinutes || DEFAULT_POLICY.session.maxDurationMinutes;
 
     if (metrics.durationMinutes >= maxMin) {
-      reasons.push(
-        `Session duration (${metrics.durationMinutes}m) exceeds limit (${maxMin}m)`
-      );
+      reasons.push(`Session duration (${metrics.durationMinutes}m) exceeds limit (${maxMin}m)`);
       status = enforce ? 'deny' : 'warn';
     } else if (metrics.durationMinutes >= maxMin * warnPct) {
       reasons.push(
@@ -199,10 +204,8 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
   const maxCmds = policy.session?.maxCommands || DEFAULT_POLICY.session.maxCommands;
 
   if (metrics.commandCount >= maxCmds) {
-    reasons.push(
-      `Command count (${metrics.commandCount}) exceeds limit (${maxCmds})`
-    );
-    status = enforce ? 'deny' : (status === 'deny' ? 'deny' : 'warn');
+    reasons.push(`Command count (${metrics.commandCount}) exceeds limit (${maxCmds})`);
+    status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
   } else if (metrics.commandCount >= maxCmds * warnPct) {
     reasons.push(
       `Command count (${metrics.commandCount}) at ${Math.round((metrics.commandCount / maxCmds) * 100)}% of limit (${maxCmds})`
@@ -213,10 +216,8 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
   // Files modified check
   const maxFiles = policy.session?.maxFilesModified || DEFAULT_POLICY.session.maxFilesModified;
   if (metrics.filesModified >= maxFiles) {
-    reasons.push(
-      `Files modified (${metrics.filesModified}) exceeds limit (${maxFiles})`
-    );
-    status = enforce ? 'deny' : (status === 'deny' ? 'deny' : 'warn');
+    reasons.push(`Files modified (${metrics.filesModified}) exceeds limit (${maxFiles})`);
+    status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
   } else if (metrics.filesModified >= maxFiles * warnPct) {
     reasons.push(
       `Files modified (${metrics.filesModified}) at ${Math.round((metrics.filesModified / maxFiles) * 100)}% of limit (${maxFiles})`
@@ -270,9 +271,7 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
   // Session count
   const maxSessions = policy.daily?.maxSessions || DEFAULT_POLICY.daily.maxSessions;
   if (metrics.sessionCount >= maxSessions) {
-    reasons.push(
-      `Daily sessions (${metrics.sessionCount}) exceeds limit (${maxSessions})`
-    );
+    reasons.push(`Daily sessions (${metrics.sessionCount}) exceeds limit (${maxSessions})`);
     status = enforce ? 'deny' : 'warn';
   } else if (metrics.sessionCount >= maxSessions * warnPct) {
     reasons.push(
@@ -282,12 +281,11 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
   }
 
   // Total duration
-  const maxDur = policy.daily?.maxTotalDurationMinutes || DEFAULT_POLICY.daily.maxTotalDurationMinutes;
+  const maxDur =
+    policy.daily?.maxTotalDurationMinutes || DEFAULT_POLICY.daily.maxTotalDurationMinutes;
   if (metrics.totalDurationMinutes >= maxDur) {
-    reasons.push(
-      `Daily duration (${metrics.totalDurationMinutes}m) exceeds limit (${maxDur}m)`
-    );
-    status = enforce ? 'deny' : (status === 'deny' ? 'deny' : 'warn');
+    reasons.push(`Daily duration (${metrics.totalDurationMinutes}m) exceeds limit (${maxDur}m)`);
+    status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
   } else if (metrics.totalDurationMinutes >= maxDur * warnPct) {
     reasons.push(
       `Daily duration (${metrics.totalDurationMinutes}m) at ${Math.round((metrics.totalDurationMinutes / maxDur) * 100)}% of limit (${maxDur}m)`
@@ -298,10 +296,8 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
   // Total commands
   const maxCmds = policy.daily?.maxTotalCommands || DEFAULT_POLICY.daily.maxTotalCommands;
   if (metrics.totalCommands >= maxCmds) {
-    reasons.push(
-      `Daily commands (${metrics.totalCommands}) exceeds limit (${maxCmds})`
-    );
-    status = enforce ? 'deny' : (status === 'deny' ? 'deny' : 'warn');
+    reasons.push(`Daily commands (${metrics.totalCommands}) exceeds limit (${maxCmds})`);
+    status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
   } else if (metrics.totalCommands >= maxCmds * warnPct) {
     reasons.push(
       `Daily commands (${metrics.totalCommands}) at ${Math.round((metrics.totalCommands / maxCmds) * 100)}% of limit (${maxCmds})`
@@ -401,7 +397,9 @@ export function runBudgetStatus({ agentkitRoot }) {
   console.log('Session metrics:');
   if (result.metrics.session) {
     const s = result.metrics.session;
-    console.log(`  Duration:       ${s.durationMinutes ?? 0}m / ${policy.session.maxDurationMinutes}m`);
+    console.log(
+      `  Duration:       ${s.durationMinutes ?? 0}m / ${policy.session.maxDurationMinutes}m`
+    );
     console.log(`  Commands:       ${s.commandCount ?? 0} / ${policy.session.maxCommands}`);
     console.log(`  Files modified: ${s.filesModified ?? 0} / ${policy.session.maxFilesModified}`);
   }
@@ -411,7 +409,9 @@ export function runBudgetStatus({ agentkitRoot }) {
   if (result.metrics.daily) {
     const d = result.metrics.daily;
     console.log(`  Sessions:       ${d.sessionCount ?? 0} / ${policy.daily.maxSessions}`);
-    console.log(`  Total duration: ${d.totalDurationMinutes ?? 0}m / ${policy.daily.maxTotalDurationMinutes}m`);
+    console.log(
+      `  Total duration: ${d.totalDurationMinutes ?? 0}m / ${policy.daily.maxTotalDurationMinutes}m`
+    );
     console.log(`  Total commands: ${d.totalCommands ?? 0} / ${policy.daily.maxTotalCommands}`);
   }
 
@@ -472,9 +472,7 @@ function getTodaySessions(agentkitRoot) {
   if (!existsSync(sessDir)) return [];
 
   const todayPrefix = new Date().toISOString().split('T')[0].replace(/-/g, '');
-  const files = readdirSync(sessDir).filter(
-    (f) => f.startsWith('session-') && f.endsWith('.json')
-  );
+  const files = readdirSync(sessDir).filter((f) => f.startsWith('session-') && f.endsWith('.json'));
 
   const sessions = [];
   for (const file of files) {
@@ -483,7 +481,10 @@ function getTodaySessions(agentkitRoot) {
       // Session IDs start with YYYYMMDD — match today's date
       if (session.sessionId && session.sessionId.startsWith(todayPrefix)) {
         sessions.push(session);
-      } else if (session.startTime && session.startTime.startsWith(new Date().toISOString().split('T')[0])) {
+      } else if (
+        session.startTime &&
+        session.startTime.startsWith(new Date().toISOString().split('T')[0])
+      ) {
         sessions.push(session);
       }
     } catch {

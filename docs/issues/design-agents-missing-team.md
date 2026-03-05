@@ -12,12 +12,14 @@ The **Design** agent category contains two agents — `brand-guardian` and `ui-d
 ### Design Agents (agents.yaml lines 317-445)
 
 **brand-guardian** (line 318):
+
 - Role: Brand consistency, design system integrity, visual identity enforcement
 - Focus: `brand.yaml`, `*.css`, `*.scss`, `theme/**`, `design-tokens/**`, `public/brand/**`
 - Accepts: `review`, `investigate`
 - Notifies: `ui-designer`, `frontend`
 
 **ui-designer** (line 407):
+
 - Role: UI/UX design, component design, accessibility review, interaction patterns
 - Focus: `components/**`, `*.tsx`, `*.jsx`, `*.css`, `*.scss`
 - Accepts: `review`, `plan`
@@ -86,10 +88,12 @@ This ensures UI changes get brand/design review before testing.
 ## Alternative: Merge into Frontend Team
 
 **Pros:**
+
 - No new team; simpler routing
 - Design agents work closely with frontend anyway
 
 **Cons:**
+
 - Frontend team scope expands significantly
 - Brand consistency is not just a frontend concern (docs, marketing materials, API responses)
 - Loses the ability to delegate design-only reviews

@@ -10,15 +10,16 @@ Implement cost centre management in the costops analytics repo: ADX/Log Analytic
 
 ## Decision Context
 
-| # | Decision | Chosen | Rationale |
-|---|---|---|---|
-| 3 | Cost centre → resource group cardinality | 1:N | One centre can own multiple resource groups (natural org structure) |
-| 4 | Anomaly detection approach | Custom KQL in ADX (primary) + Log Analytics (fallback) | More control, already have pipeline; but also implement for non-ADX backend since ADX may be too expensive |
-| 5 | Tag enforcement mode | Start `audit`, graduate to `deny` per group | Gradual rollout avoids blocking legitimate work |
+| #   | Decision                                 | Chosen                                                 | Rationale                                                                                                  |
+| --- | ---------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| 3   | Cost centre → resource group cardinality | 1:N                                                    | One centre can own multiple resource groups (natural org structure)                                        |
+| 4   | Anomaly detection approach               | Custom KQL in ADX (primary) + Log Analytics (fallback) | More control, already have pipeline; but also implement for non-ADX backend since ADX may be too expensive |
+| 5   | Tag enforcement mode                     | Start `audit`, graduate to `deny` per group            | Gradual rollout avoids blocking legitimate work                                                            |
 
 ## Important: Dual Backend Support
 
 ADX may be too expensive for some deployments. All cost functions and tables must be implemented for **both** backends:
+
 1. **ADX (Azure Data Explorer)**: Primary, high-performance analytics
 2. **Log Analytics workspace**: Cost-effective alternative using the same KQL syntax
 
@@ -59,20 +60,21 @@ The repo's `docs/adx-cost-assessment.md` documents the decision framework. Both 
 
 Functions (implement for both ADX and Log Analytics):
 
-| Function | Purpose |
-|---|---|
-| `cost_by_centre(_since)` | Aggregate cost per cost centre via resource group mapping |
-| `budget_utilization(_since)` | Spend vs budget per centre, with % utilization |
-| `disabled_groups()` | List resource groups with `is_enabled = false` |
-| `unbudgeted_resources(_since)` | Resources in groups not mapped to any cost centre |
-| `cost_anomaly_detection(_since, _threshold)` | Detect spend spikes exceeding threshold % above rolling average |
-| `cost_trend_by_centre(_since, _grain)` | Time series of cost per centre at specified grain (hourly/daily/weekly) |
+| Function                                     | Purpose                                                                 |
+| -------------------------------------------- | ----------------------------------------------------------------------- |
+| `cost_by_centre(_since)`                     | Aggregate cost per cost centre via resource group mapping               |
+| `budget_utilization(_since)`                 | Spend vs budget per centre, with % utilization                          |
+| `disabled_groups()`                          | List resource groups with `is_enabled = false`                          |
+| `unbudgeted_resources(_since)`               | Resources in groups not mapped to any cost centre                       |
+| `cost_anomaly_detection(_since, _threshold)` | Detect spend spikes exceeding threshold % above rolling average         |
+| `cost_trend_by_centre(_since, _grain)`       | Time series of cost per centre at specified grain (hourly/daily/weekly) |
 
 ### 4.3 Grafana Dashboards (P1)
 
 **File**: `grafana/dashboards/cost-centre-overview.json`
 
 Panels:
+
 - **Budget vs Actual** (bar chart): Per-centre budget utilization
 - **Cost Trend** (time series): Cost per centre over time
 - **Unbudgeted Resources** (table): Resources without cost centre mapping
@@ -87,6 +89,7 @@ Data source: Must work with both ADX and Log Analytics datasources.
 **File**: `scripts/manage_cost_centres.py`
 
 CLI for cost centre CRUD:
+
 ```bash
 python scripts/manage_cost_centres.py list
 python scripts/manage_cost_centres.py show --centre-id CC001
@@ -104,6 +107,7 @@ python scripts/manage_cost_centres.py audit   # tag compliance + budget coverage
 **File**: `infra/modules/azure_policy/`
 
 Policies to add:
+
 - **Tag audit**: Audit resources missing mandatory tags (environment, project, owner, cost_center)
 - **Tag deny** (graduated): Deny creation of resources without cost_center tag in specified resource groups
 - **Tag inheritance**: Auto-inherit tags from resource group to child resources
@@ -113,6 +117,7 @@ Start in `audit` mode for all groups. Graduate to `deny` per resource group as t
 ### 4.6 Anomaly Detection (P2)
 
 Implement in both backends:
+
 - **Rolling average comparison**: Alert when daily cost exceeds 2x the 7-day rolling average
 - **Spike detection**: Alert when hourly cost exceeds 5x the typical hourly cost for that time window
 - **New resource detection**: Alert when a resource group's cost appears for the first time (suggests unplanned provisioning)

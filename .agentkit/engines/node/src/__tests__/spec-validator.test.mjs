@@ -183,7 +183,11 @@ describe('validateCrossReferences()', () => {
       teams: { teams: [] },
       commands: {
         commands: [
-          { name: 'review', type: 'utility', 'allowed-tools': ['Bash(git *)', 'Bash(gh issue create*)', 'Read'] },
+          {
+            name: 'review',
+            type: 'utility',
+            'allowed-tools': ['Bash(git *)', 'Bash(gh issue create*)', 'Read'],
+          },
         ],
       },
       agents: { agents: {} },
@@ -196,9 +200,7 @@ describe('validateCrossReferences()', () => {
     const errors = validateCrossReferences({
       teams: { teams: [] },
       commands: {
-        commands: [
-          { name: 'x', type: 'utility', 'allowed-tools': ['Foo(bar)'] },
-        ],
+        commands: [{ name: 'x', type: 'utility', 'allowed-tools': ['Foo(bar)'] }],
       },
       agents: { agents: {} },
       rules: { rules: [] },
@@ -223,7 +225,9 @@ describe('validateCrossReferences()', () => {
           ],
         },
       },
-      rules: { rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }] }] },
+      rules: {
+        rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }] }],
+      },
     });
     expect(errors.some((e) => e.includes('must be a string'))).toBe(true);
   });
@@ -244,7 +248,9 @@ describe('validateCrossReferences()', () => {
           ],
         },
       },
-      rules: { rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }] }] },
+      rules: {
+        rules: [{ domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }] }],
+      },
     });
     expect(errors.some((e) => e.includes('unknown rule id "gw-fake-rule"'))).toBe(true);
     expect(errors.some((e) => e.includes('gw-conventional-commits'))).toBe(false);
@@ -256,9 +262,7 @@ describe('validateCrossReferences()', () => {
       commands: { commands: [] },
       agents: {
         agents: {
-          engineering: [
-            { id: 'be', 'domain-rules': 'not an array' },
-          ],
+          engineering: [{ id: 'be', 'domain-rules': 'not an array' }],
         },
       },
       rules: { rules: [] },
@@ -290,9 +294,7 @@ describe('validateCrossReferences()', () => {
       commands: { commands: [] },
       agents: {
         agents: {
-          engineering: [
-            { id: 'be', 'domain-rules': [] },
-          ],
+          engineering: [{ id: 'be', 'domain-rules': [] }],
         },
       },
       rules: { rules: [] },
@@ -332,9 +334,7 @@ describe('validateCrossReferences()', () => {
           engineering: [
             {
               id: 'be',
-              'domain-rules': [
-                'Follow rules [gw-valid] and also [gw-missing] — two groups',
-              ],
+              'domain-rules': ['Follow rules [gw-valid] and also [gw-missing] — two groups'],
             },
           ],
         },
@@ -383,7 +383,10 @@ describe('validateCrossReferences()', () => {
       },
       rules: {
         rules: [
-          { domain: 'git-workflow', conventions: [{ id: 'gw-conventional-commits' }, { id: 'gw-atomic-commits' }] },
+          {
+            domain: 'git-workflow',
+            conventions: [{ id: 'gw-conventional-commits' }, { id: 'gw-atomic-commits' }],
+          },
           { domain: 'security', conventions: [{ id: 'sec-no-secrets' }] },
         ],
       },
@@ -948,8 +951,6 @@ describe('validateMappingCoverage', () => {
   });
 });
 
-
-
 // ---------------------------------------------------------------------------
 // VALID_PHASES export
 // ---------------------------------------------------------------------------
@@ -968,9 +969,35 @@ describe('convention type and phase validation', () => {
     const specDir = resolve(root, 'spec');
     mkdirSync(specDir, { recursive: true });
 
-    const teams = { teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }], techStacks: [{ name: 'node', buildCommand: 'pnpm build', testCommand: 'pnpm test', detect: ['package.json'] }] };
-    const agents = { agents: { engineering: [{ id: 'backend', name: 'Backend Engineer', role: 'role', focus: ['src/**'], responsibilities: ['build'] }] } };
-    const rules = { rules: [{ domain: 'test', description: 'Test rules', 'applies-to': ['**/*.ts'], conventions }] };
+    const teams = {
+      teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }],
+      techStacks: [
+        {
+          name: 'node',
+          buildCommand: 'pnpm build',
+          testCommand: 'pnpm test',
+          detect: ['package.json'],
+        },
+      ],
+    };
+    const agents = {
+      agents: {
+        engineering: [
+          {
+            id: 'backend',
+            name: 'Backend Engineer',
+            role: 'role',
+            focus: ['src/**'],
+            responsibilities: ['build'],
+          },
+        ],
+      },
+    };
+    const rules = {
+      rules: [
+        { domain: 'test', description: 'Test rules', 'applies-to': ['**/*.ts'], conventions },
+      ],
+    };
     const settings = { permissions: { allow: [], deny: [] }, hooks: {} };
     const aliases = { aliases: {} };
     const docs = { categories: [] };
@@ -988,7 +1015,9 @@ describe('convention type and phase validation', () => {
   }
 
   it('accepts valid type: advisory', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', type: 'advisory' }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'warning', type: 'advisory' },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors).toEqual([]);
@@ -998,7 +1027,9 @@ describe('convention type and phase validation', () => {
   });
 
   it('accepts valid type: enforcement', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'error', type: 'enforcement' }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'error', type: 'enforcement' },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors).toEqual([]);
@@ -1008,7 +1039,9 @@ describe('convention type and phase validation', () => {
   });
 
   it('rejects invalid type value', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'error', type: 'mandatory' }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'error', type: 'mandatory' },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors.some((e) => e.includes('advisory, enforcement'))).toBe(true);
@@ -1028,7 +1061,9 @@ describe('convention type and phase validation', () => {
   });
 
   it('accepts valid single phase', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: 'validation' }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'warning', phase: 'validation' },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors).toEqual([]);
@@ -1038,7 +1073,9 @@ describe('convention type and phase validation', () => {
   });
 
   it('accepts valid phase array', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: ['planning', 'implementation'] }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'warning', phase: ['planning', 'implementation'] },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors).toEqual([]);
@@ -1048,7 +1085,9 @@ describe('convention type and phase validation', () => {
   });
 
   it('rejects invalid phase string', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: 'coding' }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'warning', phase: 'coding' },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors.some((e) => e.includes('phase') && e.includes('coding'))).toBe(true);
@@ -1058,7 +1097,9 @@ describe('convention type and phase validation', () => {
   });
 
   it('rejects invalid phase in array', () => {
-    const root = makeRulesRoot([{ id: 'r1', rule: 'A rule', severity: 'warning', phase: ['validation', 'deploy'] }]);
+    const root = makeRulesRoot([
+      { id: 'r1', rule: 'A rule', severity: 'warning', phase: ['validation', 'deploy'] },
+    ]);
     try {
       const result = validateSpec(root);
       expect(result.errors.some((e) => e.includes('phase') && e.includes('deploy'))).toBe(true);

@@ -22,6 +22,7 @@ See SPEC-PROC-004a for the full design principle statement. Same rule: **enforce
 #### Functional Requirements
 
 **FR-039.1**: Each team-to-team relationship SHALL be classified as one of:
+
 - **Collaboration**: Work together closely, shared context (temporary)
 - **X-as-a-Service**: One team provides a capability, other teams consume it (stable)
 - **Facilitating**: One team helps another adopt a new practice (temporary)
@@ -31,35 +32,37 @@ See SPEC-PROC-004a for the full design principle statement. Same rule: **enforce
 #### Technical Requirements
 
 **TR-039.1 — teams.yaml Config**:
+
 ```yaml
 team-interactions:
   - from: backend
     to: frontend
     mode: collaboration
-    notes: "Shared API contract design"
+    notes: 'Shared API contract design'
 
   - from: testing
     to: all
     mode: x-as-a-service
-    notes: "Testing provides test scaffolding and review"
+    notes: 'Testing provides test scaffolding and review'
 
   - from: quality
     to: all
     mode: facilitating
-    notes: "Quality helps teams adopt new practices"
+    notes: 'Quality helps teams adopt new practices'
 
   - from: security
     to: all
     mode: x-as-a-service
-    notes: "Security reviews on request"
+    notes: 'Security reviews on request'
 
   - from: data
     to: backend
     mode: collaboration
-    notes: "Schema design requires joint work"
+    notes: 'Schema design requires joint work'
 ```
 
 **TR-039.2 — Orchestrator Behavior**:
+
 - **Collaboration**: When assigning cross-team work, create joint tasks visible to both teams. Use pair mode (F-015) when appropriate.
 - **X-as-a-Service**: Create a request task for the service team. Consuming team waits (or works on other items).
 - **Facilitating**: Don't delegate the work TO the facilitating team. Delegate the work to the target team with facilitating team as a resource.
@@ -75,6 +78,7 @@ team-interactions:
 #### Technical Requirements
 
 **TR-040.1 — teams.yaml Extension**:
+
 ```yaml
 teams:
   - id: backend
@@ -91,6 +95,7 @@ teams:
 ```
 
 **TR-040.2 — SLE Monitoring**: `scripts/sprint-metrics.mjs` tracks SLE compliance:
+
 ```
 For each completed item:
   Check if completion time met the SLE for its priority
@@ -110,6 +115,7 @@ For each completed item:
 #### Technical Requirements
 
 **TR-041.1 — Heuristic**: Extend `scripts/validate-dor.mjs`:
+
 ```
 For each item with scope-identified files:
   estimated_context = count(files) * avg_file_size
@@ -118,12 +124,13 @@ For each item with scope-identified files:
 ```
 
 **TR-041.2 — teams.yaml Config**:
+
 ```yaml
 process:
   cognitive-load:
     max-files-per-task: 50
     max-lines-per-task: 10000
-    action: warn   # warn or block
+    action: warn # warn or block
 ```
 
 ---
@@ -139,6 +146,7 @@ process:
 #### Technical Requirements
 
 **TR-042.1 — teams.yaml Config**:
+
 ```yaml
 chapters:
   - id: code-review
@@ -169,20 +177,21 @@ chapters:
 #### Technical Requirements
 
 **TR-043.1 — teams.yaml Config**:
+
 ```yaml
 guilds:
   - id: performance
-    focus: "Runtime performance, bundle size, query optimization"
+    focus: 'Runtime performance, bundle size, query optimization'
     champion: backend
     members: [backend, frontend, data, infra]
 
   - id: security-hardening
-    focus: "Proactive security beyond compliance"
+    focus: 'Proactive security beyond compliance'
     champion: security
     members: [security, backend, devops, infra]
 
   - id: developer-experience
-    focus: "Build speed, tooling, debugging, documentation quality"
+    focus: 'Build speed, tooling, debugging, documentation quality'
     champion: quality
     members: [quality, devops, docs]
 ```
@@ -200,19 +209,20 @@ guilds:
 #### Technical Requirements
 
 **TR-044.1 — teams.yaml Config**:
+
 ```yaml
 clusters:
   - id: delivery
     teams: [backend, frontend, data]
-    focus: "Feature delivery pipeline"
+    focus: 'Feature delivery pipeline'
 
   - id: platform
     teams: [infra, devops, security]
-    focus: "Platform, infrastructure, and security"
+    focus: 'Platform, infrastructure, and security'
 
   - id: enablement
     teams: [testing, quality, docs, product]
-    focus: "Quality, process, and stakeholder alignment"
+    focus: 'Quality, process, and stakeholder alignment'
 ```
 
 **TR-044.2 — Orchestrator Behavior**: When assessing project state, report at cluster level first: "Delivery: 5/6 WIP, 2 blocked. Platform: 2/5 WIP, 0 blocked. Enablement: 3/7 WIP, 0 blocked." Drill into team-level only when needed.
@@ -230,6 +240,7 @@ clusters:
 #### Technical Requirements
 
 **TR-045.1 — Task Force Protocol**:
+
 ```json
 // .claude/state/task-forces.json
 {
@@ -266,11 +277,13 @@ clusters:
 #### Technical Requirements
 
 **TR-046.1 — Backlog Format**:
+
 ```markdown
 ## Active Sprint
 
 **Objective**: Establish reliable CI/CD that the team trusts
 **Key Results**:
+
 - KR1: CI runs on every PR with < 10 min cycle time [0.0-1.0]
 - KR2: Zero manual deployment steps for staging [0.0-1.0]
 - KR3: Test coverage reaches 80% on core modules [0.0-1.0]
@@ -293,11 +306,12 @@ clusters:
 #### Technical Requirements
 
 **TR-047.1 — Backlog Metadata**: Add `Hill` column or field:
+
 ```markdown
-| Task | Hill | Notes |
-|------|------|-------|
-| API routes | Downhill (70%) | Implementation underway |
-| Auth design | Uphill (30%) | Still investigating approach |
+| Task        | Hill           | Notes                        |
+| ----------- | -------------- | ---------------------------- |
+| API routes  | Downhill (70%) | Implementation underway      |
+| Auth design | Uphill (30%)   | Still investigating approach |
 ```
 
 **TR-047.2 — Stuck Detection**: `scripts/sprint-metrics.mjs` checks: if an item has been "Uphill" for > 1 session, flag: "STUCK UPHILL: {item}. Consider spike or swarm."
@@ -319,11 +333,13 @@ Hill status is a field on the backlog item (one word + percentage). Not carried 
 #### Technical Requirements
 
 **TR-048.1 — Pipeline Stages**: Derived from state transitions (F-022):
+
 ```
 Backlog → Ready → In Progress → In Review → Done → Shipped
 ```
 
 **TR-048.2 — Waste Analysis**: `scripts/sprint-metrics.mjs` calculates time in each stage:
+
 ```
 For each completed item:
   backlog_time = ready_timestamp - created_timestamp
@@ -335,14 +351,16 @@ Waste = stages where items spend time but no value is added (waiting)
 ```
 
 **TR-048.3 — Sprint Metrics Addition**:
+
 ```markdown
 ## Value Stream
-| Stage | Avg Time | % of Total | Waste? |
-|-------|----------|-----------|--------|
-| Waiting in Ready | 0.5 sessions | 15% | Yes — reduce by pre-assigning |
-| In Progress | 1.5 sessions | 45% | No — value-add |
-| In Review | 1.0 sessions | 30% | Partial — reduce review queue |
-| Post-review wait | 0.3 sessions | 10% | Yes — auto-merge when approved |
+
+| Stage            | Avg Time     | % of Total | Waste?                         |
+| ---------------- | ------------ | ---------- | ------------------------------ |
+| Waiting in Ready | 0.5 sessions | 15%        | Yes — reduce by pre-assigning  |
+| In Progress      | 1.5 sessions | 45%        | No — value-add                 |
+| In Review        | 1.0 sessions | 30%        | Partial — reduce review queue  |
+| Post-review wait | 0.3 sessions | 10%        | Yes — auto-merge when approved |
 ```
 
 ---
@@ -358,6 +376,7 @@ Waste = stages where items spend time but no value is added (waiting)
 #### Technical Requirements
 
 **TR-049.1 — teams.yaml Config**:
+
 ```yaml
 process:
   cooldown:
@@ -383,8 +402,10 @@ process:
 #### Technical Requirements
 
 **TR-050.1 — DOR Update**: Add to DOR.md:
+
 ```markdown
 ## scope-shape
+
 - [ ] `not-over-specified`: Task does not prescribe file names, function signatures, or specific libraries unless there is a hard constraint
 ```
 
@@ -407,6 +428,7 @@ process:
 #### Technical Requirements
 
 **TR-051.1 — Template**: `docs/history/lessons-learned/TEMPLATE-aar.md`:
+
 ```markdown
 # After-Action Review — [Incident Title]
 
@@ -416,15 +438,19 @@ process:
 **Teams involved**: [list]
 
 ## What Was Planned
+
 [What we expected to happen]
 
 ## What Actually Happened
+
 [What happened, timeline]
 
 ## Why (Root Cause — 5 Whys)
+
 1. → 2. → 3. → 4. → 5. → [root cause]
 
 ## What We'll Do Differently
+
 - [ ] [Systemic fix — backlog item link]
 - [ ] [Process change]
 - [ ] [Poka-yoke addition]
@@ -443,13 +469,21 @@ process:
 #### Technical Requirements
 
 **TR-052.1 — Events Log**: Each improvement logged as:
+
 ```json
-{"type": "kaizen", "description": "Added lint rule for unused imports", "team": "devops", "sprint": 2}
+{
+  "type": "kaizen",
+  "description": "Added lint rule for unused imports",
+  "team": "devops",
+  "sprint": 2
+}
 ```
 
 **TR-052.2 — Sprint Metrics Addition**:
+
 ```markdown
 ## Kaizen
+
 - Improvements this sprint: 4
 - Rolling trend: 2 → 3 → 4 (healthy: increasing)
 ```
@@ -467,11 +501,12 @@ process:
 #### Technical Requirements
 
 **TR-053.1 — Rule Addition**: Add to `.agentkit/spec/rules.yaml` (NOT to each agent individually):
+
 ```yaml
 rules:
   - id: ac-verify-state
     scope: all-agents
-    rule: "Before modifying any file, read its current contents. Before assuming a test passes, run it. Before assuming a dependency exists, check package.json. Never act on stale information or assumptions."
+    rule: 'Before modifying any file, read its current contents. Before assuming a test passes, run it. Before assuming a dependency exists, check package.json. Never act on stale information or assumptions.'
     type: advisory
     phase: implementation
 ```
@@ -479,6 +514,7 @@ rules:
 This rule already partially exists as `ac-verify-before-change`. Strengthen it.
 
 **TR-053.2 — Compliance Tracking**: `scripts/sprint-metrics.mjs` tracks:
+
 ```
 verify_before_edit_rate = edits_with_prior_read / total_edits
 Target: > 95%
@@ -501,13 +537,14 @@ One rule in rules.yaml, applied to all agents. Not repeated per agent. The rule 
 #### Technical Requirements
 
 **TR-054.1 — Experiment Log**: `docs/06_engineering/experiments.md`:
+
 ```markdown
 # Process Experiments
 
-| ID | Hypothesis | Duration | Success Criteria | Status | Result |
-|----|-----------|----------|-----------------|--------|--------|
-| EXP-001 | WIP limit of 2 reduces cycle time | 2 sprints | Cycle time decreases 20% | Active | — |
-| EXP-002 | Pair programming reduces P0 defects | 3 sprints | P0 defect rate decreases 50% | Active | — |
+| ID      | Hypothesis                          | Duration  | Success Criteria             | Status | Result |
+| ------- | ----------------------------------- | --------- | ---------------------------- | ------ | ------ |
+| EXP-001 | WIP limit of 2 reduces cycle time   | 2 sprints | Cycle time decreases 20%     | Active | —      |
+| EXP-002 | Pair programming reduces P0 defects | 3 sprints | P0 defect rate decreases 50% | Active | —      |
 ```
 
 **TR-054.2 — Review Cadence**: At every 2nd sprint retro, review active experiments. Score and decide: keep, modify, or revert.
@@ -525,8 +562,10 @@ One rule in rules.yaml, applied to all agents. Not repeated per agent. The rule 
 #### Technical Requirements
 
 **TR-055.1 — DOR Extension**: Add to DOR.md:
+
 ```markdown
 ## traceability
+
 - [ ] `user-need`: For features, links to a user story, PRD, or explicit user justification
 ```
 
@@ -549,11 +588,12 @@ One rule in rules.yaml, applied to all agents. Not repeated per agent. The rule 
 #### Technical Requirements
 
 **TR-056.1 — teams.yaml Config**:
+
 ```yaml
 process:
   session-budget:
-    warning-threshold: 80%     # Warn at 80% of budget consumed
-    action-at-limit: handoff   # Auto-trigger /handoff at budget
+    warning-threshold: 80% # Warn at 80% of budget consumed
+    action-at-limit: handoff # Auto-trigger /handoff at budget
 ```
 
 **TR-056.2 — Budget is external**: Token tracking is a platform concern, not something we implement in scripts. This spec defines the desired behavior for when the platform signals budget consumption. The orchestrator checks budget status and adjusts: "Budget at 80%. Prioritize completing in-progress items over starting new work."
@@ -569,12 +609,14 @@ process:
 #### Technical Requirements
 
 **TR-057.1 — Already spec'd**: Sprint buffer is defined in SPEC-PROC-001 (TR-005.3):
+
 ```yaml
 process:
   sprint-buffer-percent: 15
 ```
 
 **TR-057.2 — Enforcement**: `scripts/validate-sprint.mjs` checks:
+
 ```
 committed_points <= capacity * (1 - buffer_percent / 100)
 If violated: warn "Sprint over-committed: {committed} pts > {max_commitment} pts (buffer: {buffer}%)"
@@ -591,11 +633,12 @@ If violated: warn "Sprint over-committed: {committed} pts > {max_commitment} pts
 #### Technical Requirements
 
 **TR-058.1 — Rule Addition**: Add to `.agentkit/spec/rules.yaml`:
+
 ```yaml
 rules:
   - id: ac-just-in-time
     scope: all-agents
-    rule: "Do not create scaffolding, boilerplate, templates, or documentation for work not yet in the active sprint. Produce only what the current task requires."
+    rule: 'Do not create scaffolding, boilerplate, templates, or documentation for work not yet in the active sprint. Produce only what the current task requires.'
     type: agent-conduct
     phase: implementation
 ```

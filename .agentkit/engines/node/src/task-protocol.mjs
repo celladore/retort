@@ -43,9 +43,18 @@ export const TASK_PRIORITIES = ['P0', 'P1', 'P2', 'P3', 'P4'];
 
 /** Valid area labels — matches issue template and spec-validator issueArea. */
 export const TASK_AREAS = [
-  'backend', 'frontend', 'data', 'infra', 'devops',
-  'testing', 'security', 'docs', 'product', 'quality',
-  'cli', 'sync-engine',
+  'backend',
+  'frontend',
+  'data',
+  'infra',
+  'devops',
+  'testing',
+  'security',
+  'docs',
+  'product',
+  'quality',
+  'cli',
+  'sync-engine',
 ];
 
 /** Valid severity levels — matches issue template and spec-validator issueSeverity. */

@@ -14,16 +14,16 @@ code-review activities in **agentkit-forge**.
 
 A work item is complete only when **all** of the following pass:
 
-| Gate                    | Check                                                                                            | Tool                                                                                                                |
-| ----------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| Lint                    | Zero new lint errors                                                                             | Project linter                                                                                                      |
-| Type safety             | No type errors                                                                                   | tsc / mypy / cargo check                                                                                            |
-| Unit tests pass         | All tests green                                                                                  | vitest                      |
-| Coverage threshold      | ≥ 80% | Coverage tool                                                                                                       |
-| Integration tests pass  | All green                                                                                        | vitest |
-| No secrets in diff      | Clean                                                                                            | git-secrets / semgrep                                                                                               |
-| PR description complete | Template filled                                                                                  | Manual                                                                                                              |
-| Code review approved    | ≥ 1 approval                                                                                     | GitHub                                                                                                              |
+| Gate                    | Check                | Tool                     |
+| ----------------------- | -------------------- | ------------------------ |
+| Lint                    | Zero new lint errors | Project linter           |
+| Type safety             | No type errors       | tsc / mypy / cargo check |
+| Unit tests pass         | All tests green      | vitest                   |
+| Coverage threshold      | ≥ 80%                | Coverage tool            |
+| Integration tests pass  | All green            | vitest                   |
+| No secrets in diff      | Clean                | git-secrets / semgrep    |
+| PR description complete | Template filled      | Manual                   |
+| Code review approved    | ≥ 1 approval         | GitHub                   |
 
 ## Code Review Checklist
 

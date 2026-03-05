@@ -24,14 +24,14 @@ filesystem artifacts, and update `project.yaml` when a confident match is found.
 
 ### 1.3 Detection Signals (Priority Order)
 
-| Signal | Files / Patterns | Detected Convention |
-|---|---|---|
-| commitlint config | `.commitlintrc`, `.commitlintrc.{json,yaml,yml,js,cjs,mjs,ts}`, `commitlint.config.{js,cjs,mjs,ts}` | `conventional` |
-| semantic-release config | `.releaserc`, `.releaserc.{json,yaml,yml,js,cjs}`, `release.config.{js,cjs,mjs,ts}` | `semantic` |
-| `package.json` keys | `"commitlint"` key, `"release"` key, `"standard-version"` key | `conventional` / `semantic` |
-| Git log heuristic | Last 20 commit messages match `^(feat|fix|chore|docs|refactor|test|ci|perf|build|style|revert)(\(.+\))?!?:` | `conventional` |
-| Git log heuristic | Last 20 commit messages match `^(major|minor|patch):` | `semantic` |
-| No match | — | Leave existing value unchanged |
+| Signal                  | Files / Patterns                                                                                    | Detected Convention            |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------ | -------- | ---------- | -------- | ---- | --- | ---- | ----- | ----- | -------------------- | -------------- |
+| commitlint config       | `.commitlintrc`, `.commitlintrc.{json,yaml,yml,js,cjs,mjs,ts}`, `commitlint.config.{js,cjs,mjs,ts}` | `conventional`                 |
+| semantic-release config | `.releaserc`, `.releaserc.{json,yaml,yml,js,cjs}`, `release.config.{js,cjs,mjs,ts}`                 | `semantic`                     |
+| `package.json` keys     | `"commitlint"` key, `"release"` key, `"standard-version"` key                                       | `conventional` / `semantic`    |
+| Git log heuristic       | Last 20 commit messages match `^(feat                                                               | fix                            | chore    | docs       | refactor | test | ci  | perf | build | style | revert)(\(.+\))?!?:` | `conventional` |
+| Git log heuristic       | Last 20 commit messages match `^(major                                                              | minor                          | patch):` | `semantic` |
+| No match                | —                                                                                                   | Leave existing value unchanged |
 
 ### 1.4 User Flow
 
@@ -64,11 +64,11 @@ filesystem artifacts, and update `project.yaml` when a confident match is found.
 
 ### 2.1 Affected Files
 
-| File | Change |
-|---|---|
-| `.agentkit/engines/node/src/discover.mjs` | Add `detectCommitConvention()` detector |
-| `.agentkit/engines/node/src/__tests__/discover.test.mjs` | Unit tests |
-| `.agentkit/spec/project.yaml` | Updated by discover (runtime) |
+| File                                                     | Change                                  |
+| -------------------------------------------------------- | --------------------------------------- |
+| `.agentkit/engines/node/src/discover.mjs`                | Add `detectCommitConvention()` detector |
+| `.agentkit/engines/node/src/__tests__/discover.test.mjs` | Unit tests                              |
+| `.agentkit/spec/project.yaml`                            | Updated by discover (runtime)           |
 
 ### 2.2 Implementation
 
@@ -78,20 +78,34 @@ filesystem artifacts, and update `project.yaml` when a confident match is found.
 // discover.mjs — new export
 const COMMITLINT_FILES = [
   '.commitlintrc',
-  '.commitlintrc.json', '.commitlintrc.yaml', '.commitlintrc.yml',
-  '.commitlintrc.js', '.commitlintrc.cjs', '.commitlintrc.mjs', '.commitlintrc.ts',
-  'commitlint.config.js', 'commitlint.config.cjs', 'commitlint.config.mjs',
+  '.commitlintrc.json',
+  '.commitlintrc.yaml',
+  '.commitlintrc.yml',
+  '.commitlintrc.js',
+  '.commitlintrc.cjs',
+  '.commitlintrc.mjs',
+  '.commitlintrc.ts',
+  'commitlint.config.js',
+  'commitlint.config.cjs',
+  'commitlint.config.mjs',
   'commitlint.config.ts',
 ];
 
 const SEMANTIC_RELEASE_FILES = [
-  '.releaserc', '.releaserc.json', '.releaserc.yaml', '.releaserc.yml',
-  '.releaserc.js', '.releaserc.cjs',
-  'release.config.js', 'release.config.cjs', 'release.config.mjs',
+  '.releaserc',
+  '.releaserc.json',
+  '.releaserc.yaml',
+  '.releaserc.yml',
+  '.releaserc.js',
+  '.releaserc.cjs',
+  'release.config.js',
+  'release.config.cjs',
+  'release.config.mjs',
   'release.config.ts',
 ];
 
-const CONVENTIONAL_RE = /^(feat|fix|chore|docs|refactor|test|ci|perf|build|style|revert)(\(.+\))?!?:/;
+const CONVENTIONAL_RE =
+  /^(feat|fix|chore|docs|refactor|test|ci|perf|build|style|revert)(\(.+\))?!?:/;
 const SEMANTIC_RE = /^(major|minor|patch):/;
 
 export async function detectCommitConvention(projectRoot) {
@@ -107,7 +121,8 @@ export async function detectCommitConvention(projectRoot) {
   const pkgPath = join(projectRoot, 'package.json');
   if (existsSync(pkgPath)) {
     const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
-    if (pkg.commitlint || pkg['standard-version']) return { convention: 'conventional', source: 'package.json' };
+    if (pkg.commitlint || pkg['standard-version'])
+      return { convention: 'conventional', source: 'package.json' };
     if (pkg.release) return { convention: 'semantic', source: 'package.json' };
   }
 
@@ -133,12 +148,15 @@ import { execSync } from 'child_process';
 
 function gitLogHeuristic(projectRoot) {
   try {
-    const log = execSync('git log --oneline -20 --format=%s', { cwd: projectRoot, encoding: 'utf8' });
+    const log = execSync('git log --oneline -20 --format=%s', {
+      cwd: projectRoot,
+      encoding: 'utf8',
+    });
     const lines = log.trim().split('\n').filter(Boolean);
     if (lines.length < 5) return null;
 
-    const conventionalCount = lines.filter(l => CONVENTIONAL_RE.test(l)).length;
-    const semanticCount = lines.filter(l => SEMANTIC_RE.test(l)).length;
+    const conventionalCount = lines.filter((l) => CONVENTIONAL_RE.test(l)).length;
+    const semanticCount = lines.filter((l) => SEMANTIC_RE.test(l)).length;
     const threshold = lines.length * 0.6;
 
     if (conventionalCount >= threshold) return { convention: 'conventional', source: 'git-log' };
@@ -152,14 +170,14 @@ function gitLogHeuristic(projectRoot) {
 
 ### 2.3 Testing Strategy
 
-| Test Case | Fixture | Expected |
-|---|---|---|
-| `.commitlintrc.json` exists | Temp dir with file | `{ convention: 'conventional', source: '.commitlintrc.json' }` |
-| `.releaserc` exists | Temp dir with file | `{ convention: 'semantic', source: '.releaserc' }` |
-| `package.json` has `commitlint` key | Temp dir with pkg | `{ convention: 'conventional', source: 'package.json' }` |
-| No signals | Empty temp dir | `null` |
-| Config + git log conflict | Both present | Config wins |
-| Explicit `none` | project.yaml set | Value preserved, log emitted |
+| Test Case                           | Fixture            | Expected                                                       |
+| ----------------------------------- | ------------------ | -------------------------------------------------------------- |
+| `.commitlintrc.json` exists         | Temp dir with file | `{ convention: 'conventional', source: '.commitlintrc.json' }` |
+| `.releaserc` exists                 | Temp dir with file | `{ convention: 'semantic', source: '.releaserc' }`             |
+| `package.json` has `commitlint` key | Temp dir with pkg  | `{ convention: 'conventional', source: 'package.json' }`       |
+| No signals                          | Empty temp dir     | `null`                                                         |
+| Config + git log conflict           | Both present       | Config wins                                                    |
+| Explicit `none`                     | project.yaml set   | Value preserved, log emitted                                   |
 
 ### 2.4 Rollout
 

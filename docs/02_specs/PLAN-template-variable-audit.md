@@ -3,6 +3,7 @@
 ## 1. Current State Summary
 
 ### How template variables flow
+
 ```
 spec/*.yaml → project-mapping.mjs → synchronize.mjs (vars) → renderTemplate() → generated output
                                          ↑
@@ -11,6 +12,7 @@ spec/*.yaml → project-mapping.mjs → synchronize.mjs (vars) → renderTemplat
 ```
 
 ### Key behaviors
+
 - **Unresolved placeholders are left intact** — `{{unknown}}` stays as literal text in output
 - **`{{var|default}}` syntax is supported** — pipe defaults are applied at render time; code-level defaults (`??`, `||`) or `{{#if}}` guards are still recommended where appropriate
 - **DEBUG-only warnings** (on `dev`) — unresolved placeholders only warn when `DEBUG=1` is set
@@ -22,54 +24,57 @@ spec/*.yaml → project-mapping.mjs → synchronize.mjs (vars) → renderTemplat
 
 ### A. Variables used in templates but NOT wired (would render as unresolved)
 
-| Variable | Used in | Status | Fix |
-|----------|---------|--------|-----|
-| ~~`teamAccepts`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
-| ~~`teamHandoffChain`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
-| ~~`maxTaskTurns`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
-| ~~`maxHandoffChainDepth`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
-| ~~`maxStagnationTurns`~~ | team-TEMPLATE.md | **Fixed** in this branch | ✅ |
-| `containerRuntime` | copilot-instructions.md | **Fixed** in this branch | ✅ |
-| `drTestSchedule` | some platform templates | **Fixed** in this branch | ✅ |
-| `loggingRetentionDays` | some platform templates | **Fixed** in this branch | ✅ |
-| `isSyncBacklog` | sync-backlog template | **Not wired** | Needs mapping |
-| `placeholder` / `placeholders` | init templates | Context-specific | May be intentional |
+| Variable                       | Used in                 | Status                   | Fix                |
+| ------------------------------ | ----------------------- | ------------------------ | ------------------ |
+| ~~`teamAccepts`~~              | team-TEMPLATE.md        | **Fixed** in this branch | ✅                 |
+| ~~`teamHandoffChain`~~         | team-TEMPLATE.md        | **Fixed** in this branch | ✅                 |
+| ~~`maxTaskTurns`~~             | team-TEMPLATE.md        | **Fixed** in this branch | ✅                 |
+| ~~`maxHandoffChainDepth`~~     | team-TEMPLATE.md        | **Fixed** in this branch | ✅                 |
+| ~~`maxStagnationTurns`~~       | team-TEMPLATE.md        | **Fixed** in this branch | ✅                 |
+| `containerRuntime`             | copilot-instructions.md | **Fixed** in this branch | ✅                 |
+| `drTestSchedule`               | some platform templates | **Fixed** in this branch | ✅                 |
+| `loggingRetentionDays`         | some platform templates | **Fixed** in this branch | ✅                 |
+| `isSyncBacklog`                | sync-backlog template   | **Not wired**            | Needs mapping      |
+| `placeholder` / `placeholders` | init templates          | Context-specific         | May be intentional |
 
 ### B. Spec fields that exist in YAML but are never passed as template variables
 
-| Spec field (teams.yaml) | Template var | Status |
-|--------------------------|-------------|--------|
-| `team.accepts` | `teamAccepts` | **Fixed** in this branch |
-| `team.handoff-chain` | `teamHandoffChain` | **Fixed** in this branch |
-| `team.max-task-turns` | `maxTaskTurns` | **Fixed** in this branch (new field) |
+| Spec field (teams.yaml)        | Template var           | Status                               |
+| ------------------------------ | ---------------------- | ------------------------------------ |
+| `team.accepts`                 | `teamAccepts`          | **Fixed** in this branch             |
+| `team.handoff-chain`           | `teamHandoffChain`     | **Fixed** in this branch             |
+| `team.max-task-turns`          | `maxTaskTurns`         | **Fixed** in this branch (new field) |
 | `team.max-handoff-chain-depth` | `maxHandoffChainDepth` | **Fixed** in this branch (new field) |
-| `team.max-stagnation-turns` | `maxStagnationTurns` | **Fixed** in this branch (new field) |
+| `team.max-stagnation-turns`    | `maxStagnationTurns`   | **Fixed** in this branch (new field) |
 
 ### C. Variables with missing or weak defaults (used without `{{#if}}` guard)
 
 These variables are used **directly** (no conditional guard) and will render as literal `{{varName}}` if the value is missing:
 
-| Variable | Usage count | Has default in sync? | Risk |
-|----------|------------|---------------------|------|
-| `repoName` | 126 | ✅ fallback to overlay/dir name | Low |
-| `version` | 88 | ✅ from package.json | Low |
-| `syncDate` | 74 | ✅ `new Date().toISOString()` | Low |
-| `lastModel` | 74 | ✅ env var or `'sync-engine'` | Low |
-| `lastAgent` | 74 | ✅ env var or `'agentkit-forge'` | Low |
-| `defaultBranch` | 26 | ✅ `'main'` | Low |
-| `testingCoverage` | 19 | ❌ No default, used bare | **Medium** — will render `{{testingCoverage}}` |
-| `commitConvention` | 7 | ❌ comes from project.yaml only | **Medium** |
-| `loggingFramework` | Used bare in sections guarded by `{{#if hasLogging}}` | Indirect guard | Low |
-| `errorStrategy` | Used bare in sections guarded by `{{#if hasErrorHandling}}` | Indirect guard | Low |
-| `authProvider` | Used bare in `{{#if hasAuth}}` guarded sections | Indirect guard | Low |
+| Variable           | Usage count                                                 | Has default in sync?             | Risk                                           |
+| ------------------ | ----------------------------------------------------------- | -------------------------------- | ---------------------------------------------- |
+| `repoName`         | 126                                                         | ✅ fallback to overlay/dir name  | Low                                            |
+| `version`          | 88                                                          | ✅ from package.json             | Low                                            |
+| `syncDate`         | 74                                                          | ✅ `new Date().toISOString()`    | Low                                            |
+| `lastModel`        | 74                                                          | ✅ env var or `'sync-engine'`    | Low                                            |
+| `lastAgent`        | 74                                                          | ✅ env var or `'agentkit-forge'` | Low                                            |
+| `defaultBranch`    | 26                                                          | ✅ `'main'`                      | Low                                            |
+| `testingCoverage`  | 19                                                          | ❌ No default, used bare         | **Medium** — will render `{{testingCoverage}}` |
+| `commitConvention` | 7                                                           | ❌ comes from project.yaml only  | **Medium**                                     |
+| `loggingFramework` | Used bare in sections guarded by `{{#if hasLogging}}`       | Indirect guard                   | Low                                            |
+| `errorStrategy`    | Used bare in sections guarded by `{{#if hasErrorHandling}}` | Indirect guard                   | Low                                            |
+| `authProvider`     | Used bare in `{{#if hasAuth}}` guarded sections             | Indirect guard                   | Low                                            |
 
 ### D. Agent variables — all properly wired via `buildAgentVars()`
+
 - `agentName`, `agentId`, `agentCategory`, `agentRole`, `agentFocusList`, `agentResponsibilitiesList`, `agentToolsList`, `agentConventions`, `agentExamples`, `agentAntiPatterns`, `agentDomainRules` — all correctly populated with `||` / empty-string defaults.
 
 ### E. Command variables — all properly wired via `buildCommandVars()`
+
 - `commandName`, `commandDescription`, `commandFlags` — correctly populated.
 
 ### F. Rule variables — all properly wired
+
 - `ruleDomain`, `ruleDescription`, `ruleAppliesTo`, `ruleConventions` — correctly populated.
 
 ---
@@ -78,14 +83,15 @@ These variables are used **directly** (no conditional guard) and will render as 
 
 ### Directly relevant PRs:
 
-| Branch | Description | Overlap |
-|--------|-------------|---------|
-| `claude/fix-ci-naming-l3Q0C` | Makes placeholder warnings always-on; adds `validateMappingCoverage()` to detect mapping→spec mismatches | **High** — once merged, every unresolved variable will produce a runtime warning. Our fixes preempt those warnings. |
-| `feat/sprint-1-check-fixes` | Large refactor of synchronize.mjs (overlay resolution, `aiSynthesisLayer` setting, spec changes) | **Medium** — changes `synchronize.mjs` structure significantly; our teamVars changes may conflict |
-| `claude/improve-issue-template-Ci6Wc` | Unifies issue field enums across templates | **Low** — different templates, but touches template engine |
-| `copilot/sub-pr-154` | Removes trailing whitespace from generated headers | **Low** — formatting only |
+| Branch                                | Description                                                                                              | Overlap                                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `claude/fix-ci-naming-l3Q0C`          | Makes placeholder warnings always-on; adds `validateMappingCoverage()` to detect mapping→spec mismatches | **High** — once merged, every unresolved variable will produce a runtime warning. Our fixes preempt those warnings. |
+| `feat/sprint-1-check-fixes`           | Large refactor of synchronize.mjs (overlay resolution, `aiSynthesisLayer` setting, spec changes)         | **Medium** — changes `synchronize.mjs` structure significantly; our teamVars changes may conflict                   |
+| `claude/improve-issue-template-Ci6Wc` | Unifies issue field enums across templates                                                               | **Low** — different templates, but touches template engine                                                          |
+| `copilot/sub-pr-154`                  | Removes trailing whitespace from generated headers                                                       | **Low** — formatting only                                                                                           |
 
 ### No overlap:
+
 - `branch-protection-config`, `feature-management-strategy`, `improve-slash-commands`, `cost-management`, `standardize-github-issues` — unrelated to template variable wiring.
 
 ---
@@ -157,22 +163,26 @@ These variables are used **directly** (no conditional guard) and will render as 
 ## 5. Recommended Implementation Order
 
 ### Phase 1: Fix remaining unwired variables (this PR or follow-up)
+
 - [ ] Wire `containerRuntime` from project.yaml into template vars
 - [ ] Wire `drTestSchedule` from project.yaml into template vars
 - [ ] Wire `loggingRetentionDays` — already in project-mapping as `logRetentionDays` but template uses `loggingRetentionDays`
 - [ ] Verify `isSyncBacklog` is set correctly
 
 ### Phase 2: Add safe heuristic defaults (new PR, after `fix-ci-naming` merges)
+
 - [ ] In `synchronize.mjs`, add heuristic fallbacks for `maxTaskTurns`, `maxHandoffChainDepth`, `maxStagnationTurns` based on team/project metadata
 - [ ] Add `testingCoverage` phase-based fallback
 - [ ] Add `commitConvention` auto-detection
 
 ### Phase 3: Template engine enhancement (separate PR)
+
 - [ ] Add `{{var|default}}` pipe syntax to `replacePlaceholders()`
 - [ ] Create `spec-defaults.yaml` for centralized defaults
 - [ ] Extend `agentkit check` to report unwired template variables
 
 ### Phase 4: Coordinate with open PRs
+
 - [ ] Rebase on `fix-ci-naming` once merged (always-on warnings will validate our fixes)
 - [ ] Resolve conflicts with `sprint-1-check-fixes` (synchronize.mjs restructuring)
 
@@ -180,9 +190,9 @@ These variables are used **directly** (no conditional guard) and will render as 
 
 ## 6. Risk Assessment
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Heuristic defaults override user intent | Medium | Always prefer explicit spec values; heuristics only fill gaps |
-| `{{var|default}}` syntax breaks existing templates | Low | Only activates when `|` present; existing templates untouched |
-| Template variable name mismatches (e.g., `loggingRetentionDays` vs `logRetentionDays`) | Medium | Audit all template vars against mapping dest names |
-| Merge conflicts with sprint-1 | High | Wait for sprint-1 to merge first, then rebase |
+| Risk                                                                                   | Impact                                      | Mitigation                                                    |
+| -------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------- | --------------------- | --------------------------------------- |
+| Heuristic defaults override user intent                                                | Medium                                      | Always prefer explicit spec values; heuristics only fill gaps |
+| `{{var                                                                                 | default}}` syntax breaks existing templates | Low                                                           | Only activates when ` | ` present; existing templates untouched |
+| Template variable name mismatches (e.g., `loggingRetentionDays` vs `logRetentionDays`) | Medium                                      | Audit all template vars against mapping dest names            |
+| Merge conflicts with sprint-1                                                          | High                                        | Wait for sprint-1 to merge first, then rebase                 |

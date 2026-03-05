@@ -41,9 +41,8 @@ const TOOL_CHECKS = [
  * @returns {object}
  */
 export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) {
-  const userContext = Array.isArray(flags._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   console.log('[agentkit:healthcheck] Running pre-flight validation...');
   if (userContext) {
     console.log(`[agentkit:healthcheck] Context: ${userContext}`);

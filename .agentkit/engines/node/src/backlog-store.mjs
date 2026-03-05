@@ -71,8 +71,10 @@ export function readBacklogMarkdown(projectRoot) {
   // 6-column (legacy):  | Priority | Team | Task | Phase | Status | Notes |
   // The 7-column regex requires the 6th group (Source) to be non-whitespace-only,
   // preventing greedy consumption of 6-column rows where Notes would fill Source.
-  const tableRow7Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*(\S[^|]*)\|\s*([^|]*)\|/gm;
-  const tableRow6Regex = /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|\s*$/gm;
+  const tableRow7Regex =
+    /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*(\S[^|]*)\|\s*([^|]*)\|/gm;
+  const tableRow6Regex =
+    /^\|\s*(P[0-3])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]*)\|\s*$/gm;
 
   // Try 7-column format first (matches are greedy, so 7-col takes priority)
   let match;
@@ -86,7 +88,10 @@ export function readBacklogMarkdown(projectRoot) {
       priority: priority.trim(),
       status: status.trim().toLowerCase().replace(/\s+/g, '-'),
       phase: phase.trim(),
-      team: team.trim().toLowerCase().replace(/^t\d+-/i, ''),
+      team: team
+        .trim()
+        .toLowerCase()
+        .replace(/^t\d+-/i, ''),
       assignee: null,
       source: source.trim().toLowerCase() || 'manual',
       what: notes.trim(),
@@ -115,7 +120,10 @@ export function readBacklogMarkdown(projectRoot) {
         priority: priority.trim(),
         status: status.trim().toLowerCase().replace(/\s+/g, '-'),
         phase: phase.trim(),
-        team: team.trim().toLowerCase().replace(/^t\d+-/i, ''),
+        team: team
+          .trim()
+          .toLowerCase()
+          .replace(/^t\d+-/i, ''),
         assignee: null,
         source: 'manual',
         what: notes.trim(),
@@ -256,9 +264,7 @@ export function sortItems(items, sortBy = 'priority') {
     case 'source':
       return copy.sort((a, b) => (a.source || '').localeCompare(b.source || ''));
     case 'updated':
-      return copy.sort(
-        (a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
-      );
+      return copy.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
     case 'score':
       return copy.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
     default:

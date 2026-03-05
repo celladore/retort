@@ -7,13 +7,13 @@
 
 The `/cost --budget` flag is defined in the command spec (`commands.yaml` line 469) but is only **partially implemented**:
 
-| Layer | Status | Detail |
-|---|---|---|
-| `commands.yaml` spec | Defined | `--budget` flag with description |
-| Budget guard module | Implemented | `runBudgetStatus()` in `budget-guard.mjs` |
-| CLI entry point | Implemented | `cli.mjs cost --budget` calls `runBudgetStatus()` |
-| Command template | **MISSING** | `.agentkit/templates/claude/commands/cost.md` does not document `--budget` |
-| Generated command files | **MISSING** | All platform command outputs lack `--budget` documentation |
+| Layer                   | Status      | Detail                                                                     |
+| ----------------------- | ----------- | -------------------------------------------------------------------------- |
+| `commands.yaml` spec    | Defined     | `--budget` flag with description                                           |
+| Budget guard module     | Implemented | `runBudgetStatus()` in `budget-guard.mjs`                                  |
+| CLI entry point         | Implemented | `cli.mjs cost --budget` calls `runBudgetStatus()`                          |
+| Command template        | **MISSING** | `.agentkit/templates/claude/commands/cost.md` does not document `--budget` |
+| Generated command files | **MISSING** | All platform command outputs lack `--budget` documentation                 |
 
 Users invoking `/cost --budget` get no agent guidance because the flag isn't documented in the command template that agents read.
 

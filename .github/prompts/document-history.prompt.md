@@ -18,13 +18,13 @@ Creates a structured history document from templates for significant work comple
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--type` | Document type. The four primary types are used directly; issue and lesson are typically created via /review --focus=retrospective but can also be created manually. | — |
-| `--title` | Human-readable title for the document | — |
-| `--pr` | PR number to reference in the document | — |
-| `--auto` | Auto-detect type and title from recent git history | false |
-| `--dry-run` | Show what would be created without writing files | false |
+| Flag        | Description                                                                                                                                                         | Default |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `--type`    | Document type. The four primary types are used directly; issue and lesson are typically created via /review --focus=retrospective but can also be created manually. | —       |
+| `--title`   | Human-readable title for the document                                                                                                                               | —       |
+| `--pr`      | PR number to reference in the document                                                                                                                              | —       |
+| `--auto`    | Auto-detect type and title from recent git history                                                                                                                  | false   |
+| `--dry-run` | Show what would be created without writing files                                                                                                                    | false   |
 
 ## Instructions
 
@@ -67,4 +67,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

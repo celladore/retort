@@ -105,10 +105,10 @@ The orchestrator tracks progress per team (not per agent) using statuses: `idle`
 
 ### Project Management (2 agents)
 
-| Agent ID          | Name            | Primary Responsibility                                       |
-| ----------------- | --------------- | ------------------------------------------------------------ |
-| `project-shipper` | Project Shipper | Task scoping, delivery tracking, handoff documentation       |
-| `release-manager` | Release Manager | Release coordination, versioning, changelogs, deployment     |
+| Agent ID          | Name            | Primary Responsibility                                   |
+| ----------------- | --------------- | -------------------------------------------------------- |
+| `project-shipper` | Project Shipper | Task scoping, delivery tracking, handoff documentation   |
+| `release-manager` | Release Manager | Release coordination, versioning, changelogs, deployment |
 
 ---
 

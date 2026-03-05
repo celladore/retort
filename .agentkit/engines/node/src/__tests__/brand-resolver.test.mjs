@@ -348,7 +348,13 @@ describe('mergeThemeIntoSettings', () => {
       'titleBar.activeBackground': '#184A6C',
       'statusBar.background': '#1976D2',
     };
-    const meta = { brand: 'AgentKit Forge', mode: 'dark', scheme: 'dark', tier: 'full', version: '1.0.0' };
+    const meta = {
+      brand: 'AgentKit Forge',
+      mode: 'dark',
+      scheme: 'dark',
+      tier: 'full',
+      version: '1.0.0',
+    };
 
     const result = mergeThemeIntoSettings(existing, colors, meta);
 
@@ -460,10 +466,7 @@ describe('filterByTier', () => {
 
   it('filters to title bar only for tier "minimal"', () => {
     const result = filterByTier(allColors, 'minimal');
-    expect(Object.keys(result)).toEqual([
-      'titleBar.activeBackground',
-      'titleBar.activeForeground',
-    ]);
+    expect(Object.keys(result)).toEqual(['titleBar.activeBackground', 'titleBar.activeForeground']);
   });
 
   it('returns all colors for unknown tier', () => {

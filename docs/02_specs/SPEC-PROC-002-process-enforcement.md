@@ -22,6 +22,7 @@ Phase 2 builds on Phase 1's foundation. All enforcement continues to live in scr
 **FR-007.2**: The orchestrator SHALL NOT assign new work to a team that has reached its WIP limit.
 
 **FR-007.3**: When a team hits its WIP limit, the orchestrator SHALL offer three options:
+
 1. Complete or hand off a current item
 2. Swarm on a blocked item (see F-008)
 3. Assist another team (cross-training, Phase 3)
@@ -33,6 +34,7 @@ Phase 2 builds on Phase 1's foundation. All enforcement continues to live in scr
 ### Technical Requirements
 
 **TR-007.1 — teams.yaml Schema**:
+
 ```yaml
 teams:
   - id: backend
@@ -60,6 +62,7 @@ Default WIP limits:
 | quality | 2 | Review work |
 
 **TR-007.2 — Enforcement Script**: `scripts/wip-check.mjs`
+
 ```
 Input:  team ID
 Action:
@@ -73,11 +76,13 @@ Exit code: 0 if below limit, 1 if at/above limit
 ```
 
 **TR-007.3 — Orchestrator Integration**:
+
 - Before assigning work: `wip-check.mjs --team <id>`. If exit code 1, block assignment.
 - `/orchestrate` displays WIP status in assessment: "Backend: 2/2 (FULL) | Data: 0/1 (Available)"
 - `/tasks` view includes WIP status per team
 
 **TR-007.4 — Events Log**:
+
 ```json
 {"type": "wip-blocked", "team": "backend", "current": 2, "max": 2, "attempted_task": "..."}
 {"type": "wip-violation", "team": "backend", "current": 3, "max": 2, "reason": "manual override"}
@@ -108,13 +113,15 @@ Agents never see WIP limits in their instructions. The orchestrator checks WIP b
 ### Technical Requirements
 
 **TR-008.1 — teams.yaml Config**:
+
 ```yaml
 process:
-  swarm-threshold: 2          # Sessions/syncs before swarm triggers
-  swarm-max-recruits: 2       # Max additional teams to recruit
+  swarm-threshold: 2 # Sessions/syncs before swarm triggers
+  swarm-max-recruits: 2 # Max additional teams to recruit
 ```
 
 **TR-008.2 — Swarm Detection Script**: `scripts/swarm-check.mjs`
+
 ```
 Input:  none (scans all blocked items)
 Action:
@@ -140,12 +147,14 @@ Output:
 ```
 
 **TR-008.3 — Orchestrator Integration**:
+
 - `/orchestrate` runs `swarm-check.mjs` during assessment
 - If swarm candidates exist, orchestrator presents: "SWARM ALERT: P1-T1-001 blocked for 2 sessions. Testing (1/3 WIP) and DevOps (1/2 WIP) available to help. Assign swarm?"
 - On approval, orchestrator creates swarm tasks via `/delegate` with `priority: P0` and `type: swarm`
 - When blocker resolves, swarm tasks auto-close
 
 **TR-008.4 — Swarm Task Lifecycle**:
+
 ```
 Blocked item detected → Threshold exceeded → Available helpers identified →
 Swarm tasks created (P0) → Helpers join → Blocker resolved →
@@ -153,6 +162,7 @@ Swarm tasks auto-complete → Normal WIP resumes
 ```
 
 **TR-008.5 — Events Log**:
+
 ```json
 {"type": "swarm-triggered", "task": "P1-T1-001", "team": "backend", "helpers": ["testing", "devops"]}
 {"type": "swarm-resolved", "task": "P1-T1-001", "resolution_time": "1 session"}
@@ -171,6 +181,7 @@ Swarming logic lives entirely in the orchestrator and scripts. Agents receive a 
 **FR-009.1**: After each sprint, a metrics report SHALL be generated.
 
 **FR-009.2**: Metrics SHALL include:
+
 - Velocity: story points completed vs planned
 - Completion rate: items completed / items committed
 - Estimation accuracy: average delta between estimate and actual
@@ -187,6 +198,7 @@ Swarming logic lives entirely in the orchestrator and scripts. Agents receive a 
 ### Technical Requirements
 
 **TR-009.1 — Metrics Script**: `scripts/sprint-metrics.mjs`
+
 ```
 Input:  sprint number (or "current")
 Action:
@@ -198,39 +210,46 @@ Output: metrics/sprint-N.md
 ```
 
 **TR-009.2 — Report Format**: `metrics/sprint-N.md`
+
 ```markdown
 # Sprint N Metrics — [Date Range]
 
 ## Velocity
+
 - Planned: 21 pts | Completed: 18 pts | Completion rate: 86%
 - Rolling 3-sprint average: 17 pts
 
 ## Estimation Accuracy
+
 - Mean absolute error: 1.2 pts
 - Systematic bias: +0.5 (slight underestimation)
 - Worst miss: "Auth middleware" — estimated 3, actual 8
 
 ## Flow
+
 - Carried over: 2 items (5 pts) — reasons: [blocked by external dep, scope creep]
 - Added mid-sprint: 1 item (P0 hotfix)
 - Blocked items: 3 (avg resolution: 1.5 sessions)
 - Swarm events: 1
 
 ## Quality
+
 - DOD violations caught: 2 (missing tests, missing changelog)
 - Rework incidents: 1
 - Retro action items generated: 3
 - Previous retro actions completed: 2/3
 
 ## Per-Team Breakdown
-| Team | Planned | Completed | Accuracy | WIP Violations |
-|------|---------|-----------|----------|----------------|
-| backend | 8 | 6 | +1.5 | 0 |
-| data | 3 | 3 | 0 | 0 |
-| ...  | ... | ... | ... | ... |
+
+| Team    | Planned | Completed | Accuracy | WIP Violations |
+| ------- | ------- | --------- | -------- | -------------- |
+| backend | 8       | 6         | +1.5     | 0              |
+| data    | 3       | 3         | 0        | 0              |
+| ...     | ...     | ...       | ...      | ...            |
 ```
 
 **TR-009.3 — Capacity Planning Integration**:
+
 - `scripts/sprint-metrics.mjs capacity` outputs:
   ```json
   { "rolling_avg": 17, "recommended_commit": 18, "buffer": 3, "total_capacity": 21 }
@@ -239,6 +258,7 @@ Output: metrics/sprint-N.md
 
 **TR-009.4 — Events Log Dependencies**:
 Metrics calculation depends on structured events in `events.log`:
+
 - `task-completed` with points
 - `task-blocked` with timestamp
 - `dod-check` results
@@ -260,6 +280,7 @@ Agents never see metrics. The orchestrator reads metrics for capacity planning a
 **FR-010.1**: A Scrum Master role SHALL be formalized with explicit authority over process enforcement.
 
 **FR-010.2**: The Scrum Master SHALL be responsible for:
+
 - Enforcing DOR before work enters sprint
 - Enforcing DOD before work is marked complete
 - Monitoring WIP limits and flagging violations
@@ -285,31 +306,32 @@ Instead, the Scrum Master is a **behavior mode of the orchestrator**, activated 
 process:
   scrum-master:
     authority:
-      - enforce-dor        # Block sprint entry without DOR pass
-      - enforce-dod        # Block completion without DOD pass
-      - enforce-wip        # Block assignment beyond WIP limit
-      - trigger-swarm      # Auto-recruit when blocker exceeds threshold
-      - generate-retro     # Create retrospective at sprint end
-      - generate-metrics   # Create sprint metrics
-      - track-actions      # Monitor retro action item completion
+      - enforce-dor # Block sprint entry without DOR pass
+      - enforce-dod # Block completion without DOD pass
+      - enforce-wip # Block assignment beyond WIP limit
+      - trigger-swarm # Auto-recruit when blocker exceeds threshold
+      - generate-retro # Create retrospective at sprint end
+      - generate-metrics # Create sprint metrics
+      - track-actions # Monitor retro action item completion
     cannot:
-      - set-priority       # Product Owner authority
-      - implement-code     # Engineering team authority
-      - approve-scope      # Product Owner authority
+      - set-priority # Product Owner authority
+      - implement-code # Engineering team authority
+      - approve-scope # Product Owner authority
 ```
 
 **TR-010.2 — Orchestrator Checkpoints**: The SM behavior is a set of script calls at phase boundaries:
 
-| Orchestrator Phase | SM Check | Script |
-|---|---|---|
-| Sprint Planning | DOR validation for all candidates | `validate-dor.mjs` |
-| Task Assignment | WIP limit check | `wip-check.mjs` |
-| Every Sync | Blocker age check → swarm trigger | `swarm-check.mjs` |
-| Task Completion | DOD validation | `validate-dod.mjs` |
-| Sprint End | Metrics generation | `sprint-metrics.mjs` |
-| Session End (handoff) | Retro generation | `generate-retro.mjs` |
+| Orchestrator Phase    | SM Check                          | Script               |
+| --------------------- | --------------------------------- | -------------------- |
+| Sprint Planning       | DOR validation for all candidates | `validate-dor.mjs`   |
+| Task Assignment       | WIP limit check                   | `wip-check.mjs`      |
+| Every Sync            | Blocker age check → swarm trigger | `swarm-check.mjs`    |
+| Task Completion       | DOD validation                    | `validate-dod.mjs`   |
+| Sprint End            | Metrics generation                | `sprint-metrics.mjs` |
+| Session End (handoff) | Retro generation                  | `generate-retro.mjs` |
 
 **TR-010.3 — SM Event Log Entries**:
+
 ```json
 {"type": "sm-enforcement", "action": "dor-blocked", "item": "P2-T3-005", "reason": "missing estimate"}
 {"type": "sm-enforcement", "action": "dod-blocked", "item": "P1-T1-001", "reason": "tests failing"}
@@ -319,6 +341,7 @@ process:
 ### Context Bloat Mitigation
 
 This is the biggest context savings in Phase 2. By making the Scrum Master a set of scripts rather than an agent, we:
+
 - Save an entire agent's context window
 - Eliminate redundant instructions (the SM would need to know about DOD, DOR, WIP, swarming — all already in scripts)
 - Get more reliable enforcement (scripts don't forget, agents do)
@@ -331,6 +354,7 @@ This is the biggest context savings in Phase 2. By making the Scrum Master a set
 ### Functional Requirements
 
 **FR-011.1**: The Product Owner (PO) role SHALL have explicit, documented authority over:
+
 - Sprint Goal approval (the PO sets or approves the goal)
 - Priority arbitration (the PO decides when teams disagree on priority)
 - Scope change approval (mid-sprint changes require PO approval)
@@ -345,6 +369,7 @@ This is the biggest context savings in Phase 2. By making the Scrum Master a set
 ### Technical Requirements
 
 **TR-011.1 — teams.yaml Authority Block**:
+
 ```yaml
 teams:
   - id: product
@@ -358,14 +383,15 @@ teams:
       - scope-change-approval
       - story-acceptance
     cannot:
-      - override-dod     # Cannot bypass Definition of Done
-      - override-dor     # Cannot bypass Definition of Ready
-      - override-wip     # Cannot bypass WIP limits
+      - override-dod # Cannot bypass Definition of Done
+      - override-dor # Cannot bypass Definition of Ready
+      - override-wip # Cannot bypass WIP limits
     handoff-chain: [backend, frontend]
 ```
 
 **TR-011.2 — Decision Logging**:
 PO decisions are logged as structured events:
+
 ```json
 {"type": "po-decision", "action": "sprint-goal-approved", "goal": "...", "by": "human"}
 {"type": "po-decision", "action": "priority-change", "item": "P2-T3-005", "from": "P2", "to": "P1", "reason": "..."}
@@ -375,22 +401,23 @@ PO decisions are logged as structured events:
 ```
 
 **TR-011.3 — Orchestrator Integration**:
+
 - Sprint planning: orchestrator prompts for sprint goal. If human is present, ask directly. If not, product team agent proposes, logged as `by: product-agent`.
 - Mid-sprint scope changes: orchestrator detects new items added and flags: "Scope change detected. PO approval required." Blocks until approved.
 - Story completion: after DOD passes (SM gate), PO acceptance is the final gate.
 
 **TR-011.4 — Separation of Concerns Matrix**:
 
-| Decision | Product Owner | Scrum Master (Scripts) | Engineering Teams |
-|----------|:---:|:---:|:---:|
-| What to build | Decides | — | Advises |
-| Priority order | Decides | — | Advises |
-| Sprint goal | Decides | — | — |
-| How to build | — | — | Decides |
-| Process compliance | — | Enforces | Follows |
-| Quality gates | — | Enforces | Follows |
-| Scope changes | Approves | — | Requests |
-| Story acceptance | Accepts/Rejects | Validates DOD first | Delivers |
+| Decision           |  Product Owner  | Scrum Master (Scripts) | Engineering Teams |
+| ------------------ | :-------------: | :--------------------: | :---------------: |
+| What to build      |     Decides     |           —            |      Advises      |
+| Priority order     |     Decides     |           —            |      Advises      |
+| Sprint goal        |     Decides     |           —            |         —         |
+| How to build       |        —        |           —            |      Decides      |
+| Process compliance |        —        |        Enforces        |      Follows      |
+| Quality gates      |        —        |        Enforces        |      Follows      |
+| Scope changes      |    Approves     |           —            |     Requests      |
+| Story acceptance   | Accepts/Rejects |  Validates DOD first   |     Delivers      |
 
 ### Context Bloat Mitigation
 
@@ -433,7 +460,16 @@ process:
   swarm-threshold: 2
   swarm-max-recruits: 2
   scrum-master:
-    authority: [enforce-dor, enforce-dod, enforce-wip, trigger-swarm, generate-retro, generate-metrics, track-actions]
+    authority:
+      [
+        enforce-dor,
+        enforce-dod,
+        enforce-wip,
+        trigger-swarm,
+        generate-retro,
+        generate-metrics,
+        track-actions,
+      ]
     cannot: [set-priority, implement-code, approve-scope]
 ```
 
@@ -477,18 +513,21 @@ SESSION END (/handoff)
 ## File Manifest
 
 Files to create:
+
 ```
 scripts/wip-check.mjs           # WIP limit enforcement
 scripts/swarm-check.mjs         # Swarm detection and recruitment
 ```
 
 Files to extend:
+
 ```
 scripts/sprint-metrics.mjs      # Add velocity, accuracy, flow metrics
 .agentkit/spec/teams.yaml       # Add max-wip per team, swarm config, SM authority, PO authority
 ```
 
 Files NOT modified:
+
 ```
 .agentkit/spec/agents.yaml      # No new agents, no instruction changes
 ```
@@ -513,10 +552,10 @@ Recommended implementation order: F-011 → F-007 → F-008 → F-009 → F-010
 
 ## Acceptance Criteria
 
-| Item | Acceptance Criteria |
-|------|-------------------|
-| F-007 WIP | `wip-check.mjs` correctly counts in-progress items per team. Orchestrator blocks assignment at limit |
-| F-008 Swarming | `swarm-check.mjs` identifies items blocked > threshold. Recommends available helpers. Swarm tasks created and auto-closed |
-| F-009 Metrics | Sprint metrics report generated with velocity, accuracy, flow data. Rolling average calculated. Capacity recommendation produced |
-| F-010 SM | All SM checkpoints fire at correct orchestrator phases. No new agent created. DOD/DOR/WIP enforcement verified |
-| F-011 PO | Authority documented in teams.yaml. Sprint goal requires PO approval. Scope changes flagged. Decisions logged |
+| Item           | Acceptance Criteria                                                                                                              |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| F-007 WIP      | `wip-check.mjs` correctly counts in-progress items per team. Orchestrator blocks assignment at limit                             |
+| F-008 Swarming | `swarm-check.mjs` identifies items blocked > threshold. Recommends available helpers. Swarm tasks created and auto-closed        |
+| F-009 Metrics  | Sprint metrics report generated with velocity, accuracy, flow data. Rolling average calculated. Capacity recommendation produced |
+| F-010 SM       | All SM checkpoints fire at correct orchestrator phases. No new agent created. DOD/DOR/WIP enforcement verified                   |
+| F-011 PO       | Authority documented in teams.yaml. Sprint goal requires PO approval. Scope changes flagged. Decisions logged                    |

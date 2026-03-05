@@ -32,11 +32,11 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- components/**
-- apps/web/src/components/**
-- styles/**
-- storybook/**
-- design/**
+- components/\*\*
+- apps/web/src/components/\*\*
+- styles/\*\*
+- storybook/\*\*
+- design/\*\*
 
 ## Responsibilities
 

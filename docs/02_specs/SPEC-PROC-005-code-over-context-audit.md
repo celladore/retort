@@ -12,17 +12,17 @@
 
 ### The Numbers
 
-| Metric | Value | % of File |
-|--------|-------|-----------|
-| Total agents defined | 21 | — |
-| `domain-rules` lines (repeated process text) | 68 lines, ~13.4KB | **27% of file** |
-| `git-workflow domain rules` — identical string | Copied 20 times | — |
-| `agent-conduct domain rules` — identical string | Copied 21 times | — |
-| `security domain rules` — 8 near-identical variants | Copied 8 times | — |
-| `testing domain rules` — 6 near-identical variants | Copied 6 times | — |
-| `preferred-tools` lines (mostly identical lists) | 111 lines | — |
-| `responsibilities` lines | 141 lines | — |
-| Estimated context tokens wasted on duplication | ~3,000-4,000 tokens per agent session | — |
+| Metric                                              | Value                                 | % of File       |
+| --------------------------------------------------- | ------------------------------------- | --------------- |
+| Total agents defined                                | 21                                    | —               |
+| `domain-rules` lines (repeated process text)        | 68 lines, ~13.4KB                     | **27% of file** |
+| `git-workflow domain rules` — identical string      | Copied 20 times                       | —               |
+| `agent-conduct domain rules` — identical string     | Copied 21 times                       | —               |
+| `security domain rules` — 8 near-identical variants | Copied 8 times                        | —               |
+| `testing domain rules` — 6 near-identical variants  | Copied 6 times                        | —               |
+| `preferred-tools` lines (mostly identical lists)    | 111 lines                             | —               |
+| `responsibilities` lines                            | 141 lines                             | —               |
+| Estimated context tokens wasted on duplication      | ~3,000-4,000 tokens per agent session | —               |
 
 **Bottom line**: Every agent carries ~1,200 words of process instructions that are either (a) identical to every other agent, (b) enforceable by CI/hooks, or (c) better served by a single reference. Across 21 agents, that's **~25,000 words of duplicated text** in the spec file.
 
@@ -34,27 +34,28 @@
 
 Every agent in `agents.yaml` has a `domain-rules:` block containing 3-5 rules. These rules are **text strings** that describe process requirements — not domain expertise. Two rules are copied **identically** to nearly every agent:
 
-| Rule | Exact Copies | Characters Per Copy | Total Waste |
-|------|-------------|-------------------|-------------|
-| "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits..." | **20 of 21 agents** | ~195 chars | ~3,900 chars |
-| "Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator..." | **21 of 21 agents** | ~178 chars | ~3,738 chars |
+| Rule                                                                                                                                                                       | Exact Copies        | Characters Per Copy | Total Waste  |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------- | ------------ |
+| "Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits..." | **20 of 21 agents** | ~195 chars          | ~3,900 chars |
+| "Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator..."       | **21 of 21 agents** | ~178 chars          | ~3,738 chars |
 
 Additional near-duplicates with minor variations:
 
-| Rule Pattern | Copies | Variants |
-|---|---|---|
-| "Follow security domain rules [sec-*]..." | 8 agents | 8 different combos of the same rule IDs |
-| "Follow testing domain rules [qa-*]..." | 6 agents | 6 different combos of the same rule IDs |
-| "Follow documentation domain rules [doc-*]..." | 6 agents | 6 different combos |
-| "Follow ci-cd domain rules [ci-*]..." | 2 agents | 2 different combos |
-| "Follow typescript domain rules [ts-*]..." | 2 agents | 2 different combos |
-| "Follow dependency-management domain rules [dep-*]..." | 2 agents | 2 different combos |
+| Rule Pattern                                           | Copies   | Variants                                |
+| ------------------------------------------------------ | -------- | --------------------------------------- |
+| "Follow security domain rules [sec-*]..."              | 8 agents | 8 different combos of the same rule IDs |
+| "Follow testing domain rules [qa-*]..."                | 6 agents | 6 different combos of the same rule IDs |
+| "Follow documentation domain rules [doc-*]..."         | 6 agents | 6 different combos                      |
+| "Follow ci-cd domain rules [ci-*]..."                  | 2 agents | 2 different combos                      |
+| "Follow typescript domain rules [ts-*]..."             | 2 agents | 2 different combos                      |
+| "Follow dependency-management domain rules [dep-*]..." | 2 agents | 2 different combos                      |
 
 ### The Fix
 
 **Replace per-agent text duplication with a reference-based system.**
 
 **Option A — Domain-Rules as IDs Only** (recommended):
+
 ```yaml
 # BEFORE (current — 4 lines of text per agent, repeated 21 times)
 domain-rules:
@@ -74,16 +75,24 @@ domain-rules:
 **Savings**: ~195 chars → ~50 chars per rule. For the 68 rule lines: **~10KB saved** from the spec file. When rendered to agent context, the long descriptive text is never generated — the agent gets a compact reference. If an agent needs the full rule text, it reads `rules.yaml` on demand.
 
 **Option B — Global Rules + Per-Agent Overrides**:
+
 ```yaml
 # In teams.yaml or a new global-rules.yaml
 global-domain-rules:
   all-agents:
-    - git-workflow: [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history]
-    - agent-conduct: [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm]
+    - git-workflow:
+        [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history]
+    - agent-conduct:
+        [
+          ac-verify-before-change,
+          ac-minimal-changes,
+          ac-run-checks,
+          ac-no-destructive-without-confirm,
+        ]
 
 # In agents.yaml — only agent-SPECIFIC rules
 domain-rules:
-  - security: [sec-input-validation, sec-no-secrets, sec-deny-by-default]  # Frontend-specific combo
+  - security: [sec-input-validation, sec-no-secrets, sec-deny-by-default] # Frontend-specific combo
 ```
 
 This eliminates the need to repeat universal rules on every agent.
@@ -141,24 +150,24 @@ defaults:
 
 **16 rules describe CI/tool enforcement that agents shouldn't need to know about:**
 
-| Rule ID | Domain | Tool | Why Agent Doesn't Need This |
-|---------|--------|------|-----------------------------|
-| `ts-lint` | typescript | `eslint --fix` | Pre-commit hook or CI runs this |
-| `ts-format` | typescript | `prettier --write` | Pre-commit hook or CI runs this |
-| `py-lint` | python | `ruff check --fix` | Pre-commit hook or CI runs this |
-| `py-format` | python | `black` | Pre-commit hook or CI runs this |
-| `rs-clippy` | rust | `cargo clippy -- -D warnings` | CI runs this |
-| `rs-fmt` | rust | `cargo fmt` | Pre-commit hook runs this |
-| `iac-fmt` | iac | `terraform fmt` | Pre-commit hook runs this |
-| `iac-validate` | iac | `terraform validate` | CI runs this |
-| `dn-format` | dotnet | `dotnet format` | Pre-commit hook runs this |
-| `qa-coverage-threshold` | testing | `vitest run --coverage` | CI runs this; agents don't decide coverage |
-| `ci-quality-gates` | ci-cd | — | Describes CI config, not agent behavior |
-| `ci-pin-actions` | ci-cd | — | Pre-commit or CI linter for workflows |
-| `ci-reproducible-builds` | ci-cd | — | CI build config, not agent decision |
-| `dep-lockfile-committed` | dependency | — | Pre-commit hook |
-| `gw-sync-before-pr` | git-workflow | `pnpm -C .agentkit agentkit:sync` | Should auto-run as pre-push hook |
-| `doc-generated-files` | documentation | `pnpm -C .agentkit agentkit:sync` | Same as above — auto-run |
+| Rule ID                  | Domain        | Tool                              | Why Agent Doesn't Need This                |
+| ------------------------ | ------------- | --------------------------------- | ------------------------------------------ |
+| `ts-lint`                | typescript    | `eslint --fix`                    | Pre-commit hook or CI runs this            |
+| `ts-format`              | typescript    | `prettier --write`                | Pre-commit hook or CI runs this            |
+| `py-lint`                | python        | `ruff check --fix`                | Pre-commit hook or CI runs this            |
+| `py-format`              | python        | `black`                           | Pre-commit hook or CI runs this            |
+| `rs-clippy`              | rust          | `cargo clippy -- -D warnings`     | CI runs this                               |
+| `rs-fmt`                 | rust          | `cargo fmt`                       | Pre-commit hook runs this                  |
+| `iac-fmt`                | iac           | `terraform fmt`                   | Pre-commit hook runs this                  |
+| `iac-validate`           | iac           | `terraform validate`              | CI runs this                               |
+| `dn-format`              | dotnet        | `dotnet format`                   | Pre-commit hook runs this                  |
+| `qa-coverage-threshold`  | testing       | `vitest run --coverage`           | CI runs this; agents don't decide coverage |
+| `ci-quality-gates`       | ci-cd         | —                                 | Describes CI config, not agent behavior    |
+| `ci-pin-actions`         | ci-cd         | —                                 | Pre-commit or CI linter for workflows      |
+| `ci-reproducible-builds` | ci-cd         | —                                 | CI build config, not agent decision        |
+| `dep-lockfile-committed` | dependency    | —                                 | Pre-commit hook                            |
+| `gw-sync-before-pr`      | git-workflow  | `pnpm -C .agentkit agentkit:sync` | Should auto-run as pre-push hook           |
+| `doc-generated-files`    | documentation | `pnpm -C .agentkit agentkit:sync` | Same as above — auto-run                   |
 
 ### The Fix
 
@@ -171,15 +180,15 @@ rules:
       # ENFORCEMENT rules — enforced by tooling, not agent instructions
       - id: ts-lint
         type: enforcement
-        enforced-by: pre-commit-hook    # NEW FIELD
+        enforced-by: pre-commit-hook # NEW FIELD
         tool: 'eslint --fix'
-        agent-visible: false            # NEW FIELD — don't render to agent context
+        agent-visible: false # NEW FIELD — don't render to agent context
         # ...
 
       # ADVISORY rules — agents need to know these
       - id: ts-explicit-types
         type: advisory
-        agent-visible: true             # Rendered to agent context
+        agent-visible: true # Rendered to agent context
         # ...
 ```
 
@@ -188,12 +197,13 @@ rules:
 **Sync engine change**: When generating agent context, skip rules where `agent-visible: false`. These rules exist in CI/hook config only. Agents see: "ts-lint: enforced by CI" (one line) instead of the full rule description.
 
 **Implementation**:
+
 - Add `enforced-by:` field to applicable rules: `pre-commit-hook | ci-pipeline | linter-config`
 - Add `agent-visible: false` to rules that tools can fully enforce
 - `scripts/rules-enforcement-matrix.mjs` generates a matrix showing which rules are enforced by what tool
 - Sync engine filters rules by `agent-visible` when rendering agent instructions
 
-**Savings per agent**: ~16 enforcement rules * ~40 words each = ~640 words removed from context per agent that references those domains.
+**Savings per agent**: ~16 enforcement rules \* ~40 words each = ~640 words removed from context per agent that references those domains.
 
 ---
 
@@ -203,11 +213,11 @@ rules:
 
 The same concept — "don't commit secrets" — appears in 3 separate domains:
 
-| Rule ID | Domain | Text |
-|---------|--------|------|
-| `sec-no-secrets` | security | "Never commit secrets, API keys, or credentials..." |
-| `gw-no-secrets-in-history` | git-workflow | "No secrets or credentials in git history..." |
-| `ci-no-secrets-in-workflows` | ci-cd | "No secrets exposed in workflow logs..." |
+| Rule ID                      | Domain       | Text                                                |
+| ---------------------------- | ------------ | --------------------------------------------------- |
+| `sec-no-secrets`             | security     | "Never commit secrets, API keys, or credentials..." |
+| `gw-no-secrets-in-history`   | git-workflow | "No secrets or credentials in git history..."       |
+| `ci-no-secrets-in-workflows` | ci-cd        | "No secrets exposed in workflow logs..."            |
 
 These are the same rule applied in three contexts. An agent that references all three domains (e.g., devops) carries this text three times.
 
@@ -218,22 +228,22 @@ These are the same rule applied in three contexts. An agent that references all 
 ```yaml
 # Primary rule in security domain
 - id: sec-no-secrets
-  rule: "Never commit secrets, API keys, or credentials. Use environment variables and secret managers."
+  rule: 'Never commit secrets, API keys, or credentials. Use environment variables and secret managers.'
   severity: critical
   type: enforcement
-  enforced-by: [pre-commit-hook, ci-pipeline]    # git-secrets or TruffleHog
-  agent-visible: false                             # Tool-enforced
+  enforced-by: [pre-commit-hook, ci-pipeline] # git-secrets or TruffleHog
+  agent-visible: false # Tool-enforced
 
 # Cross-references (not full re-statements)
 # git-workflow domain
 - id: gw-no-secrets-in-history
-  extends: sec-no-secrets                          # NEW: reference, not restatement
-  context: "Applied to git commit history"
+  extends: sec-no-secrets # NEW: reference, not restatement
+  context: 'Applied to git commit history'
 
 # ci-cd domain
 - id: ci-no-secrets-in-workflows
   extends: sec-no-secrets
-  context: "Applied to GitHub Actions workflow logs and outputs"
+  context: 'Applied to GitHub Actions workflow logs and outputs'
 ```
 
 **Savings**: 3 full rule descriptions → 1 full + 2 one-liners.
@@ -246,10 +256,10 @@ These are the same rule applied in three contexts. An agent that references all 
 
 Two separate rules say the same thing:
 
-| Rule ID | Domain | What It Says |
-|---------|--------|-------------|
+| Rule ID                   | Domain       | What It Says                                                     |
+| ------------------------- | ------------ | ---------------------------------------------------------------- |
 | `gw-conventional-commits` | git-workflow | "All commit messages must follow Conventional Commits format..." |
-| `gw-pr-title-format` | git-workflow | "All PR titles must follow Conventional Commits format..." |
+| `gw-pr-title-format`      | git-workflow | "All PR titles must follow Conventional Commits format..."       |
 
 These are the same format applied to two contexts. The agent that carries both gets the Conventional Commits spec explained twice.
 
@@ -259,11 +269,11 @@ These are the same format applied to two contexts. The agent that carries both g
 
 ```yaml
 - id: gw-conventional-format
-  rule: "All commit messages AND PR titles must follow Conventional Commits format: type(scope): description"
+  rule: 'All commit messages AND PR titles must follow Conventional Commits format: type(scope): description'
   severity: error
   type: enforcement
   enforced-by: [commitlint-hook, github-branch-protection]
-  agent-visible: false    # commitlint hook and GitHub PR checks enforce this
+  agent-visible: false # commitlint hook and GitHub PR checks enforce this
 ```
 
 One rule instead of two. And since it's tool-enforced, agents don't need to carry it at all.
@@ -276,16 +286,16 @@ One rule instead of two. And since it's tool-enforced, agents don't need to carr
 
 The `agent-conduct` domain (8 rules) describes HOW agents should work, not WHAT they know about a technical domain:
 
-| Rule | What It Actually Is |
-|------|-------------------|
-| `ac-verify-before-change` | Process: read before edit |
-| `ac-minimal-changes` | Process: don't over-engineer |
-| `ac-run-checks` | Process: run CI locally |
-| `ac-no-destructive-without-confirm` | Process: safety gate |
-| `ac-explain-trade-offs` | Process: communication style |
-| `ac-session-handoff` | Process: documentation practice |
-| `ac-respect-generated-headers` | Process: don't edit generated files |
-| `ac-cost-awareness` | Process: token efficiency |
+| Rule                                | What It Actually Is                 |
+| ----------------------------------- | ----------------------------------- |
+| `ac-verify-before-change`           | Process: read before edit           |
+| `ac-minimal-changes`                | Process: don't over-engineer        |
+| `ac-run-checks`                     | Process: run CI locally             |
+| `ac-no-destructive-without-confirm` | Process: safety gate                |
+| `ac-explain-trade-offs`             | Process: communication style        |
+| `ac-session-handoff`                | Process: documentation practice     |
+| `ac-respect-generated-headers`      | Process: don't edit generated files |
+| `ac-cost-awareness`                 | Process: token efficiency           |
 
 These are copied to ALL 21 agents. They're not domain knowledge — they're behavioral instructions that apply universally.
 
@@ -298,20 +308,21 @@ These are copied to ALL 21 agents. They're not domain knowledge — they're beha
 process:
   agent-conduct:
     - id: ac-verify-before-change
-      rule: "Read file contents before modifying. Never act on stale information."
-      enforced-by: pre-tool-hook     # settings.yaml already has hooks for this
+      rule: 'Read file contents before modifying. Never act on stale information.'
+      enforced-by: pre-tool-hook # settings.yaml already has hooks for this
     - id: ac-minimal-changes
-      rule: "Change only what is necessary. No speculative refactoring."
+      rule: 'Change only what is necessary. No speculative refactoring.'
     - id: ac-run-checks
-      rule: "Run /healthcheck before creating PRs."
+      rule: 'Run /healthcheck before creating PRs.'
       enforced-by: pre-push-hook
     - id: ac-no-destructive-without-confirm
-      rule: "Never run destructive commands without user confirmation."
-      enforced-by: settings-deny-list  # settings.yaml already denies rm -rf, etc.
+      rule: 'Never run destructive commands without user confirmation.'
+      enforced-by: settings-deny-list # settings.yaml already denies rm -rf, etc.
     # ...
 ```
 
 **Key insight**: `settings.yaml` already has hooks and deny lists that enforce several of these rules:
+
 - `ac-no-destructive-without-confirm` → `permissions.deny` already blocks `rm -rf`, `git push --force`, etc.
 - `ac-respect-generated-headers` → `hooks.preToolUse.protect-templates` already blocks editing generated files
 - `ac-run-checks` → Could become a `hooks.stop.pre-push-validate` hook
@@ -325,22 +336,23 @@ process:
 ### The Problem
 
 Agent `responsibilities` lists contain a mix of:
+
 1. **Domain expertise** (good — should stay): "Design and implement RESTful APIs"
 2. **Process instructions** (bad — should be tooling): "Maintain coverage thresholds"
 3. **Enforcement duties** (bad — should be scripts): "Enforce API versioning"
 
 Examples of responsibilities that are process, not domain:
 
-| Agent | Responsibility | Should Be |
-|-------|---------------|-----------|
-| backend | "Enforce API versioning and backwards compatibility" | CI check: semver-diff on API spec |
-| backend | "Review and approve changes to API contracts" | PR review requirement (GitHub config) |
-| frontend | "Optimize bundle size" | CI check: bundle size budget |
-| infra | "Enforce mandatory resource tagging" | Terraform policy (tfsec/Checkov) |
-| infra | "Manage Terraform state backend and locking" | IaC config, not agent instruction |
-| devops | "Enforce branch protection and merge requirements" | GitHub repo settings, not agent behavior |
-| testing | "Maintain quality gate configurations" | CI config, not agent behavior |
-| quality | "Maintain testing infrastructure health" | CI monitoring, not agent instruction |
+| Agent    | Responsibility                                       | Should Be                                |
+| -------- | ---------------------------------------------------- | ---------------------------------------- |
+| backend  | "Enforce API versioning and backwards compatibility" | CI check: semver-diff on API spec        |
+| backend  | "Review and approve changes to API contracts"        | PR review requirement (GitHub config)    |
+| frontend | "Optimize bundle size"                               | CI check: bundle size budget             |
+| infra    | "Enforce mandatory resource tagging"                 | Terraform policy (tfsec/Checkov)         |
+| infra    | "Manage Terraform state backend and locking"         | IaC config, not agent instruction        |
+| devops   | "Enforce branch protection and merge requirements"   | GitHub repo settings, not agent behavior |
+| testing  | "Maintain quality gate configurations"               | CI config, not agent behavior            |
+| quality  | "Maintain testing infrastructure health"             | CI monitoring, not agent instruction     |
 
 ### The Fix
 
@@ -372,11 +384,11 @@ responsibilities:
 
 `AGENTS.md` references files that don't exist:
 
-| Referenced File | Status | Impact |
-|---|---|---|
-| `QUALITY_GATES.md` | Missing | Agents may look for it and waste context |
-| `RUNBOOK_AI.md` | Missing | Same |
-| `UNIFIED_AGENT_TEAMS.md` | Missing | Same |
+| Referenced File            | Status  | Impact                                   |
+| -------------------------- | ------- | ---------------------------------------- |
+| `QUALITY_GATES.md`         | Missing | Agents may look for it and waste context |
+| `RUNBOOK_AI.md`            | Missing | Same                                     |
+| `UNIFIED_AGENT_TEAMS.md`   | Missing | Same                                     |
 | `.claude/state/` directory | Missing | Runtime state infrastructure not created |
 
 Agents reading `AGENTS.md` see references to these files, may attempt to read them, get errors, and waste context on error handling.
@@ -402,19 +414,21 @@ Agents reading `AGENTS.md` see references to these files, may attempt to read th
 **Split into two layers:**
 
 1. **Quick-reference table** (agent context — ~30 lines):
+
 ```markdown
-| Situation | Command |
-|-----------|---------|
-| New session | /orchestrate |
-| Need a plan | /plan |
+| Situation    | Command      |
+| ------------ | ------------ |
+| New session  | /orchestrate |
+| Need a plan  | /plan        |
 | Verify build | /healthcheck |
-| End session | /handoff |
+| End session  | /handoff     |
 ```
 
 2. **Full documentation** (read on demand — 270 lines):
-Keep the full `COMMAND_GUIDE.md` but don't load it into every agent's context. The orchestrator reads it; individual agents only need the quick-reference table plus the specific command they're executing.
+   Keep the full `COMMAND_GUIDE.md` but don't load it into every agent's context. The orchestrator reads it; individual agents only need the quick-reference table plus the specific command they're executing.
 
 **Implementation**: Sync engine generates two outputs:
+
 - `COMMAND_GUIDE.md` (full — for orchestrator and human reference)
 - `COMMAND_QUICK_REF.md` (compact table — for agent context injection)
 
@@ -428,19 +442,20 @@ Keep the full `COMMAND_GUIDE.md` but don't load it into every agent's context. T
 
 `settings.yaml` defines hooks that enforce rules — but agents also carry the same rules as text instructions:
 
-| Hook | What It Enforces | Matching Rule |
-|------|-----------------|---------------|
-| `permissions.deny: ["rm -rf", "git push --force", "git reset --hard"]` | No destructive commands | `ac-no-destructive-without-confirm` |
-| `hooks.preToolUse.protect-templates` | Don't edit generated files | `ac-respect-generated-headers` |
-| `hooks.preToolUse.protect-sensitive` | Protect sensitive files | `sec-no-secrets` (partial) |
-| `hooks.preToolUse.guard-destructive-commands` | Guard destructive ops | `ac-no-destructive-without-confirm` (again) |
-| `hooks.preToolUse.pre-push-validate` | Validate before push | `ac-run-checks`, `gw-sync-before-pr` |
+| Hook                                                                   | What It Enforces           | Matching Rule                               |
+| ---------------------------------------------------------------------- | -------------------------- | ------------------------------------------- |
+| `permissions.deny: ["rm -rf", "git push --force", "git reset --hard"]` | No destructive commands    | `ac-no-destructive-without-confirm`         |
+| `hooks.preToolUse.protect-templates`                                   | Don't edit generated files | `ac-respect-generated-headers`              |
+| `hooks.preToolUse.protect-sensitive`                                   | Protect sensitive files    | `sec-no-secrets` (partial)                  |
+| `hooks.preToolUse.guard-destructive-commands`                          | Guard destructive ops      | `ac-no-destructive-without-confirm` (again) |
+| `hooks.preToolUse.pre-push-validate`                                   | Validate before push       | `ac-run-checks`, `gw-sync-before-pr`        |
 
 **Double enforcement**: The hook already blocks the behavior. The rule in agent context tells the agent not to do it. Both exist. The hook is the reliable one — the agent instruction is the redundant one.
 
 ### The Fix
 
 For rules where hooks already enforce the behavior:
+
 1. Mark the rule `agent-visible: false` in rules.yaml
 2. Add comment: `enforced-by: hook:<hook-name>`
 3. Agent context no longer carries these rules
@@ -481,19 +496,19 @@ When an agent needs examples (implementation tasks), the orchestrator includes t
 
 ## Consolidated Savings Estimate
 
-| Finding | Current Cost | After Fix | Savings |
-|---------|-------------|-----------|---------|
-| 1. Domain-rules duplication | ~13.4KB across file; ~640 words per agent | ~50 words per agent (IDs only) | **~590 words/agent** |
-| 2. Preferred-tools duplication | 111 lines | ~10 lines | **~100 lines** |
-| 3. CI-enforceable rules in context | ~640 words per agent | 0 (tool-enforced) | **~640 words/agent** |
-| 4. Duplicate secrets rules | 3 full descriptions | 1 full + 2 refs | **~80 words** |
-| 5. Duplicate conventional commits | 2 full descriptions | 1 merged, tool-enforced | **~60 words** |
-| 6. Agent-conduct in every agent | 178 chars * 21 agents | 1 global config | **~3,700 chars** |
-| 7. Process responsibilities | ~40 lines | ~28 lines | **~12 lines/agent** |
-| 8. Dead file references | Error handling context waste | No errors | **Variable** |
-| 9. Full COMMAND_GUIDE in context | ~14KB per agent | ~2KB quick-ref | **~12KB/agent** |
-| 10. Rules duplicating hooks | ~5 rules * ~40 words | 0 (hook-enforced) | **~200 words/agent** |
-| 11. Always-loaded examples | ~100 lines | On-demand only | **~100 lines** |
+| Finding                            | Current Cost                              | After Fix                      | Savings              |
+| ---------------------------------- | ----------------------------------------- | ------------------------------ | -------------------- |
+| 1. Domain-rules duplication        | ~13.4KB across file; ~640 words per agent | ~50 words per agent (IDs only) | **~590 words/agent** |
+| 2. Preferred-tools duplication     | 111 lines                                 | ~10 lines                      | **~100 lines**       |
+| 3. CI-enforceable rules in context | ~640 words per agent                      | 0 (tool-enforced)              | **~640 words/agent** |
+| 4. Duplicate secrets rules         | 3 full descriptions                       | 1 full + 2 refs                | **~80 words**        |
+| 5. Duplicate conventional commits  | 2 full descriptions                       | 1 merged, tool-enforced        | **~60 words**        |
+| 6. Agent-conduct in every agent    | 178 chars \* 21 agents                    | 1 global config                | **~3,700 chars**     |
+| 7. Process responsibilities        | ~40 lines                                 | ~28 lines                      | **~12 lines/agent**  |
+| 8. Dead file references            | Error handling context waste              | No errors                      | **Variable**         |
+| 9. Full COMMAND_GUIDE in context   | ~14KB per agent                           | ~2KB quick-ref                 | **~12KB/agent**      |
+| 10. Rules duplicating hooks        | ~5 rules \* ~40 words                     | 0 (hook-enforced)              | **~200 words/agent** |
+| 11. Always-loaded examples         | ~100 lines                                | On-demand only                 | **~100 lines**       |
 
 **Conservative estimate**: Each agent session saves **~2,000-3,000 tokens** of wasted context. Across a sprint with multiple agents active, this adds up to tens of thousands of tokens.
 
@@ -505,42 +520,42 @@ More importantly: **reliability improves**. Rules enforced by scripts and hooks 
 
 ### Phase A — Quick Wins (Config-Only Changes)
 
-| # | Change | Files Modified |
-|---|--------|---------------|
-| A1 | Convert domain-rules from text strings to ID references | `agents.yaml` |
-| A2 | Define global-domain-rules for universal rules (git-workflow, agent-conduct) | `teams.yaml` process section |
-| A3 | Define default preferred-tools; remove per-agent copies | `agents.yaml`, `teams.yaml` |
-| A4 | Add `agent-visible: false` to tool-enforced rules | `rules.yaml` |
-| A5 | Merge `gw-conventional-commits` and `gw-pr-title-format` | `rules.yaml` |
-| A6 | Add `extends:` for duplicate secrets rules | `rules.yaml` |
-| A7 | Remove or generate missing referenced files | `AGENTS.md`, project setup |
+| #   | Change                                                                       | Files Modified               |
+| --- | ---------------------------------------------------------------------------- | ---------------------------- |
+| A1  | Convert domain-rules from text strings to ID references                      | `agents.yaml`                |
+| A2  | Define global-domain-rules for universal rules (git-workflow, agent-conduct) | `teams.yaml` process section |
+| A3  | Define default preferred-tools; remove per-agent copies                      | `agents.yaml`, `teams.yaml`  |
+| A4  | Add `agent-visible: false` to tool-enforced rules                            | `rules.yaml`                 |
+| A5  | Merge `gw-conventional-commits` and `gw-pr-title-format`                     | `rules.yaml`                 |
+| A6  | Add `extends:` for duplicate secrets rules                                   | `rules.yaml`                 |
+| A7  | Remove or generate missing referenced files                                  | `AGENTS.md`, project setup   |
 
 ### Phase B — Sync Engine Changes
 
-| # | Change | Files Modified |
-|---|--------|---------------|
-| B1 | Resolve domain-rule IDs to text only when rendering full context | Sync engine |
-| B2 | Filter rules by `agent-visible` when generating agent output | Sync engine |
-| B3 | Generate `COMMAND_QUICK_REF.md` alongside full guide | Sync engine |
-| B4 | Move examples/anti-patterns to external files; load on demand | Sync engine, agents.yaml |
+| #   | Change                                                           | Files Modified           |
+| --- | ---------------------------------------------------------------- | ------------------------ |
+| B1  | Resolve domain-rule IDs to text only when rendering full context | Sync engine              |
+| B2  | Filter rules by `agent-visible` when generating agent output     | Sync engine              |
+| B3  | Generate `COMMAND_QUICK_REF.md` alongside full guide             | Sync engine              |
+| B4  | Move examples/anti-patterns to external files; load on demand    | Sync engine, agents.yaml |
 
 ### Phase C — Hook & CI Alignment
 
-| # | Change | Files Modified |
-|---|--------|---------------|
-| C1 | Add pre-commit hooks for: ts-lint, ts-format, py-lint, py-format, rs-fmt, iac-fmt | `.husky/`, `package.json` |
-| C2 | Add CI checks for: qa-coverage-threshold, ci-pin-actions, dep-lockfile-committed | `.github/workflows/` |
-| C3 | Add pre-push hook for gw-sync-before-pr | `.husky/`, settings.yaml |
-| C4 | Add `enforced-by:` field to all enforcement rules | `rules.yaml` |
-| C5 | Generate enforcement matrix document | `scripts/rules-enforcement-matrix.mjs` |
+| #   | Change                                                                            | Files Modified                         |
+| --- | --------------------------------------------------------------------------------- | -------------------------------------- |
+| C1  | Add pre-commit hooks for: ts-lint, ts-format, py-lint, py-format, rs-fmt, iac-fmt | `.husky/`, `package.json`              |
+| C2  | Add CI checks for: qa-coverage-threshold, ci-pin-actions, dep-lockfile-committed  | `.github/workflows/`                   |
+| C3  | Add pre-push hook for gw-sync-before-pr                                           | `.husky/`, settings.yaml               |
+| C4  | Add `enforced-by:` field to all enforcement rules                                 | `rules.yaml`                           |
+| C5  | Generate enforcement matrix document                                              | `scripts/rules-enforcement-matrix.mjs` |
 
 ### Phase D — Responsibility Audit
 
-| # | Change | Files Modified |
-|---|--------|---------------|
-| D1 | Classify each responsibility as domain-expertise or process-enforcement | `agents.yaml` |
-| D2 | Move process-enforcement responsibilities to tooling/CI config | Various CI/config files |
-| D3 | Trim responsibility lists to domain-expertise only | `agents.yaml` |
+| #   | Change                                                                  | Files Modified          |
+| --- | ----------------------------------------------------------------------- | ----------------------- |
+| D1  | Classify each responsibility as domain-expertise or process-enforcement | `agents.yaml`           |
+| D2  | Move process-enforcement responsibilities to tooling/CI config          | Various CI/config files |
+| D3  | Trim responsibility lists to domain-expertise only                      | `agents.yaml`           |
 
 ---
 
@@ -548,27 +563,27 @@ More importantly: **reliability improves**. Rules enforced by scripts and hooks 
 
 This audit's recommendations integrate with the process specs:
 
-| This Audit Finding | Related Spec Feature | Integration |
-|---|---|---|
-| Global agent-conduct rules → process config | SPEC-PROC-001 TR-CC-1 (teams.yaml process section) | Agent-conduct rules live in same process block |
-| Tool-enforced rules → scripts | SPEC-PROC-001 TR-CC-2 (script architecture) | Rule enforcement scripts follow same pattern |
-| Enforcement matrix | SPEC-PROC-004a F-029 (poka-yoke registry) | Registry tracks which rules have automated enforcement |
-| Hook-enforced rules | SPEC-PROC-004a F-029 (poka-yoke expansion) | Hooks are poka-yoke mechanisms |
-| On-demand examples | SPEC-PROC-002 F-010 (Scrum Master as scripts) | Same principle: push logic out of agent context |
+| This Audit Finding                          | Related Spec Feature                               | Integration                                            |
+| ------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| Global agent-conduct rules → process config | SPEC-PROC-001 TR-CC-1 (teams.yaml process section) | Agent-conduct rules live in same process block         |
+| Tool-enforced rules → scripts               | SPEC-PROC-001 TR-CC-2 (script architecture)        | Rule enforcement scripts follow same pattern           |
+| Enforcement matrix                          | SPEC-PROC-004a F-029 (poka-yoke registry)          | Registry tracks which rules have automated enforcement |
+| Hook-enforced rules                         | SPEC-PROC-004a F-029 (poka-yoke expansion)         | Hooks are poka-yoke mechanisms                         |
+| On-demand examples                          | SPEC-PROC-002 F-010 (Scrum Master as scripts)      | Same principle: push logic out of agent context        |
 
 ---
 
 ## Success Criteria
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| agents.yaml file size | 50KB / 1,037 lines | < 25KB / ~500 lines |
-| Domain-rules text per agent | ~640 words | < 100 words (IDs only) |
-| Rules with `agent-visible: false` | 0 | 16+ (all tool-enforced rules) |
-| Rules with `enforced-by:` field | 0 | All enforcement-type rules |
-| Duplicate text across agents | ~25,000 words total | < 2,000 words |
-| Missing referenced files | 3 | 0 |
-| Preferred-tools lines | 111 | < 15 |
+| Metric                            | Current             | Target                        |
+| --------------------------------- | ------------------- | ----------------------------- |
+| agents.yaml file size             | 50KB / 1,037 lines  | < 25KB / ~500 lines           |
+| Domain-rules text per agent       | ~640 words          | < 100 words (IDs only)        |
+| Rules with `agent-visible: false` | 0                   | 16+ (all tool-enforced rules) |
+| Rules with `enforced-by:` field   | 0                   | All enforcement-type rules    |
+| Duplicate text across agents      | ~25,000 words total | < 2,000 words                 |
+| Missing referenced files          | 3                   | 0                             |
+| Preferred-tools lines             | 111                 | < 15                          |
 
 ---
 

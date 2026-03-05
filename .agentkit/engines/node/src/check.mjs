@@ -351,9 +351,8 @@ function loadCoverageThreshold(agentkitRoot) {
  * @returns {object} results
  */
 export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
-  const userContext = Array.isArray(flags._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
 
   console.log('[agentkit:check] Running quality gates...');
   if (userContext) {
@@ -472,7 +471,14 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
   }
 
   // --- Unresolved placeholder audit ---
-  const outputDirs = ['.claude', '.github/instructions', '.cursor', '.clinerules', '.roo', '.windsurf'];
+  const outputDirs = [
+    '.claude',
+    '.github/instructions',
+    '.cursor',
+    '.clinerules',
+    '.roo',
+    '.windsurf',
+  ];
   const unresolvedFindings = await auditUnresolvedPlaceholders(projectRoot, outputDirs);
   if (unresolvedFindings.length > 0) {
     console.log('--- Unresolved Placeholders ---');
@@ -548,7 +554,13 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
     console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`);
   }
 
-  return { stacks: allResults, overallStatus, overallPassed, coverage: coverageResults, ...(userContext ? { userContext } : {}) };
+  return {
+    stacks: allResults,
+    overallStatus,
+    overallPassed,
+    coverage: coverageResults,
+    ...(userContext ? { userContext } : {}),
+  };
 }
 
 // Export internal helpers so they can be directly unit-tested.

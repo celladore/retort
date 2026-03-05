@@ -22,6 +22,7 @@ repositories that have integrated AgentKit Forge.
 | [#258](https://github.com/JustAGhosT/agentkit-forge/issues/258) | feat(cli): implement autoupdate functionality for repositories adopting AgentKit Forge          | Open   | [PRD-007](../../01_product/PRD-007-adopter-autoupdate.md) |
 
 > **Status update:** Milestone and autoupdate issue have been created.
+>
 > - Milestone: [#2](https://github.com/JustAGhosT/agentkit-forge/milestone/2)
 > - Autoupdate issue: [#258](https://github.com/JustAGhosT/agentkit-forge/issues/258)
 > - Cross-reference comments added on [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)
@@ -98,9 +99,9 @@ delivery channel established in
 - [ ] Add `agentkit-forge update --rollback` — restores previous version and sync outputs.
 - [ ] Add `agentkit-forge update --version X` — pin-upgrade to a specific version.
 - [ ] GitHub Action template: scheduled workflow that opens an auto-update PR when the
-  pinned forge version is behind the latest stable release.
+      pinned forge version is behind the latest stable release.
 - [ ] Preflight checks validate CLI toolchain availability before attempting upgrade
-  (integrates with #196 requirements).
+      (integrates with #196 requirements).
 - [ ] Upgrade flow always triggers sync, satisfying the pre-PR sync contract (#194).
 - [ ] Changelog summary displayed in CLI output and in auto-generated PR body.
 - [ ] Telemetry event emitted on update (version, adopter repo ID, outcome) for #241.

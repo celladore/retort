@@ -8,14 +8,14 @@ Historical documentation for significant PRs and implementations in agentkit-for
 
 ## Directory Structure
 
-| Directory                                    | Description                                        |
-| -------------------------------------------- | -------------------------------------------------- |
-| [implementations/](./implementations/)       | Major implementations and architecture changes     |
-| [bug-fixes/](./bug-fixes/)                   | Complex or critical bug resolutions                |
-| [features/](./features/)                     | New feature launches                               |
-| [migrations/](./migrations/)                 | Major migrations and upgrades                      |
-| [issues/](./issues/)                         | Issues encountered during development sessions     |
-| [lessons-learned/](./lessons-learned/)       | Lessons learned from retrospectives                |
+| Directory                              | Description                                    |
+| -------------------------------------- | ---------------------------------------------- |
+| [implementations/](./implementations/) | Major implementations and architecture changes |
+| [bug-fixes/](./bug-fixes/)             | Complex or critical bug resolutions            |
+| [features/](./features/)               | New feature launches                           |
+| [migrations/](./migrations/)           | Major migrations and upgrades                  |
+| [issues/](./issues/)                   | Issues encountered during development sessions |
+| [lessons-learned/](./lessons-learned/) | Lessons learned from retrospectives            |
 
 ## Naming Convention
 

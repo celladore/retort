@@ -115,7 +115,9 @@ describe('replacePlaceholders', () => {
   });
 
   it('resolves {{var|default}} pipe syntax with var value when present', () => {
-    const result = replacePlaceholders('coverage: {{testingCoverage|80}}%', { testingCoverage: '95' });
+    const result = replacePlaceholders('coverage: {{testingCoverage|80}}%', {
+      testingCoverage: '95',
+    });
     expect(result).toBe('coverage: 95%');
   });
 

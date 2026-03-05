@@ -9,18 +9,18 @@ Evaluate whether a dedicated **Architect** agent should be added to the agent ro
 
 ## Current State: Who Owns Architecture Today?
 
-| Architectural Concern | Current Owner | Gap? |
-|---|---|---|
-| API design | Backend Engineer | Partial — API-only, not system-wide |
-| Database schema design | Data Engineer | OK for data layer |
-| IaC module design | Infrastructure Engineer | OK for infra layer |
-| Cross-service integration design | **Nobody** | **GAP** |
-| ADR creation/maintenance | Docs team (no agent) | **GAP** — team exists but has no agent |
-| Component interaction review | **Nobody** | **GAP** |
-| Tech stack decisions | **Nobody explicitly** | **GAP** |
-| Non-functional requirements (perf, scale, security) | Split across security-auditor + infra | Fragmented |
-| Monolith-to-microservice decomposition | **Nobody** | **GAP** |
-| System boundary definition | **Nobody** | **GAP** |
+| Architectural Concern                               | Current Owner                         | Gap?                                   |
+| --------------------------------------------------- | ------------------------------------- | -------------------------------------- |
+| API design                                          | Backend Engineer                      | Partial — API-only, not system-wide    |
+| Database schema design                              | Data Engineer                         | OK for data layer                      |
+| IaC module design                                   | Infrastructure Engineer               | OK for infra layer                     |
+| Cross-service integration design                    | **Nobody**                            | **GAP**                                |
+| ADR creation/maintenance                            | Docs team (no agent)                  | **GAP** — team exists but has no agent |
+| Component interaction review                        | **Nobody**                            | **GAP**                                |
+| Tech stack decisions                                | **Nobody explicitly**                 | **GAP**                                |
+| Non-functional requirements (perf, scale, security) | Split across security-auditor + infra | Fragmented                             |
+| Monolith-to-microservice decomposition              | **Nobody**                            | **GAP**                                |
+| System boundary definition                          | **Nobody**                            | **GAP**                                |
 
 ### Existing Agents That Touch Architecture
 
@@ -32,7 +32,7 @@ Evaluate whether a dedicated **Architect** agent should be added to the agent ro
 ## Proposed Architect Agent
 
 ```yaml
-engineering:  # or new 'architecture' category
+engineering: # or new 'architecture' category
   - id: architect
     category: engineering
     name: Solution Architect
@@ -70,9 +70,9 @@ engineering:  # or new 'architecture' category
       - Assess technical debt impact on architectural health
       - Participate in design reviews for features spanning multiple teams
     domain-rules:
-      - "Follow documentation domain rules [doc-adr-format] — all significant decisions must have ADRs"
-      - "Follow agent-conduct domain rules [ac-verify-before-change, ac-explain-trade-offs]"
-      - "Follow quality domain rules — review against Definition of Done criteria"
+      - 'Follow documentation domain rules [doc-adr-format] — all significant decisions must have ADRs'
+      - 'Follow agent-conduct domain rules [ac-verify-before-change, ac-explain-trade-offs]'
+      - 'Follow quality domain rules — review against Definition of Done criteria'
     conventions:
       - Every feature spanning 2+ services requires an architecture review
       - ADRs must be created before implementation begins for cross-cutting changes
@@ -93,7 +93,7 @@ engineering:  # or new 'architecture' category
   name: QUALITY
   focus: 'Code review, refactoring, bugs, reliability, architecture review, session retrospectives'
   scope: ['**/*']
-  accepts: [review, investigate, plan]  # ADD plan
+  accepts: [review, investigate, plan] # ADD plan
   handoff-chain: []
 ```
 

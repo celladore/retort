@@ -59,9 +59,11 @@ describe('runSyncBacklog', () => {
   it('syncs with external tracker when autoImport is true', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([
+          { number: 1, title: 'Bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
+        ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -102,7 +104,12 @@ describe('runSyncBacklog', () => {
       resolve(dirs.stateDir, 'orchestrator.json'),
       JSON.stringify({
         risks: [
-          { title: 'Missing tests', description: 'Low coverage', severity: 'high', team: 'testing' },
+          {
+            title: 'Missing tests',
+            description: 'Low coverage',
+            severity: 'high',
+            team: 'testing',
+          },
         ],
       }),
       'utf-8'

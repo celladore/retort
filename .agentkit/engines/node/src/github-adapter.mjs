@@ -27,8 +27,7 @@ export class GitHubAdapter {
       if (stderr.includes('not found') || err.code === 'ENOENT') {
         return {
           ok: false,
-          message:
-            'gh CLI not found. Install: https://cli.github.com/ then run: gh auth login',
+          message: 'gh CLI not found. Install: https://cli.github.com/ then run: gh auth login',
         };
       }
       return {
@@ -51,9 +50,7 @@ export class GitHubAdapter {
     // Validate state parameter
     const validStates = ['open', 'closed', 'all'];
     if (!validStates.includes(state)) {
-      throw new Error(
-        `Invalid state "${state}". Must be one of: ${validStates.join(', ')}`
-      );
+      throw new Error(`Invalid state "${state}". Must be one of: ${validStates.join(', ')}`);
     }
 
     // Clamp limit to prevent excessive API calls
@@ -77,14 +74,7 @@ export class GitHubAdapter {
       'closedAt',
     ].join(',');
 
-    const args = [
-      'issue',
-      'list',
-      '--json',
-      fields,
-      '--limit',
-      String(limit),
-    ];
+    const args = ['issue', 'list', '--json', fields, '--limit', String(limit)];
 
     args.push('--state', state);
 
@@ -106,9 +96,7 @@ export class GitHubAdapter {
 
       const parsed = JSON.parse(stdout);
       if (!Array.isArray(parsed)) {
-        throw new Error(
-          `Unexpected gh output: expected JSON array, got ${typeof parsed}`
-        );
+        throw new Error(`Unexpected gh output: expected JSON array, got ${typeof parsed}`);
       }
 
       // Client-side filter by --since (gh doesn't support this natively on issue list)

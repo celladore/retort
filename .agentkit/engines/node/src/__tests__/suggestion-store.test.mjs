@@ -20,12 +20,7 @@ const { mkdtemp, readdir, rm } = fsPromises;
 
 describe('suggestion-store constants', () => {
   it('exports valid suggestion states', () => {
-    expect(SUGGESTION_STATES).toEqual([
-      'pending_review',
-      'approved',
-      'rejected',
-      'deferred',
-    ]);
+    expect(SUGGESTION_STATES).toEqual(['pending_review', 'approved', 'rejected', 'deferred']);
   });
 
   it('exports terminal states', () => {
@@ -113,10 +108,10 @@ describe('suggestion-store operations', () => {
 
   it('rejects invalid suggestion IDs (path traversal prevention)', async () => {
     await expect(loadSuggestion(tempRoot, '../../../etc/passwd')).rejects.toThrow(
-      'Invalid suggestion ID',
+      'Invalid suggestion ID'
     );
     await expect(loadSuggestion(tempRoot, 'SUG-001; rm -rf /')).rejects.toThrow(
-      'Invalid suggestion ID',
+      'Invalid suggestion ID'
     );
     await expect(loadSuggestion(tempRoot, '')).rejects.toThrow('Invalid suggestion ID');
   });
@@ -154,7 +149,7 @@ describe('suggestion-store operations', () => {
       tempRoot,
       'SUG-002',
       'deferred',
-      'Not a priority this quarter',
+      'Not a priority this quarter'
     );
 
     expect(updated.status).toBe('deferred');
@@ -164,30 +159,30 @@ describe('suggestion-store operations', () => {
   it('rejects invalid status values', async () => {
     await saveSuggestions(tempRoot, sampleReport);
 
-    await expect(
-      updateSuggestionStatus(tempRoot, 'SUG-001', 'invalid_status'),
-    ).rejects.toThrow('Invalid suggestion status');
+    await expect(updateSuggestionStatus(tempRoot, 'SUG-001', 'invalid_status')).rejects.toThrow(
+      'Invalid suggestion status'
+    );
   });
 
   it('rejects updates to non-existent suggestions', async () => {
-    await expect(
-      updateSuggestionStatus(tempRoot, 'SUG-999', 'approved'),
-    ).rejects.toThrow('Suggestion not found');
+    await expect(updateSuggestionStatus(tempRoot, 'SUG-999', 'approved')).rejects.toThrow(
+      'Suggestion not found'
+    );
   });
 
   it('rejects updates with invalid IDs (path traversal prevention)', async () => {
-    await expect(
-      updateSuggestionStatus(tempRoot, '../secret', 'approved'),
-    ).rejects.toThrow('Invalid suggestion ID');
+    await expect(updateSuggestionStatus(tempRoot, '../secret', 'approved')).rejects.toThrow(
+      'Invalid suggestion ID'
+    );
   });
 
   it('prevents updates to terminal-state suggestions', async () => {
     await saveSuggestions(tempRoot, sampleReport);
     await updateSuggestionStatus(tempRoot, 'SUG-001', 'approved');
 
-    await expect(
-      updateSuggestionStatus(tempRoot, 'SUG-001', 'deferred'),
-    ).rejects.toThrow('terminal state');
+    await expect(updateSuggestionStatus(tempRoot, 'SUG-001', 'deferred')).rejects.toThrow(
+      'terminal state'
+    );
   });
 
   it('saves rejection fingerprint on reject', async () => {

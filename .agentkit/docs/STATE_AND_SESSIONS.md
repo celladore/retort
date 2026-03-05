@@ -50,9 +50,17 @@ A typical `orchestrator.json` looks like this:
   "last_phase_completed": 2,
   "next_action": "Delegate rate limiting implementation to team-backend",
   "team_progress": {
-    "T1-backend": { "status": "in_progress", "notes": "Task TASK-002: Add rate limit to auth endpoints", "last_updated": "2026-02-23T14:28:00.000Z" },
+    "T1-backend": {
+      "status": "in_progress",
+      "notes": "Task TASK-002: Add rate limit to auth endpoints",
+      "last_updated": "2026-02-23T14:28:00.000Z"
+    },
     "T2-frontend": { "status": "idle", "notes": "" },
-    "T3-data": { "status": "done", "notes": "Task TASK-001: Create rate limit schema", "last_updated": "2026-02-23T14:20:00.000Z" },
+    "T3-data": {
+      "status": "done",
+      "notes": "Task TASK-001: Create rate limit schema",
+      "last_updated": "2026-02-23T14:20:00.000Z"
+    },
     "T4-infra": { "status": "idle", "notes": "" },
     "T5-devops": { "status": "idle", "notes": "" },
     "T6-testing": { "status": "idle", "notes": "" },
@@ -62,11 +70,29 @@ A typical `orchestrator.json` looks like this:
     "T10-quality": { "status": "idle", "notes": "" }
   },
   "todo_items": [
-    { "id": "TASK-002", "title": "Add rate limit to auth endpoints", "team": "backend", "priority": "P1", "status": "in-progress" },
-    { "id": "TASK-003", "title": "Write rate limit unit tests", "team": "testing", "priority": "P1", "status": "pending" }
+    {
+      "id": "TASK-002",
+      "title": "Add rate limit to auth endpoints",
+      "team": "backend",
+      "priority": "P1",
+      "status": "in-progress"
+    },
+    {
+      "id": "TASK-003",
+      "title": "Write rate limit unit tests",
+      "team": "testing",
+      "priority": "P1",
+      "status": "pending"
+    }
   ],
   "recent_results": [
-    { "action": "task_complete", "task_id": "TASK-001", "team": "data", "status": "success", "files_changed": 2 }
+    {
+      "action": "task_complete",
+      "task_id": "TASK-001",
+      "team": "data",
+      "status": "success",
+      "files_changed": 2
+    }
   ],
   "completed": false
 }
@@ -118,21 +144,21 @@ Example entries:
 
 ### Event Action Types
 
-| Action | Phase | Description |
-|--------|-------|-------------|
-| `orchestrate_invoked` | Any | Default orchestrate run started |
-| `phase_set` | Any | Orchestrator transitions to a new phase |
-| `discovery_complete` | 1 | Codebase scan finished |
-| `plan_created` | 2 | Implementation plan generated |
-| `plan_viewed` | 2 | Plan viewed via `/plan` |
-| `team_dispatch` | 3 | Task assigned to a team agent |
-| `task_complete` | 3 | Team agent finished a task |
-| `healthcheck_completed` | 4 | Healthcheck finished |
-| `check_completed` | 4 | Full quality check results |
-| `review_completed` | 4 | Code review verdict |
-| `handoff_generated` | 5 | Handoff document written to disk |
-| `session_complete` | 5 | Orchestration run finished |
-| `lock_force_released` | Any | Session lock force-cleared via `--force-unlock` |
+| Action                  | Phase | Description                                     |
+| ----------------------- | ----- | ----------------------------------------------- |
+| `orchestrate_invoked`   | Any   | Default orchestrate run started                 |
+| `phase_set`             | Any   | Orchestrator transitions to a new phase         |
+| `discovery_complete`    | 1     | Codebase scan finished                          |
+| `plan_created`          | 2     | Implementation plan generated                   |
+| `plan_viewed`           | 2     | Plan viewed via `/plan`                         |
+| `team_dispatch`         | 3     | Task assigned to a team agent                   |
+| `task_complete`         | 3     | Team agent finished a task                      |
+| `healthcheck_completed` | 4     | Healthcheck finished                            |
+| `check_completed`       | 4     | Full quality check results                      |
+| `review_completed`      | 4     | Code review verdict                             |
+| `handoff_generated`     | 5     | Handoff document written to disk                |
+| `session_complete`      | 5     | Orchestration run finished                      |
+| `lock_force_released`   | Any   | Session lock force-cleared via `--force-unlock` |
 
 ### Purpose
 

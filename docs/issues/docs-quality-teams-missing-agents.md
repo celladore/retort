@@ -7,10 +7,10 @@
 
 Two of the 10 defined teams have **no dedicated agents**, making them unable to meaningfully execute delegated work through the orchestrator:
 
-| Team | ID | Scope | Handoff Source | Current Agents |
-|---|---|---|---|---|
-| Documentation | T8 (`docs`) | `docs/**`, ADRs, guides, CHANGELOG | `backend → [testing, docs]`, `frontend → [testing, docs]` | **None** |
-| Quality | T10 (`quality`) | `**/*` (universal) | `testing → [quality]` | **None** |
+| Team          | ID              | Scope                              | Handoff Source                                            | Current Agents |
+| ------------- | --------------- | ---------------------------------- | --------------------------------------------------------- | -------------- |
+| Documentation | T8 (`docs`)     | `docs/**`, ADRs, guides, CHANGELOG | `backend → [testing, docs]`, `frontend → [testing, docs]` | **None**       |
+| Quality       | T10 (`quality`) | `**/*` (universal)                 | `testing → [quality]`                                     | **None**       |
 
 When the orchestrator delegates to these teams, there is no agent definition to guide behavior — the AI falls back to generic instructions, losing team-specific expertise and quality criteria.
 
@@ -23,7 +23,15 @@ When the orchestrator delegates to these teams, there is no agent definition to 
 - id: docs
   name: DOCUMENTATION
   focus: 'Docs, ADRs, guides'
-  scope: ['docs/**', 'docs/03_architecture/02_decisions/**', '.github/**', 'README.md', 'CHANGELOG.md', 'CONTRIBUTING.md']
+  scope:
+    [
+      'docs/**',
+      'docs/03_architecture/02_decisions/**',
+      '.github/**',
+      'README.md',
+      'CHANGELOG.md',
+      'CONTRIBUTING.md',
+    ]
   accepts: [implement, review, document]
   handoff-chain: []
 ```
@@ -72,9 +80,9 @@ operations:
       - Maintain developer setup guides in docs/06_engineering/
       - Ensure generated file headers are not manually edited
     domain-rules:
-      - "Follow documentation domain rules [doc-8-category-structure, doc-adr-format, doc-changelog, doc-api-spec]"
-      - "Follow git-workflow domain rules [gw-conventional-commits, gw-sync-before-pr]"
-      - "Follow agent-conduct domain rules [ac-verify-before-change, ac-respect-generated-headers]"
+      - 'Follow documentation domain rules [doc-8-category-structure, doc-adr-format, doc-changelog, doc-api-spec]'
+      - 'Follow git-workflow domain rules [gw-conventional-commits, gw-sync-before-pr]'
+      - 'Follow agent-conduct domain rules [ac-verify-before-change, ac-respect-generated-headers]'
     conventions:
       - ADRs must follow the format: title, status, context, decision, consequences
       - Changelog entries categorised as Added, Changed, Deprecated, Removed, Fixed, Security

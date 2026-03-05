@@ -268,7 +268,9 @@ function migrateStateDirIfNeeded(projectRoot) {
         'The old directory is preserved for backward compatibility and can be removed in a future release.'
     );
   } catch (err) {
-    console.warn(`[agentkit] State migration failed: ${err.message}. Falling back to new directory.`);
+    console.warn(
+      `[agentkit] State migration failed: ${err.message}. Falling back to new directory.`
+    );
     mkdirSync(newDir, { recursive: true });
   }
 }
@@ -1057,9 +1059,8 @@ export async function getTasksSummaryAsync(projectRoot) {
  * @param {object} opts.flags
  */
 export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
-  const userContext = Array.isArray(flags._args) && flags._args.length > 0
-    ? flags._args.join(' ')
-    : null;
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
 
   // Load team IDs from spec if available (overrides hardcoded defaults)
   loadTeamIdsFromSpec(agentkitRoot);

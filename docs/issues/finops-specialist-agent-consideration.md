@@ -34,6 +34,7 @@ The Infrastructure Engineer agent also has cost-related responsibilities:
 ### Why Not `data-analyst`?
 
 A generic "data-analyst" agent was evaluated and rejected because:
+
 - **High overlap** with Data Engineer (cost analytics) and Growth Analyst (product analytics)
 - **No clear boundary** — what would it own that these two don't?
 - **Analytics is already distributed**: Data Engineer = infrastructure/cost, Growth Analyst = product/user, Coverage Tracker = test quality
@@ -41,6 +42,7 @@ A generic "data-analyst" agent was evaluated and rejected because:
 ### Why `finops-specialist` Is a Better Fit
 
 A **FinOps Specialist** has a cohesive, well-defined scope that aligns with existing infrastructure:
+
 - The `finops` rule domain already exists with 7 conventions
 - The `/cost-centres` command already provides a dedicated workflow
 - The `pvc-costops-analytics` overlay enables FinOps capabilities per-repo

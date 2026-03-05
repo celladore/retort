@@ -89,4 +89,3 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
 - Blocked cross-team escalation: `product`
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
-

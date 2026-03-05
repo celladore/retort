@@ -31,11 +31,11 @@ what they are currently doing.
 
 ### Options Considered
 
-| Option | Description | Trade-offs |
-|--------|-------------|------------|
-| **A — Separate files** | Split rules into `directives.yaml` (enforcement) and `guidelines.yaml` (advisory) | Clean separation, but doubles the number of files and splits domain cohesion |
-| **B — Status quo** | Keep using severity alone | Simple, but agents cannot distinguish enforceable gates from design principles |
-| **C — Extend conventions** | Add `type` and `phase` fields to existing conventions in `rules.yaml` | Backwards-compatible, preserves domain grouping, minimal schema change |
+| Option                     | Description                                                                       | Trade-offs                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **A — Separate files**     | Split rules into `directives.yaml` (enforcement) and `guidelines.yaml` (advisory) | Clean separation, but doubles the number of files and splits domain cohesion   |
+| **B — Status quo**         | Keep using severity alone                                                         | Simple, but agents cannot distinguish enforceable gates from design principles |
+| **C — Extend conventions** | Add `type` and `phase` fields to existing conventions in `rules.yaml`             | Backwards-compatible, preserves domain grouping, minimal schema change         |
 
 ## Decision
 
@@ -44,23 +44,23 @@ fields:
 
 ### `type` (optional, default: `advisory`)
 
-| Value | Meaning | Agent behaviour |
-|-------|---------|-----------------|
-| `enforcement` | Hard constraint backed by tooling, CI gates, or hooks | Agent MUST pass this check; violations block merge |
-| `advisory` | Design guidance, best practice, or architectural principle | Agent SHOULD follow; violations are flagged but do not block CI |
+| Value         | Meaning                                                    | Agent behaviour                                                 |
+| ------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
+| `enforcement` | Hard constraint backed by tooling, CI gates, or hooks      | Agent MUST pass this check; violations block merge              |
+| `advisory`    | Design guidance, best practice, or architectural principle | Agent SHOULD follow; violations are flagged but do not block CI |
 
 ### `phase` (optional, default: all phases)
 
 Scopes a convention to one or more phases of the 5-phase orchestrator
 lifecycle:
 
-| Phase | When |
-|-------|------|
-| `discovery` | Understanding requirements, scanning codebase |
-| `planning` | Designing solution, writing ADRs |
-| `implementation` | Writing code, adding tests |
-| `validation` | Running linters, tests, quality gates |
-| `ship` | Creating PR, deploying, documenting |
+| Phase            | When                                          |
+| ---------------- | --------------------------------------------- |
+| `discovery`      | Understanding requirements, scanning codebase |
+| `planning`       | Designing solution, writing ADRs              |
+| `implementation` | Writing code, adding tests                    |
+| `validation`     | Running linters, tests, quality gates         |
+| `ship`           | Creating PR, deploying, documenting           |
 
 When `phase` is omitted, the convention applies across all phases (e.g.,
 `sec-no-secrets` is always relevant). When provided, agents can filter their
@@ -85,16 +85,16 @@ conventions:
   - id: ts-lint
     rule: 'All code must pass ESLint'
     severity: error
-    type: enforcement          # NEW — was implicit
-    phase: validation          # NEW — when this rule matters
+    type: enforcement # NEW — was implicit
+    phase: validation # NEW — when this rule matters
     autofix: true
     tool: 'eslint --fix'
 
   - id: dn-clean-layering
     rule: 'Follow clean architecture layering...'
     severity: error
-    type: advisory             # NEW — no tool can enforce this
-    phase:                     # NEW — relevant during design & coding
+    type: advisory # NEW — no tool can enforce this
+    phase: # NEW — relevant during design & coding
       - planning
       - implementation
     autofix: false

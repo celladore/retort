@@ -10,10 +10,10 @@ Add Azure Budget Terraform resources, usage telemetry export, and a spend cap mi
 
 ## Decision Context
 
-| # | Decision | Chosen | Rationale |
-|---|---|---|---|
-| 2 | Gateway spend cap scope | Per-API-key | Enables chargeback and per-consumer limits |
-| 6 | Telemetry transport | ADX ingestion (primary) + Log Analytics (fallback) | ADX already in place for costops, but cater for Log Analytics alternative |
+| #   | Decision                | Chosen                                             | Rationale                                                                 |
+| --- | ----------------------- | -------------------------------------------------- | ------------------------------------------------------------------------- |
+| 2   | Gateway spend cap scope | Per-API-key                                        | Enables chargeback and per-consumer limits                                |
+| 6   | Telemetry transport     | ADX ingestion (primary) + Log Analytics (fallback) | ADX already in place for costops, but cater for Log Analytics alternative |
 
 ## Deliverables
 
@@ -22,11 +22,13 @@ Add Azure Budget Terraform resources, usage telemetry export, and a spend cap mi
 **File**: `infra/modules/aigateway_aca/budget.tf`
 
 Add `azurerm_consumption_budget_resource_group` for every environment (dev/uat/prod):
+
 - 80% actual threshold → email notification
 - 100% actual threshold → email + webhook notification
 - 120% forecasted threshold → email + webhook notification
 
 **Variables** (`variables.tf`):
+
 ```hcl
 variable "monthly_budget_amount" {
   type    = number
@@ -43,6 +45,7 @@ variable "budget_alert_webhook_url" {
 ```
 
 **Environment overrides** (`infra/env/{dev,uat,prod}/terraform.tfvars`):
+
 - dev: $100/month
 - uat: $200/month
 - prod: $500/month
@@ -52,12 +55,14 @@ variable "budget_alert_webhook_url" {
 **File**: `state-service/state_service/usage_tracker.py`
 
 Implement a LiteLLM `success_callback` that:
+
 1. Counts tokens per request (input_tokens, output_tokens, cache_tokens)
 2. Tags with: api_key_hash, model, timestamp, session_id (from header)
 3. Writes to ADX ingestion endpoint (primary) or Log Analytics workspace (fallback)
 4. Handles errors silently — telemetry must never block requests
 
 Schema for telemetry events:
+
 ```json
 {
   "timestamp": "RFC3339",
@@ -77,6 +82,7 @@ Schema for telemetry events:
 **File**: `state-service/state_service/spend_cap.py`
 
 Middleware that checks cumulative daily/monthly spend against configurable caps:
+
 - **Per-API-key daily cap**: configurable, default $50
 - **Per-API-key monthly cap**: configurable, default $500
 - **Global daily cap**: configurable, default $1000
@@ -89,6 +95,7 @@ Middleware that checks cumulative daily/monthly spend against configurable caps:
 **File**: `dashboard/`
 
 Extend the existing dashboard to show:
+
 - Real-time token consumption (last 1h, 24h)
 - Spend rate (tokens/minute, $/hour)
 - Budget utilization gauge per environment

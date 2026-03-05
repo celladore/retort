@@ -12,6 +12,7 @@ The Data Engineer agent currently owns two distinct domains: traditional data en
 ### Data Engineer Agent (`agents.yaml` lines 133-192)
 
 **Core data responsibilities (original):**
+
 - Design and maintain database schemas and data models
 - Write and review migration scripts for safety and reversibility
 - Optimise queries and indexing strategies
@@ -21,17 +22,20 @@ The Data Engineer agent currently owns two distinct domains: traditional data en
 - Plan and execute data migration strategies for breaking changes
 
 **Cost analytics responsibilities (added Wave 2, lines 165-167):**
+
 - Build and maintain cost attribution dashboards and analytics (ADX/KQL for Azure, or provider-equivalent)
 - Implement cost-centre reporting functions (cost_by_product, cost_trend_by_product, untagged_resources)
 - Monitor cost anomalies and generate alerts for spend exceeding budget thresholds
 
 **Cost-related focus paths (also added Wave 2, lines 155-156):**
+
 - `adx/**`
 - `grafana/**`
 
 ### Infrastructure Engineer Agent (`agents.yaml` lines 237-312)
 
 Also has cost-adjacent responsibilities:
+
 - Provision consumption budget resources (line 279)
 - Enforce cost-center tag on all resources (line 280)
 - Run cost impact assessment before provisioning (line 281)
@@ -39,17 +43,17 @@ Also has cost-adjacent responsibilities:
 
 ### Overlap Analysis
 
-| Concern | Data Engineer | Infra Engineer | Proposed Owner |
-|---|---|---|---|
-| Database schema design | Primary | - | Data Engineer |
-| Migration scripts | Primary | - | Data Engineer |
-| Query optimisation | Primary | - | Data Engineer |
-| Cost attribution dashboards | Primary (Wave 2) | - | FinOps Specialist |
-| Cost-centre reporting | Primary (Wave 2) | - | FinOps Specialist |
-| Cost anomaly monitoring | Primary (Wave 2) | - | FinOps Specialist |
-| Budget resource provisioning | - | Primary | Infra Engineer |
-| Cost-center tag enforcement | - | Primary | Infra Engineer |
-| Cost impact assessment | - | Primary | Infra Engineer |
+| Concern                      | Data Engineer    | Infra Engineer | Proposed Owner    |
+| ---------------------------- | ---------------- | -------------- | ----------------- |
+| Database schema design       | Primary          | -              | Data Engineer     |
+| Migration scripts            | Primary          | -              | Data Engineer     |
+| Query optimisation           | Primary          | -              | Data Engineer     |
+| Cost attribution dashboards  | Primary (Wave 2) | -              | FinOps Specialist |
+| Cost-centre reporting        | Primary (Wave 2) | -              | FinOps Specialist |
+| Cost anomaly monitoring      | Primary (Wave 2) | -              | FinOps Specialist |
+| Budget resource provisioning | -                | Primary        | Infra Engineer    |
+| Cost-center tag enforcement  | -                | Primary        | Infra Engineer    |
+| Cost impact assessment       | -                | Primary        | Infra Engineer    |
 
 ## Problem Statement
 
@@ -66,11 +70,13 @@ Also has cost-adjacent responsibilities:
 See `docs/issues/finops-specialist-agent-consideration.md` for the full agent definition.
 
 **Changes to Data Engineer:**
+
 1. Remove lines 165-167 (cost analytics responsibilities)
 2. Remove `adx/**` and `grafana/**` from focus paths (lines 155-156)
 3. Data Engineer returns to its core 7 responsibilities
 
 **Changes to agents.yaml:**
+
 1. Add `finops-specialist` agent under `operations` category
 2. Set `depends-on: [data, infra]` for the new agent
 3. Set `notifies: [infra, devops]`
@@ -78,11 +84,13 @@ See `docs/issues/finops-specialist-agent-consideration.md` for the full agent de
 ### Option B: Move cost analytics to Infrastructure Engineer
 
 **Pros:**
+
 - No new agent needed
 - Infra already owns budget provisioning and tag enforcement
 - Consolidates all cost concerns in one agent
 
 **Cons:**
+
 - Infra Engineer already has 14 responsibilities — adding 3 more worsens scope creep
 - Cost analytics (KQL dashboards) is conceptually different from IaC (Terraform modules)
 - Infra's focus paths don't include `adx/**` or `grafana/**`
@@ -90,10 +98,12 @@ See `docs/issues/finops-specialist-agent-consideration.md` for the full agent de
 ### Option C: Keep current state, add coordination rule
 
 **Pros:**
+
 - No structural change needed
 - Minimal disruption
 
 **Cons:**
+
 - Scope creep persists
 - No clear cost governance owner
 - Handoff between Data and Infra for cost concerns remains implicit

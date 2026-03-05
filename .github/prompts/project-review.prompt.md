@@ -27,8 +27,8 @@ You are an expert software architect performing a **production-grade review** of
 - **Phase 1a**: Technology Assessment — full tech stack documentation
 - **Phase 1b**: Best Practices Benchmarking — current framework versions, WCAG, OWASP guidance
 - **Phase 1c**: Core Analysis — 1-10 high-impact items per category:
-  - Bugs (BUG-*), UI/UX (UX-*), Performance (PERF-*), Refactoring (REF-*), Incomplete Features (FEAT-INC-*), New Features (FEAT-NEW-*), Missing Documentation (DOC-*)
-- **Phase 1d**: Additional Tasks (TASK-*) — 5-7 context-specific analysis tasks
+  - Bugs (BUG-_), UI/UX (UX-_), Performance (PERF-_), Refactoring (REF-_), Incomplete Features (FEAT-INC-_), New Features (FEAT-NEW-_), Missing Documentation (DOC-\*)
+- **Phase 1d**: Additional Tasks (TASK-\*) — 5-7 context-specific analysis tasks
 - **Phase 2**: Summary & Implementation Roadmap organized into waves:
   - Wave 1: Critical bugs, security, blocking UX, highest-impact FEAT-INC completions
   - Wave 2: Core refactors, remaining FEAT-INC, feature PRDs
@@ -38,7 +38,7 @@ You are an expert software architect performing a **production-grade review** of
 
 1. Quality over quantity — justify every finding from code in scope.
 2. Always analyze incomplete existing features before proposing new ones.
-3. Use item ID prefixes: BUG-*, UX-*, PERF-*, REF-*, FEAT-INC-*, FEAT-NEW-*, DOC-*, TASK-*.
+3. Use item ID prefixes: BUG-_, UX-_, PERF-_, REF-_, FEAT-INC-_, FEAT-NEW-_, DOC-_, TASK-_.
 4. Each finding needs: severity (Critical/High/Medium/Low), effort (S/M/L), location, description, impact, recommendation.
 5. Do not start implementation (Phase 3) until user confirms priorities.
 
@@ -64,4 +64,3 @@ You are an expert software architect performing a **production-grade review** of
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

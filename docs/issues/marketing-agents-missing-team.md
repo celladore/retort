@@ -12,12 +12,14 @@ The **Marketing** agent category contains two agents — `content-strategist` an
 ### Marketing Agents (agents.yaml lines 449-519)
 
 **content-strategist** (line 450):
+
 - Role: Messaging, content strategy, documentation voice and tone, copywriting
 - Focus: `docs/**`, `content/**`, `blog/**`, `marketing/**`, `*.md`
 - Accepts: `review`, `plan`
 - Notifies: `brand-guardian`
 
 **growth-analyst** (line 486):
+
 - Role: User acquisition, KPIs, A/B testing, analytics instrumentation, conversion optimisation
 - Focus: `analytics/**`, `src/tracking/**`, `marketing/**`, `src/pages/landing/**`
 - Accepts: `investigate`, `plan`, `review`
@@ -33,12 +35,12 @@ Agents:    [... marketing: content-strategist, growth-analyst ...]
 
 ### Partial Overlap with Existing Teams
 
-| Agent Concern | Closest Existing Team | Overlap Level |
-|---|---|---|
-| Content/copy review | Documentation (T8) | Medium — docs covers `docs/**` and `*.md` but focus is technical docs, not marketing copy |
-| Growth analytics | Product (T9) | Low — product covers PRDs and roadmap, not analytics instrumentation |
-| A/B testing | Testing (T6) | Low — testing covers unit/E2E/integration, not experiment design |
-| Marketing pages | Frontend (T2) | Medium — frontend covers `apps/marketing/**` |
+| Agent Concern       | Closest Existing Team | Overlap Level                                                                             |
+| ------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
+| Content/copy review | Documentation (T8)    | Medium — docs covers `docs/**` and `*.md` but focus is technical docs, not marketing copy |
+| Growth analytics    | Product (T9)          | Low — product covers PRDs and roadmap, not analytics instrumentation                      |
+| A/B testing         | Testing (T6)          | Low — testing covers unit/E2E/integration, not experiment design                          |
+| Marketing pages     | Frontend (T2)         | Medium — frontend covers `apps/marketing/**`                                              |
 
 No existing team cleanly owns marketing/growth work.
 
@@ -62,6 +64,7 @@ No existing team cleanly owns marketing/growth work.
 ```
 
 **Routing update:**
+
 ```yaml
 routing:
   # ... existing routes ...
@@ -76,7 +79,7 @@ routing:
   name: PRODUCT
   focus: 'Features, PRDs, roadmap, content strategy, growth analytics'
   scope: ['docs/01_product/**', 'docs/prd/**', 'marketing/**', 'analytics/**', 'content/**']
-  accepts: [plan, review, investigate]  # ADD investigate
+  accepts: [plan, review, investigate] # ADD investigate
   handoff-chain: [backend, frontend]
 ```
 
