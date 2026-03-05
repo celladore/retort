@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
+description: 'Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,17 +12,19 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# format
+# infra-eval
 
-Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.
+Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.
 
 ## Flags
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--stack` | Force a specific tech stack formatter | — |
-| `--check` | Check formatting without making changes | false |
-| `--path` | Format only files matching this path or glob | — |
+| `--scope` | Limit evaluation to specific paths or modules | — |
+| `--focus` | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops | all |
+| `--output` | Output format: markdown, json, or yaml | markdown |
+| `--save` | Save evaluation report to docs/evaluations/ | true |
+| `--gates-only` | Run hard gate checks only without full dimensional scoring | false |
 
 ## Instructions
 

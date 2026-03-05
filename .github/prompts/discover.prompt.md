@@ -16,6 +16,14 @@ last_updated: '2026-03-05'
 
 Scans the repository to build a comprehensive understanding of the project structure, tech stacks in use, team boundaries, and architectural patterns. Outputs a structured discovery report used by other commands.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--output` | Output format: json, yaml, or markdown | yaml |
+| `--depth` | Directory traversal depth limit | 5 |
+| `--include-deps` | Include dependency analysis in discovery output | true |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

@@ -16,6 +16,15 @@ last_updated: '2026-03-05'
 
 Runs security-focused analysis: dependency vulnerability scanning, secret detection, OWASP compliance checks, and permission auditing. Generates a security report with severity ratings.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--scan-type` | Scan type: deps, secrets, owasp, permissions, or all | all |
+| `--severity` | Minimum severity to report: low, medium, high, critical | medium |
+| `--fix` | Attempt to auto-fix vulnerabilities (dependency updates) | false |
+| `--output` | Output format: json, markdown, or sarif | markdown |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

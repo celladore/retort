@@ -16,6 +16,16 @@ last_updated: '2026-03-05'
 
 Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--stack` | Limit checks to a specific stack | — |
+| `--branch` | Branch to check (defaults to current branch) | — |
+| `--base` | Remote base branch used for merge-base when --range is omitted (e.g., origin/main) | — |
+| `--range` | Git range used for changelog/commit checks (auto-detect via merge-base; fallback emits warning and uses HEAD~50..HEAD) | — |
+| `--strict` | Fail on warnings | false |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

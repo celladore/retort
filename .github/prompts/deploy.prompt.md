@@ -16,6 +16,16 @@ last_updated: '2026-03-05'
 
 Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--environment` | Target environment: dev, staging, production | dev |
+| `--dry-run` | Simulate deployment without executing | true |
+| `--project` | Deploy a specific project or package in a monorepo | — |
+| `--skip-checks` | Skip pre-deployment quality checks (use with caution) | false |
+| `--stack` | Deploy a specific tech stack component | — |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:

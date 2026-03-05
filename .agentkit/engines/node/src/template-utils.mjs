@@ -32,7 +32,7 @@ function isShellScriptTarget(targetPath) {
  *
  * - Replaces longest keys first to prevent partial matches (e.g., {{versionInfo}} before {{version}})
  * - Sanitizes string values to prevent shell metacharacter injection
- * - Warns on unresolved placeholders when DEBUG is set
+ * - Warns on unresolved placeholders
  */
 export function renderTemplate(template, vars, targetPath = '') {
   let result = template;
@@ -66,7 +66,7 @@ export function collapseBlankLines(text) {
  * - Replaces longest keys first to prevent partial matches
  * - Sanitizes string values to prevent shell metacharacter injection
  * - Allows raw values for keys in RAW_TEMPLATE_VARS when allowRawVars is true
- * - Warns on unresolved placeholders when DEBUG is set
+ * - Warns on unresolved placeholders
  */
 export function replacePlaceholders(template, vars, sanitizeStrings = false) {
   let result = template;
@@ -85,7 +85,7 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
 
   // Warn about unresolved placeholders (ignore block syntax remnants, including {{else}})
   const unresolved = result.match(/\{\{(?!#|\/|else\}\})([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g);
-  if (unresolved && process.env.DEBUG) {
+  if (unresolved) {
     const unique = [...new Set(unresolved)];
     console.warn(`[agentkit:sync] Warning: unresolved placeholders: ${unique.join(', ')}`);
   }
@@ -475,6 +475,12 @@ export function flattenProjectYaml(project, docsSpec = null) {
     vars.languageInferenceSource = 'none';
     vars.languageInferenceConfidence = 'low';
   }
+
+  // --- Defaults for workflow-critical placeholders ---
+  // Prevents unresolved {{placeholders}} from producing invalid YAML in generated workflows.
+  if (!vars.nodeVersion) vars.nodeVersion = '22';
+  if (!vars.pythonVersion) vars.pythonVersion = '3.12';
+  if (!vars.docsHistoryPath) vars.docsHistoryPath = 'docs/history';
 
   return vars;
 }
