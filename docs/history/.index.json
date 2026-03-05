@@ -1,48 +1,12 @@
 {
-  "nextNumber": 5,
+  "nextNumber": 1,
   "sequences": {
-    "implementation": 5,
-    "bugfix": 2,
+    "implementation": 1,
+    "bugfix": 1,
     "feature": 1,
     "migration": 1,
     "issue": 1,
     "lesson": 1
   },
-  "entries": [
-    {
-      "number": 1,
-      "type": "implementation",
-      "date": "2026-03-01",
-      "title": "origin-main-merge-reconciliation",
-      "file": "implementations/0001-2026-03-01-origin-main-merge-reconciliation-implementation.md"
-    },
-    {
-      "number": 2,
-      "type": "implementation",
-      "date": "2026-03-01",
-      "title": "sync-test-performance-stabilization",
-      "file": "implementations/0002-2026-03-01-sync-test-performance-stabilization-implementation.md"
-    },
-    {
-      "number": 3,
-      "type": "implementation",
-      "date": "2026-03-01",
-      "title": "post-history-ci-and-config-stabilization",
-      "file": "implementations/0003-2026-03-01-post-history-ci-and-config-stabilization-implementation.md"
-    },
-    {
-      "number": 4,
-      "type": "implementation",
-      "date": "2026-03-04",
-      "title": "infra-eval-template-integration",
-      "file": "implementations/0004-2026-03-04-infra-eval-template-integration-implementation.md"
-    },
-    {
-      "number": 1,
-      "type": "bugfix",
-      "date": "2026-03-04",
-      "title": "infra-eval-review-fixes",
-      "file": "bug-fixes/0001-2026-03-04-infra-eval-review-fixes-bugfix.md"
-    }
-  ]
+  "entries": []
 }
