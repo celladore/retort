@@ -45,6 +45,44 @@ export function readText(filePath) {
   return readFileSync(filePath, 'utf-8');
 }
 
+/**
+ * Loads spec-defaults.yaml from the given agentkit root and returns a merged
+ * defaults object based on the current phase and teamSize.
+ *
+ * Merge precedence within spec-defaults (highest → lowest):
+ *   teamSize block > phase block > static defaults
+ *
+ * Returns an empty object when spec-defaults.yaml is not present (backward-compatible).
+ *
+ * @param {string} agentkitRoot
+ * @param {{ phase?: string, teamSize?: string }} context
+ * @returns {Record<string, unknown>}
+ */
+export function loadSpecDefaults(agentkitRoot, context = {}) {
+  const specDefaultsPath = resolve(agentkitRoot, 'spec', 'spec-defaults.yaml');
+  const raw = readYaml(specDefaultsPath);
+  if (!raw) return {};
+
+  // Start with static defaults (omit the conditional blocks)
+  const { phase: phaseBlock, teamSize: teamSizeBlock, ...staticDefaults } = raw;
+
+  let merged = { ...staticDefaults };
+
+  // Apply phase-conditional overrides
+  const phase = context.phase;
+  if (phase && phaseBlock?.[phase]) {
+    merged = { ...merged, ...phaseBlock[phase] };
+  }
+
+  // Apply teamSize-conditional overrides (highest priority within spec-defaults)
+  const teamSize = context.teamSize;
+  if (teamSize && teamSizeBlock?.[teamSize]) {
+    merged = { ...merged, ...teamSizeBlock[teamSize] };
+  }
+
+  return merged;
+}
+
 const templateTextCache = new Map();
 
 async function readTemplateText(filePath) {
@@ -1142,9 +1180,17 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const blockedEscalationTeams = Array.isArray(intakeEscalation.blockedCrossTeam)
     ? intakeEscalation.blockedCrossTeam.join(', ')
     : '';
+
+  // Load spec-defaults.yaml (lowest-priority defaults; project.yaml always wins)
+  const specDefaultVars = loadSpecDefaults(agentkitRoot, {
+    phase: projectSpec?.process?.phase,
+    teamSize: projectSpec?.process?.teamSize,
+  });
+
   const vars = {
+    ...specDefaultVars,
     ...projectVars,
-    issueTracker: projectVars.issueTracker || 'github',
+    issueTracker: projectVars.issueTracker || specDefaultVars.issueTracker,
     intakeOwnerTeam: projectVars.intakeOwnerTeam || processIntake.ownerTeam || teamsIntake.ownerTeam || 'product',
     intakeOperationsTeam:
       projectVars.intakeOperationsTeam ||

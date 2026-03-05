@@ -1,0 +1,49 @@
+# AgentKit Forge — Spec Defaults
+# Single source of truth for template-variable default values.
+#
+# Merge precedence (highest → lowest):
+#   overlay settings > project.yaml > heuristic inference
+#   > spec-defaults phase/teamSize > spec-defaults static
+#   > {{var|default}} pipe syntax in templates
+
+# ---------------------------------------------------------------------------
+# Static defaults — applied when a variable is not set anywhere else
+# ---------------------------------------------------------------------------
+issueTracker: github
+testingCoverage: 80
+maxTaskTurns: 25
+maxStagnationTurns: 20
+
+# ---------------------------------------------------------------------------
+# Phase-conditional defaults — keyed by process.phase in project.yaml
+# ---------------------------------------------------------------------------
+phase:
+  greenfield:
+    testingCoverage: 60
+    maxStagnationTurns: 15
+  active:
+    testingCoverage: 80
+    maxStagnationTurns: 20
+  maintenance:
+    testingCoverage: 90
+    maxStagnationTurns: 25
+  legacy:
+    testingCoverage: 70
+    maxStagnationTurns: 30
+
+# ---------------------------------------------------------------------------
+# Team-size-conditional defaults — keyed by process.teamSize in project.yaml
+# ---------------------------------------------------------------------------
+teamSize:
+  solo:
+    maxTaskTurns: 15
+    maxStagnationTurns: 10
+  small:
+    maxTaskTurns: 20
+    maxStagnationTurns: 15
+  medium:
+    maxTaskTurns: 25
+    maxStagnationTurns: 20
+  large:
+    maxTaskTurns: 35
+    maxStagnationTurns: 25
