@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { runDoctor } from '../doctor.mjs';
+import { runDoctor, checkTemplateHygiene } from '../doctor.mjs';
 import * as fs from 'fs';
 
 // Mock fs and spec-validator
@@ -460,3 +460,57 @@ automation:
     );
   });
 });
+
+describe('checkTemplateHygiene', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should detect hardcoded node-version in templates', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readdirSync').mockReturnValue(['test-workflow.yml']);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      'steps:\n  - uses: actions/setup-node@v4\n    with:\n      node-version: lts/*\n'
+    );
+
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toEqual(
+      expect.objectContaining({
+        file: 'test-workflow.yml',
+        varName: 'nodeVersion',
+        description: expect.stringContaining('{{nodeVersion}}'),
+      })
+    );
+  });
+
+  it('should not flag templates that already use the template var', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readdirSync').mockReturnValue(['test-workflow.yml']);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      'steps:\n  - uses: actions/setup-node@v4\n    with:\n      node-version: {{nodeVersion}}\n'
+    );
+
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(0);
+  });
+
+  it('should detect hardcoded branch lists', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readdirSync').mockReturnValue(['ci.yml']);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      'on:\n  pull_request:\n    branches: [main, dev]\n'
+    );
+
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(1);
+    expect(findings[0].varName).toBe('protectedBranches');
+  });
+
+  it('should return empty when workflow directory does not exist', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(0);
+  });
+});
+
