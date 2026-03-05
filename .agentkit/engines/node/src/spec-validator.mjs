@@ -1223,7 +1223,7 @@ export function validateRequiredFields(specRoot) {
   }
   try {
     const project = yaml.load(readFileSync(projectPath, 'utf-8'));
-    if (!project || typeof project !== 'object') {
+    if (!project || typeof project !== 'object' || Array.isArray(project)) {
       return warnings;
     }
     const requiredFields = ['name', 'phase'];
