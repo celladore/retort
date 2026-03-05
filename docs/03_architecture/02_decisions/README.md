@@ -13,3 +13,4 @@
 - [05-dependency-supply-chain-detection-tooling.md](./05-dependency-supply-chain-detection-tooling.md)
 - [06-code-quality-maintainability-signal-tooling.md](./06-code-quality-maintainability-signal-tooling.md)
 - [07-delivery-strategy.md](./07-delivery-strategy.md)
+- [08-issue-sync-strategy.md](./08-issue-sync-strategy.md)

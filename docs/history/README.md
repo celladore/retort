@@ -43,4 +43,8 @@ Use the provided script to generate a new document from the correct template:
 
 Or use the `/document-history` slash command for auto-detection of type and title from session context.
 
+> **Fallback:** When `gh` CLI is unavailable (proxy failures, air-gapped
+> environments), use `./scripts/create-doc.sh issue "Title"` to record issues
+> locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
+
 See [docs/06_engineering/06_pr_documentation.md](../06_engineering/06_pr_documentation.md) for the full documentation strategy.
