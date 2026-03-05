@@ -99,7 +99,7 @@ governance already planned for adopter repos.
 - PRD-005 (Mesh-Native Distribution) targets GA for the npm package delivery
   channel; autoupdate is a natural complement once the package is published.
 - ADR-07 explicitly calls out "autoupdate support" as part of the `npm install
-  -g agentkit-forge` CLI consumer experience.
+-g agentkit-forge` CLI consumer experience.
 - Governance enforcement (#194) and CLI toolchain requirements (#196) create the
   prerequisite infrastructure for autoupdate to function safely.
 - Growing adopter base amplifies the support cost of manual upgrades.
@@ -140,13 +140,13 @@ governance already planned for adopter repos.
 
 ## Stakeholders
 
-| Stakeholder   | Role                | Responsibility                                          |
-| ------------- | ------------------- | ------------------------------------------------------- |
-| Product Owner | Direction, Approval | Feature scope, acceptance criteria, GTM alignment       |
-| Tech Lead     | Technical Guidance  | Architecture, version resolution, rollback design       |
-| Core Eng      | Build               | CLI command, Action workflow, Renovate config template  |
-| DevOps Owner  | CI/CD Integration   | Update action publishing, drift-detection hook          |
-| Pilot Adopter | Feedback            | Early validation, edge-case discovery, NPS input        |
+| Stakeholder   | Role                | Responsibility                                         |
+| ------------- | ------------------- | ------------------------------------------------------ |
+| Product Owner | Direction, Approval | Feature scope, acceptance criteria, GTM alignment      |
+| Tech Lead     | Technical Guidance  | Architecture, version resolution, rollback design      |
+| Core Eng      | Build               | CLI command, Action workflow, Renovate config template |
+| DevOps Owner  | CI/CD Integration   | Update action publishing, drift-detection hook         |
+| Pilot Adopter | Feedback            | Early validation, edge-case discovery, NPS input       |
 
 ## User Personas and Stories
 
@@ -228,7 +228,7 @@ agentkit-forge update --apply
 # .github/workflows/agentkit-update.yml (generated template)
 on:
   schedule:
-    - cron: '0 9 * * 1'  # weekly Monday 9am
+    - cron: '0 9 * * 1' # weekly Monday 9am
 jobs:
   autoupdate:
     uses: org/agentkit-forge-action@v3
@@ -250,25 +250,25 @@ agentkit-forge update --check
 
 ### User Flow Matrix
 
-| Step              | CLI Path                                    | Automated CI Path              | Outcome                            |
-| ----------------- | ------------------------------------------- | ------------------------------ | ---------------------------------- |
-| Detect update     | `agentkit-forge update --check`             | Scheduled Action detects delta | New version identified             |
-| Preview changelog | Printed in CLI output                       | PR body contains changelog     | Team informed of changes           |
-| Apply update      | `agentkit-forge update --apply`             | Action bumps version, re-syncs | Overlay outputs regenerated        |
-| Validate          | Sync output diff printed; CI check          | PR checks validate drift       | Regression surfaced before merge   |
-| Rollback          | `agentkit-forge update --rollback`          | Close PR / revert commit       | Previous state restored            |
+| Step              | CLI Path                           | Automated CI Path              | Outcome                          |
+| ----------------- | ---------------------------------- | ------------------------------ | -------------------------------- |
+| Detect update     | `agentkit-forge update --check`    | Scheduled Action detects delta | New version identified           |
+| Preview changelog | Printed in CLI output              | PR body contains changelog     | Team informed of changes         |
+| Apply update      | `agentkit-forge update --apply`    | Action bumps version, re-syncs | Overlay outputs regenerated      |
+| Validate          | Sync output diff printed; CI check | PR checks validate drift       | Regression surfaced before merge |
+| Rollback          | `agentkit-forge update --rollback` | Close PR / revert commit       | Previous state restored          |
 
 ## Functional Requirements
 
 ### CLI Commands
 
-| Command                             | Description                                              |
-| ----------------------------------- | -------------------------------------------------------- |
-| `agentkit-forge update`             | Check for updates and print summary (no-op, dry-run)     |
-| `agentkit-forge update --apply`     | Upgrade to latest version and re-run sync                |
-| `agentkit-forge update --check`     | Alias for default: check-only, machine-readable output   |
-| `agentkit-forge update --version X` | Upgrade to a specific version X (pinned upgrade)         |
-| `agentkit-forge update --rollback`  | Restore previously pinned version and sync outputs       |
+| Command                             | Description                                            |
+| ----------------------------------- | ------------------------------------------------------ |
+| `agentkit-forge update`             | Check for updates and print summary (no-op, dry-run)   |
+| `agentkit-forge update --apply`     | Upgrade to latest version and re-run sync              |
+| `agentkit-forge update --check`     | Alias for default: check-only, machine-readable output |
+| `agentkit-forge update --version X` | Upgrade to a specific version X (pinned upgrade)       |
+| `agentkit-forge update --rollback`  | Restore previously pinned version and sync outputs     |
 
 ### GitHub Action
 
@@ -311,13 +311,13 @@ agentkit-forge update --check
 
 ## Dependencies and Related Issues
 
-| Issue | Title | Relationship |
-| --- | --- | --- |
-| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation |
-| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR for adopters | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
-| [PRD-005](./PRD-005-mesh-native-distribution.md) | Mesh-Native Distribution | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability |
-| [ADR-07](../03_architecture/02_decisions/07-delivery-strategy.md) | Delivery Strategy | Architectural decisions that autoupdate must respect (npm, GH Action) |
-| [#241](https://github.com/JustAGhosT/agentkit-forge/issues/241) | feat(analytics): cross-repo usage telemetry | Future: telemetry can track autoupdate adoption and version currency |
+| Issue                                                             | Title                                                  | Relationship                                                          |
+| ----------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
+| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)   | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
+| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194)   | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
+| [PRD-005](./PRD-005-mesh-native-distribution.md)                  | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
+| [ADR-07](../03_architecture/02_decisions/07-delivery-strategy.md) | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
+| [#241](https://github.com/JustAGhosT/agentkit-forge/issues/241)   | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
 
 ## Milestone
 

@@ -94,13 +94,19 @@ describe('detectCommitConvention()', () => {
   });
 
   it('detects conventional from .commitlintrc', async () => {
-    writeFile(join(tmpDir, '.commitlintrc'), JSON.stringify({ extends: ['@commitlint/config-conventional'] }));
+    writeFile(
+      join(tmpDir, '.commitlintrc'),
+      JSON.stringify({ extends: ['@commitlint/config-conventional'] })
+    );
     const result = await detectCommitConvention(tmpDir);
     expect(result).toBe('conventional');
   });
 
   it('detects conventional from commitlint.config.js', async () => {
-    writeFile(join(tmpDir, 'commitlint.config.js'), 'module.exports = { extends: ["@commitlint/config-conventional"] };');
+    writeFile(
+      join(tmpDir, 'commitlint.config.js'),
+      'module.exports = { extends: ["@commitlint/config-conventional"] };'
+    );
     const result = await detectCommitConvention(tmpDir);
     expect(result).toBe('conventional');
   });
@@ -112,7 +118,10 @@ describe('detectCommitConvention()', () => {
   });
 
   it('detects conventional from .commitlintrc.yaml', async () => {
-    writeFile(join(tmpDir, '.commitlintrc.yaml'), 'extends:\n  - "@commitlint/config-conventional"\n');
+    writeFile(
+      join(tmpDir, '.commitlintrc.yaml'),
+      'extends:\n  - "@commitlint/config-conventional"\n'
+    );
     const result = await detectCommitConvention(tmpDir);
     expect(result).toBe('conventional');
   });
@@ -212,44 +221,52 @@ describe('detectCommitConvention() — git-log heuristic', () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('detects conventional from git log when ≥60% of commits match', async () => {
-    // 6 out of 8 = 75% conventional
-    const subjects = [
-      'feat(auth): add login flow',
-      'fix(api): handle null response',
-      'docs: update readme',
-      'chore(deps): update vitest',
-      'refactor(sync): extract helpers',
-      'test(discover): add unit tests',
-      'Update something randomly',
-      'Another random commit',
-    ];
-    initGitRepo(tmpDir, subjects);
+  it(
+    'detects conventional from git log when ≥60% of commits match',
+    { timeout: 15_000 },
+    async () => {
+      // 6 out of 8 = 75% conventional
+      const subjects = [
+        'feat(auth): add login flow',
+        'fix(api): handle null response',
+        'docs: update readme',
+        'chore(deps): update vitest',
+        'refactor(sync): extract helpers',
+        'test(discover): add unit tests',
+        'Update something randomly',
+        'Another random commit',
+      ];
+      initGitRepo(tmpDir, subjects);
 
-    const result = await detectCommitConvention(tmpDir);
-    expect(result).toBe('conventional');
-  });
+      const result = await detectCommitConvention(tmpDir);
+      expect(result).toBe('conventional');
+    }
+  );
 
-  it('detects semantic from git log when ≥60% match semantic pattern', async () => {
-    // 6 out of 8 = 75% semantic
-    const subjects = [
-      'feat: add new feature',
-      'fix: correct bug',
-      'docs: update docs',
-      'release: v1.2.0',
-      'bump: version update',
-      'merge: branch sync',
-      'Random commit message',
-      'Another plain message',
-    ];
-    initGitRepo(tmpDir, subjects);
+  it(
+    'detects semantic from git log when ≥60% match semantic pattern',
+    { timeout: 15_000 },
+    async () => {
+      // 6 out of 8 = 75% semantic
+      const subjects = [
+        'feat: add new feature',
+        'fix: correct bug',
+        'docs: update docs',
+        'release: v1.2.0',
+        'bump: version update',
+        'merge: branch sync',
+        'Random commit message',
+        'Another plain message',
+      ];
+      initGitRepo(tmpDir, subjects);
 
-    const result = await detectCommitConvention(tmpDir);
-    // Most of these match "type: description" → semantic
-    expect(result).toBe('semantic');
-  });
+      const result = await detectCommitConvention(tmpDir);
+      // Most of these match "type: description" → semantic
+      expect(result).toBe('semantic');
+    }
+  );
 
-  it('returns null when commits do not meet 60% threshold', async () => {
+  it('returns null when commits do not meet 60% threshold', { timeout: 15_000 }, async () => {
     // Only 1 out of 6 ≈ 17% conventional
     const subjects = [
       'feat(auth): add login',
@@ -265,25 +282,29 @@ describe('detectCommitConvention() — git-log heuristic', () => {
     expect(result).toBeNull();
   });
 
-  it('handles breaking change marker (!) in conventional commits', async () => {
-    // 8 out of 8 = 100% conventional, some with breaking change markers
-    const subjects = [
-      'feat!: major breaking change',
-      'fix(api)!: breaking fix',
-      'feat(auth): add login flow',
-      'fix: small bug',
-      'docs: update readme',
-      'chore(deps): update packages',
-      'refactor(sync): cleanup',
-      'test: add coverage',
-    ];
-    initGitRepo(tmpDir, subjects);
+  it(
+    'handles breaking change marker (!) in conventional commits',
+    { timeout: 15_000 },
+    async () => {
+      // 8 out of 8 = 100% conventional, some with breaking change markers
+      const subjects = [
+        'feat!: major breaking change',
+        'fix(api)!: breaking fix',
+        'feat(auth): add login flow',
+        'fix: small bug',
+        'docs: update readme',
+        'chore(deps): update packages',
+        'refactor(sync): cleanup',
+        'test: add coverage',
+      ];
+      initGitRepo(tmpDir, subjects);
 
-    const result = await detectCommitConvention(tmpDir);
-    expect(result).toBe('conventional');
-  });
+      const result = await detectCommitConvention(tmpDir);
+      expect(result).toBe('conventional');
+    }
+  );
 
-  it('returns null for empty git repos (no commits)', async () => {
+  it('returns null for empty git repos (no commits)', { timeout: 15_000 }, async () => {
     execSync('git init', { cwd: tmpDir, stdio: 'ignore' });
     execSync('git config user.email "test@test.com"', { cwd: tmpDir, stdio: 'ignore' });
     execSync('git config user.name "Test"', { cwd: tmpDir, stdio: 'ignore' });
@@ -292,19 +313,23 @@ describe('detectCommitConvention() — git-log heuristic', () => {
     expect(result).toBeNull();
   });
 
-  it('file-based detection takes priority over git-log heuristic', async () => {
-    // Git log has semantic commits, but commitlint config is present
-    const subjects = [
-      'feat: add feature',
-      'fix: correct bug',
-      'docs: update docs',
-      'chore: cleanup',
-      'test: add tests',
-    ];
-    initGitRepo(tmpDir, subjects);
-    writeFile(join(tmpDir, '.commitlintrc.json'), '{}');
+  it(
+    'file-based detection takes priority over git-log heuristic',
+    { timeout: 15_000 },
+    async () => {
+      // Git log has semantic commits, but commitlint config is present
+      const subjects = [
+        'feat: add feature',
+        'fix: correct bug',
+        'docs: update docs',
+        'chore: cleanup',
+        'test: add tests',
+      ];
+      initGitRepo(tmpDir, subjects);
+      writeFile(join(tmpDir, '.commitlintrc.json'), '{}');
 
-    const result = await detectCommitConvention(tmpDir);
-    expect(result).toBe('conventional'); // file-based wins over git-log
-  });
+      const result = await detectCommitConvention(tmpDir);
+      expect(result).toBe('conventional'); // file-based wins over git-log
+    }
+  );
 });

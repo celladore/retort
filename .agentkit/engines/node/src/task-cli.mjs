@@ -2,8 +2,6 @@
  * AgentKit Forge — Task CLI Handlers
  * CLI entry points for the task delegation protocol.
  */
-import { appendFileSync, mkdirSync } from 'fs';
-import { resolve } from 'path';
 import {
   TASK_PRIORITIES,
   TASK_TYPES,
@@ -15,6 +13,7 @@ import {
   listTasks,
   processHandoffs,
 } from './task-protocol.mjs';
+import { emitEvent } from './event-emitter.mjs';
 
 function parseCsvFlag(value) {
   if (typeof value !== 'string') return [];
@@ -22,26 +21,6 @@ function parseCsvFlag(value) {
     .split(',')
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
-}
-
-function appendTaskAuditEvent(projectRoot, payload) {
-  const timestamp = new Date().toISOString();
-  const event = {
-    ...payload,
-    timestamp: payload.timestamp || timestamp,
-  };
-
-  try {
-    const stateDir = resolve(projectRoot, '.claude', 'state');
-    mkdirSync(stateDir, { recursive: true });
-    const eventPath = resolve(stateDir, 'events.log');
-    appendFileSync(eventPath, JSON.stringify(event) + '\n', 'utf-8');
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(
-      `[agentkit:audit] Failed to append audit event at ${event.timestamp} for projectRoot=${projectRoot}: ${message}`
-    );
-  }
 }
 
 /**
@@ -119,8 +98,7 @@ export async function runTasks({ projectRoot, flags }) {
     if (createdTasks.length > 0) {
       console.log(`[agentkit:tasks] Created ${createdTasks.length} handoff task(s)`);
       for (const task of createdTasks) {
-        appendTaskAuditEvent(projectRoot, {
-          action: 'create_task',
+        emitEvent(projectRoot, 'create_task', {
           actor: 'tasks:process-handoffs',
           taskId: task.id,
           dependsOn: Array.isArray(task.dependsOn) ? task.dependsOn : [],
@@ -206,8 +184,7 @@ export async function runDelegate({ projectRoot, flags }) {
     process.exit(1);
   }
 
-  appendTaskAuditEvent(projectRoot, {
-    action: 'delegate',
+  emitEvent(projectRoot, 'delegate', {
     actor: 'cli',
     taskId: result.task.id,
     dependsOn: Array.isArray(result.task.dependsOn) ? result.task.dependsOn : [],

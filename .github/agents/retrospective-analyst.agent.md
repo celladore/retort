@@ -32,10 +32,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/history/issues/**
-- docs/history/lessons-learned/**
+- docs/history/issues/\*\*
+- docs/history/lessons-learned/\*\*
 - docs/history/.index.json
-- docs/ai_handoffs/**
+- docs/ai_handoffs/\*\*
 
 ## Responsibilities
 

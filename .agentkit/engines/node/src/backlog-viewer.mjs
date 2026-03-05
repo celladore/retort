@@ -3,12 +3,7 @@
  * Displays a consolidated backlog view with filtering and output format options.
  */
 import yaml from 'js-yaml';
-import {
-  readBacklogJson,
-  readBacklogMarkdown,
-  filterItems,
-  sortItems,
-} from './backlog-store.mjs';
+import { readBacklogJson, readBacklogMarkdown, filterItems, sortItems } from './backlog-store.mjs';
 
 /**
  * Format items as an ASCII table.

@@ -35,16 +35,17 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
   {{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
   {{/if}}
 
+{{#if hasSlashCommands}}
 ## Quick Reference
 
 | Command              | Purpose                                      |
 | -------------------- | -------------------------------------------- |
-| `/orchestrate`       | Master coordinator — assess, plan, delegate  |
-| `/discover`          | Scan codebase, detect tech stacks            |
-| `/healthcheck`       | Pre-flight validation                        |
-| `/review`            | Code review with quality gates               |
-| `/check`             | Universal quality gate (lint + test + build) |
-| `/plan`              | Structured planning before implementation    |
+{{#if hasTeamOrchestration}}| `/orchestrate`       | Master coordinator — assess, plan, delegate  |
+{{/if}}| `/discover`          | Scan codebase, detect tech stacks            |
+{{#if hasHealthcheck}}| `/healthcheck`       | Pre-flight validation                        |
+{{/if}}{{#if hasCodeReview}}| `/review`            | Code review with quality gates               |
+{{/if}}{{#if hasQualityGates}}| `/check`             | Universal quality gate (lint + test + build) |
+{{/if}}| `/plan`              | Structured planning before implementation    |
 | `/build`             | Build project (auto-detects stack)           |
 | `/test`              | Run tests (auto-detects stack)               |
 | `/format`            | Format code (auto-detects stack)             |
@@ -52,8 +53,10 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 | `/security`          | Security audit                               |
 | `/sync-backlog`      | Update AGENT_BACKLOG.md                      |
 | `/document-history`  | Create history doc for completed work        |
-| `/handoff`           | Session handoff summary                      |
+{{#if hasSessionHandoff}}| `/handoff`           | Session handoff summary                      |
+{{/if}}{{/if}}
 
+{{#if hasTeamOrchestration}}
 ## Team Commands
 
 | Command          | Team                | Focus                     |
@@ -68,28 +71,30 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 | `/team-docs`     | Documentation (T8)  | Docs, guides              |
 | `/team-product`  | Product (T9)        | Features, PRDs            |
 | `/team-quality`  | Quality (T10)       | Review, refactor          |
-
+{{/if}}
 ## Workflow
 
 ### 5-Phase Lifecycle
 
 1. **Discovery** — Understand requirements, scan codebase (`/discover`)
 2. **Planning** — Design solution, create ADRs (`/plan`)
-3. **Implementation** — Write code, add tests (team commands)
-4. **Validation** — Verify quality, run gates (`/check`, `/review`)
-5. **Ship** — Deploy, document, hand off (`/deploy`, `/handoff`)
+3. **Implementation** — Write code, add tests{{#if hasTeamOrchestration}} (team commands){{/if}}
+4. **Validation** — Verify quality, run gates{{#if hasQualityGates}} (`/check`{{#if hasCodeReview}}, `/review`{{/if}}){{/if}}
+5. **Ship** — Deploy, document{{#if hasSessionHandoff}}, hand off (`/deploy`, `/handoff`){{/if}}
 
+{{#if hasTeamOrchestration}}
 ### Standard Session Flow
 
 ```text
 /orchestrate --assess-only → Understand current state
 /plan                     → Design implementation
 /team-<name>              → Execute with appropriate team
-/check                    → Verify quality gates
-/review                   → Code review
-/document-history         → Record what was done and why
-/handoff                  → Document session for continuity
-```
+{{#if hasQualityGates}}/check                    → Verify quality gates
+{{/if}}{{#if hasCodeReview}}/review                   → Code review
+{{/if}}/document-history         → Record what was done and why
+{{#if hasSessionHandoff}}/handoff                  → Document session for continuity
+{{/if}}```
+{{/if}}
 
 ## Cross-Cutting Conventions
 

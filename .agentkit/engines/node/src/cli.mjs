@@ -43,6 +43,7 @@ const VALID_COMMANDS = [
   'add',
   'remove',
   'list',
+  'features',
   'tasks',
   'delegate',
   'doctor',
@@ -84,7 +85,7 @@ const VALID_FLAGS = {
     'diff',
     'help',
   ],
-  validate: ['help'],
+  validate: ['auto-task', 'help'],
   discover: ['output', 'depth', 'include-deps', 'help'],
   'spec-validate': ['help'],
   orchestrate: [
@@ -98,10 +99,23 @@ const VALID_FLAGS = {
     'help',
   ],
   plan: ['issue', 'output', 'depth', 'help'],
-  check: ['fix', 'fast', 'stack', 'bail', 'project', 'help'],
-  review: ['pr', 'branch', 'range', 'file', 'focus', 'severity', 'project', 'open-issues', 'dry-run', 'help'],
+  check: ['fix', 'fast', 'stack', 'bail', 'coverage', 'project', 'help'],
+  review: [
+    'pr',
+    'branch',
+    'range',
+    'file',
+    'focus',
+    'severity',
+    'coverage',
+    'project',
+    'open-issues',
+    'dry-run',
+    'auto-task',
+    'help',
+  ],
   handoff: ['format', 'include-diff', 'tag', 'save', 'help'],
-  healthcheck: ['stack', 'fix', 'verbose', 'project', 'help'],
+  healthcheck: ['stack', 'fix', 'verbose', 'project', 'auto-task', 'help'],
   cost: ['summary', 'sessions', 'report', 'month', 'format', 'last', 'help'],
   tasks: ['status', 'assignee', 'type', 'priority', 'id', 'process-handoffs', 'help'],
   delegate: [
@@ -118,13 +132,25 @@ const VALID_FLAGS = {
   doctor: ['verbose', 'help'],
   'import-issues': ['tracker', 'state', 'labels', 'since', 'dry-run', 'limit', 'force', 'help'],
   backlog: ['format', 'team', 'priority', 'source', 'status', 'sort', 'help'],
-  'sync-backlog': ['tracker', 'state', 'direction', 'labels', 'owner-team', 'team', 'since', 'limit', 'force', 'help'],
+  'sync-backlog': [
+    'tracker',
+    'state',
+    'direction',
+    'labels',
+    'owner-team',
+    'team',
+    'since',
+    'limit',
+    'force',
+    'help',
+  ],
   scaffold: ['type', 'name', 'stack', 'path', 'help'],
   preflight: ['stack', 'branch', 'range', 'base', 'strict', 'help'],
   'project-review': ['scope', 'focus', 'phase', 'help'],
   add: ['help'],
   remove: ['clean', 'help'],
   list: ['help'],
+  features: ['verbose', 'help'],
 };
 
 // Global flags that apply to all commands
@@ -203,12 +229,14 @@ const FLAG_TYPES = {
   fix: 'boolean',
   fast: 'boolean',
   bail: 'boolean',
+  coverage: 'boolean',
   'include-diff': 'boolean',
   save: 'boolean',
   summary: 'boolean',
   sessions: 'boolean',
   report: 'boolean',
   'open-issues': 'boolean',
+  'auto-task': 'boolean',
   'process-handoffs': 'boolean',
   clean: 'boolean',
   strict: 'boolean',
@@ -324,6 +352,13 @@ Tool Management:
                   --clean             Also delete generated files
   list            Show enabled and available AI tools
 
+Feature Management:
+  features                 List all kit features and their status
+                  --verbose           Show available presets
+  features enable <f...>   Enable one or more kit features
+  features disable <f...>  Disable one or more kit features
+  features preset <name>   Apply a named feature preset (minimal, standard, full, lean)
+
 Workflow Commands:
   orchestrate     Multi-team coordination workflow (state machine)
   plan            Show plan status and recommendations
@@ -396,6 +431,7 @@ Options:
     --fast              Skip build step
     --stack <name>      Limit to specific tech stack
     --bail              Stop on first failure
+    --coverage          Run coverage checks and enforce thresholds
 
   review:
     --range <range>     Git commit range (e.g. HEAD~3..HEAD)
@@ -616,6 +652,31 @@ async function main() {
       case 'list': {
         const { runList } = await import('./tool-manager.mjs');
         await runList({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        break;
+      }
+      case 'features': {
+        // Sub-actions: list (default), enable, disable, preset
+        const subAction = (flags._args || [])[0];
+        if (subAction === 'enable') {
+          flags._args = flags._args.slice(1);
+          const { runFeatureEnable } = await import('./feature-manager.mjs');
+          await runFeatureEnable({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else if (subAction === 'disable') {
+          flags._args = flags._args.slice(1);
+          const { runFeatureDisable } = await import('./feature-manager.mjs');
+          await runFeatureDisable({
+            agentkitRoot: AGENTKIT_ROOT,
+            projectRoot: PROJECT_ROOT,
+            flags,
+          });
+        } else if (subAction === 'preset') {
+          flags._args = flags._args.slice(1);
+          const { runFeaturePreset } = await import('./feature-manager.mjs');
+          await runFeaturePreset({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else {
+          const { runFeatures } = await import('./feature-manager.mjs');
+          await runFeatures({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        }
         break;
       }
       default: {

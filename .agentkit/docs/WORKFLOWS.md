@@ -1535,12 +1535,12 @@ The evaluation produces:
 
 Score interpretation:
 
-| Score Range | Meaning                        |
-| ----------- | ------------------------------ |
-| 50–65       | High risk, significant gaps    |
-| 65–75       | Healthy startup baseline       |
-| 75–85       | Strong infrastructure posture  |
-| >85         | Likely over-engineered         |
+| Score Range | Meaning                       |
+| ----------- | ----------------------------- |
+| 50–65       | High risk, significant gaps   |
+| 65–75       | Healthy startup baseline      |
+| 75–85       | Strong infrastructure posture |
+| >85         | Likely over-engineered        |
 
 #### Step 4: Address Hard Gate Failures
 

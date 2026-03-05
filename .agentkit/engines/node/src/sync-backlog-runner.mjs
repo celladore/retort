@@ -5,7 +5,6 @@
  */
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
-import { appendFile, mkdir } from 'fs/promises';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import {
@@ -15,8 +14,10 @@ import {
   writeBacklogMarkdown,
   sortItems,
 } from './backlog-store.mjs';
-import { normalizeIssue, deduplicateItems } from './issue-normalizer.mjs';
+import { emitEvent } from './event-emitter.mjs';
+import { normalizeIssue, deduplicateItems, inferCategoryScores } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
+import { calculateScore } from './weighted-scorer.mjs';
 
 /**
  * Collect items from the orchestrator state (healthcheck, risks).
@@ -25,7 +26,7 @@ import { createAdapter } from './tracker-adapter.mjs';
  */
 function collectOrchestratorItems(projectRoot) {
   const items = [];
-  const orchPath = resolve(projectRoot, '.claude', 'state', 'orchestrator.json');
+  const orchPath = resolve(projectRoot, '.agentkit', 'state', 'orchestrator.json');
   if (!existsSync(orchPath)) return items;
 
   try {
@@ -36,7 +37,10 @@ function collectOrchestratorItems(projectRoot) {
       const now = new Date().toISOString();
       for (const risk of orch.risks) {
         const riskKey = risk.title || risk.description || 'risk';
-        const hash = createHash('sha256').update(`healthcheck:${riskKey}`).digest('hex').slice(0, 8);
+        const hash = createHash('sha256')
+          .update(`healthcheck:${riskKey}`)
+          .digest('hex')
+          .slice(0, 8);
         items.push({
           id: `bi-healthcheck-${hash}`,
           externalId: `HC-${hash}`,
@@ -76,6 +80,11 @@ function collectOrchestratorItems(projectRoot) {
  * @param {object} opts.flags
  */
 export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+  if (userContext) {
+    console.log(`[agentkit:sync-backlog] Context: ${userContext}`);
+  }
   // Load project config
   const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
   let project = {};
@@ -87,7 +96,9 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   const tracker = flags.tracker || project?.process?.issueTracker || 'none';
   const direction = flags.direction || 'pull';
 
-  console.log(`[agentkit:sync-backlog] Starting backlog sync (tracker: ${tracker}, direction: ${direction})...`);
+  console.log(
+    `[agentkit:sync-backlog] Starting backlog sync (tracker: ${tracker}, direction: ${direction})...`
+  );
 
   if (direction === 'push') {
     console.warn(
@@ -117,7 +128,7 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
         state: flags.state || 'open',
         labels: flags.labels || null,
         since: flags.since || null,
-        limit: flags.limit ? Number(flags.limit) : 100,
+        limit: flags.limit && Number.isFinite(Number(flags.limit)) ? Number(flags.limit) : 100,
       });
 
       const config = {
@@ -142,6 +153,18 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
     console.log(`  Orchestrator/healthcheck: ${orchItems.length} items`);
   }
 
+  // 3b. Enrich with weighted scoring when enabled
+  const scoringEnabled = intake.scoring?.enabled ?? false;
+  if (scoringEnabled && allIncoming.length) {
+    const phase = project?.phase || undefined;
+    for (const item of allIncoming) {
+      const result = calculateScore(inferCategoryScores(item), { phase });
+      item.priority = result.priority;
+      item.score = result.score;
+    }
+    console.log(`  Scoring applied to ${allIncoming.length} items (phase: ${phase || 'default'}).`);
+  }
+
   // 4. Merge
   const { merged, added, updated, preserved } = deduplicateItems(existing, allIncoming);
 
@@ -152,15 +175,23 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   const repoName = project?.name || '';
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
 
-  // 6. Events log
-  const eventsDir = resolve(projectRoot, '.claude', 'state');
-  await mkdir(eventsDir, { recursive: true });
-  const eventsPath = resolve(eventsDir, 'events.log');
-  const timestamp = new Date().toISOString();
+  // 6. Emit structured event
   const p0 = sorted.filter((i) => i.priority === 'P0').length;
   const p1 = sorted.filter((i) => i.priority === 'P1').length;
-  const logEntry = `[${timestamp}] [BACKLOG] [SYNC] Synced backlog. Total: ${sorted.length}. P0: ${p0}. P1: ${p1}. New: ${added}. Updated: ${updated}. Manual: ${preserved}.\n`;
-  await appendFile(eventsPath, logEntry, 'utf-8');
+  emitEvent(
+    projectRoot,
+    'backlog_sync',
+    {
+      total: sorted.length,
+      p0,
+      p1,
+      added,
+      updated,
+      preserved,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'sync-backlog' }
+  );
 
   // Apply team filter for display only (does not affect persisted data)
   let displayItems = sorted;
@@ -170,7 +201,9 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   }
 
   console.log(`[agentkit:sync-backlog] Done.`);
-  console.log(`  Total: ${sorted.length} | Added: ${added} | Updated: ${updated} | Manual: ${preserved}`);
+  console.log(
+    `  Total: ${sorted.length} | Added: ${added} | Updated: ${updated} | Manual: ${preserved}`
+  );
   if (flags.team) {
     console.log(`  Showing: ${displayItems.length} items for team "${flags.team}"`);
   }

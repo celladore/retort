@@ -19,7 +19,7 @@ Where heuristics help:
 Recommended model: **hybrid precedence**
 
 1. Configured flags (`stack.languages`) win.
-2. Heuristics infer *candidate* flags when config is missing or empty.
+2. Heuristics infer _candidate_ flags when config is missing or empty.
 3. Generators consume `hasLanguage*Effective` + `languageSource` metadata.
 4. CLI surfaces warnings/suggestions when config and heuristics disagree.
 

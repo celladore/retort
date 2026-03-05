@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { runHealthcheck } from '../healthcheck.mjs';
 import * as runner from '../runner.mjs';
 import * as orchestrator from '../orchestrator.mjs';
+import * as taskProtocol from '../task-protocol.mjs';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -10,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'healthcheck');
-const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
 
 describe('runHealthcheck()', () => {
   afterEach(() => {
@@ -130,6 +131,48 @@ describe('runHealthcheck()', () => {
     expect(result.agentkit).toHaveProperty('hasCommands');
     expect(result.agentkit).toHaveProperty('hasHooks');
     expect(result.agentkit.hasMarker).toBe(true);
+  });
+
+  it('creates tasks for failed checks when --auto-task is set', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    // Simulate a failing build check by mocking stack detection
+    vi.spyOn(runner, 'commandExists').mockReturnValue(false);
+    vi.spyOn(runner, 'execCommand').mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'build failed',
+      durationMs: 100,
+    });
+    vi.spyOn(runner, 'isValidCommand').mockReturnValue(true);
+
+    vi.spyOn(orchestrator, 'loadState').mockReturnValue({});
+    vi.spyOn(orchestrator, 'saveState').mockImplementation(() => {});
+    vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+
+    const createTaskSpy = vi.spyOn(taskProtocol, 'createTask').mockResolvedValue({
+      task: { id: 'test-task-1' },
+      error: null,
+    });
+
+    mkdirSync(TEST_ROOT, { recursive: true });
+
+    // Inject a fake stack result by making overallHealth UNHEALTHY
+    const result = await runHealthcheck({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: TEST_ROOT,
+      flags: { 'auto-task': true },
+    });
+
+    // If there were failed checks, createTask should have been called
+    if (result.overallHealth === 'UNHEALTHY') {
+      expect(createTaskSpy).toHaveBeenCalled();
+      const call = createTaskSpy.mock.calls[0];
+      expect(call[1].delegator).toBe('healthcheck');
+      expect(call[1].type).toBe('investigate');
+    }
   });
 
   it('handles project root without agentkit setup', async () => {

@@ -72,7 +72,6 @@ This project uses a multi-team orchestration model. Teams are specialized by dom
 - Start with `/orchestrate` to assess the current state and coordinate work.
 - Use `/plan` to create structured implementation plans before coding.
 - Run `/check` to verify quality gates (lint, test, build) before committing.
-- Use `/handoff` to document session state for continuity.
 
 See `UNIFIED_AGENT_TEAMS.md` for full team definitions and workflow phases.
 See `COMMAND_GUIDE.md` for when to choose `/orchestrate`, `/plan`, `/project-review`, and other commands.

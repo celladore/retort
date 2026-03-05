@@ -16,30 +16,24 @@ last_updated: '2026-03-05'
 
 Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.
 
-## Instructions
+## Checks
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+1. Verify all required directories exist for active render targets
+2. Validate JSON files are well-formed (settings.json, orchestrator.json)
+3. Verify all expected command files exist and have valid frontmatter
+4. Check hook scripts exist and are executable
+5. Scan for forbidden patterns (hardcoded secrets, absolute paths)
+6. Verify settings.json hooks configuration matches spec
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Output
+
+Report: per-check pass/fail with details, overall PASS/FAIL status, list of missing or malformed files.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
@@ -57,4 +51,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

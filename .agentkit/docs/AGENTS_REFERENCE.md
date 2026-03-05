@@ -20,15 +20,15 @@ AgentKit Forge defines 19 specialized agents organized into 7 categories. Each a
 
 ## Agent Categories
 
-| Category             | Agents | IDs                                                          |
-|----------------------|--------|--------------------------------------------------------------|
-| Engineering          | 5      | `backend`, `frontend`, `data`, `devops`, `infra`             |
-| Design               | 2      | `brand-guardian`, `ui-designer`                               |
-| Marketing            | 2      | `content-strategist`, `growth-analyst`                        |
-| Operations           | 3      | `dependency-watcher`, `environment-manager`, `security-auditor` |
-| Product              | 2      | `product-manager`, `roadmap-tracker`                          |
-| Testing              | 3      | `test-lead`, `coverage-tracker`, `integration-tester`         |
-| Project Management   | 2      | `project-shipper`, `release-manager`                          |
+| Category           | Agents | IDs                                                             |
+| ------------------ | ------ | --------------------------------------------------------------- |
+| Engineering        | 5      | `backend`, `frontend`, `data`, `devops`, `infra`                |
+| Design             | 2      | `brand-guardian`, `ui-designer`                                 |
+| Marketing          | 2      | `content-strategist`, `growth-analyst`                          |
+| Operations         | 3      | `dependency-watcher`, `environment-manager`, `security-auditor` |
+| Product            | 2      | `product-manager`, `roadmap-tracker`                            |
+| Testing            | 3      | `test-lead`, `coverage-tracker`, `integration-tester`           |
+| Project Management | 2      | `project-shipper`, `release-manager`                            |
 
 ---
 

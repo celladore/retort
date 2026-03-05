@@ -17,7 +17,7 @@ function makeTempDirs() {
   const projectRoot = resolve(tmpdir(), `agentkit-sync-test-${id}`);
   const agentkitRoot = resolve(projectRoot, '.agentkit');
   const specDir = resolve(agentkitRoot, 'spec');
-  const stateDir = resolve(projectRoot, '.claude', 'state');
+  const stateDir = resolve(projectRoot, '.agentkit', 'state');
   mkdirSync(specDir, { recursive: true });
   mkdirSync(stateDir, { recursive: true });
   return { projectRoot, agentkitRoot, specDir, stateDir };
@@ -59,9 +59,11 @@ describe('runSyncBacklog', () => {
   it('syncs with external tracker when autoImport is true', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([
+          { number: 1, title: 'Bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
+        ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -72,7 +74,7 @@ describe('runSyncBacklog', () => {
     });
 
     expect(createAdapter).toHaveBeenCalledWith('github', dirs.projectRoot);
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     expect(existsSync(jsonPath)).toBe(true);
   });
 
@@ -102,7 +104,12 @@ describe('runSyncBacklog', () => {
       resolve(dirs.stateDir, 'orchestrator.json'),
       JSON.stringify({
         risks: [
-          { title: 'Missing tests', description: 'Low coverage', severity: 'high', team: 'testing' },
+          {
+            title: 'Missing tests',
+            description: 'Low coverage',
+            severity: 'high',
+            team: 'testing',
+          },
         ],
       }),
       'utf-8'
@@ -114,7 +121,7 @@ describe('runSyncBacklog', () => {
       flags: {},
     });
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     const data = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(data.items.some((i) => i.title === 'Missing tests')).toBe(true);
     expect(data.items.find((i) => i.title === 'Missing tests').priority).toBe('P1');
@@ -171,7 +178,7 @@ describe('runSyncBacklog', () => {
     });
 
     // Team filter is display-only — all items should be persisted
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     expect(existsSync(jsonPath)).toBe(true);
   });
 
@@ -189,8 +196,9 @@ describe('runSyncBacklog', () => {
 
     const eventsPath = resolve(dirs.stateDir, 'events.log');
     expect(existsSync(eventsPath)).toBe(true);
-    const log = readFileSync(eventsPath, 'utf-8');
-    expect(log).toContain('[BACKLOG]');
-    expect(log).toContain('[SYNC]');
+    const log = readFileSync(eventsPath, 'utf-8').trim();
+    const event = JSON.parse(log);
+    expect(event.action).toBe('backlog_sync');
+    expect(event.source).toBe('sync-backlog');
   });
 });

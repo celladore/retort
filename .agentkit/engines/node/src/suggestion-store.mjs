@@ -1,7 +1,7 @@
 /**
  * AgentKit Forge — Suggestion Store
  * File-backed suggestion management with YAML serialization.
- * Stores suggestions in .claude/state/suggestions/ as individual YAML files.
+ * Stores suggestions in .agentkit/state/suggestions/ as individual YAML files.
  *
  * Tracks suggestion lifecycle: pending_review → approved | rejected | deferred
  */
@@ -15,12 +15,7 @@ const { mkdir, readFile, readdir, writeFile } = fsPromises;
 // Suggestion states
 // ---------------------------------------------------------------------------
 
-export const SUGGESTION_STATES = [
-  'pending_review',
-  'approved',
-  'rejected',
-  'deferred',
-];
+export const SUGGESTION_STATES = ['pending_review', 'approved', 'rejected', 'deferred'];
 
 export const TERMINAL_SUGGESTION_STATES = ['approved', 'rejected'];
 
@@ -33,7 +28,7 @@ const SUGGESTION_ID_PATTERN = /^SUG-\d{3,}$/;
 function validateSuggestionId(suggestionId) {
   if (!SUGGESTION_ID_PATTERN.test(suggestionId)) {
     throw new Error(
-      `Invalid suggestion ID: "${suggestionId}". Must match pattern SUG-NNN (e.g., SUG-001).`,
+      `Invalid suggestion ID: "${suggestionId}". Must match pattern SUG-NNN (e.g., SUG-001).`
     );
   }
 }
@@ -43,7 +38,7 @@ function validateSuggestionId(suggestionId) {
 // ---------------------------------------------------------------------------
 
 function suggestionsDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state', 'suggestions');
+  return resolve(projectRoot, '.agentkit', 'state', 'suggestions');
 }
 
 function rejectedDir(projectRoot) {
@@ -81,11 +76,7 @@ export async function saveSuggestions(projectRoot, report) {
       createdAt: report.generatedAt,
       runTimestamp: timestamp,
     };
-    await writeFile(
-      suggestionFile,
-      yaml.dump(record, { lineWidth: 100, noRefs: true }),
-      'utf-8',
-    );
+    await writeFile(suggestionFile, yaml.dump(record, { lineWidth: 100, noRefs: true }), 'utf-8');
   }
 
   return { runFile, suggestionsDir: dir, count: report.suggestions.length };
@@ -158,7 +149,9 @@ export async function updateSuggestionStatus(projectRoot, suggestionId, newStatu
   validateSuggestionId(suggestionId);
 
   if (!SUGGESTION_STATES.includes(newStatus)) {
-    throw new Error(`Invalid suggestion status: ${newStatus}. Must be one of: ${SUGGESTION_STATES.join(', ')}`);
+    throw new Error(
+      `Invalid suggestion status: ${newStatus}. Must be one of: ${SUGGESTION_STATES.join(', ')}`
+    );
   }
 
   const suggestion = await loadSuggestion(projectRoot, suggestionId);
@@ -168,7 +161,7 @@ export async function updateSuggestionStatus(projectRoot, suggestionId, newStatu
 
   if (TERMINAL_SUGGESTION_STATES.includes(suggestion.status)) {
     throw new Error(
-      `Suggestion ${suggestionId} is in terminal state "${suggestion.status}" and cannot be updated.`,
+      `Suggestion ${suggestionId} is in terminal state "${suggestion.status}" and cannot be updated.`
     );
   }
 
@@ -233,11 +226,7 @@ async function saveRejectionFingerprint(projectRoot, suggestion) {
   };
 
   const filePath = resolve(dir, `${suggestion.id}.yaml`);
-  await writeFile(
-    filePath,
-    yaml.dump(fingerprint, { lineWidth: 100, noRefs: true }),
-    'utf-8',
-  );
+  await writeFile(filePath, yaml.dump(fingerprint, { lineWidth: 100, noRefs: true }), 'utf-8');
 }
 
 function normalizeTitle(title) {

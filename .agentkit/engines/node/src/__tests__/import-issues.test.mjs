@@ -10,7 +10,7 @@ function makeTempDirs() {
   const projectRoot = resolve(tmpdir(), `agentkit-import-test-${id}`);
   const agentkitRoot = resolve(projectRoot, '.agentkit');
   const specDir = resolve(agentkitRoot, 'spec');
-  const stateDir = resolve(projectRoot, '.claude', 'state');
+  const stateDir = resolve(projectRoot, '.agentkit', 'state');
   mkdirSync(specDir, { recursive: true });
   mkdirSync(stateDir, { recursive: true });
   return { projectRoot, agentkitRoot, specDir, stateDir };
@@ -69,9 +69,11 @@ describe('runImportIssues', () => {
   it('imports when --force is set even with autoImport false', async () => {
     writeProjectYaml(dirs.specDir, { autoImport: false });
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Test bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([
+          { number: 1, title: 'Test bug', state: 'open', labels: [{ name: 'bug' }], body: '' },
+        ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -90,7 +92,13 @@ describe('runImportIssues', () => {
     const mockAdapter = {
       fetchIssues: vi.fn().mockReturnValue([
         { number: 10, title: 'Fix auth', state: 'open', labels: [{ name: 'bug' }], body: '' },
-        { number: 11, title: 'Add feature', state: 'open', labels: [{ name: 'enhancement' }], body: '' },
+        {
+          number: 11,
+          title: 'Add feature',
+          state: 'open',
+          labels: [{ name: 'enhancement' }],
+          body: '',
+        },
       ]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
@@ -101,7 +109,7 @@ describe('runImportIssues', () => {
       flags: {},
     });
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     expect(existsSync(jsonPath)).toBe(true);
     const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(jsonData.items).toHaveLength(2);
@@ -116,9 +124,9 @@ describe('runImportIssues', () => {
   it('appends to events.log', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -130,17 +138,19 @@ describe('runImportIssues', () => {
 
     const eventsPath = resolve(dirs.stateDir, 'events.log');
     expect(existsSync(eventsPath)).toBe(true);
-    const log = readFileSync(eventsPath, 'utf-8');
-    expect(log).toContain('[IMPORT]');
-    expect(log).toContain('[GITHUB]');
+    const log = readFileSync(eventsPath, 'utf-8').trim();
+    const event = JSON.parse(log);
+    expect(event.action).toBe('import_issues');
+    expect(event.tracker).toBe('GITHUB');
+    expect(event.source).toBe('import-issues');
   });
 
   it('dry-run does not write files', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -151,7 +161,7 @@ describe('runImportIssues', () => {
     });
 
     expect(result.dryRun).toBe(true);
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     expect(existsSync(jsonPath)).toBe(false);
   });
 
@@ -160,16 +170,20 @@ describe('runImportIssues', () => {
 
     // Write a legacy markdown backlog with a manual item
     const mdPath = resolve(dirs.projectRoot, 'AGENT_BACKLOG.md');
-    writeFileSync(mdPath, `# Backlog
+    writeFileSync(
+      mdPath,
+      `# Backlog
 | Priority | Team | Task | Phase | Status | Notes |
 | -------- | ---- | ---- | ----- | ------ | ----- |
 | P1 | backend | Manual task | Planning | Open | Important |
-`, 'utf-8');
+`,
+      'utf-8'
+    );
 
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 5, title: 'New issue', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 5, title: 'New issue', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -182,7 +196,7 @@ describe('runImportIssues', () => {
     expect(result.preserved).toBe(1);
     expect(result.imported).toBe(1);
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(jsonData.items.length).toBeGreaterThanOrEqual(2);
     expect(jsonData.items.some((i) => i.title === 'Manual task')).toBe(true);
@@ -191,9 +205,9 @@ describe('runImportIssues', () => {
   it('deduplicates on subsequent imports', async () => {
     writeProjectYaml(dirs.specDir);
     const mockAdapter = {
-      fetchIssues: vi.fn().mockReturnValue([
-        { number: 1, title: 'Bug v1', state: 'open', labels: [], body: '' },
-      ]),
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug v1', state: 'open', labels: [], body: '' }]),
     };
     createAdapter.mockResolvedValue(mockAdapter);
 
@@ -217,10 +231,60 @@ describe('runImportIssues', () => {
     expect(result.updated).toBe(1);
     expect(result.imported).toBe(0);
 
-    const jsonPath = resolve(dirs.projectRoot, '.claude', 'state', 'backlog.json');
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
     const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
     expect(jsonData.items).toHaveLength(1);
     expect(jsonData.items[0].title).toBe('Bug v2');
+  });
+
+  it('applies weighted scoring when intake.scoring.enabled is true', async () => {
+    writeProjectYaml(dirs.specDir, { scoring: { enabled: true } });
+    const mockAdapter = {
+      fetchIssues: vi.fn().mockReturnValue([
+        {
+          number: 1,
+          title: 'Critical bug',
+          state: 'open',
+          labels: [{ name: 'critical' }],
+          body: '',
+        },
+      ]),
+    };
+    createAdapter.mockResolvedValue(mockAdapter);
+
+    const result = await runImportIssues({
+      agentkitRoot: dirs.agentkitRoot,
+      projectRoot: dirs.projectRoot,
+      flags: {},
+    });
+
+    expect(result.imported).toBe(1);
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
+    const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+    // Scoring should have added a score field
+    expect(jsonData.items[0]).toHaveProperty('score');
+    expect(typeof jsonData.items[0].score).toBe('number');
+  });
+
+  it('skips scoring when intake.scoring.enabled is not set', async () => {
+    writeProjectYaml(dirs.specDir);
+    const mockAdapter = {
+      fetchIssues: vi
+        .fn()
+        .mockReturnValue([{ number: 1, title: 'Bug', state: 'open', labels: [], body: '' }]),
+    };
+    createAdapter.mockResolvedValue(mockAdapter);
+
+    await runImportIssues({
+      agentkitRoot: dirs.agentkitRoot,
+      projectRoot: dirs.projectRoot,
+      flags: {},
+    });
+
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
+    const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+    // No score field when scoring is disabled
+    expect(jsonData.items[0].score).toBeUndefined();
   });
 
   it('returns early when tracker is none', async () => {

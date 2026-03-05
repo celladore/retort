@@ -12,16 +12,16 @@ AgentKit Forge has a comprehensive documentation set across 20+ files in `.agent
 
 ### Key Findings
 
-| Category | Status | Details |
-|----------|--------|---------|
-| README | Good | Clear purpose, adoption guides, navigation. One broken link. |
-| Command Reference | Incomplete | 5 commands completely undocumented; several missing flags from CLI source |
-| Agent Reference | Missing | No dedicated reference for 19 agent personas; scattered across AGENTS_VS_TEAMS.md |
-| Team Guide | Good | Decision matrix, handoff patterns, edge cases covered |
-| Architecture | Good | Sync engine, template rendering, directory structure documented |
-| Security Model | Good | Threat model, hooks, permissions documented |
-| Cross-linking | Fair | Some broken links, inconsistent command counts between docs |
-| PRD Library | Broken | README link in main README points to nonexistent `docs/prd/README.md` |
+| Category          | Status     | Details                                                                           |
+| ----------------- | ---------- | --------------------------------------------------------------------------------- |
+| README            | Good       | Clear purpose, adoption guides, navigation. One broken link.                      |
+| Command Reference | Incomplete | 5 commands completely undocumented; several missing flags from CLI source         |
+| Agent Reference   | Missing    | No dedicated reference for 19 agent personas; scattered across AGENTS_VS_TEAMS.md |
+| Team Guide        | Good       | Decision matrix, handoff patterns, edge cases covered                             |
+| Architecture      | Good       | Sync engine, template rendering, directory structure documented                   |
+| Security Model    | Good       | Threat model, hooks, permissions documented                                       |
+| Cross-linking     | Fair       | Some broken links, inconsistent command counts between docs                       |
+| PRD Library       | Broken     | README link in main README points to nonexistent `docs/prd/README.md`             |
 
 ---
 
@@ -31,19 +31,20 @@ AgentKit Forge has a comprehensive documentation set across 20+ files in `.agent
 
 #### 1.1 Missing Commands in COMMAND_REFERENCE.md
 
-| Command | Type | Status | Priority |
-|---------|------|--------|----------|
-| `/tasks` | Workflow | Completely undocumented | High |
-| `/delegate` | Workflow | Completely undocumented | High |
-| `/doctor` | Diagnostic | Completely undocumented | High |
-| `/scaffold` | Workflow (slash-only) | Completely undocumented | Medium |
-| `/preflight` | Workflow (slash-only) | Completely undocumented | Medium |
+| Command      | Type                  | Status                  | Priority |
+| ------------ | --------------------- | ----------------------- | -------- |
+| `/tasks`     | Workflow              | Completely undocumented | High     |
+| `/delegate`  | Workflow              | Completely undocumented | High     |
+| `/doctor`    | Diagnostic            | Completely undocumented | High     |
+| `/scaffold`  | Workflow (slash-only) | Completely undocumented | Medium   |
+| `/preflight` | Workflow (slash-only) | Completely undocumented | Medium   |
 
 **Why it matters:** Developers using `/tasks` and `/delegate` for task management have no reference for flags, expected behavior, or examples. `/doctor` is the primary diagnostic tool but has zero documentation.
 
 #### 1.2 Missing Agent Reference Document
 
 **What's missing:** A dedicated `AGENTS_REFERENCE.md` documenting all 19 agent personas with their:
+
 - Role and responsibilities
 - File scope (glob patterns)
 - Dependency chain (depends-on, notifies)
@@ -52,6 +53,7 @@ AgentKit Forge has a comprehensive documentation set across 20+ files in `.agent
 - Preferred tools
 
 **Current state:** Agent information is split between:
+
 - `AGENTS_VS_TEAMS.md` (brief list of 16 agents — undercounts actual 30)
 - `agents.yaml` spec file (complete but YAML, not human-readable docs)
 - `TEAM_GUIDE.md` (team-level only, no agent detail)
@@ -70,21 +72,22 @@ AgentKit Forge has a comprehensive documentation set across 20+ files in `.agent
 
 The following commands have flags defined in the CLI source (`cli.mjs`) that are not documented in COMMAND_REFERENCE.md:
 
-| Command | Missing Flags | In CLI Source |
-|---------|--------------|---------------|
-| `/discover` | `--depth`, `--include-deps` | Yes |
-| `/plan` | `--issue`, `--output`, `--depth` | Yes |
-| `/orchestrate` | `--scope` | Yes |
-| `/sync-backlog` | `--direction`, `--labels`, `--team` | Yes |
-| `/build` | `--stack`, `--package`, `--production` | Yes |
-| `/test` | `--stack`, `--filter`, `--package` | Yes |
-| `/format` | `--stack`, `--path` | Yes |
-| `/deploy` | `--environment`, `--skip-checks`, `--stack` | Yes |
-| `/security` | `--scan-type`, `--severity`, `--fix`, `--output` | Yes |
+| Command         | Missing Flags                                    | In CLI Source |
+| --------------- | ------------------------------------------------ | ------------- |
+| `/discover`     | `--depth`, `--include-deps`                      | Yes           |
+| `/plan`         | `--issue`, `--output`, `--depth`                 | Yes           |
+| `/orchestrate`  | `--scope`                                        | Yes           |
+| `/sync-backlog` | `--direction`, `--labels`, `--team`              | Yes           |
+| `/build`        | `--stack`, `--package`, `--production`           | Yes           |
+| `/test`         | `--stack`, `--filter`, `--package`               | Yes           |
+| `/format`       | `--stack`, `--path`                              | Yes           |
+| `/deploy`       | `--environment`, `--skip-checks`, `--stack`      | Yes           |
+| `/security`     | `--scan-type`, `--severity`, `--fix`, `--output` | Yes           |
 
 #### 2.2 Team Commands Missing Detail
 
 Team commands in COMMAND_REFERENCE.md have a quick-reference table but lack:
+
 - The `--task` flag (present in all team commands per `commands.yaml`)
 - Expected output format
 - How backlog items are selected and prioritized
@@ -92,31 +95,31 @@ Team commands in COMMAND_REFERENCE.md have a quick-reference table but lack:
 
 ### 3. Cross-Document Inconsistencies
 
-| Issue | Location | Details |
-|-------|----------|---------|
-| Command count mismatch | QUICK_START.md says "24 commands"; `VALID_COMMANDS` in `cli.mjs` contains 21 CLI-routable commands; `commands.yaml` defines 30 total commands (including 10 team commands and 3 slash-only commands not in the CLI router). The prior "48" figure was erroneous. | Reconciled to 29 in QUICK_START.md (see remediation item 10) |
-| Agent count mismatch | AGENTS_VS_TEAMS.md lists "16 agents"; agents.yaml defines 19 | agents.yaml is authoritative |
-| Team count | Consistent at 10 across all docs | No issue |
-| `/sync` vs `agentkit sync` | Some docs use slash-command syntax, others use CLI | Should clarify that `/sync` is not a slash command — it's CLI-only |
-| `--overwrite` flag | Referenced in CUSTOMIZATION.md but not in COMMAND_REFERENCE.md under any command | Should be documented under sync |
+| Issue                      | Location                                                                                                                                                                                                                                                         | Details                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Command count mismatch     | QUICK_START.md says "24 commands"; `VALID_COMMANDS` in `cli.mjs` contains 21 CLI-routable commands; `commands.yaml` defines 30 total commands (including 10 team commands and 3 slash-only commands not in the CLI router). The prior "48" figure was erroneous. | Reconciled to 29 in QUICK_START.md (see remediation item 10)       |
+| Agent count mismatch       | AGENTS_VS_TEAMS.md lists "16 agents"; agents.yaml defines 19                                                                                                                                                                                                     | agents.yaml is authoritative                                       |
+| Team count                 | Consistent at 10 across all docs                                                                                                                                                                                                                                 | No issue                                                           |
+| `/sync` vs `agentkit sync` | Some docs use slash-command syntax, others use CLI                                                                                                                                                                                                               | Should clarify that `/sync` is not a slash command — it's CLI-only |
+| `--overwrite` flag         | Referenced in CUSTOMIZATION.md but not in COMMAND_REFERENCE.md under any command                                                                                                                                                                                 | Should be documented under sync                                    |
 
 ### 4. Structural/Navigation Issues
 
-| Issue | Details | Recommendation |
-|-------|---------|----------------|
-| Platform Reference is a stub | `PLATFORM_REFERENCE.md` is a redirect to `platform_reference/` subdirectory with 48 files | Already addressed; no action needed |
-| No index for `.agentkit/docs/` | No README or index file in the docs directory itself | Low priority — README serves as index |
-| COST_TRACKING.md partial implementation | Header says "PARTIALLY IMPLEMENTED" but body describes features as implemented | Clarify which features are implemented vs roadmap |
+| Issue                                   | Details                                                                                   | Recommendation                                    |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Platform Reference is a stub            | `PLATFORM_REFERENCE.md` is a redirect to `platform_reference/` subdirectory with 48 files | Already addressed; no action needed               |
+| No index for `.agentkit/docs/`          | No README or index file in the docs directory itself                                      | Low priority — README serves as index             |
+| COST_TRACKING.md partial implementation | Header says "PARTIALLY IMPLEMENTED" but body describes features as implemented            | Clarify which features are implemented vs roadmap |
 
 ### 5. Documentation Quality Issues
 
-| File | Issue |
-|------|-------|
-| WORKFLOWS.md | Time estimates (10-20 min for feature, 5-10 min for bugfix) are optimistic and should be qualified |
-| STATE_AND_SESSIONS.md | No concrete examples of `orchestrator.json` or `events.log` contents |
-| MCP_A2A_GUIDE.md | No examples of actual A2A messages or MCP server usage |
-| ONBOARDING.md | CI integration examples only cover GitHub Actions; no other CI systems |
-| TROUBLESHOOTING.md | No troubleshooting for spec validation errors or team command failures |
+| File                  | Issue                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
+| WORKFLOWS.md          | Time estimates (10-20 min for feature, 5-10 min for bugfix) are optimistic and should be qualified |
+| STATE_AND_SESSIONS.md | No concrete examples of `orchestrator.json` or `events.log` contents                               |
+| MCP_A2A_GUIDE.md      | No examples of actual A2A messages or MCP server usage                                             |
+| ONBOARDING.md         | CI integration examples only cover GitHub Actions; no other CI systems                             |
+| TROUBLESHOOTING.md    | No troubleshooting for spec validation errors or team command failures                             |
 
 ---
 
@@ -158,15 +161,15 @@ A comprehensive analysis of 7 active branches identified 6 new commands, 2 new a
 
 ### Branch-by-Branch Impact Summary
 
-| Branch | New Commands | New Agents | Key Documentation Impact |
-|--------|-------------|------------|--------------------------|
-| `agentforge-template-integration` | `/infra-eval` | — | 8-dimension evaluation framework, hard gates, orchestrator Phase 4 integration |
-| `elegant-knuth` | `/review` enhancements | `retrospective-analyst` | 4 new review criteria (7-10), retrospective mode, 4 CI workflows, docs/history/ structure |
-| `feature-management-strategy` | `/feature-configure`, `/feature-flow`, `/feature-review` | `feature-ops` | Feature gating system, presets, 564-line features.yaml spec, feature-aware sync |
-| `repo-specific-editor-theme` | `/brand` | — | Brand spec system, editor theme generation, brand-resolver engine |
-| `resolve-merge-conflicts` | — (system) | — | Merge conflict resolution scripts, CI workflow, gitattributes merge driver |
-| `review-cicd-infrastructure` | — (audit) | — | 502-line CI/CD audit with 28 findings and 4-wave remediation roadmap |
-| `docs/issue-intake-ownership-flow` | — (spec) | — | Issue intake ownership model for GitHub/Linear, enhances `/sync-backlog` |
+| Branch                             | New Commands                                             | New Agents              | Key Documentation Impact                                                                  |
+| ---------------------------------- | -------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| `agentforge-template-integration`  | `/infra-eval`                                            | —                       | 8-dimension evaluation framework, hard gates, orchestrator Phase 4 integration            |
+| `elegant-knuth`                    | `/review` enhancements                                   | `retrospective-analyst` | 4 new review criteria (7-10), retrospective mode, 4 CI workflows, docs/history/ structure |
+| `feature-management-strategy`      | `/feature-configure`, `/feature-flow`, `/feature-review` | `feature-ops`           | Feature gating system, presets, 564-line features.yaml spec, feature-aware sync           |
+| `repo-specific-editor-theme`       | `/brand`                                                 | —                       | Brand spec system, editor theme generation, brand-resolver engine                         |
+| `resolve-merge-conflicts`          | — (system)                                               | —                       | Merge conflict resolution scripts, CI workflow, gitattributes merge driver                |
+| `review-cicd-infrastructure`       | — (audit)                                                | —                       | 502-line CI/CD audit with 28 findings and 4-wave remediation roadmap                      |
+| `docs/issue-intake-ownership-flow` | — (spec)                                                 | —                       | Issue intake ownership model for GitHub/Linear, enhances `/sync-backlog`                  |
 
 ### Merge Checklist
 

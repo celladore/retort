@@ -20,8 +20,6 @@ export async function createAdapter(tracker, projectRoot) {
       return new LinearAdapter(projectRoot);
     }
     default:
-      throw new Error(
-        `Unsupported tracker: "${tracker}". Supported: github, linear`
-      );
+      throw new Error(`Unsupported tracker: "${tracker}". Supported: github, linear`);
   }
 }

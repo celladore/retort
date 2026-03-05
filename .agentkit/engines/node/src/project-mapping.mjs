@@ -331,6 +331,91 @@ export const PROJECT_MAPPING = [
   { src: 'crosscutting.environments.configStrategy', dest: 'envConfigStrategy', check: 'not-none' },
   { src: 'crosscutting.environments.envFilePattern', dest: 'envFilePattern' },
 
+  // Branch Protection
+  { src: 'branchProtection.requiredReviewCount', dest: 'bpRequiredReviewCount', type: 'string' },
+  { src: 'branchProtection.dismissStaleReviews', dest: 'bpDismissStaleReviews', type: 'boolean' },
+  {
+    src: 'branchProtection.requireCodeOwnerReviews',
+    dest: 'bpRequireCodeOwnerReviews',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.requireLastPushApproval',
+    dest: 'bpRequireLastPushApproval',
+    type: 'boolean',
+  },
+  { src: 'branchProtection.strictStatusChecks', dest: 'bpStrictStatusChecks', type: 'boolean' },
+  { src: 'branchProtection.requiredStatusChecks', dest: 'bpRequiredStatusChecks', type: 'array' },
+  { src: 'branchProtection.enforceAdmins', dest: 'bpEnforceAdmins', type: 'boolean' },
+  {
+    src: 'branchProtection.requiredLinearHistory',
+    dest: 'bpRequiredLinearHistory',
+    type: 'boolean',
+  },
+  { src: 'branchProtection.requireSignedCommits', dest: 'bpRequireSignedCommits', type: 'boolean' },
+  { src: 'branchProtection.allowForcePushes', dest: 'bpAllowForcePushes', type: 'boolean' },
+  { src: 'branchProtection.allowDeletions', dest: 'bpAllowDeletions', type: 'boolean' },
+  { src: 'branchProtection.blockCreations', dest: 'bpBlockCreations', type: 'boolean' },
+  {
+    src: 'branchProtection.requiredConversationResolution',
+    dest: 'bpRequiredConversationResolution',
+    type: 'boolean',
+  },
+  { src: 'branchProtection.codeScanning.enabled', dest: 'bpCodeScanningEnabled', type: 'boolean' },
+  { src: 'branchProtection.codeScanning.tools', dest: 'bpCodeScanningTools', type: 'array' },
+  {
+    src: 'branchProtection.copilotReview.enabled',
+    dest: 'bpCopilotReviewEnabled',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.copilotReview.reviewNewPushes',
+    dest: 'bpCopilotReviewNewPushes',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.copilotReview.reviewDraftPRs',
+    dest: 'bpCopilotReviewDraftPRs',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.mergeStrategies.allowMergeCommits',
+    dest: 'bpAllowMergeCommits',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.mergeStrategies.allowSquashMerge',
+    dest: 'bpAllowSquashMerge',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.mergeStrategies.allowRebaseMerge',
+    dest: 'bpAllowRebaseMerge',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.mergeStrategies.deleteBranchOnMerge',
+    dest: 'bpDeleteBranchOnMerge',
+    type: 'boolean',
+  },
+  {
+    src: 'branchProtection.mergeStrategies.allowAutoMerge',
+    dest: 'bpAllowAutoMerge',
+    type: 'boolean',
+  },
+  { src: 'branchProtection.mergeQueue.enabled', dest: 'bpMergeQueueEnabled', type: 'boolean' },
+  { src: 'branchProtection.mergeQueue.mergeMethod', dest: 'bpMergeQueueMethod', type: 'string' },
+  {
+    src: 'branchProtection.mergeQueue.minGroupSize',
+    dest: 'bpMergeQueueMinGroupSize',
+    type: 'string',
+  },
+  {
+    src: 'branchProtection.mergeQueue.maxGroupSize',
+    dest: 'bpMergeQueueMaxGroupSize',
+    type: 'string',
+  },
+
   // Evaluation
   { src: 'evaluation.infraEval', dest: 'hasInfraEval', type: 'boolean' },
   { src: 'evaluation.weights.reliability', dest: 'evalWeightReliability', type: 'string' },
@@ -342,6 +427,9 @@ export const PROJECT_MAPPING = [
   { src: 'evaluation.weights.code', dest: 'evalWeightCode', type: 'string' },
   { src: 'evaluation.weights.ops', dest: 'evalWeightOps', type: 'string' },
   { src: 'evaluation.customGates', dest: 'evalCustomGates', check: 'not-none' },
+
+  // Scoring
+  { src: 'scoring.enabled', dest: 'hasScoringEnabled', type: 'boolean' },
 ];
 
 /**
@@ -372,6 +460,8 @@ export function transform(value, type) {
       return Array.isArray(value) ? value.join(', ') : String(value);
     case 'boolean-array-length':
       return Array.isArray(value) && value.length > 0;
+    case 'array':
+      return Array.isArray(value) ? value : undefined;
     default:
       return value;
   }

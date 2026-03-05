@@ -3,12 +3,18 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as orchestrator from '../orchestrator.mjs';
-import { runReview, normalizeSeverity } from '../review-runner.mjs';
+import {
+  runReview,
+  normalizeSeverity,
+  convertFindingsToTasks,
+  trackUnfixedFindings,
+} from '../review-runner.mjs';
+import * as eventEmitter from '../event-emitter.mjs';
 import * as runner from '../runner.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'review');
-const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
 const FAKE_AWS_KEY = `AKIA${'IOSFODNN7EXAMPLE'}`;
 const FAKE_PRIVATE_KEY_HEADER = `-----BEGIN ${'RSA '}PRIVATE KEY-----`;
 
@@ -416,6 +422,127 @@ describe('review-runner', () => {
 
       expect(result.status).toBe('SKIP');
       expect(result.files).toBe(0);
+    });
+  });
+
+  describe('convertFindingsToTasks', () => {
+    it('creates tasks for high-severity findings', async () => {
+      setupTestRepo();
+      // Ensure tasks dir exists
+      mkdirSync(resolve(TEST_ROOT, '.agentkit', 'state', 'tasks'), { recursive: true });
+
+      const findings = [
+        { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key', count: 1 },
+        { type: 'todo', severity: 'low', file: 'app.js', line: 5, text: 'TODO: fix' },
+      ];
+
+      const tasks = await convertFindingsToTasks(TEST_ROOT, findings);
+
+      expect(tasks).toHaveLength(1);
+      expect(tasks[0].title).toContain('secret');
+      expect(tasks[0].title).toContain('AWS Key');
+      expect(tasks[0].priority).toBe('P1');
+    });
+
+    it('creates P0 tasks for critical-severity findings', async () => {
+      setupTestRepo();
+      mkdirSync(resolve(TEST_ROOT, '.agentkit', 'state', 'tasks'), { recursive: true });
+
+      const findings = [
+        { type: 'secret', severity: 'critical', file: 'env.js', pattern: 'Private Key', count: 1 },
+      ];
+
+      const tasks = await convertFindingsToTasks(TEST_ROOT, findings);
+
+      expect(tasks).toHaveLength(1);
+      expect(tasks[0].priority).toBe('P0');
+    });
+
+    it('returns empty array when no critical/high findings', async () => {
+      setupTestRepo();
+
+      const findings = [
+        { type: 'todo', severity: 'low', file: 'app.js', line: 5, text: 'TODO: fix' },
+        { type: 'large_file', severity: 'medium', file: 'big.bin', sizeBytes: 600000 },
+      ];
+
+      const tasks = await convertFindingsToTasks(TEST_ROOT, findings);
+      expect(tasks).toHaveLength(0);
+    });
+
+    it('assigns security team for secret findings', async () => {
+      setupTestRepo();
+      mkdirSync(resolve(TEST_ROOT, '.agentkit', 'state', 'tasks'), { recursive: true });
+
+      const findings = [
+        { type: 'secret', severity: 'high', file: 'config.js', pattern: 'JWT', count: 1 },
+      ];
+
+      const tasks = await convertFindingsToTasks(TEST_ROOT, findings);
+      expect(tasks[0].assignees).toContain('security');
+    });
+  });
+
+  describe('trackUnfixedFindings', () => {
+    it('returns isFirstRun when no previous review events exist', async () => {
+      setupTestRepo();
+      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([]);
+
+      const result = await trackUnfixedFindings(TEST_ROOT, [
+        { type: 'secret', severity: 'high', file: 'a.js', pattern: 'AWS Key' },
+      ]);
+
+      expect(result.isFirstRun).toBe(true);
+      expect(result.unfixed).toHaveLength(0);
+    });
+
+    it('detects unfixed findings from previous review', async () => {
+      setupTestRepo();
+      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([
+        {
+          action: 'review_completed',
+          findingDetails: [
+            { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
+            { type: 'todo', severity: 'low', file: 'old.js', pattern: null },
+          ],
+        },
+      ]);
+      vi.spyOn(eventEmitter, 'emitEvent').mockImplementation(() => {});
+
+      const currentFindings = [
+        { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
+        { type: 'secret', severity: 'high', file: 'new.js', pattern: 'JWT' },
+      ];
+
+      const result = await trackUnfixedFindings(TEST_ROOT, currentFindings);
+
+      expect(result.isFirstRun).toBe(false);
+      expect(result.unfixed).toHaveLength(1);
+      expect(result.unfixed[0].file).toBe('config.js');
+    });
+
+    it('emits event when unfixed findings are found', async () => {
+      setupTestRepo();
+      vi.spyOn(eventEmitter, 'readEvents').mockReturnValue([
+        {
+          action: 'review_completed',
+          findingDetails: [
+            { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
+          ],
+        },
+      ]);
+      const emitSpy = vi.spyOn(eventEmitter, 'emitEvent').mockImplementation(() => {});
+
+      await trackUnfixedFindings(TEST_ROOT, [
+        { type: 'secret', severity: 'high', file: 'config.js', pattern: 'AWS Key' },
+      ]);
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        TEST_ROOT,
+        'review_unfixed_findings',
+        expect.objectContaining({ count: 1 }),
+        expect.objectContaining({ source: 'review-runner' })
+      );
     });
   });
 });

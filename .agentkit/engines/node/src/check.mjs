@@ -9,6 +9,7 @@ import yaml from 'js-yaml';
 import { join, resolve } from 'path';
 import { appendEvent } from './orchestrator.mjs';
 import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
+import { resolveCoverageCommand, parseCoveragePercentage } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Step definitions per tech stack
@@ -325,15 +326,38 @@ async function walkForPlaceholders(dir, projectRoot, findings, depth = 0) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Load coverage threshold from project.yaml.
+ * @param {string} agentkitRoot
+ * @returns {number|null} Coverage threshold percentage or null if not configured
+ */
+function loadCoverageThreshold(agentkitRoot) {
+  try {
+    const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
+    if (!existsSync(projectPath)) return null;
+    const spec = yaml.load(readFileSync(projectPath, 'utf-8'));
+    const threshold = spec?.testing?.coverage;
+    return typeof threshold === 'number' ? threshold : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Run quality gate checks.
  * @param {object} opts
  * @param {string} opts.agentkitRoot
  * @param {string} opts.projectRoot
- * @param {object} opts.flags - --fix, --fast, --stack
+ * @param {object} opts.flags - --fix, --fast, --stack, --coverage
  * @returns {object} results
  */
 export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+
   console.log('[agentkit:check] Running quality gates...');
+  if (userContext) {
+    console.log(`[agentkit:check] Context: ${userContext}`);
+  }
   console.log('');
 
   const detectedStacks = await detectStacks(agentkitRoot, projectRoot, flags.stack);
@@ -341,10 +365,12 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
   if (detectedStacks.length === 0) {
     console.log('[agentkit:check] No tech stacks detected. Nothing to check.');
     console.log('Tip: Ensure your project has marker files (package.json, Cargo.toml, etc.)');
-    return { stacks: [], overallStatus: 'SKIP', overallPassed: true };
+    return { stacks: [], overallStatus: 'SKIP', overallPassed: true, coverage: null };
   }
 
   const allResults = [];
+  const coverageResults = [];
+  const coverageThreshold = loadCoverageThreshold(agentkitRoot);
 
   for (const stack of detectedStacks) {
     console.log(`--- Stack: ${stack.name} ---`);
@@ -394,12 +420,65 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
       if (flags.bail && result.exitCode > 0) break;
     }
 
+    // Coverage check: run after test step if --coverage flag or threshold is configured
+    if (flags.coverage || coverageThreshold != null) {
+      const covCmd = resolveCoverageCommand(stack);
+      if (covCmd.command && isValidCommand(covCmd.command)) {
+        process.stdout.write(`  ${'coverage'.padEnd(12)} `);
+        const covResult = execCommand(covCmd.command, { cwd: projectRoot });
+        const percentage = parseCoveragePercentage(
+          covResult.stdout + '\n' + covResult.stderr,
+          covCmd.parser
+        );
+
+        let covStatus = 'SKIP';
+        if (percentage != null) {
+          if (coverageThreshold != null && percentage < coverageThreshold) {
+            covStatus = 'FAIL';
+            console.log(`FAIL  (${percentage.toFixed(1)}% < ${coverageThreshold}% threshold)`);
+          } else {
+            covStatus = 'PASS';
+            console.log(
+              `PASS  (${percentage.toFixed(1)}%${coverageThreshold != null ? ` >= ${coverageThreshold}%` : ''})`
+            );
+          }
+        } else {
+          console.log(`SKIP (could not parse coverage)`);
+        }
+
+        stackResults.push({
+          step: 'coverage',
+          exitCode: covStatus === 'FAIL' ? 1 : covStatus === 'SKIP' ? -1 : 0,
+          durationMs: covResult.durationMs,
+          status: covStatus,
+          stdout: covResult.stdout.slice(0, 500),
+          stderr: covResult.stderr.slice(0, 500),
+          coveragePercentage: percentage,
+          coverageThreshold,
+        });
+
+        coverageResults.push({
+          stack: stack.name,
+          percentage,
+          threshold: coverageThreshold,
+          status: covStatus,
+        });
+      }
+    }
+
     allResults.push({ stack: stack.name, steps: stackResults });
     console.log('');
   }
 
   // --- Unresolved placeholder audit ---
-  const outputDirs = ['.claude', '.github/instructions', '.cursor', '.clinerules', '.roo', '.windsurf'];
+  const outputDirs = [
+    '.claude',
+    '.github/instructions',
+    '.cursor',
+    '.clinerules',
+    '.roo',
+    '.windsurf',
+  ];
   const unresolvedFindings = await auditUnresolvedPlaceholders(projectRoot, outputDirs);
   if (unresolvedFindings.length > 0) {
     console.log('--- Unresolved Placeholders ---');
@@ -439,6 +518,17 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
     }
   }
 
+  // Coverage summary
+  if (coverageResults.length > 0) {
+    console.log('');
+    console.log('--- Coverage ---');
+    for (const cov of coverageResults) {
+      const pct = cov.percentage != null ? `${cov.percentage.toFixed(1)}%` : 'N/A';
+      const thresh = cov.threshold != null ? ` (threshold: ${cov.threshold}%)` : '';
+      console.log(`  ${cov.stack}: ${pct}${thresh} — ${cov.status}`);
+    }
+  }
+
   // Log event
   try {
     await appendEvent(projectRoot, 'check_completed', {
@@ -451,13 +541,26 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
           durationMs: st.durationMs,
         })),
       })),
-      flags: { fix: !!flags.fix, fast: !!flags.fast, stack: flags.stack || null },
+      coverage: coverageResults.length > 0 ? coverageResults : undefined,
+      flags: {
+        fix: !!flags.fix,
+        fast: !!flags.fast,
+        coverage: !!flags.coverage,
+        stack: flags.stack || null,
+      },
+      ...(userContext ? { userContext } : {}),
     });
   } catch (err) {
     console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`);
   }
 
-  return { stacks: allResults, overallStatus, overallPassed };
+  return {
+    stacks: allResults,
+    overallStatus,
+    overallPassed,
+    coverage: coverageResults,
+    ...(userContext ? { userContext } : {}),
+  };
 }
 
 // Export internal helpers so they can be directly unit-tested.

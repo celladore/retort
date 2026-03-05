@@ -91,7 +91,7 @@ describe('backlog-store', () => {
       await writeBacklogJson(tempDir, sampleItems);
 
       const raw = JSON.parse(
-        readFileSync(resolve(tempDir, '.claude', 'state', 'backlog.json'), 'utf-8')
+        readFileSync(resolve(tempDir, '.agentkit', 'state', 'backlog.json'), 'utf-8')
       );
       expect(raw.version).toBe(1);
       expect(raw.count).toBe(3);

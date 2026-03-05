@@ -20,10 +20,10 @@ Where `{NNN}` is a zero-padded sequential number and `{slug}` is a lowercase-hyp
 
 ## Available PRDs
 
-| PRD | Title | Status |
-|-----|-------|--------|
-| [PRD-001](../01_product/PRD-001-llm-decision-engine.md) | LLM Decision Engine | Active |
-| [PRD-002](../01_product/PRD-002-llm-selection-scorecard-guide.md) | LLM Selection Scorecard Guide | Active |
+| PRD                                                                           | Title                                     | Status |
+| ----------------------------------------------------------------------------- | ----------------------------------------- | ------ |
+| [PRD-001](../01_product/PRD-001-llm-decision-engine.md)                       | LLM Decision Engine                       | Active |
+| [PRD-002](../01_product/PRD-002-llm-selection-scorecard-guide.md)             | LLM Selection Scorecard Guide             | Active |
 | [PRD-003](../01_product/PRD-003-agent-to-llm-weighted-matrix-config-guide.md) | Agent-to-LLM Weighted Matrix Config Guide | Active |
 
 ## Creating a New PRD

@@ -16,39 +16,30 @@ last_updated: '2026-03-05'
 
 Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.
 
-## Flags
+## Usage
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--type` | Scaffold type: endpoint, component, module, migration, test, service | — |
-| `--name` | Name of the scaffold artifact | — |
-| `--stack` | Target tech stack override | — |
-| `--path` | Target output path (must be inside workspace root) | — |
+`/scaffold --type <endpoint|component|module|migration|test|service> --name <name> [--stack <stack>] [--path <path>]`
 
-## Instructions
+## Workflow
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+1. Read `project.yaml`, `rules.yaml`, and relevant agent/team scopes
+2. Resolve target files and directories for the scaffold type
+3. Generate minimal, compilable skeleton files with TODO markers only where unavoidable
+4. Include tests and docs stubs when applicable
+5. Report generated files and next implementation steps
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Guardrails
+
+- Never overwrite non-generated files without explicit instruction
+- Reject `--path` values that resolve outside the workspace root (including `..` traversal, symlink escapes, and absolute paths). Abort with a clear error.
+- Keep generated outputs small and composable
+- Follow naming conventions and architecture patterns from project config
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
@@ -66,4 +57,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

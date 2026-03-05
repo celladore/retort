@@ -14,15 +14,45 @@ describe('backlog-viewer', () => {
     lastUpdated: '2026-03-01T00:00:00Z',
     count: 3,
     items: [
-      { id: 'bi-1', externalId: 'GH#1', title: 'Fix bug', priority: 'P0', status: 'open', phase: 'Planning', team: 'backend', source: 'github', what: 'Auth fix' },
-      { id: 'bi-2', externalId: 'GH#2', title: 'Add feature', priority: 'P2', status: 'open', phase: 'Discovery', team: 'frontend', source: 'github', what: 'Dashboard' },
-      { id: 'bi-3', externalId: null, title: 'Manual task', priority: 'P1', status: 'open', phase: 'Planning', team: 'docs', source: 'manual', what: 'Write docs' },
+      {
+        id: 'bi-1',
+        externalId: 'GH#1',
+        title: 'Fix bug',
+        priority: 'P0',
+        status: 'open',
+        phase: 'Planning',
+        team: 'backend',
+        source: 'github',
+        what: 'Auth fix',
+      },
+      {
+        id: 'bi-2',
+        externalId: 'GH#2',
+        title: 'Add feature',
+        priority: 'P2',
+        status: 'open',
+        phase: 'Discovery',
+        team: 'frontend',
+        source: 'github',
+        what: 'Dashboard',
+      },
+      {
+        id: 'bi-3',
+        externalId: null,
+        title: 'Manual task',
+        priority: 'P1',
+        status: 'open',
+        phase: 'Planning',
+        team: 'docs',
+        source: 'manual',
+        what: 'Write docs',
+      },
     ],
   };
 
   beforeEach(() => {
     tempDir = mkdtempSync(resolve(tmpdir(), 'agentkit-viewer-test-'));
-    mkdirSync(resolve(tempDir, '.claude', 'state'), { recursive: true });
+    mkdirSync(resolve(tempDir, '.agentkit', 'state'), { recursive: true });
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
@@ -35,7 +65,7 @@ describe('backlog-viewer', () => {
 
   function writeBacklog(items = sampleBacklog) {
     writeFileSync(
-      resolve(tempDir, '.claude', 'state', 'backlog.json'),
+      resolve(tempDir, '.agentkit', 'state', 'backlog.json'),
       JSON.stringify(items),
       'utf-8'
     );

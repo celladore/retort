@@ -48,13 +48,13 @@ The following trigger points are under consideration. **The manual sync script
 (Phase 1) is implemented; CI and session-hook triggers are not yet** — this ADR
 records the decision on which to adopt.
 
-| Trigger | Pros | Cons | Decision |
-|---------|------|------|----------|
-| **Manual** — developer runs `sync-issues.sh --apply` | Simple, zero infra, full control | Easy to forget | **Adopt — always available** |
-| **CI post-merge** — GitHub Action runs on push to default branch | Automatic, no human step | Needs `gh` token in CI, may create duplicates on retries | **Adopt — primary automation** |
-| **Session-start hook** — run at Claude Code session start | Catches issues before new work begins | Adds session startup latency, may fail if `gh` still broken | **Defer — evaluate after CI path is proven** |
-| **Pre-push git hook** — run before `git push` | Syncs at natural checkpoint | Blocks push on failure, slow for large batches | **Reject — too disruptive** |
-| **Scheduled (cron)** — run on a timer | Catches stragglers | Over-engineered for current scale | **Reject — unnecessary complexity** |
+| Trigger                                                          | Pros                                  | Cons                                                        | Decision                                     |
+| ---------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------- | -------------------------------------------- |
+| **Manual** — developer runs `sync-issues.sh --apply`             | Simple, zero infra, full control      | Easy to forget                                              | **Adopt — always available**                 |
+| **CI post-merge** — GitHub Action runs on push to default branch | Automatic, no human step              | Needs `gh` token in CI, may create duplicates on retries    | **Adopt — primary automation**               |
+| **Session-start hook** — run at Claude Code session start        | Catches issues before new work begins | Adds session startup latency, may fail if `gh` still broken | **Defer — evaluate after CI path is proven** |
+| **Pre-push git hook** — run before `git push`                    | Syncs at natural checkpoint           | Blocks push on failure, slow for large batches              | **Reject — too disruptive**                  |
+| **Scheduled (cron)** — run on a timer                            | Catches stragglers                    | Over-engineered for current scale                           | **Reject — unnecessary complexity**          |
 
 **Primary flow:** CI workflow on push to the default branch (`dev`) detects
 unsynced issue docs and runs `sync-issues.sh --apply`. If the step fails it is

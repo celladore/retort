@@ -1,15 +1,17 @@
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { runValidate } from '../validate.mjs';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { runValidate } from '../validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
 describe('runValidate()', () => {
-  afterEach(() => { vi.restoreAllMocks(); });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('runs all validation phases against the real project', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -25,7 +27,7 @@ describe('runValidate()', () => {
     });
 
     // Should produce output for each phase
-    const allOutput = logSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const allOutput = logSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(allOutput).toContain('Spec Validation');
     expect(allOutput).toContain('Output Directories');
     expect(allOutput).toContain('JSON Files');
@@ -38,7 +40,16 @@ describe('runValidate()', () => {
 });
 
 describe('validate - Phase 9 issue template validation', () => {
-  const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'validate-phase9');
+  const TEST_ROOT = resolve(
+    __dirname,
+    '..',
+    '..',
+    '..',
+    '..',
+    '..',
+    '.test-tmp',
+    'validate-phase9'
+  );
 
   beforeEach(() => {
     if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true });
@@ -93,7 +104,7 @@ describe('validate - Phase 9 issue template validation', () => {
 
     await runValidate({ agentkitRoot: AGENTKIT_ROOT, projectRoot: TEST_ROOT, flags: {} });
 
-    const logOutput = logSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const logOutput = logSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(logOutput).toContain('bug_report.yml \u2014 all dropdown values valid');
   });
 
@@ -122,7 +133,7 @@ describe('validate - Phase 9 issue template validation', () => {
 
     await runValidate({ agentkitRoot: AGENTKIT_ROOT, projectRoot: TEST_ROOT, flags: {} });
 
-    const errors = errorSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const errors = errorSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(errors).toContain('field "area" has invalid option "invalid-area"');
   });
 
@@ -150,7 +161,7 @@ describe('validate - Phase 9 issue template validation', () => {
 
     await runValidate({ agentkitRoot: AGENTKIT_ROOT, projectRoot: TEST_ROOT, flags: {} });
 
-    const errors = errorSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const errors = errorSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(errors).toContain('field "severity" has invalid option');
   });
 
@@ -168,7 +179,7 @@ describe('validate - Phase 9 issue template validation', () => {
 
     await runValidate({ agentkitRoot: AGENTKIT_ROOT, projectRoot: TEST_ROOT, flags: {} });
 
-    const warns = warnSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const warns = warnSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(warns).toContain('not a valid issue form');
   });
 
@@ -197,7 +208,7 @@ describe('validate - Phase 9 issue template validation', () => {
 
     await runValidate({ agentkitRoot: AGENTKIT_ROOT, projectRoot: TEST_ROOT, flags: {} });
 
-    const logOutput = logSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const logOutput = logSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(logOutput).toContain('area_desc.yml \u2014 all dropdown values valid');
   });
 });
@@ -227,7 +238,7 @@ describe('validate - edge cases', () => {
       flags: {},
     });
 
-    const errors = errorSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const errors = errorSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(errors).toContain('Missing directory');
     // process.exit(1) should have been called due to errors
     expect(exitSpy).toHaveBeenCalledWith(1);
@@ -249,7 +260,7 @@ describe('validate - edge cases', () => {
       flags: {},
     });
 
-    const errors = errorSpy.mock.calls.map(c => c.join(' ')).join('\n');
+    const errors = errorSpy.mock.calls.map((c) => c.join(' ')).join('\n');
     expect(errors).toContain('invalid JSON');
   });
 });

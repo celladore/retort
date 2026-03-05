@@ -7,9 +7,16 @@ import { existsSync, readdirSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { extname, join, resolve } from 'path';
 import { validateSpec, PROJECT_ENUMS } from './spec-validator.mjs';
+import { emitEvent } from './event-emitter.mjs';
+import { createTask } from './task-protocol.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   console.log('[agentkit:validate] Validating generated outputs...');
+  if (userContext) {
+    console.log(`[agentkit:validate] Context: ${userContext}`);
+  }
   let errors = 0;
   let warnings = 0;
 
@@ -33,7 +40,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const requiredDirs = [
     '.claude/commands',
     '.claude/hooks',
-    '.claude/state',
+    '.agentkit/state',
     '.claude/rules',
     '.claude/agents',
     '.cursor/rules',
@@ -54,7 +61,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 3: Validate JSON files ──────────────────────────────────────
   console.log('\n  --- JSON Files ---');
-  const jsonFiles = ['.claude/settings.json', '.claude/state/schema.json'];
+  const jsonFiles = ['.claude/settings.json', '.agentkit/state/schema.json'];
 
   for (const file of jsonFiles) {
     const fullPath = resolve(projectRoot, file);
@@ -298,7 +305,38 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
     warnings++;
   }
 
-  // ─── Summary ───────────────────────────────────────────────────────────
+  // ─── Event + Summary ────────────────────────────────────────────────────
+  emitEvent(
+    projectRoot,
+    'validate_completed',
+    {
+      errors,
+      warnings,
+      passed: errors === 0,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'validate' }
+  );
+
+  // Auto-create task for validation failures
+  if (flags['auto-task'] && errors > 0) {
+    const priority = errors >= 5 ? 'P0' : errors >= 2 ? 'P1' : 'P2';
+    const result = await createTask(projectRoot, {
+      delegator: 'validate',
+      assignees: ['quality'],
+      title: `Fix ${errors} validation error(s)`,
+      description: `Validation found ${errors} error(s) and ${warnings} warning(s). Run /validate for details.`,
+      type: 'implement',
+      priority,
+      area: 'quality',
+      dependsOn: [],
+      handoffTo: [],
+    });
+    if (result.task) {
+      console.log(`[agentkit:validate] Created task for validation failures (${priority}).`);
+    }
+  }
+
   console.log('');
   if (errors > 0) {
     console.error(`[agentkit:validate] FAILED: ${errors} error(s), ${warnings} warning(s)`);

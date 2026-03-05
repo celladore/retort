@@ -4,7 +4,6 @@
  * merges into the local backlog.
  */
 import { existsSync, readFileSync } from 'fs';
-import { appendFile, mkdir } from 'fs/promises';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import {
@@ -14,8 +13,10 @@ import {
   writeBacklogMarkdown,
   sortItems,
 } from './backlog-store.mjs';
-import { normalizeIssue, deduplicateItems } from './issue-normalizer.mjs';
+import { emitEvent } from './event-emitter.mjs';
+import { normalizeIssue, deduplicateItems, inferCategoryScores } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
+import { calculateScore } from './weighted-scorer.mjs';
 
 /**
  * @param {object} opts
@@ -24,6 +25,11 @@ import { createAdapter } from './tracker-adapter.mjs';
  * @param {object} opts.flags
  */
 export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
+  const userContext =
+    Array.isArray(flags?._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+  if (userContext) {
+    console.log(`[agentkit:import-issues] Context: ${userContext}`);
+  }
   // Load project config
   const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
   let project = {};
@@ -57,7 +63,7 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
     state: flags.state || 'open',
     labels: flags.labels || null,
     since: flags.since || null,
-    limit: flags.limit ? Number(flags.limit) : 100,
+    limit: flags.limit && Number.isFinite(Number(flags.limit)) ? Number(flags.limit) : 100,
   });
 
   console.log(`[agentkit:import-issues] Fetched ${rawIssues.length} issues from ${tracker}.`);
@@ -72,13 +78,25 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
   };
   const normalized = rawIssues.map((issue) => normalizeIssue(issue, config));
 
+  // Enrich with weighted scoring when enabled
+  const scoringEnabled = intake.scoring?.enabled ?? false;
+  if (scoringEnabled) {
+    const phase = project?.phase || undefined;
+    for (const item of normalized) {
+      const result = calculateScore(inferCategoryScores(item), { phase });
+      item.priority = result.priority;
+      item.score = result.score;
+    }
+    console.log(`[agentkit:import-issues] Scoring applied (phase: ${phase || 'default'}).`);
+  }
+
   // Dry-run
   if (flags['dry-run']) {
-    console.log(`\n[agentkit:import-issues] DRY RUN — ${normalized.length} items would be imported:\n`);
+    console.log(
+      `\n[agentkit:import-issues] DRY RUN — ${normalized.length} items would be imported:\n`
+    );
     for (const item of normalized) {
-      console.log(
-        `  ${item.priority} | ${item.team} | ${item.title} [${item.externalId}]`
-      );
+      console.log(`  ${item.priority} | ${item.team} | ${item.title} [${item.externalId}]`);
     }
     return { imported: normalized.length, skipped: 0, dryRun: true };
   }
@@ -102,13 +120,20 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
   const repoName = project?.name || '';
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
 
-  // Append to events.log
-  const eventsDir = resolve(projectRoot, '.claude', 'state');
-  await mkdir(eventsDir, { recursive: true });
-  const eventsPath = resolve(eventsDir, 'events.log');
-  const timestamp = new Date().toISOString();
-  const logEntry = `[${timestamp}] [IMPORT] [${tracker.toUpperCase()}] Imported ${added} new, updated ${updated}, preserved ${preserved} manual items. Total: ${sorted.length}.\n`;
-  await appendFile(eventsPath, logEntry, 'utf-8');
+  // Emit structured event
+  emitEvent(
+    projectRoot,
+    'import_issues',
+    {
+      tracker: tracker.toUpperCase(),
+      added,
+      updated,
+      preserved,
+      total: sorted.length,
+      ...(userContext ? { userContext } : {}),
+    },
+    { source: 'import-issues' }
+  );
 
   console.log(`[agentkit:import-issues] Done.`);
   console.log(`  Added:     ${added}`);

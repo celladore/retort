@@ -21,7 +21,7 @@ There is no automated mechanism to:
 4. **Trigger this automatically** when a configuration flag is enabled during
    adoption (like `infraEval` gates `/infra-eval`)
 
-The existing `/sync-backlog` command template describes the *intent* but lacks
+The existing `/sync-backlog` command template describes the _intent_ but lacks
 runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 ---
@@ -30,27 +30,27 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 ### What already works well
 
-| Pattern | Location | Lesson |
-|---------|----------|--------|
-| Feature-flag gating | `evaluation.infraEval` in `project.yaml` → `hasInfraEval` template var → conditional command rendering | Use the same pattern: add a `process.intake.autoImport` flag |
-| Tracker-neutral abstraction | `sync-backlog.md` template uses `{{issueTracker}}` and delegates to `gh` or `linear` CLI | Keep the adapter pattern; add runtime adapter implementations |
-| Intake ownership flow | `teams.yaml` → `intake.ownerTeam`, `operationsTeam`, `routing`, `escalation` | Already defined — reuse as-is for team assignment during normalization |
-| Task protocol (A2A-lite) | `.claude/state/tasks/` JSON files with lifecycle states | Use same schema for ingested issues to enable orchestrator integration |
-| Template variable propagation | `project-mapping.mjs` flattens `project.yaml` → Handlebars vars | Extend with new intake/import vars |
-| Post-sync validation matrix | Documented in `docs/08_reference/issue_intake_ownership_and_invocation_flow.md` | Extend the matrix with the new command/feature checks |
-| Command definition pattern | `commands.yaml` → template → sync → multi-platform output | Follow exactly for the new `import-issues` command |
-| History document pattern | `/document-history` creates institutional memory | Auto-create a history doc after bulk import |
+| Pattern                       | Location                                                                                               | Lesson                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Feature-flag gating           | `evaluation.infraEval` in `project.yaml` → `hasInfraEval` template var → conditional command rendering | Use the same pattern: add a `process.intake.autoImport` flag           |
+| Tracker-neutral abstraction   | `sync-backlog.md` template uses `{{issueTracker}}` and delegates to `gh` or `linear` CLI               | Keep the adapter pattern; add runtime adapter implementations          |
+| Intake ownership flow         | `teams.yaml` → `intake.ownerTeam`, `operationsTeam`, `routing`, `escalation`                           | Already defined — reuse as-is for team assignment during normalization |
+| Task protocol (A2A-lite)      | `.claude/state/tasks/` JSON files with lifecycle states                                                | Use same schema for ingested issues to enable orchestrator integration |
+| Template variable propagation | `project-mapping.mjs` flattens `project.yaml` → Handlebars vars                                        | Extend with new intake/import vars                                     |
+| Post-sync validation matrix   | Documented in `docs/08_reference/issue_intake_ownership_and_invocation_flow.md`                        | Extend the matrix with the new command/feature checks                  |
+| Command definition pattern    | `commands.yaml` → template → sync → multi-platform output                                              | Follow exactly for the new `import-issues` command                     |
+| History document pattern      | `/document-history` creates institutional memory                                                       | Auto-create a history doc after bulk import                            |
 
 ### Gaps identified from branch history
 
-| Gap | Evidence | Resolution |
-|-----|----------|------------|
-| Sync-backlog runtime coverage is partial | `cli.mjs` now includes `sync-backlog` in `VALID_COMMANDS` with a handler, but source collection coverage still needs to match this plan | Expand source collectors and complete end-to-end tests for all documented sources |
-| No GitHub issue fetcher | `gh issue list` is in allowed-tools but no code calls it | Implement `github-adapter.mjs` that shells out to `gh` |
-| No field normalization layer | Sync-backlog template describes it as prose, not code | Implement `issue-normalizer.mjs` with canonical schema |
-| No consolidated view command | Backlog is only `AGENT_BACKLOG.md` (markdown table) | Add `backlog` CLI command with `--format` (table/json/yaml) output |
-| Feature flag provider is `null` | `crosscutting.featureFlags.provider: null` | Use `project.yaml` flags directly (same pattern as `infraEval`) — no external provider needed |
-| Linear integration placeholder | Mentioned in docs but no adapter code | Implement `linear-adapter.mjs` stub with clear interface |
+| Gap                                      | Evidence                                                                                                                                | Resolution                                                                                    |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Sync-backlog runtime coverage is partial | `cli.mjs` now includes `sync-backlog` in `VALID_COMMANDS` with a handler, but source collection coverage still needs to match this plan | Expand source collectors and complete end-to-end tests for all documented sources             |
+| No GitHub issue fetcher                  | `gh issue list` is in allowed-tools but no code calls it                                                                                | Implement `github-adapter.mjs` that shells out to `gh`                                        |
+| No field normalization layer             | Sync-backlog template describes it as prose, not code                                                                                   | Implement `issue-normalizer.mjs` with canonical schema                                        |
+| No consolidated view command             | Backlog is only `AGENT_BACKLOG.md` (markdown table)                                                                                     | Add `backlog` CLI command with `--format` (table/json/yaml) output                            |
+| Feature flag provider is `null`          | `crosscutting.featureFlags.provider: null`                                                                                              | Use `project.yaml` flags directly (same pattern as `infraEval`) — no external provider needed |
+| Linear integration placeholder           | Mentioned in docs but no adapter code                                                                                                   | Implement `linear-adapter.mjs` stub with clear interface                                      |
 
 ---
 
@@ -159,20 +159,21 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 **Files to modify:**
 
 1. **`.agentkit/spec/project.yaml`** — Add intake auto-import flag:
+
    ```yaml
    process:
      intake:
-       autoImport: false          # NEW — enable to auto-import on adoption
-       importLabelsMap:           # NEW — map tracker labels to priorities
+       autoImport: false # NEW — enable to auto-import on adoption
+       importLabelsMap: # NEW — map tracker labels to priorities
          bug: P1
          critical: P0
          enhancement: P2
          documentation: P3
          security: P0
-       importStateMap:            # NEW — map tracker states to backlog status
+       importStateMap: # NEW — map tracker states to backlog status
          open: open
          closed: completed
-       importTeamMap:             # NEW — map tracker labels/assignees to teams
+       importTeamMap: # NEW — map tracker labels/assignees to teams
          backend: backend
          frontend: frontend
          api: backend
@@ -186,6 +187,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
    ```
 
 2. **`.agentkit/spec/commands.yaml`** — Under `commands:`, add `import-issues` command and `backlog` command:
+
    ```yaml
    commands:
      - name: import-issues
@@ -295,6 +297,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 ### Phase 3: Runtime Adapters (engine layer — new files)
 
 6. **`.agentkit/engines/node/src/tracker-adapter.mjs`** — Adapter interface:
+
    ```javascript
    // Tracker adapter contract
    // fetchIssues(options) → Promise<RawIssue[]>
@@ -475,28 +478,28 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 The `agentkit backlog --format json` output will serve as the API contract for
 any future UI. Each item includes:
 
-| Field | Type | Source | Description |
-|-------|------|--------|-------------|
-| `id` | string | generated | Local backlog item ID |
-| `externalId` | string? | tracker | e.g., "GH#42", "LIN-123" |
-| `externalUrl` | string? | tracker | Link to external issue |
-| `title` | string | tracker/local | Issue title |
-| `priority` | enum | inferred | P0, P1, P2, P3 |
-| `status` | enum | mapped | open, in-progress, completed, blocked, deferred |
-| `phase` | enum | inferred | Discovery, Planning, Implementation, Validation, Ship |
-| `team` | string | routed | Team ID from teams.yaml |
-| `assignee` | string? | tracker | Human assignee name |
-| `source` | enum | detected | github, linear, discovery, healthcheck, todo, review, manual |
-| `what` | string | extracted | What needs to be done |
-| `why` | string | extracted | Why it matters |
-| `acceptance` | string[] | extracted | Acceptance criteria |
-| `files` | string[] | extracted | Likely files to touch |
-| `labels` | string[] | tracker | Original tracker labels |
-| `milestone` | string? | tracker | Milestone/sprint |
-| `createdAt` | ISO date | tracker | Creation timestamp |
-| `updatedAt` | ISO date | tracker | Last update timestamp |
-| `lastSyncedAt` | ISO date | local | Last sync timestamp |
-| `dirty` | boolean | local | Local changes not yet pushed |
+| Field          | Type     | Source        | Description                                                  |
+| -------------- | -------- | ------------- | ------------------------------------------------------------ |
+| `id`           | string   | generated     | Local backlog item ID                                        |
+| `externalId`   | string?  | tracker       | e.g., "GH#42", "LIN-123"                                     |
+| `externalUrl`  | string?  | tracker       | Link to external issue                                       |
+| `title`        | string   | tracker/local | Issue title                                                  |
+| `priority`     | enum     | inferred      | P0, P1, P2, P3                                               |
+| `status`       | enum     | mapped        | open, in-progress, completed, blocked, deferred              |
+| `phase`        | enum     | inferred      | Discovery, Planning, Implementation, Validation, Ship        |
+| `team`         | string   | routed        | Team ID from teams.yaml                                      |
+| `assignee`     | string?  | tracker       | Human assignee name                                          |
+| `source`       | enum     | detected      | github, linear, discovery, healthcheck, todo, review, manual |
+| `what`         | string   | extracted     | What needs to be done                                        |
+| `why`          | string   | extracted     | Why it matters                                               |
+| `acceptance`   | string[] | extracted     | Acceptance criteria                                          |
+| `files`        | string[] | extracted     | Likely files to touch                                        |
+| `labels`       | string[] | tracker       | Original tracker labels                                      |
+| `milestone`    | string?  | tracker       | Milestone/sprint                                             |
+| `createdAt`    | ISO date | tracker       | Creation timestamp                                           |
+| `updatedAt`    | ISO date | tracker       | Last update timestamp                                        |
+| `lastSyncedAt` | ISO date | local         | Last sync timestamp                                          |
+| `dirty`        | boolean  | local         | Local changes not yet pushed                                 |
 
 ---
 
@@ -516,14 +519,14 @@ Following the `infraEval` pattern:
 
 ## Risks & Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| `gh` CLI not installed or not authenticated | Check `gh auth status` before attempting; provide clear error message with setup instructions |
-| Rate limiting on GitHub API | Respect `--limit` flag; implement exponential backoff; cache results in `.claude/state/` |
-| Large repos with 1000+ issues | Default `--limit 100`; support `--since` for incremental sync |
-| Label/priority mapping is wrong | Make mapping fully configurable in `project.yaml`; provide `--dry-run` to preview before writing |
-| Existing AGENT_BACKLOG.md has manual items | Preserve items without `externalId`; never delete manually-added items |
-| Breaking changes to backlog format | Version the backlog JSON schema; migration path for existing files |
+| Risk                                        | Mitigation                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `gh` CLI not installed or not authenticated | Check `gh auth status` before attempting; provide clear error message with setup instructions    |
+| Rate limiting on GitHub API                 | Respect `--limit` flag; implement exponential backoff; cache results in `.claude/state/`         |
+| Large repos with 1000+ issues               | Default `--limit 100`; support `--since` for incremental sync                                    |
+| Label/priority mapping is wrong             | Make mapping fully configurable in `project.yaml`; provide `--dry-run` to preview before writing |
+| Existing AGENT_BACKLOG.md has manual items  | Preserve items without `externalId`; never delete manually-added items                           |
+| Breaking changes to backlog format          | Version the backlog JSON schema; migration path for existing files                               |
 
 ---
 

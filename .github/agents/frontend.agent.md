@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- apps/web/**
-- apps/marketing/**
-- src/client/**
-- components/**
-- styles/**
-- public/**
+- apps/web/\*\*
+- apps/marketing/\*\*
+- src/client/\*\*
+- components/\*\*
+- styles/\*\*
+- public/\*\*
 
 ## Responsibilities
 
@@ -74,6 +74,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Accessible interactive component
+
 ```
 <button
   type="button"

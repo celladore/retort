@@ -16,40 +16,54 @@ last_updated: '2026-03-05'
 
 Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.
 
-## Flags
+## CRITICAL SAFETY RULE
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--environment` | Target environment: dev, staging, production | dev |
-| `--dry-run` | Simulate deployment without executing | true |
-| `--project` | Deploy a specific project or package in a monorepo | — |
-| `--skip-checks` | Skip pre-deployment quality checks (use with caution) | false |
-| `--stack` | Deploy a specific tech stack component | — |
+**You MUST ask for explicit user confirmation before executing any deployment command.** Never deploy automatically.
 
-## Instructions
+## Pre-Deployment Checklist (all must pass)
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+1. **Healthcheck Gate** — Build, lint, typecheck, tests must pass. Refuse to deploy if not HEALTHY (unless `--skip-checks`).
+2. **Branch & Git State** — Production deploys from main/master only (warn otherwise). Warn if dirty working directory.
+3. **Environment Configuration** — Check for required env files, verify critical env vars are set (don't print values).
+4. **Version & Changelog** — Check for version bump and changelog entry for production deploys.
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Deployment Detection
+
+| Signal                       | Platform   | Deploy Command             |
+| ---------------------------- | ---------- | -------------------------- |
+| `vercel.json`                | Vercel     | `vercel --prod` / `vercel` |
+| `netlify.toml`               | Netlify    | `netlify deploy --prod`    |
+| `fly.toml`                   | Fly.io     | `fly deploy`               |
+| `wrangler.toml`              | Cloudflare | `wrangler deploy`          |
+| Dockerfile + k8s/            | Kubernetes | `kubectl apply -f k8s/`    |
+| `package.json` deploy script | Custom     | `pnpm deploy`              |
+
+## Flow
+
+1. Gather info (service, env, branch, commit, platform, command)
+2. Show the plan
+3. Request explicit confirmation
+4. Execute
+5. Post-deploy verification (health endpoint, smoke test)
+
+## Output
+
+Report: service, environment, platform, status, timeline, command output, post-deploy verification, and rollback instructions.
+
+## Rules
+
+1. ALWAYS require confirmation — no exceptions.
+2. Run healthcheck first.
+3. Warn on production deploys from non-main branches.
+4. Never print secrets.
+5. Every output must include rollback instructions.
+6. Default to staging if no environment specified.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
@@ -67,4 +81,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

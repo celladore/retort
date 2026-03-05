@@ -34,7 +34,9 @@ describe('GitHubAdapter', () => {
     it('returns not-found message when gh is missing', () => {
       const err = new Error('not found');
       err.code = 'ENOENT';
-      execFileSync.mockImplementation(() => { throw err; });
+      execFileSync.mockImplementation(() => {
+        throw err;
+      });
       const result = adapter.checkAuth();
       expect(result.ok).toBe(false);
       expect(result.message).toContain('gh CLI not found');
@@ -43,7 +45,9 @@ describe('GitHubAdapter', () => {
     it('returns auth message when not authenticated', () => {
       const err = new Error('auth failed');
       err.stderr = 'You are not logged in';
-      execFileSync.mockImplementation(() => { throw err; });
+      execFileSync.mockImplementation(() => {
+        throw err;
+      });
       const result = adapter.checkAuth();
       expect(result.ok).toBe(false);
       expect(result.message).toContain('gh not authenticated');

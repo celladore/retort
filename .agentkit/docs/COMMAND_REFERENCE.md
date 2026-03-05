@@ -244,11 +244,11 @@ These seven commands form the core orchestration and lifecycle workflow.
 
 **Flags:**
 
-| Flag                                | Description                                                     |
-| ----------------------------------- | --------------------------------------------------------------- |
-| `--issue <number>`                  | GitHub issue number to plan for.                                |
-| `--output markdown\|yaml\|json`    | Output format for the plan. Default: markdown.                  |
-| `--depth high\|medium\|low`        | Level of detail in the plan. Default: medium.                   |
+| Flag                            | Description                                    |
+| ------------------------------- | ---------------------------------------------- |
+| `--issue <number>`              | GitHub issue number to plan for.               |
+| `--output markdown\|yaml\|json` | Output format for the plan. Default: markdown. |
+| `--depth high\|medium\|low`     | Level of detail in the plan. Default: medium.  |
 
 **Example invocation:**
 
@@ -498,9 +498,9 @@ Team commands invoke a specialized agent scoped to a particular domain. Each tea
 
 **Flags (all team commands):**
 
-| Flag              | Description                                                             |
-| ----------------- | ----------------------------------------------------------------------- |
-| `--task <text>`   | Specify a specific task instead of pulling from the backlog.            |
+| Flag            | Description                                                  |
+| --------------- | ------------------------------------------------------------ |
+| `--task <text>` | Specify a specific task instead of pulling from the backlog. |
 
 **How team commands work:**
 
@@ -535,12 +535,12 @@ Build the project with auto-detected stack. Supports scoped builds for monorepos
 
 **Flags:**
 
-| Flag               | Description                                                    |
-| ------------------ | -------------------------------------------------------------- |
+| Flag               | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
 | `--stack <name>`   | Limit build to a specific tech stack (node, dotnet, rust, python). |
-| `--package <name>` | Build a specific package in a monorepo.                        |
-| `--production`     | Run a production-optimized build.                              |
-| `--verbose`        | Show detailed build output.                                    |
+| `--package <name>` | Build a specific package in a monorepo.                            |
+| `--production`     | Run a production-optimized build.                                  |
+| `--verbose`        | Show detailed build output.                                        |
 
 ```
 /build
@@ -556,16 +556,16 @@ Run the test suite with auto-detected framework. Supports scoped runs, filters, 
 
 **Flags:**
 
-| Flag                   | Description                                                     |
-| ---------------------- | --------------------------------------------------------------- |
-| `--stack <name>`       | Limit tests to a specific tech stack.                           |
-| `--filter <pattern>`   | Run only tests matching the given name or pattern.              |
-| `--coverage`           | Generate coverage report after test run.                        |
-| `--watch`              | Run tests in watch mode (re-run on file changes).               |
-| `--package <name>`     | Run tests for a specific monorepo package.                      |
-| `--bail`               | Stop on first test failure.                                     |
-| `--update-snapshots`   | Update snapshot files.                                          |
-| `--verbose`            | Show detailed test output.                                      |
+| Flag                 | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| `--stack <name>`     | Limit tests to a specific tech stack.              |
+| `--filter <pattern>` | Run only tests matching the given name or pattern. |
+| `--coverage`         | Generate coverage report after test run.           |
+| `--watch`            | Run tests in watch mode (re-run on file changes).  |
+| `--package <name>`   | Run tests for a specific monorepo package.         |
+| `--bail`             | Stop on first test failure.                        |
+| `--update-snapshots` | Update snapshot files.                             |
+| `--verbose`          | Show detailed test output.                         |
 
 ```
 /test
@@ -582,13 +582,13 @@ Run code formatters across the project. Defaults to write mode (applies fixes). 
 
 **Flags:**
 
-| Flag             | Description                                                          |
-| ---------------- | -------------------------------------------------------------------- |
-| `--stack <name>` | Limit formatting to a specific tech stack.                           |
+| Flag             | Description                                                             |
+| ---------------- | ----------------------------------------------------------------------- |
+| `--stack <name>` | Limit formatting to a specific tech stack.                              |
 | `--check`        | Check formatting without writing changes. Exit non-zero if unformatted. |
-| `--path <path>`  | Format only files under the specified path.                          |
-| `--staged`       | Format only git-staged files.                                        |
-| `--changed`      | Format only files changed since the last commit.                     |
+| `--path <path>`  | Format only files under the specified path.                             |
+| `--staged`       | Format only git-staged files.                                           |
+| `--changed`      | Format only files changed since the last commit.                        |
 
 ```
 /format
@@ -605,14 +605,14 @@ Deployment automation with safety checks, explicit confirmation gates, and rollb
 
 **Flags:**
 
-| Flag                    | Description                                                      |
-| ----------------------- | ---------------------------------------------------------------- |
-| `--environment <env>`   | Target environment (e.g., staging, production).                  |
-| `--dry-run`             | Show what would be deployed without executing.                   |
-| `--skip-checks`         | Skip pre-deployment healthcheck (use with caution).              |
-| `--stack <name>`        | Deploy only a specific stack in a polyglot project.              |
-| `--rollback`            | Roll back the last deployment.                                   |
-| `--tag <version>`       | Deploy a specific version tag.                                   |
+| Flag                  | Description                                         |
+| --------------------- | --------------------------------------------------- |
+| `--environment <env>` | Target environment (e.g., staging, production).     |
+| `--dry-run`           | Show what would be deployed without executing.      |
+| `--skip-checks`       | Skip pre-deployment healthcheck (use with caution). |
+| `--stack <name>`      | Deploy only a specific stack in a polyglot project. |
+| `--rollback`          | Roll back the last deployment.                      |
+| `--tag <version>`     | Deploy a specific version tag.                      |
 
 ```
 /deploy staging
@@ -628,12 +628,12 @@ Full security audit covering OWASP Top 10, dependency vulnerabilities, auth flow
 
 **Flags:**
 
-| Flag                                               | Description                                                    |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| `--scan-type deps\|secrets\|code\|all`             | Type of security scan to run. Default: all.                    |
-| `--severity info\|warning\|error\|critical`        | Minimum severity to report. Default: warning.                  |
-| `--fix`                                            | Attempt to auto-fix issues (e.g., dependency upgrades).        |
-| `--output json\|markdown`                          | Output format. Default: markdown.                              |
+| Flag                                        | Description                                             |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `--scan-type deps\|secrets\|code\|all`      | Type of security scan to run. Default: all.             |
+| `--severity info\|warning\|error\|critical` | Minimum severity to report. Default: warning.           |
+| `--fix`                                     | Attempt to auto-fix issues (e.g., dependency upgrades). |
+| `--output json\|markdown`                   | Output format. Default: markdown.                       |
 
 ```
 /security
@@ -650,11 +650,11 @@ Updates `AGENT_BACKLOG.md` by gathering work items from discovery findings, heal
 
 **Flags:**
 
-| Flag                         | Description                                                        |
-| ---------------------------- | ------------------------------------------------------------------ |
+| Flag                           | Description                                                       |
+| ------------------------------ | ----------------------------------------------------------------- |
 | `--direction pull\|push\|both` | Sync direction: pull from GitHub Issues, push to Issues, or both. |
-| `--labels <csv>`             | Filter GitHub Issues by labels (comma-separated).                  |
-| `--team <name>`              | Only sync backlog items for a specific team.                       |
+| `--labels <csv>`               | Filter GitHub Issues by labels (comma-separated).                 |
+| `--team <name>`                | Only sync backlog items for a specific team.                      |
 
 ```
 /sync-backlog
@@ -670,11 +670,11 @@ Runs a comprehensive project-wide audit combining discovery, healthcheck, securi
 
 **Flags:**
 
-| Flag              | Description                                                              |
-| ----------------- | ------------------------------------------------------------------------ |
-| `--scope <path>`  | Limit the review to a specific directory or set of files.                |
-| `--focus <area>`  | Focus area: security, performance, correctness, architecture, or all.    |
-| `--phase <n>`     | Run only a specific phase of the review.                                 |
+| Flag             | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| `--scope <path>` | Limit the review to a specific directory or set of files.             |
+| `--focus <area>` | Focus area: security, performance, correctness, architecture, or all. |
+| `--phase <n>`    | Run only a specific phase of the review.                              |
 
 ```
 /project-review
@@ -724,14 +724,14 @@ These commands manage the delegated task system used by the orchestrator and tea
 
 **Flags:**
 
-| Flag                                   | Description                                                      |
-| -------------------------------------- | ---------------------------------------------------------------- |
-| `--status <status>`                    | Filter by task status (submitted, accepted, working, completed, failed, rejected, canceled). Maps to the task protocol lifecycle defined in `task-protocol.mjs`.|
-| `--assignee <team>`                    | Filter by assigned team (e.g., backend, frontend).               |
-| `--id <task-id>`                       | Show details for a specific task.                                |
-| `--type <type>`                        | Filter by task type (implement, review, plan, investigate, test, document). |
-| `--priority <level>`                   | Filter by priority (P0, P1, P2, P3).                            |
-| `--process-handoffs`                   | Process handoff chains before listing tasks.                     |
+| Flag                 | Description                                                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--status <status>`  | Filter by task status (submitted, accepted, working, completed, failed, rejected, canceled). Maps to the task protocol lifecycle defined in `task-protocol.mjs`. |
+| `--assignee <team>`  | Filter by assigned team (e.g., backend, frontend).                                                                                                               |
+| `--id <task-id>`     | Show details for a specific task.                                                                                                                                |
+| `--type <type>`      | Filter by task type (implement, review, plan, investigate, test, document).                                                                                      |
+| `--priority <level>` | Filter by priority (P0, P1, P2, P3).                                                                                                                             |
+| `--process-handoffs` | Process handoff chains before listing tasks.                                                                                                                     |
 
 **Example invocations:**
 
@@ -770,16 +770,16 @@ Total: 3 tasks (1 completed, 1 in-progress, 1 pending)
 
 **Flags:**
 
-| Flag                      | Description                                                            |
-| ------------------------- | ---------------------------------------------------------------------- |
-| `--to <team>`             | **(Required)** The team to assign the task to.                         |
-| `--title <text>`          | **(Required)** Short title for the task.                               |
-| `--type <type>`           | Task type: implement, review, plan, investigate, test, document. Default: implement. |
-| `--priority <level>`      | Priority level: P0, P1, P2, P3. Default: P2.                          |
-| `--depends-on <task-id>`  | Task ID that must complete before this task can start.                 |
-| `--handoff-to <team>`     | Team to automatically hand off to when this task completes.            |
-| `--scope <path>`          | File path or directory scope for the task.                             |
-| `--description <text>`    | Detailed description of what needs to be done.                         |
+| Flag                     | Description                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `--to <team>`            | **(Required)** The team to assign the task to.                                       |
+| `--title <text>`         | **(Required)** Short title for the task.                                             |
+| `--type <type>`          | Task type: implement, review, plan, investigate, test, document. Default: implement. |
+| `--priority <level>`     | Priority level: P0, P1, P2, P3. Default: P2.                                         |
+| `--depends-on <task-id>` | Task ID that must complete before this task can start.                               |
+| `--handoff-to <team>`    | Team to automatically hand off to when this task completes.                          |
+| `--scope <path>`         | File path or directory scope for the task.                                           |
+| `--description <text>`   | Detailed description of what needs to be done.                                       |
 
 **Example invocations:**
 
@@ -829,9 +829,9 @@ Task added to AGENT_BACKLOG.md. Run `/team-backend` to begin work.
 
 **Flags:**
 
-| Flag        | Description                              |
-| ----------- | ---------------------------------------- |
-| `--verbose` | Show detailed diagnostic output.         |
+| Flag        | Description                      |
+| ----------- | -------------------------------- |
+| `--verbose` | Show detailed diagnostic output. |
 
 **Example invocations:**
 
@@ -882,12 +882,12 @@ These commands are available only as slash commands within AI coding tools. They
 
 **Flags:**
 
-| Flag             | Description                                                           |
-| ---------------- | --------------------------------------------------------------------- |
+| Flag             | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
 | `--type <type>`  | Scaffold type (e.g., component, service, middleware, migration, test). |
-| `--name <name>`  | Name for the generated entity.                                        |
-| `--stack <name>` | Tech stack context (auto-detected if omitted).                        |
-| `--path <path>`  | Target directory for the generated file(s).                           |
+| `--name <name>`  | Name for the generated entity.                                         |
+| `--stack <name>` | Tech stack context (auto-detected if omitted).                         |
+| `--path <path>`  | Target directory for the generated file(s).                            |
 
 **Example invocations:**
 
@@ -910,12 +910,12 @@ These commands are available only as slash commands within AI coding tools. They
 
 **Flags:**
 
-| Flag              | Description                                                        |
-| ----------------- | ------------------------------------------------------------------ |
-| `--stack <name>`  | Limit checks to a specific tech stack.                             |
-| `--base <ref>`    | Base branch or commit to compare against. Default: main.           |
-| `--range <range>` | Git commit range to check (e.g., v1.0.0..HEAD).                   |
-| `--strict`        | Fail on warnings in addition to errors.                            |
+| Flag              | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `--stack <name>`  | Limit checks to a specific tech stack.                   |
+| `--base <ref>`    | Base branch or commit to compare against. Default: main. |
+| `--range <range>` | Git commit range to check (e.g., v1.0.0..HEAD).          |
+| `--strict`        | Fail on warnings in addition to errors.                  |
 
 **Example invocations:**
 
@@ -947,14 +947,14 @@ These commands are available only as slash commands within AI coding tools. They
 
 **Flags:**
 
-| Flag           | Description                                                                                |
-| -------------- | ------------------------------------------------------------------------------------------ |
-| `--scope <path>` | Limit evaluation to specific paths or modules.                                           |
+| Flag             | Description                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| `--scope <path>` | Limit evaluation to specific paths or modules.                                                   |
 | `--focus <area>` | Target dimension: all, reliability, cost, security, infra, scalability, architecture, code, ops. |
-| `--output <fmt>` | Output format: markdown, json, yaml.                                                     |
-| `--save`       | Save report to `docs/evaluations/`. Default: true.                                        |
-| `--no-save`    | Do not save report.                                                                        |
-| `--gates-only` | Run hard gate checks only (skip dimensional scoring).                                      |
+| `--output <fmt>` | Output format: markdown, json, yaml.                                                             |
+| `--save`         | Save report to `docs/evaluations/`. Default: true.                                               |
+| `--no-save`      | Do not save report.                                                                              |
+| `--gates-only`   | Run hard gate checks only (skip dimensional scoring).                                            |
 
 **8 evaluation dimensions (weighted):**
 
@@ -993,14 +993,14 @@ These commands are available only as slash commands within AI coding tools. They
 
 **Modes:**
 
-| Flag           | Description                                                  |
-| -------------- | ------------------------------------------------------------ |
-| `--init`       | Scaffold `brand.yaml` and `editor-theme.yaml` templates.     |
-| `--validate`   | Validate brand spec for completeness and accessibility.       |
-| `--palette`    | Preview color palette with contrast ratios.                   |
-| `--theme`      | Regenerate editor theme files from brand spec.                |
-| `--contrast`   | Audit WCAG compliance of color combinations.                  |
-| `--all`        | Run all validations and generation.                           |
+| Flag         | Description                                              |
+| ------------ | -------------------------------------------------------- |
+| `--init`     | Scaffold `brand.yaml` and `editor-theme.yaml` templates. |
+| `--validate` | Validate brand spec for completeness and accessibility.  |
+| `--palette`  | Preview color palette with contrast ratios.              |
+| `--theme`    | Regenerate editor theme files from brand spec.           |
+| `--contrast` | Audit WCAG compliance of color combinations.             |
+| `--all`      | Run all validations and generation.                      |
 
 **Key files:**
 
@@ -1076,10 +1076,10 @@ agentkit features preset <name>            # Apply preset
 
 **Flags:**
 
-| Flag          | Description                                                          |
-| ------------- | -------------------------------------------------------------------- |
-| `--recommend` | Scan codebase and recommend features based on detected patterns.     |
-| `--audit`     | Check if enabled features have corresponding generated files.        |
+| Flag          | Description                                                      |
+| ------------- | ---------------------------------------------------------------- |
+| `--recommend` | Scan codebase and recommend features based on detected patterns. |
+| `--audit`     | Check if enabled features have corresponding generated files.    |
 
 ---
 
@@ -1097,20 +1097,20 @@ agentkit features preset <name>            # Apply preset
 
 **New `/review` flags (this branch):**
 
-| Flag             | Description                                                        |
-| ---------------- | ------------------------------------------------------------------ |
-| `--focus=retrospective` | Activate retrospective mode instead of code review.          |
-| `--open-issues`  | Automatically file issues in external tracker for critical findings.|
-| `--dry-run`      | Preview findings without writing files or creating issues.         |
+| Flag                    | Description                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| `--focus=retrospective` | Activate retrospective mode instead of code review.                  |
+| `--open-issues`         | Automatically file issues in external tracker for critical findings. |
+| `--dry-run`             | Preview findings without writing files or creating issues.           |
 
 **Expanded review criteria (7-10, new):**
 
-| # | Criterion | Description |
-|---|-----------|-------------|
-| 7 | Completeness | Ensures features are fully implemented, no stubs/TODOs left |
-| 8 | Documentation Gaps | Validates all public APIs/components/changes have docs |
-| 9 | Bug Detection | Identifies latent bugs and race conditions |
-| 10 | Enhancement Opportunities | Non-blocking improvement suggestions |
+| #   | Criterion                 | Description                                                 |
+| --- | ------------------------- | ----------------------------------------------------------- |
+| 7   | Completeness              | Ensures features are fully implemented, no stubs/TODOs left |
+| 8   | Documentation Gaps        | Validates all public APIs/components/changes have docs      |
+| 9   | Bug Detection             | Identifies latent bugs and race conditions                  |
+| 10  | Enhancement Opportunities | Non-blocking improvement suggestions                        |
 
 **Output locations:**
 

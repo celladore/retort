@@ -6,6 +6,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
@@ -329,15 +330,27 @@ const PROJECT_ENUMS = {
   auditEventBus: ['service-bus', 'event-hub', 'sns', 'none'],
   // Issue template fields — canonical allowed values for issue forms and validation
   issueArea: [
-    'backend', 'frontend', 'data', 'infra', 'devops',
-    'testing', 'security', 'docs', 'product', 'quality',
-    'cli', 'sync-engine',
+    'backend',
+    'frontend',
+    'data',
+    'infra',
+    'devops',
+    'testing',
+    'security',
+    'docs',
+    'product',
+    'quality',
+    'cli',
+    'sync-engine',
   ],
   issuePriority: ['P0', 'P1', 'P2', 'P3', 'P4'],
   issueSeverity: ['critical', 'high', 'medium', 'low'],
   issueImpact: [
-    'all users', 'most users', 'some users',
-    'specific configuration only', 'developer/CI only',
+    'all users',
+    'most users',
+    'some users',
+    'specific configuration only',
+    'developer/CI only',
   ],
 };
 
@@ -661,10 +674,7 @@ function validateProjectYaml(project) {
       }
     }
 
-    if (
-      intake.autoImport === true &&
-      project?.process?.issueTracker === 'none'
-    ) {
+    if (intake.autoImport === true && project?.process?.issueTracker === 'none') {
       warnings.push(
         'project.yaml: process.intake.autoImport is true but issueTracker is "none" — external import will be a no-op'
       );
@@ -871,9 +881,7 @@ function validateCrossReferences(specs) {
 
     const operationsTeam = intake.operationsTeam;
     if (typeof operationsTeam === 'string' && operationsTeam && !teamIds.has(operationsTeam)) {
-      errors.push(
-        `teams.yaml: intake.operationsTeam references unknown team "${operationsTeam}"`
-      );
+      errors.push(`teams.yaml: intake.operationsTeam references unknown team "${operationsTeam}"`);
     }
 
     const routing = intake.routing;
@@ -1037,6 +1045,41 @@ export function validateSpec(agentkitRoot) {
   const aliases = loadYaml('aliases.yaml');
   const docs = loadYaml('docs.yaml');
 
+  // Validate features.yaml if present
+  const featuresPath = resolve(specDir, 'features.yaml');
+  if (existsSync(featuresPath)) {
+    try {
+      const featuresData = yaml.load(readFileSync(featuresPath, 'utf-8'));
+      if (featuresData === null || featuresData === undefined) {
+        errors.push('features.yaml: file is empty or contains only null');
+      } else if (typeof featuresData !== 'object' || Array.isArray(featuresData)) {
+        errors.push(
+          `features.yaml: root must be an object, got ${Array.isArray(featuresData) ? 'array' : typeof featuresData}`
+        );
+      } else if (featuresData && typeof featuresData === 'object') {
+        if (!featuresData.features || !Array.isArray(featuresData.features)) {
+          errors.push('features.yaml: missing or invalid "features" array');
+        } else {
+          const featureResult = validateFeatureSpec(
+            featuresData.features,
+            featuresData.presets || {}
+          );
+          errors.push(...featureResult.errors);
+          warnings.push(...featureResult.warnings);
+
+          // Validate affectsTemplates paths reference real template files/dirs
+          const templatesDir = resolve(agentkitRoot, 'templates');
+          if (existsSync(templatesDir)) {
+            const affectsResult = validateAffectsTemplates(featuresData.features, templatesDir);
+            warnings.push(...affectsResult.warnings);
+          }
+        }
+      }
+    } catch (err) {
+      errors.push(`features.yaml: YAML parse error — ${err.message}`);
+    }
+  }
+
   // project.yaml is optional — only validate if present
   let project = null;
   const projectPath = resolve(specDir, 'project.yaml');
@@ -1126,7 +1169,7 @@ export function validateSpec(agentkitRoot) {
             for (const p of phases) {
               if (!VALID_PHASES.includes(p)) {
                 errors.push(
-                  `rules.yaml.rules[${i}].conventions[${j}].phase: must be one of [${VALID_PHASES.join(', ')}], got "${p}"`,
+                  `rules.yaml.rules[${i}].conventions[${j}].phase: must be one of [${VALID_PHASES.join(', ')}], got "${p}"`
                 );
               }
             }

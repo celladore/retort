@@ -6,12 +6,10 @@
 
 {{commandDescription}}
 
-{{#if commandFlags}}
-## Flags
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
 
-{{commandFlags}}
-
-{{/if}}
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
@@ -21,6 +19,7 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 3. **Execute** the task following project conventions
 4. **Validate** the output meets quality gates
 5. **Report** results clearly
+{{/if}}
 
 ## Project Context
 
@@ -47,12 +46,4 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Keep backlog sync tracker-neutral (GitHub/Linear) and ownership-aware using the configured intake values.
-
-### Issue Field Routing
-
-Route issues to teams by area: {{intakeAreaRoutingTable}}
-
-**Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
-**Severity (bugs):** critical · high · medium · low
-**Escalation:** severity=critical + area in [security,infra,backend] → cc {{intakeSecurityEscalationTeams}}; impact=all users + P0 → cc {{intakeBlockedEscalationTeams}}
 {{/if}}

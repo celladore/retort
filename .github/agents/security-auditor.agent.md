@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- auth/**
-- security/**
-- middleware/auth*
-- infra/**
-- .github/workflows/**
-- **/.env*
+- auth/\*\*
+- security/\*\*
+- middleware/auth\*
+- infra/\*\*
+- .github/workflows/\*\*
+- \*_/.env_
 
 ## Responsibilities
 

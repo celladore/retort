@@ -117,7 +117,7 @@ assumptions about project structure or conventions.
 
 - Default region: global
 - Organisation prefix: akf
-- Preferred IaC toolchain: none
+- Preferred IaC toolchain: terraform, terragrunt
 
 - Mandatory tags: environment, project, owner, cost_center
 

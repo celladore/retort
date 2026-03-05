@@ -15,10 +15,7 @@ const DEFAULT_STATUS = 'open';
  * @returns {string}
  */
 function generateId(source, externalId) {
-  const hash = createHash('sha256')
-    .update(`${source}:${externalId}`)
-    .digest('hex')
-    .slice(0, 8);
+  const hash = createHash('sha256').update(`${source}:${externalId}`).digest('hex').slice(0, 8);
   return `bi-${source}-${hash}`;
 }
 
@@ -167,9 +164,7 @@ export function normalizeIssue(rawIssue, config = {}) {
     source = 'github',
   } = config;
 
-  const labelNames = (rawIssue.labels || []).map((l) =>
-    typeof l === 'string' ? l : l.name || ''
-  );
+  const labelNames = (rawIssue.labels || []).map((l) => (typeof l === 'string' ? l : l.name || ''));
 
   const prefixMap = { github: 'GH', linear: 'LIN', jira: 'JIRA' };
   const prefix = prefixMap[source] || source.toUpperCase();
@@ -267,6 +262,26 @@ export function deduplicateItems(existing, incoming) {
     added,
     updated,
     preserved: manualItems.length - incomingWithoutExtId,
+  };
+}
+
+/**
+ * Infer category scores (0-10) from a normalized backlog item's metadata.
+ * Used as input to calculateScore() from weighted-scorer.mjs.
+ * @param {object} item - Normalized BacklogItem
+ * @returns {object} Category scores { severity, impact, urgency, effort, alignment, risk }
+ */
+export function inferCategoryScores(item) {
+  const priorityScores = { P0: 10, P1: 7, P2: 5, P3: 3 };
+  const labels = (item.labels || []).map((l) => l.toLowerCase());
+
+  return {
+    severity: priorityScores[item.priority] ?? 5,
+    impact: labels.some((l) => l.includes('breaking') || l.includes('blocker')) ? 9 : 5,
+    urgency: labels.some((l) => l.includes('urgent') || l.includes('critical')) ? 9 : 5,
+    effort: 5,
+    alignment: 5,
+    risk: labels.some((l) => l.includes('security') || l.includes('vulnerability')) ? 8 : 5,
   };
 }
 

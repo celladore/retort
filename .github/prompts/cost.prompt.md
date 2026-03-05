@@ -16,41 +16,33 @@ last_updated: '2026-03-05'
 
 Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.
 
-## Flags
+## Workflow
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--summary` | Show recent session summary | false |
-| `--sessions` | List recent sessions | false |
-| `--report` | Generate aggregate usage report | false |
-| `--month` | Month for report (YYYY-MM format) | — |
-| `--format` | Export format: table, json, csv | table |
-| `--last` | Time period for queries (e.g. 7d, 30d) | 7d |
+1. Parse arguments to determine which view the user wants
+2. Run the cost tracking CLI command
+3. Present results in a clear, formatted table
+4. Suggest optimizations if usage is high
 
-## Instructions
+## Available Views
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+| Command                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| `--summary`                | Recent session overview with durations and file counts |
+| `--sessions`               | List all recent sessions                               |
+| `--report --month YYYY-MM` | Monthly aggregate report                               |
+| `--report --format json`   | Export report as JSON                                  |
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Notes
+
+- Session tracking is automatic via lifecycle hooks
+- Tracks operational metrics (duration, commands, files) — not token counts
+- Logs stored in `.agentkit/logs/` as daily JSONL files
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
@@ -68,4 +60,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

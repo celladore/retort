@@ -16,40 +16,30 @@ last_updated: '2026-03-05'
 
 Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.
 
-## Flags
+## Checks (beyond /check)
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--stack` | Limit checks to a specific stack | — |
-| `--branch` | Branch to check (defaults to current branch) | — |
-| `--base` | Remote base branch used for merge-base when --range is omitted (e.g., origin/main) | — |
-| `--range` | Git range used for changelog/commit checks (auto-detect via merge-base; fallback emits warning and uses HEAD~50..HEAD) | — |
-| `--strict` | Fail on warnings | false |
+1. **Quality Gates** — Run `/check` and fail on any error
+2. **Changelog Updates** — Verify changelog/release notes when user-facing behavior changed (CLI flags, API contracts, UI copy, migration semantics)
+3. **Commit Convention** — Validate commits in range follow conventional commit format
+4. **TODO/FIXME Hygiene** — Detect entries without issue references in changed files
+5. **Coverage Delta** — Fail when coverage regresses vs. baseline. Accept documented waivers with author, rationale, linked issue, and expiry date.
+6. **Docs Updates** — Confirm docs updated for API/CLI behavior changes
 
-## Instructions
+## Output
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+Produce a pass/fail table: Check | Status | Evidence | Required Follow-up. Include range resolution info, baseline and current coverage percentages with delta.
 
-1. **Understand** the request and any arguments provided
-2. **Scan** relevant files to build context
-3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
-4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
-5. **Report** results clearly
+## Usage
+
+`/preflight [--stack <stack>] [--range <git-range>] [--base <remote-branch>] [--strict]`
+
+If `--range` is omitted, auto-detect via merge-base against the default branch. If detection fails, fall back to `HEAD~50..HEAD` with a visible warning.
 
 ## Project Context
 
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
-
-## Language Profile Diagnostics
-
-- Source: mixed (confidence: high)
-- Configured languages present: yes
-- JS-like: configured=true, inferred=true, effective=true
-- Python: configured=false, inferred=false, effective=false
-- .NET: configured=false, inferred=false, effective=false
-- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
@@ -67,4 +57,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

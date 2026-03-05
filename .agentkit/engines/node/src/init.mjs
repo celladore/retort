@@ -13,6 +13,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { basename, resolve } from 'path';
+import { loadFeatureSpec, resolveFeatures } from './feature-manager.mjs';
 import { REPO_NAME_PATTERN } from './repo-name.mjs';
 
 // ---------------------------------------------------------------------------
@@ -23,6 +24,7 @@ const PRESETS = {
   minimal: {
     label: 'Minimal — AGENTS.md + one primary tool',
     renderTargets: ['claude'],
+    featurePreset: 'minimal',
   },
   full: {
     label: 'Full — all supported AI tools',
@@ -39,14 +41,17 @@ const PRESETS = {
       'ai',
       'mcp',
     ],
+    featurePreset: 'full',
   },
   team: {
     label: 'Team — the big four (Claude, Cursor, Copilot, Windsurf)',
     renderTargets: ['claude', 'cursor', 'copilot', 'windsurf'],
+    featurePreset: 'standard',
   },
   infra: {
     label: 'Infra — IaC-focused defaults + key AI tools',
     renderTargets: ['claude', 'cursor', 'copilot', 'windsurf', 'mcp'],
+    featurePreset: 'standard',
   },
 };
 
@@ -241,13 +246,14 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   if (nonInteractive || process.env.CI) {
     console.log('[agentkit:init] Non-interactive mode — using auto-detected defaults.');
     applyPresetDefaults(project, preset);
-    const targets = preset ? PRESETS[preset].renderTargets : PRESETS.full.renderTargets;
+    const presetDef = preset ? PRESETS[preset] : PRESETS.full;
     return await finalizeInit({
       agentkitRoot,
       projectRoot,
       repoName,
       project,
-      renderTargets: targets,
+      renderTargets: presetDef.renderTargets,
+      featurePreset: presetDef.featurePreset || 'standard',
       force,
     });
   }
@@ -262,6 +268,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
       repoName,
       project,
       renderTargets: PRESETS[preset].renderTargets,
+      featurePreset: PRESETS[preset].featurePreset || 'standard',
       force,
     });
   }
@@ -280,6 +287,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
       repoName,
       project,
       renderTargets: PRESETS.full.renderTargets,
+      featurePreset: 'standard',
       force,
     });
   }
@@ -572,6 +580,64 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
     }
   }
 
+  // --- Phase 5.5: Kit Feature Selection ---
+  let featurePreset = null;
+  let enabledFeatures = null;
+  try {
+    const featureSpec = loadFeatureSpec(agentkitRoot);
+    const nonCoreFeatures = featureSpec.features.filter((f) => !f.alwaysOn);
+    const presetOptions = Object.entries(featureSpec.presets).map(([key, p]) => ({
+      value: key,
+      label: p.label,
+      hint: `${p.features.length} features`,
+    }));
+
+    const featureMode = await clack.select({
+      message: 'Kit feature adoption strategy',
+      options: [
+        ...presetOptions,
+        { value: '__custom__', label: 'Custom — pick individual features' },
+      ],
+      initialValue: 'standard',
+    });
+
+    if (clack.isCancel(featureMode)) {
+      clack.cancel('Init cancelled.');
+      process.exit(0);
+    }
+
+    if (featureMode === '__custom__') {
+      const featureChoices = nonCoreFeatures.map((f) => ({
+        value: f.id,
+        label: f.name,
+        hint: f.category,
+      }));
+
+      const defaultFeatures = nonCoreFeatures.filter((f) => f.default).map((f) => f.id);
+
+      const selectedFeatures = await clack.multiselect({
+        message: 'Select kit features to enable (core features are always on)',
+        options: featureChoices,
+        initialValues: defaultFeatures,
+        required: false,
+      });
+
+      if (clack.isCancel(selectedFeatures)) {
+        clack.cancel('Init cancelled.');
+        process.exit(0);
+      }
+
+      enabledFeatures = [
+        ...featureSpec.features.filter((f) => f.alwaysOn).map((f) => f.id),
+        ...selectedFeatures,
+      ];
+    } else {
+      featurePreset = featureMode;
+    }
+  } catch {
+    // features.yaml not available — skip feature selection
+  }
+
   // --- Phase 6: AI Tool Selection ---
   const existingHints = detectExistingTools(projectRoot);
   const toolOptions = ALL_TOOL_OPTIONS.map((opt) => ({
@@ -595,7 +661,16 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Phase 7: Write & Sync ---
   clack.outro('Configuration complete — writing files...');
 
-  return await finalizeInit({ agentkitRoot, projectRoot, repoName, project, renderTargets, force });
+  return await finalizeInit({
+    agentkitRoot,
+    projectRoot,
+    repoName,
+    project,
+    renderTargets,
+    featurePreset,
+    enabledFeatures,
+    force,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -608,6 +683,8 @@ async function finalizeInit({
   repoName,
   project,
   renderTargets,
+  featurePreset,
+  enabledFeatures,
   force,
 }) {
   // 1. Copy __TEMPLATE__ overlay
@@ -621,7 +698,7 @@ async function finalizeInit({
   mkdirSync(overlayDir, { recursive: true });
   cpSync(templateDir, overlayDir, { recursive: true, force: true });
 
-  // 2. Update settings.yaml with repoName + renderTargets
+  // 2. Update settings.yaml with repoName + renderTargets + features
   const settingsPath = resolve(overlayDir, 'settings.yaml');
   if (existsSync(settingsPath)) {
     const settings = yaml.load(readFileSync(settingsPath, 'utf-8')) || {};
@@ -630,9 +707,26 @@ async function finalizeInit({
     if (project.stack?.languages?.length > 0) {
       settings.primaryStack = project.stack.languages[0];
     }
+
+    // Write feature configuration
+    if (enabledFeatures) {
+      // Custom feature list — explicit mode
+      settings.enabledFeatures = enabledFeatures;
+      delete settings.featurePreset;
+    } else if (featurePreset) {
+      // Preset mode
+      settings.featurePreset = featurePreset;
+      delete settings.enabledFeatures;
+    }
+
     writeFileSync(settingsPath, yaml.dump(settings, { lineWidth: 120 }), 'utf-8');
+    const featureInfo = enabledFeatures
+      ? `${enabledFeatures.length} features (custom)`
+      : featurePreset
+        ? `preset: ${featurePreset}`
+        : 'default features';
     console.log(
-      `[agentkit:init] Updated overlay settings (${renderTargets.length} render targets)`
+      `[agentkit:init] Updated overlay settings (${renderTargets.length} render targets, ${featureInfo})`
     );
   }
 
@@ -669,9 +763,7 @@ async function finalizeInit({
             flags: { force: true },
           });
         } catch (importErr) {
-          console.warn(
-            `[agentkit:init] Issue import failed (non-fatal): ${importErr.message}`
-          );
+          console.warn(`[agentkit:init] Issue import failed (non-fatal): ${importErr.message}`);
           console.warn(
             `  You can import later with: pnpm -C .agentkit agentkit:import-issues -- --force`
           );
@@ -685,6 +777,7 @@ async function finalizeInit({
   console.log(`[agentkit:init] Done! Repo initialized as: ${repoName}`);
   console.log(`  Render targets: ${renderTargets.join(', ')}`);
   console.log(`  Tip: Run "agentkit add <tool>" to add tools later.`);
+  console.log(`  Tip: Run "agentkit features" to manage kit features.`);
 }
 
 // ---------------------------------------------------------------------------

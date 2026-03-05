@@ -4,10 +4,18 @@
  * TODO/FIXME scanning, and lint on changed files.
  * This is NOT the AI review — that's the /review slash command.
  */
-import { promises as fsPromises, realpathSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, promises as fsPromises, realpathSync, statSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
+import yaml from 'js-yaml';
+import { emitEvent, readEvents } from './event-emitter.mjs';
 import { appendEvent } from './orchestrator.mjs';
 import { execCommand, runInPool } from './runner.mjs';
+import { addTaskArtifact, createTask } from './task-protocol.mjs';
+import {
+  getIncrementalTestCommands,
+  resolveCoverageCommand,
+  parseCoveragePercentage,
+} from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Secret patterns — compiled once at module level to avoid per-call overhead.
@@ -281,6 +289,113 @@ async function scanTodos(projectRoot, files) {
 }
 
 // ---------------------------------------------------------------------------
+// Review → Task conversion
+// ---------------------------------------------------------------------------
+
+/**
+ * Infer the responsible team area from a review finding.
+ * @param {object} finding
+ * @returns {string}
+ */
+function inferAreaFromFinding(finding) {
+  if (finding.type === 'secret') return 'security';
+  if (finding.type === 'large_file') return 'devops';
+  return 'quality';
+}
+
+/**
+ * Convert critical/high-severity findings into delegated tasks.
+ * Only creates tasks for findings with severity 'critical' or 'high'.
+ * @param {string} projectRoot
+ * @param {object[]} findings
+ * @returns {Promise<object[]>} Created tasks
+ */
+export async function convertFindingsToTasks(projectRoot, findings) {
+  const actionable = findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
+  if (!actionable.length) return [];
+
+  const created = [];
+  for (const finding of actionable) {
+    const priority = finding.severity === 'critical' ? 'P0' : 'P1';
+    const area = inferAreaFromFinding(finding);
+    const title = `Fix ${finding.type}: ${finding.pattern || finding.file}`;
+
+    const result = await createTask(projectRoot, {
+      delegator: 'review-runner',
+      assignees: [area],
+      title,
+      description: `Auto-created from review finding.\nFile: ${finding.file}\nType: ${finding.type}\nSeverity: ${finding.severity}${finding.count ? `\nMatches: ${finding.count}` : ''}`,
+      type: 'implement',
+      priority,
+      severity: finding.severity,
+      area,
+      dependsOn: [],
+      handoffTo: [],
+      scope: finding.file ? [finding.file] : [],
+    });
+
+    if (result.task) {
+      // Persist the finding as a review-findings artifact to disk
+      await addTaskArtifact(projectRoot, result.task.id, {
+        type: 'review-findings',
+        summary: `${finding.type}: ${finding.pattern || ''} in ${finding.file}`,
+        finding,
+      });
+      created.push(result.task);
+    } else if (result.error) {
+      console.warn(
+        `[agentkit:review] Failed to create task for ${finding.type} in ${finding.file}: ${result.error}`
+      );
+    }
+  }
+
+  return created;
+}
+
+/**
+ * Track unfixed findings by comparing current findings with previous review.
+ * Emits a 'review_unfixed_findings' event for findings that persist across reviews.
+ * @param {string} projectRoot
+ * @param {object[]} currentFindings
+ */
+export async function trackUnfixedFindings(projectRoot, currentFindings) {
+  const previousEvents = readEvents(projectRoot, {
+    action: 'review_completed',
+    limit: 1,
+  });
+
+  if (!previousEvents.length || !Array.isArray(previousEvents[0].findingDetails)) {
+    return { unfixed: [], isFirstRun: true };
+  }
+
+  const prevFindings = previousEvents[0].findingDetails;
+
+  // Match by type + file + pattern (fingerprint)
+  const fingerprint = (f) => `${f.type}:${f.file}:${f.pattern || ''}`;
+  const prevSet = new Set(prevFindings.map(fingerprint));
+  const unfixed = currentFindings.filter((f) => prevSet.has(fingerprint(f)));
+
+  if (unfixed.length > 0) {
+    emitEvent(
+      projectRoot,
+      'review_unfixed_findings',
+      {
+        count: unfixed.length,
+        findings: unfixed.map((f) => ({
+          type: f.type,
+          severity: f.severity,
+          file: f.file,
+          pattern: f.pattern || null,
+        })),
+      },
+      { source: 'review-runner' }
+    );
+  }
+
+  return { unfixed, isFirstRun: false };
+}
+
+// ---------------------------------------------------------------------------
 // Main handler
 // ---------------------------------------------------------------------------
 
@@ -297,7 +412,13 @@ export async function runReview({
   projectRoot,
   flags = {},
 }) {
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+
   console.log('[agentkit:review] Running automated review checks...');
+  if (userContext) {
+    console.log(`[agentkit:review] Context: ${userContext}`);
+  }
   console.log('');
 
   const changedFiles = getChangedFiles(projectRoot, flags);
@@ -366,25 +487,115 @@ export async function runReview({
   }
   console.log('');
 
+  // --- Test Coverage Delta ---
+  let coverageDelta = null;
+  if (flags.coverage === true) {
+    console.log('--- Test Coverage Check ---');
+    try {
+      const teamsPath = resolve(projectRoot, '.agentkit', 'spec', 'teams.yaml');
+      if (existsSync(teamsPath)) {
+        const teamsSpec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+        const techStacks = teamsSpec?.techStacks || [];
+        const testCommands = getIncrementalTestCommands(changedFiles, techStacks);
+
+        if (testCommands.length > 0) {
+          for (const { stack, command } of testCommands) {
+            const covCmd = resolveCoverageCommand({ testCommand: command });
+            if (covCmd.command) {
+              const covResult = execCommand(covCmd.command, { cwd: projectRoot });
+              const percentage = parseCoveragePercentage(
+                covResult.stdout + '\n' + covResult.stderr,
+                covCmd.parser
+              );
+
+              if (percentage != null) {
+                coverageDelta = { stack, percentage, command: covCmd.command };
+                allFindings.push({
+                  type: 'coverage',
+                  severity: percentage < 50 ? 'MEDIUM' : 'LOW',
+                  stack,
+                  percentage,
+                });
+                console.log(`  ${stack}: ${percentage.toFixed(1)}% coverage on changed files`);
+              } else {
+                console.log(`  ${stack}: coverage data not parseable`);
+              }
+              break; // Only run coverage for the first matching stack
+            }
+          }
+        } else {
+          console.log('  No matching test commands for changed files');
+        }
+      } else {
+        console.log('  Skipped (no teams.yaml)');
+      }
+    } catch (err) {
+      console.log(`  Skipped (${err?.message ?? 'error'})`);
+    }
+    console.log('');
+  }
+
   // Summary
-  const hasHighSeverity = allFindings.some((f) => f.severity === 'high' || f.severity === 'critical');
+  const hasHighSeverity = allFindings.some(
+    (f) => f.severity === 'high' || f.severity === 'critical'
+  );
   const status = hasHighSeverity ? 'FAIL' : 'PASS';
 
   console.log(`=== Review: ${status} ===`);
   console.log(
-    `Files: ${changedFiles.length} | Findings: ${allFindings.length} (${secrets.length} secrets, ${largeFiles.length} large files, ${todos.length} TODOs)`
+    `Files: ${changedFiles.length} | Findings: ${allFindings.length} (${secrets.length} secrets, ${largeFiles.length} large files, ${todos.length} TODOs${coverageDelta ? `, coverage: ${coverageDelta.percentage.toFixed(1)}%` : ''})`
   );
 
-  // Log event
+  // Track unfixed findings (compare with previous review)
+  const { unfixed } = await trackUnfixedFindings(projectRoot, allFindings);
+  if (unfixed.length > 0) {
+    console.log(`\n  ⚠ ${unfixed.length} finding(s) persist from previous review`);
+  }
+
+  // Log event with detailed findings for guardrail tracking
   try {
     await appendEvent(projectRoot, 'review_completed', {
       filesReviewed: changedFiles.length,
       totalFindings: allFindings.length,
       secretFindings: secrets.length,
+      coverage: coverageDelta,
       status,
+      ...(userContext ? { userContext } : {}),
+      findingDetails: allFindings.map((f) => ({
+        type: f.type,
+        severity: f.severity,
+        file: f.file,
+        pattern: f.pattern || null,
+      })),
     });
   } catch (err) {
     console.warn(`[agentkit:review] Event logging failed: ${err?.message ?? String(err)}`);
+  }
+
+  // Auto-create tasks for critical/high findings when --auto-task is set
+  let createdTasks = [];
+  if (flags['auto-task'] && hasHighSeverity) {
+    try {
+      createdTasks = await convertFindingsToTasks(projectRoot, allFindings);
+      if (createdTasks.length > 0) {
+        console.log(`\n[agentkit:review] Created ${createdTasks.length} task(s) from findings`);
+        for (const task of createdTasks) {
+          console.log(`  → ${task.id}: ${task.title}`);
+          emitEvent(
+            projectRoot,
+            'review_auto_task',
+            {
+              taskId: task.id,
+              findingType: task.artifacts?.[0]?.finding?.type,
+              severity: task.severity,
+            },
+            { source: 'review-runner' }
+          );
+        }
+      }
+    } catch (err) {
+      console.warn(`[agentkit:review] Auto-task creation failed: ${err?.message ?? String(err)}`);
+    }
   }
 
   return {
@@ -393,6 +604,10 @@ export async function runReview({
     secrets: secrets.length,
     largeFiles: largeFiles.length,
     todos: todos.length,
+    coverage: coverageDelta,
     status,
+    unfixedFindings: unfixed.length,
+    createdTasks: createdTasks.length,
+    ...(userContext ? { userContext } : {}),
   };
 }
