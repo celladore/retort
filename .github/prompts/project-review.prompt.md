@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Comprehensive production-grade project review and assessment. Systematically analyzes code quality, architecture, security, UX, performance, documentation, and feature completeness. Produces structured findings with a prioritized roadmap organized into implementation waves.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-04'
+last_updated: '2026-03-05'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
