@@ -1188,10 +1188,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   });
 
   // Merge spec-defaults with project vars — project.yaml wins, but fall back to
-  // spec-defaults for any variable that is falsy (empty string, undefined, null).
+  // spec-defaults for any variable that is undefined, null, or empty string.
+  // Boolean false and 0 are valid values and must not be dropped.
   const mergedDefaults = { ...specDefaultVars };
   for (const [key, value] of Object.entries(projectVars)) {
-    if (value) mergedDefaults[key] = value;
+    if (value !== undefined && value !== null && value !== '') {
+      mergedDefaults[key] = value;
+    }
   }
 
   const vars = {
