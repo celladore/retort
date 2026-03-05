@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.'
+description: 'Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,9 +12,9 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# handoff
+# document-history
 
-Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.
+Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.
 
 ## Instructions
 

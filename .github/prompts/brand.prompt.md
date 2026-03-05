@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.'
+description: 'Manage the project brand spec (brand.yaml) and editor theme. Supports validation, palette preview, theme mapping, contrast auditing, scaffolding, and regeneration of editor theme files.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,9 +12,9 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# handoff
+# brand
 
-Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.
+Manage the project brand spec (brand.yaml) and editor theme. Supports validation, palette preview, theme mapping, contrast auditing, scaffolding, and regeneration of editor theme files.
 
 ## Instructions
 

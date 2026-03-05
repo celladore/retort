@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.'
+description: 'Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,9 +12,9 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# handoff
+# infra-eval
 
-Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.
+Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.
 
 ## Instructions
 
