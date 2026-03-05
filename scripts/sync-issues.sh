@@ -42,17 +42,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ---------------------------------------------------------------------------
-# Preflight checks
+# Preflight checks (only needed when actually creating issues)
 # ---------------------------------------------------------------------------
 
-if ! command -v gh &>/dev/null; then
-  echo "Error: gh CLI is not installed. Install it from https://cli.github.com/"
-  exit 1
-fi
+if [[ "$APPLY" == true ]]; then
+  if ! command -v gh &>/dev/null; then
+    echo "Error: gh CLI is not installed. Install it from https://cli.github.com/"
+    exit 1
+  fi
 
-if ! gh auth status &>/dev/null; then
-  echo "Error: gh is not authenticated. Run 'gh auth login' first."
-  exit 1
+  if ! gh auth status &>/dev/null; then
+    echo "Error: gh is not authenticated. Run 'gh auth login' first."
+    exit 1
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -81,8 +83,8 @@ for issue_file in "$ISSUES_DIR"/*-issue.md; do
     continue
   fi
 
-  # Extract title from first H1
-  TITLE="$(grep -m1 '^# ' "$issue_file" | sed 's/^# //' | sed 's/ - Issue Record$//')"
+  # Extract title from first H1 (|| true prevents set -e exit on no match)
+  TITLE="$(grep -m1 '^# ' "$issue_file" | sed 's/^# //' | sed 's/ - Issue Record$//')" || true
   if [[ -z "$TITLE" ]]; then
     TITLE="$basename_file"
   fi
