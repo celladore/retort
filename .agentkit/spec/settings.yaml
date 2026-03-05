@@ -12,92 +12,92 @@ permissions:
     # -------------------------------------------------------------------------
     # Git — read-only and branch operations
     # -------------------------------------------------------------------------
-    - "Bash(git status*)"
-    - "Bash(git diff*)"
-    - "Bash(git log*)"
-    - "Bash(git show*)"
-    - "Bash(git branch*)"
-    - "Bash(git rev-parse*)"
+    - 'Bash(git status*)'
+    - 'Bash(git diff*)'
+    - 'Bash(git log*)'
+    - 'Bash(git show*)'
+    - 'Bash(git branch*)'
+    - 'Bash(git rev-parse*)'
 
     # -------------------------------------------------------------------------
     # npm / pnpm — package management and script execution
     # -------------------------------------------------------------------------
-    - "Bash(npm ci*)"
-    - "Bash(npm install*)"
-    - "Bash(npm run *)"
-    - "Bash(pnpm install*)"
-    - "Bash(pnpm i*)"
-    - "Bash(pnpm run *)"
-    - "Bash(pnpm build*)"
-    - "Bash(pnpm test*)"
-    - "Bash(pnpm lint*)"
-    - "Bash(pnpm -w *)"
+    - 'Bash(npm ci*)'
+    - 'Bash(npm install*)'
+    - 'Bash(npm run *)'
+    - 'Bash(pnpm install*)'
+    - 'Bash(pnpm i*)'
+    - 'Bash(pnpm run *)'
+    - 'Bash(pnpm build*)'
+    - 'Bash(pnpm test*)'
+    - 'Bash(pnpm lint*)'
+    - 'Bash(pnpm -w *)'
 
     # -------------------------------------------------------------------------
     # .NET — build, test, and format
     # -------------------------------------------------------------------------
-    - "Bash(dotnet restore*)"
-    - "Bash(dotnet build*)"
-    - "Bash(dotnet test*)"
+    - 'Bash(dotnet restore*)'
+    - 'Bash(dotnet build*)'
+    - 'Bash(dotnet test*)'
 
     # -------------------------------------------------------------------------
     # Cargo / Rust — build, test, lint, and format
     # -------------------------------------------------------------------------
-    - "Bash(cargo build*)"
-    - "Bash(cargo test*)"
-    - "Bash(cargo clippy*)"
-    - "Bash(cargo fmt*)"
+    - 'Bash(cargo build*)'
+    - 'Bash(cargo test*)'
+    - 'Bash(cargo clippy*)'
+    - 'Bash(cargo fmt*)'
 
     # -------------------------------------------------------------------------
     # Python — test, install, lint, format, and typecheck
     # -------------------------------------------------------------------------
-    - "Bash(python -m pytest*)"
-    - "Bash(python -m pip install*)"
-    - "Bash(pip install*)"
-    - "Bash(ruff *)"
-    - "Bash(black *)"
-    - "Bash(mypy *)"
+    - 'Bash(python -m pytest*)'
+    - 'Bash(python -m pip install*)'
+    - 'Bash(pip install*)'
+    - 'Bash(ruff *)'
+    - 'Bash(black *)'
+    - 'Bash(mypy *)'
 
     # -------------------------------------------------------------------------
     # Monorepo tooling — Nx, Turbo, npx
     # -------------------------------------------------------------------------
-    - "Bash(nx *)"
-    - "Bash(turbo *)"
-    - "Bash(npx *)"
+    - 'Bash(nx *)'
+    - 'Bash(turbo *)'
+    - 'Bash(npx *)'
 
     # -------------------------------------------------------------------------
     # Docker — build and compose
     # -------------------------------------------------------------------------
-    - "Bash(docker build*)"
-    - "Bash(docker compose*)"
+    - 'Bash(docker build*)'
+    - 'Bash(docker compose*)'
 
     # -------------------------------------------------------------------------
     # GitHub CLI — PR, issue, and run management
     # -------------------------------------------------------------------------
-    - "Bash(gh pr *)"
-    - "Bash(gh issue *)"
-    - "Bash(gh run *)"
+    - 'Bash(gh pr *)'
+    - 'Bash(gh issue *)'
+    - 'Bash(gh run *)'
 
     # -------------------------------------------------------------------------
     # Cloud / IaC — Azure, Terraform, Terragrunt
     # -------------------------------------------------------------------------
-    - "Bash(az account*)"
-    - "Bash(az group*)"
-    - "Bash(terraform *)"
-    - "Bash(terragrunt *)"
+    - 'Bash(az account*)'
+    - 'Bash(az group*)'
+    - 'Bash(terraform *)'
+    - 'Bash(terragrunt *)'
 
   deny:
     # -------------------------------------------------------------------------
     # Destructive operations — always blocked
     # -------------------------------------------------------------------------
-    - "Bash(rm -rf /)"
-    - "Bash(rm -rf ~*)"
-    - "Bash(git push --force*)"
-    - "Bash(git push -f*)"
-    - "Bash(git reset --hard*)"
-    - "Bash(terraform destroy*)"
-    - "Bash(az group delete*)"
-    - "Bash(gh repo delete*)"
+    - 'Bash(rm -rf /)'
+    - 'Bash(rm -rf ~*)'
+    - 'Bash(git push --force*)'
+    - 'Bash(git push -f*)'
+    - 'Bash(git reset --hard*)'
+    - 'Bash(terraform destroy*)'
+    - 'Bash(az group delete*)'
+    - 'Bash(gh repo delete*)'
 
 # =============================================================================
 # Cost Tracking — Session-level usage tracking
@@ -105,19 +105,40 @@ permissions:
 
 costTracking:
   enabled: true
-  logDir: logs                  # Relative to agentkit root
-  retentionDays: 90             # Auto-purge logs older than this
+  logDir: logs # Relative to agentkit root
+  retentionDays: 90 # Auto-purge logs older than this
   # Note: Token-level tracking requires AI tool API access (not available).
   # Session-level metrics (duration, commands, files) are tracked via hooks.
+
+# =============================================================================
+# Budget Policy — Circuit breaker for runaway sessions
+# =============================================================================
+# Enforcement modes:
+#   warn    — log warnings when thresholds are approached/exceeded (default)
+#   enforce — block tool execution when limits are exceeded
+#   off     — disable budget checking entirely
+
+budgetPolicy:
+  enforcement: warn
+  session:
+    maxDurationMinutes: 120
+    maxCommands: 200
+    maxFilesModified: 100
+    warnAtPercent: 80
+  daily:
+    maxSessions: 50
+    maxTotalDurationMinutes: 480
+    maxTotalCommands: 1000
+    warnAtPercent: 80
 
 # =============================================================================
 # Dependency Management — Automated dependency update configuration
 # =============================================================================
 
 dependencyManagement:
-  tool: renovate             # renovate | dependabot | none
-  schedule: weekly           # weekly | daily | monthly
-  automerge: patch           # major | minor | patch | none
+  tool: renovate # renovate | dependabot | none
+  schedule: weekly # weekly | daily | monthly
+  automerge: patch # major | minor | patch | none
 
 # =============================================================================
 # Hooks — Lifecycle callbacks for session and tool events
@@ -134,18 +155,22 @@ hooks:
   # Matcher is a regex against the tool name.
   # ---------------------------------------------------------------------------
   preToolUse:
-    - matcher: "Write|Edit"
+    - matcher: 'Bash|Write|Edit'
+      hook: budget-guard-check
+    - matcher: 'Write|Edit'
       hook: protect-sensitive
-    - matcher: "Write|Edit"
+    - matcher: 'Write|Edit'
       hook: protect-templates
-    - matcher: "Bash"
+    - matcher: 'Bash'
       hook: guard-destructive-commands
+    - matcher: 'Bash'
+      hook: pre-push-validate
 
   # ---------------------------------------------------------------------------
   # Post-tool-use hooks — run after a tool completes
   # ---------------------------------------------------------------------------
   postToolUse:
-    - matcher: "Write|Edit"
+    - matcher: 'Write|Edit'
       hook: warn-uncommitted
 
   # ---------------------------------------------------------------------------

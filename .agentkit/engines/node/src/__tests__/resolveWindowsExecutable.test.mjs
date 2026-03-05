@@ -18,7 +18,7 @@ describe('resolveWindowsExecutable()', () => {
     // Mock platform to win32, ensuring configurable so it can be restored
     Object.defineProperty(process, 'platform', {
       value: 'win32',
-      configurable: true
+      configurable: true,
     });
 
     vi.spyOn(fs, 'statSync').mockImplementation(() => ({ isFile: () => false }));
@@ -28,7 +28,7 @@ describe('resolveWindowsExecutable()', () => {
     // Restore platform
     Object.defineProperty(process, 'platform', {
       value: originalPlatform,
-      configurable: true
+      configurable: true,
     });
     // Restore env
     process.env = originalEnv;
@@ -106,7 +106,9 @@ describe('resolveWindowsExecutable()', () => {
     process.env.PATH = path.resolve('/bin');
 
     // Both exist
-    vi.spyOn(fs, 'statSync').mockImplementation((p) => ({ isFile: () => p === cwdPath || p === pathPath }));
+    vi.spyOn(fs, 'statSync').mockImplementation((p) => ({
+      isFile: () => p === cwdPath || p === pathPath,
+    }));
 
     expect(resolveWindowsExecutable(cmd, cwd)).toBe(cwdPath);
   });

@@ -7,20 +7,16 @@
  */
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
-import {
-  chmod,
-  cp,
-  mkdir,
-  mkdtemp,
-  readFile,
-  readdir,
-  rm,
-  unlink,
-  writeFile,
-} from 'fs/promises';
+import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
+import {
+  buildFeatureVars,
+  buildHookFeatureMap,
+  loadFeatureSpec,
+  resolveFeatures,
+} from './feature-manager.mjs';
 import {
   categorizeFile,
   computeProjectCompleteness,
@@ -32,8 +28,16 @@ import {
   printSyncSummary,
   renderTemplate,
   resolveRenderTargets,
-  simpleDiff
+  simpleDiff,
 } from './template-utils.mjs';
+import {
+  filterByTier,
+  mergeThemeIntoSettings,
+  resolveColor,
+  resolveThemeMapping,
+  validateBrandSpec,
+  validateThemeSpec,
+} from './brand-resolver.mjs';
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -47,6 +51,44 @@ export function readYaml(filePath) {
 export function readText(filePath) {
   if (!existsSync(filePath)) return null;
   return readFileSync(filePath, 'utf-8');
+}
+
+/**
+ * Loads spec-defaults.yaml from the given agentkit root and returns a merged
+ * defaults object based on the current phase and teamSize.
+ *
+ * Merge precedence within spec-defaults (highest → lowest):
+ *   teamSize block > phase block > static defaults
+ *
+ * Returns an empty object when spec-defaults.yaml is not present (backward-compatible).
+ *
+ * @param {string} agentkitRoot
+ * @param {{ phase?: string, teamSize?: string }} context
+ * @returns {Record<string, unknown>}
+ */
+export function loadSpecDefaults(agentkitRoot, context = {}) {
+  const specDefaultsPath = resolve(agentkitRoot, 'spec', 'spec-defaults.yaml');
+  const raw = readYaml(specDefaultsPath);
+  if (!raw) return {};
+
+  // Start with static defaults (omit the conditional blocks)
+  const { phase: phaseBlock, teamSize: teamSizeBlock, ...staticDefaults } = raw;
+
+  let merged = { ...staticDefaults };
+
+  // Apply phase-conditional overrides
+  const phase = context.phase;
+  if (phase && phaseBlock?.[phase]) {
+    merged = { ...merged, ...phaseBlock[phase] };
+  }
+
+  // Apply teamSize-conditional overrides (highest priority within spec-defaults)
+  const teamSize = context.teamSize;
+  if (teamSize && teamSizeBlock?.[teamSize]) {
+    merged = { ...merged, ...teamSizeBlock[teamSize] };
+  }
+
+  return merged;
 }
 
 const templateTextCache = new Map();
@@ -98,6 +140,57 @@ export async function* walkDir(dir) {
   }
 }
 
+function inferOverlayFromProjectRoot(agentkitRoot, projectRoot) {
+  const inferredName = basename(resolve(projectRoot));
+  if (!inferredName) return null;
+  const settingsPath = resolve(agentkitRoot, 'overlays', inferredName, 'settings.yaml');
+  return existsSync(settingsPath) ? inferredName : null;
+}
+
+function resolveOverlaySelection(agentkitRoot, projectRoot, flags) {
+  if (flags?.overlay) {
+    return {
+      repoName: flags.overlay,
+      reason: '--overlay flag',
+    };
+  }
+
+  const markerPath = resolve(projectRoot, '.agentkit-repo');
+  if (existsSync(markerPath)) {
+    return {
+      repoName: readText(markerPath).trim(),
+      reason: '.agentkit-repo marker',
+    };
+  }
+
+  const inferredOverlay = inferOverlayFromProjectRoot(agentkitRoot, projectRoot);
+  if (inferredOverlay) {
+    return {
+      repoName: inferredOverlay,
+      reason: `inferred from project root name "${basename(resolve(projectRoot))}"`,
+    };
+  }
+
+  return {
+    repoName: '__TEMPLATE__',
+    reason: 'fallback to __TEMPLATE__ (no --overlay, no .agentkit-repo, no inferred overlay)',
+  };
+}
+
+async function collectTemplateFiles(baseDir, overlayDir = null) {
+  const filesByRelativePath = new Map();
+
+  for (const dir of [baseDir, overlayDir]) {
+    if (!dir || !existsSync(dir)) continue;
+    for await (const srcFile of walkDir(dir)) {
+      const relPath = relative(dir, srcFile);
+      filesByRelativePath.set(relPath, srcFile);
+    }
+  }
+
+  return filesByRelativePath;
+}
+
 // ---------------------------------------------------------------------------
 // Sync helper — generic directory copy with template rendering
 // ---------------------------------------------------------------------------
@@ -109,6 +202,7 @@ export async function* walkDir(dir) {
  */
 export async function syncDirectCopy(
   templatesDir,
+  overlayTemplatesDir,
   sourceSubdir,
   tmpDir,
   destSubdir,
@@ -117,18 +211,12 @@ export async function syncDirectCopy(
   repoName
 ) {
   const sourceDir = join(templatesDir, sourceSubdir);
-  if (!existsSync(sourceDir)) return;
-  const sourceFiles = [];
-  for await (const srcFile of walkDir(sourceDir)) {
-    sourceFiles.push(srcFile);
-  }
+  const overlaySourceDir = overlayTemplatesDir ? join(overlayTemplatesDir, sourceSubdir) : null;
+  const sourceFiles = await collectTemplateFiles(sourceDir, overlaySourceDir);
+  if (sourceFiles.size === 0) return;
 
-  await runConcurrent(sourceFiles, async (srcFile) => {
-    const relPath = relative(sourceDir, srcFile);
-    const destFile =
-      destSubdir === '.'
-        ? join(tmpDir, relPath)
-        : join(tmpDir, destSubdir, relPath);
+  await runConcurrent([...sourceFiles.entries()], async ([relPath, srcFile]) => {
+    const destFile = destSubdir === '.' ? join(tmpDir, relPath) : join(tmpDir, destSubdir, relPath);
     const ext = extname(srcFile).toLowerCase();
     let content;
     try {
@@ -157,7 +245,16 @@ export async function syncDirectCopy(
  * Copies templates/root to tmpDir root — AGENTS.md and other always-on files.
  */
 async function syncAgentsMd(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(templatesDir, 'root', tmpDir, '.', vars, version, repoName);
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'root',
+    tmpDir,
+    '.',
+    vars,
+    version,
+    repoName
+  );
 }
 
 /**
@@ -174,14 +271,320 @@ async function syncRootDocs(_templatesDir, _tmpDir, _vars, _version, _repoName) 
  * Copies templates/github to tmpDir/.github.
  */
 async function syncGitHub(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(templatesDir, 'github', tmpDir, '.github', vars, version, repoName);
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'github',
+    tmpDir,
+    '.github',
+    vars,
+    version,
+    repoName
+  );
 }
 
 /**
- * Copies templates/renovate to tmpDir root.
+ * Copies templates/renovate to tmpDir root (renovate.json) and other editor configs.
  */
 async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) {
-  await syncDirectCopy(templatesDir, 'renovate', tmpDir, '.', vars, version, repoName);
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'renovate',
+    tmpDir,
+    '.',
+    vars,
+    version,
+    repoName
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Git merge driver sync
+// ---------------------------------------------------------------------------
+
+/** Marker comments delimiting the managed section in .gitattributes */
+const GITATTR_START = '# >>> AgentKit Forge merge drivers — DO NOT EDIT below this line';
+const GITATTR_END = '# <<< AgentKit Forge merge drivers — DO NOT EDIT above this line';
+
+/**
+ * Appends (or updates) the AgentKit merge-driver section in .gitattributes.
+ * Preserves all user-authored content outside the markers. Writes the result
+ * to tmpDir so the standard manifest/diff/swap pipeline handles it.
+ */
+async function syncGitattributes(tmpDir, projectRoot, version) {
+  const destRelPath = '.gitattributes';
+  const existingPath = join(projectRoot, destRelPath);
+  const tmpPath = join(tmpDir, destRelPath);
+
+  // Read existing .gitattributes (may not exist yet)
+  let existing = '';
+  if (existsSync(existingPath)) {
+    existing = readFileSync(existingPath, 'utf-8');
+  }
+
+  // Strip any previous managed section
+  const startIdx = existing.indexOf(GITATTR_START);
+  const endIdx = existing.indexOf(GITATTR_END);
+  if (startIdx !== -1 && endIdx !== -1) {
+    existing =
+      existing.slice(0, startIdx).trimEnd() +
+      '\n' +
+      existing.slice(endIdx + GITATTR_END.length).trimStart();
+  }
+
+  // Build the managed merge-driver section
+  const managedSection = `
+${GITATTR_START}
+# GENERATED by AgentKit Forge v${version} — regenerated on every sync.
+# These custom merge drivers auto-resolve conflicts on framework-managed files.
+# Driver "agentkit-generated" accepts the incoming (upstream/theirs) version.
+#
+# To activate locally, run:
+#   git config merge.agentkit-generated.name "Accept upstream for generated files"
+#   git config merge.agentkit-generated.driver "cp %B %A"
+#
+# Or use: scripts/resolve-merge.sh <target-branch>
+
+# --- Generated agent/skill/prompt packs (always accept upstream) ---
+.agents/skills/**/SKILL.md           merge=agentkit-generated
+.github/agents/*.agent.md            merge=agentkit-generated
+.github/chatmodes/*.chatmode.md      merge=agentkit-generated
+.github/prompts/*.prompt.md          merge=agentkit-generated
+
+# --- Generated doc indexes (always accept upstream) ---
+docs/*/README.md                     merge=agentkit-generated
+
+# --- Generated config files (always accept upstream) ---
+.github/copilot-instructions.md      merge=agentkit-generated
+.github/PULL_REQUEST_TEMPLATE.md     merge=agentkit-generated
+
+# --- Lock files (accept upstream, regenerate after merge) ---
+pnpm-lock.yaml                       merge=agentkit-generated
+.agentkit/pnpm-lock.yaml             merge=agentkit-generated
+${GITATTR_END}
+`;
+
+  const result = existing.trimEnd() + '\n' + managedSection.trimEnd() + '\n';
+
+  await mkdir(dirname(tmpPath), { recursive: true });
+  await writeFile(tmpPath, result, 'utf-8');
+}
+
+// ---------------------------------------------------------------------------
+// Editor theme sync — brand-driven .vscode/settings.json color customizations
+// ---------------------------------------------------------------------------
+
+/**
+ * Generates workbench.colorCustomizations in editor settings files
+ * by resolving editor-theme.yaml mappings against brand.yaml colors.
+ *
+ * Supports multiple output targets (VS Code, Cursor, Windsurf) and
+ * per-tool overlay overrides. Runs after syncDirectCopy('vscode', ...)
+ * so it can merge into the base settings.
+ *
+ * @param {string} agentkitRoot - Path to the .agentkit directory
+ * @param {string} tmpDir - Temporary directory for rendered output
+ * @param {object} vars - Flattened template variables (must include editorThemeEnabled)
+ * @param {Function} log - Logging function
+ * @param {{ force?: boolean }} [flags] - Optional flags (force skips scaffold-once check)
+ */
+async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutputs) {
+  if (!vars.editorThemeEnabled) return;
+
+  const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
+  if (!brandSpec) {
+    log('[agentkit:sync] Editor theme enabled but no brand.yaml found — skipping');
+    return;
+  }
+
+  // Validate brand spec
+  const validation = validateBrandSpec(brandSpec);
+  for (const err of validation.errors) {
+    log(`[agentkit:sync] Brand error: ${err}`);
+  }
+  for (const warn of validation.warnings) {
+    if (process.env.DEBUG) log(`[agentkit:sync] Brand warning: ${warn}`);
+  }
+  if (validation.errors.length > 0) {
+    log('[agentkit:sync] Brand validation failed — skipping editor theme');
+    return;
+  }
+
+  const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
+  if (!themeSpec || !themeSpec.enabled) {
+    log('[agentkit:sync] Editor theme spec not found or disabled — skipping');
+    return;
+  }
+
+  // Validate tier/scheme values
+  const themeValidation = validateThemeSpec(themeSpec);
+  for (const warn of themeValidation.warnings) {
+    log(`[agentkit:sync] Theme config warning: ${warn}`);
+  }
+
+  // Determine which mode mapping(s) to resolve
+  const mode = themeSpec.mode || 'dark';
+  const scheme = themeSpec.scheme || 'dark'; // light | dark — preference when mode is 'both'
+  const tier = themeSpec.tier || 'full'; // full | medium | minimal
+  let lightColors = {};
+  let darkColors = {};
+
+  if (mode === 'both' || mode === 'light') {
+    const lightMapping = themeSpec.light || {};
+    const { resolved, warnings } = resolveThemeMapping(lightMapping, brandSpec);
+    lightColors = resolved;
+    for (const warn of warnings) {
+      log(`[agentkit:sync] Theme warning (light): ${warn}`);
+    }
+  }
+  if (mode === 'both' || mode === 'dark') {
+    const darkMapping = themeSpec.dark || {};
+    const { resolved, warnings } = resolveThemeMapping(darkMapping, brandSpec);
+    darkColors = resolved;
+    for (const warn of warnings) {
+      log(`[agentkit:sync] Theme warning (dark): ${warn}`);
+    }
+  }
+
+  // Build final color customizations — scheme controls which wins on conflict
+  let colorCustomizations;
+  if (mode === 'both') {
+    // Scheme preference: the preferred scheme's colors win on conflict
+    if (scheme === 'light') {
+      colorCustomizations = { ...darkColors, ...lightColors };
+    } else {
+      colorCustomizations = { ...lightColors, ...darkColors };
+    }
+  } else if (mode === 'light') {
+    colorCustomizations = lightColors;
+  } else {
+    colorCustomizations = darkColors;
+  }
+
+  // Apply brand density tier — filter to only the configured surface level
+  colorCustomizations = filterByTier(colorCustomizations, tier);
+  if (tier !== 'full') {
+    log(
+      `[agentkit:sync] Brand tier "${tier}" — filtered to ${Object.keys(colorCustomizations).length} color slots`
+    );
+  }
+
+  if (Object.keys(colorCustomizations).length === 0) {
+    log('[agentkit:sync] No colors resolved from editor theme — skipping');
+    return;
+  }
+
+  // Build metadata sentinel
+  const meta = {
+    brand: brandSpec.identity?.name || 'unknown',
+    mode,
+    scheme,
+    tier,
+    version: brandSpec.version || '1.0.0',
+  };
+
+  // Honor baseTheme — sets workbench.colorTheme per workspace
+  if (themeSpec.baseTheme) {
+    const preferLight = mode === 'light' || (mode === 'both' && scheme === 'light');
+    const baseThemeValue = preferLight ? themeSpec.baseTheme.light : themeSpec.baseTheme.dark;
+    if (baseThemeValue) {
+      meta.baseTheme = baseThemeValue;
+    }
+  }
+
+  // Honor fontFromBrand — sets editor.fontFamily from brand typography
+  let fontFamily = null;
+  if (themeSpec.fontFromBrand && brandSpec.typography?.mono) {
+    fontFamily = `'${brandSpec.typography.mono}', monospace`;
+    meta.font = brandSpec.typography.mono;
+  }
+
+  // Determine output targets — default to vscode only
+  const defaultOutputs = { vscode: '.vscode/settings.json' };
+  const outputs = themeSpec.outputs || defaultOutputs;
+
+  // Reserved keys are top-level theme config — never treated as tool names
+  const RESERVED_THEME_KEYS = new Set([
+    'light',
+    'dark',
+    'enabled',
+    'mode',
+    'outputs',
+    'baseTheme',
+    'fontFromBrand',
+    'tier',
+    'scheme',
+  ]);
+
+  // Write theme into each output target
+  const resolvedTmpDir = resolve(tmpDir);
+  const writePromises = [];
+  for (const [tool, outputPath] of Object.entries(outputs)) {
+    if (!outputPath) continue; // null = skip this target
+
+    // Scaffold-once: skip targets that already exist in projectRoot (unless --overwrite/--force)
+    if (skipOutputs && skipOutputs.has(outputPath)) {
+      log(`[agentkit:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
+      continue;
+    }
+
+    // Path traversal protection — resolve and verify the output stays inside tmpDir
+    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
+    const settingsPath = resolve(tmpDir, normalizedPath);
+    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
+      log(`[agentkit:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
+      continue;
+    }
+
+    writePromises.push(
+      (async () => {
+        // Read existing settings if already rendered by prior sync step
+        let existingSettings = {};
+        if (existsSync(settingsPath)) {
+          try {
+            const raw = await readFile(settingsPath, 'utf-8');
+            existingSettings = JSON.parse(raw);
+          } catch {
+            existingSettings = {};
+          }
+        }
+
+        // Check for per-tool overrides in themeSpec (e.g. themeSpec.cursor: { ... })
+        let toolColors = colorCustomizations;
+        if (
+          themeSpec[tool] &&
+          typeof themeSpec[tool] === 'object' &&
+          !RESERVED_THEME_KEYS.has(tool)
+        ) {
+          // Tool-specific overrides: resolve and merge on top of base colors
+          const { resolved: toolOverrides } = resolveThemeMapping(themeSpec[tool], brandSpec);
+          toolColors = { ...colorCustomizations, ...toolOverrides };
+        }
+
+        const mergedSettings = mergeThemeIntoSettings(existingSettings, toolColors, meta);
+
+        // Apply baseTheme if present
+        if (meta.baseTheme) {
+          mergedSettings['workbench.colorTheme'] = meta.baseTheme;
+        }
+
+        // Apply font from brand if present
+        if (fontFamily) {
+          mergedSettings['editor.fontFamily'] = fontFamily;
+        }
+
+        await ensureDir(dirname(settingsPath));
+        await writeFile(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n', 'utf-8');
+
+        log(
+          `[agentkit:sync] Editor theme → ${outputPath}: ${Object.keys(toolColors).length} color(s) from "${meta.brand}" (${mode} mode)`
+        );
+      })()
+    );
+  }
+
+  await Promise.all(writePromises);
 }
 
 // ---------------------------------------------------------------------------
@@ -215,6 +618,33 @@ async function syncClaudeSettings(
 }
 
 /**
+ * Copies hook files from templates/claude/hooks, skipping hooks whose
+ * owning feature is disabled. The hook→feature mapping is derived from
+ * features.yaml affectsTemplates via buildHookFeatureMap().
+ */
+async function syncClaudeHooks(templatesDir, tmpDir, vars, version, repoName, hookFeatureMap) {
+  const hooksDir = join(templatesDir, 'claude', 'hooks');
+  if (!existsSync(hooksDir)) return;
+
+  const { specific, defaultFeature } = hookFeatureMap;
+
+  for await (const srcFile of walkDir(hooksDir)) {
+    const fname = basename(srcFile);
+    // Strip extension(s) to get the hook name stem (e.g. 'protect-sensitive' from 'protect-sensitive.sh')
+    const stem = fname.replace(/\.(sh|ps1)$/i, '');
+    // Check specific mapping first, then fall back to directory-level default feature
+    const requiredFeature = specific[stem] || defaultFeature;
+    if (requiredFeature && !isFeatureEnabled(requiredFeature, vars)) continue;
+
+    const ext = extname(srcFile).toLowerCase();
+    const content = await readTemplateText(srcFile);
+    const rendered = renderTemplate(content, vars, srcFile);
+    const withHeader = insertHeader(rendered, ext, version, repoName);
+    await writeOutput(join(tmpDir, '.claude', 'hooks', fname), withHeader);
+  }
+}
+
+/**
  * Copies individual command templates and generates team commands.
  * Skips team-TEMPLATE.md; uses it as the generator for team commands.
  */
@@ -230,10 +660,20 @@ async function syncClaudeCommands(
   const commandsDir = join(templatesDir, 'claude', 'commands');
   if (!existsSync(commandsDir)) return;
 
-  // Copy non-template command files
+  // Build lookup: command-name → command spec (for requiredFeature gating)
+  const cmdByName = new Map();
+  for (const cmd of commandsSpec?.commands || []) {
+    cmdByName.set(cmd.name, cmd);
+  }
+
+  // Copy non-template command files, skipping feature-gated commands
   for await (const srcFile of walkDir(commandsDir)) {
     const fname = basename(srcFile);
     if (fname === 'team-TEMPLATE.md') continue; // skip template
+    // Check if this file corresponds to a feature-gated command
+    const cmdName = fname.replace(/\.md$/i, '');
+    const cmdSpec = cmdByName.get(cmdName);
+    if (cmdSpec && !isItemFeatureEnabled(cmdSpec, vars)) continue;
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
@@ -241,18 +681,13 @@ async function syncClaudeCommands(
     await writeOutput(join(tmpDir, '.claude', 'commands', fname), withHeader);
   }
 
-  // Generate team commands from team-TEMPLATE.md
+  // Generate team commands from team-TEMPLATE.md (gated by team-orchestration)
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const teamTemplatePath = join(commandsDir, 'team-TEMPLATE.md');
   if (!existsSync(teamTemplatePath)) return;
   const teamTemplate = await readTemplateText(teamTemplatePath);
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, teamTemplatePath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.claude', 'commands', `team-${team.id}.md`), withHeader);
@@ -271,6 +706,7 @@ async function syncClaudeAgents(
   agentsSpec,
   _rulesSpec
 ) {
+  if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'claude', 'agents', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -300,20 +736,14 @@ async function syncClaudeMd(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .claude/skills/<name>/SKILL.md for each non-team command.
  */
-async function syncClaudeSkills(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'claude', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars);
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
@@ -329,6 +759,7 @@ async function syncClaudeSkills(
  * Generates .cursor/rules/team-<id>.mdc for each team.
  */
 async function syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'cursor', 'teams', 'TEMPLATE.mdc');
   const fallbackTemplate = `---
 description: "Team {{teamName}} — {{teamFocus}}"
@@ -351,13 +782,7 @@ Scope all operations to the team's owned paths.
 `;
   const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.mdc', version, repoName);
     await writeOutput(join(tmpDir, '.cursor', 'rules', `team-${team.id}.mdc`), withHeader);
@@ -367,21 +792,15 @@ Scope all operations to the team's owned paths.
 /**
  * Generates .cursor/commands/<name>.md for each non-team command.
  */
-async function syncCursorCommands(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'cursor', 'commands', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
+    const cmdVars = buildCommandVars(cmd, vars, '.cursor/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.cursor', 'commands', `${cmd.name}.md`), withHeader);
@@ -396,6 +815,7 @@ async function syncCursorCommands(
  * Generates .windsurf/rules/team-<id>.md for each team.
  */
 async function syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'windsurf', 'teams', 'TEMPLATE.md');
   const fallbackTemplate = `# Team: {{teamName}}
 
@@ -409,13 +829,7 @@ Scope all operations to the team's owned paths.
 `;
   const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.windsurf', 'rules', `team-${team.id}.md`), withHeader);
@@ -425,21 +839,15 @@ Scope all operations to the team's owned paths.
 /**
  * Generates .windsurf/commands/<name>.md for each non-team command.
  */
-async function syncWindsurfCommands(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'windsurf', 'templates', 'command.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
+    const cmdVars = buildCommandVars(cmd, vars, '.windsurf/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.windsurf', 'commands', `${cmd.name}.md`), withHeader);
@@ -465,6 +873,7 @@ async function syncCopilot(templatesDir, tmpDir, vars, version, repoName) {
   // instructions/ → .github/instructions/
   await syncDirectCopy(
     templatesDir,
+    vars.overlayTemplatesDir,
     'copilot/instructions',
     tmpDir,
     '.github/instructions',
@@ -477,27 +886,18 @@ async function syncCopilot(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .github/prompts/<name>.prompt.md for each non-team command.
  */
-async function syncCopilotPrompts(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'copilot', 'prompts', 'TEMPLATE.prompt.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
+    const cmdVars = buildCommandVars(cmd, vars, '.github/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(
-      join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`),
-      withHeader
-    );
+    await writeOutput(join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`), withHeader);
   }
 }
 
@@ -513,6 +913,7 @@ async function syncCopilotAgents(
   agentsSpec,
   _rulesSpec
 ) {
+  if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'agents', 'TEMPLATE.agent.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -530,26 +931,14 @@ async function syncCopilotAgents(
 /**
  * Generates .github/chatmodes/team-<id>.chatmode.md for each team.
  */
-async function syncCopilotChatModes(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  teamsSpec
-) {
+async function syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+  if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'chatmodes', 'TEMPLATE.chatmode.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const team of teamsSpec.teams || []) {
-    const teamVars = {
-      ...vars,
-      teamName: team.name || team.id,
-      teamId: team.id,
-      teamFocus: team.focus || '',
-      teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : (team.scope || ''),
-    };
+    const teamVars = buildTeamVars(team, vars, teamsSpec);
     const rendered = renderTemplate(template, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(
@@ -684,21 +1073,15 @@ async function syncGemini(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .agents/skills/<name>/SKILL.md for each non-team command.
  */
-async function syncCodexSkills(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const tplPath = join(templatesDir, 'codex', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    if (!isItemFeatureEnabled(cmd, vars)) continue;
+    const cmdVars = buildCommandVars(cmd, vars, '.agents/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.agents', 'skills', cmd.name, 'SKILL.md'), withHeader);
@@ -728,14 +1111,7 @@ async function syncWarp(templatesDir, tmpDir, vars, version, repoName) {
 /**
  * Generates .clinerules/<domain>.md for each rule domain.
  */
-async function syncClineRules(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  rulesSpec
-) {
+async function syncClineRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec) {
   const tplPath = join(templatesDir, 'cline', 'clinerules', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -755,14 +1131,7 @@ async function syncClineRules(
 /**
  * Generates .roo/rules/<domain>.md for each rule domain.
  */
-async function syncRooRules(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  rulesSpec
-) {
+async function syncRooRules(templatesDir, tmpDir, vars, version, repoName, rulesSpec) {
   const tplPath = join(templatesDir, 'roo', 'rules', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
@@ -783,7 +1152,15 @@ async function syncRooRules(
  * Copies templates/mcp/ → tmpDir/.mcp/
  * agentsSpec and teamsSpec are accepted for API symmetry and future use.
  */
-async function syncA2aConfig(tmpDir, vars, version, repoName, _agentsSpec, _teamsSpec, templatesDir) {
+async function syncA2aConfig(
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  _agentsSpec,
+  _teamsSpec,
+  templatesDir
+) {
   const mcpDir = join(templatesDir, 'mcp');
   if (!existsSync(mcpDir)) return;
   for await (const srcFile of walkDir(mcpDir)) {
@@ -805,16 +1182,157 @@ async function syncA2aConfig(tmpDir, vars, version, repoName, _agentsSpec, _team
 }
 
 // ---------------------------------------------------------------------------
+// Heuristic defaults — infer sensible values from project/team context
+// ---------------------------------------------------------------------------
+
+/**
+ * Infers maxTaskTurns based on team size from project spec.
+ * Larger teams tend to have broader tasks requiring more turns.
+ */
+function inferMaxTaskTurns(teamSize) {
+  switch (teamSize) {
+    case 'solo':
+      return 15;
+    case 'small':
+      return 25;
+    case 'medium':
+    case 'large':
+      return 35;
+    default:
+      return 25;
+  }
+}
+
+/**
+ * Infers maxHandoffChainDepth based on the number of teams.
+ * More teams = more legitimate handoff paths.
+ */
+function inferMaxHandoffChainDepth(teamCount) {
+  if (teamCount <= 3) return 3;
+  if (teamCount <= 6) return 5;
+  return 7;
+}
+
+/**
+ * Infers maxStagnationTurns based on project phase.
+ * Greenfield work involves more exploration; maintenance should be tighter.
+ */
+function inferMaxStagnationTurns(projectPhase) {
+  switch (projectPhase) {
+    case 'greenfield':
+      return 15;
+    case 'active':
+      return 10;
+    case 'maintenance':
+    case 'legacy':
+      return 5;
+    default:
+      return 10;
+  }
+}
+
+/**
+ * Infers testingCoverage target based on project phase.
+ */
+function inferTestingCoverage(projectPhase) {
+  switch (projectPhase) {
+    case 'greenfield':
+      return '60';
+    case 'active':
+      return '80';
+    case 'maintenance':
+    case 'legacy':
+      return '90';
+    default:
+      return '80';
+  }
+}
+
 // Variable builder helpers (private — used by tool-specific sync functions)
 // ---------------------------------------------------------------------------
 
-function buildCommandVars(cmd, vars) {
+function buildTeamVars(team, vars, teamsSpec) {
+  return {
+    ...vars,
+    teamName: team.name || team.id,
+    teamId: team.id,
+    teamFocus: team.focus || '',
+    teamScope: Array.isArray(team.scope) ? team.scope.join(', ') : team.scope || '',
+    teamAccepts: Array.isArray(team.accepts) ? team.accepts.join(', ') : team.accepts || '',
+    teamHandoffChain: Array.isArray(team['handoff-chain'])
+      ? team['handoff-chain'].join(' → ')
+      : team['handoff-chain'] || '',
+    maxTaskTurns: team['max-task-turns'] ?? inferMaxTaskTurns(vars.teamSize),
+    maxHandoffChainDepth:
+      team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
+    maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
+  };
+}
+
+/**
+ * Build a compact area→team routing string from teams.yaml intake config.
+ * Used as a template variable so all platform templates share the same routing.
+ */
+function buildAreaRoutingTable(teamsIntake) {
+  const defaultRouting = {
+    backend: 'team-backend',
+    frontend: 'team-frontend',
+    data: 'team-data',
+    infra: 'team-infra',
+    devops: 'team-devops',
+    testing: 'team-testing',
+    security: 'team-security',
+    docs: 'team-docs',
+    product: 'team-product',
+    quality: 'team-quality',
+    cli: 'team-backend',
+    'sync-engine': 'team-devops',
+  };
+  const routing = teamsIntake?.routing || {};
+  const merged = { ...defaultRouting };
+  for (const [area, team] of Object.entries(routing)) {
+    merged[area] = team.startsWith('team-') ? team : `team-${team}`;
+  }
+  return Object.entries(merged)
+    .map(([area, team]) => `\`${area}\`→${team}`)
+    .join(', ');
+}
+
+/**
+ * Returns true if the item's requiredFeature is enabled (or if it has no requiredFeature).
+ * Items without a requiredFeature are always enabled.
+ */
+function isItemFeatureEnabled(item, vars) {
+  if (!item.requiredFeature) return true;
+  return isFeatureEnabled(item.requiredFeature, vars);
+}
+
+/**
+ * Returns true if a feature is enabled (or if feature vars are not loaded).
+ * Uses the canonical `feature_<id>` var. Missing vars default to enabled
+ * (graceful degradation for repos without features.yaml).
+ */
+function isFeatureEnabled(featureId, vars) {
+  const featureVar = `feature_${featureId.replace(/-/g, '_')}`;
+  return vars[featureVar] !== false;
+}
+
+// HOOK_FEATURE_MAP is derived at sync time from features.yaml affectsTemplates
+// via buildHookFeatureMap(). See syncClaudeHooks() for usage.
+
+function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
+  let prompt = typeof cmd.prompt === 'string' ? cmd.prompt.trim() : '';
+  if (prompt) {
+    prompt = prompt.replaceAll('{{stateDir}}', stateDir);
+  }
   return {
     ...vars,
     commandName: cmd.name,
+    isSyncBacklog: cmd.name === 'sync-backlog',
     commandDescription:
-      typeof cmd.description === 'string' ? cmd.description.trim() : (cmd.description || ''),
+      typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
+    commandPrompt: prompt,
   };
 }
 
@@ -825,13 +1343,14 @@ function buildAgentVars(agent, category, vars) {
   const conventions = agent.conventions || [];
   const examples = agent.examples || [];
   const antiPatterns = agent['anti-patterns'] || [];
+  const domainRules = agent['domain-rules'] || [];
 
   return {
     ...vars,
     agentName: agent.name,
     agentId: agent.id,
     agentCategory: category,
-    agentRole: typeof agent.role === 'string' ? agent.role.trim() : (agent.role || ''),
+    agentRole: typeof agent.role === 'string' ? agent.role.trim() : agent.role || '',
     agentFocusList: focus.map((f) => `- ${f}`).join('\n'),
     agentResponsibilitiesList: responsibilities.map((r) => `- ${r}`).join('\n'),
     agentToolsList: tools.map((t) => `- ${t}`).join('\n'),
@@ -839,30 +1358,72 @@ function buildAgentVars(agent, category, vars) {
     agentExamples:
       examples.length > 0
         ? examples
-            .map(
-              (e) =>
-                `### ${e.title || 'Example'}\n\`\`\`\n${(e.code || '').trim()}\n\`\`\``
-            )
+            .map((e) => `### ${e.title || 'Example'}\n\`\`\`\n${(e.code || '').trim()}\n\`\`\``)
             .join('\n\n')
         : '',
-    agentAntiPatterns:
-      antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
-    agentDomainRules: '',
+    agentAntiPatterns: antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
+    agentDomainRules: domainRules.length > 0 ? domainRules.map((r) => `- ${r}`).join('\n') : '',
   };
 }
 
-function buildRuleVars(rule, vars) {
+/**
+ * Builds precomputed JSON strings for branch protection template variables.
+ * Filters invalid entries and returns valid JSON array literals for use in
+ * heredoc payloads sent to the GitHub API.
+ */
+export function buildBranchProtectionJson(vars) {
+  const statusChecks = vars.bpRequiredStatusChecks ?? [];
+  const statusChecksJson = JSON.stringify(
+    Array.isArray(statusChecks) ? statusChecks.filter((s) => typeof s === 'string') : []
+  );
+  const scanningToolsRaw = vars.bpCodeScanningTools ?? [];
+  const scanningTools = Array.isArray(scanningToolsRaw)
+    ? scanningToolsRaw.filter(
+        (t) => t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() !== ''
+      )
+    : [];
+  const scanningToolsJson = JSON.stringify(
+    scanningTools.map((t) => ({
+      tool: t.name.trim(),
+      security_alerts_threshold:
+        typeof t.securityAlertThreshold === 'string' ? t.securityAlertThreshold : 'none',
+      alerts_threshold: typeof t.alertThreshold === 'string' ? t.alertThreshold : 'none',
+    }))
+  );
+  return { statusChecksJson, scanningToolsJson };
+}
+
+export function formatConventionLine(c) {
+  if (typeof c === 'string') return `- ${c}`;
+  const id = c.id || '';
+  const rule = c.rule || '';
+  const badges = [];
+  if (c.type) badges.push(c.type);
+  if (c.phase) {
+    const phases = Array.isArray(c.phase) ? c.phase : [c.phase];
+    badges.push(`phase: ${phases.join(', ')}`);
+  }
+  const suffix = badges.length > 0 ? ` _(${badges.join(' · ')})_` : '';
+  return `- **[${id}]** ${rule}${suffix}`;
+}
+
+export function buildRuleVars(rule, vars) {
   const appliesTo = rule['applies-to'] || [];
   const conventions = rule.conventions || [];
+  const enforcement = conventions.filter((c) => c.type === 'enforcement');
+  // Conventions without an explicit type default to advisory (see ADR-08)
+  const advisory = conventions.filter((c) => c.type !== 'enforcement');
   return {
     ...vars,
     ruleDomain: rule.domain,
     ruleDescription:
-      typeof rule.description === 'string' ? rule.description.trim() : (rule.description || ''),
+      typeof rule.description === 'string' ? rule.description.trim() : rule.description || '',
     ruleAppliesTo: appliesTo.join('\n'),
-    ruleConventions: conventions
-      .map((c) => (typeof c === 'string' ? `- ${c}` : `- **[${c.id || ''}]** ${c.rule || ''}`))
-      .join('\n'),
+    ruleConventions: conventions.map(formatConventionLine).join('\n'),
+    ruleEnforcementConventions: enforcement.map(formatConventionLine).join('\n'),
+    ruleAdvisoryConventions: advisory.map(formatConventionLine).join('\n'),
+    ruleHasEnforcement: enforcement.length > 0 ? 'true' : '',
+    ruleHasAdvisory: advisory.length > 0 ? 'true' : '',
   };
 }
 
@@ -910,17 +1471,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const projectSpec = readYaml(resolve(agentkitRoot, 'spec', 'project.yaml'));
 
   // 2. Detect overlay
-  let repoName = flags?.overlay;
-  if (!repoName) {
-    const markerPath = resolve(projectRoot, '.agentkit-repo');
-    if (existsSync(markerPath)) {
-      repoName = readText(markerPath).trim();
-    }
-  }
-  if (!repoName) {
-    repoName = '__TEMPLATE__';
-    log('[agentkit:sync] No overlay detected, using __TEMPLATE__');
-  }
+  const overlaySelection = resolveOverlaySelection(agentkitRoot, projectRoot, flags);
+  const repoName = overlaySelection.repoName;
+  log(`[agentkit:sync] Using overlay: ${repoName} (${overlaySelection.reason})`);
 
   // 3. Load overlay
   const overlayDir = resolve(agentkitRoot, 'overlays', repoName);
@@ -934,16 +1487,121 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // Template variables — start with project.yaml flat vars, then overlay with core vars
   const projectVars = projectSpec ? flattenProjectYaml(projectSpec, docsSpec) : {};
+
+  // Resolve enabled features from spec + overlay settings
+  let featureVars = {};
+  let hookFeatureMap = { specific: {}, defaultFeature: null };
+  try {
+    const { features, presets } = loadFeatureSpec(agentkitRoot, { log });
+    const enabledFeatures = resolveFeatures(features, overlaySettings, presets, { log });
+    featureVars = buildFeatureVars(features, enabledFeatures);
+    hookFeatureMap = buildHookFeatureMap(features);
+    log(`[agentkit:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
+  } catch {
+    // features.yaml may not exist yet in older repos — degrade gracefully
+    log('[agentkit:sync] Features: spec not found, all features assumed enabled');
+  }
+
+  const teamsIntake = teamsSpec?.intake || {};
+  const processIntake = projectSpec?.process?.intake || {};
+  const intakeEscalation = processIntake.escalation || teamsIntake.escalation || {};
+  const securityEscalationTeams = Array.isArray(intakeEscalation.securityCritical)
+    ? intakeEscalation.securityCritical.join(', ')
+    : '';
+  const blockedEscalationTeams = Array.isArray(intakeEscalation.blockedCrossTeam)
+    ? intakeEscalation.blockedCrossTeam.join(', ')
+    : '';
+
+  // Load spec-defaults.yaml (lowest-priority defaults; project.yaml always wins)
+  const specDefaultVars = loadSpecDefaults(agentkitRoot, {
+    phase: projectSpec?.process?.phase,
+    teamSize: projectSpec?.process?.teamSize,
+  });
+
+  // Merge spec-defaults with project vars — project.yaml wins, but fall back to
+  // spec-defaults for any variable that is undefined, null, or empty string.
+  // Boolean false and 0 are valid values and must not be dropped.
+  const mergedDefaults = { ...specDefaultVars };
+  for (const [key, value] of Object.entries(projectVars)) {
+    if (value !== undefined && value !== null && value !== '') {
+      mergedDefaults[key] = value;
+    }
+  }
+
   const vars = {
-    ...projectVars,
+    ...mergedDefaults,
+    ...featureVars,
+    intakeOwnerTeam:
+      projectVars.intakeOwnerTeam || processIntake.ownerTeam || teamsIntake.ownerTeam || 'product',
+    intakeOperationsTeam:
+      projectVars.intakeOperationsTeam ||
+      processIntake.operationsTeam ||
+      teamsIntake.operationsTeam ||
+      'quality',
+    intakeCadence: projectVars.intakeCadence || processIntake.cadence || 'daily',
+    intakeSecurityEscalationTeams: securityEscalationTeams,
+    intakeBlockedEscalationTeams: blockedEscalationTeams,
+    intakeAreaRoutingTable: buildAreaRoutingTable(teamsIntake),
     version,
-    repoName: (overlaySettings.repoName === '__TEMPLATE__' && projectSpec?.name) || overlaySettings.repoName || repoName,
+    overlayTemplatesDir: resolve(overlayDir, 'templates'),
+    repoName:
+      (overlaySettings.repoName === '__TEMPLATE__' && projectSpec?.name) ||
+      overlaySettings.repoName ||
+      repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     syncDate: new Date().toISOString().slice(0, 10),
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'agentkit-forge',
+    // Branch protection defaults — ensure generated scripts produce valid
+    // JSON even when project.yaml omits the branchProtection section.
+    bpRequiredReviewCount: projectVars.bpRequiredReviewCount ?? '1',
+    bpDismissStaleReviews: projectVars.bpDismissStaleReviews ?? true,
+    bpRequireCodeOwnerReviews: projectVars.bpRequireCodeOwnerReviews ?? true,
+    bpRequireLastPushApproval: projectVars.bpRequireLastPushApproval ?? false,
+    bpStrictStatusChecks: projectVars.bpStrictStatusChecks ?? true,
+    bpEnforceAdmins: projectVars.bpEnforceAdmins ?? false,
+    bpRequiredLinearHistory: projectVars.bpRequiredLinearHistory ?? true,
+    bpRequireSignedCommits: projectVars.bpRequireSignedCommits ?? false,
+    bpAllowForcePushes: projectVars.bpAllowForcePushes ?? false,
+    bpAllowDeletions: projectVars.bpAllowDeletions ?? false,
+    bpBlockCreations: projectVars.bpBlockCreations ?? false,
+    bpRequiredConversationResolution: projectVars.bpRequiredConversationResolution ?? true,
+    bpCodeScanningEnabled: projectVars.bpCodeScanningEnabled ?? false,
+    bpCopilotReviewEnabled: projectVars.bpCopilotReviewEnabled ?? false,
+    bpCopilotReviewNewPushes: projectVars.bpCopilotReviewNewPushes ?? false,
+    bpCopilotReviewDraftPRs: projectVars.bpCopilotReviewDraftPRs ?? false,
+    bpAllowMergeCommits: projectVars.bpAllowMergeCommits ?? false,
+    bpAllowSquashMerge: projectVars.bpAllowSquashMerge ?? true,
+    bpAllowRebaseMerge: projectVars.bpAllowRebaseMerge ?? false,
+    bpDeleteBranchOnMerge: projectVars.bpDeleteBranchOnMerge ?? true,
+    bpAllowAutoMerge: projectVars.bpAllowAutoMerge ?? false,
+    bpMergeQueueEnabled: projectVars.bpMergeQueueEnabled ?? false,
+    bpMergeQueueMethod: projectVars.bpMergeQueueMethod || 'squash',
+    bpMergeQueueMinGroupSize: projectVars.bpMergeQueueMinGroupSize ?? '1',
+    bpMergeQueueMaxGroupSize: projectVars.bpMergeQueueMaxGroupSize ?? '5',
   };
+
+  // Heuristic fallbacks for commonly-used variables that lack {{#if}} guards
+  if (!vars.testingCoverage && projectSpec?.phase) {
+    vars.testingCoverage = inferTestingCoverage(projectSpec.phase);
+  }
+
+  // Precomputed JSON strings for branch protection — avoids {{#each}} comma
+  // issues inside JSON heredocs. These render as valid JSON array literals.
+  const bpJson = buildBranchProtectionJson(vars);
+  vars.bpRequiredStatusChecksJson = bpJson.statusChecksJson;
+  vars.bpCodeScanningToolsJson = bpJson.scanningToolsJson;
+
+  // Inject brand identity into template vars when brand guide exists
+  if (vars.hasBrandGuide) {
+    const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
+    if (brandSpec) {
+      vars.brandName = brandSpec.identity?.name || '';
+      vars.brandPrimaryColor = resolveColor(brandSpec.colors?.primary?.brand) || '';
+      vars.brandMono = brandSpec.typography?.mono || '';
+    }
+  }
 
   // Resolve render targets — determines which tool outputs to generate
   let targets = resolveRenderTargets(overlaySettings.renderTargets, flags);
@@ -959,297 +1617,507 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const templatesDir = resolve(agentkitRoot, 'templates');
 
   try {
+    // Use vars.repoName for file headers (resolved project name, e.g. "agentkit-forge")
+    // rather than the raw overlay dir name which may be "__TEMPLATE__".
+    const headerRepoName = vars.repoName;
 
-  // Use vars.repoName for file headers (resolved project name, e.g. "agentkit-forge")
-  // rather than the raw overlay dir name which may be "__TEMPLATE__".
-  const headerRepoName = vars.repoName;
-
-  // --- Always-on outputs (not gated by renderTargets) ---
-  await Promise.all([
-    syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName),
-    syncDirectCopy(templatesDir, 'docs', tmpDir, 'docs', vars, version, headerRepoName),
-    syncDirectCopy(templatesDir, 'vscode', tmpDir, '.vscode', vars, version, headerRepoName),
-    syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName)
-  ]);
-
-  // --- Gated by renderTargets ---
-  const gatedTasks = [];
-
-  if (targets.has('claude')) {
-    gatedTasks.push(
-      syncDirectCopy(templatesDir, 'claude/hooks', tmpDir, '.claude/hooks', vars, version, headerRepoName),
-      syncClaudeSettings(templatesDir, tmpDir, vars, version, mergedPermissionsResult, settingsSpec),
-      syncClaudeCommands(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, commandsSpec),
-      syncClaudeAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncDirectCopy(templatesDir, 'claude/rules', tmpDir, '.claude/rules', vars, version, headerRepoName),
-      syncDirectCopy(templatesDir, 'claude/state', tmpDir, '.claude/state', vars, version, headerRepoName),
-      syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
-      syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.claude/rules/languages', 'claude')
-    );
-  }
-
-  if (targets.has('cursor')) {
-    gatedTasks.push(
-      syncDirectCopy(templatesDir, 'cursor/rules', tmpDir, '.cursor/rules', vars, version, headerRepoName),
-      syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.cursor/rules/languages', 'cursor')
-    );
-  }
-
-  if (targets.has('windsurf')) {
-    gatedTasks.push(
+    // --- Always-on outputs (not gated by renderTargets) ---
+    // These run even with --only because they're framework-level infrastructure:
+    // - AGENTS.md, root docs — always needed regardless of tool target
+    // - .gitattributes merge drivers — repo-wide, not tool-specific
+    // - .vscode/settings.json, editor configs — workspace-level, not tool-specific
+    const alwaysOnTasks = [
+      syncAgentsMd(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncRootDocs(templatesDir, tmpDir, vars, version, headerRepoName),
+      syncGitattributes(tmpDir, projectRoot, version),
       syncDirectCopy(
         templatesDir,
-        'windsurf/rules',
+        vars.overlayTemplatesDir,
+        'vscode',
         tmpDir,
-        '.windsurf/rules',
+        '.vscode',
         vars,
         version,
         headerRepoName
       ),
-      syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncDirectCopy(
-        templatesDir,
-        'windsurf/workflows',
-        tmpDir,
-        '.windsurf/workflows',
-        vars,
-        version,
-        headerRepoName
-      ),
-      syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.windsurf/rules/languages', 'windsurf')
-    );
-  }
+    ];
 
-  if (targets.has('ai')) {
-    gatedTasks.push(
-      syncDirectCopy(templatesDir, 'ai', tmpDir, '.ai', vars, version, headerRepoName)
-    );
-  }
-
-  if (targets.has('copilot')) {
-    gatedTasks.push(
-      syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
-      syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-      syncCopilotAgents(templatesDir, tmpDir, vars, version, headerRepoName, agentsSpec, rulesSpec),
-      syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.github/instructions/languages', 'copilot')
-    );
-  }
-
-  if (targets.has('gemini')) {
-    gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
-  }
-
-  if (targets.has('codex')) {
-    gatedTasks.push(syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec));
-  }
-
-  if (targets.has('warp')) {
-    gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
-  }
-
-  if (targets.has('cline')) {
-    gatedTasks.push(
-      syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.clinerules/languages', 'cline')
-    );
-  }
-
-  if (targets.has('roo')) {
-    gatedTasks.push(
-      syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
-      syncLanguageInstructions(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec, '.roo/rules/languages', 'roo')
-    );
-  }
-
-  if (targets.has('mcp')) {
-    gatedTasks.push(syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir));
-  }
-
-  await Promise.all(gatedTasks);
-
-  // 5. Build file list from temp and compute summary
-  const newManifestFiles = {};
-  const fileSummary = {}; // category → count
-  const allTmpFiles = [];
-
-  for await (const srcFile of walkDir(tmpDir)) {
-    allTmpFiles.push(srcFile);
-  }
-
-  // Process files concurrently
-  await runConcurrent(allTmpFiles, async (srcFile) => {
-    if (!existsSync(srcFile)) return; // Should exist, but safety check
-    const relPath = relative(tmpDir, srcFile);
-    const manifestKey = relPath.replace(/\\/g, '/');
-    let fileContent;
-    try {
-      fileContent = await readFile(srcFile);
-    } catch (err) {
-      if (err?.code === 'ENOENT') return;
-      throw err;
+    // Feature-gated always-on outputs (no render-target gate, but feature-gated)
+    if (isFeatureEnabled('ci-automation', vars)) {
+      alwaysOnTasks.push(syncGitHub(templatesDir, tmpDir, vars, version, headerRepoName));
     }
-    const hash = createHash('sha256').update(fileContent).digest('hex').slice(0, 12);
+    if (isFeatureEnabled('doc-scaffolding', vars)) {
+      alwaysOnTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'docs',
+          tmpDir,
+          'docs',
+          vars,
+          version,
+          headerRepoName
+        )
+      );
+    }
+    if (isFeatureEnabled('dependency-management', vars)) {
+      alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
 
-    // JS object assignment is atomic enough for keys
-    newManifestFiles[manifestKey] = { hash };
-  });
+    await Promise.all(alwaysOnTasks);
 
-  // Re-compute summary sequentially to avoid race condition on counters
-  for (const manifestKey of Object.keys(newManifestFiles)) {
-     const cat = categorizeFile(manifestKey);
-     fileSummary[cat] = (fileSummary[cat] || 0) + 1;
-  }
-
-  // --- Dry-run: print summary and exit without writing ---
-  if (dryRun) {
-    const total = Object.keys(newManifestFiles).length;
-    log(`[agentkit:sync] Dry-run: would generate ${total} file(s):`);
-    printSyncSummary(fileSummary, targets, { quiet });
-    return;
-  }
-
-  // --- Diff: show what would change and exit without writing ---
-  if (diff) {
-    const resolvedRoot = resolve(projectRoot) + sep;
-    const overwrite = flags?.overwrite || flags?.force;
-    let createCount = 0;
-    let updateCount = 0;
-    let skipCount = 0;
-
-    // Sequential to avoid interleaved console output
-    for (const srcFile of allTmpFiles) {
-      if (!existsSync(srcFile)) continue;
-      const relPath = relative(tmpDir, srcFile);
-      const destFile = resolve(projectRoot, relPath);
-      const normPath = relPath.replace(/\\/g, '/');
-      if (!resolve(destFile).startsWith(resolvedRoot) && resolve(destFile) !== resolve(projectRoot))
-        continue;
-      const wouldSkip = !overwrite && isScaffoldOnce(normPath) && existsSync(destFile);
-      if (wouldSkip) {
-        skipCount++;
-        logVerbose(`  skip ${normPath} (project-owned, exists)`);
-        continue;
+    // --- Editor theme (must run after vscode template copy to merge into settings) ---
+    // Scaffold-once: per-output target — only skip targets that already exist in projectRoot
+    const forceTheme = flags?.overwrite || flags?.force;
+    if (forceTheme) {
+      await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags);
+    } else {
+      const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
+      const outputs = themeSpec?.outputs || { vscode: '.vscode/settings.json' };
+      const existingOutputs = new Set();
+      for (const [, outputPath] of Object.entries(outputs)) {
+        if (outputPath && existsSync(resolve(projectRoot, outputPath))) {
+          existingOutputs.add(outputPath);
+        }
       }
-      let newContent;
+      if (existingOutputs.size < Object.keys(outputs).length) {
+        await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs);
+      } else {
+        log(
+          '[agentkit:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.'
+        );
+      }
+    }
+
+    // --- Gated by renderTargets ---
+    const gatedTasks = [];
+
+    if (targets.has('claude')) {
+      gatedTasks.push(
+        syncClaudeHooks(templatesDir, tmpDir, vars, version, headerRepoName, hookFeatureMap),
+        syncClaudeSettings(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          mergedPermissionsResult,
+          settingsSpec
+        ),
+        syncClaudeCommands(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          teamsSpec,
+          commandsSpec
+        ),
+        syncClaudeAgents(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          agentsSpec,
+          rulesSpec
+        ),
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'claude/state',
+          tmpDir,
+          '.agentkit/state',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncClaudeMd(templatesDir, tmpDir, vars, version, headerRepoName),
+        syncClaudeSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+      );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncDirectCopy(
+            templatesDir,
+            vars.overlayTemplatesDir,
+            'claude/rules',
+            tmpDir,
+            '.claude/rules',
+            vars,
+            version,
+            headerRepoName
+          ),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.claude/rules/languages',
+            'claude'
+          )
+        );
+      }
+    }
+
+    if (targets.has('cursor')) {
+      gatedTasks.push(
+        syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+      );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncDirectCopy(
+            templatesDir,
+            vars.overlayTemplatesDir,
+            'cursor/rules',
+            tmpDir,
+            '.cursor/rules',
+            vars,
+            version,
+            headerRepoName
+          ),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.cursor/rules/languages',
+            'cursor'
+          )
+        );
+      }
+    }
+
+    if (targets.has('windsurf')) {
+      gatedTasks.push(
+        syncWindsurfCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'windsurf/workflows',
+          tmpDir,
+          '.windsurf/workflows',
+          vars,
+          version,
+          headerRepoName
+        ),
+        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+      );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncDirectCopy(
+            templatesDir,
+            vars.overlayTemplatesDir,
+            'windsurf/rules',
+            tmpDir,
+            '.windsurf/rules',
+            vars,
+            version,
+            headerRepoName
+          ),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.windsurf/rules/languages',
+            'windsurf'
+          )
+        );
+      }
+    }
+
+    if (targets.has('ai')) {
+      gatedTasks.push(
+        syncDirectCopy(
+          templatesDir,
+          vars.overlayTemplatesDir,
+          'ai',
+          tmpDir,
+          '.ai',
+          vars,
+          version,
+          headerRepoName
+        )
+      );
+    }
+
+    if (targets.has('copilot')) {
+      gatedTasks.push(
+        syncCopilot(templatesDir, tmpDir, vars, version, headerRepoName),
+        syncCopilotPrompts(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncCopilotAgents(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          agentsSpec,
+          rulesSpec
+        ),
+        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+      );
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.github/instructions/languages',
+            'copilot'
+          )
+        );
+      }
+    }
+
+    if (targets.has('gemini')) {
+      gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+
+    if (targets.has('codex')) {
+      gatedTasks.push(
+        syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+      );
+    }
+
+    if (targets.has('warp')) {
+      gatedTasks.push(syncWarp(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+
+    if (targets.has('cline')) {
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncClineRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.clinerules/languages',
+            'cline'
+          )
+        );
+      }
+    }
+
+    if (targets.has('roo')) {
+      if (isFeatureEnabled('coding-rules', vars)) {
+        gatedTasks.push(
+          syncRooRules(templatesDir, tmpDir, vars, version, headerRepoName, rulesSpec),
+          syncLanguageInstructions(
+            templatesDir,
+            tmpDir,
+            vars,
+            version,
+            headerRepoName,
+            rulesSpec,
+            '.roo/rules/languages',
+            'roo'
+          )
+        );
+      }
+    }
+
+    if (targets.has('mcp') && isFeatureEnabled('mcp-integration', vars)) {
+      gatedTasks.push(
+        syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir)
+      );
+    }
+
+    await Promise.all(gatedTasks);
+
+    // 5. Build file list from temp and compute summary
+    const newManifestFiles = {};
+    const fileSummary = {}; // category → count
+    const allTmpFiles = [];
+
+    for await (const srcFile of walkDir(tmpDir)) {
+      allTmpFiles.push(srcFile);
+    }
+
+    // Process files concurrently
+    await runConcurrent(allTmpFiles, async (srcFile) => {
+      if (!existsSync(srcFile)) return; // Should exist, but safety check
+      const relPath = relative(tmpDir, srcFile);
+      const manifestKey = relPath.replace(/\\/g, '/');
+      let fileContent;
       try {
-        newContent = await readFile(srcFile, 'utf-8');
+        fileContent = await readFile(srcFile);
       } catch (err) {
-        if (err?.code === 'ENOENT') continue;
+        if (err?.code === 'ENOENT') return;
         throw err;
       }
-      if (!existsSync(destFile)) {
-        createCount++;
-        log(`  create ${normPath}`);
-      } else {
-        const oldContent = await readFile(destFile, 'utf-8');
-        if (oldContent !== newContent) {
-          updateCount++;
-          log(`  update ${normPath}`);
-          const diffOut = simpleDiff(oldContent, newContent);
-          if (diffOut)
-            log(
-              diffOut
-                .split('\n')
-                .map((l) => `    ${l}`)
-                .join('\n')
-            );
-        } else {
+      const hash = createHash('sha256').update(fileContent).digest('hex').slice(0, 12);
+
+      // JS object assignment is atomic enough for keys
+      newManifestFiles[manifestKey] = { hash };
+    });
+
+    // Re-compute summary sequentially to avoid race condition on counters
+    for (const manifestKey of Object.keys(newManifestFiles)) {
+      const cat = categorizeFile(manifestKey);
+      fileSummary[cat] = (fileSummary[cat] || 0) + 1;
+    }
+
+    // --- Dry-run: print summary and exit without writing ---
+    if (dryRun) {
+      const total = Object.keys(newManifestFiles).length;
+      log(`[agentkit:sync] Dry-run: would generate ${total} file(s):`);
+      printSyncSummary(fileSummary, targets, { quiet });
+      return;
+    }
+
+    // --- Diff: show what would change and exit without writing ---
+    if (diff) {
+      const resolvedRoot = resolve(projectRoot) + sep;
+      const overwrite = flags?.overwrite || flags?.force;
+      let createCount = 0;
+      let updateCount = 0;
+      let skipCount = 0;
+
+      // Sequential to avoid interleaved console output
+      for (const srcFile of allTmpFiles) {
+        if (!existsSync(srcFile)) continue;
+        const relPath = relative(tmpDir, srcFile);
+        const destFile = resolve(projectRoot, relPath);
+        const normPath = relPath.replace(/\\/g, '/');
+        if (
+          !resolve(destFile).startsWith(resolvedRoot) &&
+          resolve(destFile) !== resolve(projectRoot)
+        )
+          continue;
+        const wouldSkip = !overwrite && isScaffoldOnce(normPath, vars) && existsSync(destFile);
+        if (wouldSkip) {
           skipCount++;
-          logVerbose(`  unchanged ${normPath}`);
+          logVerbose(`  skip ${normPath} (project-owned, exists)`);
+          continue;
         }
-      }
-    }
-    log(
-      `[agentkit:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
-    );
-    return;
-  }
-
-  // 6. Load previous manifest for stale file cleanup
-  const manifestPath = resolve(agentkitRoot, '.manifest.json');
-  let previousManifest = null;
-  try {
-    if (existsSync(manifestPath)) {
-      previousManifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
-    }
-  } catch {
-    /* ignore corrupt manifest */
-  }
-
-  // 7. Atomic swap: move temp outputs to project root & build new manifest
-  log('[agentkit:sync] Writing outputs...');
-  const resolvedRoot = resolve(projectRoot) + sep;
-
-  // Use a shared counter and error list
-  let count = 0;
-  let skippedScaffold = 0;
-  const failedFiles = [];
-
-  await runConcurrent(allTmpFiles, async (srcFile) => {
-    if (!existsSync(srcFile)) return;
-    const relPath = relative(tmpDir, srcFile);
-    const destFile = resolve(projectRoot, relPath);
-
-    // Path traversal protection: ensure all output stays within project root
-    if (!resolve(destFile).startsWith(resolvedRoot) && resolve(destFile) !== resolve(projectRoot)) {
-      console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${relPath}`);
-      failedFiles.push({ file: relPath, error: 'path traversal blocked' });
-      return;
-    }
-
-    // Scaffold-once: skip project-owned files that already exist (unless --overwrite)
-    const overwrite = flags?.overwrite || flags?.force;
-    if (!overwrite && isScaffoldOnce(relPath) && existsSync(destFile)) {
-      skippedScaffold++;
-      return;
-    }
-
-    try {
-      await ensureDir(dirname(destFile));
-      await cp(srcFile, destFile, { force: true, recursive: false });
-
-      // Make .sh files executable
-      if (extname(srcFile) === '.sh') {
+        let newContent;
         try {
-          await chmod(destFile, 0o755);
-        } catch {
-          /* ignore on Windows */
+          newContent = await readFile(srcFile, 'utf-8');
+        } catch (err) {
+          if (err?.code === 'ENOENT') continue;
+          throw err;
+        }
+        if (!existsSync(destFile)) {
+          createCount++;
+          log(`  create ${normPath}`);
+        } else {
+          const oldContent = await readFile(destFile, 'utf-8');
+          if (oldContent !== newContent) {
+            updateCount++;
+            log(`  update ${normPath}`);
+            const diffOut = simpleDiff(oldContent, newContent);
+            if (diffOut)
+              log(
+                diffOut
+                  .split('\n')
+                  .map((l) => `    ${l}`)
+                  .join('\n')
+              );
+          } else {
+            skipCount++;
+            logVerbose(`  unchanged ${normPath}`);
+          }
         }
       }
-      count++;
-      logVerbose(`  wrote ${relPath.replace(/\\/g, '/')}`);
-    } catch (err) {
-      failedFiles.push({ file: relPath, error: err.message });
-      console.error(`[agentkit:sync] Failed to write: ${relPath} — ${err.message}`);
+      log(
+        `[agentkit:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
+      );
+      return;
     }
-  });
 
-  if (failedFiles.length > 0) {
-    console.error(`[agentkit:sync] Error: ${failedFiles.length} file(s) failed to write:`);
-    for (const f of failedFiles) {
-      console.error(`  - ${f.file}: ${f.error}`);
-    }
-    throw new Error(`Sync completed with ${failedFiles.length} write failure(s)`);
-  }
-
-  // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
-  let cleanedCount = 0;
-  if (!noClean && previousManifest?.files) {
-    const staleFiles = [];
-    for (const prevFile of Object.keys(previousManifest.files)) {
-      if (!newManifestFiles[prevFile]) {
-        staleFiles.push(prevFile);
+    // 6. Load previous manifest for stale file cleanup
+    const manifestPath = resolve(agentkitRoot, '.manifest.json');
+    let previousManifest = null;
+    try {
+      if (existsSync(manifestPath)) {
+        previousManifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
       }
+    } catch {
+      /* ignore corrupt manifest */
     }
 
-    await runConcurrent(staleFiles, async (prevFile) => {
+    // 7. Atomic swap: move temp outputs to project root & build new manifest
+    log('[agentkit:sync] Writing outputs...');
+    const resolvedRoot = resolve(projectRoot) + sep;
+
+    // Use a shared counter and error list
+    let count = 0;
+    let skippedScaffold = 0;
+    const failedFiles = [];
+
+    await runConcurrent(allTmpFiles, async (srcFile) => {
+      if (!existsSync(srcFile)) return;
+      const relPath = relative(tmpDir, srcFile);
+      const destFile = resolve(projectRoot, relPath);
+
+      // Path traversal protection: ensure all output stays within project root
+      if (
+        !resolve(destFile).startsWith(resolvedRoot) &&
+        resolve(destFile) !== resolve(projectRoot)
+      ) {
+        console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${relPath}`);
+        failedFiles.push({ file: relPath, error: 'path traversal blocked' });
+        return;
+      }
+
+      // Scaffold-once: skip project-owned files that already exist (unless --overwrite)
+      const overwrite = flags?.overwrite || flags?.force;
+      if (!overwrite && isScaffoldOnce(relPath, vars) && existsSync(destFile)) {
+        skippedScaffold++;
+        return;
+      }
+
+      try {
+        await ensureDir(dirname(destFile));
+        await cp(srcFile, destFile, { force: true, recursive: false });
+
+        // Make .sh files executable
+        if (extname(srcFile) === '.sh') {
+          try {
+            await chmod(destFile, 0o755);
+          } catch {
+            /* ignore on Windows */
+          }
+        }
+        count++;
+        logVerbose(`  wrote ${relPath.replace(/\\/g, '/')}`);
+      } catch (err) {
+        failedFiles.push({ file: relPath, error: err.message });
+        console.error(`[agentkit:sync] Failed to write: ${relPath} — ${err.message}`);
+      }
+    });
+
+    if (failedFiles.length > 0) {
+      console.error(`[agentkit:sync] Error: ${failedFiles.length} file(s) failed to write:`);
+      for (const f of failedFiles) {
+        console.error(`  - ${f.file}: ${f.error}`);
+      }
+      throw new Error(`Sync completed with ${failedFiles.length} write failure(s)`);
+    }
+
+    // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
+    let cleanedCount = 0;
+    if (!noClean && previousManifest?.files) {
+      const staleFiles = [];
+      for (const prevFile of Object.keys(previousManifest.files)) {
+        if (!newManifestFiles[prevFile]) {
+          staleFiles.push(prevFile);
+        }
+      }
+
+      await runConcurrent(staleFiles, async (prevFile) => {
         const orphanPath = resolve(projectRoot, prevFile);
         // Path traversal protection: ensure orphan path stays within project root
         if (!orphanPath.startsWith(resolvedRoot) && orphanPath !== resolve(projectRoot)) {
@@ -1267,51 +2135,51 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
             );
           }
         }
-    });
-  }
-
-  // 9. Write new manifest
-  const newManifest = {
-    generatedAt: new Date().toISOString(),
-    version,
-    repoName: vars.repoName,
-    files: newManifestFiles,
-  };
-  try {
-    await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
-  } catch (err) {
-    console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
-  }
-
-  if (skippedScaffold > 0) {
-    log(`[agentkit:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
-  }
-  if (cleanedCount > 0) {
-    log(`[agentkit:sync] Cleaned ${cleanedCount} stale file(s) from previous sync.`);
-  }
-
-  // 11. Post-sync summary
-  printSyncSummary(fileSummary, targets, { quiet });
-  const completeness = computeProjectCompleteness(projectSpec);
-  if (completeness.total > 0) {
-    log(
-      `[agentkit:sync] project.yaml completeness: ${completeness.percent}% (${completeness.present}/${completeness.total} fields populated)`
-    );
-    if (completeness.missing.length > 0) {
-      log(`[agentkit:sync] Top missing fields: ${completeness.missing.slice(0, 5).join(', ')}`);
+      });
     }
-  }
-  log(`[agentkit:sync] Done! Generated ${count} files.`);
 
-  // 12. First-sync hint (when not called from init)
-  if (!flags?.overlay) {
-    const markerPath = resolve(projectRoot, '.agentkit-repo');
-    if (!existsSync(markerPath)) {
-      log('');
-      log('  Tip: Run "agentkit init" to customize which AI tools you generate configs for.');
-      log('       Run "agentkit add <tool>" to add tools incrementally.');
+    // 9. Write new manifest
+    const newManifest = {
+      generatedAt: new Date().toISOString(),
+      version,
+      repoName: vars.repoName,
+      files: newManifestFiles,
+    };
+    try {
+      await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
+    } catch (err) {
+      console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
     }
-  }
+
+    if (skippedScaffold > 0) {
+      log(`[agentkit:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
+    }
+    if (cleanedCount > 0) {
+      log(`[agentkit:sync] Cleaned ${cleanedCount} stale file(s) from previous sync.`);
+    }
+
+    // 11. Post-sync summary
+    printSyncSummary(fileSummary, targets, { quiet });
+    const completeness = computeProjectCompleteness(projectSpec);
+    if (completeness.total > 0) {
+      log(
+        `[agentkit:sync] project.yaml completeness: ${completeness.percent}% (${completeness.present}/${completeness.total} fields populated)`
+      );
+      if (completeness.missing.length > 0) {
+        log(`[agentkit:sync] Top missing fields: ${completeness.missing.slice(0, 5).join(', ')}`);
+      }
+    }
+    log(`[agentkit:sync] Done! Generated ${count} files.`);
+
+    // 12. First-sync hint (when not called from init)
+    if (!flags?.overlay) {
+      const markerPath = resolve(projectRoot, '.agentkit-repo');
+      if (!existsSync(markerPath)) {
+        log('');
+        log('  Tip: Run "agentkit init" to customize which AI tools you generate configs for.');
+        log('       Run "agentkit add <tool>" to add tools incrementally.');
+      }
+    }
   } finally {
     await rm(tmpDir, { recursive: true, force: true });
   }

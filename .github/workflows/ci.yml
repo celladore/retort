@@ -1,4 +1,4 @@
-name: CI
+name: AgentKit Forge CI
 
 on:
   push:
@@ -6,12 +6,16 @@ on:
   pull_request:
     branches: [main, dev]
 
+# Branch protection depends on these check names. If you rename a job's `name:`
+# field, update branch protection rules for dev and main to match.
+# Current required checks: Test (ubuntu-latest), Validate, YAML Lint,
+# Markdown Lint, branch-rules (from branch-protection.yml).
 jobs:
   test:
+    name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [24]
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: .node-version
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 
@@ -35,6 +39,7 @@ jobs:
         working-directory: .agentkit
 
   validate:
+    name: Validate
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -53,7 +58,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 
@@ -77,6 +82,18 @@ jobs:
         run: node engines/node/src/cli.mjs discover --output json
         working-directory: .agentkit
 
+      - name: Validate merge driver configuration
+        run: |
+          if ! grep -q 'merge=agentkit-generated' .gitattributes 2>/dev/null; then
+            echo "::error::.gitattributes is missing merge=agentkit-generated rules. Run sync to generate them."
+            exit 1
+          fi
+          echo "✓ .gitattributes merge driver rules present"
+
+      - name: Run doctor diagnostics
+        run: node engines/node/src/cli.mjs doctor
+        working-directory: .agentkit
+
       - name: Check for drift
         run: |
           if ! git diff --quiet; then
@@ -86,6 +103,7 @@ jobs:
           fi
 
   yaml-lint:
+    name: YAML Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +114,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 
@@ -113,6 +131,7 @@ jobs:
           done
 
   markdown-lint:
+    name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -123,7 +142,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: 'pnpm'
           cache-dependency-path: .agentkit/pnpm-lock.yaml
 

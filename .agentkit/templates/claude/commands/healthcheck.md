@@ -1,9 +1,9 @@
 ---
-description: "Pre-flight validation — verify build, lint, typecheck, and tests all pass"
+description: 'Pre-flight validation — verify build, lint, typecheck, and tests all pass'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(pytest *), Bash(go *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -20,15 +20,15 @@ Run the following checks in order. Stop and record the result of each step befor
 
 Detect the package manager and attempt to install dependencies:
 
-| Signal | Command |
-|--------|---------|
-| `pnpm-lock.yaml` | `pnpm install --frozen-lockfile` |
-| `package-lock.json` | `npm ci` |
-| `yarn.lock` | `yarn install --frozen-lockfile` |
-| `Cargo.toml` | `cargo fetch` |
-| `*.csproj` / `*.sln` | `dotnet restore` |
-| `pyproject.toml` | `pip install -e .` or `poetry install` |
-| `go.mod` | `go mod download` |
+| Signal               | Command                                |
+| -------------------- | -------------------------------------- |
+| `pnpm-lock.yaml`     | `pnpm install --frozen-lockfile`       |
+| `package-lock.json`  | `npm ci`                               |
+| `yarn.lock`          | `yarn install --frozen-lockfile`       |
+| `Cargo.toml`         | `cargo fetch`                          |
+| `*.csproj` / `*.sln` | `dotnet restore`                       |
+| `pyproject.toml`     | `pip install -e .` or `poetry install` |
+| `go.mod`             | `go mod download`                      |
 
 Record: pass/fail, duration, any warnings.
 
@@ -36,13 +36,13 @@ Record: pass/fail, duration, any warnings.
 
 Run the appropriate build command:
 
-| Signal | Command |
-|--------|---------|
+| Signal                             | Command                        |
+| ---------------------------------- | ------------------------------ |
 | `package.json` with `build` script | `pnpm build` / `npm run build` |
-| `Cargo.toml` | `cargo build` |
-| `*.sln` | `dotnet build` |
-| `pyproject.toml` with build | `python -m build` |
-| `go.mod` | `go build ./...` |
+| `Cargo.toml`                       | `cargo build`                  |
+| `*.sln`                            | `dotnet build`                 |
+| `pyproject.toml` with build        | `python -m build`              |
+| `go.mod`                           | `go build ./...`               |
 
 Record: pass/fail, error output (first 50 lines if long), duration.
 
@@ -50,14 +50,14 @@ Record: pass/fail, error output (first 50 lines if long), duration.
 
 Run all available linters and type checkers:
 
-| Tool | Detection | Command |
-|------|-----------|---------|
-| ESLint | `.eslintrc*` or `eslint.config.*` or `package.json` eslint dep | `npx eslint .` |
-| TypeScript | `tsconfig.json` | `npx tsc --noEmit` |
-| Clippy | `Cargo.toml` | `cargo clippy -- -D warnings` |
-| Ruff | `ruff.toml` or `pyproject.toml` with ruff | `ruff check .` |
-| MyPy | `mypy.ini` or `pyproject.toml` with mypy | `mypy .` |
-| .NET Analyzers | `*.csproj` | `dotnet build /warnaserror` |
+| Tool           | Detection                                                      | Command                       |
+| -------------- | -------------------------------------------------------------- | ----------------------------- |
+| ESLint         | `.eslintrc*` or `eslint.config.*` or `package.json` eslint dep | `npx eslint .`                |
+| TypeScript     | `tsconfig.json`                                                | `npx tsc --noEmit`            |
+| Clippy         | `Cargo.toml`                                                   | `cargo clippy -- -D warnings` |
+| Ruff           | `ruff.toml` or `pyproject.toml` with ruff                      | `ruff check .`                |
+| MyPy           | `mypy.ini` or `pyproject.toml` with mypy                       | `mypy .`                      |
+| .NET Analyzers | `*.csproj`                                                     | `dotnet build /warnaserror`   |
 
 Record: pass/fail, number of warnings, number of errors, first 20 issues.
 
@@ -65,14 +65,14 @@ Record: pass/fail, number of warnings, number of errors, first 20 issues.
 
 Run the test suite:
 
-| Signal | Command |
-|--------|---------|
+| Signal                          | Command          |
+| ------------------------------- | ---------------- |
 | Vitest config or vitest in deps | `npx vitest run` |
-| Jest config or jest in deps | `npx jest` |
-| `Cargo.toml` | `cargo test` |
-| `*.csproj` with test projects | `dotnet test` |
-| pytest config or pytest in deps | `pytest` |
-| `go.mod` | `go test ./...` |
+| Jest config or jest in deps     | `npx jest`       |
+| `Cargo.toml`                    | `cargo test`     |
+| `*.csproj` with test projects   | `dotnet test`    |
+| pytest config or pytest in deps | `pytest`         |
+| `go.mod`                        | `go test ./...`  |
 
 Record: pass/fail, tests run, tests passed, tests failed, tests skipped, duration.
 
@@ -128,6 +128,7 @@ Append to `.claude/state/events.log`:
 ### Orchestrator State
 
 If `.claude/state/orchestrator.json` exists, update:
+
 - `lastHealthcheck`: timestamp
 - `healthStatus`: `"healthy"`, `"degraded"`, or `"broken"`
 - `healthDetails`: summary object of results

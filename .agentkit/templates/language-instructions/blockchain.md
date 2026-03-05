@@ -1,5 +1,6 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Language-specific AI assistant instructions. -->
+
 # Instructions — Blockchain / Smart Contracts
 
 Apply these rules when editing `.sol` files or code in `contracts/`,
@@ -40,13 +41,14 @@ Apply these rules when editing `.sol` files or code in `contracts/`,
 ## Testing
 
 {{#if testingUnit}}- Test framework: **{{testingUnit}}**.{{/if}}
+
 - Write unit tests for every public instruction/function using Anchor test
   framework (TypeScript) or Hardhat/Foundry for EVM contracts.
 - Test both happy-path and all failure conditions (invalid accounts, overflow,
   replay attacks).
 - Use local validator / Hardhat network for integration tests; never test on
   mainnet.
-{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** on public contract surfaces.{{/if}}
+  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** on public contract surfaces.{{/if}}
 
 ## Security
 
@@ -57,10 +59,24 @@ Apply these rules when editing `.sol` files or code in `contracts/`,
 - Run Slither or equivalent static analyser before deploying.
 
 {{#if ruleConventions}}
+
 ## Project Conventions
 
 The following conventions are enforced in **{{projectName}}** and derived from
 `.agentkit/spec/rules.yaml`:
 
-{{ruleConventions}}
+{{#if ruleHasEnforcement}}
+
+### Enforcement Rules
+
+{{ruleEnforcementConventions}}
+
+{{/if}}
+{{#if ruleHasAdvisory}}
+
+### Advisory Rules
+
+{{ruleAdvisoryConventions}}
+
+{{/if}}
 {{/if}}

@@ -37,12 +37,12 @@ Move router-specialist authoritative planning/docs ownership to `justaghost/agen
 
 ## 3) Repository Responsibility Model
 
-| Concern | Primary Repo | Secondary/Consumer |
-| --- | --- | --- |
-| Router-specialist specs/templates/contracts | `justaghost/agentkit-forge` | Generated copies in consumer repos |
-| Gateway runtime behavior and SLO operations | `phoenixvc/ai-gateway` | N/A |
-| Consumer overlays and local integration notes | Consumer repo (`phoenixvc/chaufher`) | N/A |
-| Cost analytics and KPI dashboards | `phoenixvc/pvc-costops-analytics` | Downstream consumer of canonical contracts |
+| Concern                                       | Primary Repo                         | Secondary/Consumer                         |
+| --------------------------------------------- | ------------------------------------ | ------------------------------------------ |
+| Router-specialist specs/templates/contracts   | `justaghost/agentkit-forge`          | Generated copies in consumer repos         |
+| Gateway runtime behavior and SLO operations   | `phoenixvc/ai-gateway`               | N/A                                        |
+| Consumer overlays and local integration notes | Consumer repo (`phoenixvc/chaufher`) | N/A                                        |
+| Cost analytics and KPI dashboards             | `phoenixvc/pvc-costops-analytics`    | Downstream consumer of canonical contracts |
 
 ## 4) Migration Deliverables
 
@@ -111,6 +111,6 @@ Treat as downstream consumer in this phase, with the following checkpoints:
 ## 9) Acceptance Criteria
 
 - No authoritative section in consumer docs claims implementation ownership over generated router-specialist artifacts.
-- Upstream docs are sufficient to execute Waves 0–3.5 without relying on consumer-repo copies.
+- Upstream docs are sufficient to execute Waves A–C without relying on consumer-repo copies.
 - Runtime handoff and analytics integration checkpoints are explicitly represented in the upstream checklist.
 - Upstream `COMMAND_REFERENCE`, `QUICK_START`, `commands.yaml`, command templates, and hook templates are aligned with the intended `/mode` + delegated-task protocol and hook output contract.

@@ -57,7 +57,15 @@ teams:
   - id: docs
     name: DOCUMENTATION
     focus: 'Docs, ADRs, guides'
-    scope: ['docs/**', 'docs/03_architecture/02_decisions/**', '.github/**', 'README.md', 'CHANGELOG.md', 'CONTRIBUTING.md']
+    scope:
+      [
+        'docs/**',
+        'docs/03_architecture/02_decisions/**',
+        '.github/**',
+        'README.md',
+        'CHANGELOG.md',
+        'CONTRIBUTING.md',
+      ]
     accepts: [implement, review, document]
     handoff-chain: []
 
@@ -70,10 +78,30 @@ teams:
 
   - id: quality
     name: QUALITY
-    focus: 'Code review, refactoring, bugs, reliability'
+    focus: 'Code review, refactoring, bugs, reliability, session retrospectives'
     scope: ['**/*']
     accepts: [review, investigate]
     handoff-chain: []
+
+intake:
+  ownerTeam: product
+  operationsTeam: quality
+  routing:
+    backend: backend
+    frontend: frontend
+    data: data
+    infra: infra
+    devops: devops
+    testing: testing
+    security: security
+    docs: docs
+    product: product
+    quality: quality
+    cli: backend # CLI issues route to backend team
+    sync-engine: devops # Sync engine issues route to devops team
+  escalation:
+    securityCritical: [security, devops]
+    blockedCrossTeam: [product]
 
 # =============================================================================
 # Tech Stack Definitions

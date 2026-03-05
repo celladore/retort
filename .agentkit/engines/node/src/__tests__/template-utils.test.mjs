@@ -17,6 +17,7 @@ import {
   ALL_RENDER_TARGETS,
   collapseBlankLines,
 } from '../template-utils.mjs';
+import { transform } from '../project-mapping.mjs';
 
 // ---------------------------------------------------------------------------
 // renderTemplate
@@ -65,23 +66,16 @@ describe('renderTemplate', () => {
 // replacePlaceholders
 // ---------------------------------------------------------------------------
 describe('replacePlaceholders', () => {
-  let origDebug;
-  beforeEach(() => {
-    origDebug = process.env.DEBUG;
-    delete process.env.DEBUG;
-  });
-  afterEach(() => {
-    if (origDebug !== undefined) process.env.DEBUG = origDebug;
-    else delete process.env.DEBUG;
-  });
-
   it('replaces simple placeholders', () => {
     expect(replacePlaceholders('Hello {{name}}!', { name: 'World' })).toBe('Hello World!');
   });
 
   it('replaces longest keys first to prevent partial collisions', () => {
     expect(
-      replacePlaceholders('{{version}} {{versionInfo}}', { version: '1.0', versionInfo: 'v1.0-beta' })
+      replacePlaceholders('{{version}} {{versionInfo}}', {
+        version: '1.0',
+        versionInfo: 'v1.0-beta',
+      })
     ).toBe('1.0 v1.0-beta');
   });
 
@@ -115,17 +109,33 @@ describe('replacePlaceholders', () => {
     expect(replacePlaceholders('no vars', {})).toBe('no vars');
   });
 
-  it('warns on unresolved placeholders when DEBUG is set', () => {
+  it('resolves {{var|default}} pipe syntax with fallback when var is missing', () => {
+    const result = replacePlaceholders('coverage: {{testingCoverage|80}}%', {});
+    expect(result).toBe('coverage: 80%');
+  });
+
+  it('resolves {{var|default}} pipe syntax with var value when present', () => {
+    const result = replacePlaceholders('coverage: {{testingCoverage|80}}%', {
+      testingCoverage: '95',
+    });
+    expect(result).toBe('coverage: 95%');
+  });
+
+  it('supports empty default in {{var|}} pipe syntax', () => {
+    const result = replacePlaceholders('val: {{missing|}}!', {});
+    expect(result).toBe('val: !');
+  });
+
+  it('warns on unresolved placeholders', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    process.env.DEBUG = '1';
     replacePlaceholders('{{unknown}}', {});
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('{{unknown}}'));
     warnSpy.mockRestore();
   });
 
-  it('does not warn when DEBUG is not set', () => {
+  it('does not warn when all placeholders are resolved', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    replacePlaceholders('{{unknown}}', {});
+    replacePlaceholders('{{known}}', { known: 'value' });
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });
@@ -158,7 +168,9 @@ describe('sanitizeTemplateValue', () => {
   });
 
   it('preserves spaces, slashes, and @ symbols', () => {
-    expect(sanitizeTemplateValue('user@example.com /home/user')).toBe('user@example.com /home/user');
+    expect(sanitizeTemplateValue('user@example.com /home/user')).toBe(
+      'user@example.com /home/user'
+    );
   });
 });
 
@@ -217,18 +229,12 @@ describe('getGeneratedHeader', () => {
 // ---------------------------------------------------------------------------
 describe('mergePermissions', () => {
   it('merges allow lists with deduplication', () => {
-    const result = mergePermissions(
-      { allow: ['Read', 'Write'] },
-      { allow: ['Write', 'Bash'] }
-    );
+    const result = mergePermissions({ allow: ['Read', 'Write'] }, { allow: ['Write', 'Bash'] });
     expect(result.allow).toEqual(['Read', 'Write', 'Bash']);
   });
 
   it('merges deny lists with deduplication', () => {
-    const result = mergePermissions(
-      { deny: ['Bash'] },
-      { deny: ['Bash', 'Write'] }
-    );
+    const result = mergePermissions({ deny: ['Bash'] }, { deny: ['Bash', 'Write'] });
     expect(result.deny).toEqual(['Bash', 'Write']);
   });
 
@@ -319,9 +325,12 @@ describe('isScaffoldOnce', () => {
 
   it('identifies GitHub scaffold-once files', () => {
     expect(isScaffoldOnce('.github/PULL_REQUEST_TEMPLATE.md')).toBe(true);
-    expect(isScaffoldOnce('.github/copilot-instructions.md')).toBe(true);
     expect(isScaffoldOnce('.github/ISSUE_TEMPLATE/bug_report.md')).toBe(true);
     expect(isScaffoldOnce('.github/instructions/docs.md')).toBe(true);
+  });
+
+  it('treats .github/copilot-instructions.md as always-regenerated', () => {
+    expect(isScaffoldOnce('.github/copilot-instructions.md')).toBe(false);
   });
 
   it('returns false for always-regenerate AI tool configs', () => {
@@ -335,6 +344,16 @@ describe('isScaffoldOnce', () => {
     expect(isScaffoldOnce('.claude/settings.json')).toBe(false);
     expect(isScaffoldOnce('.cursor/rules/team-backend.mdc')).toBe(false);
     expect(isScaffoldOnce('.windsurf/rules/team-backend.md')).toBe(false);
+  });
+
+  it('supports scaffold override lists from vars', () => {
+    const vars = {
+      languageProfileScaffoldAlwaysRegenerateList: ['docs/README.md'],
+      languageProfileScaffoldOnceList: ['CLAUDE.md'],
+    };
+
+    expect(isScaffoldOnce('docs/README.md', vars)).toBe(false);
+    expect(isScaffoldOnce('CLAUDE.md', vars)).toBe(true);
   });
 });
 
@@ -531,26 +550,26 @@ describe('resolveEachBlocks', () => {
   });
 
   it('iterates over object array using {{.prop}}', () => {
-    const result = resolveEachBlocks(
-      '{{#each items}}{{.name}}:{{.purpose}} {{/each}}',
-      { items: [{ name: 'A', purpose: 'auth' }, { name: 'B', purpose: 'pay' }] }
-    );
+    const result = resolveEachBlocks('{{#each items}}{{.name}}:{{.purpose}} {{/each}}', {
+      items: [
+        { name: 'A', purpose: 'auth' },
+        { name: 'B', purpose: 'pay' },
+      ],
+    });
     expect(result).toBe('A:auth B:pay ');
   });
 
   it('replaces missing object props with empty string', () => {
-    const result = resolveEachBlocks(
-      '{{#each items}}{{.name}}{{.missing}}{{/each}}',
-      { items: [{ name: 'X' }] }
-    );
+    const result = resolveEachBlocks('{{#each items}}{{.name}}{{.missing}}{{/each}}', {
+      items: [{ name: 'X' }],
+    });
     expect(result).toBe('X');
   });
 
   it('exposes {{@index}} for current position', () => {
-    const result = resolveEachBlocks(
-      '{{#each items}}{{@index}}:{{.}} {{/each}}',
-      { items: ['x', 'y'] }
-    );
+    const result = resolveEachBlocks('{{#each items}}{{@index}}:{{.}} {{/each}}', {
+      items: ['x', 'y'],
+    });
     expect(result).toBe('0:x 1:y ');
   });
 });
@@ -600,7 +619,12 @@ describe('flattenProjectYaml', () => {
 
   it('maps deployment fields', () => {
     const vars = flattenProjectYaml({
-      deployment: { cloudProvider: 'azure', containerized: true, environments: ['dev', 'prod'], iacTool: 'bicep' },
+      deployment: {
+        cloudProvider: 'azure',
+        containerized: true,
+        environments: ['dev', 'prod'],
+        iacTool: 'bicep',
+      },
     });
     expect(vars.cloudProvider).toBe('azure');
     expect(vars.hasContainerized).toBe(true);
@@ -651,7 +675,130 @@ describe('flattenProjectYaml', () => {
     const vars = flattenProjectYaml({ stack: { languages: ['Rust', 'TypeScript'] } });
     expect(vars.hasLanguageRust).toBe(true);
     expect(vars.hasLanguageTypeScript).toBe(true);
+    expect(vars.hasLanguageJsLike).toBe(true);
     expect(vars.hasLanguagePython).toBe(false);
+  });
+
+  it('derives hasLanguageJsLike for javascript variants', () => {
+    const vars = flattenProjectYaml({ stack: { languages: ['javascript'] } });
+    expect(vars.hasLanguageJavaScript).toBe(true);
+    expect(vars.hasLanguageJsLike).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('configured');
+    expect(vars.languageInferenceConfidence).toBe('high');
+  });
+
+  it('infers js-like language from node framework when configured languages are missing', () => {
+    const vars = flattenProjectYaml({
+      stack: { languages: [], frameworks: { backend: ['node.js'] } },
+      testing: { unit: [] },
+    });
+    expect(vars.hasConfiguredLanguages).toBe(false);
+    expect(vars.hasLanguageJsLikeInferred).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('heuristic');
+    expect(vars.languageInferenceConfidence).toBe('medium');
+    expect(vars.hasLanguageInferenceUsed).toBe(true);
+    expect(vars.hasLanguageInferenceMismatch).toBe(false);
+  });
+
+  it('prefers configured languages over inferred signals for effective flags', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      testing: { unit: [] },
+    });
+    expect(vars.hasConfiguredLanguages).toBe(true);
+    expect(vars.hasLanguageJsLikeInferred).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(false);
+    expect(vars.hasLanguagePythonEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('mixed');
+    expect(vars.languageInferenceConfidence).toBe('high');
+    expect(vars.hasLanguageInferenceMismatch).toBe(true);
+    expect(vars.hasLanguageInferenceUsed).toBe(false);
+  });
+
+  it('supports configured mode language profile', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      automation: {
+        languageProfile: {
+          mode: 'configured',
+        },
+      },
+    });
+
+    expect(vars.languageProfileMode).toBe('configured');
+    expect(vars.hasLanguagePythonEffective).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(false);
+    expect(vars.languageInferenceSource).toBe('configured');
+    expect(vars.hasLanguageInferenceUsedRaw).toBe(false);
+  });
+
+  it('supports heuristic mode language profile', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      automation: {
+        languageProfile: {
+          mode: 'heuristic',
+        },
+      },
+    });
+
+    expect(vars.languageProfileMode).toBe('heuristic');
+    expect(vars.hasLanguagePythonEffective).toBe(false);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+    expect(vars.languageInferenceSource).toBe('heuristic');
+    expect(vars.hasLanguageInferenceUsedRaw).toBe(true);
+  });
+
+  it('respects inferFrom signal toggles', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: [],
+        frameworks: { backend: ['node.js'] },
+      },
+      testing: { unit: ['vitest'] },
+      automation: {
+        languageProfile: {
+          inferFrom: {
+            frameworks: false,
+            tests: true,
+          },
+        },
+      },
+    });
+
+    expect(vars.languageInferenceFromFrameworks).toBe(false);
+    expect(vars.languageInferenceFromTests).toBe(true);
+    expect(vars.hasLanguageJsLikeInferred).toBe(true);
+    expect(vars.hasLanguageJsLikeEffective).toBe(true);
+  });
+
+  it('disables language diagnostics output vars when diagnostics is off', () => {
+    const vars = flattenProjectYaml({
+      stack: {
+        languages: ['python'],
+        frameworks: { backend: ['node.js'] },
+      },
+      automation: {
+        languageProfile: {
+          diagnostics: 'off',
+        },
+      },
+    });
+
+    expect(vars.showLanguageProfileDiagnostics).toBe(false);
+    expect(vars.hasLanguageInferenceMismatchRaw).toBe(true);
+    expect(vars.hasLanguageInferenceMismatch).toBe(false);
   });
 
   it('derives hasLanguageDotnet for csharp variant', () => {
@@ -669,8 +816,14 @@ describe('flattenProjectYaml', () => {
     expect(vars.hasLanguageRust).toBe(false);
     expect(vars.hasLanguagePython).toBe(false);
     expect(vars.hasLanguageTypeScript).toBe(false);
+    expect(vars.hasLanguageJsLike).toBe(false);
+    expect(vars.hasLanguageJsLikeEffective).toBe(false);
     expect(vars.hasLanguageDotnet).toBe(false);
     expect(vars.hasLanguageBlockchain).toBe(false);
+    expect(vars.languageInferenceSource).toBe('none');
+    expect(vars.languageInferenceConfidence).toBe('low');
+    expect(vars.hasLanguageInferenceUsed).toBe(false);
+    expect(vars.hasLanguageInferenceMismatch).toBe(false);
   });
 
   it('keeps integrations as array and sets hasIntegrations true', () => {
@@ -748,14 +901,191 @@ describe('flattenProjectYaml', () => {
 });
 
 // ---------------------------------------------------------------------------
+// branchProtection mappings (flattenProjectYaml)
+// ---------------------------------------------------------------------------
+describe('flattenProjectYaml — branchProtection', () => {
+  it('maps core branch protection booleans and scalars', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        requiredReviewCount: 2,
+        dismissStaleReviews: true,
+        requireCodeOwnerReviews: false,
+        requireLastPushApproval: true,
+        strictStatusChecks: true,
+        enforceAdmins: true,
+        requiredLinearHistory: false,
+        requireSignedCommits: true,
+        allowForcePushes: false,
+        allowDeletions: true,
+        blockCreations: true,
+        requiredConversationResolution: false,
+      },
+    });
+    expect(vars.bpRequiredReviewCount).toBe('2');
+    expect(vars.bpDismissStaleReviews).toBe(true);
+    expect(vars.bpRequireCodeOwnerReviews).toBe(false);
+    expect(vars.bpRequireLastPushApproval).toBe(true);
+    expect(vars.bpStrictStatusChecks).toBe(true);
+    expect(vars.bpEnforceAdmins).toBe(true);
+    expect(vars.bpRequiredLinearHistory).toBe(false);
+    expect(vars.bpRequireSignedCommits).toBe(true);
+    expect(vars.bpAllowForcePushes).toBe(false);
+    expect(vars.bpAllowDeletions).toBe(true);
+    expect(vars.bpBlockCreations).toBe(true);
+    expect(vars.bpRequiredConversationResolution).toBe(false);
+  });
+
+  it('maps requiredStatusChecks as array (not joined string)', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        requiredStatusChecks: ['CI / test', 'CI / validate'],
+      },
+    });
+    expect(vars.bpRequiredStatusChecks).toEqual(['CI / test', 'CI / validate']);
+  });
+
+  it('maps code scanning fields', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        codeScanning: {
+          enabled: true,
+          tools: [
+            { name: 'CodeQL', securityAlertThreshold: 'high_or_higher', alertThreshold: 'errors' },
+          ],
+        },
+      },
+    });
+    expect(vars.bpCodeScanningEnabled).toBe(true);
+    expect(vars.bpCodeScanningTools).toEqual([
+      { name: 'CodeQL', securityAlertThreshold: 'high_or_higher', alertThreshold: 'errors' },
+    ]);
+  });
+
+  it('maps copilot review fields', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        copilotReview: {
+          enabled: true,
+          reviewNewPushes: true,
+          reviewDraftPRs: false,
+        },
+      },
+    });
+    expect(vars.bpCopilotReviewEnabled).toBe(true);
+    expect(vars.bpCopilotReviewNewPushes).toBe(true);
+    expect(vars.bpCopilotReviewDraftPRs).toBe(false);
+  });
+
+  it('maps merge strategy and merge queue fields', () => {
+    const vars = flattenProjectYaml({
+      branchProtection: {
+        mergeStrategies: {
+          allowMergeCommits: false,
+          allowSquashMerge: true,
+          allowRebaseMerge: false,
+          deleteBranchOnMerge: true,
+          allowAutoMerge: true,
+        },
+        mergeQueue: {
+          enabled: true,
+          mergeMethod: 'squash',
+          minGroupSize: 2,
+          maxGroupSize: 10,
+        },
+      },
+    });
+    expect(vars.bpAllowMergeCommits).toBe(false);
+    expect(vars.bpAllowSquashMerge).toBe(true);
+    expect(vars.bpAllowRebaseMerge).toBe(false);
+    expect(vars.bpDeleteBranchOnMerge).toBe(true);
+    expect(vars.bpAllowAutoMerge).toBe(true);
+    expect(vars.bpMergeQueueEnabled).toBe(true);
+    expect(vars.bpMergeQueueMethod).toBe('squash');
+    expect(vars.bpMergeQueueMinGroupSize).toBe('2');
+    expect(vars.bpMergeQueueMaxGroupSize).toBe('10');
+  });
+
+  it('returns no bp* vars when branchProtection is absent', () => {
+    const vars = flattenProjectYaml({ name: 'NoProtection' });
+    expect(vars.bpRequiredReviewCount).toBeUndefined();
+    expect(vars.bpCodeScanningEnabled).toBeUndefined();
+    expect(vars.bpCopilotReviewEnabled).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// transform — array type
+// ---------------------------------------------------------------------------
+describe('transform — array type', () => {
+  it('passes through arrays unchanged', () => {
+    expect(transform(['a', 'b'], 'array')).toEqual(['a', 'b']);
+  });
+
+  it('passes through object arrays unchanged', () => {
+    const tools = [{ name: 'CodeQL', threshold: 'errors' }];
+    expect(transform(tools, 'array')).toEqual(tools);
+  });
+
+  it('returns undefined for non-array values', () => {
+    expect(transform('not-array', 'array')).toBeUndefined();
+    expect(transform(42, 'array')).toBeUndefined();
+  });
+
+  it('returns empty array for empty array', () => {
+    expect(transform([], 'array')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveEachBlocks — JSON comma handling
+// ---------------------------------------------------------------------------
+describe('resolveEachBlocks — JSON array rendering', () => {
+  it('renders object arrays with trailing commas for JSON post-processing', () => {
+    const template =
+      '[\n{{#each tools}}  {"tool": "{{.name}}", "threshold": "{{.threshold}}"},\n{{/each}}]';
+    const result = resolveEachBlocks(template, {
+      tools: [
+        { name: 'CodeQL', threshold: 'errors' },
+        { name: 'Semgrep', threshold: 'warnings' },
+      ],
+    });
+    // Each item gets a trailing comma; the last comma before ] can be stripped by the consumer
+    expect(result).toContain('"tool": "CodeQL"');
+    expect(result).toContain('"tool": "Semgrep"');
+    // Verify the trailing-comma-then-strip pattern produces valid JSON
+    const cleaned = result.replace(/,(\s*[\]}])/g, '$1');
+    expect(() => JSON.parse(cleaned)).not.toThrow();
+  });
+
+  it('renders string arrays with trailing commas for JSON post-processing', () => {
+    const template = '[\n{{#each checks}}  "{{.}}",\n{{/each}}]';
+    const result = resolveEachBlocks(template, {
+      checks: ['CI / test', 'CI / validate', 'Branch Protection / branch-rules'],
+    });
+    const cleaned = result.replace(/,(\s*[\]}])/g, '$1');
+    const parsed = JSON.parse(cleaned);
+    expect(parsed).toEqual(['CI / test', 'CI / validate', 'Branch Protection / branch-rules']);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // flattenCrosscutting
 // ---------------------------------------------------------------------------
 describe('flattenCrosscutting', () => {
   it('maps logging fields', () => {
     const vars = {};
-    flattenCrosscutting({
-      logging: { framework: 'serilog', structured: true, correlationId: true, level: 'information', sink: ['console'] },
-    }, vars);
+    flattenCrosscutting(
+      {
+        logging: {
+          framework: 'serilog',
+          structured: true,
+          correlationId: true,
+          level: 'information',
+          sink: ['console'],
+        },
+      },
+      vars
+    );
     expect(vars.loggingFramework).toBe('serilog');
     expect(vars.hasLogging).toBe(true);
     expect(vars.hasStructuredLogging).toBe(true);
@@ -772,9 +1102,17 @@ describe('flattenCrosscutting', () => {
 
   it('maps authentication fields', () => {
     const vars = {};
-    flattenCrosscutting({
-      authentication: { provider: 'auth0', strategy: 'jwt-bearer', rbac: true, multiTenant: false },
-    }, vars);
+    flattenCrosscutting(
+      {
+        authentication: {
+          provider: 'auth0',
+          strategy: 'jwt-bearer',
+          rbac: true,
+          multiTenant: false,
+        },
+      },
+      vars
+    );
     expect(vars.authProvider).toBe('auth0');
     expect(vars.hasAuth).toBe(true);
     expect(vars.authStrategy).toBe('jwt-bearer');
@@ -784,9 +1122,12 @@ describe('flattenCrosscutting', () => {
 
   it('maps caching fields', () => {
     const vars = {};
-    flattenCrosscutting({
-      caching: { provider: 'redis', patterns: ['cache-aside'], distributedCache: true },
-    }, vars);
+    flattenCrosscutting(
+      {
+        caching: { provider: 'redis', patterns: ['cache-aside'], distributedCache: true },
+      },
+      vars
+    );
     expect(vars.cachingProvider).toBe('redis');
     expect(vars.hasCaching).toBe(true);
     expect(vars.cachingPatterns).toBe('cache-aside');
@@ -848,7 +1189,9 @@ describe('resolveRenderTargets', () => {
   });
 
   it('--only flag overrides overlay targets', () => {
-    const result = resolveRenderTargets(['claude', 'cursor', 'windsurf'], { only: 'claude,cursor' });
+    const result = resolveRenderTargets(['claude', 'cursor', 'windsurf'], {
+      only: 'claude,cursor',
+    });
     expect(result).toEqual(new Set(['claude', 'cursor']));
   });
 

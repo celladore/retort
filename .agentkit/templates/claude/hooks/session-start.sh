@@ -33,18 +33,46 @@ detect_tool() {
     local cmd="$2"
     if command -v "$cmd" &>/dev/null; then
         local ver
-        ver=$("$cmd" --version 2>/dev/null | head -n1) || ver="installed"
-        tools_found+=("${name}: ${ver}")
+        if ver=$("$cmd" --version 2>/dev/null | head -n1); then
+            if [[ -n "$ver" ]]; then
+                tools_found+=("${name}: ${ver}")
+            else
+                tools_found+=("${name}: installed")
+            fi
+        fi
     fi
 }
 
+detect_tool "Git"      "git"
+detect_tool "GitHub CLI" "gh"
+detect_tool "jq"       "jq"
+detect_tool "Bash"     "bash"
+detect_tool "PowerShell" "pwsh"
+
+{{#if hasLanguageJsLikeEffective}}
 detect_tool "Node.js"  "node"
 detect_tool "pnpm"     "pnpm"
 detect_tool "npm"      "npm"
+{{/if}}
+
+{{#if hasLanguageDotnetEffective}}
 detect_tool "dotnet"   "dotnet"
+{{/if}}
+
+{{#if hasLanguageRustEffective}}
 detect_tool "Cargo"    "cargo"
+{{/if}}
+
+{{#if hasLanguagePythonEffective}}
 detect_tool "Python"   "python3"
 detect_tool "Python"   "python"   # fallback if python3 is absent
+{{/if}}
+
+{{#if hasAnyInfraConfig}}
+detect_tool "Docker"   "docker"
+detect_tool "Azure CLI" "az"
+detect_tool "Terraform" "terraform"
+{{/if}}
 
 tools_summary=""
 if [[ ${#tools_found[@]} -gt 0 ]]; then
@@ -102,9 +130,16 @@ if [[ -n "$AGENTKIT_ROOT" ]] && command -v node &>/dev/null; then
     fi
 fi
 
+# ── Convention reminders ────────────────────────────────────────────────
+conventions_reminder="REMINDERS:
+- Commits & PR titles MUST use Conventional Commits: type(scope): description
+  Types: feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert
+- After editing .agentkit/spec/, run: pnpm -C .agentkit agentkit:sync
+- Run /check before creating a PR"
+
 # ── Compose the environment summary ─────────────────────────────────────
-env_summary=$(printf 'Session: %s\nWorking directory: %s\n\nToolchains:\n%s\n\nGit:\n%s' \
-    "$SESSION_ID" "$CWD" "$tools_summary" "$git_summary")
+env_summary=$(printf 'Session: %s\nWorking directory: %s\n{{#if showLanguageProfileDiagnostics}}Language profile source: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})\n{{/if}}\nToolchains:\n%s\n\nGit:\n%s\n\n%s' \
+    "$SESSION_ID" "$CWD" "$tools_summary" "$git_summary" "$conventions_reminder")
 
 # ── Return structured output ────────────────────────────────────────────
 if command -v jq &>/dev/null; then

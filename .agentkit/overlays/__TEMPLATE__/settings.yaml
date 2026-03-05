@@ -4,6 +4,14 @@ repoName: __TEMPLATE__
 defaultBranch: main
 primaryStack: auto
 windowsFirst: true
+
+# After template + overlay are combined, run an LLM synthesis pass that produces
+# AI-optimised output targeted at agent consumers (denser context, resolved conflicts,
+# decision trees).  The synthesised result is committed and only regenerated when inputs
+# change (content-hash cache).  Requires AGENTKIT_AI_KEY env var at sync time.
+# See docs/ai-synthesis.md for model selection and caching details.
+aiSynthesisLayer: false
+
 renderTargets:
   - claude
   - cursor
@@ -16,3 +24,28 @@ renderTargets:
   - roo
   - ai
   - mcp
+
+# ---------------------------------------------------------------------------
+# Feature Management — Control which kit features this repo adopts.
+# Use ONE of these strategies:
+#
+# 1. featurePreset: Apply a named preset (minimal, standard, full, lean)
+# 2. enabledFeatures: Explicit list of feature IDs to enable
+# 3. Neither: Uses features with default: true from features.yaml
+#
+# Use `agentkit features` to list all available features.
+# Use `agentkit features enable <id>` / `agentkit features disable <id>` to manage.
+# Use `agentkit features preset <name>` to switch presets.
+# ---------------------------------------------------------------------------
+featurePreset: standard
+# enabledFeatures:
+#   - team-orchestration
+#   - agent-personas
+#   - slash-commands
+#   - quality-gates
+#   - code-review
+#   - coding-rules
+#   - doc-scaffolding
+#   - permission-guards
+#   - sensitive-file-protection
+#   - ci-automation

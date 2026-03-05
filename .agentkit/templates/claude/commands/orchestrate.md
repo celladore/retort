@@ -1,9 +1,9 @@
 ---
-description: "Master orchestrator — coordinate work across unified teams with state persistence"
+description: 'Master orchestrator — coordinate work across unified teams with state persistence'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(dotnet *), Bash(cargo *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -31,11 +31,11 @@ The user may pass the following flags via `$ARGUMENTS`:
 
 The orchestrator, `/plan`, and `/project-review` all use the same state files. The orchestrator, `/plan`, and `/project-review` may each acquire `orchestrator.lock` when writing to shared state (orchestrator for full sessions; `/plan` and `/project-review` when appending to `events.log`).
 
-| Asset               | Purpose                | Orchestrator    | Plan              | Project-Review    |
-| ------------------- | ---------------------- | --------------- | ----------------- | ----------------- |
-| `AGENT_BACKLOG.md`  | Work items, priorities | Read/Write      | Read              | Read              |
-| `orchestrator.json` | Phase, teams, metrics  | Read/Write      | Read              | Read              |
-| `events.log`        | Audit trail            | Append          | Append            | Append            |
+| Asset               | Purpose                | Orchestrator    | Plan                 | Project-Review       |
+| ------------------- | ---------------------- | --------------- | -------------------- | -------------------- |
+| `AGENT_BACKLOG.md`  | Work items, priorities | Read/Write      | Read                 | Read                 |
+| `orchestrator.json` | Phase, teams, metrics  | Read/Write      | Read                 | Read                 |
+| `events.log`        | Audit trail            | Append          | Append               | Append               |
 | `orchestrator.lock` | Session lock           | Acquire/Release | Acquire when writing | Acquire when writing |
 
 **Coordination requirement for `events.log`:** Writers (orchestrator,
@@ -57,7 +57,7 @@ acquisition protocol and abort after timeout. Example atomic append (Node.js):
 
 ```js
 const fs = require('fs');
-const fd = fs.openSync(path, 'a');  // O_APPEND flag ensures atomic append
+const fd = fs.openSync(path, 'a'); // O_APPEND flag ensures atomic append
 fs.writeSync(fd, jsonLine + '\n');
 fs.closeSync(fd);
 ```
@@ -118,7 +118,7 @@ For machine-identifiable events, use JSON lines format:
 {"eventType": "CANCELED", "taskId": "<task-id>", "reason": "dependency-cycle", "cycleId": "<cycle-id>", "cycleMembers": ["<task-id-1>", "<task-id-2>"], "actor": "orchestrator", "timestamp": "<ISO-8601>"}
 ```
 
-**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`
+**eventType enum values:** `DESCOPED`, `CANCELED`, `COMPLETED`, `FAILED`, `REJECTED`, `STARTED`, `BLOCKED`, `UNBLOCKED`, `DELEGATED`, `ACCEPTED`, `RETRY_ESCALATED`, `INFRA_EVAL_COMPLETED`, `TURN_LIMIT_REACHED`, `LOOP_DETECTED`, `STAGNATION_DETECTED`, `HANDOFF_DEPTH_EXCEEDED`
 
 **cycleId format:** Generate a deterministic identifier per detected cycle. Hash the sorted list of member task IDs with SHA-256 and truncate to 12 chars. Reuse the same cycleId for all events from that cycle.
 
@@ -126,26 +126,37 @@ Required fields for DESCOPED events: `eventType` (must be "DESCOPED"), `taskId`,
 
 **Required and optional fields by eventType:**
 
-| eventType                     | Required fields                                                               | Optional fields     |
-| ----------------------------- | ----------------------------------------------------------------------------- | ------------------- |
-| `COMPLETED`                   | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `FAILED`                      | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `REJECTED`                    | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED`                    | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `CANCELED` (dependency-cycle) | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp` | `actor`, `metadata` |
-| `DESCOPED`                    | `taskId`, `reason`, `timestamp`                                               | `actor`, `metadata` |
-| `STARTED`                     | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `BLOCKED`                     | `taskId`, `blockedBy`, `timestamp`                                            | `actor`, `metadata` |
-| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                 | `actor`, `metadata` |
-| `UNBLOCKED`                   | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `DELEGATED`                   | `taskId`, `assignees`, `timestamp`                                            | `actor`, `metadata` |
-| `ACCEPTED`                    | `taskId`, `timestamp`                                                         | `actor`, `metadata` |
-| `RETRY_ESCALATED`             | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                          | `actor`, `metadata` |
+| eventType                       | Required fields                                                                      | Optional fields     |
+| ------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
+| `COMPLETED`                     | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `FAILED`                        | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `REJECTED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `CANCELED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `CANCELED` (dependency-cycle)   | `taskId`, `reason`="dependency-cycle", `cycleId`, `cycleMembers`, `timestamp`        | `actor`, `metadata` |
+| `DESCOPED`                      | `taskId`, `reason`, `timestamp`                                                      | `actor`, `metadata` |
+| `STARTED`                       | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `BLOCKED`                       | `taskId`, `blockedBy`, `timestamp`                                                   | `actor`, `metadata` |
+| `BLOCKED` (blocked-on-canceled) | `taskId`, `blockedBy`, `blockedReason`="canceled", `timestamp`                       | `actor`, `metadata` |
+| `UNBLOCKED`                     | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `DELEGATED`                     | `taskId`, `assignees`, `timestamp`                                                   | `actor`, `metadata` |
+| `ACCEPTED`                      | `taskId`, `timestamp`                                                                | `actor`, `metadata` |
+| `RETRY_ESCALATED`               | `reason`, `roundKey`, `roundRetryCount`, `timestamp`                                 | `actor`, `metadata` |
+| `INFRA_EVAL_COMPLETED`          | `timestamp`, `data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores` | `actor`, `metadata` |
+| `TURN_LIMIT_REACHED`            | `taskId`, `turnCount`, `timestamp`                                                   | `actor`, `metadata` |
+| `LOOP_DETECTED`                 | `taskId`, `repeatedAction`, `count`, `timestamp`                                     | `actor`, `metadata` |
+| `STAGNATION_DETECTED`           | `taskId`, `turnsSinceProgress`, `timestamp`                                          | `actor`, `metadata` |
+| `HANDOFF_DEPTH_EXCEEDED`        | `taskId`, `depth`, `maxDepth`, `violatingTeams`, `timestamp`                         | `actor`, `metadata` |
 
 Example with all optional fields:
 
 ```json
-{"eventType": "COMPLETED", "taskId": "task-20260226-001", "actor": "team-backend", "metadata": {"duration_ms": 45000}, "timestamp": "2026-02-26T10:30:00Z"}
+{
+  "eventType": "COMPLETED",
+  "taskId": "task-20260226-001",
+  "actor": "team-backend",
+  "metadata": { "duration_ms": 45000 },
+  "timestamp": "2026-02-26T10:30:00Z"
+}
 ```
 
 Create this file if it does not exist.
@@ -203,7 +214,14 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      "handoffContext": "",
      "supersedes": "<task-id of failed/rejected/canceled task this replaces>",
      "backlogItemId": "<reference to original backlog item>",
-     "messages": [{"role":"delegator","from":"orchestrator","timestamp":"<ISO>","content":"<instructions>"}],
+     "messages": [
+       {
+         "role": "delegator",
+         "from": "orchestrator",
+         "timestamp": "<ISO>",
+         "content": "<instructions>"
+       }
+     ],
      "artifacts": []
    }
    ```
@@ -238,41 +256,70 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
    - Ignore tasks whose state is one of: `completed`, `failed`, `rejected`, `canceled`, `BLOCKED_ON_CANCELED` (terminal states).
    - Update `blockedBy` arrays and unblock tasks whose dependencies are satisfied (completed only; never unblock when blocked only by canceled deps).
 8. Process handoffs: for completed tasks with `handoffTo`, create follow-up tasks for the downstream team with the `handoffContext` carried forward.
-9. Monitor progress via task status and log team outputs to `events.log`.
+9. **Cross-agent integration** — when an engineering task completes, the agent-integration engine automatically:
+   - **Processes notifications:** Creates lightweight review tasks for agents listed in the completing agent's `notifies` field (e.g., `test-lead` gets notified when `backend` completes).
+   - **Auto-creates test tasks:** For each completed engineering task (backend, frontend, data, infra, devops), creates a `test` task assigned to `team-testing` to verify test coverage.
+   - **Auto-creates integration tests:** When both backend AND frontend tasks complete, creates a cross-team integration test task.
+   - **Auto-creates documentation tasks:** For teams with `docs` in their `handoff-chain` (backend, frontend), creates `document` tasks for `team-docs` when changes touch public-facing files (APIs, config, schemas).
+   - **Auto-creates security reviews:** For teams with `security` in their `handoff-chain` (infra, devops), creates `review` tasks for `team-security`.
+   - **Validates test acceptance criteria:** Warns if `implement` tasks complete without `test-results` artifacts or with zero `testsAdded`.
+10. **Incremental test validation** — between delegation rounds:
+    - After each round of task completions, run the test suite on the affected tech stacks before starting the next round.
+    - If tests fail between rounds, create a fix task for the responsible team immediately rather than waiting for Phase 4.
+    - Log inter-round test results to `events.log` with `eventType: "INTER_ROUND_TEST"`.
+11. Monitor progress via task status and log team outputs to `events.log`.
 
 ### Phase 4 — Validation
 
 1. Verify all delegated tasks have reached a terminal state (`completed`, `failed`, `rejected`, or `canceled`).
-2. Invoke `/check` to run the full quality gate (format, lint, typecheck, tests, build).
-3. Invoke `/review` on all changed files since the orchestration began.
-4. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
-5. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
+2. Verify all auto-created cross-agent tasks (test, docs, security) from Phase 3 step 9 have also reached terminal state. If not, wait or process them before proceeding.
+3. Invoke `/check --coverage` to run the full quality gate **including coverage threshold enforcement** (format, lint, typecheck, tests, coverage, build).
+4. Invoke `/review` on all changed files since the orchestration began. This now includes automated coverage delta checking.
+{{#if hasInfraEval}}
+5. Invoke `/infra-eval` to assess infrastructure fitness. Delegate to `team-infra` as an `investigate` task. Log results to `events.log` using the `INFRA_EVAL_COMPLETED` schema (`data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores`). A hard-gate FAIL should be surfaced as a risk but does not block Phase 5 unless the user explicitly requires it.
+{{/if}}
+{{#if hasInfraEval}}6{{else}}5{{/if}}. **Test failure routing:** If `/check` reports test, lint, or typecheck failures:
+   - Create a `test` task assigned to `team-testing` (not just the engineering team) to diagnose and fix the failures.
+   - Include the failure details, responsible teams, and affected files in the task description.
+   - The testing team coordinates with the responsible engineering team to resolve issues.
+{{#if hasInfraEval}}7{{else}}6{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+{{#if hasInfraEval}}8{{else}}7{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
-   **Retry key convention:**
-   - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
-   - `"validation:<issue-id>"` format tracks retries of a specific validation issue.
-   - Both formats may coexist in `retryPolicy.roundRetries` but represent independent counters.
-   - **Rule:** Do not create multiple keys for the same logical target (e.g., do not use both formats for the same round or same issue).
+ **Retry key convention:**
+ - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
+ - `"validation:<issue-id>"` format tracks retries of a specific validation issue.
+ - Both formats may coexist in `retryPolicy.roundRetries` but represent independent counters.
+ - **Rule:** Do not create multiple keys for the same logical target (e.g., do not use both formats for the same round or same issue).
 
-   **Retry flow:**
-   - Track retries per round or issue key in `retryPolicy.roundRetries[roundKey]`.
-   - On each replacement-task retry, increment `retryPolicy.roundRetries[roundKey]` and `retryPolicy.totalRetries`, then persist `orchestrator.json` before continuing.
-   - If `retryPolicy.roundRetries[roundKey] >= retryPolicy.maxRetryCount`, escalate and stop automatic retries for that round/issue.
-   - When escalation occurs:
-     1. Append a structured entry to `events.log`:
+ **Retry flow:**
+ - Track retries per round or issue key in `retryPolicy.roundRetries[roundKey]`.
+ - On each replacement-task retry, increment `retryPolicy.roundRetries[roundKey]` and `retryPolicy.totalRetries`, then persist `orchestrator.json` before continuing.
+ - If `retryPolicy.roundRetries[roundKey] >= retryPolicy.maxRetryCount`, escalate and stop automatic retries for that round/issue.
+ - When escalation occurs:
+   1. Append a structured entry to `events.log`:
 
-        ```json
-        {"eventType": "RETRY_ESCALATED", "reason": "retry-limit-reached", "roundKey": "round-4", "roundRetryCount": 2, "timestamp": "2026-02-26T10:30:00Z"}
-        ```
+      ```json
+      {
+        "eventType": "RETRY_ESCALATED",
+        "reason": "retry-limit-reached",
+        "roundKey": "round-4",
+        "roundRetryCount": 2,
+        "timestamp": "2026-02-26T10:30:00Z"
+      }
+      ```
 
-     2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
-     3. Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
+   2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
+   3. Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
 
-   **Reset behavior:** Implement `shouldResetRetryState` and `isTimestampNewer` as exported utilities in the orchestrator's validation module (e.g., `orchestrator/validation.ts`). Use them to enforce the exact rules:
-   - **`isTimestampNewer(newTs?: string | null, oldTs?: string | null): boolean`** — Validate non-null ISO-8601 strings; normalize both to UTC; return false for null, undefined, malformed inputs.
-   - **`shouldResetRetryState(retryPolicy, retryEscalated): Promise<{allowed: boolean, reason?: string}>`** — Require `retryPolicy.allowReset === true`. If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison needed). If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be non-null and a valid ISO-8601 timestamp; call `isTimestampNewer(retryPolicy.lastResetAt, retryEscalated.at)` and only allow clearing `retryPolicy.roundRetries` when it returns true. When `isTimestampNewer` returns false: do NOT clear `roundRetries`; return `{allowed: false, reason: "reset prevented: lastResetAt not newer than retryEscalated.at"}` and ensure calling code logs/surfaces this reason.
-   - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where isTimestampNewer returns false (roundRetries remains unchanged).
-6. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
+  **Reset behavior:** Enforce these exact rules in the orchestration validation path:
+  - Require `retryPolicy.allowReset === true` before allowing any reset.
+  - If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
+  - If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
+  - Treat null/undefined/malformed timestamps as non-newer and deny reset.
+  - When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
+  - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
+
+{{#if hasInfraEval}}7{{else}}6{{/if}}. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 
 ### Phase 5 — Ship
 
@@ -283,9 +330,18 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      3. An entry with `eventType: "CANCELED"` exists in `events.log` for that task-id (any reason, including `dependency-cycle`, user/manual, or non-replacement cancellation).
    - If neither condition is true for any terminal task, halt orchestration and surface the unresolved task(s) for human review.
    - **DESCOPED vs CANCELED:** Emit DESCOPED for intentional removal that needs rationale recorded; emit CANCELED for user/manual or non-replacement cancellation.
-2. Invoke `/handoff` to produce a session summary.
-3. Update `orchestrator.json`: set `currentPhase` to 5, clear the lock, update metrics.
-4. Log completion to `events.log`.
+2. **Create history documents** for significant work completed during this orchestration:
+   - Review all completed tasks. For each task that involved non-trivial changes (not purely cosmetic or config-only), determine the appropriate document type:
+     - `implementation` — Architecture changes, new subsystems, major refactors
+     - `bugfix` — Non-trivial bug fixes (2+ files or root-cause analysis)
+     - `feature` — New user-facing features or capabilities
+     - `migration` — Library upgrades, data migrations, infrastructure changes
+   - Run `./scripts/create-doc.sh <type> "<task title>" [pr-number]` for each qualifying task.
+   - Fill in the generated document with: Overview (from task description), Key Changes (from task artifacts), Results (from validation outcomes), and Lessons Learned (from any issues encountered).
+   - If no tasks qualify (all changes were trivial), skip this step and note "No history docs needed — all changes were trivial" in the summary.
+3. Invoke `/handoff` to produce a session summary.
+4. Update `orchestrator.json`: set `currentPhase` to 5, clear the lock, update metrics.
+5. Log completion to `events.log`.
 
 ## Output Format
 
@@ -295,21 +351,26 @@ At the end of each orchestration run, produce a summary with the following secti
 ## Orchestration Summary
 
 ### Actions Taken
+
 - <bulleted list of actions performed>
 
 ### Files Changed
+
 - <bulleted list of file paths modified>
 
 ### Validation Commands
+
 - <exact commands to verify the changes>
 
 ### Updated State
+
 - Phase: <current phase>
 - Teams active: <list>
 - Backlog items completed: <count>
 - Tests added: <count>
 
 ### Risks & Open Items
+
 - <any risks, blockers, or items requiring human attention>
 ```
 

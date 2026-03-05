@@ -1,9 +1,14 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Cursor command template. -->
 <!-- Docs: https://docs.cursor.com/context/rules -->
+
 # {{commandName}}
 
 {{commandDescription}}
+
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
 
 ## Instructions
 
@@ -14,12 +19,13 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 3. **Execute** the task following project conventions
 4. **Validate** the output meets quality gates
 5. **Report** results clearly
+{{/if}}
 
 ## Project Context
 
 - Repository: {{repoName}}
 - Default branch: {{defaultBranch}}
-{{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
+  {{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
 
 ## Conventions
 
@@ -28,3 +34,16 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+
+{{#if isSyncBacklog}}
+## Intake Semantics
+
+- Tracker: `{{issueTracker}}`
+- Intake owner team: `{{intakeOwnerTeam}}`
+- Operations team: `{{intakeOperationsTeam}}`
+- Cadence: `{{intakeCadence}}`
+{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+
+Keep backlog sync tracker-neutral (GitHub/Linear) and ownership-aware using the configured intake values.
+{{/if}}

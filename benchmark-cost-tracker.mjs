@@ -47,7 +47,11 @@ console.log('\nBenchmarking recordCommand with 1000 closed sessions (Worst Case 
 // Clear any stale pointer so every iteration exercises the full O(N) scan path
 const pointerPath = resolve(AGENTKIT_ROOT, 'logs', 'active-session-id');
 if (existsSync(pointerPath)) {
-  try { unlinkSync(pointerPath); } catch (err) { console.warn(`[benchmark] Failed to remove stale pointer: ${err.message}`); }
+  try {
+    unlinkSync(pointerPath);
+  } catch (err) {
+    console.warn(`[benchmark] Failed to remove stale pointer: ${err.message}`);
+  }
 }
 
 let start = process.hrtime.bigint();
@@ -66,7 +70,9 @@ console.log(`Total time for ${ITERATIONS} iterations: ${duration.toFixed(2)}ms`)
 console.log(`Average time per call: ${avg.toFixed(2)}ms`);
 
 // --- Benchmark 2: Common case — 1 active session via pointer file (O(1) lookup) ---
-console.log('\nBenchmarking recordCommand with 1 active session + pointer file (Common Case — O(1) lookup)...');
+console.log(
+  '\nBenchmarking recordCommand with 1 active session + pointer file (Common Case — O(1) lookup)...'
+);
 
 const activeSession = initSession({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT });
 

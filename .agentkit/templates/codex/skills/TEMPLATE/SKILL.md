@@ -1,9 +1,9 @@
 ---
-name: "{{commandName}}"
-description: "{{commandDescription}}"
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+name: '{{commandName}}'
+description: '{{commandDescription}}'
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -15,6 +15,10 @@ last_updated: "{{syncDate}}"
 ## Usage
 
 Invoke this skill when you need to perform the `{{commandName}}` operation.
+
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
 
 ## Instructions
 
@@ -29,12 +33,13 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Return a concise summary with status (`success`/`partial`/`failed`)
 - Include validation evidence (exit code, failing command, or passing summary)
 - Include next-step remediation when checks fail
+{{/if}}
 
 ## Project Context
 
 - Repository: {{repoName}}
 - Default branch: {{defaultBranch}}
-{{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
+  {{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
 
 ## Conventions
 
@@ -43,3 +48,16 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+
+{{#if isSyncBacklog}}
+## Intake Semantics
+
+- Tracker: `{{issueTracker}}`
+- Intake owner team: `{{intakeOwnerTeam}}`
+- Operations team: `{{intakeOperationsTeam}}`
+- Cadence: `{{intakeCadence}}`
+{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+
+For backlog sync, use tracker-neutral intake and ownership-aware routing based on configured intake values.
+{{/if}}

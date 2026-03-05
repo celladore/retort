@@ -99,7 +99,7 @@ Edit `.agentkit/overlays/my-project/settings.yaml`:
 ```yaml
 repoName: my-project
 defaultBranch: main
-primaryStack: node          # node | dotnet | rust | python | auto
+primaryStack: node # node | dotnet | rust | python | auto
 windowsFirst: true
 renderTargets:
   - claude
@@ -220,11 +220,11 @@ Edit `.agentkit/overlays/my-existing-project/settings.yaml`:
 
 ```yaml
 repoName: my-existing-project
-defaultBranch: main            # or develop, trunk, etc.
-primaryStack: auto             # auto-detects from Cargo.toml, package.json, etc.
-windowsFirst: false            # set to true for Windows-primary teams
+defaultBranch: main # or develop, trunk, etc.
+primaryStack: auto # auto-detects from Cargo.toml, package.json, etc.
+windowsFirst: false # set to true for Windows-primary teams
 renderTargets:
-  - claude                     # only enable tools your team uses
+  - claude # only enable tools your team uses
   - cursor
 ```
 
@@ -273,8 +273,10 @@ Comprehensive guides for using AgentKit Forge:
 | **[MCP/A2A Guide](.agentkit/docs/MCP_A2A_GUIDE.md)**                   | Model Context Protocol and Agent-to-Agent integration               |
 | **[CLI Installation](.agentkit/docs/CLI_INSTALLATION.md)**             | Installing and configuring the CLI                                  |
 | **[Agents vs Teams](.agentkit/docs/AGENTS_VS_TEAMS.md)**               | When to use agents vs teams, comparison guide                       |
+| **[Agents Reference](.agentkit/docs/AGENTS_REFERENCE.md)**             | All 19 agent personas — roles, scopes, conventions, dependencies    |
 | **[Roadmap](.agentkit/docs/ROADMAP.md)**                               | Planned features and development roadmap                            |
 | **[PRD Library](docs/prd/README.md)**                                  | Product requirement docs and LLM-mapping PRD examples               |
+| **[Documentation Audit](.agentkit/docs/DOCUMENTATION_AUDIT.md)**       | Gap analysis and documentation completeness report                  |
 
 ---
 

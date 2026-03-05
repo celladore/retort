@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # Copilot Instructions — Performance Testing
 
 Apply these rules when writing performance tests, benchmarks, or load tests
@@ -25,6 +26,7 @@ Write a performance test when:
 ## Writing Benchmarks
 
 {{#if hasLanguageTypeScript}}
+
 ### TypeScript / JavaScript
 
 ```typescript
@@ -37,7 +39,8 @@ bench('process 1000 items', () => {
 Include a baseline comparison (`bench.todo` or commented reference) so
 regressions are visible in the diff.
 {{/if}}
-{{#if hasLanguageRust}}
+{{#if hasLanguageRustEffective}}
+
 ### Rust
 
 ```rust
@@ -56,7 +59,8 @@ criterion_main!(benches);
 
 Use [Criterion.rs](https://github.com/bheisler/criterion.rs) for stable, statistically rigorous benchmarks.
 {{/if}}
-{{#if hasLanguagePython}}
+{{#if hasLanguagePythonEffective}}
+
 ### Python
 
 ```python
@@ -64,6 +68,7 @@ Use [Criterion.rs](https://github.com/bheisler/criterion.rs) for stable, statist
 def test_process_items_perf(benchmark):
     benchmark(process_items, dataset)
 ```
+
 {{/if}}
 
 ## Performance Budgets
@@ -79,6 +84,7 @@ def test_process_items_perf(benchmark):
 
 {{#if hasPerformanceTesting}}- Load testing tool: **{{testingPerformanceTesting}}**.{{/if}}
 {{#unless hasPerformanceTesting}}- Use `k6`, `artillery`, or equivalent for HTTP load testing.{{/unless}}
+
 - Load tests live in `tests/load/` or `load-tests/`.
 - Define realistic scenarios based on actual production traffic patterns.
 - Include ramp-up, steady-state, and spike scenarios.

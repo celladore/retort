@@ -1,9 +1,9 @@
 ---
-description: "{{teamName}} ({{teamId}}) — {{teamFocus}}"
+description: '{{teamName}} ({{teamId}}) — {{teamFocus}}'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -29,7 +29,25 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 
 **Allowed task statuses:** `submitted`, `accepted`, `working`, `input-required`, `completed`, `failed`, `rejected`, `canceled`, `BLOCKED_ON_CANCELED`. These align with the runtime task protocol; use only canonical statuses.
 
-**MAX_HANDOFF_CHAIN_DEPTH:** 5 (configurable). Rationale: limits handoff chain length to avoid unbounded delegation; default balances flexibility with traceability.
+**MAX_HANDOFF_CHAIN_DEPTH:** {{maxHandoffChainDepth}} (configurable via `max-handoff-chain-depth` in teams.yaml, hard limit). Rationale: limits handoff chain length to avoid unbounded delegation; default balances flexibility with traceability. If `task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH`, the handoff is **blocked** (set `status` to `"input-required"`, append reason to `handoffContext`, emit events.log entry). This is a hard stop, not a warning.
+
+**MAX_TASK_TURNS:** {{maxTaskTurns}} (configurable via `max-task-turns` in teams.yaml). Maximum number of agentic turns (tool calls / LLM round-trips) allowed per task execution. Track the current turn count in the task file under `_turnCount` (initialize to 0). Increment `_turnCount` before each action (file edit, tool call, command execution). If `_turnCount >= MAX_TASK_TURNS`:
+1. Stop work immediately.
+2. Set task status to `input-required`.
+3. Append a message: `"Turn limit reached (MAX_TASK_TURNS={{maxTaskTurns}}). Requesting human guidance to continue or descope."`.
+4. Emit an events.log entry: `{"eventType": "TURN_LIMIT_REACHED", "taskId": "<id>", "turnCount": <N>, "timestamp": "<ISO>"}`.
+5. Do NOT continue working or retry — wait for human intervention.
+
+**Action Repetition Detection:** Track the last 5 actions (tool name + target file + action summary) in the task file under `_recentActions[]`. Before each action, check if the new action is substantially similar to 3 or more of the last 5 entries (same tool + same target file + similar intent). If repetition is detected:
+1. Stop work immediately.
+2. Set task status to `input-required`.
+3. Append a message: `"Repetition loop detected: same action attempted 3+ times without progress. Requesting human guidance."`.
+4. Emit an events.log entry: `{"eventType": "LOOP_DETECTED", "taskId": "<id>", "repeatedAction": "<summary>", "count": <N>, "timestamp": "<ISO>"}`.
+
+**Stagnation Detection:** Track the turn count at which the last meaningful progress occurred (file changed, test added, artifact produced) in `_lastProgressTurn` (set to the current `_turnCount` whenever progress occurs). If more than {{maxStagnationTurns}} turns have elapsed since `_lastProgressTurn` was updated (i.e., `_turnCount - _lastProgressTurn >= {{maxStagnationTurns}}`) and no `files-changed` or `test-results` artifact has been added (configurable via `max-stagnation-turns` in teams.yaml):
+1. Set task status to `input-required`.
+2. Append a message: `"Stagnation detected: no measurable progress in {{maxStagnationTurns}} turns. Requesting human guidance."`.
+3. Emit an events.log entry: `{"eventType": "STAGNATION_DETECTED", "taskId": "<id>", "turnsSinceProgress": <N>, "timestamp": "<ISO>"}`.
 
 **Accepted task types:** {{teamAccepts}}
 {{#if teamHandoffChain}}
@@ -54,21 +72,23 @@ Follow these steps in order for every work session:
      TTL, refresh `expiresAt` before continuing. If refreshing the lock fails or returns a conflict (another agent claimed the lock), the agent must abort the current operation, roll back any partial changes, release/clear local lock state, and surface an explicit error. Retry/backoff is only allowed for transient errors, not for lease conflicts.
 
 **Rollback Strategy for Lock Renewal Failures:**
+
 - **Transaction log schema:** `{taskId, lockId, operations: [{action, path, tempPath, inverseAction}], timestamps, state: "prepared"|"committed"}`. Canonical directory: `.claude/state/tasks/tx/` or configurable. Temp-file naming: `{taskId}.{lockId}.{opIndex}.tmp` correlating to tx entries. Action types: create, modify, delete, rename. Record inverse operations for rollback.
 - **Two-phase commit:** Prepare (write temps, record tx) → Commit (atomic renames) or Rollback (apply inverse ops, remove temps). Durable "prepared" state with recovery/commit markers.
 - **Cleanup routine:** `runCleanupOnLeaseFailure(txLogPath)` — documented recovery routine: read tx log, revert actions via inverse ops, remove temp files. Retry with backoff; record cleanup failures to metrics/alerts. Invoked by reconciliation job that scans orphaned tx logs; enforce TTL and alert when cleanup fails.
 - **Error reporting:** Include tx log identifier, lock id, and expiresAt in error output.
 - **Retention/TTL:** Default 24h; configurable via env or config.
-   - **Re-check status under lock:** read task file again and verify
-     `status === "submitted"`. If changed, release lock and skip.
-   - If still `submitted` and task is within scope and accepted type, perform a single atomic transition from "submitted"→"working":
-     write updated JSON to temp file in same directory with unique per-attempt naming (e.g., `{taskID}.tmp.{pid}.{timestamp}`),
-     set `status` to "working", append executor message. **Durability:** `fsync(temp_fd)` → `rename(temp, final)` → `open_dir(parent)` → `fsync(dir_fd)` → `close_dir`. fsync on the temp file alone is insufficient for POSIX crash safety; sync the parent directory after rename. Handle and log errors from opening/fsyncing the parent dir; retry or surface failures consistently.
-     If rename fails, attempt unlink of temp file. **Unlink retry policy:** Retry transient errors (EAGAIN, ETIMEDOUT, file-lock related) with exponential backoff, max 3 attempts. Escalate immediately for permissions/ENOENT. On failure beyond retries: emit alert/metric and log full context.
-     **Stale temp cleanup:** Inspect temp contents; attempt safe resume/cleanup or move to quarantine folder and log for manual review. TTL example: 60 minutes (configurable via `stale_temp_ttl_minutes`).
-   - If outside scope/type, **reject** with the same atomic update mechanism:
-     set `status` to "rejected", append reason + suggested team.
-   - **Always release lock** in `finally` after accept/reject/skip paths.
+  - **Re-check status under lock:** read task file again and verify
+    `status === "submitted"`. If changed, release lock and skip.
+  - If still `submitted` and task is within scope and accepted type, perform a single atomic transition from "submitted"→"working":
+    write updated JSON to temp file in same directory with unique per-attempt naming (e.g., `{taskID}.tmp.{pid}.{timestamp}`),
+    set `status` to "working", append executor message. **Durability:** `fsync(temp_fd)` → `rename(temp, final)` → `open_dir(parent)` → `fsync(dir_fd)` → `close_dir`. fsync on the temp file alone is insufficient for POSIX crash safety; sync the parent directory after rename. Handle and log errors from opening/fsyncing the parent dir; retry or surface failures consistently.
+    If rename fails, attempt unlink of temp file. **Unlink retry policy:** Retry transient errors (EAGAIN, ETIMEDOUT, file-lock related) with exponential backoff, max 3 attempts. Escalate immediately for permissions/ENOENT. On failure beyond retries: emit alert/metric and log full context.
+    **Stale temp cleanup:** Inspect temp contents; attempt safe resume/cleanup or move to quarantine folder and log for manual review. TTL example: 60 minutes (configurable via `stale_temp_ttl_minutes`).
+  - If outside scope/type, **reject** with the same atomic update mechanism:
+    set `status` to "rejected", append reason + suggested team.
+  - **Always release lock** in `finally` after accept/reject/skip paths.
+
 3. If no delegated tasks exist, fall through to Step 1 (backlog-based work).
 
 ### Step 1: Identify Work Items
@@ -117,6 +137,31 @@ If your changes affect **public behavior** (APIs, CLI flags, configuration optio
 
 Do NOT update docs for internal-only refactors.
 
+### Step 4b: Create History Document
+
+If this session involved **significant work** (not trivial one-line fixes), create a history document using the `/document-history` command:
+
+1. **Preview first (optional):**
+   ```
+   /document-history --auto --dry-run
+   ```
+   This shows what type and title would be auto-detected without writing files.
+
+2. **Create the document:**
+   ```
+   /document-history --auto
+   ```
+   The command auto-detects the document type (`bugfix`, `feature`, `implementation`, or `migration`) from commit messages, gathers session context, generates the file via `./scripts/create-doc.sh`, fills in all sections, and checks `docs/history/.index.json` for duplicates before creating.
+
+   To override auto-detection, specify flags explicitly:
+   ```
+   /document-history --type implementation --title "My Feature"
+   ```
+
+3. **Skip this step only if** deduplication indicates the work is already documented (a matching entry exists in `docs/history/.index.json` for today's date with a similar title), or the work was purely cosmetic (formatting, typo fixes, comment updates).
+
+The history document ensures institutional memory persists across sessions. Templates are in `docs/history/`.
+
 ### Step 5: Run Quality Gate
 
 After completing your changes, run the equivalent of `/check`:
@@ -143,24 +188,33 @@ After completing your work, produce a summary:
 **Items Completed:** <count>
 
 ### Changes Made
+
 - **<backlog item title>**
   - <file path>: <what was changed and why>
   - <file path>: <what was changed and why>
 
 ### Tests Added / Modified
+
 - `<test file path>`: <description of test coverage added>
   - <test name>: <what it verifies>
 
 ### Documentation Updated
+
 - <file path>: <what was updated>
 - "None — changes are internal only"
 
+### History Document
+
+- <path to created history doc, or "Skipped — trivial change" with brief justification>
+
 ### Validation Commands
+
 ```bash
 <exact commands to verify the changes work>
 ```
 
 ### Quality Gate Results
+
 - Format: PASS/FAIL
 - Lint: PASS/FAIL
 - Typecheck: PASS/FAIL
@@ -168,10 +222,12 @@ After completing your work, produce a summary:
 - Build: PASS/FAIL
 
 ### Findings (outside our scope)
+
 - <issues discovered that belong to other teams>
 - <pre-existing problems worth noting>
 
 ### Remaining Backlog Items
+
 - <items in our scope that were not addressed this session>
 ````
 
@@ -187,15 +243,17 @@ If you were working on a delegated task from `.claude/state/tasks/`:
 4. Add a final message summarising what was done.
 5. If the task has a `handoffTo` array, validate handoff:
    - **Reject and block:** (1) if `handoffTo` contains `currentTeam` (self-handoff) → set status to "blocked"; (2) if `handoffTo` contains the immediate predecessor (last entry in task.handoffHistory) → set status to "blocked"; (3) if `handoffTo` contains duplicate team IDs → set status to "needs-review". In all cases: append explanatory text to task.handoffContext, create events.log entry, call notification hook. Human clearance required for "needs-review" before orchestrator can create follow-ups.
-   - **Depth-based warning (not hard-fail):** If task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH (default 5), emit a warning entry in events.log, append a warning to task.handoffContext, call the notification hook — but do NOT change task.status or prevent the handoff. Keep duplicate-ID check within task.handoffTo (reject duplicates). All log entries must include task id, violating teams, depth, and timestamp.
+   - **Depth-based hard stop:** If task.handoffHistory.length + task.handoffTo.length > MAX_HANDOFF_CHAIN_DEPTH ({{maxHandoffChainDepth}}), set task.status to "input-required", emit an error entry in events.log with `{"eventType": "HANDOFF_DEPTH_EXCEEDED", "taskId": "<id>", "depth": <N>, "maxDepth": {{maxHandoffChainDepth}}, "violatingTeams": [...], "timestamp": "<ISO>"}`, append reason to task.handoffContext, and call the notification hook. Do NOT allow the handoff to proceed. Keep duplicate-ID check within task.handoffTo (reject duplicates). All log entries must include task id, violating teams, depth, and timestamp. Human clearance is required to override.
    - If validation passes, populate `handoffContext` with a one-paragraph summary of what was done and what the next team needs. The orchestrator will auto-create follow-up tasks only for statuses that explicitly allow it (e.g., "ready-for-followup"); require human clearance to move from "needs-review" to "ready-for-followup".
 
 **Notification Hook Interface:**
+
 - **Hook name:** `notifyOnCall(handoffEvent)`
 - **Parameters:** `{taskId, violatingTeams, depth, timestamp, message}`
 - **Validation:** `validateNotifyOnCall` invoked from orchestrator startup and task/deploy flows (e.g., AgentOrchestrator.start, createTask, deployTask). Fail early with clear error if config/env lacks notifyOnCall when `REQUIRE_NOTIFY_ON_CALL` is enabled (default: true for production).
 - **Implementation options:** HTTP endpoint, event bus, or local file sink (`.claude/state/alerts.json`)
 - **Failure handling:** On runtime notification errors: call `emitFallbackAlert`, log to events.log, set task.status = "needs-review" (not "blocked"). Prevent orchestrator auto-followup routine from creating follow-ups while status == "needs-review". Split handoffContext into `errorContext` (why fallback was triggered) and `workSummary` (what was done and next-team steps). `emitFallbackAlert` populates both.
+
 6. If no `handoffTo` is set but you identified downstream work, set
    `handoffTo` to the appropriate team(s) from your handoff chain:
    {{#if teamHandoffChain}}

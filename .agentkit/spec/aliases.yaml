@@ -9,20 +9,20 @@
 
 aliases:
   # Assessment shorthand
-  /assess: "/orchestrate --assess-only"
+  /assess: '/orchestrate --assess-only'
 
   # Project review shorthand
-  /audit: "/project-review"
+  /audit: '/project-review'
 
   # Team command colon-syntax compatibility
   # Maps /team:<id> to the canonical /team-<id> form
-  "/team:backend": "/team-backend"
-  "/team:frontend": "/team-frontend"
-  "/team:data": "/team-data"
-  "/team:infra": "/team-infra"
-  "/team:devops": "/team-devops"
-  "/team:testing": "/team-testing"
-  "/team:security": "/team-security"
-  "/team:docs": "/team-docs"
-  "/team:product": "/team-product"
-  "/team:quality": "/team-quality"
+  '/team:backend': '/team-backend'
+  '/team:frontend': '/team-frontend'
+  '/team:data': '/team-data'
+  '/team:infra': '/team-infra'
+  '/team:devops': '/team-devops'
+  '/team:testing': '/team-testing'
+  '/team:security': '/team-security'
+  '/team:docs': '/team-docs'
+  '/team:product': '/team-product'
+  '/team:quality': '/team-quality'

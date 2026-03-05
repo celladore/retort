@@ -8,12 +8,14 @@ Historical documentation for significant PRs and implementations in {{repoName}}
 
 ## Directory Structure
 
-| Directory | Description |
-|-----------|-------------|
-| [implementations/](./implementations/) | Major implementations and architecture changes |
-| [bug-fixes/](./bug-fixes/) | Complex or critical bug resolutions |
-| [features/](./features/) | New feature launches |
-| [migrations/](./migrations/) | Major migrations and upgrades |
+| Directory                                    | Description                                        |
+| -------------------------------------------- | -------------------------------------------------- |
+| [implementations/](./implementations/)       | Major implementations and architecture changes     |
+| [bug-fixes/](./bug-fixes/)                   | Complex or critical bug resolutions                |
+| [features/](./features/)                     | New feature launches                               |
+| [migrations/](./migrations/)                 | Major migrations and upgrades                      |
+| [issues/](./issues/)                         | Issues encountered during development sessions     |
+| [lessons-learned/](./lessons-learned/)       | Lessons learned from retrospectives                |
 
 ## Naming Convention
 
@@ -22,7 +24,7 @@ Files use the format: `XXXX-YYYY-MM-DD-[title]-[type].md`
 - `XXXX` — sequential 4-digit number (maintained in [.index.json](./.index.json))
 - `YYYY-MM-DD` — completion date
 - `[title]` — kebab-case title
-- `[type]` — `implementation`, `bugfix`, `feature`, or `migration`
+- `[type]` — `implementation`, `bugfix`, `feature`, `migration`, `issue`, or `lesson`
 
 ## Creating New Documentation
 
@@ -34,6 +36,23 @@ Use the provided script to generate a new document from the correct template:
 ./scripts/create-doc.sh bugfix "Bug Description" <pr-number>
 ./scripts/create-doc.sh feature "Feature Name" <pr-number>
 ./scripts/create-doc.sh migration "Migration Name" <pr-number>
+```
+
+> **Note:** Issue and lesson records are created automatically via
+> `/review --focus=retrospective`, not through the create-doc script.
+>
+> **Fallback:** When `gh` CLI is unavailable (proxy failures, air-gapped
+> environments), use `./scripts/create-doc.sh issue "Title"` to record issues
+> locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
+
+The `/review` command with `--focus=retrospective` automates issue and lesson
+creation at end-of-session (non-blocking — never gates delivery):
+
+```bash
+# Via agent command
+/review --focus=retrospective                  # Full retrospective: issues + lessons
+/review --focus=retrospective --dry-run        # Preview without writing
+/review --focus=retrospective --open-issues    # Also create GitHub issues for unresolved problems
 ```
 
 ```powershell

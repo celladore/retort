@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | Autonomous Cloud Coding Agent + CLI Tool |
-| **Categories** | Cloud / Autonomous Agent, CLI Agent |
-| **Access** | Web — [jules.google](https://jules.google/); CLI — `npm install -g @google/jules` |
-| **Documentation** | [jules.google/docs](https://jules.google/docs/cli/reference) |
+|                        |                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Type**               | Autonomous Cloud Coding Agent + CLI Tool                                                                     |
+| **Categories**         | Cloud / Autonomous Agent, CLI Agent                                                                          |
+| **Access**             | Web — [jules.google](https://jules.google/); CLI — `npm install -g @google/jules`                            |
+| **Documentation**      | [jules.google/docs](https://jules.google/docs/cli/reference)                                                 |
 | **Performance Rating** | ⭐⭐⭐½ — **71/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents)) |
 
 ---
@@ -35,6 +35,7 @@ jules remote pull --session 123456
 ```
 
 Key CLI features:
+
 - **Interactive TUI dashboard** — `jules` launches a terminal UI
 - **Parallel sessions** — `--parallel 3` runs multiple tasks concurrently
 - **Scriptable** — pipe GitHub issues or TODO items to Jules
@@ -44,8 +45,8 @@ Key CLI features:
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
+| Feature              | Location                | Format         |
+| -------------------- | ----------------------- | -------------- |
 | Project instructions | `AGENTS.md` (repo root) | Plain Markdown |
 
 ### Key Capabilities
@@ -64,8 +65,8 @@ Key CLI features:
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output             | Path        | Source                               |
+| ------------------ | ----------- | ------------------------------------ |
 | Agent instructions | `AGENTS.md` | Always generated from `project.yaml` |
 
 Jules reads the universal `AGENTS.md` — no platform-specific files needed.
@@ -74,13 +75,13 @@ Jules reads the universal `AGENTS.md` — no platform-specific files needed.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| AGENTS.md | ✅ Reads before every task | ✅ Always generated | None |
-| Task-specific instructions | ✅ Via AGENTS.md content | ✅ Included in AGENTS.md | None |
-| Repo structure context | ✅ Analyzes automatically | ✅ Documented in AGENTS.md | None |
-| Build/test commands | ✅ Reads from AGENTS.md | ✅ Included in AGENTS.md | None |
-| Platform-specific config | ❌ No dedicated config system | N/A | No gap — Jules relies on AGENTS.md |
+| Feature                    | Platform Supports             | AgentKit Forge Status      | Gap                                |
+| -------------------------- | ----------------------------- | -------------------------- | ---------------------------------- |
+| AGENTS.md                  | ✅ Reads before every task    | ✅ Always generated        | None                               |
+| Task-specific instructions | ✅ Via AGENTS.md content      | ✅ Included in AGENTS.md   | None                               |
+| Repo structure context     | ✅ Analyzes automatically     | ✅ Documented in AGENTS.md | None                               |
+| Build/test commands        | ✅ Reads from AGENTS.md       | ✅ Included in AGENTS.md   | None                               |
+| Platform-specific config   | ❌ No dedicated config system | N/A                        | No gap — Jules relies on AGENTS.md |
 
 **Summary:** Jules is fully served by the universal `AGENTS.md`. No dedicated
 render target or platform-specific files are needed. The comprehensiveness
@@ -99,15 +100,15 @@ of the generated `AGENTS.md` directly determines Jules' effectiveness.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 71/100 ⭐⭐⭐½ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents) |
-| Developer Experience | 68/100 ⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cloud--autonomous-agents) |
-| Cost & Value | 62/100 ⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cloud--autonomous-agents) |
-| Customization | 41/100 ⭐⭐ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cloud--autonomous-agents) |
-| Privacy & Security | 49/100 ⭐⭐½ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cloud--autonomous-agents) |
-| Team & Enterprise | 43/100 ⭐⭐ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cloud--autonomous-agents) |
-| **Weighted Total** | **62/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                                 |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| Coding Performance   | 71/100 ⭐⭐⭐½    | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cloud--autonomous-agents)   |
+| Developer Experience | 68/100 ⭐⭐⭐½    | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cloud--autonomous-agents) |
+| Cost & Value         | 62/100 ⭐⭐⭐     | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cloud--autonomous-agents)        |
+| Customization        | 41/100 ⭐⭐       | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cloud--autonomous-agents)        |
+| Privacy & Security   | 49/100 ⭐⭐½      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cloud--autonomous-agents)     |
+| Team & Enterprise    | 43/100 ⭐⭐       | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cloud--autonomous-agents)      |
+| **Weighted Total**   | **62/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights)           |
 
 ### Best For
 

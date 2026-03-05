@@ -23,18 +23,18 @@
 
 ## Team Directory
 
-| ID   | Team Name       | Focus Area                        | Primary Scope                          |
-|------|-----------------|-----------------------------------|----------------------------------------|
-| T1   | Backend         | Server-side logic & APIs          | `src/server/**`, `src/api/**`          |
-| T2   | Frontend        | UI components & client state      | `src/client/**`, `src/components/**`   |
-| T3   | Data            | Database, migrations, ORM         | `src/db/**`, `migrations/**`           |
-| T4   | Infrastructure  | CI/CD, Docker, cloud config       | `infra/**`, `.github/**`, `docker/**`  |
-| T5   | Auth            | Authentication & authorization    | `src/auth/**`, `src/middleware/auth*`   |
-| T6   | Integration     | Third-party services & webhooks   | `src/integrations/**`, `src/webhooks/**` |
-| T7   | Documentation   | Docs, ADRs, runbooks              | `docs/**`, `*.md`                      |
-| T8   | DevEx           | Tooling, linting, DX improvements | `scripts/**`, `tools/**`, `.config/**` |
-| T9   | Platform        | Shared libraries & core modules   | `src/lib/**`, `src/core/**`            |
-| T10  | Quality         | Testing, coverage, benchmarks     | `tests/**`, `benchmarks/**`, `e2e/**`  |
+| ID  | Team Name      | Focus Area                        | Primary Scope                            |
+| --- | -------------- | --------------------------------- | ---------------------------------------- |
+| T1  | Backend        | Server-side logic & APIs          | `src/server/**`, `src/api/**`            |
+| T2  | Frontend       | UI components & client state      | `src/client/**`, `src/components/**`     |
+| T3  | Data           | Database, migrations, ORM         | `src/db/**`, `migrations/**`             |
+| T4  | Infrastructure | CI/CD, Docker, cloud config       | `infra/**`, `.github/**`, `docker/**`    |
+| T5  | Auth           | Authentication & authorization    | `src/auth/**`, `src/middleware/auth*`    |
+| T6  | Integration    | Third-party services & webhooks   | `src/integrations/**`, `src/webhooks/**` |
+| T7  | Documentation  | Docs, ADRs, runbooks              | `docs/**`, `*.md`                        |
+| T8  | DevEx          | Tooling, linting, DX improvements | `scripts/**`, `tools/**`, `.config/**`   |
+| T9  | Platform       | Shared libraries & core modules   | `src/lib/**`, `src/core/**`              |
+| T10 | Quality        | Testing, coverage, benchmarks     | `tests/**`, `benchmarks/**`, `e2e/**`    |
 
 ---
 
@@ -210,8 +210,9 @@ criteria, activities, and exit criteria (quality gates).
 
 - **Objective**: Verify the solution meets requirements.
 - **Activities**:
-  - Create pull request with description and test plan
-  - All CI checks must pass
+  - Create pull request — **title MUST use Conventional Commits**: `type(scope): description`
+  - Run `pnpm -C .agentkit agentkit:sync` if any spec files changed, and commit regenerated outputs
+  - All CI checks must pass (including PR title validation and drift check)
   - Code review by relevant team members
   - Manual testing for UI or user-facing changes
 - **Exit criteria**: PR created, all checks pass, approvals received.
@@ -321,14 +322,14 @@ For changes that affect all teams (e.g., T9 shared library update):
 
 ## Escalation Paths
 
-| Severity | Condition                           | Action                              |
-|----------|-------------------------------------|-------------------------------------|
-| Low      | Task delayed, no blockers           | Log in backlog, continue            |
-| Medium   | Cross-team dependency unresolved    | Orchestrator mediates               |
-| High     | Quality gate failure on retry       | Escalate to T10 + team lead         |
-| Critical | Security issue or data loss risk    | Immediate halt, escalate to T5 + T4 |
+| Severity | Condition                        | Action                              |
+| -------- | -------------------------------- | ----------------------------------- |
+| Low      | Task delayed, no blockers        | Log in backlog, continue            |
+| Medium   | Cross-team dependency unresolved | Orchestrator mediates               |
+| High     | Quality gate failure on retry    | Escalate to T10 + team lead         |
+| Critical | Security issue or data loss risk | Immediate halt, escalate to T5 + T4 |
 
 ---
 
-*This specification is maintained by AgentKit Forge. Do not edit directly.*
-*Run `pnpm -C .agentkit agentkit:sync` to regenerate from the canonical spec.*
+_This specification is maintained by AgentKit Forge. Do not edit directly._
+_Run `pnpm -C .agentkit agentkit:sync` to regenerate from the canonical spec._

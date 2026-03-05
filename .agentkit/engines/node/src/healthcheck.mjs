@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import yaml from 'js-yaml';
 import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
 import { appendEvent, loadState, saveState } from './orchestrator.mjs';
+import { createTask } from './task-protocol.mjs';
 
 // ---------------------------------------------------------------------------
 // Tooling checks
@@ -40,7 +41,12 @@ const TOOL_CHECKS = [
  * @returns {object}
  */
 export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) {
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
   console.log('[agentkit:healthcheck] Running pre-flight validation...');
+  if (userContext) {
+    console.log(`[agentkit:healthcheck] Context: ${userContext}`);
+  }
   console.log('');
 
   const results = {
@@ -71,7 +77,7 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
   // --- Step 2: Check AgentKit setup ---
   console.log('--- AgentKit Setup ---');
   const hasMarker = existsSync(resolve(projectRoot, '.agentkit-repo'));
-  const hasState = existsSync(resolve(projectRoot, '.claude', 'state', 'orchestrator.json'));
+  const hasState = existsSync(resolve(projectRoot, '.agentkit', 'state', 'orchestrator.json'));
   const hasCommands = existsSync(resolve(projectRoot, '.claude', 'commands'));
   const hasHooks = existsSync(resolve(projectRoot, '.claude', 'hooks'));
 
@@ -90,10 +96,13 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
     const stacks = spec.techStacks || [];
 
     for (const stack of stacks) {
-      const detected = (stack.detect || []).some(marker => {
+      const detected = (stack.detect || []).some((marker) => {
         if (marker.startsWith('*')) {
-          try { return readdirSync(projectRoot).some(f => f.endsWith(marker.replace('*', ''))); }
-          catch { return false; }
+          try {
+            return readdirSync(projectRoot).some((f) => f.endsWith(marker.replace('*', '')));
+          } catch {
+            return false;
+          }
         }
         return existsSync(resolve(projectRoot, marker));
       });
@@ -114,7 +123,13 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
         if (!check.cmd) continue;
         if (!isValidCommand(check.cmd)) {
           console.warn(`  ${check.name.padEnd(12)} SKIP (invalid command rejected)`);
-          stackResult.checks.push({ name: check.name, command: check.cmd, status: 'SKIP', exitCode: -1, durationMs: 0 });
+          stackResult.checks.push({
+            name: check.name,
+            command: check.cmd,
+            status: 'SKIP',
+            exitCode: -1,
+            durationMs: 0,
+          });
           continue;
         }
         process.stdout.write(`  ${check.name.padEnd(12)} `);
@@ -141,6 +156,31 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
   // --- Summary ---
   console.log(`=== Health: ${results.overallHealth} ===`);
 
+  // Auto-create tasks for failed checks
+  if (flags['auto-task'] && results.overallHealth === 'UNHEALTHY') {
+    const failedChecks = results.stacks.flatMap((s) =>
+      s.checks.filter((c) => c.status === 'FAIL').map((c) => ({ stack: s.name, ...c }))
+    );
+    let tasksCreated = 0;
+    for (const check of failedChecks) {
+      const result = await createTask(projectRoot, {
+        delegator: 'healthcheck',
+        assignees: ['testing'],
+        title: `Investigate ${check.name} failure in ${check.stack}`,
+        description: `Healthcheck ${check.name} failed for stack ${check.stack}.\nCommand: ${check.command}\nExit code: ${check.exitCode}`,
+        type: 'investigate',
+        priority: 'P1',
+        area: 'testing',
+        dependsOn: [],
+        handoffTo: [],
+      });
+      if (result.task) tasksCreated++;
+    }
+    if (tasksCreated) {
+      console.log(`[agentkit:healthcheck] Created ${tasksCreated} task(s) for failed checks.`);
+    }
+  }
+
   // Update orchestrator state
   try {
     const state = await loadState(projectRoot);
@@ -149,10 +189,13 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
     await saveState(projectRoot, state);
     await appendEvent(projectRoot, 'healthcheck_completed', {
       overallHealth: results.overallHealth,
-      toolsFound: results.tools.filter(t => t.found).length,
+      toolsFound: results.tools.filter((t) => t.found).length,
       stacksChecked: results.stacks.length,
+      ...(userContext ? { userContext } : {}),
     });
-  } catch (err) { console.warn(`[agentkit:healthcheck] State update failed: ${err?.message ?? String(err)}`); }
+  } catch (err) {
+    console.warn(`[agentkit:healthcheck] State update failed: ${err?.message ?? String(err)}`);
+  }
 
   return results;
 }

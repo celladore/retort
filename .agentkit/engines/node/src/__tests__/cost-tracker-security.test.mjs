@@ -13,7 +13,7 @@ vi.mock('child_process', () => {
 });
 
 describe('cost-tracker security', () => {
-  const TEST_ROOT = resolve('.test-cost-security');
+  const TEST_ROOT = resolve('.test-tmp', 'cost-security');
   const PROJECT_ROOT = resolve(TEST_ROOT, 'project');
 
   beforeEach(() => {
@@ -60,7 +60,11 @@ describe('cost-tracker security', () => {
     const session = initSession({ agentkitRoot: TEST_ROOT, projectRoot: PROJECT_ROOT });
     vi.clearAllMocks(); // Clear calls from initSession
 
-    endSession({ agentkitRoot: TEST_ROOT, projectRoot: PROJECT_ROOT, sessionId: session.sessionId });
+    endSession({
+      agentkitRoot: TEST_ROOT,
+      projectRoot: PROJECT_ROOT,
+      sessionId: session.sessionId,
+    });
 
     // Should NOT use shell execution
     expect(child_process.execSync).not.toHaveBeenCalled();
@@ -97,19 +101,25 @@ describe('cost-tracker security', () => {
       throw new Error('git not found');
     });
 
-    const endedSession = endSession({ agentkitRoot: TEST_ROOT, projectRoot: PROJECT_ROOT, sessionId: session.sessionId });
+    const endedSession = endSession({
+      agentkitRoot: TEST_ROOT,
+      projectRoot: PROJECT_ROOT,
+      sessionId: session.sessionId,
+    });
 
     // Should default to 0 files modified
     expect(endedSession.filesModified).toBe(0);
   });
   describe('generateSessionId security', () => {
     it('generates a secure session ID using crypto', () => {
-      const getRandomValuesSpy = vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation((array) => {
-        for (let i = 0; i < array.length; i++) {
-          array[i] = 0xab;
-        }
-        return array;
-      });
+      const getRandomValuesSpy = vi
+        .spyOn(globalThis.crypto, 'getRandomValues')
+        .mockImplementation((array) => {
+          for (let i = 0; i < array.length; i++) {
+            array[i] = 0xab;
+          }
+          return array;
+        });
 
       try {
         const sessionId = generateSessionId();
@@ -135,12 +145,14 @@ describe('cost-tracker security', () => {
       ];
       let callIndex = 0;
 
-      const getRandomValuesSpy = vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation((typedArray) => {
-        const source = randomSequences[callIndex] ?? randomSequences[randomSequences.length - 1];
-        callIndex += 1;
-        typedArray.set(source.slice(0, typedArray.length));
-        return typedArray;
-      });
+      const getRandomValuesSpy = vi
+        .spyOn(globalThis.crypto, 'getRandomValues')
+        .mockImplementation((typedArray) => {
+          const source = randomSequences[callIndex] ?? randomSequences[randomSequences.length - 1];
+          callIndex += 1;
+          typedArray.set(source.slice(0, typedArray.length));
+          return typedArray;
+        });
 
       try {
         const id1 = generateSessionId();
@@ -161,5 +173,4 @@ describe('cost-tracker security', () => {
       }
     });
   });
-
 });

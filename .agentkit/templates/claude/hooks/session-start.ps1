@@ -29,22 +29,48 @@ function Test-Tool {
     try {
         $cmd = Get-Command $Command -ErrorAction SilentlyContinue
         if ($cmd) {
-            $ver = & $Command --version 2>$null | Select-Object -First 1
-            if (-not $ver) { $ver = "installed" }
-            $toolsFound.Add("${Name}: ${ver}")
+            $lines = @(& $Command --version 2>&1 | ForEach-Object { ([string]$_) -replace "`0", "" })
+            $ver = $lines | Where-Object { $_ -and $_.Trim() -ne '' -and $_ -notmatch '^(?i)warning:' } | Select-Object -First 1
+            if (-not $ver) {
+                $ver = $lines | Where-Object { $_ -and $_.Trim() -ne '' } | Select-Object -First 1
+            }
+            if ($ver) {
+                $text = [string]$ver
+                if ($text -notmatch '(?i)class not registered|not recognized|not found|no such file|cannot find') {
+                    $toolsFound.Add("${Name}: ${text}")
+                }
+            }
         }
     } catch {
         # Tool not available -- skip.
     }
 }
 
+Test-Tool -Name "Git"      -Command "git"
+Test-Tool -Name "GitHub CLI" -Command "gh"
+Test-Tool -Name "jq"       -Command "jq"
+Test-Tool -Name "Bash"     -Command "bash"
+Test-Tool -Name "PowerShell" -Command "pwsh"
+{{#if hasLanguageJsLikeEffective}}
 Test-Tool -Name "Node.js"  -Command "node"
 Test-Tool -Name "pnpm"     -Command "pnpm"
 Test-Tool -Name "npm"      -Command "npm"
+{{/if}}
+{{#if hasLanguageDotnetEffective}}
 Test-Tool -Name "dotnet"   -Command "dotnet"
+{{/if}}
+{{#if hasLanguageRustEffective}}
 Test-Tool -Name "Cargo"    -Command "cargo"
+{{/if}}
+{{#if hasLanguagePythonEffective}}
 Test-Tool -Name "Python"   -Command "python3"
 Test-Tool -Name "Python"   -Command "python"
+{{/if}}
+{{#if hasAnyInfraConfig}}
+Test-Tool -Name "Docker"   -Command "docker"
+Test-Tool -Name "Azure CLI" -Command "az"
+Test-Tool -Name "Terraform" -Command "terraform"
+{{/if}}
 
 if ($toolsFound.Count -gt 0) {
     $toolsSummary = $toolsFound -join "`n"
@@ -76,6 +102,9 @@ try {
 $envSummary = @"
 Session: $sessionId
 Working directory: $cwd
+{{#if showLanguageProfileDiagnostics}}
+Language profile source: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
+{{/if}}
 
 Toolchains:
 $toolsSummary

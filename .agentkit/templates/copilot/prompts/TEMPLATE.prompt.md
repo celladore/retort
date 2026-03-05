@@ -1,9 +1,9 @@
 ---
-mode: "agent"
-description: "{{commandDescription}}"
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+mode: 'agent'
+description: '{{commandDescription}}'
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -11,6 +11,10 @@ last_updated: "{{syncDate}}"
 # {{commandName}}
 
 {{commandDescription}}
+
+{{#if commandPrompt}}
+{{commandPrompt}}
+{{else}}
 
 ## Instructions
 
@@ -21,12 +25,13 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
 4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
 5. **Report** results clearly
+{{/if}}
 
 ## Project Context
 
 - Repository: {{repoName}}
 - Default branch: {{defaultBranch}}
-{{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
+  {{#if stackLanguages}}- Tech stack: {{stackLanguages}}{{/if}}
 
 ## Conventions
 
@@ -44,3 +49,16 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+
+{{#if isSyncBacklog}}
+## Intake Semantics
+
+- Tracker: `{{issueTracker}}`
+- Intake owner team: `{{intakeOwnerTeam}}`
+- Operations team: `{{intakeOperationsTeam}}`
+- Cadence: `{{intakeCadence}}`
+{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+
+Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
+{{/if}}

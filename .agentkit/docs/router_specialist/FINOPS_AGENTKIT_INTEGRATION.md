@@ -10,12 +10,12 @@
 
 ## 2) Repository Responsibility Model
 
-| Concern | Primary Repo | Role |
-| --- | --- | --- |
-| FinOps methodology, rules, and Phase 1 spec (guidance only) | `agentkit-forge` | Spec + templates: rule domain, optional skill/doc; sync generates `.claude/rules`, `.claude/skills`, or docs in consumer. |
+| Concern                                                            | Primary Repo                      | Role                                                                                                                           |
+| ------------------------------------------------------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| FinOps methodology, rules, and Phase 1 spec (guidance only)        | `agentkit-forge`                  | Spec + templates: rule domain, optional skill/doc; sync generates `.claude/rules`, `.claude/skills`, or docs in consumer.      |
 | FinOps implementation (KQL, Grafana, Advisor, scripts, Cost Guide) | `phoenixvc/pvc-costops-analytics` | All executable and dashboard artifacts; ADX schema, ingestion, dashboards, `export_az_tag_commands.py`, Cost Management Guide. |
-| Session/token cost tracking (AI usage) | `agentkit-forge` | Existing `cost` command/skill; unrelated to cloud FinOps. |
-| Downstream telemetry / KPI (orchestration vs runtime cost) | `phoenixvc/pvc-costops-analytics` | Consumer of canonical contracts; see UPSTREAM_MIGRATION_SPEC §6. |
+| Session/token cost tracking (AI usage)                             | `agentkit-forge`                  | Existing `cost` command/skill; unrelated to cloud FinOps.                                                                      |
+| Downstream telemetry / KPI (orchestration vs runtime cost)         | `phoenixvc/pvc-costops-analytics` | Consumer of canonical contracts; see UPSTREAM_MIGRATION_SPEC §6.                                                               |
 
 So: **Forge = what to do and how to do it (rules/spec). Repo = where it gets done (code and config).**
 

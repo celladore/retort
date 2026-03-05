@@ -1,7 +1,7 @@
 /**
  * AgentKit Forge — Task Protocol
  * File-based A2A-lite task delegation protocol.
- * Tasks are JSON files in .claude/state/tasks/ with lifecycle states,
+ * Tasks are JSON files in .agentkit/state/tasks/ with lifecycle states,
  * messages, artifacts, dependency tracking, and chained handoffs.
  */
 import { existsSync } from 'fs';
@@ -27,13 +27,38 @@ export const TASK_STATES = [
 ];
 
 /** Terminal states — no further transitions allowed. */
-export const TERMINAL_STATES = ['completed', 'failed', 'rejected', 'canceled', 'BLOCKED_ON_CANCELED'];
+export const TERMINAL_STATES = [
+  'completed',
+  'failed',
+  'rejected',
+  'canceled',
+  'BLOCKED_ON_CANCELED',
+];
 
 /** Valid task types. */
 export const TASK_TYPES = VALID_TASK_TYPES;
 
 /** Valid priority levels. */
-export const TASK_PRIORITIES = ['P0', 'P1', 'P2', 'P3'];
+export const TASK_PRIORITIES = ['P0', 'P1', 'P2', 'P3', 'P4'];
+
+/** Valid area labels — matches issue template and spec-validator issueArea. */
+export const TASK_AREAS = [
+  'backend',
+  'frontend',
+  'data',
+  'infra',
+  'devops',
+  'testing',
+  'security',
+  'docs',
+  'product',
+  'quality',
+  'cli',
+  'sync-engine',
+];
+
+/** Valid severity levels — matches issue template and spec-validator issueSeverity. */
+export const TASK_SEVERITIES = ['critical', 'high', 'medium', 'low'];
 
 /** Valid message roles. */
 export const MESSAGE_ROLES = ['delegator', 'executor'];
@@ -52,7 +77,7 @@ export const ARTIFACT_TYPES = [
 // ---------------------------------------------------------------------------
 
 function tasksDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state', 'tasks');
+  return resolve(projectRoot, '.agentkit', 'state', 'tasks');
 }
 
 const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/;
@@ -133,7 +158,7 @@ async function withHandoffLock(projectRoot, taskId, fn) {
 function generateRandomSuffix() {
   if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') {
     throw new Error(
-      'AgentKit Forge Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).',
+      'AgentKit Forge Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).'
     );
   }
   const bytes = new Uint8Array(3);
@@ -157,7 +182,9 @@ export async function generateTaskId(projectRoot) {
   let seq = 1;
 
   try {
-    const dirExists = await access(dir).then(() => true).catch(() => false);
+    const dirExists = await access(dir)
+      .then(() => true)
+      .catch(() => false);
     if (dirExists) {
       const files = await readdir(dir);
       // Single pass to find max sequence number
@@ -184,7 +211,9 @@ export async function generateTaskId(projectRoot) {
 
   while (attempts < maxRetries) {
     const p = taskPath(projectRoot, candidate);
-    const exists = await access(p).then(() => true).catch(() => false);
+    const exists = await access(p)
+      .then(() => true)
+      .catch(() => false);
     if (!exists) {
       return candidate;
     }
@@ -273,6 +302,8 @@ async function writeTaskFile(projectRoot, taskId, data) {
  * @param {string[]} taskData.assignees - Teams/agents this task is assigned to
  * @param {string} [taskData.type] - One of TASK_TYPES (default 'implement')
  * @param {string} [taskData.priority] - One of TASK_PRIORITIES (default P2)
+ * @param {string} [taskData.area] - One of TASK_AREAS (e.g. 'backend', 'security')
+ * @param {string} [taskData.severity] - One of TASK_SEVERITIES (e.g. 'critical', 'high')
  * @param {string[]} [taskData.dependsOn] - Task IDs that must complete first
  * @param {string[]} [taskData.handoffTo] - Teams to auto-delegate to on completion
  * @param {string} [taskData.handoffContext] - Context for the handoff
@@ -302,6 +333,18 @@ export async function createTask(projectRoot, taskData) {
       error: `Invalid priority: ${taskData.priority}. Valid: ${TASK_PRIORITIES.join(', ')}`,
     };
   }
+  if (taskData.area && !TASK_AREAS.includes(taskData.area)) {
+    return {
+      task: null,
+      error: `Invalid area: ${taskData.area}. Valid: ${TASK_AREAS.join(', ')}`,
+    };
+  }
+  if (taskData.severity && !TASK_SEVERITIES.includes(taskData.severity)) {
+    return {
+      task: null,
+      error: `Invalid severity: ${taskData.severity}. Valid: ${TASK_SEVERITIES.join(', ')}`,
+    };
+  }
 
   // Validate dependsOn references exist
   if (Array.isArray(taskData.dependsOn)) {
@@ -323,6 +366,8 @@ export async function createTask(projectRoot, taskData) {
     type: taskData.type || 'implement',
     status: 'submitted',
     priority: taskData.priority || 'P2',
+    area: taskData.area || null,
+    severity: taskData.severity || null,
     createdAt: now,
     updatedAt: now,
 
@@ -405,6 +450,8 @@ export async function getTask(projectRoot, taskId) {
  * @param {string} [filters.delegator] - Filter by delegator
  * @param {string} [filters.type] - Filter by type
  * @param {string} [filters.priority] - Filter by priority
+ * @param {string} [filters.area] - Filter by area
+ * @param {string} [filters.severity] - Filter by severity
  * @returns {Promise<{ tasks: object[] }>}
  */
 export async function listTasks(projectRoot, filters = {}) {
@@ -448,7 +495,7 @@ export async function listTasks(projectRoot, filters = {}) {
           }
           return null;
         }
-      }),
+      })
     );
 
     for (const data of results) {
@@ -463,6 +510,8 @@ export async function listTasks(projectRoot, filters = {}) {
       if (filters.delegator && data.delegator !== filters.delegator) continue;
       if (filters.type && data.type !== filters.type) continue;
       if (filters.priority && data.priority !== filters.priority) continue;
+      if (filters.area && data.area !== filters.area) continue;
+      if (filters.severity && data.severity !== filters.severity) continue;
 
       tasks.push(data);
     }
@@ -699,7 +748,10 @@ export async function checkDependencies(projectRoot) {
     if (newBlockers.length > 0 && !hasInProgressDep && hasCanceledDep) {
       task.blockedReason = 'canceled';
       task.status = 'BLOCKED_ON_CANCELED';
-    } else if (task.status === 'BLOCKED_ON_CANCELED' && (newBlockers.length === 0 || hasInProgressDep)) {
+    } else if (
+      task.status === 'BLOCKED_ON_CANCELED' &&
+      (newBlockers.length === 0 || hasInProgressDep)
+    ) {
       delete task.blockedReason;
       task.status = 'submitted';
     }
@@ -829,7 +881,9 @@ export async function processHandoffs(projectRoot, delegator = 'orchestrator') {
         });
 
         if (createResult.error) {
-          localErrors.push(`Failed to create handoff task for ${targetTeam}: ${createResult.error}`);
+          localErrors.push(
+            `Failed to create handoff task for ${targetTeam}: ${createResult.error}`
+          );
         } else {
           localCreated.push(createResult.task);
           t._handoffProcessedTargets.push(targetTeam);
@@ -877,6 +931,8 @@ export function formatTaskSummary(task) {
     `Task: ${safeTask.id || 'unknown'}`,
     `Title: ${safeTask.title || '(untitled)'}`,
     `Type: ${safeTask.type || 'unknown'} | Priority: ${safeTask.priority || 'unknown'} | Status: ${safeTask.status || 'unknown'}`,
+    safeTask.area ? `Area: ${safeTask.area}` : null,
+    safeTask.severity ? `Severity: ${safeTask.severity}` : null,
     `Delegator: ${safeTask.delegator || 'unknown'} → Assignees: ${safeAssignees.join(', ')}`,
   ];
 
@@ -897,7 +953,7 @@ export function formatTaskSummary(task) {
   lines.push(`Updated: ${safeTask.updatedAt || 'unknown'}`);
   lines.push(`Messages: ${safeMessages.length}`);
 
-  return lines.join('\n');
+  return lines.filter(Boolean).join('\n');
 }
 
 /**
@@ -939,4 +995,3 @@ export function formatTaskList(tasks) {
 
   return lines.join('\n');
 }
-

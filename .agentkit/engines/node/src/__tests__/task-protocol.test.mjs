@@ -238,8 +238,18 @@ describe('listTasks', () => {
   });
 
   it('sorts by priority then date', async () => {
-    await createTask(tmpRoot, { title: 'Low', delegator: 'test', assignees: ['x'], priority: 'P3' });
-    await createTask(tmpRoot, { title: 'High', delegator: 'test', assignees: ['x'], priority: 'P0' });
+    await createTask(tmpRoot, {
+      title: 'Low',
+      delegator: 'test',
+      assignees: ['x'],
+      priority: 'P3',
+    });
+    await createTask(tmpRoot, {
+      title: 'High',
+      delegator: 'test',
+      assignees: ['x'],
+      priority: 'P0',
+    });
     const { tasks } = await listTasks(tmpRoot);
     expect(tasks[0].title).toBe('High');
     expect(tasks[1].title).toBe('Low');
@@ -449,7 +459,7 @@ describe('checkDependencies', () => {
       dependsOn: [taskA.task.id],
     });
 
-    const taskAPath = resolve(tmpRoot, '.claude', 'state', 'tasks', `${taskA.task.id}.json`);
+    const taskAPath = resolve(tmpRoot, '.agentkit', 'state', 'tasks', `${taskA.task.id}.json`);
     const taskAData = JSON.parse(readFileSync(taskAPath, 'utf-8'));
     taskAData.dependsOn = [taskB.task.id];
     writeFileSync(taskAPath, JSON.stringify(taskAData, null, 2) + '\n', 'utf-8');
@@ -461,7 +471,7 @@ describe('checkDependencies', () => {
 
   it('detects self-loop cycle', async () => {
     const taskA = await createTask(tmpRoot, { title: 'A', delegator: 'test', assignees: ['a'] });
-    const taskAPath = resolve(tmpRoot, '.claude', 'state', 'tasks', `${taskA.task.id}.json`);
+    const taskAPath = resolve(tmpRoot, '.agentkit', 'state', 'tasks', `${taskA.task.id}.json`);
     const taskAData = JSON.parse(readFileSync(taskAPath, 'utf-8'));
     taskAData.dependsOn = [taskA.task.id];
     writeFileSync(taskAPath, JSON.stringify(taskAData, null, 2) + '\n', 'utf-8');
@@ -487,8 +497,8 @@ describe('checkDependencies', () => {
       dependsOn: [taskC.task.id],
     });
 
-    const taskAPath = resolve(tmpRoot, '.claude', 'state', 'tasks', `${taskA.task.id}.json`);
-    const taskCPath = resolve(tmpRoot, '.claude', 'state', 'tasks', `${taskC.task.id}.json`);
+    const taskAPath = resolve(tmpRoot, '.agentkit', 'state', 'tasks', `${taskA.task.id}.json`);
+    const taskCPath = resolve(tmpRoot, '.agentkit', 'state', 'tasks', `${taskC.task.id}.json`);
     const taskAData = JSON.parse(readFileSync(taskAPath, 'utf-8'));
     const taskCData = JSON.parse(readFileSync(taskCPath, 'utf-8'));
     taskAData.dependsOn = [taskB.task.id];
@@ -610,7 +620,7 @@ describe('processHandoffs', () => {
     await updateTaskStatus(tmpRoot, task.task.id, 'working', { from: 'data' });
     await updateTaskStatus(tmpRoot, task.task.id, 'completed', { from: 'data' });
 
-    const taskPath = resolve(tmpRoot, '.claude', 'state', 'tasks', `${task.task.id}.json`);
+    const taskPath = resolve(tmpRoot, '.agentkit', 'state', 'tasks', `${task.task.id}.json`);
     const taskData = JSON.parse(readFileSync(taskPath, 'utf-8'));
     taskData.priority = 'P9';
     writeFileSync(taskPath, JSON.stringify(taskData, null, 2) + '\n', 'utf-8');
@@ -658,4 +668,3 @@ describe('formatTaskList', () => {
     expect(table).toContain('submitted');
   });
 });
-

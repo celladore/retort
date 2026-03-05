@@ -6,6 +6,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
@@ -84,6 +85,11 @@ const teamSchema = {
     name: { type: 'string', required: true, minLength: 1 },
     focus: { type: 'string', required: true },
     scope: { type: 'array', required: true, items: { type: 'string' } },
+    accepts: { type: 'array', items: { type: 'string' } },
+    'handoff-chain': { type: 'array', items: { type: 'string' } },
+    'max-task-turns': { type: 'number', min: 1 },
+    'max-handoff-chain-depth': { type: 'number', min: 1 },
+    'max-stagnation-turns': { type: 'number', min: 1 },
   },
 };
 
@@ -145,7 +151,8 @@ function isValidFlagDefault(defaultValue, flagType) {
   if (defaultValue === null || defaultValue === undefined) return true;
   if (flagType === 'string') return typeof defaultValue === 'string';
   if (flagType === 'boolean') return typeof defaultValue === 'boolean';
-  if (flagType === 'number') return typeof defaultValue === 'number' && Number.isFinite(defaultValue);
+  if (flagType === 'number')
+    return typeof defaultValue === 'number' && Number.isFinite(defaultValue);
   if (flagType === 'integer') return Number.isInteger(defaultValue);
   return true;
 }
@@ -164,19 +171,16 @@ function validateCommandFlagSemantics(command, commandPath) {
     }
 
     if (!isValidFlagDefault(flag.default, flag.type)) {
-      errors.push(
-        `${flagPath}.default: invalid default for type "${flag.type}"`
-      );
+      errors.push(`${flagPath}.default: invalid default for type "${flag.type}"`);
     }
 
     if (flag.required === true && (flag.default === null || flag.default === undefined)) {
-      errors.push(
-        `${flagPath}: required flag cannot have null/undefined default`
-      );
+      errors.push(`${flagPath}: required flag cannot have null/undefined default`);
     }
 
     if (Array.isArray(flag.enum)) {
-      const expectedPrimitive = flag.type === 'integer' || flag.type === 'number' ? 'number' : flag.type;
+      const expectedPrimitive =
+        flag.type === 'integer' || flag.type === 'number' ? 'number' : flag.type;
       for (let enumIndex = 0; enumIndex < flag.enum.length; enumIndex++) {
         const enumValue = flag.enum[enumIndex];
         if (typeof enumValue !== expectedPrimitive) {
@@ -186,10 +190,12 @@ function validateCommandFlagSemantics(command, commandPath) {
         }
       }
 
-      if (flag.default !== null && flag.default !== undefined && !flag.enum.includes(flag.default)) {
-        errors.push(
-          `${flagPath}.default: must be one of enum values`
-        );
+      if (
+        flag.default !== null &&
+        flag.default !== undefined &&
+        !flag.enum.includes(flag.default)
+      ) {
+        errors.push(`${flagPath}.default: must be one of enum values`);
       }
     }
 
@@ -198,9 +204,7 @@ function validateCommandFlagSemantics(command, commandPath) {
       (flag.name === '--team' || flag.name === '--phase') &&
       (!Array.isArray(flag.enum) || flag.enum.length === 0)
     ) {
-      errors.push(
-        `${flagPath}.enum: required for workflow routing flag "${flag.name}"`
-      );
+      errors.push(`${flagPath}.enum: required for workflow routing flag "${flag.name}"`);
     }
   }
 
@@ -210,12 +214,15 @@ function validateCommandFlagSemantics(command, commandPath) {
 // ---------------------------------------------------------------------------
 // Schema: rules.yaml
 // ---------------------------------------------------------------------------
+const VALID_PHASES = ['discovery', 'planning', 'implementation', 'validation', 'ship'];
+
 const ruleConventionSchema = {
   type: 'object',
   properties: {
     id: { type: 'string', required: true, minLength: 1 },
     rule: { type: 'string', required: true },
     severity: { type: 'string', required: true, enum: ['critical', 'error', 'warning', 'info'] },
+    type: { type: 'string', required: false, enum: ['advisory', 'enforcement'] },
   },
 };
 
@@ -260,6 +267,8 @@ const PROJECT_ENUMS = {
   commitConvention: ['conventional', 'semantic', 'none'],
   codeReview: ['required-pr', 'optional', 'none'],
   teamSize: ['solo', 'small', 'medium', 'large'],
+  issueTracker: ['github', 'linear', 'none'],
+  intakeCadence: ['daily', 'on-demand', 'weekly'],
   loggingFramework: [
     'serilog',
     'winston',
@@ -299,6 +308,8 @@ const PROJECT_ENUMS = {
   ],
   envConfigStrategy: ['env-vars', 'config-files', 'vault', 'app-config', 'none'],
   monorepoTool: ['turborepo', 'nx', 'lerna', 'pnpm-workspaces'],
+  languageProfileMode: ['configured', 'hybrid', 'heuristic'],
+  languageProfileDiagnostics: ['off', 'minimal', 'verbose'],
   // Infrastructure
   infraStateBackend: ['azurerm', 's3', 'gcs', 'consul', 'local', 'none'],
   infraLockProvider: ['blob-lease', 'dynamodb', 'consul', 'none'],
@@ -317,8 +328,47 @@ const PROJECT_ENUMS = {
   complianceFramework: ['soc2', 'iso27001', 'pci-dss', 'hipaa', 'gdpr', 'internal', 'none'],
   backupSchedule: ['daily', 'weekly', 'continuous', 'none'],
   auditEventBus: ['service-bus', 'event-hub', 'sns', 'none'],
+  // Issue template fields — canonical allowed values for issue forms and validation
+  issueArea: [
+    'backend',
+    'frontend',
+    'data',
+    'infra',
+    'devops',
+    'testing',
+    'security',
+    'docs',
+    'product',
+    'quality',
+    'cli',
+    'sync-engine',
+  ],
+  issuePriority: ['P0', 'P1', 'P2', 'P3', 'P4'],
+  issueSeverity: ['critical', 'high', 'medium', 'low'],
+  issueImpact: [
+    'all users',
+    'most users',
+    'some users',
+    'specific configuration only',
+    'developer/CI only',
+  ],
 };
 
+const teamsIntakeSchema = {
+  type: 'object',
+  properties: {
+    ownerTeam: { type: 'string', required: true, minLength: 1 },
+    operationsTeam: { type: 'string', required: true, minLength: 1 },
+    routing: { type: 'object' },
+    escalation: {
+      type: 'object',
+      properties: {
+        securityCritical: { type: 'array', items: { type: 'string' } },
+        blockedCrossTeam: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  },
+};
 // ---------------------------------------------------------------------------
 // Schema: project.yaml
 // ---------------------------------------------------------------------------
@@ -443,6 +493,27 @@ const projectSchema = {
         commitConvention: { type: 'string', enum: PROJECT_ENUMS.commitConvention },
         codeReview: { type: 'string', enum: PROJECT_ENUMS.codeReview },
         teamSize: { type: 'string', enum: PROJECT_ENUMS.teamSize },
+        issueTracker: { type: 'string', enum: PROJECT_ENUMS.issueTracker },
+        intake: {
+          type: 'object',
+          properties: {
+            ownerTeam: { type: 'string', minLength: 1 },
+            operationsTeam: { type: 'string', minLength: 1 },
+            cadence: { type: 'string', enum: PROJECT_ENUMS.intakeCadence },
+            autoImport: { type: 'boolean' },
+            importLabelsMap: { type: 'object' },
+            importStateMap: { type: 'object' },
+            importTeamMap: { type: 'object' },
+            routing: { type: 'object' },
+            escalation: {
+              type: 'object',
+              properties: {
+                securityCritical: { type: 'array', items: { type: 'string' } },
+                blockedCrossTeam: { type: 'array', items: { type: 'string' } },
+              },
+            },
+          },
+        },
       },
     },
     testing: {
@@ -452,6 +523,42 @@ const projectSchema = {
         integration: { type: 'array', items: { type: 'string' } },
         e2e: { type: 'array', items: { type: 'string' } },
         coverage: { type: 'number', min: 0, max: 100 },
+      },
+    },
+    automation: {
+      type: 'object',
+      properties: {
+        baselineProfile: { type: 'string' },
+        ciProfile: { type: 'string' },
+        checks: {
+          type: 'object',
+          properties: {
+            codeql: { type: 'boolean' },
+            semgrep: { type: 'boolean' },
+            dependencyAudit: { type: 'boolean' },
+          },
+        },
+        languageProfile: {
+          type: 'object',
+          properties: {
+            mode: { type: 'string', enum: PROJECT_ENUMS.languageProfileMode },
+            diagnostics: { type: 'string', enum: PROJECT_ENUMS.languageProfileDiagnostics },
+            inferFrom: {
+              type: 'object',
+              properties: {
+                frameworks: { type: 'boolean' },
+                tests: { type: 'boolean' },
+              },
+            },
+            scaffoldOverrides: {
+              type: 'object',
+              properties: {
+                alwaysRegenerate: { type: 'array', items: { type: 'string' } },
+                scaffoldOnce: { type: 'array', items: { type: 'string' } },
+              },
+            },
+          },
+        },
       },
     },
     integrations: {
@@ -541,6 +648,39 @@ function validateProjectYaml(project) {
 
   errors.push(...validate(project, projectSchema, 'project.yaml'));
 
+  // Validate intake import maps
+  const intake = project?.process?.intake;
+  if (intake) {
+    const VALID_PRIORITIES = ['P0', 'P1', 'P2', 'P3'];
+    const VALID_STATUSES = ['open', 'in-progress', 'completed', 'blocked', 'deferred'];
+
+    if (intake.importLabelsMap && typeof intake.importLabelsMap === 'object') {
+      for (const [label, priority] of Object.entries(intake.importLabelsMap)) {
+        if (!VALID_PRIORITIES.includes(priority)) {
+          errors.push(
+            `project.yaml: process.intake.importLabelsMap.${label} must be one of [${VALID_PRIORITIES.join(', ')}], got "${priority}"`
+          );
+        }
+      }
+    }
+
+    if (intake.importStateMap && typeof intake.importStateMap === 'object') {
+      for (const [state, status] of Object.entries(intake.importStateMap)) {
+        if (!VALID_STATUSES.includes(status)) {
+          errors.push(
+            `project.yaml: process.intake.importStateMap.${state} must be one of [${VALID_STATUSES.join(', ')}], got "${status}"`
+          );
+        }
+      }
+    }
+
+    if (intake.autoImport === true && project?.process?.issueTracker === 'none') {
+      warnings.push(
+        'project.yaml: process.intake.autoImport is true but issueTracker is "none" — external import will be a no-op'
+      );
+    }
+  }
+
   return { errors, warnings };
 }
 
@@ -551,7 +691,7 @@ function validateProjectYaml(project) {
 function validateCrossReferences(specs) {
   const errors = [];
 
-  const { teams, commands, agents } = specs;
+  const { teams, commands, agents, project } = specs;
 
   // Verify team commands reference valid team IDs
   const teamIds = new Set((teams?.teams || []).map((t) => t.id));
@@ -731,6 +871,70 @@ function validateCrossReferences(specs) {
     detectHandoffCycle(teamId);
   }
 
+  // Validate teams.intake ownership/routing references
+  const intake = teams?.intake;
+  if (intake && typeof intake === 'object' && !Array.isArray(intake)) {
+    const ownerTeam = intake.ownerTeam;
+    if (typeof ownerTeam === 'string' && ownerTeam && !teamIds.has(ownerTeam)) {
+      errors.push(`teams.yaml: intake.ownerTeam references unknown team "${ownerTeam}"`);
+    }
+
+    const operationsTeam = intake.operationsTeam;
+    if (typeof operationsTeam === 'string' && operationsTeam && !teamIds.has(operationsTeam)) {
+      errors.push(`teams.yaml: intake.operationsTeam references unknown team "${operationsTeam}"`);
+    }
+
+    const routing = intake.routing;
+    if (routing && typeof routing === 'object' && !Array.isArray(routing)) {
+      for (const [routeKey, routeTeam] of Object.entries(routing)) {
+        if (typeof routeTeam !== 'string') {
+          errors.push(`teams.yaml: intake.routing.${routeKey} must be a string team id`);
+          continue;
+        }
+        if (!teamIds.has(routeTeam)) {
+          errors.push(
+            `teams.yaml: intake.routing.${routeKey} references unknown team "${routeTeam}"`
+          );
+        }
+      }
+    }
+
+    const escalation = intake.escalation;
+    if (escalation && typeof escalation === 'object' && !Array.isArray(escalation)) {
+      for (const [escalationKey, escalationTeams] of Object.entries(escalation)) {
+        if (!Array.isArray(escalationTeams)) {
+          errors.push(`teams.yaml: intake.escalation.${escalationKey} must be an array`);
+          continue;
+        }
+        for (const escalationTeam of escalationTeams) {
+          if (typeof escalationTeam !== 'string') {
+            errors.push(
+              `teams.yaml: intake.escalation.${escalationKey} entries must be string team ids`
+            );
+            continue;
+          }
+          if (!teamIds.has(escalationTeam)) {
+            errors.push(
+              `teams.yaml: intake.escalation.${escalationKey} references unknown team "${escalationTeam}"`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Validate project.yaml importTeamMap values against team IDs
+  const importTeamMap = project?.process?.intake?.importTeamMap;
+  if (importTeamMap && typeof importTeamMap === 'object' && teamIds.size > 0) {
+    for (const [mapLabel, teamId] of Object.entries(importTeamMap)) {
+      if (typeof teamId === 'string' && teamId && !teamIds.has(teamId)) {
+        errors.push(
+          `project.yaml: process.intake.importTeamMap.${mapLabel} references unknown team "${teamId}" (not defined in teams.yaml)`
+        );
+      }
+    }
+  }
+
   // Check for duplicate rule convention IDs
   const seenRuleIds = new Set();
   for (const domain of specs.rules?.rules || []) {
@@ -744,10 +948,57 @@ function validateCrossReferences(specs) {
     }
   }
 
-  // Validate that allowed-tools in commands only reference known tools
+  // Validate agent domain-rules: each entry must be a string, and any
+  // bracketed rule IDs (e.g. [gw-conventional-commits, gw-atomic-commits])
+  // must reference known convention IDs from rules.yaml.
+  if (agents?.agents) {
+    for (const [category, agentList] of Object.entries(agents.agents)) {
+      if (!Array.isArray(agentList)) continue;
+      for (const agent of agentList) {
+        const domainRules = agent['domain-rules'];
+        if (domainRules === undefined || domainRules === null) continue;
+        if (!Array.isArray(domainRules)) {
+          errors.push(`agents.yaml: agent "${agent.id}" domain-rules must be an array`);
+          continue;
+        }
+        for (let i = 0; i < domainRules.length; i++) {
+          const rule = domainRules[i];
+          if (typeof rule !== 'string') {
+            errors.push(
+              `agents.yaml: agent "${agent.id}" domain-rules[${i}] must be a string, got ${typeof rule}`
+            );
+            continue;
+          }
+          // Extract bracketed rule IDs and validate against rules.yaml
+          for (const bracketMatch of rule.matchAll(/\[([^\]]+)\]/g)) {
+            const ids = bracketMatch[1].split(',').map((s) => s.trim());
+            for (const id of ids) {
+              if (id && !seenRuleIds.has(id)) {
+                errors.push(
+                  `agents.yaml: agent "${agent.id}" domain-rules[${i}] references unknown rule id "${id}"`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Validate that allowed-tools in commands only reference known tools.
+  // Only Bash supports restricted patterns like "Bash(git *)". Other tools
+  // must be plain names from VALID_TOOLS.
   for (const cmd of commands?.commands || []) {
     for (const tool of cmd['allowed-tools'] || []) {
-      if (!VALID_TOOLS.includes(tool)) {
+      let baseTool = tool;
+      if (tool.startsWith('Bash(') && tool.endsWith(')')) {
+        baseTool = 'Bash';
+        const pattern = tool.slice(5, -1);
+        if (!pattern) {
+          errors.push(`commands.yaml: command "${cmd.name}" has empty Bash() pattern`);
+        }
+      }
+      if (!VALID_TOOLS.includes(baseTool)) {
         errors.push(`commands.yaml: command "${cmd.name}" references unknown tool "${tool}"`);
       }
     }
@@ -794,11 +1045,47 @@ export function validateSpec(agentkitRoot) {
   const aliases = loadYaml('aliases.yaml');
   const docs = loadYaml('docs.yaml');
 
+  // Validate features.yaml if present
+  const featuresPath = resolve(specDir, 'features.yaml');
+  if (existsSync(featuresPath)) {
+    try {
+      const featuresData = yaml.load(readFileSync(featuresPath, 'utf-8'));
+      if (featuresData === null || featuresData === undefined) {
+        errors.push('features.yaml: file is empty or contains only null');
+      } else if (typeof featuresData !== 'object' || Array.isArray(featuresData)) {
+        errors.push(
+          `features.yaml: root must be an object, got ${Array.isArray(featuresData) ? 'array' : typeof featuresData}`
+        );
+      } else if (featuresData && typeof featuresData === 'object') {
+        if (!featuresData.features || !Array.isArray(featuresData.features)) {
+          errors.push('features.yaml: missing or invalid "features" array');
+        } else {
+          const featureResult = validateFeatureSpec(
+            featuresData.features,
+            featuresData.presets || {}
+          );
+          errors.push(...featureResult.errors);
+          warnings.push(...featureResult.warnings);
+
+          // Validate affectsTemplates paths reference real template files/dirs
+          const templatesDir = resolve(agentkitRoot, 'templates');
+          if (existsSync(templatesDir)) {
+            const affectsResult = validateAffectsTemplates(featuresData.features, templatesDir);
+            warnings.push(...affectsResult.warnings);
+          }
+        }
+      }
+    } catch (err) {
+      errors.push(`features.yaml: YAML parse error — ${err.message}`);
+    }
+  }
+
   // project.yaml is optional — only validate if present
+  let project = null;
   const projectPath = resolve(specDir, 'project.yaml');
   if (existsSync(projectPath)) {
     try {
-      const project = yaml.load(readFileSync(projectPath, 'utf-8'));
+      project = yaml.load(readFileSync(projectPath, 'utf-8'));
       if (project && typeof project === 'object') {
         const projectResult = validateProjectYaml(project);
         errors.push(...projectResult.errors);
@@ -828,6 +1115,9 @@ export function validateSpec(agentkitRoot) {
           );
         }
       }
+    }
+    if (teams.intake !== undefined && teams.intake !== null) {
+      errors.push(...validate(teams.intake, teamsIntakeSchema, 'teams.yaml.intake'));
     }
   }
 
@@ -870,6 +1160,21 @@ export function validateSpec(agentkitRoot) {
     } else {
       for (let i = 0; i < rules.rules.length; i++) {
         errors.push(...validate(rules.rules[i], ruleDomainSchema, `rules.yaml.rules[${i}]`));
+        // Validate convention-level phase fields (string or array of valid phases)
+        const conventions = rules.rules[i].conventions || [];
+        for (let j = 0; j < conventions.length; j++) {
+          const phase = conventions[j].phase;
+          if (phase !== undefined && phase !== null) {
+            const phases = Array.isArray(phase) ? phase : [phase];
+            for (const p of phases) {
+              if (!VALID_PHASES.includes(p)) {
+                errors.push(
+                  `rules.yaml.rules[${i}].conventions[${j}].phase: must be one of [${VALID_PHASES.join(', ')}], got "${p}"`
+                );
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -899,7 +1204,7 @@ export function validateSpec(agentkitRoot) {
 
   // Cross-spec validation
   if (teams && commands && agents && rules) {
-    errors.push(...validateCrossReferences({ teams, commands, agents, rules }));
+    errors.push(...validateCrossReferences({ teams, commands, agents, rules, project }));
   }
 
   return {
@@ -934,5 +1239,67 @@ export function runSpecValidation(agentkitRoot) {
   return result;
 }
 
+/**
+ * Validates that every PROJECT_MAPPING src path resolves to a value in a
+ * given project.yaml object. This catches mapping entries that reference
+ * spec fields that don't exist (e.g. after a rename or typo).
+ * Returns warnings (not errors) since missing fields are optional.
+ */
+export function validateMappingCoverage(project, projectMapping) {
+  const warnings = [];
+  if (!project || typeof project !== 'object') return warnings;
+
+  for (const mapping of projectMapping) {
+    const parts = mapping.src.split('.');
+    let current = project;
+    let resolved = true;
+
+    for (const part of parts) {
+      if (current === undefined || current === null || typeof current !== 'object') {
+        resolved = false;
+        break;
+      }
+      current = current[part];
+    }
+
+    if (!resolved || current === undefined) {
+      warnings.push(
+        `project-mapping: src "${mapping.src}" (→ {{${mapping.dest}}}) has no corresponding field in project.yaml`
+      );
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Validates that critical project.yaml fields required for template variable coverage are present.
+ * Returns an array of warning strings (empty array when all critical fields are covered).
+ */
+export function validateRequiredFields(specRoot) {
+  const warnings = [];
+  const projectPath = resolve(specRoot, 'spec', 'project.yaml');
+  if (!existsSync(projectPath)) {
+    return warnings;
+  }
+  try {
+    const project = yaml.load(readFileSync(projectPath, 'utf-8'));
+    if (!project || typeof project !== 'object' || Array.isArray(project)) {
+      return warnings;
+    }
+    const requiredFields = ['name', 'phase'];
+    for (const field of requiredFields) {
+      if (project[field] == null || project[field] === '') {
+        warnings.push(
+          `project.yaml: missing '${field}' — template variable coverage will be incomplete.`
+        );
+      }
+    }
+  } catch {
+    // Parse errors are reported by other doctor checks; silently skip here.
+  }
+  return warnings;
+}
+
 // Export validate for testing
-export { PROJECT_ENUMS, validate, validateCrossReferences, validateProjectYaml };
+export { PROJECT_ENUMS, VALID_PHASES, validate, validateCrossReferences, validateProjectYaml };

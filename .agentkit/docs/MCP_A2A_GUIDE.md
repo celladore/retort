@@ -8,9 +8,9 @@ the Agent-to-Agent (A2A) protocol templates shipped with AgentKit Forge.
 AgentKit Forge includes two template files under `.agentkit/templates/mcp/` that
 configure how AI agents interact with external tools and with each other:
 
-| File | Purpose |
-|------|---------|
-| `servers.json` | MCP server definitions for tool-level capabilities |
+| File              | Purpose                                                             |
+| ----------------- | ------------------------------------------------------------------- |
+| `servers.json`    | MCP server definitions for tool-level capabilities                  |
 | `a2a-config.json` | Agent-to-Agent protocol configuration for inter-agent communication |
 
 Both files are rendered by the sync engine and written to the `mcp/` directory in
@@ -88,12 +88,12 @@ tasks to team agents and aggregate their results.
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `enabled` | Whether A2A communication is active. Set to `false` to disable inter-agent messaging. |
-| `protocol_version` | Version of the A2A protocol in use. |
-| `task_format` | Serialization format for task payloads. Currently `"json"`. |
-| `context_transfer` | How context is shared between agents. `"memory"` uses the MCP memory server. |
+| Field                | Description                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `enabled`            | Whether A2A communication is active. Set to `false` to disable inter-agent messaging.                      |
+| `protocol_version`   | Version of the A2A protocol in use.                                                                        |
+| `task_format`        | Serialization format for task payloads. Currently `"json"`.                                                |
+| `context_transfer`   | How context is shared between agents. `"memory"` uses the MCP memory server.                               |
 | `result_aggregation` | Which agent collects and merges results. `"orchestrator"` means the coordinator agent handles aggregation. |
 
 ### Agent Definitions
@@ -128,30 +128,122 @@ capabilities:
 
 **Registered agents:**
 
-| Agent ID | Role | Domain | Capabilities |
-|----------|------|--------|-------------|
-| `orchestrator` | coordinator | (all) | delegate, aggregate, monitor |
-| `team-backend` | executor | api, services | implement, test, review |
-| `team-frontend` | executor | ui, components | implement, test, review |
-| `team-data` | executor | database, models | implement, test, review |
-| `team-infra` | executor | iac, cloud | implement, test, review |
-| `team-devops` | executor | ci, cd, automation | implement, test, review |
-| `team-testing` | executor | tests, quality | implement, test, review |
-| `team-security` | executor | auth, compliance | implement, test, review |
-| `team-docs` | executor | documentation | implement, review |
-| `team-product` | executor | features, prd | implement, review |
-| `team-quality` | executor | review, refactor | implement, test, review |
+| Agent ID        | Role        | Domain             | Capabilities                 |
+| --------------- | ----------- | ------------------ | ---------------------------- |
+| `orchestrator`  | coordinator | (all)              | delegate, aggregate, monitor |
+| `team-backend`  | executor    | api, services      | implement, test, review      |
+| `team-frontend` | executor    | ui, components     | implement, test, review      |
+| `team-data`     | executor    | database, models   | implement, test, review      |
+| `team-infra`    | executor    | iac, cloud         | implement, test, review      |
+| `team-devops`   | executor    | ci, cd, automation | implement, test, review      |
+| `team-testing`  | executor    | tests, quality     | implement, test, review      |
+| `team-security` | executor    | auth, compliance   | implement, test, review      |
+| `team-docs`     | executor    | documentation      | implement, review            |
+| `team-product`  | executor    | features, prd      | implement, review            |
+| `team-quality`  | executor    | review, refactor   | implement, test, review      |
 
 ### Message Types
 
 The A2A protocol supports four message types:
 
-| Type | Direction | Purpose |
-|------|-----------|---------|
-| `delegate` | coordinator to executor | Assign a task to a team agent |
-| `report` | executor to coordinator | Return results from a completed task |
-| `query` | any to any | Request information from another agent |
-| `broadcast` | coordinator to all | Send information to all agents simultaneously |
+| Type        | Direction               | Purpose                                       |
+| ----------- | ----------------------- | --------------------------------------------- |
+| `delegate`  | coordinator to executor | Assign a task to a team agent                 |
+| `report`    | executor to coordinator | Return results from a completed task          |
+| `query`     | any to any              | Request information from another agent        |
+| `broadcast` | coordinator to all      | Send information to all agents simultaneously |
+
+### Message Payload Examples
+
+> **Note:** The following JSON payloads are **illustrative examples** showing the intended message structure and content. They are not normative schemas — field names, nesting, and envelope structure may differ from the runtime implementation. Use these as a conceptual guide for understanding message flow, not as a wire-format specification.
+
+Below are examples of each message type.
+
+**`delegate` message** (coordinator to executor):
+
+```json
+{
+  "type": "delegate",
+  "id": "msg-001",
+  "from": "orchestrator",
+  "to": "team-backend",
+  "timestamp": "2026-02-23T10:03:45.000Z",
+  "payload": {
+    "task_id": "TASK-001",
+    "title": "Add rate limiting middleware",
+    "description": "Create Express middleware that limits POST /api/auth/login to 5 requests per 15 minutes per IP address. Return HTTP 429 when exceeded.",
+    "type": "implement",
+    "priority": "P1",
+    "scope": ["src/middleware/**", "src/routes/auth.ts"],
+    "context": {
+      "plan_ref": "plan-20260223-rate-limiting",
+      "dependencies": [],
+      "constraints": ["Must use Redis for rate limit state", "Must not break existing auth tests"]
+    }
+  }
+}
+```
+
+**`report` message** (executor to coordinator):
+
+```json
+{
+  "type": "report",
+  "id": "msg-002",
+  "from": "team-backend",
+  "to": "orchestrator",
+  "timestamp": "2026-02-23T10:08:30.000Z",
+  "in_reply_to": "msg-001",
+  "payload": {
+    "task_id": "TASK-001",
+    "status": "success",
+    "summary": "Created rate limiting middleware with Redis backend. Applied to POST /api/auth/login.",
+    "files_changed": [
+      { "path": "src/middleware/rateLimit.ts", "action": "created" },
+      { "path": "src/routes/auth.ts", "action": "modified" },
+      { "path": "src/middleware/__tests__/rateLimit.test.ts", "action": "created" }
+    ],
+    "tests": { "added": 4, "passed": 4, "failed": 0 },
+    "quality_gate": "pass",
+    "handoff_to": "team-testing",
+    "notes": "Redis connection retry logic not yet implemented -- logged as P2 follow-up."
+  }
+}
+```
+
+**`query` message** (any to any):
+
+```json
+{
+  "type": "query",
+  "id": "msg-003",
+  "from": "team-frontend",
+  "to": "team-backend",
+  "timestamp": "2026-02-23T11:00:00.000Z",
+  "payload": {
+    "question": "What is the response shape for GET /api/notifications?unread=true?",
+    "context": "Building NotificationBell component, need to know the API contract."
+  }
+}
+```
+
+**`broadcast` message** (coordinator to all):
+
+```json
+{
+  "type": "broadcast",
+  "id": "msg-004",
+  "from": "orchestrator",
+  "to": "*",
+  "timestamp": "2026-02-23T10:12:01.000Z",
+  "payload": {
+    "event": "phase_transition",
+    "from_phase": 3,
+    "to_phase": 4,
+    "message": "Implementation complete. Entering validation phase. All teams should finalize pending work."
+  }
+}
+```
 
 ---
 

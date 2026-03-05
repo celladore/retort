@@ -3,16 +3,29 @@ import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
-  loadState, saveState, acquireLock, releaseLock, checkLock,
-  appendEvent, readEvents, advancePhase, setPhase, updateTeamStatus,
-  getStatus, PHASES, VALID_TEAM_IDS,
+  loadState,
+  saveState,
+  acquireLock,
+  releaseLock,
+  checkLock,
+  appendEvent,
+  readEvents,
+  advancePhase,
+  setPhase,
+  updateTeamStatus,
+  getStatus,
+  PHASES,
+  VALID_TEAM_IDS,
   getTasksSummary,
+  resolveTeamByArea,
+  computeEscalation,
+  clearTeamsSpecCache,
 } from '../orchestrator.mjs';
 
 // Use a temporary directory for tests
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-orchestrator');
-const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'orchestrator');
+const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
 
 describe('orchestrator', () => {
   beforeEach(() => {
@@ -53,11 +66,7 @@ describe('orchestrator', () => {
         team_progress: {},
         completed: false,
       };
-      writeFileSync(
-        resolve(STATE_DIR, 'orchestrator.json'),
-        JSON.stringify(custom),
-        'utf-8'
-      );
+      writeFileSync(resolve(STATE_DIR, 'orchestrator.json'), JSON.stringify(custom), 'utf-8');
       const state = await loadState(TEST_ROOT);
       expect(state.repo_id).toBe('custom');
       expect(state.current_phase).toBe(3);
@@ -176,11 +185,7 @@ describe('orchestrator', () => {
         started_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
         session_id: '',
       };
-      writeFileSync(
-        resolve(STATE_DIR, 'orchestrator.lock'),
-        JSON.stringify(lockData),
-        'utf-8'
-      );
+      writeFileSync(resolve(STATE_DIR, 'orchestrator.lock'), JSON.stringify(lockData), 'utf-8');
 
       const status = await checkLock(TEST_ROOT);
       expect(status.locked).toBe(true);
@@ -248,7 +253,7 @@ describe('orchestrator', () => {
   });
 
   describe('getTasksSummary()', () => {
-    const TASKS_DIR = resolve(TEST_ROOT, '.claude', 'state', 'tasks');
+    const TASKS_DIR = resolve(TEST_ROOT, '.agentkit', 'state', 'tasks');
 
     it('returns empty-queue message when tasks directory does not exist', async () => {
       const result = await getTasksSummary(TEST_ROOT);
@@ -257,7 +262,7 @@ describe('orchestrator', () => {
 
     it('returns empty-queue message when readdirSync throws', async () => {
       // Create a file at the tasks path so readdirSync throws ENOTDIR
-      mkdirSync(resolve(TEST_ROOT, '.claude', 'state'), { recursive: true });
+      mkdirSync(resolve(TEST_ROOT, '.agentkit', 'state'), { recursive: true });
       writeFileSync(TASKS_DIR, 'not-a-directory');
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toBe('No tasks in the task queue.');
@@ -268,7 +273,14 @@ describe('orchestrator', () => {
       writeFileSync(resolve(TASKS_DIR, 'bad.json'), '{ invalid json !!');
       writeFileSync(
         resolve(TASKS_DIR, 'good.json'),
-        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Do something', priority: 'P1', assignees: ['team-backend'], createdAt: new Date().toISOString() })
+        JSON.stringify({
+          id: 'task-001',
+          status: 'in_progress',
+          title: 'Do something',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: new Date().toISOString(),
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toContain('Active tasks: 1');
@@ -288,19 +300,47 @@ describe('orchestrator', () => {
       const now = new Date().toISOString();
       writeFileSync(
         resolve(TASKS_DIR, 'active1.json'),
-        JSON.stringify({ id: 'task-001', status: 'in_progress', title: 'Task 1', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-001',
+          status: 'in_progress',
+          title: 'Task 1',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'active2.json'),
-        JSON.stringify({ id: 'task-002', status: 'submitted', title: 'Task 2', priority: 'P2', assignees: ['team-frontend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-002',
+          status: 'submitted',
+          title: 'Task 2',
+          priority: 'P2',
+          assignees: ['team-frontend'],
+          createdAt: now,
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'done1.json'),
-        JSON.stringify({ id: 'task-003', status: 'completed', title: 'Task 3', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-003',
+          status: 'completed',
+          title: 'Task 3',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'done2.json'),
-        JSON.stringify({ id: 'task-004', status: 'failed', title: 'Task 4', priority: 'P3', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-004',
+          status: 'failed',
+          title: 'Task 4',
+          priority: 'P3',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toContain('Active tasks: 2');
@@ -312,7 +352,14 @@ describe('orchestrator', () => {
       const now = new Date().toISOString();
       writeFileSync(
         resolve(TASKS_DIR, 'done.json'),
-        JSON.stringify({ id: 'task-001', status: 'canceled', title: 'Done', priority: 'P1', assignees: ['team-backend'], createdAt: now })
+        JSON.stringify({
+          id: 'task-001',
+          status: 'canceled',
+          title: 'Done',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: now,
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).not.toContain('Active tasks');
@@ -323,15 +370,36 @@ describe('orchestrator', () => {
       mkdirSync(TASKS_DIR, { recursive: true });
       writeFileSync(
         resolve(TASKS_DIR, 'task-low-priority.json'),
-        JSON.stringify({ id: 'task-low-priority', status: 'working', priority: 'P2', title: 'Low priority', assignees: [], createdAt: '2024-01-01T08:00:00Z' })
+        JSON.stringify({
+          id: 'task-low-priority',
+          status: 'working',
+          priority: 'P2',
+          title: 'Low priority',
+          assignees: [],
+          createdAt: '2024-01-01T08:00:00Z',
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'task-high-older.json'),
-        JSON.stringify({ id: 'task-high-older', status: 'working', priority: 'P0', title: 'High priority older', assignees: [], createdAt: '2024-01-01T09:00:00Z' })
+        JSON.stringify({
+          id: 'task-high-older',
+          status: 'working',
+          priority: 'P0',
+          title: 'High priority older',
+          assignees: [],
+          createdAt: '2024-01-01T09:00:00Z',
+        })
       );
       writeFileSync(
         resolve(TASKS_DIR, 'task-high-newer.json'),
-        JSON.stringify({ id: 'task-high-newer', status: 'working', priority: 'P0', title: 'Newer high priority', assignees: [], createdAt: '2024-01-01T10:00:00Z' })
+        JSON.stringify({
+          id: 'task-high-newer',
+          status: 'working',
+          priority: 'P0',
+          title: 'Newer high priority',
+          assignees: [],
+          createdAt: '2024-01-01T10:00:00Z',
+        })
       );
       const result = await getTasksSummary(TEST_ROOT);
       const newerPos = result.indexOf('task-high-newer');
@@ -339,6 +407,109 @@ describe('orchestrator', () => {
       const lowPos = result.indexOf('task-low-priority');
       expect(newerPos).toBeLessThan(olderPos);
       expect(olderPos).toBeLessThan(lowPos);
+    });
+  });
+
+  describe('resolveTeamByArea()', () => {
+    const AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
+
+    beforeEach(() => {
+      clearTeamsSpecCache();
+    });
+
+    it('returns default routing for known areas without config', () => {
+      expect(resolveTeamByArea('backend')).toBe('team-backend');
+      expect(resolveTeamByArea('frontend')).toBe('team-frontend');
+      expect(resolveTeamByArea('cli')).toBe('team-backend');
+      expect(resolveTeamByArea('sync-engine')).toBe('team-devops');
+    });
+
+    it('falls back to team-quality for unknown areas', () => {
+      expect(resolveTeamByArea('unknown-area')).toBe('team-quality');
+    });
+
+    it('reads routing from teams.yaml when available', () => {
+      mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
+      writeFileSync(
+        resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'),
+        'intake:\n  routing:\n    backend: custom-backend-team\n',
+        'utf-8'
+      );
+      expect(resolveTeamByArea('backend', AGENTKIT_ROOT)).toBe('team-custom-backend-team');
+      // Other areas still use defaults
+      expect(resolveTeamByArea('frontend', AGENTKIT_ROOT)).toBe('team-frontend');
+    });
+
+    it('handles teams.yaml with team- prefix already present', () => {
+      clearTeamsSpecCache();
+      mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
+      writeFileSync(
+        resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'),
+        'intake:\n  routing:\n    data: team-analytics\n',
+        'utf-8'
+      );
+      expect(resolveTeamByArea('data', AGENTKIT_ROOT)).toBe('team-analytics');
+    });
+  });
+
+  describe('computeEscalation()', () => {
+    const AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
+
+    beforeEach(() => {
+      clearTeamsSpecCache();
+    });
+
+    it('returns empty array when no escalation rules match', () => {
+      const result = computeEscalation({ area: 'docs', priority: 'P3', severity: 'low' });
+      expect(result).toEqual([]);
+    });
+
+    it('escalates critical security issues to security teams', () => {
+      const result = computeEscalation({ area: 'security', priority: 'P0', severity: 'critical' });
+      expect(result).toContain('team-security');
+      expect(result).toContain('team-devops');
+    });
+
+    it('escalates critical backend issues to security teams', () => {
+      const result = computeEscalation({ area: 'backend', priority: 'P1', severity: 'critical' });
+      expect(result).toContain('team-security');
+    });
+
+    it('does not escalate critical docs issues to security teams', () => {
+      const result = computeEscalation({ area: 'docs', priority: 'P0', severity: 'critical' });
+      // P0 still triggers ops team, but not security escalation for docs area
+      expect(result).not.toContain('team-security');
+    });
+
+    it('escalates all-users P0 to blocked cross-team', () => {
+      const result = computeEscalation({ area: 'frontend', priority: 'P0', impact: 'all users' });
+      expect(result).toContain('team-product');
+    });
+
+    it('does not escalate P1 all-users impact', () => {
+      const result = computeEscalation({ area: 'frontend', priority: 'P1', impact: 'all users' });
+      expect(result).not.toContain('team-product');
+    });
+
+    it('notifies operations team for any P0', () => {
+      const result = computeEscalation({ area: 'docs', priority: 'P0' });
+      expect(result).toContain('team-quality');
+    });
+
+    it('reads operations team from config', () => {
+      mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
+      writeFileSync(
+        resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'),
+        'intake:\n  operationsTeam: devops\n  escalation:\n    securityCritical: [infra]\n    blockedCrossTeam: [engineering]\n',
+        'utf-8'
+      );
+      const result = computeEscalation(
+        { area: 'backend', priority: 'P0', severity: 'critical', impact: 'all users' },
+        AGENTKIT_ROOT
+      );
+      expect(result).toContain('team-devops');
+      expect(result).toContain('team-infra');
+      expect(result).toContain('team-engineering');
     });
   });
 });

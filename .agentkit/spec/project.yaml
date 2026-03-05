@@ -20,6 +20,8 @@ phase: active # greenfield | active | maintenance | legacy
 # Tech stack (auto-detected + confirmed at init)
 stack:
   languages: [javascript, yaml, markdown] # e.g. [typescript, csharp, python]
+  nodeVersion: lts/* # e.g. 22, 20, lts/* — used in CI setup-node
+  pythonVersion: '3.12' # e.g. 3.12, 3.11 — used in CI setup-python (only when python in languages)
   frameworks:
     frontend: [] # e.g. [next.js, react]
     backend: [node.js] # e.g. [asp.net-core, express]
@@ -58,6 +60,14 @@ documentation:
   designSystemPath: null # e.g. packages/ui/
   storybook: false
   designTokensPath: null # e.g. styles/tokens/
+  historyPath: docs/history # path to retrospective/issue/lesson history docs
+  hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
+  brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
+
+# Editor theme — generates workbench.colorCustomizations in .vscode/settings.json
+editorTheme:
+  enabled: true # master toggle for VS Code theme generation
+  source: brand # brand | custom | none
 
 # External knowledge/doc sources used to seed template metadata + overlays
 # (no raw bulk copy by default).
@@ -75,15 +85,16 @@ externalKnowledge:
 deployment:
   cloudProvider: none # aws | azure | gcp | vercel | netlify | self-hosted | none
   containerized: false
+  containerRuntime: null # docker | podman | containerd | nerdctl | none
   environments: [local, ci] # e.g. [dev, staging, prod]
   iacTool: none # terraform | bicep | pulumi | cdk | terragrunt | none
 
 # Infrastructure — IaC conventions, naming, and resource management
 infrastructure:
-  namingConvention: "{org}-{env}-{project}-{resourcetype}-{region}" # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
+  namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}' # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
   defaultRegion: global # e.g. southafricanorth, eastus, westeurope
   org: akf # e.g. nl, contoso — the org prefix used in resource names
-  iacToolchain: [none] # e.g. [terraform, terragrunt]
+  iacToolchain: [terraform, terragrunt] # e.g. [terraform, terragrunt]
   stateBackend: none # azurerm | s3 | gcs | consul | local | none
   modulesRepo: null # e.g. git::https://github.com/org/tf-modules.git
   lockProvider: null # blob-lease | dynamodb | consul | none
@@ -113,6 +124,7 @@ compliance:
     rpoHours: null # Recovery Point Objective in hours
     rtoHours: null # Recovery Time Objective in hours
     backupSchedule: null # daily | weekly | continuous | none
+    testSchedule: null # monthly | quarterly | annually | none
     geoRedundancy: false
   audit:
     enabled: false
@@ -122,9 +134,108 @@ compliance:
 # Process & conventions
 process:
   branchStrategy: github-flow # trunk-based | github-flow | gitflow
+  protectedBranches: [main, dev] # branches used in CI triggers (pull_request.branches)
   commitConvention: conventional # conventional | semantic | none
   codeReview: required-pr # required-pr | optional | none
   teamSize: solo # solo | small | medium | large
+  # Issue tracker used by review/project-review/sync-backlog workflows.
+  # github   → gh issue create (requires gh CLI authenticated)
+  # linear   → Linear MCP or linear CLI
+  # none     → log finding to events.log only, do not open external issue
+  issueTracker: github # github | linear | none
+  intake:
+    ownerTeam: product # primary triage owner
+    operationsTeam: quality # routing/hygiene executor
+    cadence: daily # daily | on-demand | weekly
+    # Auto-import external issues into AGENT_BACKLOG.md during adoption (agentkit init)
+    # and when running /sync-backlog. When false, import-issues requires explicit invocation.
+    autoImport: false
+    # Map tracker labels to backlog priorities (P0–P3)
+    importLabelsMap:
+      bug: P1
+      critical: P0
+      enhancement: P2
+      documentation: P3
+      security: P0
+      feature: P2
+      chore: P3
+    # Map tracker issue states to backlog statuses
+    importStateMap:
+      open: open
+      closed: completed
+    # Map tracker labels/keywords to team assignments
+    importTeamMap:
+      backend: backend
+      frontend: frontend
+      api: backend
+      ui: frontend
+      database: data
+      infra: infra
+      ci: devops
+      test: testing
+      security: security
+      docs: docs
+    escalation:
+      securityCritical: [security, devops]
+      blockedCrossTeam: [product]
+
+# Branch protection — GitHub branch protection & repository settings
+# These values feed into the generated setup-branch-protection script.
+# The script uses the GitHub API to apply these rules programmatically.
+branchProtection:
+  # Pull request review requirements
+  requiredReviewCount: 1 # 0-6 approvals required
+  dismissStaleReviews: true # re-review required after new pushes
+  requireCodeOwnerReviews: true # CODEOWNERS review required
+  requireLastPushApproval: false # last pusher cannot self-approve
+
+  # Status checks
+  strictStatusChecks: true # branch must be up-to-date before merge
+  requiredStatusChecks: # CI job names that must pass
+    - 'CI / test (ubuntu-latest, 24)'
+    - 'CI / validate'
+    - 'Branch Protection / branch-rules'
+
+  # Branch rules
+  enforceAdmins: false # apply rules to repo admins too
+  requiredLinearHistory: true # squash/rebase only (no merge commits in history)
+  requireSignedCommits: false # require GPG/SSH signed commits
+  allowForcePushes: false # block force pushes
+  allowDeletions: false # block branch deletion
+  blockCreations: false # block branch creation via push
+  requiredConversationResolution: true # all PR conversations must be resolved
+
+  # Code scanning (applied via GitHub Rulesets API)
+  # Requires GitHub Advanced Security or public repos
+  codeScanning:
+    enabled: true
+    tools:
+      - name: CodeQL
+        # none | critical | high_or_higher | medium_or_higher | all
+        securityAlertThreshold: high_or_higher
+        # none | errors | warnings_and_errors | all
+        alertThreshold: errors
+
+  # GitHub Copilot automated code review
+  copilotReview:
+    enabled: true # auto-request Copilot review on PRs
+    reviewNewPushes: true # re-review when new commits are pushed
+    reviewDraftPRs: true # also review draft pull requests
+
+  # Merge strategies (repository-level settings)
+  mergeStrategies:
+    allowMergeCommits: false # disable merge commits
+    allowSquashMerge: true # enable squash merging
+    allowRebaseMerge: false # disable rebase merging
+    deleteBranchOnMerge: true # auto-delete head branch after merge
+    allowAutoMerge: false # allow PRs to merge automatically when checks pass
+
+  # Merge queue (GitHub merge queue)
+  mergeQueue:
+    enabled: false # enable merge queue for the protected branch
+    mergeMethod: squash # merge | squash | rebase
+    minGroupSize: 1 # minimum PRs to batch
+    maxGroupSize: 5 # maximum PRs to batch
 
 # Testing strategy
 testing:
@@ -145,6 +256,15 @@ automation:
     codeql: true
     semgrep: true
     dependencyAudit: true
+  languageProfile:
+    mode: hybrid # configured | hybrid | heuristic
+    diagnostics: verbose # off | minimal | verbose
+    inferFrom:
+      frameworks: true
+      tests: true
+    scaffoldOverrides:
+      alwaysRegenerate: [] # relative paths that must always be regenerated even if scaffold-once by default
+      scaffoldOnce: [] # relative paths that should be treated as scaffold-once
 
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:
@@ -154,6 +274,22 @@ automation:
 #   - name: PayFast
 #     purpose: payments
 integrations: []
+
+# Evaluation — opt-in infrastructure & codebase fitness evaluation
+# Enable this to add the /infra-eval command for adopting repos.
+# Weights must sum to 100. Custom gates extend the default hard gate set.
+evaluation:
+  infraEval: false # set to true to enable /infra-eval command
+  weights:
+    reliability: 18
+    cost: 16
+    security: 14
+    infra: 12
+    scalability: 12
+    architecture: 10
+    code: 10
+    ops: 8
+  customGates: null # free-text markdown block for project-specific hard gates
 
 # Cross-cutting concerns (project-specific decisions agents must follow)
 crosscutting:

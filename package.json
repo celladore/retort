@@ -6,7 +6,13 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "test": "pnpm -C .agentkit test",
+    "build": "pnpm -C .agentkit agentkit:validate",
     "lint:md": "pnpm -C .agentkit lint:md",
-    "lint:md:fix": "pnpm -C .agentkit lint:md:fix"
+    "lint:md:fix": "pnpm -C .agentkit lint:md:fix",
+    "sync:split-pr": "pwsh -NoLogo -NoProfile -NonInteractive -File scripts/sync-split-pr.ps1",
+    "sync:split-pr:dry": "pwsh -NoLogo -NoProfile -NonInteractive -File scripts/sync-split-pr.ps1 -DryRun",
+    "sync:split-pr:sh": "bash scripts/sync-split-pr.sh",
+    "sync:split-pr:sh:dry": "bash scripts/sync-split-pr.sh --dry-run"
   }
 }

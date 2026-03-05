@@ -2,13 +2,13 @@
 
 **Render target:** _(see [04-windsurf-ide.md](./04-windsurf-ide.md) for Windsurf IDE)_
 
-| | |
-|---|---|
-| **Type** | AI Code Completion Engine (IDE extension) |
-| **Categories** | IDE Extension |
-| **Access** | VS Code / JetBrains / Neovim / Vim / Emacs extension — [codeium.com](https://codeium.com/) |
-| **Documentation** | [docs.codeium.com](https://docs.codeium.com/) |
-| **Performance Rating** | ⭐⭐⭐½ — **67/100** |
+|                        |                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| **Type**               | AI Code Completion Engine (IDE extension)                                                  |
+| **Categories**         | IDE Extension                                                                              |
+| **Access**             | VS Code / JetBrains / Neovim / Vim / Emacs extension — [codeium.com](https://codeium.com/) |
+| **Documentation**      | [docs.codeium.com](https://docs.codeium.com/)                                              |
+| **Performance Rating** | ⭐⭐⭐½ — **67/100**                                                                       |
 
 ---
 
@@ -33,23 +33,23 @@ extension-based completions.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                |
+| --------- | ----------- | ---------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 67/100 ⭐⭐⭐½ | Solid completions; less advanced than Copilot |
-| Developer Experience | 77/100 ⭐⭐⭐⭐ | Widest IDE support; fast, smooth experience |
-| Cost & Value | 90/100 ⭐⭐⭐⭐½ | Free unlimited for individuals; best value |
-| Customization | 35/100 ⭐⭐ | Limited configuration; primarily auto-complete |
-| Privacy & Security | 60/100 ⭐⭐⭐ | SOC 2 Type II; cloud-processed |
-| Team & Enterprise | 55/100 ⭐⭐⭐ | Team plan available; enterprise features growing |
-| **Weighted Total** | **68/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 67/100 ⭐⭐⭐½     | Solid completions; less advanced than Copilot                                 |
+| Developer Experience | 77/100 ⭐⭐⭐⭐    | Widest IDE support; fast, smooth experience                                   |
+| Cost & Value         | 90/100 ⭐⭐⭐⭐½   | Free unlimited for individuals; best value                                    |
+| Customization        | 35/100 ⭐⭐        | Limited configuration; primarily auto-complete                                |
+| Privacy & Security   | 60/100 ⭐⭐⭐      | SOC 2 Type II; cloud-processed                                                |
+| Team & Enterprise    | 55/100 ⭐⭐⭐      | Team plan available; enterprise features growing                              |
+| **Weighted Total**   | **68/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

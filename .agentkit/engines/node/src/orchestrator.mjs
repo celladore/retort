@@ -5,7 +5,7 @@
  */
 import { execFileSync } from 'child_process';
 import {
-  appendFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -16,6 +16,7 @@ import {
 } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { emitEvent, readEvents as readEventsFiltered } from './event-emitter.mjs';
 import { formatTimestamp } from './runner.mjs';
 import {
   checkDependencies,
@@ -25,6 +26,7 @@ import {
   processHandoffs,
   TERMINAL_STATES,
 } from './task-protocol.mjs';
+import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -100,24 +102,177 @@ export function ensureTeamIds(agentkitRoot) {
   }
 }
 
+/**
+ * Default area→team routing map. Used when teams.yaml intake.routing is unavailable.
+ * Matches the canonical issue template area values.
+ */
+const DEFAULT_AREA_ROUTING = {
+  backend: 'team-backend',
+  frontend: 'team-frontend',
+  data: 'team-data',
+  infra: 'team-infra',
+  devops: 'team-devops',
+  testing: 'team-testing',
+  security: 'team-security',
+  docs: 'team-docs',
+  product: 'team-product',
+  quality: 'team-quality',
+  cli: 'team-backend',
+  'sync-engine': 'team-devops',
+};
+
+/**
+ * Cache for parsed teams.yaml to avoid re-reading on every call.
+ * Keyed by resolved agentkitRoot path. Invalidated by process lifetime.
+ */
+const _teamsSpecCache = new Map();
+
+/**
+ * Load and cache teams.yaml spec from disk.
+ * @param {string} [agentkitRoot] - Path to .agentkit directory
+ * @returns {object|null} Parsed teams.yaml or null if unavailable
+ */
+function loadTeamsSpec(agentkitRoot) {
+  if (!agentkitRoot) return null;
+  const key = resolve(agentkitRoot);
+  if (_teamsSpecCache.has(key)) return _teamsSpecCache.get(key);
+  try {
+    const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
+    if (existsSync(teamsPath)) {
+      const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
+      _teamsSpecCache.set(key, spec);
+      return spec;
+    }
+  } catch {
+    /* fall through */
+  }
+  _teamsSpecCache.set(key, null);
+  return null;
+}
+
+/**
+ * Clear the cached teams spec (useful for testing).
+ */
+export function clearTeamsSpecCache() {
+  _teamsSpecCache.clear();
+}
+
+/**
+ * Resolve an issue area to the assigned team ID.
+ * Reads intake.routing from teams.yaml if available, falls back to defaults.
+ * @param {string} area - One of the canonical issue area values
+ * @param {string} [agentkitRoot] - Path to .agentkit directory for reading teams.yaml
+ * @returns {string} Team ID (e.g. 'team-backend')
+ */
+export function resolveTeamByArea(area, agentkitRoot) {
+  const spec = loadTeamsSpec(agentkitRoot);
+  const routing = spec?.intake?.routing;
+  if (routing && routing[area]) {
+    const team = routing[area];
+    return team.startsWith('team-') ? team : `team-${team}`;
+  }
+  return DEFAULT_AREA_ROUTING[area] || 'team-quality';
+}
+
+/**
+ * Compute escalation teams based on issue metadata.
+ * Returns additional team IDs that should be cc'd/notified.
+ * @param {object} params
+ * @param {string} params.area - Issue area
+ * @param {string} params.priority - Priority level (P0-P4)
+ * @param {string} [params.severity] - Severity level (critical/high/medium/low)
+ * @param {string} [params.impact] - Impact scope
+ * @param {string} [agentkitRoot] - Path to .agentkit directory
+ * @returns {string[]} Additional team IDs to escalate to
+ */
+export function computeEscalation({ area, priority, severity, impact }, agentkitRoot) {
+  const escalateTeams = new Set();
+  const spec = loadTeamsSpec(agentkitRoot);
+  const esc = spec?.intake?.escalation;
+
+  let securityTeams = ['team-security', 'team-devops'];
+  let blockedTeams = ['team-product'];
+  let opsTeam = 'team-quality';
+
+  if (esc?.securityCritical) {
+    securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+  }
+  if (esc?.blockedCrossTeam) {
+    blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+  }
+  const configOps = spec?.intake?.operationsTeam;
+  if (configOps) {
+    opsTeam = configOps.startsWith('team-') ? configOps : `team-${configOps}`;
+  }
+
+  // Rule 1: Critical severity in security-sensitive areas → security escalation
+  if (severity === 'critical' && ['security', 'infra', 'backend'].includes(area)) {
+    securityTeams.forEach((t) => escalateTeams.add(t));
+  }
+
+  // Rule 2: All-users impact + P0 priority → blocked escalation
+  if (impact === 'all users' && priority === 'P0') {
+    blockedTeams.forEach((t) => escalateTeams.add(t));
+  }
+
+  // Rule 3: Any P0 → notify operations team
+  if (priority === 'P0') {
+    escalateTeams.add(opsTeam);
+  }
+
+  return [...escalateTeams];
+}
+
 // ---------------------------------------------------------------------------
 // Path helpers
 // ---------------------------------------------------------------------------
 
 function stateDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state');
+  return resolve(projectRoot, '.agentkit', 'state');
 }
 
 function statePath(projectRoot) {
   return resolve(stateDir(projectRoot), 'orchestrator.json');
 }
 
-function eventsPath(projectRoot) {
-  return resolve(stateDir(projectRoot), 'events.log');
-}
-
 function lockPath(projectRoot) {
   return resolve(stateDir(projectRoot), 'orchestrator.lock');
+}
+
+// ---------------------------------------------------------------------------
+// State directory migration (.claude/state → .agentkit/state)
+// ---------------------------------------------------------------------------
+
+const _migrated = new Set();
+
+/**
+ * Migrate state from legacy `.claude/state/` to `.agentkit/state/` if needed.
+ * Copies files to the new location and leaves the old directory intact for one
+ * release (deprecation period). Only runs once per projectRoot per process.
+ * @param {string} projectRoot
+ */
+function migrateStateDirIfNeeded(projectRoot) {
+  if (_migrated.has(projectRoot)) return;
+  _migrated.add(projectRoot);
+
+  const oldDir = resolve(projectRoot, '.claude', 'state');
+  const newDir = stateDir(projectRoot);
+
+  if (!existsSync(oldDir) || existsSync(newDir)) return;
+
+  try {
+    // Recursively copy old → new
+    cpSync(oldDir, newDir, { recursive: true });
+    console.warn(
+      '[agentkit] Migrated state from .claude/state/ to .agentkit/state/. ' +
+        'The old directory is preserved for backward compatibility and can be removed in a future release.'
+    );
+  } catch (err) {
+    console.warn(
+      `[agentkit] State migration failed: ${err.message}. Falling back to new directory.`
+    );
+    mkdirSync(newDir, { recursive: true });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -174,6 +329,7 @@ function createDefaultState(projectRoot) {
  * @returns {object} state
  */
 export function loadState(projectRoot) {
+  migrateStateDirIfNeeded(projectRoot);
   const path = statePath(projectRoot);
   if (existsSync(path)) {
     try {
@@ -290,7 +446,10 @@ export function acquireLock(projectRoot, holder = {}) {
 
 function getHostname() {
   try {
-    return execFileSync('hostname', [], { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return execFileSync('hostname', [], {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
   } catch {
     return 'unknown';
   }
@@ -341,7 +500,8 @@ export function checkLock(projectRoot) {
 }
 
 // ---------------------------------------------------------------------------
-// Event Logging
+// Event Logging — delegated to events.mjs to avoid circular imports.
+// Re-exported here for backward compatibility.
 // ---------------------------------------------------------------------------
 
 /**
@@ -351,16 +511,7 @@ export function checkLock(projectRoot) {
  * @param {object} data - Event data
  */
 export function appendEvent(projectRoot, action, data = {}) {
-  const dir = stateDir(projectRoot);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  const event = {
-    timestamp: new Date().toISOString(),
-    action,
-    ...data,
-  };
-  appendFileSync(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
+  emitEvent(projectRoot, action, data, { source: 'orchestrator' });
 }
 
 /**
@@ -370,19 +521,7 @@ export function appendEvent(projectRoot, action, data = {}) {
  * @returns {object[]}
  */
 export function readEvents(projectRoot, limit = 20) {
-  const path = eventsPath(projectRoot);
-  if (!existsSync(path)) return [];
-  const lines = readFileSync(path, 'utf-8').trim().split('\n').filter(Boolean);
-  const events = lines
-    .map((line) => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-  return events.slice(-limit);
+  return readEventsFiltered(projectRoot, { limit });
 }
 
 // ---------------------------------------------------------------------------
@@ -717,12 +856,129 @@ export async function orchestratorProcessHandoffs(projectRoot, state) {
 }
 
 /**
+ * Deep-clone state and register a task in active_tasks + team_progress.
+ * Shared helper for processCompletedTask and routePhase4TestFailure.
+ *
+ * @param {object} state - Current orchestrator state (not mutated)
+ * @param {object} task - Task with id and assignees
+ * @returns {object} New state with the task tracked
+ */
+function trackTaskInState(state, task) {
+  if (!task?.id || !Array.isArray(task.assignees)) return state;
+
+  if (!state.active_tasks) state.active_tasks = {};
+  for (const assignee of task.assignees) {
+    if (!state.active_tasks[assignee]) {
+      state.active_tasks[assignee] = [];
+    }
+    state.active_tasks[assignee].push(task.id);
+
+    if (!state.team_progress[assignee]) {
+      state.team_progress[assignee] = {
+        status: 'in_progress',
+        tasks: {},
+        last_updated: new Date().toISOString(),
+      };
+    }
+    if (!state.team_progress[assignee].tasks) {
+      state.team_progress[assignee].tasks = {};
+    }
+    state.team_progress[assignee].tasks[task.id] = {
+      status: 'in_progress',
+      present: true,
+    };
+    state.team_progress[assignee].status = 'in_progress';
+    state.team_progress[assignee].last_updated = new Date().toISOString();
+  }
+  return state;
+}
+
+/**
+ * Deep-clone orchestrator state for immutable updates.
+ * @param {object} state
+ * @returns {object}
+ */
+function cloneState(state) {
+  return {
+    ...state,
+    active_tasks: state.active_tasks ? JSON.parse(JSON.stringify(state.active_tasks)) : {},
+    team_progress: state.team_progress ? JSON.parse(JSON.stringify(state.team_progress)) : {},
+  };
+}
+
+/**
+ * Process a completed task through the agent integration pipeline.
+ * Handles notifications, auto-test delegation, doc/security tasks,
+ * and acceptance criteria validation.
+ *
+ * @param {string} projectRoot
+ * @param {string} agentkitRoot
+ * @param {object} state - Current orchestrator state
+ * @param {object} completedTask - The task that just completed
+ * @returns {Promise<{ state: object, result: object }>}
+ */
+export async function processCompletedTask(projectRoot, agentkitRoot, state, completedTask) {
+  const integrationResult = await processTaskCompletion(projectRoot, agentkitRoot, completedTask);
+
+  const newState = cloneState(state);
+
+  // Track newly created tasks in orchestrator state
+  const allNewTasks = [
+    ...integrationResult.notifications,
+    ...integrationResult.testTasks,
+    ...integrationResult.docTasks,
+    ...integrationResult.securityTasks,
+    ...integrationResult.integrationTests,
+    ...integrationResult.dependencyAudits,
+    ...integrationResult.qualityReviews,
+  ];
+
+  for (const task of allNewTasks) {
+    trackTaskInState(newState, task);
+  }
+
+  // Log warnings
+  for (const warning of integrationResult.warnings) {
+    console.warn(`[agentkit:orchestrate] ${warning}`);
+  }
+
+  return { state: newState, result: integrationResult };
+}
+
+/**
+ * Route quality gate failures to the testing team.
+ * Called during Phase 4 when /check fails.
+ *
+ * @param {string} projectRoot
+ * @param {object} state - Current orchestrator state
+ * @param {object} checkResult - Result from runCheck
+ * @param {string[]} changedFileTeams - Team IDs responsible for the changes
+ * @returns {Promise<{ state: object, task: object|null }>}
+ */
+export async function routePhase4TestFailure(projectRoot, state, checkResult, changedFileTeams) {
+  const routeResult = await routeTestFailureToTestingTeam(
+    projectRoot,
+    checkResult,
+    changedFileTeams
+  );
+
+  if (!routeResult.created) {
+    return { state, task: null };
+  }
+
+  const newState = cloneState(state);
+  trackTaskInState(newState, routeResult.created);
+
+  return { state: newState, task: routeResult.created };
+}
+
+/**
  * Get a summary of all active tasks for display.
  * @param {string} projectRoot
  * @returns {string}
  */
 export function getTasksSummary(projectRoot) {
-  const dir = resolve(projectRoot, '.claude', 'state', 'tasks');
+  const dir = resolve(projectRoot, '.agentkit', 'state', 'tasks');
   if (!existsSync(dir)) return 'No tasks in the task queue.';
 
   let files;
@@ -803,6 +1059,9 @@ export async function getTasksSummaryAsync(projectRoot) {
  * @param {object} opts.flags
  */
 export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+
   // Load team IDs from spec if available (overrides hardcoded defaults)
   loadTeamIdsFromSpec(agentkitRoot);
 
@@ -867,6 +1126,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
     appendEvent(projectRoot, 'orchestrate_invoked', {
       phase: state.current_phase,
       phase_name: state.phase_name,
+      ...(userContext ? { userContext } : {}),
     });
   } finally {
     releaseLock(projectRoot);
@@ -876,13 +1136,26 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
 export { PHASES, VALID_TEAM_IDS, VALID_TEAM_STATUSES };
 
 // Re-export task protocol for convenience
-  export {
-    addTaskArtifact,
-    createTask,
-    formatTaskList,
-    formatTaskSummary,
-    getTask as getTaskById,
-    listTasks,
-    updateTaskStatus as updateTaskState
-  } from './task-protocol.mjs';
+export {
+  addTaskArtifact,
+  createTask,
+  formatTaskList,
+  formatTaskSummary,
+  getTask as getTaskById,
+  listTasks,
+  updateTaskStatus as updateTaskState,
+} from './task-protocol.mjs';
 
+// Re-export agent integration for convenience
+export {
+  processTaskCompletion,
+  routeTestFailureToTestingTeam,
+  loadAgentNotifies,
+  loadTeamHandoffChains,
+  validateTestAcceptanceCriteria,
+  getIncrementalTestCommands,
+  resolveCoverageCommand,
+  parseCoveragePercentage,
+  autoCreateDependencyAuditTask,
+  autoCreateQualityReviewTask,
+} from './agent-integration.mjs';

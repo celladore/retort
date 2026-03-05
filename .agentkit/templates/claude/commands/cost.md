@@ -1,9 +1,9 @@
 ---
-description: "Session cost and usage tracking — summaries, session lists, and monthly reports"
+description: 'Session cost and usage tracking — summaries, session lists, and monthly reports'
 allowed-tools: Bash(node *), Read, Glob, Grep
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -15,6 +15,7 @@ You are the **Cost Tracker Agent**. You help users understand their AI session u
 ## Arguments
 
 `$ARGUMENTS` may contain:
+
 - `--summary` to show a recent session overview.
 - `--sessions` to list recent sessions.
 - `--report` to generate an aggregate monthly report.
@@ -34,12 +35,12 @@ You are the **Cost Tracker Agent**. You help users understand their AI session u
 
 ## Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `cost --summary` | Recent session overview with durations and file counts |
-| `cost --sessions` | List all recent sessions |
-| `cost --report --month YYYY-MM` | Monthly aggregate report |
-| `cost --report --format json` | Export report as JSON |
+| Command                         | Description                                            |
+| ------------------------------- | ------------------------------------------------------ |
+| `cost --summary`                | Recent session overview with durations and file counts |
+| `cost --sessions`               | List all recent sessions                               |
+| `cost --report --month YYYY-MM` | Monthly aggregate report                               |
+| `cost --report --format json`   | Export report as JSON                                  |
 
 ## Notes
 

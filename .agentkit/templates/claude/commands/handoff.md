@@ -1,9 +1,9 @@
 ---
-description: "Write a session handoff summary for continuity between sessions"
+description: 'Write a session handoff summary for continuity between sessions'
 allowed-tools: Bash(git *), Bash(mkdir *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -24,7 +24,7 @@ Before writing the handoff, collect information from:
 
 ## Handoff Format
 
-```markdown
+````markdown
 # Session Handoff
 
 **Date:** <ISO-8601>
@@ -34,36 +34,43 @@ Before writing the handoff, collect information from:
 **Overall Status:** <HEALTHY | DEGRADED | BROKEN>
 
 ## What Was Done
+
 - <bulleted list of concrete accomplishments>
 - <include file paths for any significant changes>
 - <reference commit SHAs for key changes>
 
 ## Current Blockers
+
 - <anything that is preventing forward progress>
 - <include error messages or failing commands>
 - "None" if no blockers exist
 
 ## Next 3 Actions
+
 1. <most important next step, with enough detail to execute immediately>
 2. <second priority>
 3. <third priority>
 
 ## How to Validate
+
 <Exact commands to verify the current state of the project>
 ```bash
 <command 1>
 <command 2>
-```
+````
 
 ## Open Risks
+
 - <anything the next session should be aware of>
 - <things that might break, external dependencies, time-sensitive items>
 
 ## State Files
+
 - Orchestrator: `.claude/state/orchestrator.json` — <brief status>
 - Events: `.claude/state/events.log` — <line count> entries
 - Backlog: `AGENT_BACKLOG.md` — <item count> items (<P0 count> blocking)
 - Teams: `AGENT_TEAMS.md` — <team count> teams defined
+
 ```
 
 ## Output Destinations
@@ -73,7 +80,9 @@ Before writing the handoff, collect information from:
 Append to `.claude/state/events.log`:
 
 ```
+
 [<timestamp>] [HANDOFF] [ORCHESTRATOR] Session complete. Done: <count> items. Blockers: <count>. Next: "<first next action>".
+
 ```
 
 ### 2. Handoff Archive (optional)
@@ -81,17 +90,37 @@ Append to `.claude/state/events.log`:
 If the directory `docs/ai_handoffs/` exists, or if the orchestrator state indicates handoff archiving is enabled, also write the full handoff to:
 
 ```
+
 docs/ai_handoffs/<YYYY-MM-DD>.md
+
 ```
 
 If multiple handoffs happen on the same day, append a counter:
 ```
+
 docs/ai_handoffs/<YYYY-MM-DD>-02.md
+
 ```
 
 Do NOT create the `docs/ai_handoffs/` directory if it does not exist. Only write there if it already exists.
 
-### 3. Console Output (always)
+### 3. History Documents (when significant work was done)
+
+Before finalizing the handoff, check whether this session produced significant work that warrants a history document. Evaluate the "What Was Done" list:
+
+**Deduplication check (always do this first):**
+- Read `docs/history/.index.json` and check if a history document was already created during this session (matching today's date and a similar title/slug).
+- If `/orchestrate` Phase 5 invoked this handoff, it has already created history documents — skip creation and note: "History doc: already created by orchestrate Phase 5 — see `docs/history/.index.json`".
+- You can detect orchestrate context by checking `.claude/state/orchestrator.json` for `currentPhase: 5` or by checking if `events.log` contains a recent `[DOCS]` entry for this session.
+
+**If no existing history doc covers this work:**
+- If the session involved **non-trivial changes** (bug fixes touching 2+ files, new features, architecture changes, migrations), run `/document-history --auto` (or `./scripts/create-doc.sh <type> "<title>" [pr-number]` directly).
+- Fill in the generated document with details from the session (use the information you already gathered for the handoff).
+- If no significant work was done (only planning, investigation, or trivial fixes), skip and note in the handoff: "History doc: not needed — <brief reason>".
+
+The handoff captures *what to do next*; the history doc captures *what was done and why* for institutional memory.
+
+### 4. Console Output (always)
 
 Always print the full handoff to the console so the user can see it.
 
@@ -119,3 +148,4 @@ A good handoff passes the "cold start" test: someone with zero context about thi
 3. **Be honest about status.** If the build is broken, say so. Do not sugarcoat.
 4. **Include exact commands.** Every "how to validate" entry must be copy-paste ready.
 5. **Keep it short.** Aim for under 40 lines of content (excluding code blocks).
+```

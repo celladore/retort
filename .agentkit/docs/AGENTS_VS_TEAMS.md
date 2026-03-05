@@ -33,7 +33,7 @@ Agents and teams are complementary but serve different purposes:
 - **Agents** define _who_ does the work -- the expertise and behavioral constraints.
 - **Teams** define _what domain_ the work falls into -- the organizational unit for delegation.
 
-Agents are grouped into six categories (engineering, design, marketing, operations, product, testing). Teams cut across these categories to form action-oriented groups. A single team may draw on multiple agents. For example, the Testing team maps to three agents (test-lead, coverage-tracker, integration-tester), while the Backend team maps primarily to the backend engineer agent.
+Agents are grouped into seven categories (engineering, design, marketing, operations, product, testing, project-management). Teams cut across these categories to form action-oriented groups. A single team may draw on multiple agents. For example, the Testing team maps to three agents (test-lead, coverage-tracker, integration-tester), while the Backend team maps primarily to the backend engineer agent.
 
 The orchestrator tracks progress per team (not per agent) using statuses: `idle`, `in_progress`, `blocked`, and `done`.
 
@@ -41,67 +41,74 @@ The orchestrator tracks progress per team (not per agent) using statuses: `idle`
 
 ## The 10 Teams
 
-| ID | Name | Focus | Slash Command |
-|----|------|-------|---------------|
-| `backend` | BACKEND | API, services, core logic | `/team-backend` |
-| `frontend` | FRONTEND | UI, components, PWA | `/team-frontend` |
-| `data` | DATA | Database, models, migrations | `/team-data` |
-| `infra` | INFRA | IaC, cloud, Terraform/Bicep | `/team-infra` |
-| `devops` | DEVOPS | CI/CD, pipelines, automation | `/team-devops` |
-| `testing` | TESTING | Unit, E2E, integration tests | `/team-testing` |
-| `security` | SECURITY | Auth, compliance, audit | `/team-security` |
-| `docs` | DOCUMENTATION | Docs, ADRs, guides | `/team-docs` |
-| `product` | PRODUCT | Features, PRDs, roadmap | `/team-product` |
-| `quality` | QUALITY | Code review, refactoring, reliability | `/team-quality` |
+| ID         | Name          | Focus                                 | Slash Command    |
+| ---------- | ------------- | ------------------------------------- | ---------------- |
+| `backend`  | BACKEND       | API, services, core logic             | `/team-backend`  |
+| `frontend` | FRONTEND      | UI, components, PWA                   | `/team-frontend` |
+| `data`     | DATA          | Database, models, migrations          | `/team-data`     |
+| `infra`    | INFRA         | IaC, cloud, Terraform/Bicep           | `/team-infra`    |
+| `devops`   | DEVOPS        | CI/CD, pipelines, automation          | `/team-devops`   |
+| `testing`  | TESTING       | Unit, E2E, integration tests          | `/team-testing`  |
+| `security` | SECURITY      | Auth, compliance, audit               | `/team-security` |
+| `docs`     | DOCUMENTATION | Docs, ADRs, guides                    | `/team-docs`     |
+| `product`  | PRODUCT       | Features, PRDs, roadmap               | `/team-product`  |
+| `quality`  | QUALITY       | Code review, refactoring, reliability | `/team-quality`  |
 
-## The 16 Agents by Category
+## The 19 Agents by Category
 
 ### Engineering (5 agents)
 
-| Agent ID | Name | Primary Responsibility |
-|----------|------|----------------------|
-| `backend` | Backend Engineer | API design, service architecture, business logic |
-| `frontend` | Frontend Engineer | UI components, state management, accessibility |
-| `data` | Data Engineer | Database schemas, migrations, query optimization |
-| `devops` | DevOps Engineer | CI/CD pipelines, containers, deployment automation |
-| `infra` | Infrastructure Engineer | IaC modules, cloud resources, platform reliability |
+| Agent ID   | Name                    | Primary Responsibility                             |
+| ---------- | ----------------------- | -------------------------------------------------- |
+| `backend`  | Backend Engineer        | API design, service architecture, business logic   |
+| `frontend` | Frontend Engineer       | UI components, state management, accessibility     |
+| `data`     | Data Engineer           | Database schemas, migrations, query optimization   |
+| `devops`   | DevOps Engineer         | CI/CD pipelines, containers, deployment automation |
+| `infra`    | Infrastructure Engineer | IaC modules, cloud resources, platform reliability |
 
 ### Design (2 agents)
 
-| Agent ID | Name | Primary Responsibility |
-|----------|------|----------------------|
-| `brand-guardian` | Brand Guardian | Brand consistency, design tokens, style guidelines |
-| `ui-designer` | UI Designer | Interaction patterns, component design, visual hierarchy |
+| Agent ID         | Name           | Primary Responsibility                                   |
+| ---------------- | -------------- | -------------------------------------------------------- |
+| `brand-guardian` | Brand Guardian | Brand consistency, design tokens, style guidelines       |
+| `ui-designer`    | UI Designer    | Interaction patterns, component design, visual hierarchy |
 
 ### Marketing (2 agents)
 
-| Agent ID | Name | Primary Responsibility |
-|----------|------|----------------------|
+| Agent ID             | Name               | Primary Responsibility                                     |
+| -------------------- | ------------------ | ---------------------------------------------------------- |
 | `content-strategist` | Content Strategist | Messaging, copy, documentation voice, content architecture |
-| `growth-analyst` | Growth Analyst | User acquisition metrics, KPIs, A/B testing strategies |
+| `growth-analyst`     | Growth Analyst     | User acquisition metrics, KPIs, A/B testing strategies     |
 
 ### Operations (3 agents)
 
-| Agent ID | Name | Primary Responsibility |
-|----------|------|----------------------|
-| `dependency-watcher` | Dependency Watcher | Dependency updates, security audits, supply chain risk |
-| `environment-manager` | Environment Manager | Environment configs, secrets rotation, setup scripts |
-| `security-auditor` | Security Auditor | Security audits, vulnerability assessment, compliance |
+| Agent ID              | Name                | Primary Responsibility                                 |
+| --------------------- | ------------------- | ------------------------------------------------------ |
+| `dependency-watcher`  | Dependency Watcher  | Dependency updates, security audits, supply chain risk |
+| `environment-manager` | Environment Manager | Environment configs, secrets rotation, setup scripts   |
+| `security-auditor`    | Security Auditor    | Security audits, vulnerability assessment, compliance  |
 
 ### Product (2 agents)
 
-| Agent ID | Name | Primary Responsibility |
-|----------|------|----------------------|
-| `product-manager` | Product Manager | PRDs, acceptance criteria, backlog prioritization |
+| Agent ID          | Name            | Primary Responsibility                                  |
+| ----------------- | --------------- | ------------------------------------------------------- |
+| `product-manager` | Product Manager | PRDs, acceptance criteria, backlog prioritization       |
 | `roadmap-tracker` | Roadmap Tracker | Milestone tracking, progress reports, release timelines |
 
 ### Testing (3 agents)
 
-| Agent ID | Name | Primary Responsibility |
-|----------|------|----------------------|
-| `test-lead` | Test Lead | Test strategy, quality gate definitions, test architecture |
-| `coverage-tracker` | Coverage Tracker | Coverage metrics, threshold enforcement, gap analysis |
+| Agent ID             | Name               | Primary Responsibility                                      |
+| -------------------- | ------------------ | ----------------------------------------------------------- |
+| `test-lead`          | Test Lead          | Test strategy, quality gate definitions, test architecture  |
+| `coverage-tracker`   | Coverage Tracker   | Coverage metrics, threshold enforcement, gap analysis       |
 | `integration-tester` | Integration Tester | E2E tests, cross-service testing, API contract verification |
+
+### Project Management (2 agents)
+
+| Agent ID          | Name            | Primary Responsibility                                   |
+| ----------------- | --------------- | -------------------------------------------------------- |
+| `project-shipper` | Project Shipper | Task scoping, delivery tracking, handoff documentation   |
+| `release-manager` | Release Manager | Release coordination, versioning, changelogs, deployment |
 
 ---
 
@@ -144,20 +151,44 @@ Invoke a team directly using its slash command:
 
 ## When to Use Which Team
 
-| You need to... | Team |
-|----------------|------|
-| Add or modify an API endpoint | `/team-backend` |
-| Build a UI component or fix a layout | `/team-frontend` |
-| Write a database migration or optimize a query | `/team-data` |
-| Modify Terraform, Docker, or cloud configs | `/team-infra` |
-| Fix a CI/CD pipeline or create a GitHub Action | `/team-devops` |
-| Write tests or improve coverage | `/team-testing` |
-| Implement authentication or fix a vulnerability | `/team-security` |
-| Write docs, ADRs, or runbooks | `/team-docs` |
-| Draft product requirements or user stories | `/team-product` |
-| Review code quality or refactor for maintainability | `/team-quality` |
+| You need to...                                      | Team             |
+| --------------------------------------------------- | ---------------- |
+| Add or modify an API endpoint                       | `/team-backend`  |
+| Build a UI component or fix a layout                | `/team-frontend` |
+| Write a database migration or optimize a query      | `/team-data`     |
+| Modify Terraform, Docker, or cloud configs          | `/team-infra`    |
+| Fix a CI/CD pipeline or create a GitHub Action      | `/team-devops`   |
+| Write tests or improve coverage                     | `/team-testing`  |
+| Implement authentication or fix a vulnerability     | `/team-security` |
+| Write docs, ADRs, or runbooks                       | `/team-docs`     |
+| Draft product requirements or user stories          | `/team-product`  |
+| Review code quality or refactor for maintainability | `/team-quality`  |
 
 When a task spans multiple teams, use `/orchestrate` to let the orchestrator manage the delegation sequence and inter-team handoffs. For single-team tasks where you already know the right team, invoke the team command directly.
+
+---
+
+## Incoming Agents (In-Flight Branches)
+
+> The following agents are being developed on active branches. This section tracks them preemptively. Move entries to the main tables as each branch merges.
+
+### Retrospective Analyst (`retrospective-analyst`)
+
+**Branch:** `claude/elegant-knuth-iSy89` | **Category:** Operations
+
+Session knowledge capture agent activated via `/review --focus=retrospective`. Extracts issues and lessons from conversation history. Non-blocking.
+
+### Feature Operations Specialist (`feature-ops`)
+
+**Branch:** `claude/feature-management-strategy-1jUSw` | **Category:** Feature Management (new)
+
+Kit feature management agent that helps teams choose, configure, and audit feature presets. Activated via `/feature-configure`, `/feature-flow`, and `/feature-review`.
+
+**When these branches merge, update:**
+
+1. The agent count heading from "19" to "21"
+2. Add a "Feature Management" category (1 agent) to the category tables
+3. Add `retrospective-analyst` to the Operations table (bringing it to 4 agents)
 
 ---
 

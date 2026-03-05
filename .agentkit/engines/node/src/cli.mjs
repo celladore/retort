@@ -37,9 +37,13 @@ const VALID_COMMANDS = [
   'healthcheck',
   'cost',
   'project-review',
+  'import-issues',
+  'backlog',
+  'sync-backlog',
   'add',
   'remove',
   'list',
+  'features',
   'tasks',
   'delegate',
   'doctor',
@@ -81,7 +85,7 @@ const VALID_FLAGS = {
     'diff',
     'help',
   ],
-  validate: ['help'],
+  validate: ['auto-task', 'help'],
   discover: ['output', 'depth', 'include-deps', 'help'],
   'spec-validate': ['help'],
   orchestrate: [
@@ -95,10 +99,23 @@ const VALID_FLAGS = {
     'help',
   ],
   plan: ['issue', 'output', 'depth', 'help'],
-  check: ['fix', 'fast', 'stack', 'bail', 'help'],
-  review: ['pr', 'range', 'file', 'focus', 'severity', 'help'],
+  check: ['fix', 'fast', 'stack', 'bail', 'coverage', 'project', 'help'],
+  review: [
+    'pr',
+    'branch',
+    'range',
+    'file',
+    'focus',
+    'severity',
+    'coverage',
+    'project',
+    'open-issues',
+    'dry-run',
+    'auto-task',
+    'help',
+  ],
   handoff: ['format', 'include-diff', 'tag', 'save', 'help'],
-  healthcheck: ['stack', 'fix', 'verbose', 'help'],
+  healthcheck: ['stack', 'fix', 'verbose', 'project', 'auto-task', 'help'],
   cost: ['summary', 'sessions', 'report', 'month', 'format', 'last', 'help'],
   tasks: ['status', 'assignee', 'type', 'priority', 'id', 'process-handoffs', 'help'],
   delegate: [
@@ -113,12 +130,27 @@ const VALID_FLAGS = {
     'help',
   ],
   doctor: ['verbose', 'help'],
+  'import-issues': ['tracker', 'state', 'labels', 'since', 'dry-run', 'limit', 'force', 'help'],
+  backlog: ['format', 'team', 'priority', 'source', 'status', 'sort', 'help'],
+  'sync-backlog': [
+    'tracker',
+    'state',
+    'direction',
+    'labels',
+    'owner-team',
+    'team',
+    'since',
+    'limit',
+    'force',
+    'help',
+  ],
   scaffold: ['type', 'name', 'stack', 'path', 'help'],
-  preflight: ['stack', 'range', 'base', 'strict', 'help'],
+  preflight: ['stack', 'branch', 'range', 'base', 'strict', 'help'],
   'project-review': ['scope', 'focus', 'phase', 'help'],
   add: ['help'],
   remove: ['clean', 'help'],
   list: ['help'],
+  features: ['verbose', 'help'],
 };
 
 // Global flags that apply to all commands
@@ -169,7 +201,18 @@ const FLAG_TYPES = {
   stack: 'string',
   path: 'string',
   base: 'string',
+  branch: 'string',
+  project: 'string',
   overlay: 'string',
+  tracker: 'string',
+  state: 'string',
+  labels: 'string',
+  since: 'string',
+  limit: 'string',
+  sort: 'string',
+  direction: 'string',
+  'owner-team': 'string',
+  source: 'string',
 
   // Booleans
   force: 'boolean',
@@ -186,11 +229,14 @@ const FLAG_TYPES = {
   fix: 'boolean',
   fast: 'boolean',
   bail: 'boolean',
+  coverage: 'boolean',
   'include-diff': 'boolean',
   save: 'boolean',
   summary: 'boolean',
   sessions: 'boolean',
   report: 'boolean',
+  'open-issues': 'boolean',
+  'auto-task': 'boolean',
   'process-handoffs': 'boolean',
   clean: 'boolean',
   strict: 'boolean',
@@ -198,7 +244,11 @@ const FLAG_TYPES = {
 
 const args = process.argv.slice(2);
 const command = args[0];
-const commandArgs = args.slice(1);
+// Strip the bare `--` separator injected by `npm run`/`pnpm run` when the
+// caller uses `pnpm run agentkit:init -- --repoName foo` so that flags reach
+// parseArgs correctly.
+let commandArgs = args.slice(1);
+if (commandArgs[0] === '--') commandArgs = commandArgs.slice(1);
 
 function parseFlags(command, args) {
   try {
@@ -302,6 +352,13 @@ Tool Management:
                   --clean             Also delete generated files
   list            Show enabled and available AI tools
 
+Feature Management:
+  features                 List all kit features and their status
+                  --verbose           Show available presets
+  features enable <f...>   Enable one or more kit features
+  features disable <f...>  Disable one or more kit features
+  features preset <name>   Apply a named feature preset (minimal, standard, full, lean)
+
 Workflow Commands:
   orchestrate     Multi-team coordination workflow (state machine)
   plan            Show plan status and recommendations
@@ -328,6 +385,33 @@ Diagnostics:
   doctor          Run AgentKit diagnostics and setup checks
                   --verbose         Include detailed diagnostics
 
+Backlog & Issue Tracking:
+  import-issues   Import issues from external tracker into local backlog
+                  --tracker <type>    Tracker type: github, linear
+                  --state <state>     Filter: open, closed, all (default: open)
+                  --labels <csv>      Filter by labels
+                  --since <date>      Only issues updated since ISO date
+                  --limit <n>         Max issues to fetch (default: 100)
+                  --dry-run           Preview without writing
+                  --force             Override autoImport gate
+  backlog         Display consolidated backlog with filtering
+                  --format <fmt>      Output: table, json, yaml, csv
+                  --team <name>       Filter by team
+                  --priority <csv>    Filter by priority (e.g. P0,P1)
+                  --source <src>      Filter by source
+                  --status <status>   Filter by status
+                  --sort <field>      Sort: priority, team, source, updated
+  sync-backlog    Sync backlog with external tracker + local sources
+                  --tracker <type>    Tracker type: github, linear
+                  --direction <dir>   pull (default) or push
+                  --state <state>     Filter: open, closed, all
+                  --labels <csv>      Filter by labels
+                  --owner-team <t>    Override owner team
+                  --team <name>       Display filter (post-sync)
+                  --since <date>      Only issues updated since ISO date
+                  --limit <n>         Max issues to fetch
+                  --force             Override autoImport gate
+
 Utility Commands:
   cost            Session cost and usage tracking
 
@@ -347,6 +431,7 @@ Options:
     --fast              Skip build step
     --stack <name>      Limit to specific tech stack
     --bail              Stop on first failure
+    --coverage          Run coverage checks and enforce thresholds
 
   review:
     --range <range>     Git commit range (e.g. HEAD~3..HEAD)
@@ -517,6 +602,33 @@ async function main() {
         if (!result.ok) process.exit(1);
         break;
       }
+      case 'import-issues': {
+        const { runImportIssues } = await import('./import-issues.mjs');
+        await runImportIssues({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
+      case 'backlog': {
+        const { runBacklogViewer } = await import('./backlog-viewer.mjs');
+        await runBacklogViewer({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
+      case 'sync-backlog': {
+        const { runSyncBacklog } = await import('./sync-backlog-runner.mjs');
+        await runSyncBacklog({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        break;
+      }
       case 'tasks': {
         const { runTasks } = await import('./task-cli.mjs');
         await runTasks({ projectRoot: PROJECT_ROOT, flags });
@@ -540,6 +652,31 @@ async function main() {
       case 'list': {
         const { runList } = await import('./tool-manager.mjs');
         await runList({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        break;
+      }
+      case 'features': {
+        // Sub-actions: list (default), enable, disable, preset
+        const subAction = (flags._args || [])[0];
+        if (subAction === 'enable') {
+          flags._args = flags._args.slice(1);
+          const { runFeatureEnable } = await import('./feature-manager.mjs');
+          await runFeatureEnable({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else if (subAction === 'disable') {
+          flags._args = flags._args.slice(1);
+          const { runFeatureDisable } = await import('./feature-manager.mjs');
+          await runFeatureDisable({
+            agentkitRoot: AGENTKIT_ROOT,
+            projectRoot: PROJECT_ROOT,
+            flags,
+          });
+        } else if (subAction === 'preset') {
+          flags._args = flags._args.slice(1);
+          const { runFeaturePreset } = await import('./feature-manager.mjs');
+          await runFeaturePreset({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        } else {
+          const { runFeatures } = await import('./feature-manager.mjs');
+          await runFeatures({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
+        }
         break;
       }
       default: {

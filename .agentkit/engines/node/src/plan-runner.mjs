@@ -5,7 +5,8 @@
  */
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { appendEvent, loadState, readEvents } from './orchestrator.mjs';
+import { appendEvent, readEvents } from './events.mjs';
+import { loadState } from './orchestrator.mjs';
 import { formatTimestamp } from './runner.mjs';
 
 // ---------------------------------------------------------------------------
@@ -163,7 +164,13 @@ function readBacklog(projectRoot) {
  * @returns {object}
  */
 export async function runPlan({ projectRoot, flags = {} }) {
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+
   console.log('[agentkit:plan] Current plan and status...');
+  if (userContext) {
+    console.log(`[agentkit:plan] Context: ${userContext}`);
+  }
   console.log('');
 
   const state = await loadState(projectRoot);
@@ -255,5 +262,6 @@ export async function runPlan({ projectRoot, flags = {} }) {
     activeTeams: activeTeams.length,
     todoItems: todoItems.length,
     backlogItems: backlog ? backlog.length : 0,
+    ...(userContext ? { userContext } : {}),
   };
 }

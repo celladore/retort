@@ -7,8 +7,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-handoff');
-const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'handoff');
+const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
 
 function setupTestProject(stateOverrides = {}) {
   if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true });
@@ -48,9 +48,12 @@ describe('runHandoff()', () => {
 
     // Mock git commands to avoid spawning real processes (slow on Windows with shell:true)
     vi.spyOn(runner, 'execCommand').mockImplementation((cmd) => {
-      if (cmd.includes('rev-parse --abbrev-ref')) return { exitCode: 0, stdout: 'main\n', stderr: '', durationMs: 5 };
-      if (cmd.includes('git log')) return { exitCode: 0, stdout: 'abc1234 Initial commit\n', stderr: '', durationMs: 5 };
-      if (cmd.includes('git status --porcelain')) return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
+      if (cmd.includes('rev-parse --abbrev-ref'))
+        return { exitCode: 0, stdout: 'main\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git log'))
+        return { exitCode: 0, stdout: 'abc1234 Initial commit\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git status --porcelain'))
+        return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
       if (cmd.includes('git diff')) return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
       return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
     });

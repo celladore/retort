@@ -52,6 +52,8 @@ AI coding assistants consume tokens for every interaction -- prompts sent and co
 
 ## Token Usage Logging
 
+> **Implementation note:** Token-level tracking (input/output tokens, cache tokens, estimated USD cost) is a **roadmap** feature. It requires API-level access to token counts, which varies by AI tool provider. The configuration and log formats below describe the _target_ design. Currently, two data paths emit session events: (1) **Shell hooks** (`session-start.sh` / `stop-build-check.sh`) log `sessionId`, `user` (hashed), `branch`, and `cwd` on start, and `sessionId` and `filesModified` on end. (2) **The cost-tracker engine** (`cost-tracker.mjs`) logs `sessionId`, `user`, `repo`, and `branch` on start, and `sessionId`, `durationMs`, and `filesModified` on end. The `command` field appears only in separate `command_run` events. Token and cost fields are placeholders that will be populated once token-level tracking is implemented.
+
 ### Enabling Token Logging
 
 Token usage logs are written to the `.agentkit/logs/` directory. To enable logging, ensure your overlay `settings.yaml` includes:
@@ -60,7 +62,7 @@ Token usage logs are written to the `.agentkit/logs/` directory. To enable loggi
 costTracking:
   enabled: true
   logDir: logs
-  granularity: session  # Options: session, command, detailed
+  granularity: session # Options: session, command, detailed
 ```
 
 ### Log Format
@@ -71,30 +73,51 @@ Each log entry is a JSON line (JSONL format) written to a date-stamped file:
 .agentkit/logs/usage-2025-01-15.jsonl
 ```
 
-Each line contains:
+**Session start event** (shell hook — implemented):
 
 ```json
 {
   "timestamp": "2025-01-15T14:32:00.000Z",
+  "event": "session_start",
   "sessionId": "abc123",
-  "command": "plan",
+  "user": "a1b2c3d4e5f6",
+  "branch": "feature/auth",
+  "cwd": "/home/user/my-project"
+}
+```
+
+> The `user` field is a SHA-256 hash (first 12 chars) of `git user.email`. The cost-tracker engine emits a similar event with `user` as the plain email and `repo` instead of `cwd`.
+
+**Session end event** (shell hook — implemented):
+
+```json
+{
+  "timestamp": "2025-01-15T14:45:00.000Z",
+  "event": "session_end",
+  "sessionId": "abc123",
+  "filesModified": 3
+}
+```
+
+> The cost-tracker engine emits a similar event that also includes `durationMs`. The `command` field is only present in separate `command_run` events logged by the engine's `recordCommand()` function.
+
+**Token-level fields** (roadmap -- will be added when token tracking is available):
+
+```json
+{
   "model": "claude-sonnet-4-20250514",
   "provider": "anthropic",
   "inputTokens": 12500,
   "outputTokens": 3200,
   "cacheReadTokens": 8000,
   "cacheWriteTokens": 4500,
-  "estimatedCostUSD": 0.0847,
-  "durationMs": 4500,
-  "user": "developer@example.com",
-  "repo": "my-project",
-  "branch": "feature/auth"
+  "estimatedCostUSD": 0.0847
 }
 ```
 
 ### Viewing Recent Usage
 
-Use the CLI to view a summary of recent token usage:
+Use the CLI to view a summary of recent session usage:
 
 ```bash
 node agentkit-forge/.agentkit/engines/node/src/cli.mjs cost --summary
@@ -126,20 +149,20 @@ A session begins when an AI assistant starts processing a task and ends when the
 
 Each session records:
 
-| Field | Description |
-|-------|-------------|
-| `sessionId` | Unique identifier for the session |
-| `startTime` | When the session began |
-| `endTime` | When the session ended |
-| `totalInputTokens` | Sum of all input tokens across API calls |
-| `totalOutputTokens` | Sum of all output tokens across API calls |
-| `totalCacheReadTokens` | Tokens read from prompt cache |
-| `totalCacheWriteTokens` | Tokens written to prompt cache |
-| `estimatedTotalCostUSD` | Estimated total cost for the session |
-| `commandsRun` | List of AgentKit commands executed |
-| `filesModified` | Number of files created or modified |
-| `user` | Developer who initiated the session |
-| `branch` | Git branch the work was performed on |
+| Field                   | Description                               |
+| ----------------------- | ----------------------------------------- |
+| `sessionId`             | Unique identifier for the session         |
+| `startTime`             | When the session began                    |
+| `endTime`               | When the session ended                    |
+| `totalInputTokens`      | Sum of all input tokens across API calls  |
+| `totalOutputTokens`     | Sum of all output tokens across API calls |
+| `totalCacheReadTokens`  | Tokens read from prompt cache             |
+| `totalCacheWriteTokens` | Tokens written to prompt cache            |
+| `estimatedTotalCostUSD` | Estimated total cost for the session      |
+| `commandsRun`           | List of AgentKit commands executed        |
+| `filesModified`         | Number of files created or modified       |
+| `user`                  | Developer who initiated the session       |
+| `branch`                | Git branch the work was performed on      |
 
 ### Session Summary Files
 
@@ -189,20 +212,20 @@ The monthly report includes:
 
 #### Breakdown by User
 
-| User | Sessions | Input Tokens | Output Tokens | Est. Cost |
-|------|----------|-------------|--------------|-----------|
-| alice@example.com | 42 | 1,250,000 | 380,000 | $45.20 |
-| bob@example.com | 35 | 980,000 | 290,000 | $34.10 |
-| **Total** | **77** | **2,230,000** | **670,000** | **$79.30** |
+| User              | Sessions | Input Tokens  | Output Tokens | Est. Cost  |
+| ----------------- | -------- | ------------- | ------------- | ---------- |
+| alice@example.com | 42       | 1,250,000     | 380,000       | $45.20     |
+| bob@example.com   | 35       | 980,000       | 290,000       | $34.10     |
+| **Total**         | **77**   | **2,230,000** | **670,000**   | **$79.30** |
 
 #### Breakdown by Command
 
-| Command | Invocations | Input Tokens | Output Tokens | Est. Cost |
-|---------|------------|-------------|--------------|-----------|
-| plan | 120 | 800,000 | 250,000 | $30.50 |
-| orchestrate | 45 | 650,000 | 180,000 | $22.80 |
-| review | 88 | 480,000 | 140,000 | $16.20 |
-| discover | 30 | 300,000 | 100,000 | $9.80 |
+| Command     | Invocations | Input Tokens | Output Tokens | Est. Cost |
+| ----------- | ----------- | ------------ | ------------- | --------- |
+| plan        | 120         | 800,000      | 250,000       | $30.50    |
+| orchestrate | 45          | 650,000      | 180,000       | $22.80    |
+| review      | 88          | 480,000      | 140,000       | $16.20    |
+| discover    | 30          | 300,000      | 100,000       | $9.80     |
 
 #### Breakdown by Branch
 
@@ -230,7 +253,7 @@ name: Monthly AI Cost Report
 
 on:
   schedule:
-    - cron: '0 9 1 * *'  # 9 AM on the 1st of each month
+    - cron: '0 9 1 * *' # 9 AM on the 1st of each month
 
 jobs:
   report:
@@ -292,10 +315,10 @@ Different tasks have different complexity requirements. Configure model selectio
 ```yaml
 costTracking:
   modelPreferences:
-    discover: claude-haiku    # Low-cost for scanning/discovery
-    plan: claude-sonnet       # Mid-range for planning
-    orchestrate: claude-opus  # High-capability for complex orchestration
-    check: claude-haiku       # Low-cost for validation
+    discover: claude-haiku # Low-cost for scanning/discovery
+    plan: claude-sonnet # Mid-range for planning
+    orchestrate: claude-opus # High-capability for complex orchestration
+    check: claude-haiku # Low-cost for validation
 ```
 
 ### 4. Use the Plan Command Before Orchestrate
@@ -325,6 +348,8 @@ Review monthly reports to identify:
 ---
 
 ## Budget Alerts and Limits
+
+> **Implementation note:** Budget alerts and limits are a **roadmap** feature. The configuration below describes the target design. Budget enforcement requires token-level tracking to calculate actual costs. Currently, you can set these values in `settings.yaml` but they will not trigger alerts until token tracking is implemented.
 
 ### Setting a Budget
 

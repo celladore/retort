@@ -2,13 +2,13 @@
 
 **Render target:** `codex`
 
-| | |
-|---|---|
-| **Type** | AI Coding Agent (CLI + Cloud) |
-| **Categories** | CLI Agent, Cloud / Autonomous Agent |
-| **Access** | CLI tool — `npm install -g @openai/codex` or cloud via [chatgpt.com/codex](https://chatgpt.com/codex) |
-| **Documentation** | [developers.openai.com/codex](https://developers.openai.com/codex/) |
-| **Performance Rating** | ⭐⭐⭐⭐ — **79/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents)) |
+|                        |                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Type**               | AI Coding Agent (CLI + Cloud)                                                                         |
+| **Categories**         | CLI Agent, Cloud / Autonomous Agent                                                                   |
+| **Access**             | CLI tool — `npm install -g @openai/codex` or cloud via [chatgpt.com/codex](https://chatgpt.com/codex) |
+| **Documentation**      | [developers.openai.com/codex](https://developers.openai.com/codex/)                                   |
+| **Performance Rating** | ⭐⭐⭐⭐ — **79/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents))       |
 
 ---
 
@@ -23,14 +23,14 @@ discovery and a TOML-based configuration system.
 
 ## Native Configuration
 
-| Feature | Location | Format |
-|---------|----------|--------|
-| Project instructions | `AGENTS.md` (repo root) | Plain Markdown |
-| Directory instructions | `<subdir>/AGENTS.md` | Plain Markdown |
-| Override instructions | `AGENTS.override.md` | Plain Markdown |
-| Skills | `.agents/skills/*/SKILL.md` or `.codex/skills/*/SKILL.md` | YAML frontmatter + Markdown |
-| Global instructions | `~/.codex/AGENTS.md` | Plain Markdown |
-| Config | `~/.codex/config.toml` | TOML |
+| Feature                | Location                                                  | Format                      |
+| ---------------------- | --------------------------------------------------------- | --------------------------- |
+| Project instructions   | `AGENTS.md` (repo root)                                   | Plain Markdown              |
+| Directory instructions | `<subdir>/AGENTS.md`                                      | Plain Markdown              |
+| Override instructions  | `AGENTS.override.md`                                      | Plain Markdown              |
+| Skills                 | `.agents/skills/*/SKILL.md` or `.codex/skills/*/SKILL.md` | YAML frontmatter + Markdown |
+| Global instructions    | `~/.codex/AGENTS.md`                                      | Plain Markdown              |
+| Config                 | `~/.codex/config.toml`                                    | TOML                        |
 
 ### Key Capabilities
 
@@ -76,8 +76,8 @@ description: Deploy current branch to staging environment
 
 ## What AgentKit Forge Generates
 
-| Output | Path | Source |
-|--------|------|--------|
+| Output      | Path                        | Source                              |
+| ----------- | --------------------------- | ----------------------------------- |
 | Skills (19) | `.agents/skills/*/SKILL.md` | `commands.yaml` (non-team commands) |
 
 Codex also reads `AGENTS.md` (always generated) for project-level context.
@@ -86,18 +86,18 @@ Codex also reads `AGENTS.md` (always generated) for project-level context.
 
 ## Gap Analysis
 
-| Feature | Platform Supports | AgentKit Forge Status | Gap |
-|---------|------------------|----------------------|-----|
-| AGENTS.md | ✅ Primary instruction file | ✅ Always generated | None |
-| AGENTS.override.md | ✅ Local/temp overrides | ❌ Not generated | Generate template override file |
-| Subdirectory AGENTS.md | ✅ Per-package instructions | ❌ Not generated | Generate per-package in monorepos |
-| Skills (.agents/skills/) | ✅ Modular workflow folders | ✅ 19 generated | None |
-| Skills (.codex/skills/) | ✅ Alternate location | ❌ Uses `.agents/` only | Could support both paths |
-| Global AGENTS.md | ✅ `~/.codex/AGENTS.md` | ❌ Not applicable | User-level, not project-scoped |
-| Config.toml | ✅ Model, sandbox, approvals | ❌ Not generated | Could generate project-level config |
-| Skill scripts | ✅ Agent-invokable scripts | ❌ Not generated | Could add scripts to skill folders |
-| Skill templates | ✅ Code/response templates | ❌ Not generated | Could add templates to skill folders |
-| Lazy loading | ✅ Context-triggered | ✅ Via SKILL.md triggers | None |
+| Feature                  | Platform Supports            | AgentKit Forge Status    | Gap                                  |
+| ------------------------ | ---------------------------- | ------------------------ | ------------------------------------ |
+| AGENTS.md                | ✅ Primary instruction file  | ✅ Always generated      | None                                 |
+| AGENTS.override.md       | ✅ Local/temp overrides      | ❌ Not generated         | Generate template override file      |
+| Subdirectory AGENTS.md   | ✅ Per-package instructions  | ❌ Not generated         | Generate per-package in monorepos    |
+| Skills (.agents/skills/) | ✅ Modular workflow folders  | ✅ 19 generated          | None                                 |
+| Skills (.codex/skills/)  | ✅ Alternate location        | ❌ Uses `.agents/` only  | Could support both paths             |
+| Global AGENTS.md         | ✅ `~/.codex/AGENTS.md`      | ❌ Not applicable        | User-level, not project-scoped       |
+| Config.toml              | ✅ Model, sandbox, approvals | ❌ Not generated         | Could generate project-level config  |
+| Skill scripts            | ✅ Agent-invokable scripts   | ❌ Not generated         | Could add scripts to skill folders   |
+| Skill templates          | ✅ Code/response templates   | ❌ Not generated         | Could add templates to skill folders |
+| Lazy loading             | ✅ Context-triggered         | ✅ Via SKILL.md triggers | None                                 |
 
 **Summary:** Skills generation is solid. Key gaps are `AGENTS.override.md`,
 subdirectory AGENTS.md for monorepos, config.toml generation, and enriching
@@ -107,15 +107,15 @@ skills with scripts and templates.
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 79/100 ⭐⭐⭐⭐ | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents) |
-| Developer Experience | 69/100 ⭐⭐⭐½ | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cli-agents) |
-| Cost & Value | 59/100 ⭐⭐⭐ | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cli-agents) |
-| Customization | 67/100 ⭐⭐⭐½ | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cli-agents) |
-| Privacy & Security | 62/100 ⭐⭐⭐ | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cli-agents) |
-| Team & Enterprise | 50/100 ⭐⭐½ | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cli-agents) |
-| **Weighted Total** | **67/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score              | Details                                                                       |
+| -------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| Coding Performance   | 79/100 ⭐⭐⭐⭐    | [details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--cli-agents)       |
+| Developer Experience | 69/100 ⭐⭐⭐½     | [details](./PLATFORM_DEVELOPER_EXPERIENCE.md#category-matrix--cli-agents)     |
+| Cost & Value         | 59/100 ⭐⭐⭐      | [details](./PLATFORM_COST_ANALYSIS.md#category-matrix--cli-agents)            |
+| Customization        | 67/100 ⭐⭐⭐½     | [details](./PLATFORM_CUSTOMIZATION.md#category-matrix--cli-agents)            |
+| Privacy & Security   | 62/100 ⭐⭐⭐      | [details](./PLATFORM_PRIVACY_SECURITY.md#category-matrix--cli-agents)         |
+| Team & Enterprise    | 50/100 ⭐⭐½       | [details](./PLATFORM_TEAM_ENTERPRISE.md#category-matrix--cli-agents)          |
+| **Weighted Total**   | **67/100 ⭐⭐⭐½** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

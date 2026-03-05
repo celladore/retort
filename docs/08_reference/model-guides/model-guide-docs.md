@@ -83,9 +83,9 @@
 
 ### Tier 4: Not Recommended (Score < 7.50)
 
-| Model | Model ID | Score | Key Strengths | Notes |
-| ----- | -------- | ----- | ------------- | ----- |
-| (placeholder) | — | — | — | Models scoring below 7.50 are not recommended for production or primary documentation tasks |
+| Model         | Model ID | Score | Key Strengths | Notes                                                                                       |
+| ------------- | -------- | ----- | ------------- | ------------------------------------------------------------------------------------------- |
+| (placeholder) | —        | —     | —             | Models scoring below 7.50 are not recommended for production or primary documentation tasks |
 
 ### Display Name and Config ID Note
 
@@ -126,11 +126,11 @@ agents:
   adr-writer:
     team: docs
     model_override: gemini-2.5-pro
-    reason: "Large context ADR synthesis"
+    reason: 'Large context ADR synthesis'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

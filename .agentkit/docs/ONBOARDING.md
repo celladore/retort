@@ -180,13 +180,13 @@ Edit `overlays/<your-repo>/rules.yaml` to define repository-specific rules for A
 overrides:
   code-style:
     description: Always use single quotes for strings in TypeScript files
-    scope: "*.ts"
+    scope: '*.ts'
   testing:
     description: Every new function must have a corresponding unit test
-    scope: "src/**/*.ts"
+    scope: 'src/**/*.ts'
   security:
     description: Never log sensitive data such as tokens, passwords, or API keys
-    scope: "**/*"
+    scope: '**/*'
 ```
 
 ### Running Discovery
@@ -269,6 +269,60 @@ jobs:
         run: |
           node agentkit-forge/.agentkit/engines/node/src/cli.mjs sync
           git diff --exit-code || (echo "AgentKit config is out of sync. Run 'agentkit sync' and commit." && exit 1)
+```
+
+### GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+agentkit-check:
+  image: node:22
+  stage: test
+  only:
+    changes:
+      - agentkit-forge/**
+      - .claude/**
+      - .cursor/**
+      - .windsurf/**
+  before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+  script:
+    - node agentkit-forge/.agentkit/engines/node/src/cli.mjs validate
+    - node agentkit-forge/.agentkit/engines/node/src/cli.mjs sync
+    - git diff --exit-code || (echo "AgentKit config is out of sync. Run 'agentkit sync' and commit." && exit 1)
+```
+
+### Azure Pipelines
+
+```yaml
+# azure-pipelines.yml
+trigger:
+  paths:
+    include:
+      - agentkit-forge/**
+      - .claude/**
+      - .cursor/**
+      - .windsurf/**
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    submodules: recursive
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '22.x'
+
+  - script: node agentkit-forge/.agentkit/engines/node/src/cli.mjs validate
+    displayName: 'Validate AgentKit configuration'
+
+  - script: |
+      node agentkit-forge/.agentkit/engines/node/src/cli.mjs sync
+      git diff --exit-code || (echo "AgentKit config is out of sync. Run 'agentkit sync' and commit." && exit 1)
+    displayName: 'Verify sync is up to date'
 ```
 
 ### Pre-commit Hook

@@ -1,6 +1,6 @@
 {
   "name": "agentkit-forge-runtime",
-  "version": "0.2.1",
+  "version": "3.1.0",
   "private": true,
   "type": "module",
   "description": "AgentKit Forge — unified AI agent team framework sync engine",
@@ -24,6 +24,9 @@
     "agentkit:healthcheck": "node engines/node/src/cli.mjs healthcheck",
     "agentkit:check": "node engines/node/src/cli.mjs check",
     "agentkit:cost": "node engines/node/src/cli.mjs cost",
+    "agentkit:import-issues": "node engines/node/src/cli.mjs import-issues",
+    "agentkit:backlog": "node engines/node/src/cli.mjs backlog",
+    "agentkit:sync-backlog": "node engines/node/src/cli.mjs sync-backlog",
     "lint:md": "markdownlint-cli2 --config ../.markdownlint.json \"../docs/prd/**/*.md\" \"../docs/README.md\" \"../CONTRIBUTING.md\"",
     "lint:md:fix": "markdownlint-cli2 --fix --config ../.markdownlint.json \"../docs/prd/**/*.md\" \"../docs/README.md\" \"../CONTRIBUTING.md\"",
     "test": "vitest run",
@@ -31,6 +34,7 @@
   },
   "devDependencies": {
     "markdownlint-cli2": "^0.18.1",
+    "prettier": "^3.5.3",
     "vitest": "^4.0.18"
   }
 }

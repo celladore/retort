@@ -147,11 +147,11 @@ agents:
   migration-planner:
     team: data
     model_override: swe-llama
-    reason: "High-volume migration script generation"
+    reason: 'High-volume migration script generation'
 audit:
-  changed_by: "<owner>"
-  changed_at_utc: "2026-02-25T00:00:00Z"
-  ticket: "AKF-000"
+  changed_by: '<owner>'
+  changed_at_utc: '2026-02-25T00:00:00Z'
+  ticket: 'AKF-000'
 ```
 
 ## Data Provenance and Refresh

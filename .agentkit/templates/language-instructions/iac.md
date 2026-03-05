@@ -1,20 +1,23 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. Domain-specific AI assistant instructions for IaC. -->
+
 # Instructions — Infrastructure as Code
 
 Apply these rules when editing `.tf`, `.tfvars`, `.hcl`, `terragrunt.hcl`, or
 files in `infra/`, `terraform/`, `terragrunt/`, or `modules/` directories.
 
 {{#if infraIacToolchain}}
+
 ## Toolchain
 
 - **IaC tools**: {{infraIacToolchain}}
-{{#if infraStateBackend}}- **State backend**: {{infraStateBackend}} (remote, with locking enabled){{/if}}
-{{#if infraLockProvider}}- **Lock provider**: {{infraLockProvider}}{{/if}}
-{{#if infraModulesRepo}}- **Modules repo**: {{infraModulesRepo}}{{/if}}
-{{/if}}
+  {{#if infraStateBackend}}- **State backend**: {{infraStateBackend}} (remote, with locking enabled){{/if}}
+  {{#if infraLockProvider}}- **Lock provider**: {{infraLockProvider}}{{/if}}
+  {{#if infraModulesRepo}}- **Modules repo**: {{infraModulesRepo}}{{/if}}
+  {{/if}}
 
 {{#if infraNamingConvention}}
+
 ## Resource Naming
 
 All cloud resources must follow this naming convention:
@@ -37,6 +40,7 @@ code review. Use a shared `locals` block or Terragrunt `inputs` to apply tags
 consistently across all resources.
 
 {{#if infraMandatoryTags}}
+
 ### Mandatory Tags (required)
 
 {{#each infraMandatoryTagsList}}- `{{.}}`
@@ -82,13 +86,14 @@ resource "azurerm_resource_group" "example" {
 > **Note**: The `azurerm` provider does not support `default_tags`. Set tags
 > per-resource using `merge(local.mandatory_tags, local.optional_tags)` or
 > use Terragrunt `inputs` to enforce consistent tagging across all resources.
-{{/if}}
-{{#unless infraMandatoryTags}}
+> {{/if}}
+> {{#unless infraMandatoryTags}}
 > No mandatory tags are configured. Define them in `.agentkit/spec/project.yaml`
 > under `infrastructure.tagging.mandatory`.
-{{/unless}}
+> {{/unless}}
 
 {{#if infraOptionalTags}}
+
 ### Optional Tags (recommended)
 
 {{#each infraOptionalTagsList}}- `{{.}}`
@@ -114,10 +119,24 @@ Add optional tags for cost analysis, team ownership, and lifecycle tracking.
    manual changes into state immediately.
 
 {{#if ruleConventions}}
+
 ## Project Conventions
 
 The following conventions are enforced in **{{projectName}}** and derived from
 `.agentkit/spec/rules.yaml`:
 
-{{ruleConventions}}
+{{#if ruleHasEnforcement}}
+
+### Enforcement Rules
+
+{{ruleEnforcementConventions}}
+
+{{/if}}
+{{#if ruleHasAdvisory}}
+
+### Advisory Rules
+
+{{ruleAdvisoryConventions}}
+
+{{/if}}
 {{/if}}

@@ -30,12 +30,12 @@ available benchmarks, published evaluations, and documented capabilities.
 Each platform is assigned to one or more categories based on how users
 interact with it. A platform can appear in multiple categories.
 
-| Category | Description | Platforms |
-|----------|-------------|-----------|
-| **AI-Native IDE** | Full editor/IDE with built-in AI capabilities | Cursor, Windsurf, Warp Terminal |
-| **IDE Extension** | AI extension for existing IDEs (VS Code, JetBrains, etc.) | GitHub Copilot, Cline, Roo Code, Continue, Sourcegraph Cody, Amazon Q Developer |
-| **CLI Agent** | Terminal-based AI coding agent | Claude Code, OpenAI Codex, Google Gemini CLI, Aider, Amp, OpenCode |
-| **Cloud / Autonomous Agent** | Fully autonomous cloud-hosted coding agent | Google Jules, Factory, OpenAI Codex, GitHub Copilot (Coding Agent) |
+| Category                     | Description                                               | Platforms                                                                       |
+| ---------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **AI-Native IDE**            | Full editor/IDE with built-in AI capabilities             | Cursor, Windsurf, Warp Terminal                                                 |
+| **IDE Extension**            | AI extension for existing IDEs (VS Code, JetBrains, etc.) | GitHub Copilot, Cline, Roo Code, Continue, Sourcegraph Cody, Amazon Q Developer |
+| **CLI Agent**                | Terminal-based AI coding agent                            | Claude Code, OpenAI Codex, Google Gemini CLI, Aider, Amp, OpenCode              |
+| **Cloud / Autonomous Agent** | Fully autonomous cloud-hosted coding agent                | Google Jules, Factory, OpenAI Codex, GitHub Copilot (Coding Agent)              |
 
 > **Note:** Some platforms span categories. OpenAI Codex appears in both
 > CLI Agent and Cloud Agent. GitHub Copilot appears in both IDE Extension
@@ -46,17 +46,17 @@ interact with it. A platform can appear in multiple categories.
 
 ## Scoring Metrics
 
-| # | Metric | Weight | What It Measures |
-|---|--------|--------|-----------------|
-| 1 | **Code Correctness** | 25% | Functional accuracy of generated code — pass rates on SWE-bench, HumanEval, and real-world bug-fix benchmarks |
-| 2 | **Context Understanding** | 20% | Ability to understand project structure, cross-file dependencies, and existing patterns before generating code |
-| 3 | **Multi-file Editing** | 15% | Coordinated changes across multiple files in a single operation — critical for refactoring and feature development |
-| 4 | **Instruction Adherence** | 10% | How faithfully the platform follows AGENTS.md, project rules, coding conventions, and explicit instructions |
-| 5 | **Autonomy** | 10% | Level of independent operation — can it plan, execute, test, and iterate without constant human guidance? |
-| 6 | **Language Breadth** | 5% | Range of programming languages and frameworks where the platform performs well |
-| 7 | **Speed & Throughput** | 5% | Response latency, tokens per second, and time-to-first-meaningful-output |
-| 8 | **Testing & Verification** | 5% | Ability to generate tests, run test suites, and self-verify generated code |
-| 9 | **Ecosystem Integration** | 5% | Git workflow, CI/CD, MCP, tool use, and integration with the broader dev toolchain |
+| #   | Metric                     | Weight | What It Measures                                                                                                   |
+| --- | -------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| 1   | **Code Correctness**       | 25%    | Functional accuracy of generated code — pass rates on SWE-bench, HumanEval, and real-world bug-fix benchmarks      |
+| 2   | **Context Understanding**  | 20%    | Ability to understand project structure, cross-file dependencies, and existing patterns before generating code     |
+| 3   | **Multi-file Editing**     | 15%    | Coordinated changes across multiple files in a single operation — critical for refactoring and feature development |
+| 4   | **Instruction Adherence**  | 10%    | How faithfully the platform follows AGENTS.md, project rules, coding conventions, and explicit instructions        |
+| 5   | **Autonomy**               | 10%    | Level of independent operation — can it plan, execute, test, and iterate without constant human guidance?          |
+| 6   | **Language Breadth**       | 5%     | Range of programming languages and frameworks where the platform performs well                                     |
+| 7   | **Speed & Throughput**     | 5%     | Response latency, tokens per second, and time-to-first-meaningful-output                                           |
+| 8   | **Testing & Verification** | 5%     | Ability to generate tests, run test suites, and self-verify generated code                                         |
+| 9   | **Ecosystem Integration**  | 5%     | Git workflow, CI/CD, MCP, tool use, and integration with the broader dev toolchain                                 |
 
 ### Why These Weights?
 
@@ -78,14 +78,14 @@ interact with it. A platform can appear in multiple categories.
 
 ### Scoring Scale
 
-| Score | Meaning |
-|-------|---------|
-| 9–10 | Best in class — industry-leading capability |
-| 7–8 | Strong — above average, competitive |
-| 5–6 | Adequate — meets basic expectations |
-| 3–4 | Limited — notable gaps or constraints |
-| 1–2 | Minimal — capability is present but very limited |
-| 0 | Not supported / not applicable |
+| Score | Meaning                                          |
+| ----- | ------------------------------------------------ |
+| 9–10  | Best in class — industry-leading capability      |
+| 7–8   | Strong — above average, competitive              |
+| 5–6   | Adequate — meets basic expectations              |
+| 3–4   | Limited — notable gaps or constraints            |
+| 1–2   | Minimal — capability is present but very limited |
+| 0     | Not supported / not applicable                   |
 
 ### Data Sources
 
@@ -107,23 +107,24 @@ scores are estimated from documented capabilities and marked with `~`.
 
 Platforms that provide a full editor or IDE with AI built in.
 
-| Metric (Weight) | Cursor | Windsurf | Warp Terminal |
-|-----------------|--------|----------|---------------|
-| Code Correctness (25%) | 8 | 7 | 6 |
-| Context Understanding (20%) | 8 | 7 | 6 |
-| Multi-file Editing (15%) | 8 | 7 | 5 |
-| Instruction Adherence (10%) | 8 | 7 | 7 |
-| Autonomy (10%) | 7 | 6 | 7 |
-| Language Breadth (5%) | 8 | 8 | 7 |
-| Speed & Throughput (5%) | 8 | 7 | 8 |
-| Testing & Verification (5%) | 7 | 6 | 5 |
-| Ecosystem Integration (5%) | 7 | 6 | 8 |
-| **Weighted Score** | **77** | **69** | **63** |
-| **Rating** | ⭐⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐ |
+| Metric (Weight)             | Cursor   | Windsurf | Warp Terminal |
+| --------------------------- | -------- | -------- | ------------- |
+| Code Correctness (25%)      | 8        | 7        | 6             |
+| Context Understanding (20%) | 8        | 7        | 6             |
+| Multi-file Editing (15%)    | 8        | 7        | 5             |
+| Instruction Adherence (10%) | 8        | 7        | 7             |
+| Autonomy (10%)              | 7        | 6        | 7             |
+| Language Breadth (5%)       | 8        | 8        | 7             |
+| Speed & Throughput (5%)     | 8        | 7        | 8             |
+| Testing & Verification (5%) | 7        | 6        | 5             |
+| Ecosystem Integration (5%)  | 7        | 6        | 8             |
+| **Weighted Score**          | **77**   | **69**   | **63**        |
+| **Rating**                  | ⭐⭐⭐⭐ | ⭐⭐⭐½  | ⭐⭐⭐        |
 
 ### Scoring Justification — AI-Native IDEs
 
 **Cursor (77/100)**
+
 - Code Correctness: 8 — Uses Claude 3.5 Sonnet and GPT-4o; strong SWE-bench
   Verified results via underlying models [R1, R2]
 - Context Understanding: 8 — Codebase-aware indexing with `.cursor/rules/`
@@ -133,6 +134,7 @@ Platforms that provide a full editor or IDE with AI built in.
   recognized [R3]
 
 **Windsurf (69/100)**
+
 - Code Correctness: 7 — Cascade AI with strong models; slightly behind Cursor
   in independent comparisons [R4, R5]
 - Context Understanding: 7 — Good project context but fewer activation controls
@@ -140,6 +142,7 @@ Platforms that provide a full editor or IDE with AI built in.
 - Multi-file: 7 — Cascade handles multi-file but occasionally loses context [R5]
 
 **Warp Terminal (63/100)**
+
 - Code Correctness: 6 — Solid for command-line tasks; less tested on complex
   multi-file coding [R6]
 - Context Understanding: 6 — AGENTS.md + terminal history; limited IDE-level
@@ -153,23 +156,24 @@ Platforms that provide a full editor or IDE with AI built in.
 
 AI extensions that augment existing IDEs (VS Code, JetBrains, etc.).
 
-| Metric (Weight) | Copilot | Cline | Roo Code | Continue | Cody | Amazon Q |
-|-----------------|---------|-------|----------|----------|------|----------|
-| Code Correctness (25%) | 8 | 7 | 7 | 6 | 7 | 7 |
-| Context Understanding (20%) | 8 | 7 | 7 | 6 | 8 | 7 |
-| Multi-file Editing (15%) | 7 | 8 | 8 | 6 | 6 | 7 |
-| Instruction Adherence (10%) | 8 | 7 | 7 | 7 | 6 | 6 |
-| Autonomy (10%) | 7 | 8 | 8 | 5 | 5 | 7 |
-| Language Breadth (5%) | 9 | 8 | 8 | 8 | 8 | 8 |
-| Speed & Throughput (5%) | 8 | 7 | 7 | 7 | 7 | 7 |
-| Testing & Verification (5%) | 7 | 7 | 7 | 5 | 5 | 7 |
-| Ecosystem Integration (5%) | 9 | 7 | 7 | 7 | 8 | 8 |
-| **Weighted Score** | **78** | **73** | **73** | **61** | **68** | **70** |
-| **Rating** | ⭐⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐½ | ⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐½ |
+| Metric (Weight)             | Copilot  | Cline   | Roo Code | Continue | Cody    | Amazon Q |
+| --------------------------- | -------- | ------- | -------- | -------- | ------- | -------- |
+| Code Correctness (25%)      | 8        | 7       | 7        | 6        | 7       | 7        |
+| Context Understanding (20%) | 8        | 7       | 7        | 6        | 8       | 7        |
+| Multi-file Editing (15%)    | 7        | 8       | 8        | 6        | 6       | 7        |
+| Instruction Adherence (10%) | 8        | 7       | 7        | 7        | 6       | 6        |
+| Autonomy (10%)              | 7        | 8       | 8        | 5        | 5       | 7        |
+| Language Breadth (5%)       | 9        | 8       | 8        | 8        | 8       | 8        |
+| Speed & Throughput (5%)     | 8        | 7       | 7        | 7        | 7       | 7        |
+| Testing & Verification (5%) | 7        | 7       | 7        | 5        | 5       | 7        |
+| Ecosystem Integration (5%)  | 9        | 7       | 7        | 7        | 8       | 8        |
+| **Weighted Score**          | **78**   | **73**  | **73**   | **61**   | **68**  | **70**   |
+| **Rating**                  | ⭐⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐½  | ⭐⭐⭐   | ⭐⭐⭐½ | ⭐⭐⭐½  |
 
 ### Scoring Justification — IDE Extensions
 
 **GitHub Copilot (78/100)**
+
 - Code Correctness: 8 — GPT-4o and Claude 3.5 Sonnet backends; Copilot Workspace
   and Coding Agent show strong SWE-bench results [R7, R8]
 - Context Understanding: 8 — Layered instruction system (repo → path → prompt
@@ -179,26 +183,31 @@ AI extensions that augment existing IDEs (VS Code, JetBrains, etc.).
 - Ecosystem: 9 — Deepest GitHub integration: PRs, issues, code review [R8]
 
 **Cline (73/100)**
+
 - Multi-file: 8 — Strong agentic multi-file editing with plan-then-execute [R9]
 - Autonomy: 8 — Full agentic mode with file creation, command execution [R9]
 - Context: 7 — `.clinerules/` + AGENTS.md + cross-tool rule detection [R9]
 
 **Roo Code (73/100)**
+
 - Similar to Cline (fork) with additional mode-specific rules [R10]
 - Autonomy: 8 — Boomerang tasks and custom modes add orchestration [R10]
 
 **Sourcegraph Cody (68/100)**
+
 - Context Understanding: 8 — Code graph intelligence is industry-leading for
   large codebases [R11]
 - Multi-file: 6 — Better at understanding than editing across files [R11]
 - Autonomy: 5 — Primarily a copilot, not an autonomous agent [R11]
 
 **Amazon Q Developer (70/100)**
+
 - Code Correctness: 7 — Strong on AWS-specific code; competitive generally [R12]
 - Ecosystem: 8 — Deep AWS integration, security scanning, `/transform` [R12]
 - Autonomy: 7 — `/dev` mode handles multi-file autonomous tasks [R12]
 
 **Continue (61/100)**
+
 - Code Correctness: 6 — Quality depends heavily on chosen model [R13]
 - Autonomy: 5 — Primarily a copilot with limited agentic capabilities [R13]
 - Ecosystem: 7 — Excellent multi-IDE and multi-model flexibility [R13]
@@ -209,23 +218,24 @@ AI extensions that augment existing IDEs (VS Code, JetBrains, etc.).
 
 Terminal-based AI coding agents.
 
-| Metric (Weight) | Claude Code | Codex | Gemini CLI | Aider | Amp | OpenCode |
-|-----------------|-------------|-------|------------|-------|-----|----------|
-| Code Correctness (25%) | 9 | 8 | 8 | 8 | 7 | 6 |
-| Context Understanding (20%) | 9 | 8 | 7 | 7 | 7 | 5 |
-| Multi-file Editing (15%) | 9 | 8 | 7 | 8 | 7 | 6 |
-| Instruction Adherence (10%) | 9 | 8 | 7 | 7 | 7 | 6 |
-| Autonomy (10%) | 9 | 8 | 7 | 7 | 8 | 5 |
-| Language Breadth (5%) | 9 | 8 | 8 | 9 | 7 | 7 |
-| Speed & Throughput (5%) | 7 | 7 | 8 | 7 | 7 | 7 |
-| Testing & Verification (5%) | 9 | 7 | 7 | 8 | 6 | 5 |
-| Ecosystem Integration (5%) | 9 | 7 | 7 | 8 | 7 | 5 |
-| **Weighted Score** | **89** | **79** | **73** | **76** | **72** | **56** |
-| **Rating** | ⭐⭐⭐⭐½ | ⭐⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐ |
+| Metric (Weight)             | Claude Code | Codex    | Gemini CLI | Aider    | Amp     | OpenCode |
+| --------------------------- | ----------- | -------- | ---------- | -------- | ------- | -------- |
+| Code Correctness (25%)      | 9           | 8        | 8          | 8        | 7       | 6        |
+| Context Understanding (20%) | 9           | 8        | 7          | 7        | 7       | 5        |
+| Multi-file Editing (15%)    | 9           | 8        | 7          | 8        | 7       | 6        |
+| Instruction Adherence (10%) | 9           | 8        | 7          | 7        | 7       | 6        |
+| Autonomy (10%)              | 9           | 8        | 7          | 7        | 8       | 5        |
+| Language Breadth (5%)       | 9           | 8        | 8          | 9        | 7       | 7        |
+| Speed & Throughput (5%)     | 7           | 7        | 8          | 7        | 7       | 7        |
+| Testing & Verification (5%) | 9           | 7        | 7          | 8        | 6       | 5        |
+| Ecosystem Integration (5%)  | 9           | 7        | 7          | 8        | 7       | 5        |
+| **Weighted Score**          | **89**      | **79**   | **73**     | **76**   | **72**  | **56**   |
+| **Rating**                  | ⭐⭐⭐⭐½   | ⭐⭐⭐⭐ | ⭐⭐⭐½    | ⭐⭐⭐⭐ | ⭐⭐⭐½ | ⭐⭐⭐   |
 
 ### Scoring Justification — CLI Agents
 
 **Claude Code (89/100)**
+
 - Code Correctness: 9 — Claude 4 Sonnet achieves 72.7% on SWE-bench Verified,
   industry-leading [R14, R15]
 - Context Understanding: 9 — CLAUDE.md + hierarchical rules + skills + agents
@@ -237,12 +247,14 @@ Terminal-based AI coding agents.
 - Ecosystem: 9 — Git integration, MCP, hooks, settings, full file system access [R14]
 
 **OpenAI Codex (79/100)**
+
 - Code Correctness: 8 — Codex-1 model; 67% on SWE-bench Verified [R16, R17]
 - Context Understanding: 8 — Hierarchical AGENTS.md with override support [R16]
 - Multi-file: 8 — Skills system enables structured multi-file workflows [R16]
 - Autonomy: 8 — Cloud-based autonomous execution in sandboxed environment [R16]
 
 **Aider (76/100)**
+
 - Code Correctness: 8 — Polyglot benchmark leader when using top models;
   Aider leaderboard tracks 60+ models [R18, R19]
 - Multi-file: 8 — Excellent repo-map for multi-file context [R18]
@@ -250,15 +262,18 @@ Terminal-based AI coding agents.
 - Testing: 8 — Auto-lint, auto-test, auto-fix loop [R18]
 
 **Google Gemini CLI (73/100)**
+
 - Code Correctness: 8 — Gemini 2.5 Pro scores well on coding benchmarks [R20]
 - Speed: 8 — Fast inference with Google's infrastructure [R20]
 - Context: 7 — GEMINI.md + styleguide but fewer activation controls [R20]
 
 **Amp (72/100)**
+
 - Code Correctness: 7 — Good but less benchmarked than top agents [R21]
 - Autonomy: 8 — Strong autonomous multi-step execution [R21]
 
 **OpenCode (56/100)**
+
 - Scores are estimated (~) as benchmarks are limited for this newer tool [R22]
 - Open-source with growing community but fewer features than mature tools
 
@@ -268,23 +283,24 @@ Terminal-based AI coding agents.
 
 Fully autonomous, cloud-hosted coding agents.
 
-| Metric (Weight) | Jules | Factory | Codex (Cloud) | Copilot Agent |
-|-----------------|-------|---------|---------------|---------------|
-| Code Correctness (25%) | 7 | 7 | 8 | 8 |
-| Context Understanding (20%) | 7 | 7 | 8 | 8 |
-| Multi-file Editing (15%) | 7 | 8 | 8 | 7 |
-| Instruction Adherence (10%) | 6 | 6 | 8 | 8 |
-| Autonomy (10%) | 9 | 9 | 9 | 8 |
-| Language Breadth (5%) | 7 | 7 | 8 | 9 |
-| Speed & Throughput (5%) | 6 | 7 | 7 | 7 |
-| Testing & Verification (5%) | 6 | 7 | 7 | 7 |
-| Ecosystem Integration (5%) | 7 | 7 | 7 | 9 |
-| **Weighted Score** | **71** | **72** | **79** | **79** |
-| **Rating** | ⭐⭐⭐½ | ⭐⭐⭐½ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Metric (Weight)             | Jules   | Factory | Codex (Cloud) | Copilot Agent |
+| --------------------------- | ------- | ------- | ------------- | ------------- |
+| Code Correctness (25%)      | 7       | 7       | 8             | 8             |
+| Context Understanding (20%) | 7       | 7       | 8             | 8             |
+| Multi-file Editing (15%)    | 7       | 8       | 8             | 7             |
+| Instruction Adherence (10%) | 6       | 6       | 8             | 8             |
+| Autonomy (10%)              | 9       | 9       | 9             | 8             |
+| Language Breadth (5%)       | 7       | 7       | 8             | 9             |
+| Speed & Throughput (5%)     | 6       | 7       | 7             | 7             |
+| Testing & Verification (5%) | 6       | 7       | 7             | 7             |
+| Ecosystem Integration (5%)  | 7       | 7       | 7             | 9             |
+| **Weighted Score**          | **71**  | **72**  | **79**        | **79**        |
+| **Rating**                  | ⭐⭐⭐½ | ⭐⭐⭐½ | ⭐⭐⭐⭐      | ⭐⭐⭐⭐      |
 
 ### Scoring Justification — Cloud / Autonomous Agents
 
 **Google Jules (71/100)**
+
 - Code Correctness: 7 — Gemini-powered; good but less benchmarked as
   autonomous agent [R23]
 - Autonomy: 9 — Fully autonomous: analyzes, plans, branches, commits, PRs [R23]
@@ -292,16 +308,19 @@ Fully autonomous, cloud-hosted coding agents.
   controls [R23]
 
 **Factory (72/100)**
+
 - Multi-file: 8 — End-to-end feature implementation across files [R24]
 - Autonomy: 9 — Full SDLC automation: code, review, test, deploy [R24]
 - Instruction Adherence: 6 — AGENTS.md support but primarily dashboard
   configured [R24]
 
 **OpenAI Codex Cloud (79/100)**
+
 - Same model as CLI but in autonomous cloud mode [R16, R17]
 - Autonomy: 9 — Sandboxed cloud execution with full repo access [R16]
 
 **Copilot Coding Agent (79/100)**
+
 - Code Correctness: 8 — Strong models with GitHub context [R8, R25]
 - Ecosystem: 9 — Native GitHub integration: issues, PRs, CI checks [R8, R25]
 - Autonomy: 8 — Assigns from issues, creates branches, submits PRs [R25]
@@ -312,57 +331,57 @@ Fully autonomous, cloud-hosted coding agents.
 
 All platforms ranked by weighted score, regardless of category.
 
-| Rank | Platform | Score | Rating | Primary Category |
-|------|----------|-------|--------|-----------------|
-| 1 | Claude Code | 89 | ⭐⭐⭐⭐½ | CLI Agent |
-| 2 | OpenAI Codex | 79 | ⭐⭐⭐⭐ | CLI Agent / Cloud Agent |
-| 3 | GitHub Copilot | 78 | ⭐⭐⭐⭐ | IDE Extension / Cloud Agent |
-| 4 | Cursor IDE | 77 | ⭐⭐⭐⭐ | AI-Native IDE |
-| 5 | Aider | 76 | ⭐⭐⭐⭐ | CLI Agent |
-| 6 | Cline | 73 | ⭐⭐⭐½ | IDE Extension |
-| 7 | Roo Code | 73 | ⭐⭐⭐½ | IDE Extension |
-| 8 | Google Gemini CLI | 73 | ⭐⭐⭐½ | CLI Agent |
-| 9 | Amp | 72 | ⭐⭐⭐½ | CLI Agent |
-| 10 | Factory | 72 | ⭐⭐⭐½ | Cloud Agent |
-| 11 | Google Jules | 71 | ⭐⭐⭐½ | Cloud Agent |
-| 12 | Amazon Q Developer | 70 | ⭐⭐⭐½ | IDE Extension |
-| 13 | Windsurf IDE | 69 | ⭐⭐⭐½ | AI-Native IDE |
-| 14 | Sourcegraph Cody | 68 | ⭐⭐⭐½ | IDE Extension |
-| 15 | Warp Terminal | 63 | ⭐⭐⭐ | AI-Native IDE |
-| 16 | Continue | 61 | ⭐⭐⭐ | IDE Extension |
-| 17 | OpenCode | 56 | ⭐⭐⭐ | CLI Agent |
+| Rank | Platform           | Score | Rating    | Primary Category            |
+| ---- | ------------------ | ----- | --------- | --------------------------- |
+| 1    | Claude Code        | 89    | ⭐⭐⭐⭐½ | CLI Agent                   |
+| 2    | OpenAI Codex       | 79    | ⭐⭐⭐⭐  | CLI Agent / Cloud Agent     |
+| 3    | GitHub Copilot     | 78    | ⭐⭐⭐⭐  | IDE Extension / Cloud Agent |
+| 4    | Cursor IDE         | 77    | ⭐⭐⭐⭐  | AI-Native IDE               |
+| 5    | Aider              | 76    | ⭐⭐⭐⭐  | CLI Agent                   |
+| 6    | Cline              | 73    | ⭐⭐⭐½   | IDE Extension               |
+| 7    | Roo Code           | 73    | ⭐⭐⭐½   | IDE Extension               |
+| 8    | Google Gemini CLI  | 73    | ⭐⭐⭐½   | CLI Agent                   |
+| 9    | Amp                | 72    | ⭐⭐⭐½   | CLI Agent                   |
+| 10   | Factory            | 72    | ⭐⭐⭐½   | Cloud Agent                 |
+| 11   | Google Jules       | 71    | ⭐⭐⭐½   | Cloud Agent                 |
+| 12   | Amazon Q Developer | 70    | ⭐⭐⭐½   | IDE Extension               |
+| 13   | Windsurf IDE       | 69    | ⭐⭐⭐½   | AI-Native IDE               |
+| 14   | Sourcegraph Cody   | 68    | ⭐⭐⭐½   | IDE Extension               |
+| 15   | Warp Terminal      | 63    | ⭐⭐⭐    | AI-Native IDE               |
+| 16   | Continue           | 61    | ⭐⭐⭐    | IDE Extension               |
+| 17   | OpenCode           | 56    | ⭐⭐⭐    | CLI Agent                   |
 
 ---
 
 ## References
 
-| ID | Source | URL |
-|----|--------|-----|
-| R1 | Cursor official documentation | https://docs.cursor.com/ |
-| R2 | Cursor model selection and benchmarks | https://cursor.com/blog |
-| R3 | Cursor Rules deep dive — design.dev | https://design.dev/guides/cursor-rules/ |
-| R4 | Windsurf Cascade documentation | https://docs.windsurf.com/windsurf/cascade |
-| R5 | Windsurf vs Cursor comparison — independent review | https://www.builder.io/blog/cursor-vs-windsurf |
-| R6 | Warp Rules documentation | https://docs.warp.dev/agent-platform/capabilities/rules |
-| R7 | GitHub Copilot custom instructions | https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot |
-| R8 | GitHub Copilot coding agent changelog | https://github.blog/changelog/2025-08-28-copilot-coding-agent-now-supports-agents-md-custom-instructions/ |
-| R9 | Cline Rules documentation | https://docs.cline.bot/customization/cline-rules |
-| R10 | Roo Code features documentation | https://docs.roocode.com/features/ |
-| R11 | Sourcegraph Cody documentation | https://sourcegraph.com/docs/cody |
-| R12 | Amazon Q Developer documentation | https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html |
-| R13 | Continue Rules documentation | https://docs.continue.dev/customize/rules |
-| R14 | Claude Code documentation — Extending Claude | https://docs.anthropic.com/en/docs/claude-code |
-| R15 | SWE-bench Verified leaderboard | https://www.swebench.com/ |
-| R16 | OpenAI Codex — AGENTS.md guides | https://developers.openai.com/codex/guides/agents-md |
-| R17 | OpenAI Codex benchmarks — Codex-1 model | https://openai.com/index/introducing-codex/ |
-| R18 | Aider documentation | https://aider.chat/ |
-| R19 | Aider polyglot leaderboard | https://aider.chat/docs/leaderboards/ |
-| R20 | Gemini CLI configuration docs | https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html |
-| R21 | Amp by Sourcegraph | https://ampcode.com/docs |
-| R22 | OpenCode GitHub repository | https://github.com/opencode-ai/opencode |
-| R23 | Google Jules | https://jules.google/ |
-| R24 | Factory — autonomous coding | https://www.factory.ai/ |
-| R25 | GitHub Copilot Coding Agent | https://docs.github.com/en/copilot/using-github-copilot/using-the-github-copilot-coding-agent |
+| ID  | Source                                             | URL                                                                                                             |
+| --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| R1  | Cursor official documentation                      | https://docs.cursor.com/                                                                                        |
+| R2  | Cursor model selection and benchmarks              | https://cursor.com/blog                                                                                         |
+| R3  | Cursor Rules deep dive — design.dev                | https://design.dev/guides/cursor-rules/                                                                         |
+| R4  | Windsurf Cascade documentation                     | https://docs.windsurf.com/windsurf/cascade                                                                      |
+| R5  | Windsurf vs Cursor comparison — independent review | https://www.builder.io/blog/cursor-vs-windsurf                                                                  |
+| R6  | Warp Rules documentation                           | https://docs.warp.dev/agent-platform/capabilities/rules                                                         |
+| R7  | GitHub Copilot custom instructions                 | https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot |
+| R8  | GitHub Copilot coding agent changelog              | https://github.blog/changelog/2025-08-28-copilot-coding-agent-now-supports-agents-md-custom-instructions/       |
+| R9  | Cline Rules documentation                          | https://docs.cline.bot/customization/cline-rules                                                                |
+| R10 | Roo Code features documentation                    | https://docs.roocode.com/features/                                                                              |
+| R11 | Sourcegraph Cody documentation                     | https://sourcegraph.com/docs/cody                                                                               |
+| R12 | Amazon Q Developer documentation                   | https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html                                           |
+| R13 | Continue Rules documentation                       | https://docs.continue.dev/customize/rules                                                                       |
+| R14 | Claude Code documentation — Extending Claude       | https://docs.anthropic.com/en/docs/claude-code                                                                  |
+| R15 | SWE-bench Verified leaderboard                     | https://www.swebench.com/                                                                                       |
+| R16 | OpenAI Codex — AGENTS.md guides                    | https://developers.openai.com/codex/guides/agents-md                                                            |
+| R17 | OpenAI Codex benchmarks — Codex-1 model            | https://openai.com/index/introducing-codex/                                                                     |
+| R18 | Aider documentation                                | https://aider.chat/                                                                                             |
+| R19 | Aider polyglot leaderboard                         | https://aider.chat/docs/leaderboards/                                                                           |
+| R20 | Gemini CLI configuration docs                      | https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html                                  |
+| R21 | Amp by Sourcegraph                                 | https://ampcode.com/docs                                                                                        |
+| R22 | OpenCode GitHub repository                         | https://github.com/opencode-ai/opencode                                                                         |
+| R23 | Google Jules                                       | https://jules.google/                                                                                           |
+| R24 | Factory — autonomous coding                        | https://www.factory.ai/                                                                                         |
+| R25 | GitHub Copilot Coding Agent                        | https://docs.github.com/en/copilot/using-github-copilot/using-the-github-copilot-coding-agent                   |
 
 ---
 

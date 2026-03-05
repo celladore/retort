@@ -2,12 +2,12 @@
 
 **Render target:** _(via AGENTS.md — no dedicated render target)_
 
-| | |
-|---|---|
-| **Type** | AI App Builder (natural language to full-stack app) |
-| **Categories** | Vibe Coding / App Builder |
-| **Access** | Web app — [lovable.dev](https://lovable.dev/) — browser-based, no install required |
-| **Documentation** | [lovable.dev/docs](https://lovable.dev/docs) |
+|                        |                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Type**               | AI App Builder (natural language to full-stack app)                                                           |
+| **Categories**         | Vibe Coding / App Builder                                                                                     |
+| **Access**             | Web app — [lovable.dev](https://lovable.dev/) — browser-based, no install required                            |
+| **Documentation**      | [lovable.dev/docs](https://lovable.dev/docs)                                                                  |
 | **Performance Rating** | ⭐⭐⭐½ — **66/100** ([details](./PLATFORM_CODING_PERFORMANCE.md#category-matrix--vibe-coding--app-builders)) |
 
 ---
@@ -32,23 +32,23 @@ apps, not just prototypes.
 
 ### What AgentKit Forge Generates
 
-| Output | Path | Purpose |
-|--------|------|---------|
+| Output    | Path        | Purpose                                       |
+| --------- | ----------- | --------------------------------------------- |
 | AGENTS.md | `AGENTS.md` | Universal instructions (if repo is connected) |
 
 ---
 
 ## Consolidated Rating
 
-| Dimension | Score | Details |
-|-----------|-------|---------|
-| Coding Performance | 66/100 ⭐⭐⭐½ | Good React/Supabase generation; limited backend depth |
-| Developer Experience | 84/100 ⭐⭐⭐⭐ | Excellent for non-coders; intuitive visual builder |
-| Cost & Value | 63/100 ⭐⭐⭐ | $25–30+/mo; reasonable for full-stack delivery |
-| Customization | 25/100 ⭐ | Prompt-driven; minimal file-based configuration |
-| Privacy & Security | 55/100 ⭐⭐⭐ | Cloud-only; mandatory security scan is a plus |
-| Team & Enterprise | 40/100 ⭐⭐ | Basic team features; not enterprise-ready |
-| **Weighted Total** | **60/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
+| Dimension            | Score             | Details                                                                       |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Coding Performance   | 66/100 ⭐⭐⭐½    | Good React/Supabase generation; limited backend depth                         |
+| Developer Experience | 84/100 ⭐⭐⭐⭐   | Excellent for non-coders; intuitive visual builder                            |
+| Cost & Value         | 63/100 ⭐⭐⭐     | $25–30+/mo; reasonable for full-stack delivery                                |
+| Customization        | 25/100 ⭐         | Prompt-driven; minimal file-based configuration                               |
+| Privacy & Security   | 55/100 ⭐⭐⭐     | Cloud-only; mandatory security scan is a plus                                 |
+| Team & Enterprise    | 40/100 ⭐⭐       | Basic team features; not enterprise-ready                                     |
+| **Weighted Total**   | **60/100 ⭐⭐⭐** | [methodology](./PLATFORM_CONSOLIDATED_RATING.md#decision-dimensions--weights) |
 
 ### Best For
 

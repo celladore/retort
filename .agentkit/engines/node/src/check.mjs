@@ -4,11 +4,12 @@
  * Outputs a structured results table and logs to events.
  */
 import { existsSync, readFileSync } from 'fs';
-import { readdir } from 'fs/promises';
-import { resolve } from 'path';
+import { readdir, readFile } from 'fs/promises';
 import yaml from 'js-yaml';
-import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
+import { join, resolve } from 'path';
 import { appendEvent } from './orchestrator.mjs';
+import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
+import { resolveCoverageCommand, parseCoveragePercentage } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Step definitions per tech stack
@@ -18,16 +19,17 @@ import { appendEvent } from './orchestrator.mjs';
  * Build the check steps for a detected stack.
  * @param {object} stack - Stack config from teams.yaml techStacks
  * @param {object} flags - CLI flags
+ * @param {string} agentkitRoot - Path to .agentkit root
  * @returns {Array<{ name: string, command: string, fixCommand?: string }>}
  */
-function buildSteps(stack, flags) {
+function buildSteps(stack, flags, agentkitRoot) {
   const steps = [];
 
   if (stack.formatter) {
     if (typeof stack.formatter !== 'string' || !stack.formatter.trim()) {
       console.warn(`[agentkit:check] Skipping non-string formatter value`);
     } else {
-      const resolved = resolveFormatter(stack.formatter);
+      const resolved = resolveFormatter(stack.formatter, agentkitRoot);
       if (!isValidCommand(resolved.check)) {
         console.warn(`[agentkit:check] Skipping invalid formatter command: ${stack.formatter}`);
       } else if (!isAllowedFormatter(resolved)) {
@@ -99,29 +101,50 @@ function buildSteps(stack, flags) {
 // one of these (after resolveFormatter mapping) to prevent a compromised spec
 // from executing arbitrary binaries.
 const ALLOWED_FORMATTER_BASES = new Set([
-  'prettier', 'black', 'cargo', 'dotnet', 'gofmt', 'rustfmt',
-  'clang-format', 'autopep8', 'yapf', 'isort', 'shfmt', 'stylua',
+  'prettier',
+  'black',
+  'cargo',
+  'dotnet',
+  'gofmt',
+  'rustfmt',
+  'clang-format',
+  'autopep8',
+  'yapf',
+  'isort',
+  'shfmt',
+  'stylua',
 ]);
 
 // Packages allowed to run via npx. 'npx' alone is too broad — a compromised
 // spec could set formatter: "npx malicious-package" and pass the base check.
-const ALLOWED_NPX_PACKAGES = new Set([
-  'prettier',
-]);
+const ALLOWED_NPX_PACKAGES = new Set(['prettier']);
 
 /**
  * Resolve a formatter shorthand to its check/fix command variants.
  * Returns an object with { cmd, check, fix } so buildSteps can use
  * tool-specific CLI syntax instead of hardcoding Prettier-style flags.
  * @param {string} formatter
+ * @param {string} [agentkitRoot]
  * @returns {{ cmd: string, check: string, fix: string }}
  */
-function resolveFormatter(formatter) {
+function resolveFormatter(formatter, agentkitRoot) {
+  const prettierBin = agentkitRoot
+    ? resolve(agentkitRoot, 'node_modules', 'prettier', 'bin', 'prettier.cjs').replace(/\\/g, '/')
+    : '.agentkit/node_modules/prettier/bin/prettier.cjs';
+
   const map = {
-    prettier:        { cmd: 'npx prettier',  check: 'npx prettier --check .',            fix: 'npx prettier --write .' },
-    black:           { cmd: 'black',         check: 'black --check .',                   fix: 'black .' },
-    'cargo fmt':     { cmd: 'cargo fmt',     check: 'cargo fmt -- --check',              fix: 'cargo fmt' },
-    'dotnet format': { cmd: 'dotnet format', check: 'dotnet format --verify-no-changes', fix: 'dotnet format' },
+    prettier: {
+      cmd: 'prettier',
+      check: `node "${prettierBin}" --check .`,
+      fix: `node "${prettierBin}" --write .`,
+    },
+    black: { cmd: 'black', check: 'black --check .', fix: 'black .' },
+    'cargo fmt': { cmd: 'cargo fmt', check: 'cargo fmt -- --check', fix: 'cargo fmt' },
+    'dotnet format': {
+      cmd: 'dotnet format',
+      check: 'dotnet format --verify-no-changes',
+      fix: 'dotnet format',
+    },
   };
   const entry = map[formatter];
   if (entry) return entry;
@@ -136,10 +159,10 @@ function resolveFormatter(formatter) {
  */
 function resolveLinter(linter) {
   const map = {
-    eslint:          { cmd: 'eslint',        check: 'eslint .',       fix: 'eslint --fix .' },
-    'cargo clippy':  { cmd: 'cargo clippy',  check: 'cargo clippy',   fix: 'cargo clippy --fix' },
-    pylint:          { cmd: 'pylint',        check: 'pylint .',       fix: null },
-    flake8:          { cmd: 'flake8',        check: 'flake8 .',       fix: null },
+    eslint: { cmd: 'eslint', check: 'eslint .', fix: 'eslint --fix .' },
+    'cargo clippy': { cmd: 'cargo clippy', check: 'cargo clippy', fix: 'cargo clippy --fix' },
+    pylint: { cmd: 'pylint', check: 'pylint .', fix: null },
+    flake8: { cmd: 'flake8', check: 'flake8 .', fix: null },
   };
   const entry = map[linter];
   if (entry) return entry;
@@ -167,8 +190,15 @@ function isAllowedFormatter(resolved) {
 // Allowed linter base executables. Values from the YAML spec must resolve to
 // one of these to prevent a compromised spec from executing arbitrary binaries.
 const ALLOWED_LINTER_BASES = new Set([
-  'eslint', 'cargo', 'pylint', 'flake8', 'rubocop', 'golangci-lint',
-  'tslint', 'stylelint', 'shellcheck',
+  'eslint',
+  'cargo',
+  'pylint',
+  'flake8',
+  'rubocop',
+  'golangci-lint',
+  'tslint',
+  'stylelint',
+  'shellcheck',
 ]);
 
 /**
@@ -180,8 +210,6 @@ function isAllowedLinter(resolved) {
   const base = resolved.cmd.split(/\s+/)[0];
   return ALLOWED_LINTER_BASES.has(base);
 }
-
-
 
 /**
  * Detect tech stacks from teams.yaml techStacks config.
@@ -199,10 +227,11 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
 
   // Optimization: Read project root directory once if any stack uses wildcard detection
   let projectFiles = null;
-  const needsWildcard = stacks.some(stack =>
-    (!filterStack || stack.name === filterStack) &&
-    Array.isArray(stack.detect) &&
-    stack.detect.some(m => typeof m === 'string' && m.startsWith('*'))
+  const needsWildcard = stacks.some(
+    (stack) =>
+      (!filterStack || stack.name === filterStack) &&
+      Array.isArray(stack.detect) &&
+      stack.detect.some((m) => typeof m === 'string' && m.startsWith('*'))
   );
 
   if (needsWildcard) {
@@ -213,17 +242,17 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
     }
   }
 
-  return stacks.filter(stack => {
+  return stacks.filter((stack) => {
     if (filterStack && stack.name !== filterStack) return false;
     // Check if any detect markers exist in the project
     if (!Array.isArray(stack.detect)) return false;
-    return stack.detect.some(marker => {
+    return stack.detect.some((marker) => {
       if (typeof marker !== 'string') return false;
       if (marker.startsWith('*')) {
         // Wildcard: check for files with this extension at root using cached file list
         if (!projectFiles) return false;
         const ext = marker.replace('*', '');
-        return projectFiles.some(f => f.endsWith(ext));
+        return projectFiles.some((f) => f.endsWith(ext));
       }
       return existsSync(resolve(projectRoot, marker));
     });
@@ -231,19 +260,104 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
 }
 
 // ---------------------------------------------------------------------------
+// Unresolved placeholder audit
+// ---------------------------------------------------------------------------
+
+/**
+ * Regex matching {{variable}} placeholders that remain after template rendering.
+ * Excludes block helpers like {{#if}}, {{/if}}, {{else}}, and pipe-default syntax.
+ */
+const UNRESOLVED_RE = /\{\{(?!#|\/|else\}\})([a-zA-Z_][a-zA-Z0-9_.]*)\}\}/g;
+
+/**
+ * Scan generated output directories for files containing unresolved {{variable}}
+ * placeholders. These indicate variables that lack defaults in both project.yaml
+ * and spec-defaults.yaml.
+ *
+ * @param {string} projectRoot
+ * @param {string[]} outputDirs - Directories to scan (e.g. .claude, .github/instructions)
+ * @returns {Promise<Array<{ file: string, variables: string[] }>>}
+ */
+export async function auditUnresolvedPlaceholders(projectRoot, outputDirs) {
+  const findings = [];
+
+  for (const dir of outputDirs) {
+    const fullDir = resolve(projectRoot, dir);
+    if (!existsSync(fullDir)) continue;
+
+    await walkForPlaceholders(fullDir, projectRoot, findings);
+  }
+
+  return findings;
+}
+
+async function walkForPlaceholders(dir, projectRoot, findings, depth = 0) {
+  if (depth > 5) return;
+  let entries;
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === 'node_modules' || entry.name === '.git') continue;
+      await walkForPlaceholders(fullPath, projectRoot, findings, depth + 1);
+    } else if (/\.(md|yaml|yml|json|mjs|js|ts)$/.test(entry.name)) {
+      try {
+        const content = await readFile(fullPath, 'utf-8');
+        const matches = [...content.matchAll(UNRESOLVED_RE)].map((m) => m[1]);
+        if (matches.length > 0) {
+          const unique = [...new Set(matches)];
+          const relPath = fullPath.replace(projectRoot + '\\', '').replace(projectRoot + '/', '');
+          findings.push({ file: relPath, variables: unique });
+        }
+      } catch {
+        /* skip unreadable files */
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main handler
 // ---------------------------------------------------------------------------
+
+/**
+ * Load coverage threshold from project.yaml.
+ * @param {string} agentkitRoot
+ * @returns {number|null} Coverage threshold percentage or null if not configured
+ */
+function loadCoverageThreshold(agentkitRoot) {
+  try {
+    const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
+    if (!existsSync(projectPath)) return null;
+    const spec = yaml.load(readFileSync(projectPath, 'utf-8'));
+    const threshold = spec?.testing?.coverage;
+    return typeof threshold === 'number' ? threshold : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Run quality gate checks.
  * @param {object} opts
  * @param {string} opts.agentkitRoot
  * @param {string} opts.projectRoot
- * @param {object} opts.flags - --fix, --fast, --stack
+ * @param {object} opts.flags - --fix, --fast, --stack, --coverage
  * @returns {object} results
  */
 export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
+  const userContext =
+    Array.isArray(flags._args) && flags._args.length > 0 ? flags._args.join(' ') : null;
+
   console.log('[agentkit:check] Running quality gates...');
+  if (userContext) {
+    console.log(`[agentkit:check] Context: ${userContext}`);
+  }
   console.log('');
 
   const detectedStacks = await detectStacks(agentkitRoot, projectRoot, flags.stack);
@@ -251,14 +365,16 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
   if (detectedStacks.length === 0) {
     console.log('[agentkit:check] No tech stacks detected. Nothing to check.');
     console.log('Tip: Ensure your project has marker files (package.json, Cargo.toml, etc.)');
-    return { stacks: [], overallStatus: 'SKIP', overallPassed: true };
+    return { stacks: [], overallStatus: 'SKIP', overallPassed: true, coverage: null };
   }
 
   const allResults = [];
+  const coverageResults = [];
+  const coverageThreshold = loadCoverageThreshold(agentkitRoot);
 
   for (const stack of detectedStacks) {
     console.log(`--- Stack: ${stack.name} ---`);
-    const steps = buildSteps(stack, flags);
+    const steps = buildSteps(stack, flags, agentkitRoot);
     const stackResults = [];
 
     for (const step of steps) {
@@ -267,11 +383,16 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
       // Check if the base command exists
       const parts = step.command.split(' ').filter(Boolean);
       const isNpx = parts[0] === 'npx';
-      const baseCmd = isNpx ? (parts[1] || '') : parts[0];
+      const baseCmd = isNpx ? parts[1] || '' : parts[0];
 
       let result;
       if (!isNpx && baseCmd && !commandExists(baseCmd)) {
-        result = { exitCode: -1, stdout: '', stderr: `Command not found: ${baseCmd}`, durationMs: 0 };
+        result = {
+          exitCode: -1,
+          stdout: '',
+          stderr: `Command not found: ${baseCmd}`,
+          durationMs: 0,
+        };
         console.log(`SKIP (${baseCmd} not found)`);
       } else {
         // If --fix and we have a fix command, run that first
@@ -299,13 +420,79 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
       if (flags.bail && result.exitCode > 0) break;
     }
 
+    // Coverage check: run after test step if --coverage flag or threshold is configured
+    if (flags.coverage || coverageThreshold != null) {
+      const covCmd = resolveCoverageCommand(stack);
+      if (covCmd.command && isValidCommand(covCmd.command)) {
+        process.stdout.write(`  ${'coverage'.padEnd(12)} `);
+        const covResult = execCommand(covCmd.command, { cwd: projectRoot });
+        const percentage = parseCoveragePercentage(
+          covResult.stdout + '\n' + covResult.stderr,
+          covCmd.parser
+        );
+
+        let covStatus = 'SKIP';
+        if (percentage != null) {
+          if (coverageThreshold != null && percentage < coverageThreshold) {
+            covStatus = 'FAIL';
+            console.log(`FAIL  (${percentage.toFixed(1)}% < ${coverageThreshold}% threshold)`);
+          } else {
+            covStatus = 'PASS';
+            console.log(
+              `PASS  (${percentage.toFixed(1)}%${coverageThreshold != null ? ` >= ${coverageThreshold}%` : ''})`
+            );
+          }
+        } else {
+          console.log(`SKIP (could not parse coverage)`);
+        }
+
+        stackResults.push({
+          step: 'coverage',
+          exitCode: covStatus === 'FAIL' ? 1 : covStatus === 'SKIP' ? -1 : 0,
+          durationMs: covResult.durationMs,
+          status: covStatus,
+          stdout: covResult.stdout.slice(0, 500),
+          stderr: covResult.stderr.slice(0, 500),
+          coveragePercentage: percentage,
+          coverageThreshold,
+        });
+
+        coverageResults.push({
+          stack: stack.name,
+          percentage,
+          threshold: coverageThreshold,
+          status: covStatus,
+        });
+      }
+    }
+
     allResults.push({ stack: stack.name, steps: stackResults });
     console.log('');
   }
 
+  // --- Unresolved placeholder audit ---
+  const outputDirs = [
+    '.claude',
+    '.github/instructions',
+    '.cursor',
+    '.clinerules',
+    '.roo',
+    '.windsurf',
+  ];
+  const unresolvedFindings = await auditUnresolvedPlaceholders(projectRoot, outputDirs);
+  if (unresolvedFindings.length > 0) {
+    console.log('--- Unresolved Placeholders ---');
+    for (const finding of unresolvedFindings) {
+      console.log(`  ${finding.file}: ${finding.variables.join(', ')}`);
+    }
+    console.log(`  WARN  ${unresolvedFindings.length} file(s) with unresolved variables`);
+    console.log('  Tip: Add defaults in .agentkit/spec/spec-defaults.yaml or project.yaml');
+    console.log('');
+  }
+
   // --- Summary ---
-  const overallPassed = allResults.every(s =>
-    s.steps.every(step => step.status === 'PASS' || step.status === 'SKIP')
+  const overallPassed = allResults.every((s) =>
+    s.steps.every((step) => step.status === 'PASS' || step.status === 'SKIP')
   );
   const overallStatus = overallPassed ? 'PASS' : 'FAIL';
 
@@ -331,28 +518,59 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
     }
   }
 
+  // Coverage summary
+  if (coverageResults.length > 0) {
+    console.log('');
+    console.log('--- Coverage ---');
+    for (const cov of coverageResults) {
+      const pct = cov.percentage != null ? `${cov.percentage.toFixed(1)}%` : 'N/A';
+      const thresh = cov.threshold != null ? ` (threshold: ${cov.threshold}%)` : '';
+      console.log(`  ${cov.stack}: ${pct}${thresh} — ${cov.status}`);
+    }
+  }
+
   // Log event
   try {
     await appendEvent(projectRoot, 'check_completed', {
       overallStatus,
-      stacks: allResults.map(s => ({
+      stacks: allResults.map((s) => ({
         stack: s.stack,
-        steps: s.steps.map(st => ({ step: st.step, status: st.status, durationMs: st.durationMs })),
+        steps: s.steps.map((st) => ({
+          step: st.step,
+          status: st.status,
+          durationMs: st.durationMs,
+        })),
       })),
-      flags: { fix: !!flags.fix, fast: !!flags.fast, stack: flags.stack || null },
+      coverage: coverageResults.length > 0 ? coverageResults : undefined,
+      flags: {
+        fix: !!flags.fix,
+        fast: !!flags.fast,
+        coverage: !!flags.coverage,
+        stack: flags.stack || null,
+      },
+      ...(userContext ? { userContext } : {}),
     });
-  } catch (err) { console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`); }
+  } catch (err) {
+    console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`);
+  }
 
-  return { stacks: allResults, overallStatus, overallPassed };
+  return {
+    stacks: allResults,
+    overallStatus,
+    overallPassed,
+    coverage: coverageResults,
+    ...(userContext ? { userContext } : {}),
+  };
 }
 
 // Export internal helpers so they can be directly unit-tested.
 export {
-  resolveFormatter,
-  resolveLinter,
+  ALLOWED_FORMATTER_BASES,
+  ALLOWED_LINTER_BASES,
+  ALLOWED_NPX_PACKAGES,
+  auditUnresolvedPlaceholders,
   isAllowedFormatter,
   isAllowedLinter,
-  ALLOWED_FORMATTER_BASES,
-  ALLOWED_NPX_PACKAGES,
-  ALLOWED_LINTER_BASES,
+  resolveFormatter,
+  resolveLinter,
 };

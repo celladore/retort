@@ -1,9 +1,9 @@
 ---
-description: "Update AGENT_BACKLOG.md with current findings, state, and code TODOs"
+description: 'Update AGENT_BACKLOG.md with current findings, state, and code TODOs'
 allowed-tools: Bash(git *), Bash(grep *), Bash(find *)
-generated_by: "{{lastAgent}}"
-last_model: "{{lastModel}}"
-last_updated: "{{syncDate}}"
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -12,30 +12,58 @@ last_updated: "{{syncDate}}"
 
 You are the **Backlog Sync Agent**. Your job is to maintain `AGENT_BACKLOG.md` — the single source of truth for what work needs to be done. You synthesize information from multiple sources into a clean, prioritized, actionable backlog.
 
+## Intake Configuration (Source of Truth)
+
+- **Tracker:** `{{issueTracker}}`
+- **Intake owner:** `{{intakeOwnerTeam}}`
+- **Operations owner:** `{{intakeOperationsTeam}}`
+- **Cadence:** `{{intakeCadence}}`
+{{#if intakeSecurityEscalationTeams}}- **Security-critical escalation:** `{{intakeSecurityEscalationTeams}}`{{/if}}
+{{#if intakeBlockedEscalationTeams}}- **Blocked cross-team escalation:** `{{intakeBlockedEscalationTeams}}`{{/if}}
+
+Use these values as defaults unless the command flags override them for the current run.
+
+## CLI Runtime
+
+This command has a runtime handler. You can also run it via CLI:
+
+```bash
+pnpm -C .agentkit agentkit:sync-backlog -- [--tracker github|linear] [--direction pull|push] [--state open|closed|all] [--labels <csv>] [--owner-team <team>] [--team <team>] [--since <ISO-date>] [--limit <n>] [--force]
+```
+
+The runtime handler combines external tracker pull with local source collection
+(orchestrator state, healthcheck results), normalizes all items, deduplicates,
+and writes to both `.claude/state/backlog.json` and `AGENT_BACKLOG.md`.
+
 ## Input Sources
 
 Gather work items from all of the following sources:
 
 ### 1. Discovery Findings
+
 - Read `AGENT_TEAMS.md` for detected issues from the last `/discover` run.
 - Check for any "Detected Issues" section and convert each into a backlog item.
 
 ### 2. Healthcheck Results
+
 - Read `.claude/state/orchestrator.json` for `healthDetails`.
 - Any failing check (build, lint, typecheck, tests) becomes a backlog item.
 - Read `.claude/state/events.log` for recent healthcheck entries.
 
 ### 3. Orchestrator State
+
 - Check `.claude/state/orchestrator.json` for any `risks` entries.
 - Check for incomplete items from previous orchestration runs.
 - Review team entries for unfinished or blocked work.
 
 ### 4. Code TODOs
+
 - Search the codebase for `TODO`, `FIXME`, `HACK`, `XXX`, and `TEMP` comments.
 - Group by file and area. Do not create one backlog item per TODO — group related TODOs into logical work items.
 - Exclude TODOs in `node_modules/`, `target/`, `bin/`, `obj/`, `.git/`, and other build output directories.
 
 ### 5. Review Findings
+
 - Check `.claude/state/events.log` for recent review entries with `REQUEST_CHANGES` verdict.
 - Convert required changes into backlog items.
 
@@ -47,33 +75,81 @@ Every backlog item must follow this format:
 - [ ] **[PRIORITY] AREA: Title** (team-<assigned>)
   - _What:_ <1-2 sentence description of the work>
   - _Why:_ <impact or motivation>
+  - _Severity:_ <critical|high|medium|low> (bugs/incidents only, omit for features)
   - _Acceptance:_ <checkable criteria that define "done">
   - _Files:_ <likely files to touch, or "TBD">
+  - _Source:_ <issue #N | discovery | healthcheck | TODO | review | manual>
 ```
 
 ### Priority Levels
 
-| Priority | Meaning | Examples |
-|----------|---------|---------|
-| **P0** | Blocking — nothing else can proceed | Build broken, critical security vuln, data loss risk |
-| **P1** | High — should be done this session | Failing tests, type errors, lint errors, missing auth checks |
-| **P2** | Medium — important but not urgent | Performance improvements, test coverage gaps, code cleanup |
-| **P3** | Low — nice to have | Documentation, style consistency, minor refactors |
+| Priority | Meaning                             | Examples                                                     |
+| -------- | ----------------------------------- | ------------------------------------------------------------ |
+| **P0**   | Critical — nothing else can proceed | Build broken, critical security vuln, data loss risk         |
+| **P1**   | High — should be done this session  | Failing tests, type errors, lint errors, missing auth checks |
+| **P2**   | Medium — important but not urgent   | Performance improvements, test coverage gaps, code cleanup   |
+| **P3**   | Low — nice to have                  | Documentation, style consistency, minor refactors            |
+| **P4**   | Trivial — cosmetic, polish          | Typos, formatting, minor UI tweaks                           |
+
+### Area Labels
+
+Use **exactly** one of the canonical area labels in the `AREA:` field of each backlog item. These match the issue template dropdowns and the task-protocol:
+
+`backend` · `frontend` · `data` · `infra` · `devops` · `testing` · `security` · `docs` · `product` · `quality` · `cli` · `sync-engine`
+
+The area determines which team the item is routed to via `teams.yaml` intake routing:
+
+| Area          | Routed to team |
+| ------------- | -------------- |
+| `backend`     | team-backend   |
+| `frontend`    | team-frontend  |
+| `data`        | team-data      |
+| `infra`       | team-infra     |
+| `devops`      | team-devops    |
+| `testing`     | team-testing   |
+| `security`    | team-security  |
+| `docs`        | team-docs      |
+| `product`     | team-product   |
+| `quality`     | team-quality   |
+| `cli`         | team-backend   |
+| `sync-engine` | team-devops    |
+
+### Severity Levels (for bugs / incidents)
+
+When a backlog item originates from a bug report or incident, include a severity tag:
+
+| Severity     | Meaning                                              |
+| ------------ | ---------------------------------------------------- |
+| **critical** | Complete failure, data loss, or security vulnerability |
+| **high**     | Major functionality broken                            |
+| **medium**   | Partial functionality impaired                        |
+| **low**      | Minor issue, cosmetic or edge-case                    |
+
+### Escalation Rules
+
+Escalate automatically when **all** of these conditions are met:
+
+1. **Severity is `critical`** AND **area is `security`, `infra`, or `backend`** → cc `{{intakeSecurityEscalationTeams}}`
+2. **Impact is `all users`** AND **priority is `P0`** → cc `{{intakeBlockedEscalationTeams}}`
+3. **Any P0 item unresolved for > 24 hours** → escalate to `{{intakeOwnerTeam}}`
 
 ### Acceptance Criteria Rules
 
 Every item **must** have at least one acceptance criterion that is:
+
 - **Verifiable** — can be checked by running a command or inspecting a file
 - **Specific** — not vague like "code is better"
 - **Small** — achievable in a single focused session
 
 Good examples:
+
 - `pnpm build` exits with code 0
 - All tests in `src/auth/` pass
 - No `any` types remain in `src/api/handlers.ts`
 - `cargo clippy` produces zero warnings
 
 Bad examples:
+
 - "Code quality improves"
 - "Performance is better"
 - "Tests are good"
@@ -88,6 +164,7 @@ Create or replace `AGENT_BACKLOG.md` in the repository root:
 > Auto-synced by /sync-backlog on <date>. Do not edit manually during an active orchestration session.
 
 ## Summary
+
 - **Total items:** <count>
 - **P0 (blocking):** <count>
 - **P1 (high):** <count>
@@ -96,21 +173,27 @@ Create or replace `AGENT_BACKLOG.md` in the repository root:
 - **Source:** discovery (<count>), healthcheck (<count>), TODOs (<count>), review (<count>), manual (<count>)
 
 ## P0 — Blocking
+
 <items or "None">
 
 ## P1 — High Priority
+
 <items>
 
 ## P2 — Medium Priority
+
 <items>
 
 ## P3 — Low Priority
+
 <items>
 
 ## Completed (This Session)
+
 <checked-off items that were resolved during the current orchestration>
 
 ## Deferred
+
 <items explicitly postponed with a reason>
 ```
 
@@ -123,6 +206,14 @@ When updating an existing backlog:
 3. **Preserve completed items.** Move them to the "Completed" section, do not delete them.
 4. **Re-prioritize based on current state.** A P2 item may become P0 if the build is now broken.
 5. **Preserve manually added items.** If an item does not match any automated source, keep it (it was likely added by a human).
+
+## Tracker Execution Rules
+
+1. Read `process.issueTracker` from `.agentkit/spec/project.yaml` unless `--tracker` is provided.
+2. For `github`, use `gh` issue/board commands and GitHub metadata.
+3. For `linear`, use configured Linear integration (MCP/CLI/API) with equivalent field mapping.
+4. If tracker is `none`, skip external create/update actions and only update local backlog + events.
+5. Keep team routing anchored to intake owner `{{intakeOwnerTeam}}` and operations owner `{{intakeOperationsTeam}}`.
 
 ## State Updates
 

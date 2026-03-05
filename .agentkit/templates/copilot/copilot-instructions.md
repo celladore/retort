@@ -1,6 +1,7 @@
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
 <!-- Format: Plain Markdown. GitHub Copilot repository-wide instructions. -->
 <!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
 # GitHub Copilot Instructions
 
 You are assisting with a project managed by the AgentKit Forge framework.
@@ -18,8 +19,22 @@ Follow these instructions for all code generation, suggestions, and chat respons
 {{#if architecturePattern}}- **Architecture**: {{architecturePattern}}{{/if}}
 {{#if architectureApiStyle}}- **API Style**: {{architectureApiStyle}}{{/if}}
 {{#if hasMonorepo}}- **Monorepo**: {{monorepoTool}}{{/if}}
+
 - **Default Branch**: {{defaultBranch}}
-{{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
+  {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
+
+{{#if showLanguageProfileDiagnostics}}
+## Language Profile Diagnostics
+
+- **Source**: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
+- **Configured languages present**: {{#if hasConfiguredLanguages}}yes{{else}}no{{/if}}
+- **JS-like**: configured={{hasLanguageJsLike}}, inferred={{hasLanguageJsLikeInferred}}, effective={{hasLanguageJsLikeEffective}}
+- **Python**: configured={{hasLanguagePython}}, inferred={{hasLanguagePythonInferred}}, effective={{hasLanguagePythonEffective}}
+- **.NET**: configured={{hasLanguageDotnet}}, inferred={{hasLanguageDotnetInferred}}, effective={{hasLanguageDotnetEffective}}
+- **Rust**: configured={{hasLanguageRust}}, inferred={{hasLanguageRustInferred}}, effective={{hasLanguageRustEffective}}
+{{#if hasLanguageInferenceMismatch}}- **Notice**: configured and inferred language signals diverge; generation uses configured values.{{/if}}
+{{#if hasLanguageInferenceUsed}}- **Notice**: heuristics are currently prepopulating effective language flags because configured languages are empty.{{/if}}
+{{/if}}
 
 ## Core Workflow
 
@@ -51,10 +66,12 @@ understand team assignments, ownership boundaries, and escalation paths.
   leaking internal details.
 - **Type safety** — Use the strongest type guarantees available in the language
   (TypeScript strict mode, Rust's type system, Python type hints with mypy).
-{{#if commitConvention}}- Follow {{commitConvention}} commit convention.{{/if}}
-{{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
+  {{#if commitConvention}}- **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" or "Update files" — CI will reject them.{{/if}}
+  {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, run `pnpm -C .agentkit agentkit:sync` and commit the regenerated output. CI drift checks will fail otherwise.
 
 {{#if hasLogging}}
+
 ## Logging
 
 Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use structured logging — never use raw `console.log` or `Console.WriteLine`.{{/if}}{{#if hasCorrelationId}} Include correlation IDs in all log entries.{{/if}}
@@ -63,24 +80,28 @@ Use {{loggingFramework}} for all logging.{{#if hasStructuredLogging}} Use struct
 {{/if}}
 
 {{#if hasErrorHandling}}
+
 ## Error Handling
 
 Strategy: {{errorStrategy}}.{{#if hasGlobalHandler}} A global error handler is configured — do not add catch-all handlers in individual endpoints.{{/if}}{{#if hasCustomExceptions}} Use the project's custom exception types.{{/if}}
 {{/if}}
 
 {{#if hasAuth}}
+
 ## Authentication & Authorization
 
 Provider: {{authProvider}}{{#if authStrategy}}, strategy: {{authStrategy}}{{/if}}.{{#if hasRbac}} RBAC is enforced.{{/if}}{{#if hasMultiTenant}} Multi-tenant — never leak data across tenants.{{/if}}
 {{/if}}
 
 {{#if hasCaching}}
+
 ## Caching
 
 Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPatterns}}.{{/if}}{{#if hasDistributedCache}} Distributed cache — consider invalidation across nodes.{{/if}}
 {{/if}}
 
 {{#if hasApiVersioning}}
+
 ## API Conventions
 
 {{#if hasApiVersioning}}- Versioning: {{apiVersioning}}{{/if}}
@@ -90,12 +111,13 @@ Provider: {{cachingProvider}}.{{#if cachingPatterns}} Patterns: {{cachingPattern
 {{/if}}
 
 {{#if hasDbMigrations}}
+
 ## Database
 
 - Migrations: {{dbMigrations}}{{#if hasDbSeeding}} with seeding{{/if}}
-{{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
-{{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
-{{/if}}
+  {{#if dbTransactionStrategy}}- Transactions: {{dbTransactionStrategy}}{{/if}}
+  {{#if hasConnectionPooling}}- Connection pooling is enabled{{/if}}
+  {{/if}}
 
 ## Testing
 
@@ -124,10 +146,13 @@ assumptions about project structure or conventions.
 {{#if hasApiSpec}}- **API Spec**: `{{apiSpecPath}}`{{/if}}
 {{#if hasTechnicalSpec}}- **Technical Spec**: `{{technicalSpecPath}}`{{/if}}
 {{#if hasDesignSystem}}- **Design System**: `{{designSystemPath}}`{{/if}}
+{{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
+
 - See `AGENTS.md` for universal agent instructions.
 - See `QUALITY_GATES.md` for quality gate definitions.
 
 {{#if hasIntegrations}}
+
 ## External Integrations
 
 {{#each integrations}}- {{.name}} — {{.purpose}}
@@ -135,6 +160,7 @@ assumptions about project structure or conventions.
 {{/if}}
 
 {{#if hasFeatureFlags}}
+
 ## Feature Flags
 
 Provider: {{featureFlagProvider}}. Gate new features behind flags.
