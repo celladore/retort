@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.'
+description: 'Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,9 +12,9 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# validate
+# document-history
 
-Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.
+Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.
 
 ## Instructions
 

@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: 'Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.'
+description: 'Cost centre management for cloud infrastructure. Manages budget allocations, resource group mappings, tag compliance, and spend tracking. Requires a FinOps-enabled overlay (finops rule domain). For AI session cost tracking, use /cost instead.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-05'
@@ -12,9 +12,9 @@ last_updated: '2026-03-05'
 <!-- Source: .agentkit/spec + .agentkit/overlays/agentkit-forge -->
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
-# validate
+# cost-centres
 
-Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.
+Cost centre management for cloud infrastructure. Manages budget allocations, resource group mappings, tag compliance, and spend tracking. Requires a FinOps-enabled overlay (finops rule domain). For AI session cost tracking, use /cost instead.
 
 ## Instructions
 
