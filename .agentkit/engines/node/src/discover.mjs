@@ -779,9 +779,12 @@ async function detectFromList(
  * 5. No match → null (preserve existing)
  *
  * @param {string} projectRoot
+ * @param {{ currentConvention?: string }} [options]
  * @returns {Promise<string|null>}
  */
-export async function detectCommitConvention(projectRoot) {
+export async function detectCommitConvention(projectRoot, { currentConvention } = {}) {
+  // Respect explicit 'none' — never override a project that has opted out
+  if (currentConvention === 'none') return 'none';
   const COMMITLINT_FILES = [
     '.commitlintrc',
     '.commitlintrc.json',
@@ -1092,7 +1095,20 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   }
 
   // --- Commit convention detection ---
-  report.commitConvention = await detectCommitConvention(projectRoot);
+  // Read existing commitConvention from project.yaml so we respect explicit 'none'
+  let currentConvention;
+  if (agentkitRoot) {
+    try {
+      const projPath = resolve(agentkitRoot, 'spec', 'project.yaml');
+      const projRaw = existsSync(projPath)
+        ? yaml.load(await readFile(projPath, 'utf-8'))
+        : null;
+      currentConvention = projRaw?.process?.commitConvention;
+    } catch {
+      /* ignore read errors */
+    }
+  }
+  report.commitConvention = await detectCommitConvention(projectRoot, { currentConvention });
 
   // --- Output ---
   const format = flags?.output || 'yaml';

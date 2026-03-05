@@ -1187,10 +1187,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     teamSize: projectSpec?.process?.teamSize,
   });
 
+  // Merge spec-defaults with project vars — project.yaml wins, but fall back to
+  // spec-defaults for any variable that is falsy (empty string, undefined, null).
+  const mergedDefaults = { ...specDefaultVars };
+  for (const [key, value] of Object.entries(projectVars)) {
+    if (value) mergedDefaults[key] = value;
+  }
+
   const vars = {
-    ...specDefaultVars,
-    ...projectVars,
-    issueTracker: projectVars.issueTracker || specDefaultVars.issueTracker,
+    ...mergedDefaults,
     intakeOwnerTeam: projectVars.intakeOwnerTeam || processIntake.ownerTeam || teamsIntake.ownerTeam || 'product',
     intakeOperationsTeam:
       projectVars.intakeOperationsTeam ||

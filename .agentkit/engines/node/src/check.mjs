@@ -4,9 +4,9 @@
  * Outputs a structured results table and logs to events.
  */
 import { existsSync, readFileSync } from 'fs';
-import { readdir } from 'fs/promises';
+import { readdir, readFile } from 'fs/promises';
 import yaml from 'js-yaml';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { appendEvent } from './orchestrator.mjs';
 import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
 
@@ -259,6 +259,68 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
 }
 
 // ---------------------------------------------------------------------------
+// Unresolved placeholder audit
+// ---------------------------------------------------------------------------
+
+/**
+ * Regex matching {{variable}} placeholders that remain after template rendering.
+ * Excludes block helpers like {{#if}}, {{/if}}, {{else}}, and pipe-default syntax.
+ */
+const UNRESOLVED_RE = /\{\{(?!#|\/|else\}\})([a-zA-Z_][a-zA-Z0-9_.]*)\}\}/g;
+
+/**
+ * Scan generated output directories for files containing unresolved {{variable}}
+ * placeholders. These indicate variables that lack defaults in both project.yaml
+ * and spec-defaults.yaml.
+ *
+ * @param {string} projectRoot
+ * @param {string[]} outputDirs - Directories to scan (e.g. .claude, .github/instructions)
+ * @returns {Promise<Array<{ file: string, variables: string[] }>>}
+ */
+export async function auditUnresolvedPlaceholders(projectRoot, outputDirs) {
+  const findings = [];
+
+  for (const dir of outputDirs) {
+    const fullDir = resolve(projectRoot, dir);
+    if (!existsSync(fullDir)) continue;
+
+    await walkForPlaceholders(fullDir, projectRoot, findings);
+  }
+
+  return findings;
+}
+
+async function walkForPlaceholders(dir, projectRoot, findings, depth = 0) {
+  if (depth > 5) return;
+  let entries;
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === 'node_modules' || entry.name === '.git') continue;
+      await walkForPlaceholders(fullPath, projectRoot, findings, depth + 1);
+    } else if (/\.(md|yaml|yml|json|mjs|js|ts)$/.test(entry.name)) {
+      try {
+        const content = await readFile(fullPath, 'utf-8');
+        const matches = [...content.matchAll(UNRESOLVED_RE)].map((m) => m[1]);
+        if (matches.length > 0) {
+          const unique = [...new Set(matches)];
+          const relPath = fullPath.replace(projectRoot + '\\', '').replace(projectRoot + '/', '');
+          findings.push({ file: relPath, variables: unique });
+        }
+      } catch {
+        /* skip unreadable files */
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main handler
 // ---------------------------------------------------------------------------
 
@@ -336,6 +398,19 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
     console.log('');
   }
 
+  // --- Unresolved placeholder audit ---
+  const outputDirs = ['.claude', '.github/instructions', '.cursor', '.clinerules', '.roo', '.windsurf'];
+  const unresolvedFindings = await auditUnresolvedPlaceholders(projectRoot, outputDirs);
+  if (unresolvedFindings.length > 0) {
+    console.log('--- Unresolved Placeholders ---');
+    for (const finding of unresolvedFindings) {
+      console.log(`  ${finding.file}: ${finding.variables.join(', ')}`);
+    }
+    console.log(`  WARN  ${unresolvedFindings.length} file(s) with unresolved variables`);
+    console.log('  Tip: Add defaults in .agentkit/spec/spec-defaults.yaml or project.yaml');
+    console.log('');
+  }
+
   // --- Summary ---
   const overallPassed = allResults.every((s) =>
     s.steps.every((step) => step.status === 'PASS' || step.status === 'SKIP')
@@ -390,6 +465,7 @@ export {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
+  auditUnresolvedPlaceholders,
   isAllowedFormatter,
   isAllowedLinter,
   resolveFormatter,
