@@ -14,8 +14,9 @@ import {
   sortItems,
 } from './backlog-store.mjs';
 import { emitEvent } from './event-emitter.mjs';
-import { normalizeIssue, deduplicateItems } from './issue-normalizer.mjs';
+import { normalizeIssue, deduplicateItems, inferCategoryScores } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
+import { calculateScore } from './weighted-scorer.mjs';
 
 /**
  * @param {object} opts
@@ -24,6 +25,12 @@ import { createAdapter } from './tracker-adapter.mjs';
  * @param {object} opts.flags
  */
 export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
+  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
+  if (userContext) {
+    console.log(`[agentkit:import-issues] Context: ${userContext}`);
+  }
   // Load project config
   const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
   let project = {};
@@ -57,7 +64,7 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
     state: flags.state || 'open',
     labels: flags.labels || null,
     since: flags.since || null,
-    limit: flags.limit ? Number(flags.limit) : 100,
+    limit: flags.limit && Number.isFinite(Number(flags.limit)) ? Number(flags.limit) : 100,
   });
 
   console.log(`[agentkit:import-issues] Fetched ${rawIssues.length} issues from ${tracker}.`);
@@ -71,6 +78,18 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
     source: tracker,
   };
   const normalized = rawIssues.map((issue) => normalizeIssue(issue, config));
+
+  // Enrich with weighted scoring when enabled
+  const scoringEnabled = intake.scoring?.enabled ?? false;
+  if (scoringEnabled) {
+    const phase = project?.phase || undefined;
+    for (const item of normalized) {
+      const result = calculateScore(inferCategoryScores(item), { phase });
+      item.priority = result.priority;
+      item.score = result.score;
+    }
+    console.log(`[agentkit:import-issues] Scoring applied (phase: ${phase || 'default'}).`);
+  }
 
   // Dry-run
   if (flags['dry-run']) {
@@ -109,6 +128,7 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
     updated,
     preserved,
     total: sorted.length,
+    ...(userContext ? { userContext } : {}),
   }, { source: 'import-issues' });
 
   console.log(`[agentkit:import-issues] Done.`);

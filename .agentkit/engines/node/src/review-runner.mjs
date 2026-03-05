@@ -9,7 +9,7 @@ import { extname, resolve, sep } from 'node:path';
 import { emitEvent, readEvents } from './event-emitter.mjs';
 import { appendEvent } from './orchestrator.mjs';
 import { execCommand, runInPool } from './runner.mjs';
-import { createTask } from './task-protocol.mjs';
+import { addTaskArtifact, createTask } from './task-protocol.mjs';
 
 // ---------------------------------------------------------------------------
 // Secret patterns — compiled once at module level to avoid per-call overhead.
@@ -331,16 +331,15 @@ export async function convertFindingsToTasks(projectRoot, findings) {
     });
 
     if (result.task) {
-      // Attach the finding as a review-findings artifact
-      if (!Array.isArray(result.task.artifacts)) {
-        result.task.artifacts = [];
-      }
-      result.task.artifacts.push({
+      // Persist the finding as a review-findings artifact to disk
+      await addTaskArtifact(projectRoot, result.task.id, {
         type: 'review-findings',
         summary: `${finding.type}: ${finding.pattern || ''} in ${finding.file}`,
         finding,
       });
       created.push(result.task);
+    } else if (result.error) {
+      console.warn(`[agentkit:review] Failed to create task for ${finding.type} in ${finding.file}: ${result.error}`);
     }
   }
 
@@ -500,6 +499,7 @@ export async function runReview({
       totalFindings: allFindings.length,
       secretFindings: secrets.length,
       status,
+      ...(userContext ? { userContext } : {}),
       findingDetails: allFindings.map((f) => ({
         type: f.type,
         severity: f.severity,

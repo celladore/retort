@@ -38,10 +38,10 @@ export function emitEvent(projectRoot, action, data = {}, opts = {}) {
       mkdirSync(dir, { recursive: true });
     }
     const event = {
+      ...data,
       timestamp: new Date().toISOString(),
       action,
       ...(opts.source ? { source: opts.source } : {}),
-      ...data,
     };
     appendFileSync(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
   } catch (error) {

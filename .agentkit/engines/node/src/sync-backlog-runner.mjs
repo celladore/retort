@@ -15,8 +15,9 @@ import {
   sortItems,
 } from './backlog-store.mjs';
 import { emitEvent } from './event-emitter.mjs';
-import { normalizeIssue, deduplicateItems } from './issue-normalizer.mjs';
+import { normalizeIssue, deduplicateItems, inferCategoryScores } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
+import { calculateScore } from './weighted-scorer.mjs';
 
 /**
  * Collect items from the orchestrator state (healthcheck, risks).
@@ -76,6 +77,12 @@ function collectOrchestratorItems(projectRoot) {
  * @param {object} opts.flags
  */
 export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
+  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
+  if (userContext) {
+    console.log(`[agentkit:sync-backlog] Context: ${userContext}`);
+  }
   // Load project config
   const projectPath = resolve(agentkitRoot, 'spec', 'project.yaml');
   let project = {};
@@ -117,7 +124,7 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
         state: flags.state || 'open',
         labels: flags.labels || null,
         since: flags.since || null,
-        limit: flags.limit ? Number(flags.limit) : 100,
+        limit: flags.limit && Number.isFinite(Number(flags.limit)) ? Number(flags.limit) : 100,
       });
 
       const config = {
@@ -142,6 +149,18 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
     console.log(`  Orchestrator/healthcheck: ${orchItems.length} items`);
   }
 
+  // 3b. Enrich with weighted scoring when enabled
+  const scoringEnabled = intake.scoring?.enabled ?? false;
+  if (scoringEnabled && allIncoming.length) {
+    const phase = project?.phase || undefined;
+    for (const item of allIncoming) {
+      const result = calculateScore(inferCategoryScores(item), { phase });
+      item.priority = result.priority;
+      item.score = result.score;
+    }
+    console.log(`  Scoring applied to ${allIncoming.length} items (phase: ${phase || 'default'}).`);
+  }
+
   // 4. Merge
   const { merged, added, updated, preserved } = deduplicateItems(existing, allIncoming);
 
@@ -162,6 +181,7 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
     added,
     updated,
     preserved,
+    ...(userContext ? { userContext } : {}),
   }, { source: 'sync-backlog' });
 
   // Apply team filter for display only (does not affect persisted data)

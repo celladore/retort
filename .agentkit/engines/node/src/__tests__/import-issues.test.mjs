@@ -225,6 +225,50 @@ describe('runImportIssues', () => {
     expect(jsonData.items[0].title).toBe('Bug v2');
   });
 
+  it('applies weighted scoring when intake.scoring.enabled is true', async () => {
+    writeProjectYaml(dirs.specDir, { scoring: { enabled: true } });
+    const mockAdapter = {
+      fetchIssues: vi.fn().mockReturnValue([
+        { number: 1, title: 'Critical bug', state: 'open', labels: [{ name: 'critical' }], body: '' },
+      ]),
+    };
+    createAdapter.mockResolvedValue(mockAdapter);
+
+    const result = await runImportIssues({
+      agentkitRoot: dirs.agentkitRoot,
+      projectRoot: dirs.projectRoot,
+      flags: {},
+    });
+
+    expect(result.imported).toBe(1);
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
+    const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+    // Scoring should have added a score field
+    expect(jsonData.items[0]).toHaveProperty('score');
+    expect(typeof jsonData.items[0].score).toBe('number');
+  });
+
+  it('skips scoring when intake.scoring.enabled is not set', async () => {
+    writeProjectYaml(dirs.specDir);
+    const mockAdapter = {
+      fetchIssues: vi.fn().mockReturnValue([
+        { number: 1, title: 'Bug', state: 'open', labels: [], body: '' },
+      ]),
+    };
+    createAdapter.mockResolvedValue(mockAdapter);
+
+    await runImportIssues({
+      agentkitRoot: dirs.agentkitRoot,
+      projectRoot: dirs.projectRoot,
+      flags: {},
+    });
+
+    const jsonPath = resolve(dirs.projectRoot, '.agentkit', 'state', 'backlog.json');
+    const jsonData = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+    // No score field when scoring is disabled
+    expect(jsonData.items[0].score).toBeUndefined();
+  });
+
   it('returns early when tracker is none', async () => {
     writeProjectYaml(dirs.specDir, { autoImport: true });
     // Override issueTracker

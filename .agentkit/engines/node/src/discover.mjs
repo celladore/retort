@@ -6,6 +6,7 @@
 import { existsSync, promises as fsPromises } from 'fs';
 import yaml from 'js-yaml';
 import { basename, extname, join, resolve } from 'node:path';
+import { emitEvent } from './event-emitter.mjs';
 const { readdir, access, readFile } = fsPromises;
 
 // ---------------------------------------------------------------------------
@@ -873,7 +874,13 @@ export async function detectCommitConvention(projectRoot, { currentConvention } 
 // ---------------------------------------------------------------------------
 
 export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
+  const userContext = Array.isArray(flags?._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
   console.log('[agentkit:discover] Scanning repository...');
+  if (userContext) {
+    console.log(`[agentkit:discover] Context: ${userContext}`);
+  }
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -1127,6 +1134,14 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   console.log(
     `[agentkit:discover] Found ${report.techStacks.length} tech stack(s), ${fwCount} framework(s), ${report.testing.length} test tool(s), ${report.infrastructure.length} infra tool(s), ${report.cicd.length} CI/CD system(s).`
   );
+
+  const fwCountForEvent = Object.values(report.frameworks).flat().length;
+  emitEvent(projectRoot, 'discover_completed', {
+    stacksDetected: report.techStacks.length,
+    primaryStack: report.techStacks[0]?.name || null,
+    frameworkCount: fwCountForEvent,
+    ...(userContext ? { userContext } : {}),
+  }, { source: 'discover' });
 
   return report;
 }

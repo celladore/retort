@@ -5,6 +5,7 @@
  */
 import { execFileSync } from 'child_process';
 import {
+  cpSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -15,6 +16,7 @@ import {
 } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { emitEvent, readEvents as readEventsFiltered } from './event-emitter.mjs';
 import { formatTimestamp } from './runner.mjs';
 import {
   checkDependencies,
@@ -24,7 +26,6 @@ import {
   processHandoffs,
   TERMINAL_STATES,
 } from './task-protocol.mjs';
-import { emitEvent, readEvents as readEventsFiltered } from './event-emitter.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -264,7 +265,6 @@ function migrateStateDirIfNeeded(projectRoot) {
 
   try {
     // Recursively copy old → new
-    const { cpSync } = require('fs');
     cpSync(oldDir, newDir, { recursive: true });
     console.warn(
       '[agentkit] Migrated state from .claude/state/ to .agentkit/state/. ' +
@@ -1020,12 +1020,13 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
 export { PHASES, VALID_TEAM_IDS, VALID_TEAM_STATUSES };
 
 // Re-export task protocol for convenience
-export {
-  addTaskArtifact,
-  createTask,
-  formatTaskList,
-  formatTaskSummary,
-  getTask as getTaskById,
-  listTasks,
-  updateTaskStatus as updateTaskState,
-} from './task-protocol.mjs';
+  export {
+    addTaskArtifact,
+    createTask,
+    formatTaskList,
+    formatTaskSummary,
+    getTask as getTaskById,
+    listTasks,
+    updateTaskStatus as updateTaskState
+  } from './task-protocol.mjs';
+

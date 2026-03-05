@@ -9,6 +9,7 @@ import { validateSpec, validateMappingCoverage, validateRequiredFields } from '.
 import { computeProjectCompleteness } from './project-completeness.mjs';
 import { PROJECT_MAPPING } from './project-mapping.mjs';
 import { flattenProjectYaml } from './template-utils.mjs';
+import { emitEvent } from './event-emitter.mjs';
 
 function resolveSpecRoot(agentkitRoot, projectRoot) {
   const projectAgentkitRoot = resolve(projectRoot, '.agentkit');
@@ -158,6 +159,12 @@ export function checkTemplateHygiene(agentkitRoot) {
 }
 
 export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
+  const userContext = Array.isArray(flags._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
+  if (userContext) {
+    console.log(`[agentkit:doctor] Context: ${userContext}`);
+  }
   const findings = [];
   const specRoot = resolveSpecRoot(agentkitRoot, projectRoot);
   const templateSpecRoot = agentkitRoot;
@@ -339,6 +346,13 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
       console.log('  System healthy. Continue with /orchestrate workflow.');
     }
   }
+
+  emitEvent(projectRoot, 'doctor_completed', {
+    status,
+    errorCount: findings.filter((f) => f.severity === 'error').length,
+    warningCount: findings.filter((f) => f.severity === 'warning').length,
+    ...(userContext ? { userContext } : {}),
+  }, { source: 'doctor' });
 
   return { ok: !hasErrors, status, findings };
 }

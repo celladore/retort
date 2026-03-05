@@ -270,4 +270,24 @@ export function deduplicateItems(existing, incoming) {
   };
 }
 
+/**
+ * Infer category scores (0-10) from a normalized backlog item's metadata.
+ * Used as input to calculateScore() from weighted-scorer.mjs.
+ * @param {object} item - Normalized BacklogItem
+ * @returns {object} Category scores { severity, impact, urgency, effort, alignment, risk }
+ */
+export function inferCategoryScores(item) {
+  const priorityScores = { P0: 10, P1: 7, P2: 5, P3: 3 };
+  const labels = (item.labels || []).map((l) => l.toLowerCase());
+
+  return {
+    severity: priorityScores[item.priority] ?? 5,
+    impact: labels.some((l) => l.includes('breaking') || l.includes('blocker')) ? 9 : 5,
+    urgency: labels.some((l) => l.includes('urgent') || l.includes('critical')) ? 9 : 5,
+    effort: 5,
+    alignment: 5,
+    risk: labels.some((l) => l.includes('security') || l.includes('vulnerability')) ? 8 : 5,
+  };
+}
+
 export { inferPriority, inferTeam, mapStatus, extractAcceptanceCriteria, extractFilePaths };
