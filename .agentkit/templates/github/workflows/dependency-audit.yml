@@ -17,11 +17,16 @@ on:
       - '**/pnpm-lock.yaml'
       - 'yarn.lock'
       - 'package-lock.json'
-{{#if hasLanguageRust}}      - 'Cargo.toml'
+{{#if hasLanguageRust}}
+      - 'Cargo.toml'
       - 'Cargo.lock'
-{{/if}}{{#if hasLanguagePython}}      - 'pyproject.toml'
+{{/if}}
+{{#if hasLanguagePython}}
+      - 'pyproject.toml'
       - 'requirements*.txt'
-{{/if}}{{#if hasLanguageDotnet}}      - '*.csproj'
+{{/if}}
+{{#if hasLanguageDotnet}}
+      - '**/*.csproj'
       - 'Directory.Packages.props'
 {{/if}}
 

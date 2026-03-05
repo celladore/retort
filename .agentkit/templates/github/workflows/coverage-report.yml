@@ -123,6 +123,9 @@ jobs:
           fi
 
       - name: Enforce threshold
+        if: env.COVERAGE_THRESHOLD != '' || '{{testingCoverage}}' != ''
+        env:
+          COVERAGE_THRESHOLD: ${{ vars.COVERAGE_THRESHOLD }}
         run: |
           THRESHOLD="${COVERAGE_THRESHOLD:-{{testingCoverage}}}"
           ACTUAL="${{ steps.coverage.outputs.lines }}"

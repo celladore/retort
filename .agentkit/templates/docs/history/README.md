@@ -40,6 +40,10 @@ Use the provided script to generate a new document from the correct template:
 
 > **Note:** Issue and lesson records are created automatically via
 > `/review --focus=retrospective`, not through the create-doc script.
+>
+> **Fallback:** When `gh` CLI is unavailable (proxy failures, air-gapped
+> environments), use `./scripts/create-doc.sh issue "Title"` to record issues
+> locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
 
 The `/review` command with `--focus=retrospective` automates issue and lesson
 creation at end-of-session (non-blocking — never gates delivery):

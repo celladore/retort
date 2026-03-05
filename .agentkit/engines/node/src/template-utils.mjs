@@ -470,6 +470,12 @@ export function flattenProjectYaml(project, docsSpec = null) {
     vars.languageInferenceConfidence = 'low';
   }
 
+  // --- Defaults for workflow-critical placeholders ---
+  // Prevents unresolved {{placeholders}} from producing invalid YAML in generated workflows.
+  if (!vars.nodeVersion) vars.nodeVersion = '22';
+  if (!vars.pythonVersion) vars.pythonVersion = '3.12';
+  if (!vars.docsHistoryPath) vars.docsHistoryPath = 'docs/history';
+
   return vars;
 }
 

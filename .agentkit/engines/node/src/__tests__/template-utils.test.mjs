@@ -65,16 +65,6 @@ describe('renderTemplate', () => {
 // replacePlaceholders
 // ---------------------------------------------------------------------------
 describe('replacePlaceholders', () => {
-  let origDebug;
-  beforeEach(() => {
-    origDebug = process.env.DEBUG;
-    delete process.env.DEBUG;
-  });
-  afterEach(() => {
-    if (origDebug !== undefined) process.env.DEBUG = origDebug;
-    else delete process.env.DEBUG;
-  });
-
   it('replaces simple placeholders', () => {
     expect(replacePlaceholders('Hello {{name}}!', { name: 'World' })).toBe('Hello World!');
   });

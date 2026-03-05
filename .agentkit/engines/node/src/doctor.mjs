@@ -134,14 +134,14 @@ export function checkTemplateHygiene(agentkitRoot) {
 
     const lines = content.split('\n');
     for (const rule of HYGIENE_RULES) {
-      // Skip if the template already uses this variable
       const placeholder = `{{${rule.varName}}}`;
-      if (content.includes(placeholder)) continue;
 
       // Check each line for the hardcoded pattern
       for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes(placeholder)) continue;
         for (const pattern of rule.patterns) {
-          if (pattern.test(lines[i])) {
+          if (pattern.test(line)) {
             findings.push({
               file,
               line: i + 1,
@@ -239,12 +239,13 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
 
       // 3b) Validate PROJECT_MAPPING src paths exist in project.yaml
       const mappingWarnings = validateMappingCoverage(project, PROJECT_MAPPING);
-      if (mappingWarnings.length > 0) {
+      if (mappingWarnings && mappingWarnings.length > 0) {
         for (const w of mappingWarnings) {
           findings.push({ severity: 'warning', message: w });
         }
       }
-      
+
+
       const vars = flattenProjectYaml(project);
       if (vars.languageProfileMode === 'configured' && !vars.hasConfiguredLanguages) {
         findings.push({
