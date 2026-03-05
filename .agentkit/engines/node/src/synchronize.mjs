@@ -1194,6 +1194,23 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     bpMergeQueueMaxGroupSize: projectVars.bpMergeQueueMaxGroupSize ?? '5',
   };
 
+  // Precomputed JSON strings for branch protection — avoids {{#each}} comma
+  // issues inside JSON heredocs. These render as valid JSON array literals.
+  const statusChecks = vars.bpRequiredStatusChecks ?? projectVars.bpRequiredStatusChecks ?? [];
+  vars.bpRequiredStatusChecksJson = JSON.stringify(
+    Array.isArray(statusChecks) ? statusChecks : []
+  );
+  const scanningTools = vars.bpCodeScanningTools ?? projectVars.bpCodeScanningTools ?? [];
+  vars.bpCodeScanningToolsJson = JSON.stringify(
+    Array.isArray(scanningTools)
+      ? scanningTools.map((t) => ({
+          tool: t.name || '',
+          security_alerts_threshold: t.securityAlertThreshold || 'none',
+          alerts_threshold: t.alertThreshold || 'none',
+        }))
+      : []
+  );
+
   // Inject brand identity into template vars when brand guide exists
   if (vars.hasBrandGuide) {
     const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));

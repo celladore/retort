@@ -39,6 +39,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# -- Validate branch name (prevent injection) ------------------------------
+if [[ ! "$BRANCH" =~ ^[a-zA-Z0-9._/-]+$ ]]; then
+    echo "Error: Invalid branch name '$BRANCH'. Only alphanumeric, '.', '_', '/', and '-' are allowed."
+    exit 1
+fi
+
 # -- Verify prerequisites ---------------------------------------------------
 if ! command -v gh &>/dev/null; then
     echo "Error: gh CLI is not installed. Install from https://cli.github.com/"
@@ -63,24 +69,15 @@ echo "Repository: $REPO"
 echo "Branch:     $BRANCH"
 echo ""
 
-# -- Helper: strip trailing commas from JSON produced by {{#each}} blocks ----
-strip_trailing_commas() {
-    sed -E 's/,([[:space:]]*[\]}])/\1/g'
-}
-
 # =============================================================================
 # 1. Branch protection rules (legacy API)
 # =============================================================================
 
-PAYLOAD=$(cat <<'ENDJSON' | strip_trailing_commas
+PAYLOAD=$(cat <<ENDJSON
 {
   "required_status_checks": {
     "strict": {{bpStrictStatusChecks}},
-    "contexts": [
-{{#each bpRequiredStatusChecks}}
-      "{{.}}",
-{{/each}}
-    ]
+    "contexts": {{bpRequiredStatusChecksJson}}
   },
   "enforce_admins": {{bpEnforceAdmins}},
   "required_pull_request_reviews": {
@@ -168,14 +165,14 @@ echo ""
 # =============================================================================
 
 {{#if bpCodeScanningEnabled}}
-CODE_SCANNING_RULESET=$(cat <<'ENDJSON' | strip_trailing_commas
+CODE_SCANNING_RULESET=$(cat <<ENDJSON
 {
   "name": "code-scanning",
   "target": "branch",
   "enforcement": "active",
   "conditions": {
     "ref_name": {
-      "include": ["refs/heads/{{defaultBranch}}"],
+      "include": ["refs/heads/$BRANCH"],
       "exclude": []
     }
   },
@@ -183,15 +180,7 @@ CODE_SCANNING_RULESET=$(cat <<'ENDJSON' | strip_trailing_commas
     {
       "type": "code_scanning",
       "parameters": {
-        "code_scanning_tools": [
-{{#each bpCodeScanningTools}}
-          {
-            "tool": "{{.name}}",
-            "security_alerts_threshold": "{{.securityAlertThreshold}}",
-            "alerts_threshold": "{{.alertThreshold}}"
-          },
-{{/each}}
-        ]
+        "code_scanning_tools": {{bpCodeScanningToolsJson}}
       }
     }
   ]
@@ -210,16 +199,20 @@ else
     EXISTING_RULESET_ID=$(gh api "/repos/$REPO/rulesets" --jq '.[] | select(.name == "code-scanning") | .id' 2>/dev/null || true)
     if [[ -n "$EXISTING_RULESET_ID" ]]; then
         echo "  Updating existing ruleset (ID: $EXISTING_RULESET_ID)..."
-        gh api \
+        if ! gh api \
             --method PUT \
             "/repos/$REPO/rulesets/$EXISTING_RULESET_ID" \
-            --input - <<< "$CODE_SCANNING_RULESET"
+            --input - <<< "$CODE_SCANNING_RULESET"; then
+            echo "  Warning: Failed to update code scanning ruleset. GitHub Advanced Security may not be enabled."
+        fi
     else
         echo "  Creating new code scanning ruleset..."
-        gh api \
+        if ! gh api \
             --method POST \
             "/repos/$REPO/rulesets" \
-            --input - <<< "$CODE_SCANNING_RULESET"
+            --input - <<< "$CODE_SCANNING_RULESET"; then
+            echo "  Warning: Failed to create code scanning ruleset. GitHub Advanced Security may not be enabled."
+        fi
     fi
     echo "Code scanning ruleset applied."
 fi
@@ -264,14 +257,14 @@ echo ""
 # =============================================================================
 
 {{#if bpMergeQueueEnabled}}
-MERGE_QUEUE_RULESET=$(cat <<'ENDJSON'
+MERGE_QUEUE_RULESET=$(cat <<ENDJSON
 {
   "name": "merge-queue",
   "target": "branch",
   "enforcement": "active",
   "conditions": {
     "ref_name": {
-      "include": ["refs/heads/{{defaultBranch}}"],
+      "include": ["refs/heads/$BRANCH"],
       "exclude": []
     }
   },
@@ -301,16 +294,20 @@ else
     EXISTING_MQ_ID=$(gh api "/repos/$REPO/rulesets" --jq '.[] | select(.name == "merge-queue") | .id' 2>/dev/null || true)
     if [[ -n "$EXISTING_MQ_ID" ]]; then
         echo "  Updating existing merge queue ruleset (ID: $EXISTING_MQ_ID)..."
-        gh api \
+        if ! gh api \
             --method PUT \
             "/repos/$REPO/rulesets/$EXISTING_MQ_ID" \
-            --input - <<< "$MERGE_QUEUE_RULESET"
+            --input - <<< "$MERGE_QUEUE_RULESET"; then
+            echo "  Warning: Failed to update merge queue ruleset."
+        fi
     else
         echo "  Creating new merge queue ruleset..."
-        gh api \
+        if ! gh api \
             --method POST \
             "/repos/$REPO/rulesets" \
-            --input - <<< "$MERGE_QUEUE_RULESET"
+            --input - <<< "$MERGE_QUEUE_RULESET"; then
+            echo "  Warning: Failed to create merge queue ruleset."
+        fi
     fi
     echo "Merge queue configured."
 fi

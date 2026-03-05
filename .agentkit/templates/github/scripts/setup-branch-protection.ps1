@@ -33,6 +33,12 @@ if ($Help) {
     exit 0
 }
 
+# -- Validate branch name (prevent injection) ------------------------------
+if ($Branch -notmatch '^[a-zA-Z0-9._/\-]+$') {
+    Write-Error "Invalid branch name '$Branch'. Only alphanumeric, '.', '_', '/', and '-' are allowed."
+    exit 1
+}
+
 # -- Verify prerequisites ---------------------------------------------------
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     Write-Error "gh CLI is not installed. Install from https://cli.github.com/"
@@ -62,29 +68,27 @@ Write-Host ""
 # 1. Branch protection rules (legacy API)
 # =============================================================================
 
-$Payload = @{
-    required_status_checks = @{
-        strict   = ${{bpStrictStatusChecks}}
-        contexts = @(
-{{#each bpRequiredStatusChecks}}
-            "{{.}}"
-{{/each}}
-        )
-    }
-    enforce_admins = ${{bpEnforceAdmins}}
-    required_pull_request_reviews = @{
-        required_approving_review_count = {{bpRequiredReviewCount}}
-        dismiss_stale_reviews           = ${{bpDismissStaleReviews}}
-        require_code_owner_reviews      = ${{bpRequireCodeOwnerReviews}}
-        require_last_push_approval      = ${{bpRequireLastPushApproval}}
-    }
-    restrictions                    = $null
-    required_linear_history         = ${{bpRequiredLinearHistory}}
-    allow_force_pushes              = ${{bpAllowForcePushes}}
-    allow_deletions                 = ${{bpAllowDeletions}}
-    block_creations                 = ${{bpBlockCreations}}
-    required_conversation_resolution = ${{bpRequiredConversationResolution}}
-} | ConvertTo-Json -Depth 4
+$Payload = @"
+{
+  "required_status_checks": {
+    "strict": {{bpStrictStatusChecks}},
+    "contexts": {{bpRequiredStatusChecksJson}}
+  },
+  "enforce_admins": {{bpEnforceAdmins}},
+  "required_pull_request_reviews": {
+    "required_approving_review_count": {{bpRequiredReviewCount}},
+    "dismiss_stale_reviews": {{bpDismissStaleReviews}},
+    "require_code_owner_reviews": {{bpRequireCodeOwnerReviews}},
+    "require_last_push_approval": {{bpRequireLastPushApproval}}
+  },
+  "restrictions": null,
+  "required_linear_history": {{bpRequiredLinearHistory}},
+  "allow_force_pushes": {{bpAllowForcePushes}},
+  "allow_deletions": {{bpAllowDeletions}},
+  "block_creations": {{bpBlockCreations}},
+  "required_conversation_resolution": {{bpRequiredConversationResolution}}
+}
+"@
 
 if ($DryRun) {
     Write-Host "[dry-run] Would apply the following branch protection to $Repo/$Branch:"
@@ -124,13 +128,15 @@ Write-Host ""
 # 3. Repository settings (merge strategies, auto-delete, auto-merge)
 # =============================================================================
 
-$RepoSettings = @{
-    allow_merge_commit     = ${{bpAllowMergeCommits}}
-    allow_squash_merge     = ${{bpAllowSquashMerge}}
-    allow_rebase_merge     = ${{bpAllowRebaseMerge}}
-    delete_branch_on_merge = ${{bpDeleteBranchOnMerge}}
-    allow_auto_merge       = ${{bpAllowAutoMerge}}
-} | ConvertTo-Json -Depth 2
+$RepoSettings = @"
+{
+  "allow_merge_commit": {{bpAllowMergeCommits}},
+  "allow_squash_merge": {{bpAllowSquashMerge}},
+  "allow_rebase_merge": {{bpAllowRebaseMerge}},
+  "delete_branch_on_merge": {{bpDeleteBranchOnMerge}},
+  "allow_auto_merge": {{bpAllowAutoMerge}}
+}
+"@
 
 if ($DryRun) {
     Write-Host "[dry-run] Would apply the following repository settings to ${Repo}:"
@@ -149,33 +155,27 @@ Write-Host ""
 # =============================================================================
 
 {{#if bpCodeScanningEnabled}}
-$CodeScanningRuleset = @{
-    name        = "code-scanning"
-    target      = "branch"
-    enforcement = "active"
-    conditions  = @{
-        ref_name = @{
-            include = @("refs/heads/{{defaultBranch}}")
-            exclude = @()
-        }
+$CodeScanningRuleset = @"
+{
+  "name": "code-scanning",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/$Branch"],
+      "exclude": []
     }
-    rules = @(
-        @{
-            type       = "code_scanning"
-            parameters = @{
-                code_scanning_tools = @(
-{{#each bpCodeScanningTools}}
-                    @{
-                        tool                     = "{{.name}}"
-                        security_alerts_threshold = "{{.securityAlertThreshold}}"
-                        alerts_threshold          = "{{.alertThreshold}}"
-                    }
-{{/each}}
-                )
-            }
-        }
-    )
-} | ConvertTo-Json -Depth 6
+  },
+  "rules": [
+    {
+      "type": "code_scanning",
+      "parameters": {
+        "code_scanning_tools": {{bpCodeScanningToolsJson}}
+      }
+    }
+  ]
+}
+"@
 
 if ($DryRun) {
     Write-Host "[dry-run] Would create/update code scanning ruleset on ${Repo}:"
@@ -184,15 +184,20 @@ if ($DryRun) {
     Write-Host ""
 } else {
     Write-Host "Configuring code scanning ruleset..."
-    $existingId = gh api "/repos/$Repo/rulesets" --jq '.[] | select(.name == \"code-scanning\") | .id' 2>$null
-    if ($existingId) {
-        Write-Host "  Updating existing ruleset (ID: $existingId)..."
-        $CodeScanningRuleset | gh api --method PUT "/repos/$Repo/rulesets/$existingId" --input -
-    } else {
-        Write-Host "  Creating new code scanning ruleset..."
-        $CodeScanningRuleset | gh api --method POST "/repos/$Repo/rulesets" --input -
+    try {
+        $existingId = gh api "/repos/$Repo/rulesets" --jq '.[] | select(.name == \"code-scanning\") | .id' 2>$null
+        if ($existingId) {
+            Write-Host "  Updating existing ruleset (ID: $existingId)..."
+            $CodeScanningRuleset | gh api --method PUT "/repos/$Repo/rulesets/$existingId" --input -
+        } else {
+            Write-Host "  Creating new code scanning ruleset..."
+            $CodeScanningRuleset | gh api --method POST "/repos/$Repo/rulesets" --input -
+        }
+        Write-Host "Code scanning ruleset applied."
+    } catch {
+        Write-Host "  Warning: Failed to configure code scanning ruleset. GitHub Advanced Security may not be enabled."
+        Write-Host "  Error: $_"
     }
-    Write-Host "Code scanning ruleset applied."
 }
 Write-Host ""
 {{/if}}
@@ -202,11 +207,13 @@ Write-Host ""
 # =============================================================================
 
 {{#if bpCopilotReviewEnabled}}
-$CopilotReview = @{
-    enabled                    = $true
-    review_new_pushes          = ${{bpCopilotReviewNewPushes}}
-    review_draft_pull_requests = ${{bpCopilotReviewDraftPRs}}
-} | ConvertTo-Json -Depth 2
+$CopilotReview = @"
+{
+  "enabled": true,
+  "review_new_pushes": {{bpCopilotReviewNewPushes}},
+  "review_draft_pull_requests": {{bpCopilotReviewDraftPRs}}
+}
+"@
 
 if ($DryRun) {
     Write-Host "[dry-run] Would enable Copilot code review on ${Repo}:"
@@ -232,29 +239,31 @@ Write-Host ""
 # =============================================================================
 
 {{#if bpMergeQueueEnabled}}
-$MergeQueueRuleset = @{
-    name        = "merge-queue"
-    target      = "branch"
-    enforcement = "active"
-    conditions  = @{
-        ref_name = @{
-            include = @("refs/heads/{{defaultBranch}}")
-            exclude = @()
-        }
+$MergeQueueRuleset = @"
+{
+  "name": "merge-queue",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/$Branch"],
+      "exclude": []
     }
-    rules = @(
-        @{
-            type       = "merge_queue"
-            parameters = @{
-                merge_method                 = "{{bpMergeQueueMethod}}"
-                min_entries_to_merge         = {{bpMergeQueueMinGroupSize}}
-                max_entries_to_merge         = {{bpMergeQueueMaxGroupSize}}
-                grouping_strategy            = "ALLGREEN"
-                check_response_timeout_minutes = 60
-            }
-        }
-    )
-} | ConvertTo-Json -Depth 6
+  },
+  "rules": [
+    {
+      "type": "merge_queue",
+      "parameters": {
+        "merge_method": "{{bpMergeQueueMethod}}",
+        "min_entries_to_merge": {{bpMergeQueueMinGroupSize}},
+        "max_entries_to_merge": {{bpMergeQueueMaxGroupSize}},
+        "grouping_strategy": "ALLGREEN",
+        "check_response_timeout_minutes": 60
+      }
+    }
+  ]
+}
+"@
 
 if ($DryRun) {
     Write-Host "[dry-run] Would create/update merge queue ruleset on ${Repo}:"
@@ -263,15 +272,20 @@ if ($DryRun) {
     Write-Host ""
 } else {
     Write-Host "Configuring merge queue..."
-    $existingMqId = gh api "/repos/$Repo/rulesets" --jq '.[] | select(.name == \"merge-queue\") | .id' 2>$null
-    if ($existingMqId) {
-        Write-Host "  Updating existing merge queue ruleset (ID: $existingMqId)..."
-        $MergeQueueRuleset | gh api --method PUT "/repos/$Repo/rulesets/$existingMqId" --input -
-    } else {
-        Write-Host "  Creating new merge queue ruleset..."
-        $MergeQueueRuleset | gh api --method POST "/repos/$Repo/rulesets" --input -
+    try {
+        $existingMqId = gh api "/repos/$Repo/rulesets" --jq '.[] | select(.name == \"merge-queue\") | .id' 2>$null
+        if ($existingMqId) {
+            Write-Host "  Updating existing merge queue ruleset (ID: $existingMqId)..."
+            $MergeQueueRuleset | gh api --method PUT "/repos/$Repo/rulesets/$existingMqId" --input -
+        } else {
+            Write-Host "  Creating new merge queue ruleset..."
+            $MergeQueueRuleset | gh api --method POST "/repos/$Repo/rulesets" --input -
+        }
+        Write-Host "Merge queue configured."
+    } catch {
+        Write-Host "  Warning: Failed to configure merge queue ruleset."
+        Write-Host "  Error: $_"
     }
-    Write-Host "Merge queue configured."
 }
 Write-Host ""
 {{/if}}
