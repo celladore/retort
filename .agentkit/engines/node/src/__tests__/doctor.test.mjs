@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { runDoctor } from '../doctor.mjs';
+import { runDoctor, checkTemplateHygiene } from '../doctor.mjs';
 import * as fs from 'fs';
 
 // Mock fs and spec-validator
@@ -289,4 +289,232 @@ stack:
       ])
     );
   });
+
+  it('should report warning when language profile is inferred heuristically', async () => {
+    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    validateMappingCoverage.mockReturnValue([]);
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+description: A test
+phase: active
+stack:
+  languages: []
+  frameworks:
+    backend: [node.js]
+testing:
+  unit: []
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('Language profile is being inferred heuristically'),
+        }),
+      ])
+    );
+  });
+
+  it('should report warning when configured and inferred language profiles diverge', async () => {
+    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    validateMappingCoverage.mockReturnValue([]);
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+description: A test
+phase: active
+stack:
+  languages: [python]
+  frameworks:
+    backend: [node.js]
+testing:
+  unit: []
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('Configured stack.languages diverges'),
+        }),
+      ])
+    );
+  });
+
+  it('should report diagnostics disabled info when language profile diagnostics are off', async () => {
+    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    validateMappingCoverage.mockReturnValue([]);
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+phase: active
+stack:
+  languages: [python]
+  frameworks:
+    backend: [node.js]
+automation:
+  languageProfile:
+    diagnostics: off
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'info',
+          message: expect.stringContaining('diagnostics are disabled'),
+        }),
+      ])
+    );
+  });
+
+  it('should warn when configured mode is set but stack.languages is empty', async () => {
+    const { validateSpec, validateMappingCoverage } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    validateMappingCoverage.mockReturnValue([]);
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string') {
+        if (p.includes('overlays') && p.includes('settings.yaml')) {
+          return 'renderTargets: ["claude"]';
+        }
+        if (p.endsWith('project.yaml')) {
+          return `
+name: Test Project
+phase: active
+stack:
+  languages: []
+automation:
+  languageProfile:
+    mode: configured
+`;
+        }
+      }
+      return '';
+    });
+
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    const result = await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+    });
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          message: expect.stringContaining('configured-only but stack.languages is empty'),
+        }),
+      ])
+    );
+  });
 });
+
+describe('checkTemplateHygiene', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should detect hardcoded node-version in templates', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readdirSync').mockReturnValue(['test-workflow.yml']);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      'steps:\n  - uses: actions/setup-node@v4\n    with:\n      node-version: lts/*\n'
+    );
+
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toEqual(
+      expect.objectContaining({
+        file: 'test-workflow.yml',
+        varName: 'nodeVersion',
+        description: expect.stringContaining('{{nodeVersion}}'),
+      })
+    );
+  });
+
+  it('should not flag templates that already use the template var', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readdirSync').mockReturnValue(['test-workflow.yml']);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      'steps:\n  - uses: actions/setup-node@v4\n    with:\n      node-version: {{nodeVersion}}\n'
+    );
+
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(0);
+  });
+
+  it('should detect hardcoded branch lists', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readdirSync').mockReturnValue(['ci.yml']);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(
+      'on:\n  pull_request:\n    branches: [main, dev]\n'
+    );
+
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(1);
+    expect(findings[0].varName).toBe('protectedBranches');
+  });
+
+  it('should return empty when workflow directory does not exist', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+    const findings = checkTemplateHygiene('/mock/agentkit');
+    expect(findings).toHaveLength(0);
+  });
+});
+

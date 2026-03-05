@@ -56,6 +56,13 @@
 - **Related issues**: [Links to related issue records]
 - **Lessons learned**: [Link to associated lesson-learned record, if any]
 
+## Sync Status
+
+<!-- Used by scripts/sync-issues.sh to track GitHub Issue creation -->
+- **gh_synced**: false
+- **gh_issue_number**: —
+- **gh_synced_at**: —
+
 ---
 
 **Reported by**: [Agent/Human]

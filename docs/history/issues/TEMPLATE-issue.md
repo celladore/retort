@@ -26,7 +26,7 @@
 
 [Observable symptoms — error messages, unexpected behaviour, failures]
 
-```
+```text
 [Relevant error output or logs, if any]
 ```
 
@@ -58,6 +58,13 @@
 - **Issue tracker**: [GitHub Issue #, Linear ID, or Jira ticket]
 - **Related issues**: [Links to related issue records]
 - **Lessons learned**: [Link to associated lesson-learned record, if any]
+
+## Sync Status
+
+<!-- Used by scripts/sync-issues.sh to track GitHub Issue creation -->
+- **gh_synced**: false
+- **gh_issue_number**: —
+- **gh_synced_at**: —
 
 ---
 

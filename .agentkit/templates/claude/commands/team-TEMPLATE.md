@@ -137,6 +137,31 @@ If your changes affect **public behavior** (APIs, CLI flags, configuration optio
 
 Do NOT update docs for internal-only refactors.
 
+### Step 4b: Create History Document
+
+If this session involved **significant work** (not trivial one-line fixes), create a history document using the `/document-history` command:
+
+1. **Preview first (optional):**
+   ```
+   /document-history --auto --dry-run
+   ```
+   This shows what type and title would be auto-detected without writing files.
+
+2. **Create the document:**
+   ```
+   /document-history --auto
+   ```
+   The command auto-detects the document type (`bugfix`, `feature`, `implementation`, or `migration`) from commit messages, gathers session context, generates the file via `./scripts/create-doc.sh`, fills in all sections, and checks `docs/history/.index.json` for duplicates before creating.
+
+   To override auto-detection, specify flags explicitly:
+   ```
+   /document-history --type implementation --title "My Feature"
+   ```
+
+3. **Skip this step only if** deduplication indicates the work is already documented (a matching entry exists in `docs/history/.index.json` for today's date with a similar title), or the work was purely cosmetic (formatting, typo fixes, comment updates).
+
+The history document ensures institutional memory persists across sessions. Templates are in `docs/history/`.
+
 ### Step 5: Run Quality Gate
 
 After completing your changes, run the equivalent of `/check`:
@@ -177,6 +202,10 @@ After completing your work, produce a summary:
 
 - <file path>: <what was updated>
 - "None — changes are internal only"
+
+### History Document
+
+- <path to created history doc, or "Skipped — trivial change" with brief justification>
 
 ### Validation Commands
 

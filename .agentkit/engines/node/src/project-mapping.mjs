@@ -13,6 +13,8 @@ export const PROJECT_MAPPING = [
   { src: 'stack.database', dest: 'stackDatabase', type: 'array-join' },
   { src: 'stack.search', dest: 'stackSearch', type: 'string' },
   { src: 'stack.messaging', dest: 'stackMessaging', type: 'array-join' },
+  { src: 'stack.nodeVersion', dest: 'nodeVersion' },
+  { src: 'stack.pythonVersion', dest: 'pythonVersion' },
 
   // Architecture
   { src: 'architecture.pattern', dest: 'architecturePattern' },
@@ -41,6 +43,7 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.designSystemPath', dest: 'designSystemPath' },
   { src: 'documentation.storybook', dest: 'hasStorybook', type: 'boolean' },
   { src: 'documentation.designTokensPath', dest: 'designTokensPath' },
+  { src: 'documentation.historyPath', dest: 'docsHistoryPath' },
   { src: 'documentation.hasBrandGuide', dest: 'hasBrandGuide', type: 'boolean' },
   { src: 'documentation.brandGuidePath', dest: 'brandGuidePath' },
 
@@ -156,6 +159,7 @@ export const PROJECT_MAPPING = [
 
   // Process
   { src: 'process.branchStrategy', dest: 'branchStrategy' },
+  { src: 'process.protectedBranches', dest: 'protectedBranches', type: 'array-join' },
   { src: 'process.commitConvention', dest: 'commitConvention' },
   { src: 'process.codeReview', dest: 'codeReview' },
   { src: 'process.teamSize', dest: 'teamSize' },
@@ -194,6 +198,38 @@ export const PROJECT_MAPPING = [
   { src: 'automation.checks.codeql', dest: 'enableCodeql', type: 'boolean' },
   { src: 'automation.checks.semgrep', dest: 'enableSemgrep', type: 'boolean' },
   { src: 'automation.checks.dependencyAudit', dest: 'enableDependencyAudit', type: 'boolean' },
+  { src: 'automation.languageProfile.mode', dest: 'languageProfileMode' },
+  { src: 'automation.languageProfile.diagnostics', dest: 'languageProfileDiagnostics' },
+  {
+    src: 'automation.languageProfile.inferFrom.frameworks',
+    dest: 'languageInferenceFromFrameworks',
+    type: 'boolean',
+  },
+  {
+    src: 'automation.languageProfile.inferFrom.tests',
+    dest: 'languageInferenceFromTests',
+    type: 'boolean',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.alwaysRegenerate',
+    dest: 'languageProfileScaffoldAlwaysRegenerate',
+    type: 'array-join',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.alwaysRegenerate',
+    dest: 'hasLanguageProfileScaffoldAlwaysRegenerate',
+    type: 'boolean-array-length',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.scaffoldOnce',
+    dest: 'languageProfileScaffoldOnce',
+    type: 'array-join',
+  },
+  {
+    src: 'automation.languageProfile.scaffoldOverrides.scaffoldOnce',
+    dest: 'hasLanguageProfileScaffoldOnce',
+    type: 'boolean-array-length',
+  },
 
   // Cross-cutting (formerly flattenCrosscutting)
   // Logging

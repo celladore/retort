@@ -304,6 +304,8 @@ const PROJECT_ENUMS = {
   ],
   envConfigStrategy: ['env-vars', 'config-files', 'vault', 'app-config', 'none'],
   monorepoTool: ['turborepo', 'nx', 'lerna', 'pnpm-workspaces'],
+  languageProfileMode: ['configured', 'hybrid', 'heuristic'],
+  languageProfileDiagnostics: ['off', 'minimal', 'verbose'],
   // Infrastructure
   infraStateBackend: ['azurerm', 's3', 'gcs', 'consul', 'local', 'none'],
   infraLockProvider: ['blob-lease', 'dynamodb', 'consul', 'none'],
@@ -489,6 +491,42 @@ const projectSchema = {
         integration: { type: 'array', items: { type: 'string' } },
         e2e: { type: 'array', items: { type: 'string' } },
         coverage: { type: 'number', min: 0, max: 100 },
+      },
+    },
+    automation: {
+      type: 'object',
+      properties: {
+        baselineProfile: { type: 'string' },
+        ciProfile: { type: 'string' },
+        checks: {
+          type: 'object',
+          properties: {
+            codeql: { type: 'boolean' },
+            semgrep: { type: 'boolean' },
+            dependencyAudit: { type: 'boolean' },
+          },
+        },
+        languageProfile: {
+          type: 'object',
+          properties: {
+            mode: { type: 'string', enum: PROJECT_ENUMS.languageProfileMode },
+            diagnostics: { type: 'string', enum: PROJECT_ENUMS.languageProfileDiagnostics },
+            inferFrom: {
+              type: 'object',
+              properties: {
+                frameworks: { type: 'boolean' },
+                tests: { type: 'boolean' },
+              },
+            },
+            scaffoldOverrides: {
+              type: 'object',
+              properties: {
+                alwaysRegenerate: { type: 'array', items: { type: 'string' } },
+                scaffoldOnce: { type: 'array', items: { type: 'string' } },
+              },
+            },
+          },
+        },
       },
     },
     integrations: {
@@ -1073,6 +1111,39 @@ export function runSpecValidation(agentkitRoot) {
   }
 
   return result;
+}
+
+/**
+ * Validates that every PROJECT_MAPPING src path resolves to a value in a
+ * given project.yaml object. This catches mapping entries that reference
+ * spec fields that don't exist (e.g. after a rename or typo).
+ * Returns warnings (not errors) since missing fields are optional.
+ */
+export function validateMappingCoverage(project, projectMapping) {
+  const warnings = [];
+  if (!project || typeof project !== 'object') return warnings;
+
+  for (const mapping of projectMapping) {
+    const parts = mapping.src.split('.');
+    let current = project;
+    let resolved = true;
+
+    for (const part of parts) {
+      if (current === undefined || current === null || typeof current !== 'object') {
+        resolved = false;
+        break;
+      }
+      current = current[part];
+    }
+
+    if (!resolved || current === undefined) {
+      warnings.push(
+        `project-mapping: src "${mapping.src}" (→ {{${mapping.dest}}}) has no corresponding field in project.yaml`
+      );
+    }
+  }
+
+  return warnings;
 }
 
 // Export validate for testing

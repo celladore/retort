@@ -314,9 +314,18 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
      3. An entry with `eventType: "CANCELED"` exists in `events.log` for that task-id (any reason, including `dependency-cycle`, user/manual, or non-replacement cancellation).
    - If neither condition is true for any terminal task, halt orchestration and surface the unresolved task(s) for human review.
    - **DESCOPED vs CANCELED:** Emit DESCOPED for intentional removal that needs rationale recorded; emit CANCELED for user/manual or non-replacement cancellation.
-2. Invoke `/handoff` to produce a session summary.
-3. Update `orchestrator.json`: set `currentPhase` to 5, clear the lock, update metrics.
-4. Log completion to `events.log`.
+2. **Create history documents** for significant work completed during this orchestration:
+   - Review all completed tasks. For each task that involved non-trivial changes (not purely cosmetic or config-only), determine the appropriate document type:
+     - `implementation` — Architecture changes, new subsystems, major refactors
+     - `bugfix` — Non-trivial bug fixes (2+ files or root-cause analysis)
+     - `feature` — New user-facing features or capabilities
+     - `migration` — Library upgrades, data migrations, infrastructure changes
+   - Run `./scripts/create-doc.sh <type> "<task title>" [pr-number]` for each qualifying task.
+   - Fill in the generated document with: Overview (from task description), Key Changes (from task artifacts), Results (from validation outcomes), and Lessons Learned (from any issues encountered).
+   - If no tasks qualify (all changes were trivial), skip this step and note "No history docs needed — all changes were trivial" in the summary.
+3. Invoke `/handoff` to produce a session summary.
+4. Update `orchestrator.json`: set `currentPhase` to 5, clear the lock, update metrics.
+5. Log completion to `events.log`.
 
 ## Output Format
 

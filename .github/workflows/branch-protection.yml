@@ -7,8 +7,8 @@ on:
 
 # Enforce that all PRs to main pass required checks before merge.
 # Configure GitHub branch protection rules to require these status checks:
-#   - CI / test (ubuntu-latest, 24)
-#   - CI / validate
+#   - AgentKit Forge CI / Test (ubuntu-latest)
+#   - AgentKit Forge CI / Validate
 #   - Branch Protection / branch-rules
 
 jobs:

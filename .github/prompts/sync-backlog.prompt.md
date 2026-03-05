@@ -16,6 +16,16 @@ last_updated: '2026-03-05'
 
 Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--tracker` | Override tracker for this run (github, linear) | — |
+| `--direction` | Sync direction: pull (from tracker), push (to tracker), or both | pull |
+| `--labels` | Filter by labels/tags (comma-separated) | — |
+| `--owner-team` | Override intake owner team for this run | — |
+| `--team` | Filter issues relevant to a specific team | — |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
@@ -31,6 +41,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 

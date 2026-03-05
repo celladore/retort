@@ -46,21 +46,31 @@ function Test-Tool {
     }
 }
 
-Test-Tool -Name "Node.js"  -Command "node"
-Test-Tool -Name "pnpm"     -Command "pnpm"
-Test-Tool -Name "npm"      -Command "npm"
 Test-Tool -Name "Git"      -Command "git"
 Test-Tool -Name "GitHub CLI" -Command "gh"
-Test-Tool -Name "dotnet"   -Command "dotnet"
-Test-Tool -Name "Cargo"    -Command "cargo"
-Test-Tool -Name "Python"   -Command "python3"
-Test-Tool -Name "Python"   -Command "python"
 Test-Tool -Name "jq"       -Command "jq"
 Test-Tool -Name "Bash"     -Command "bash"
 Test-Tool -Name "PowerShell" -Command "pwsh"
+{{#if hasLanguageJsLikeEffective}}
+Test-Tool -Name "Node.js"  -Command "node"
+Test-Tool -Name "pnpm"     -Command "pnpm"
+Test-Tool -Name "npm"      -Command "npm"
+{{/if}}
+{{#if hasLanguageDotnetEffective}}
+Test-Tool -Name "dotnet"   -Command "dotnet"
+{{/if}}
+{{#if hasLanguageRustEffective}}
+Test-Tool -Name "Cargo"    -Command "cargo"
+{{/if}}
+{{#if hasLanguagePythonEffective}}
+Test-Tool -Name "Python"   -Command "python3"
+Test-Tool -Name "Python"   -Command "python"
+{{/if}}
+{{#if hasAnyInfraConfig}}
 Test-Tool -Name "Docker"   -Command "docker"
 Test-Tool -Name "Azure CLI" -Command "az"
 Test-Tool -Name "Terraform" -Command "terraform"
+{{/if}}
 
 if ($toolsFound.Count -gt 0) {
     $toolsSummary = $toolsFound -join "`n"
@@ -92,6 +102,9 @@ try {
 $envSummary = @"
 Session: $sessionId
 Working directory: $cwd
+{{#if showLanguageProfileDiagnostics}}
+Language profile source: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
+{{/if}}
 
 Toolchains:
 $toolsSummary

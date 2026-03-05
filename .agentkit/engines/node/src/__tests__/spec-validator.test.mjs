@@ -4,6 +4,7 @@ import {
   validateCrossReferences,
   validateSpec,
   validateProjectYaml,
+  validateMappingCoverage,
   PROJECT_ENUMS,
 } from '../spec-validator.mjs';
 import { resolve, dirname } from 'path';
@@ -819,6 +820,40 @@ describe('validateProjectYaml', () => {
     const { errors } = validateProjectYaml({ process: { intake: { cadence: 'hourly' } } });
     expect(errors.some((e) => e.includes('process.intake.cadence'))).toBe(true);
   });
+
+  it('validates automation.languageProfile.mode enum values', () => {
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { mode: 'configured' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { mode: 'hybrid' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { mode: 'heuristic' } } }).errors
+    ).toEqual([]);
+
+    const { errors } = validateProjectYaml({
+      automation: { languageProfile: { mode: 'invalid-mode' } },
+    });
+    expect(errors.some((e) => e.includes('automation.languageProfile.mode'))).toBe(true);
+  });
+
+  it('validates automation.languageProfile.diagnostics enum values', () => {
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { diagnostics: 'off' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { diagnostics: 'minimal' } } }).errors
+    ).toEqual([]);
+    expect(
+      validateProjectYaml({ automation: { languageProfile: { diagnostics: 'verbose' } } }).errors
+    ).toEqual([]);
+
+    const { errors } = validateProjectYaml({
+      automation: { languageProfile: { diagnostics: 'full' } },
+    });
+    expect(errors.some((e) => e.includes('automation.languageProfile.diagnostics'))).toBe(true);
+  });
 });
 
 describe('teams intake cross-references', () => {
@@ -858,5 +893,56 @@ describe('teams intake cross-references', () => {
     });
 
     expect(errors.some((e) => e.includes('intake.routing.api'))).toBe(true);
+  });
+});
+
+describe('validateMappingCoverage', () => {
+  it('should warn about mapping src paths that do not exist in project spec', () => {
+    const project = { name: 'test' };
+    const mapping = [
+      { src: 'name', dest: 'projectName' },
+      { src: 'nonexistent.field', dest: 'missing' },
+    ];
+
+    const warnings = validateMappingCoverage(project, mapping);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('nonexistent.field');
+    expect(warnings[0]).toContain('{{missing}}');
+  });
+
+  it('should not warn about null fields (they exist but are empty)', () => {
+    const project = { stack: { orm: null } };
+    const mapping = [{ src: 'stack.orm', dest: 'stackOrm', type: 'string' }];
+
+    const warnings = validateMappingCoverage(project, mapping);
+    expect(warnings).toHaveLength(0);
+  });
+
+  it('should not warn when all mapping paths exist', () => {
+    const project = {
+      name: 'test',
+      stack: { languages: ['js'] },
+    };
+    const mapping = [
+      { src: 'name', dest: 'projectName' },
+      { src: 'stack.languages', dest: 'stackLanguages', type: 'array-join' },
+    ];
+
+    const warnings = validateMappingCoverage(project, mapping);
+    expect(warnings).toHaveLength(0);
+  });
+
+  it('should warn about leaf-level missing fields', () => {
+    const project = { stack: { languages: ['js'] } };
+    const mapping = [{ src: 'stack.missing', dest: 'x' }];
+
+    const warnings = validateMappingCoverage(project, mapping);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('stack.missing');
+  });
+
+  it('should handle empty project gracefully', () => {
+    const warnings = validateMappingCoverage(null, [{ src: 'a.b', dest: 'x' }]);
+    expect(warnings).toHaveLength(0);
   });
 });

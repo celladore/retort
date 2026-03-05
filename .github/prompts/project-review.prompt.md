@@ -16,6 +16,14 @@ last_updated: '2026-03-05'
 
 Comprehensive production-grade project review and assessment. Systematically analyzes code quality, architecture, security, UX, performance, documentation, and feature completeness. Produces structured findings with a prioritized roadmap organized into implementation waves.
 
+## Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--scope` | Limit review to specific paths or modules | — |
+| `--focus` | Focus area: all, security, performance, ux, docs, architecture | all |
+| `--phase` | Run only a specific review phase (0-4) | — |
+
 ## Instructions
 
 When invoked, follow the AgentKit Forge orchestration lifecycle:
@@ -31,6 +39,15 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - Repository: agentkit-forge
 - Default branch: main
   - Tech stack: javascript, yaml, markdown
+
+## Language Profile Diagnostics
+
+- Source: mixed (confidence: high)
+- Configured languages present: yes
+- JS-like: configured=true, inferred=true, effective=true
+- Python: configured=false, inferred=false, effective=false
+- .NET: configured=false, inferred=false, effective=false
+- Rust: configured=false, inferred=false, effective=false
 
 ## Conventions
 
