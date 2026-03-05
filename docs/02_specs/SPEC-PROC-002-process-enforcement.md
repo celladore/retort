@@ -1,9 +1,9 @@
-# SPEC-002: Process Enforcement
+# SPEC-PROC-002: Process Enforcement
 
 **Status**: Draft
 **Phase**: 2 — Next Sprint (process logic changes)
 **Scope**: WIP Limits, Swarming, Velocity Metrics, Scrum Master Role, Product Owner Authority
-**Depends On**: SPEC-001 (Process Foundations)
+**Depends On**: SPEC-PROC-001 (Process Foundations)
 
 ---
 
@@ -413,7 +413,7 @@ scripts/
 
 ```yaml
 process:
-  # Phase 1 (from SPEC-001)
+  # Phase 1 (from SPEC-PROC-001)
   definition-of-done: DOD.md
   definition-of-ready: DOR.md
   dod-validation: scripts/validate-dod.mjs

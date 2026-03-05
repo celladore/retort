@@ -1,4 +1,4 @@
-# SPEC-001: Process Foundations
+# SPEC-PROC-001: Process Foundations
 
 **Status**: Draft
 **Phase**: 1 — Immediate (config & document changes)
@@ -429,6 +429,13 @@ This is the most context-sensitive item in Phase 1.
 
 ### TR-CC-1: teams.yaml Process Section
 
+> **Schema Migration Notice**: The current `teams.yaml` does NOT have a `process:` section. Adding this block is a **schema change** that requires updates to the sync engine (`synchronize.mjs`). The sync engine's YAML parser must be updated to:
+> 1. Accept the new `process:` top-level key without treating it as an error or unresolved placeholder
+> 2. Make the `process:` section available to orchestrator templates and scripts
+> 3. Not attempt to map `process:` entries to team definitions
+>
+> This should be implemented as the first task in Phase 1, before any process scripts are created, since all scripts depend on reading config from this section.
+
 All Phase 1 items are referenced from a single `process:` block in `teams.yaml`:
 
 ```yaml
@@ -471,7 +478,51 @@ Output: JSON to stdout for programmatic consumption
 Output: Human-readable summary to stderr for agent display
 ```
 
-### TR-CC-3: Events Log Integration
+**Script extension model**: Scripts that are extended across phases (notably `sprint-metrics.mjs`, which gains features in SPEC-PROC-001 through SPEC-PROC-004) use a **subcommand monolith** pattern — a single script with multiple subcommands, NOT separate scripts that share a library. This keeps the `teams.yaml` process section simple (one script path per concern) and avoids import/dependency management across script files.
+
+```
+# sprint-metrics.mjs subcommands (grows across phases):
+node scripts/sprint-metrics.mjs calibration   # Phase 1: estimation accuracy
+node scripts/sprint-metrics.mjs velocity      # Phase 2: velocity & flow
+node scripts/sprint-metrics.mjs capacity      # Phase 2: capacity recommendation
+node scripts/sprint-metrics.mjs cycle-time    # Phase 4: cycle time tracking (F-023)
+node scripts/sprint-metrics.mjs dora          # Phase 4: DORA metrics (F-032)
+node scripts/sprint-metrics.mjs kaizen        # Phase 4: improvement counter (F-052)
+node scripts/sprint-metrics.mjs report        # All phases: full sprint report
+```
+
+Each subcommand is a self-contained function within the script. Shared utilities (date parsing, backlog reading, events.log querying) are internal helper functions — not exported modules.
+
+### TR-CC-3: Command Integration
+
+All process scripts are internal to the orchestrator — they are NOT registered as user-facing commands in `commands.yaml`. Instead, existing commands invoke them at the appropriate phase boundaries.
+
+| Script | Invoked By | When | User-Visible? |
+|--------|-----------|------|---------------|
+| `validate-dod.mjs` | `/orchestrate` | Task Completion phase | No — result shown as "DOD: PASS/FAIL" |
+| `validate-dor.mjs` | `/orchestrate` | Sprint Planning phase | No — result shown in planning output |
+| `validate-sprint.mjs` | `/orchestrate` | Session Start | No — result shown in assessment |
+| `generate-retro.mjs` | `/handoff` | Session End (step 2 of handoff) | Yes — retro file link in handoff summary |
+| `sprint-metrics.mjs` | `/orchestrate` | Sprint Planning (capacity); Sprint End (report) | No — metrics shown as summary line |
+| `agent-sync.mjs` | `/orchestrate`, `/handoff` | Session Start (read), Task Assignment (read --for), Session End (update) | No — sync data shown as filtered summary |
+| `wip-check.mjs` | `/orchestrate` | Task Assignment phase | No — shown as "Backend: 2/2 (FULL)" |
+| `swarm-check.mjs` | `/orchestrate` | Assessment phase | No — shown as "SWARM ALERT" if triggered |
+| `sprint-lifecycle.mjs` | `/orchestrate` | Sprint boundaries | No — shown as "Sprint 2: session 3/5" |
+| `generate-review.mjs` | `/orchestrate` | Sprint End | Yes — review file link in output |
+| `burndown-update.mjs` | `/orchestrate` | After task completion | No — updates AGENT_BACKLOG.md silently |
+| `backlog-refine.mjs` | `/orchestrate` | Pre-sprint-planning | No — refinement report in planning output |
+| `backlog-health.mjs` | `/orchestrate` | Sprint Planning | No — "Tech debt: 35% — consider dedicated sprint" |
+| `generate-status.mjs` | `/orchestrate` | End of every `/orchestrate` call | Yes — STATUS.md updated |
+| `code-ownership.mjs` | `/orchestrate` | Sprint Planning (cross-training input) | No — bus factor shown in planning |
+| `andon.mjs` | `/orchestrate` | Any phase (stop-the-line trigger) | Yes — blocks further work with alert |
+
+**No new commands are introduced.** All process enforcement flows through the existing `/orchestrate` and `/handoff` commands. The only user-visible change is that these commands now produce richer output (DOD/DOR status, WIP status, burndown warnings, etc.).
+
+**Flags**: No new flags are added to existing commands. The process checks are automatic — they run based on the orchestrator phase, not user flags. If a future need arises for opt-out (e.g., `--skip-dor`), it would be added to `/orchestrate` in `commands.yaml` at that time.
+
+---
+
+### TR-CC-4: Events Log Integration
 
 All scripts append structured entries to `.claude/state/events.log`:
 ```json
@@ -483,7 +534,7 @@ All scripts append structured entries to `.claude/state/events.log`:
 
 This creates an audit trail that the retro generator can analyze for patterns.
 
-### TR-CC-4: No Agent Instruction Changes for Phase 1
+### TR-CC-5: No Agent Instruction Changes for Phase 1
 
 **Critical constraint**: Phase 1 should NOT add any text to agent `domain-rules`, `responsibilities`, or `role` fields in `agents.yaml`. All enforcement happens through:
 1. `teams.yaml` `process:` config (read by orchestrator)

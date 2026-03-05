@@ -1,9 +1,9 @@
-# SPEC-003: Advanced Practices
+# SPEC-PROC-003: Advanced Practices
 
 **Status**: Draft
 **Phase**: 3 — Future Sprints (architecture & design work)
 **Scope**: Time-boxed Sprints, Sprint Review, Cross-training, Pair Programming, Burndown, Backlog Refinement, Tech Debt Management, Information Radiators, Root Cause Analysis, Collective Code Ownership
-**Depends On**: SPEC-001 (Process Foundations), SPEC-002 (Process Enforcement)
+**Depends On**: SPEC-PROC-001 (Process Foundations), SPEC-PROC-002 (Process Enforcement)
 
 ---
 

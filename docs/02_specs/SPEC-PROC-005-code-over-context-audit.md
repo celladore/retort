@@ -1,7 +1,7 @@
-# SPEC-005: Code Over Context — Existing Agent Configuration Audit
+# SPEC-PROC-005: Code Over Context — Existing Agent Configuration Audit
 
 **Status**: Draft
-**Phase**: Cross-phase — applies to all SPEC-001 through SPEC-004 implementation
+**Phase**: Cross-phase — applies to all SPEC-PROC-001 through SPEC-PROC-004a/b implementation
 **Purpose**: Identify opportunities in the existing agent configuration where instructions currently carried in agent context can be replaced by tooling, scripts, CI checks, or config references.
 
 ---
@@ -544,17 +544,17 @@ More importantly: **reliability improves**. Rules enforced by scripts and hooks 
 
 ---
 
-## Dependency on SPEC-001 through SPEC-004
+## Dependency on SPEC-PROC-001 through SPEC-PROC-004a/b
 
 This audit's recommendations integrate with the process specs:
 
 | This Audit Finding | Related Spec Feature | Integration |
 |---|---|---|
-| Global agent-conduct rules → process config | SPEC-001 TR-CC-1 (teams.yaml process section) | Agent-conduct rules live in same process block |
-| Tool-enforced rules → scripts | SPEC-001 TR-CC-2 (script architecture) | Rule enforcement scripts follow same pattern |
-| Enforcement matrix | SPEC-004 F-029 (poka-yoke registry) | Registry tracks which rules have automated enforcement |
-| Hook-enforced rules | SPEC-004 F-029 (poka-yoke expansion) | Hooks are poka-yoke mechanisms |
-| On-demand examples | SPEC-002 F-010 (Scrum Master as scripts) | Same principle: push logic out of agent context |
+| Global agent-conduct rules → process config | SPEC-PROC-001 TR-CC-1 (teams.yaml process section) | Agent-conduct rules live in same process block |
+| Tool-enforced rules → scripts | SPEC-PROC-001 TR-CC-2 (script architecture) | Rule enforcement scripts follow same pattern |
+| Enforcement matrix | SPEC-PROC-004a F-029 (poka-yoke registry) | Registry tracks which rules have automated enforcement |
+| Hook-enforced rules | SPEC-PROC-004a F-029 (poka-yoke expansion) | Hooks are poka-yoke mechanisms |
+| On-demand examples | SPEC-PROC-002 F-010 (Scrum Master as scripts) | Same principle: push logic out of agent context |
 
 ---
 
@@ -573,4 +573,4 @@ This audit's recommendations integrate with the process specs:
 ---
 
 _This is a planning/audit document. No implementation changes have been made._
-_See also: SPEC-001 through SPEC-004 for companion process specifications._
+_See also: SPEC-PROC-001 through SPEC-PROC-004a/b for companion process specifications._
