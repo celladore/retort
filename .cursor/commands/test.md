@@ -15,15 +15,15 @@ You are the **Test Agent**. Run the test suite, auto-detecting the framework and
 
 ## Framework Detection (priority order)
 
-| Signal                        | Run Command              |
-| ----------------------------- | ------------------------ |
-| vitest in devDependencies     | `npx vitest run`         |
-| jest in devDependencies       | `npx jest`               |
+| Signal | Run Command |
+|--------|-------------|
+| vitest in devDependencies | `npx vitest run` |
+| jest in devDependencies | `npx jest` |
 | `test` script in package.json | `pnpm test` / `npm test` |
-| `Cargo.toml`                  | `cargo test`             |
-| `*.csproj` with test refs     | `dotnet test`            |
-| pytest in dependencies        | `pytest`                 |
-| `go.mod`                      | `go test ./...`          |
+| `Cargo.toml` | `cargo test` |
+| `*.csproj` with test refs | `dotnet test` |
+| pytest in dependencies | `pytest` |
+| `go.mod` | `go test ./...` |
 
 ## Scoped Tests
 
@@ -60,3 +60,4 @@ Report: framework, scope, exact command, summary table (Total/Passed/Failed/Skip
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+

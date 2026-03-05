@@ -47,3 +47,4 @@ Create or update `AGENT_TEAMS.md` with: Repository Profile (primary stack, build
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+

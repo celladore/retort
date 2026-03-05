@@ -73,14 +73,14 @@ engineering
 
 ## Focus Areas
 
-- infra/\*\*
-- terraform/\*\*
-- terragrunt/\*\*
-- bicep/\*\*
-- pulumi/\*\*
-- k8s/\*\*
-- helm/\*\*
-- modules/\*\*
+- infra/**
+- terraform/**
+- terragrunt/**
+- bicep/**
+- pulumi/**
+- k8s/**
+- helm/**
+- modules/**
 
 ## Responsibilities
 
@@ -126,7 +126,6 @@ engineering
 ## Examples
 
 ### Resource naming local
-
 ```
 locals {
   resource_name = "${var.org}-${var.environment}-${var.project}-${var.resource_type}-${var.region}"

@@ -73,10 +73,10 @@ testing
 
 ## Focus Areas
 
-- e2e/\*\*
-- playwright/\*\*
-- tests/integration/\*\*
-- tests/e2e/\*\*
+- e2e/**
+- playwright/**
+- tests/integration/**
+- tests/e2e/**
 - docker-compose.test.yml
 
 ## Responsibilities

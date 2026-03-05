@@ -247,7 +247,6 @@ When filing issues (GitHub or Linear), use these **exact** values from the proje
 - **Area:** `backend`, `frontend`, `data`, `infra`, `devops`, `testing`, `security`, `docs`, `product`, `quality`, `cli`, `sync-engine`
 
 Map review findings to area based on the file path:
-
 - `.agentkit/engines/**`, `src/server/**` → `backend`
 - `src/client/**`, `apps/web/**` → `frontend`
 - `.github/workflows/**`, `scripts/**` → `devops`
@@ -390,7 +389,6 @@ The `create-doc.sh` script handles naming and numbering automatically. If you mu
 ## Deduplication
 
 Before writing a record:
-
 - Search existing issue/lesson files for similar titles or root causes.
 - If a substantially similar record exists, add a cross-reference comment instead of creating a duplicate.
 
@@ -401,7 +399,6 @@ For unresolved issues with severity >= `high`, file in the project's configured 
 ## Non-Blocking Behaviour
 
 Retrospective output is **informational only**:
-
 - It MUST NOT block commits, PRs, or deployments.
 - It MUST NOT modify source code or test files.
 - It only writes to `docs/history/issues/`, `docs/history/lessons-learned/`, and `docs/history/.index.json`.
@@ -418,15 +415,15 @@ Retrospective output is **informational only**:
 
 ### Issues Encountered (<count>)
 
-| #   | Severity | Status   | Title   | File                   |
-| --- | -------- | -------- | ------- | ---------------------- |
-| 1   | HIGH     | Resolved | <title> | <path to issue record> |
+| # | Severity | Status | Title | File |
+|---|----------|--------|-------|------|
+| 1 | HIGH     | Resolved | <title> | <path to issue record> |
 
 ### Lessons Learned (<count>)
 
-| #   | Category  | Title   | File                    |
-| --- | --------- | ------- | ----------------------- |
-| 1   | Technical | <title> | <path to lesson record> |
+| # | Category | Title | File |
+|---|----------|-------|------|
+| 1 | Technical | <title> | <path to lesson record> |
 
 ### Suggested Rule Updates
 

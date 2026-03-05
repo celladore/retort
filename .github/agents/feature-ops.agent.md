@@ -33,12 +33,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Focus Areas
 
 - .agentkit/spec/features.yaml
-- .agentkit/overlays/\*/settings.yaml
+- .agentkit/overlays/*/settings.yaml
 - .agentkit/engines/node/src/feature-manager.mjs
 - CLAUDE.md
-- .claude/commands/\*\*
-- .claude/agents/\*\*
-- .claude/skills/\*\*
+- .claude/commands/**
+- .claude/agents/**
+- .claude/skills/**
 
 ## Responsibilities
 
@@ -67,7 +67,6 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Review current feature configuration
-
 ```
 # Check which features are active and their status
 agentkit features --verbose
@@ -77,7 +76,6 @@ agentkit features --verbose
 ```
 
 ### Trace a feature end-to-end
-
 ```
 # Understand exactly what team-orchestration does
 /feature-flow --feature team-orchestration --show-templates
@@ -87,7 +85,6 @@ agentkit features --verbose
 ```
 
 ### Configure features for a solo developer
-
 ```
 # Apply lean preset (no team orchestration overhead)
 agentkit features preset lean

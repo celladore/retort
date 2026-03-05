@@ -51,3 +51,4 @@ Produce: Quality Gate Results table (Step | Status | Duration | Details), Overal
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+

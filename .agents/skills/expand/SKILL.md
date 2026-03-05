@@ -47,3 +47,4 @@ Invoke this skill when you need to perform the `expand` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

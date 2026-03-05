@@ -1,9 +1,9 @@
 ---
-description: 'Configure kit features — enable, disable, or apply presets with guided workflow'
+description: "Configure kit features — enable, disable, or apply presets with guided workflow"
 allowed-tools: Bash(node *agentkit* features*)
-generated_by: 'agentkit-forge'
-last_model: 'sync-engine'
-last_updated: '2026-03-05'
+generated_by: "agentkit-forge"
+last_model: "sync-engine"
+last_updated: "2026-03-05"
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -20,11 +20,11 @@ You are the **Feature Operations Specialist**. You help the user configure kit f
 
 This repository uses **AgentKit Forge** feature management with these presets:
 
-| Preset   | Features | Use-case                                             |
-| -------- | -------- | ---------------------------------------------------- |
-| minimal  | 5        | Just sync + basic quality. No teams, no docs         |
-| lean     | 8        | Quality + docs, no team orchestration. Solo devs     |
-| standard | 12       | Teams + quality + docs + security. Most projects     |
+| Preset   | Features | Use-case |
+|----------|----------|----------|
+| minimal  | 5        | Just sync + basic quality. No teams, no docs |
+| lean     | 8        | Quality + docs, no team orchestration. Solo devs |
+| standard | 12       | Teams + quality + docs + security. Most projects |
 | full     | 20       | Everything including cost tracking, MCP, healthcheck |
 
 ### Current Configuration
@@ -85,12 +85,10 @@ Based on `$ARGUMENTS`, perform the appropriate configuration action:
 ## Dependency Rules
 
 When enabling a feature:
-
 - Auto-enable its dependencies (e.g., enabling `agent-personas` auto-enables `team-orchestration`)
 - Inform the user about auto-enabled dependencies
 
 When disabling a feature:
-
 - Check if other enabled features depend on it
 - If so, list the dependents and ask if those should be disabled too
 - Block the disable if the user doesn't want to disable dependents
