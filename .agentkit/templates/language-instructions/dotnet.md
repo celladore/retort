@@ -36,7 +36,7 @@ Apply these rules when editing `.cs` files, `.csproj`, or `.sln` files.
 - NUnit: `[Test]` for single-case, `[TestCase(...)]` for parameterised tests.
 - Follow Arrange-Act-Assert with blank lines separating each phase.
 - Use `Moq` or `NSubstitute` for mocking; mock interfaces, not concrete types.
-  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
+{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
 
 ## API Compatibility
 

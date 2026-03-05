@@ -94,7 +94,7 @@ infrastructure:
   namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}' # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
   defaultRegion: global # e.g. southafricanorth, eastus, westeurope
   org: akf # e.g. nl, contoso — the org prefix used in resource names
-  iacToolchain: [none] # e.g. [terraform, terragrunt]
+  iacToolchain: [terraform, terragrunt] # e.g. [terraform, terragrunt]
   stateBackend: none # azurerm | s3 | gcs | consul | local | none
   modulesRepo: null # e.g. git::https://github.com/org/tf-modules.git
   lockProvider: null # blob-lease | dynamodb | consul | none
@@ -178,6 +178,64 @@ process:
     escalation:
       securityCritical: [security, devops]
       blockedCrossTeam: [product]
+
+# Branch protection — GitHub branch protection & repository settings
+# These values feed into the generated setup-branch-protection script.
+# The script uses the GitHub API to apply these rules programmatically.
+branchProtection:
+  # Pull request review requirements
+  requiredReviewCount: 1             # 0-6 approvals required
+  dismissStaleReviews: true          # re-review required after new pushes
+  requireCodeOwnerReviews: true      # CODEOWNERS review required
+  requireLastPushApproval: false     # last pusher cannot self-approve
+
+  # Status checks
+  strictStatusChecks: true           # branch must be up-to-date before merge
+  requiredStatusChecks:              # CI job names that must pass
+    - "CI / test (ubuntu-latest, 24)"
+    - "CI / validate"
+    - "Branch Protection / branch-rules"
+
+  # Branch rules
+  enforceAdmins: false               # apply rules to repo admins too
+  requiredLinearHistory: true        # squash/rebase only (no merge commits in history)
+  requireSignedCommits: false        # require GPG/SSH signed commits
+  allowForcePushes: false            # block force pushes
+  allowDeletions: false              # block branch deletion
+  blockCreations: false              # block branch creation via push
+  requiredConversationResolution: true # all PR conversations must be resolved
+
+  # Code scanning (applied via GitHub Rulesets API)
+  # Requires GitHub Advanced Security or public repos
+  codeScanning:
+    enabled: true
+    tools:
+      - name: CodeQL
+        # none | critical | high_or_higher | medium_or_higher | all
+        securityAlertThreshold: high_or_higher
+        # none | errors | warnings_and_errors | all
+        alertThreshold: errors
+
+  # GitHub Copilot automated code review
+  copilotReview:
+    enabled: true                    # auto-request Copilot review on PRs
+    reviewNewPushes: true            # re-review when new commits are pushed
+    reviewDraftPRs: true             # also review draft pull requests
+
+  # Merge strategies (repository-level settings)
+  mergeStrategies:
+    allowMergeCommits: false         # disable merge commits
+    allowSquashMerge: true           # enable squash merging
+    allowRebaseMerge: false          # disable rebase merging
+    deleteBranchOnMerge: true        # auto-delete head branch after merge
+    allowAutoMerge: false            # allow PRs to merge automatically when checks pass
+
+  # Merge queue (GitHub merge queue)
+  mergeQueue:
+    enabled: false                   # enable merge queue for the protected branch
+    mergeMethod: squash              # merge | squash | rebase
+    minGroupSize: 1                  # minimum PRs to batch
+    maxGroupSize: 5                  # maximum PRs to batch
 
 # Testing strategy
 testing:

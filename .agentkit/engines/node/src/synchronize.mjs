@@ -1200,6 +1200,31 @@ function buildAgentVars(agent, category, vars) {
   };
 }
 
+/**
+ * Builds precomputed JSON strings for branch protection template variables.
+ * Filters invalid entries and returns valid JSON array literals for use in
+ * heredoc payloads sent to the GitHub API.
+ */
+export function buildBranchProtectionJson(vars) {
+  const statusChecks = vars.bpRequiredStatusChecks ?? [];
+  const statusChecksJson = JSON.stringify(
+    Array.isArray(statusChecks) ? statusChecks.filter((s) => typeof s === 'string') : []
+  );
+  const scanningToolsRaw = vars.bpCodeScanningTools ?? [];
+  const scanningTools = Array.isArray(scanningToolsRaw)
+    ? scanningToolsRaw.filter((t) => t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() !== '')
+    : [];
+  const scanningToolsJson = JSON.stringify(
+    scanningTools.map((t) => ({
+      tool: t.name.trim(),
+      security_alerts_threshold:
+        typeof t.securityAlertThreshold === 'string' ? t.securityAlertThreshold : 'none',
+      alerts_threshold: typeof t.alertThreshold === 'string' ? t.alertThreshold : 'none',
+    }))
+  );
+  return { statusChecksJson, scanningToolsJson };
+}
+
 export function formatConventionLine(c) {
   if (typeof c === 'string') return `- ${c}`;
   const id = c.id || '';
@@ -1343,12 +1368,45 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     syncDate: new Date().toISOString().slice(0, 10),
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'agentkit-forge',
+    // Branch protection defaults — ensure generated scripts produce valid
+    // JSON even when project.yaml omits the branchProtection section.
+    bpRequiredReviewCount: projectVars.bpRequiredReviewCount ?? '1',
+    bpDismissStaleReviews: projectVars.bpDismissStaleReviews ?? true,
+    bpRequireCodeOwnerReviews: projectVars.bpRequireCodeOwnerReviews ?? true,
+    bpRequireLastPushApproval: projectVars.bpRequireLastPushApproval ?? false,
+    bpStrictStatusChecks: projectVars.bpStrictStatusChecks ?? true,
+    bpEnforceAdmins: projectVars.bpEnforceAdmins ?? false,
+    bpRequiredLinearHistory: projectVars.bpRequiredLinearHistory ?? true,
+    bpRequireSignedCommits: projectVars.bpRequireSignedCommits ?? false,
+    bpAllowForcePushes: projectVars.bpAllowForcePushes ?? false,
+    bpAllowDeletions: projectVars.bpAllowDeletions ?? false,
+    bpBlockCreations: projectVars.bpBlockCreations ?? false,
+    bpRequiredConversationResolution: projectVars.bpRequiredConversationResolution ?? true,
+    bpCodeScanningEnabled: projectVars.bpCodeScanningEnabled ?? false,
+    bpCopilotReviewEnabled: projectVars.bpCopilotReviewEnabled ?? false,
+    bpCopilotReviewNewPushes: projectVars.bpCopilotReviewNewPushes ?? false,
+    bpCopilotReviewDraftPRs: projectVars.bpCopilotReviewDraftPRs ?? false,
+    bpAllowMergeCommits: projectVars.bpAllowMergeCommits ?? false,
+    bpAllowSquashMerge: projectVars.bpAllowSquashMerge ?? true,
+    bpAllowRebaseMerge: projectVars.bpAllowRebaseMerge ?? false,
+    bpDeleteBranchOnMerge: projectVars.bpDeleteBranchOnMerge ?? true,
+    bpAllowAutoMerge: projectVars.bpAllowAutoMerge ?? false,
+    bpMergeQueueEnabled: projectVars.bpMergeQueueEnabled ?? false,
+    bpMergeQueueMethod: projectVars.bpMergeQueueMethod || 'squash',
+    bpMergeQueueMinGroupSize: projectVars.bpMergeQueueMinGroupSize ?? '1',
+    bpMergeQueueMaxGroupSize: projectVars.bpMergeQueueMaxGroupSize ?? '5',
   };
 
   // Heuristic fallbacks for commonly-used variables that lack {{#if}} guards
   if (!vars.testingCoverage && projectSpec?.phase) {
     vars.testingCoverage = inferTestingCoverage(projectSpec.phase);
   }
+
+  // Precomputed JSON strings for branch protection — avoids {{#each}} comma
+  // issues inside JSON heredocs. These render as valid JSON array literals.
+  const bpJson = buildBranchProtectionJson(vars);
+  vars.bpRequiredStatusChecksJson = bpJson.statusChecksJson;
+  vars.bpCodeScanningToolsJson = bpJson.scanningToolsJson;
 
   // Inject brand identity into template vars when brand guide exists
   if (vars.hasBrandGuide) {
@@ -1485,7 +1543,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           vars.overlayTemplatesDir,
           'claude/state',
           tmpDir,
-          '.claude/state',
+          '.agentkit/state',
           vars,
           version,
           headerRepoName

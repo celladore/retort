@@ -22,7 +22,7 @@ describe('backlog-viewer', () => {
 
   beforeEach(() => {
     tempDir = mkdtempSync(resolve(tmpdir(), 'agentkit-viewer-test-'));
-    mkdirSync(resolve(tempDir, '.claude', 'state'), { recursive: true });
+    mkdirSync(resolve(tempDir, '.agentkit', 'state'), { recursive: true });
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
@@ -35,7 +35,7 @@ describe('backlog-viewer', () => {
 
   function writeBacklog(items = sampleBacklog) {
     writeFileSync(
-      resolve(tempDir, '.claude', 'state', 'backlog.json'),
+      resolve(tempDir, '.agentkit', 'state', 'backlog.json'),
       JSON.stringify(items),
       'utf-8'
     );

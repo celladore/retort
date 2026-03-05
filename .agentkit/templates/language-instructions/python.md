@@ -35,7 +35,7 @@ Apply these rules when editing `.py` files or `pyproject.toml`.
 - Use `pytest` fixtures for shared setup; use `@pytest.mark.parametrize` for
   variants.
 - Mock at IO boundaries using `pytest-mock` or `unittest.mock`.
-  {{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
+{{#if testingCoverage}}- Minimum coverage: **{{testingCoverage}}%** line and branch.{{/if}}
 
 ```python
 def test_process_invoice_raises_on_invalid_amount():

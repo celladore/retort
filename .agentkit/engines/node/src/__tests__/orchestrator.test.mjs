@@ -25,7 +25,7 @@ import {
 // Use a temporary directory for tests
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'orchestrator');
-const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
 
 describe('orchestrator', () => {
   beforeEach(() => {
@@ -253,7 +253,7 @@ describe('orchestrator', () => {
   });
 
   describe('getTasksSummary()', () => {
-    const TASKS_DIR = resolve(TEST_ROOT, '.claude', 'state', 'tasks');
+    const TASKS_DIR = resolve(TEST_ROOT, '.agentkit', 'state', 'tasks');
 
     it('returns empty-queue message when tasks directory does not exist', async () => {
       const result = await getTasksSummary(TEST_ROOT);
@@ -262,7 +262,7 @@ describe('orchestrator', () => {
 
     it('returns empty-queue message when readdirSync throws', async () => {
       // Create a file at the tasks path so readdirSync throws ENOTDIR
-      mkdirSync(resolve(TEST_ROOT, '.claude', 'state'), { recursive: true });
+      mkdirSync(resolve(TEST_ROOT, '.agentkit', 'state'), { recursive: true });
       writeFileSync(TASKS_DIR, 'not-a-directory');
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toBe('No tasks in the task queue.');

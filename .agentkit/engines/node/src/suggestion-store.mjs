@@ -1,7 +1,7 @@
 /**
  * AgentKit Forge — Suggestion Store
  * File-backed suggestion management with YAML serialization.
- * Stores suggestions in .claude/state/suggestions/ as individual YAML files.
+ * Stores suggestions in .agentkit/state/suggestions/ as individual YAML files.
  *
  * Tracks suggestion lifecycle: pending_review → approved | rejected | deferred
  */
@@ -43,7 +43,7 @@ function validateSuggestionId(suggestionId) {
 // ---------------------------------------------------------------------------
 
 function suggestionsDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state', 'suggestions');
+  return resolve(projectRoot, '.agentkit', 'state', 'suggestions');
 }
 
 function rejectedDir(projectRoot) {

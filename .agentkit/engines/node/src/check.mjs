@@ -333,7 +333,14 @@ async function walkForPlaceholders(dir, projectRoot, findings, depth = 0) {
  * @returns {object} results
  */
 export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
+  const userContext = Array.isArray(flags._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
+
   console.log('[agentkit:check] Running quality gates...');
+  if (userContext) {
+    console.log(`[agentkit:check] Context: ${userContext}`);
+  }
   console.log('');
 
   const detectedStacks = await detectStacks(agentkitRoot, projectRoot, flags.stack);
@@ -452,12 +459,13 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
         })),
       })),
       flags: { fix: !!flags.fix, fast: !!flags.fast, stack: flags.stack || null },
+      ...(userContext ? { userContext } : {}),
     });
   } catch (err) {
     console.warn(`[agentkit:check] Event logging failed: ${err?.message ?? String(err)}`);
   }
 
-  return { stacks: allResults, overallStatus, overallPassed };
+  return { stacks: allResults, overallStatus, overallPassed, ...(userContext ? { userContext } : {}) };
 }
 
 // Export internal helpers so they can be directly unit-tested.

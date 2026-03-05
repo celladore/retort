@@ -164,7 +164,14 @@ function generateHandoffDoc(git, state, events, timestamp) {
  * @returns {object}
  */
 export async function runHandoff({ agentkitRoot, projectRoot, flags = {} }) {
+  const userContext = Array.isArray(flags._args) && flags._args.length > 0
+    ? flags._args.join(' ')
+    : null;
+
   console.log('[agentkit:handoff] Generating session handoff...');
+  if (userContext) {
+    console.log(`[agentkit:handoff] Context: ${userContext}`);
+  }
   console.log('');
 
   const timestamp = new Date().toISOString();
@@ -198,6 +205,7 @@ export async function runHandoff({ agentkitRoot, projectRoot, flags = {} }) {
       uncommittedCount: git.uncommittedCount,
       phase: state.current_phase,
       saved: !!flags.save,
+      ...(userContext ? { userContext } : {}),
     });
   } catch (err) {
     console.warn(`[agentkit:handoff] Event logging failed: ${err?.message ?? String(err)}`);

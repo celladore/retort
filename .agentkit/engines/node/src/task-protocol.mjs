@@ -1,7 +1,7 @@
 /**
  * AgentKit Forge — Task Protocol
  * File-based A2A-lite task delegation protocol.
- * Tasks are JSON files in .claude/state/tasks/ with lifecycle states,
+ * Tasks are JSON files in .agentkit/state/tasks/ with lifecycle states,
  * messages, artifacts, dependency tracking, and chained handoffs.
  */
 import { existsSync } from 'fs';
@@ -68,7 +68,7 @@ export const ARTIFACT_TYPES = [
 // ---------------------------------------------------------------------------
 
 function tasksDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state', 'tasks');
+  return resolve(projectRoot, '.agentkit', 'state', 'tasks');
 }
 
 const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/;

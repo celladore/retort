@@ -84,7 +84,7 @@ const VALID_FLAGS = {
     'diff',
     'help',
   ],
-  validate: ['help'],
+  validate: ['auto-task', 'help'],
   discover: ['output', 'depth', 'include-deps', 'help'],
   'spec-validate': ['help'],
   orchestrate: [
@@ -99,9 +99,9 @@ const VALID_FLAGS = {
   ],
   plan: ['issue', 'output', 'depth', 'help'],
   check: ['fix', 'fast', 'stack', 'bail', 'project', 'help'],
-  review: ['pr', 'branch', 'range', 'file', 'focus', 'severity', 'project', 'open-issues', 'dry-run', 'help'],
+  review: ['pr', 'branch', 'range', 'file', 'focus', 'severity', 'project', 'open-issues', 'dry-run', 'auto-task', 'help'],
   handoff: ['format', 'include-diff', 'tag', 'save', 'help'],
-  healthcheck: ['stack', 'fix', 'verbose', 'project', 'help'],
+  healthcheck: ['stack', 'fix', 'verbose', 'project', 'auto-task', 'help'],
   cost: ['summary', 'sessions', 'report', 'month', 'format', 'last', 'help'],
   tasks: ['status', 'assignee', 'type', 'priority', 'id', 'process-handoffs', 'help'],
   delegate: [

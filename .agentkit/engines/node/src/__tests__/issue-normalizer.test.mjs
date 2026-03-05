@@ -7,6 +7,7 @@ import {
   mapStatus,
   extractAcceptanceCriteria,
   extractFilePaths,
+  inferCategoryScores,
 } from '../issue-normalizer.mjs';
 
 describe('inferPriority', () => {
@@ -237,5 +238,52 @@ describe('deduplicateItems', () => {
     const manuals = result.merged.filter((i) => !i.externalId);
     expect(manuals).toHaveLength(2);
     expect(result.added).toBe(1);
+  });
+});
+
+describe('inferCategoryScores', () => {
+  it('maps P0 priority to severity 10', () => {
+    const scores = inferCategoryScores({ priority: 'P0', labels: [] });
+    expect(scores.severity).toBe(10);
+  });
+
+  it('maps P3 priority to severity 3', () => {
+    const scores = inferCategoryScores({ priority: 'P3', labels: [] });
+    expect(scores.severity).toBe(3);
+  });
+
+  it('defaults severity to 5 for unknown priority', () => {
+    const scores = inferCategoryScores({ priority: 'unknown', labels: [] });
+    expect(scores.severity).toBe(5);
+  });
+
+  it('detects breaking/blocker labels as high impact', () => {
+    const scores = inferCategoryScores({ priority: 'P2', labels: ['breaking-change'] });
+    expect(scores.impact).toBe(9);
+  });
+
+  it('detects urgent labels as high urgency', () => {
+    const scores = inferCategoryScores({ priority: 'P2', labels: ['urgent'] });
+    expect(scores.urgency).toBe(9);
+  });
+
+  it('detects security labels as high risk', () => {
+    const scores = inferCategoryScores({ priority: 'P2', labels: ['security'] });
+    expect(scores.risk).toBe(8);
+  });
+
+  it('returns neutral scores for items with no special labels', () => {
+    const scores = inferCategoryScores({ priority: 'P2', labels: ['enhancement'] });
+    expect(scores.impact).toBe(5);
+    expect(scores.urgency).toBe(5);
+    expect(scores.effort).toBe(5);
+    expect(scores.alignment).toBe(5);
+    expect(scores.risk).toBe(5);
+  });
+
+  it('handles missing labels gracefully', () => {
+    const scores = inferCategoryScores({ priority: 'P1' });
+    expect(scores.severity).toBe(7);
+    expect(scores.impact).toBe(5);
   });
 });

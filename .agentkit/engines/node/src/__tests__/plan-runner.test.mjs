@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'plan');
-const STATE_DIR = resolve(TEST_ROOT, '.claude', 'state');
+const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
 
 function setupTestProject(phase = 1, extras = {}) {
   if (existsSync(TEST_ROOT)) rmSync(TEST_ROOT, { recursive: true });
