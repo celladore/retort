@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, dev]
 
+# Branch protection depends on these check names. If you rename a job's `name:`
+# field, update branch protection rules for dev and main to match.
+# Current required checks: Test (ubuntu-latest), Validate, YAML Lint,
+# Markdown Lint, branch-rules (from branch-protection.yml).
 jobs:
   test:
     name: Test (${{ matrix.os }})
