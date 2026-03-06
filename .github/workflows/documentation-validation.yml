@@ -3,6 +3,7 @@
 # Regenerate: pnpm -C .agentkit agentkit:sync
 #
 # Validates documentation requirements and structure on pull requests.
+# Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
 
 name: Documentation Validation
 
@@ -30,11 +31,45 @@ jobs:
           ./scripts/check-documentation-requirement.sh
 
       - name: Validate documentation structure
+        id: doc-structure
+        continue-on-error: true
         run: |
           chmod +x ./scripts/validate-documentation.sh
-          ./scripts/validate-documentation.sh
+          ./scripts/validate-documentation.sh 2>&1 | tee /tmp/doc-structure.txt
 
       - name: Validate sequential numbering
+        id: doc-numbering
+        continue-on-error: true
         run: |
           chmod +x ./scripts/validate-numbering.sh
-          ./scripts/validate-numbering.sh
+          ./scripts/validate-numbering.sh 2>&1 | tee /tmp/doc-numbering.txt
+
+      - name: Report validation results
+        if: steps.doc-structure.outcome == 'failure' || steps.doc-numbering.outcome == 'failure'
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: |
+          {
+            echo "## Documentation Validation Issues"
+            echo ""
+            if [ "${{ steps.doc-structure.outcome }}" = "failure" ]; then
+              echo "### Structure validation"
+              echo '```'
+              head -30 /tmp/doc-structure.txt
+              echo '```'
+            fi
+            if [ "${{ steps.doc-numbering.outcome }}" = "failure" ]; then
+              echo "### Sequential numbering"
+              echo '```'
+              head -30 /tmp/doc-numbering.txt
+              echo '```'
+            fi
+            echo ""
+            echo "Run \`./scripts/validate-documentation.sh\` locally to see full details."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$TARGET_BRANCH" = "main" ]; then
+            echo "::error::Documentation validation failed. Fix issues before merging to main."
+            exit 1
+          else
+            echo "::warning::Documentation validation issues found. These must be fixed before merging to main."
+          fi

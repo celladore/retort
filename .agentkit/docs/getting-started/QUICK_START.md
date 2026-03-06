@@ -260,7 +260,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ## Command Quick Reference
 
-AgentKit Forge provides 30 slash commands, organized into five categories. The tables below list 28 commands; the remaining 2 (`/scaffold` and `/preflight`) are slash-command-only and documented in [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md). See that reference for full details, flags, and examples.
+AgentKit Forge provides 30 slash commands, organized into five categories. The tables below list 28 commands; the remaining 2 (`/scaffold` and `/preflight`) are slash-command-only and documented in [COMMAND_REFERENCE.md](../guides/COMMAND_REFERENCE.md). See that reference for full details, flags, and examples.
 
 ### Workflow Commands
 
@@ -318,7 +318,7 @@ These commands activate specialized agent teams for focused work.
 
 ### Coming Soon (In-Flight Branches)
 
-The following commands are in active development. See [COMMAND_REFERENCE.md — Incoming Commands](./COMMAND_REFERENCE.md#incoming-commands-in-flight-branches) for full details.
+The following commands are in active development. See [COMMAND_REFERENCE.md — Incoming Commands](../guides/COMMAND_REFERENCE.md#incoming-commands-in-flight-branches) for full details.
 
 | Command                         | Purpose                                                      | Branch                            |
 | ------------------------------- | ------------------------------------------------------------ | --------------------------------- |
@@ -335,11 +335,11 @@ The following commands are in active development. See [COMMAND_REFERENCE.md — 
 
 Now that you have AgentKit Forge running, here is where to go next:
 
-- **[COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md)** -- Detailed documentation for every command, including all flags, arguments, and output formats.
-- **[WORKFLOWS.md](./WORKFLOWS.md)** -- Worked examples of complete sessions: new feature development, bug fixes, project audits, and multi-session continuity.
-- **[CUSTOMIZATION.md](./CUSTOMIZATION.md)** -- How to customize commands, rules, team definitions, and overlay settings for your project.
+- **[COMMAND_REFERENCE.md](../guides/COMMAND_REFERENCE.md)** -- Detailed documentation for every command, including all flags, arguments, and output formats.
+- **[WORKFLOWS.md](../guides/WORKFLOWS.md)** -- Worked examples of complete sessions: new feature development, bug fixes, project audits, and multi-session continuity.
+- **[CUSTOMIZATION.md](../configuration/CUSTOMIZATION.md)** -- How to customize commands, rules, team definitions, and overlay settings for your project.
 - **[ONBOARDING.md](./ONBOARDING.md)** -- The full onboarding guide with CI integration, pre-commit hooks, and troubleshooting.
-- **[COST_TRACKING.md](./COST_TRACKING.md)** -- Token usage logging, session tracking, and monthly cost reports (roadmap).
+- **[COST_TRACKING.md](../architecture/COST_TRACKING.md)** -- Token usage logging, session tracking, and monthly cost reports (roadmap).
 
 ### Tips for Getting the Most Out of AgentKit Forge
 

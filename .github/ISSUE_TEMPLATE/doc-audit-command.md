@@ -29,7 +29,7 @@ New `doc-audit` command entry (type: `workflow`) with flags:
 - `--scope` — limit audit to specific doc categories
 - `--fix` — auto-fix safe issues (counts, broken links)
 - `--output` — report format (markdown/json)
-- `--save` — persist report to `.agentkit/docs/DOCUMENTATION_AUDIT.md`
+- `--save` — persist report to `.agentkit/docs/reference/DOCUMENTATION_AUDIT.md`
 
 ### 2. Create template at `.agentkit/templates/claude/commands/doc-audit.md`
 
@@ -71,4 +71,4 @@ The full spec YAML entry and complete Handlebars template (with all 7 phases) ar
 - [ ] `/doc-audit` produces a structured report when run
 - [ ] `--fix` mode safely corrects count mismatches and broken links
 - [ ] `--scope` filters to specific doc categories
-- [ ] Report is saved to `.agentkit/docs/DOCUMENTATION_AUDIT.md` by default
+- [ ] Report is saved to `.agentkit/docs/reference/DOCUMENTATION_AUDIT.md` by default

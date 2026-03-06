@@ -321,5 +321,5 @@ etc.) via `{{variableName}}` syntax. Boolean variables can be used in
 ## References
 
 - [CUSTOMIZATION.md](./CUSTOMIZATION.md) — Overlay system, render targets, presets
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — How `flattenProjectYaml()` works internally
+- [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) — How `flattenProjectYaml()` works internally
 - [TOOLS.md](./TOOLS.md) — What each render target generates

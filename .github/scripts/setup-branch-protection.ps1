@@ -110,8 +110,6 @@ Write-Host ""
 # 2. Signed commits
 # =============================================================================
 
-
-
 # =============================================================================
 # 3. Repository settings (merge strategies, auto-delete, auto-merge)
 # =============================================================================
@@ -142,7 +140,6 @@ Write-Host ""
 # =============================================================================
 # 4. Code scanning ruleset (GitHub Rulesets API)
 # =============================================================================
-
 
 $CodeScanningRuleset = @"
 {
@@ -190,11 +187,9 @@ if ($DryRun) {
 }
 Write-Host ""
 
-
 # =============================================================================
 # 5. Copilot code review
 # =============================================================================
-
 
 $CopilotReview = @"
 {
@@ -222,12 +217,9 @@ if ($DryRun) {
 }
 Write-Host ""
 
-
 # =============================================================================
 # 6. Merge queue
 # =============================================================================
-
-
 
 # =============================================================================
 # 7. Labels
@@ -289,13 +281,10 @@ Write-Host "  Code scanning:"
 
 Write-Host "    - CodeQL: security=high_or_higher, alerts=errors"
 
-
-
 Write-Host "  Copilot code review:"
 Write-Host "    - Auto-request: enabled"
 Write-Host "    - Review new pushes: true"
 Write-Host "    - Review draft PRs: true"
-
 
 Write-Host ""
 Write-Host "Run 'gh api /repos/$Repo/branches/$Branch/protection' to verify."

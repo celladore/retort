@@ -75,7 +75,6 @@ function Send-Block {
 # -- Auto-detect stack and run checks --------------------------------------
 $ranCheck = $false
 
-
 # Node.js / JavaScript / TypeScript
 $packageJsonPath = Join-Path $cwd "package.json"
 if (Test-Path $packageJsonPath) {
@@ -128,13 +127,6 @@ if (Test-Path $packageJsonPath) {
         if (-not $result.Success) { Send-Block -Reason $result.Output }
     }
 }
-
-
-
-
-
-
-
 
 # If no build tools were found, or all checks passed -- allow stop.
 exit 0

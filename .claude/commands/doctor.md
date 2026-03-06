@@ -14,7 +14,7 @@ last_updated: '2026-03-06'
 
 # /doctor
 
-{{commandDescription}}
+Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.
 
 ## Purpose
 

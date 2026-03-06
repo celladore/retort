@@ -24,8 +24,8 @@ When adopters run sync, generated outputs include:
 
 ### Docs and references
 
-- .agentkit/docs/QUICK_START.md
-- .agentkit/docs/ONBOARDING.md
+- .agentkit/docs/getting-started/QUICK_START.md
+- .agentkit/docs/getting-started/ONBOARDING.md
 - .agentkit/templates/root/QUALITY_GATES.md
 
 ### Engine wiring (if needed for render/copy)

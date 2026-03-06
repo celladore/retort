@@ -14,7 +14,7 @@ last_updated: '2026-03-06'
 
 # /scaffold
 
-{{commandDescription}}
+Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.
 
 ## Purpose
 

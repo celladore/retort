@@ -36,7 +36,7 @@ Add the following entry under the **Workflow Commands** section (after `project-
       required: false
       enum: [markdown, json]
     - name: --save
-      description: 'Save report to .agentkit/docs/DOCUMENTATION_AUDIT.md'
+      description: 'Save report to .agentkit/docs/reference/DOCUMENTATION_AUDIT.md'
       type: boolean
       default: true
   allowed-tools:
@@ -197,7 +197,7 @@ Produce a structured report:
 ```
 
 {{#if flags.save}}
-Save the report to `.agentkit/docs/DOCUMENTATION_AUDIT.md`.
+Save the report to `.agentkit/docs/reference/DOCUMENTATION_AUDIT.md`.
 {{/if}}
 
 {{#if flags.fix}}

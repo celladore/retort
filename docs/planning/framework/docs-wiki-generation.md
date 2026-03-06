@@ -1,6 +1,7 @@
 # FW-003: Documentation Site Generation — Wiki & Static Site Options
 
 ## Metadata
+
 - **ID**: FW-003
 - **Priority**: P2
 - **Status**: not-started
@@ -14,35 +15,35 @@ Template-generated documentation files use numbered prefixes (`01_prd.md`, `02_e
 
 ### 1. Static Site Generators (Free, Open Source)
 
-| Tool | Language | Key Features | Notes |
-|------|----------|-------------|-------|
-| **Docusaurus** | React/JS | Versioning, i18n, MDX, search, sidebar auto-gen | Meta (Facebook) backed; heavy for small projects |
-| **MkDocs + Material** | Python | YAML config, search, dark mode, nav auto-gen | Lightweight; Material theme is feature-rich |
-| **VitePress** | Vue/JS | Fast builds, Vue components in MD, sidebar auto-gen | From Vue team; lighter than Docusaurus |
-| **Nextra** | React/Next.js | MDX, file-system routing, theme system | Good if already using Next.js |
-| **Starlight** (Astro) | Astro | i18n, sidebar from filesystem, fast | Newer; Astro ecosystem |
-| **mdBook** | Rust | SUMMARY.md-driven, simple, fast | Good for technical docs; Rust ecosystem |
-| **Hugo** | Go | Extremely fast builds, many themes | Template language can be complex |
+| Tool                  | Language      | Key Features                                        | Notes                                            |
+| --------------------- | ------------- | --------------------------------------------------- | ------------------------------------------------ |
+| **Docusaurus**        | React/JS      | Versioning, i18n, MDX, search, sidebar auto-gen     | Meta (Facebook) backed; heavy for small projects |
+| **MkDocs + Material** | Python        | YAML config, search, dark mode, nav auto-gen        | Lightweight; Material theme is feature-rich      |
+| **VitePress**         | Vue/JS        | Fast builds, Vue components in MD, sidebar auto-gen | From Vue team; lighter than Docusaurus           |
+| **Nextra**            | React/Next.js | MDX, file-system routing, theme system              | Good if already using Next.js                    |
+| **Starlight** (Astro) | Astro         | i18n, sidebar from filesystem, fast                 | Newer; Astro ecosystem                           |
+| **mdBook**            | Rust          | SUMMARY.md-driven, simple, fast                     | Good for technical docs; Rust ecosystem          |
+| **Hugo**              | Go            | Extremely fast builds, many themes                  | Template language can be complex                 |
 
 ### 2. Wiki-Style Options (Free)
 
-| Tool | Type | Key Features | Notes |
-|------|------|-------------|-------|
-| **GitHub Wiki** | Built-in | Free with repo, git-backed | Limited customization, no versioning |
-| **Outline** | Self-hosted | Real-time collab, search, API | Needs hosting; good team wiki |
-| **Wiki.js** | Self-hosted | Multiple editors, git sync, search | Feature-rich; needs hosting |
-| **Notion** (via export) | SaaS | Already in use for some docs | Export to static site possible |
-| **GitBook** | SaaS/Free tier | Git sync, clean UI, search | Free for open source |
+| Tool                    | Type           | Key Features                       | Notes                                |
+| ----------------------- | -------------- | ---------------------------------- | ------------------------------------ |
+| **GitHub Wiki**         | Built-in       | Free with repo, git-backed         | Limited customization, no versioning |
+| **Outline**             | Self-hosted    | Real-time collab, search, API      | Needs hosting; good team wiki        |
+| **Wiki.js**             | Self-hosted    | Multiple editors, git sync, search | Feature-rich; needs hosting          |
+| **Notion** (via export) | SaaS           | Already in use for some docs       | Export to static site possible       |
+| **GitBook**             | SaaS/Free tier | Git sync, clean UI, search         | Free for open source                 |
 
 ### 3. AI-Powered Documentation Options
 
-| Tool | Key Features | Notes |
-|------|-------------|-------|
-| **Mintlify** | AI search, auto-generated API docs, analytics | Free tier; AI-first design |
-| **ReadMe** | AI-assisted docs, API explorer, changelogs | Free tier for open source |
-| **Swimm** | AI doc generation from code, auto-update on code changes | Keeps docs in sync with code |
-| **Cursor + MkDocs** | Use AI to auto-generate/maintain docs, serve via MkDocs | DIY approach; flexible |
-| **GitHub Copilot Docs** | Generate docs from code context | In-editor; no standalone site |
+| Tool                    | Key Features                                             | Notes                         |
+| ----------------------- | -------------------------------------------------------- | ----------------------------- |
+| **Mintlify**            | AI search, auto-generated API docs, analytics            | Free tier; AI-first design    |
+| **ReadMe**              | AI-assisted docs, API explorer, changelogs               | Free tier for open source     |
+| **Swimm**               | AI doc generation from code, auto-update on code changes | Keeps docs in sync with code  |
+| **Cursor + MkDocs**     | Use AI to auto-generate/maintain docs, serve via MkDocs  | DIY approach; flexible        |
+| **GitHub Copilot Docs** | Generate docs from code context                          | In-editor; no standalone site |
 
 ### 4. Considerations for AgentKit Forge
 

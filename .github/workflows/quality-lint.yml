@@ -1,0 +1,63 @@
+name: Quality Lint
+
+# Runs markdown lint checks on PRs. Prettier is validated in the test suite (ci.yml).
+# Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
+# Split from ci.yml so branch protection can enforce separately per branch.
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+          cache-dependency-path: .agentkit/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .agentkit
+
+      - name: Lint Markdown files
+        id: mdlint
+        continue-on-error: true
+        run: pnpm lint:md 2>&1 | tee /tmp/mdlint-output.txt
+        working-directory: .agentkit
+
+      - name: Report results
+        if: steps.mdlint.outcome == 'failure'
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: |
+          {
+            echo "## Markdown Lint Issues"
+            echo ""
+            echo "Markdown lint found formatting issues. Run locally to fix:"
+            echo '```bash'
+            echo "pnpm -C .agentkit lint:md"
+            echo '```'
+            echo ""
+            echo "### Details"
+            echo '```'
+            head -50 /tmp/mdlint-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$TARGET_BRANCH" = "main" ]; then
+            echo "::error::Markdown lint failed. Fix lint issues before merging to main."
+            exit 1
+          else
+            echo "::warning::Markdown lint issues found. These must be fixed before merging to main."
+          fi

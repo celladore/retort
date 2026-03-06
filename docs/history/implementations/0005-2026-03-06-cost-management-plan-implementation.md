@@ -151,7 +151,7 @@ hooks:
 
 **D. Add budget policy section to settings.yaml:**
 
-```yaml
+````yaml
 budgetPolicy:
   enforcement: warn # warn | enforce | off
   session:
@@ -164,15 +164,15 @@ budgetPolicy:
     maxTotalDurationMinutes: 480
     maxTotalCommands: 1000
     warnAtPercent: 80
-```
+```text
 
 **E. Add `/budget` CLI command** (or extend `/cost`):
 
-```
+```text
 cost --budget          # Show budget status (session + daily)
 cost --budget --set enforcement=enforce
 cost --budget --policy # Show active policy
-```
+````
 
 ### 4.2 Update Agent Definitions (agents.yaml)
 
@@ -376,7 +376,7 @@ Extend the existing `dashboard/` to show:
 
 **KQL Functions:**
 
-```
+```text
 cost_by_centre(_since)         — Aggregate cost per cost centre
 budget_utilization(_since)     — Spend vs budget per centre
 disabled_groups()              — List disabled resource groups
@@ -460,7 +460,7 @@ unbudgeted_resources(_since)   — Resources not in any cost centre
 | `.agentkit/overlays/pvc-costops-analytics/commands.yaml`     | Enable cost-centres command                   | P1       |
 | `.agentkit/templates/claude/commands/cost.md`                | Add `--budget` flag documentation             | P2       |
 | `.agentkit/templates/claude/commands/infra-eval.md`          | Add cost sub-evaluation details               | P2       |
-| `.agentkit/docs/COST_TRACKING.md`                            | Update to reflect enforcement layer           | P2       |
+| `.agentkit/docs/architecture/COST_TRACKING.md`               | Update to reflect enforcement layer           | P2       |
 
 ### 7.2 ai-gateway Changes (Separate PR)
 
