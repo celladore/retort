@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-05 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-06 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
 
 # Instructions — documentation
@@ -26,14 +26,14 @@ These rules are hard constraints — violations block CI or are prevented by hoo
 
 These rules are guidance for agents — violations are flagged but do not block CI.
 
-- **[doc-8-category-structure]** All project documentation must follow the unified 8-category structure under docs/. The canonical categories are: 01*product, 02_specs (architecture and specifications), 03_architecture (system design, diagrams, ADRs), 04_api, 05_operations, 06_engineering, 07_integrations, 08_reference. New documentation files must be placed in the appropriate category. If a repository uses legacy names (e.g. 02_architecture instead of 02_specs), respect the existing structure rather than renaming.
-  *(advisory · phase: implementation)\_
-- **[doc-adr-format]** Architecture Decision Records must follow the format: title, status (proposed/accepted/deprecated/superseded), context, decision, consequences. ADRs are numbered sequentially and stored in docs/03*architecture/02_decisions/ (or the repository's equivalent ADR directory). Every significant architectural decision must have an ADR.
-  *(advisory · phase: planning)\_
+- **[doc-8-category-structure]** All project documentation must follow the domain-driven structure under docs/. The canonical categories are: product (vision, strategy, personas), architecture/ (specs, decisions, diagrams), orchestration (guides, protocols), api, operations, engineering, integrations, reference. Additional directories: agents (catalog), handoffs (session handoffs), history (retrospectives). New documentation files must be placed in the appropriate category.
+  _(advisory · phase: implementation)_
+- **[doc-adr-format]** Architecture Decision Records must follow the format: title, status (proposed/accepted/deprecated/superseded), context, decision, consequences. ADRs are numbered sequentially and stored in docs/architecture/decisions/ (or the repository's equivalent ADR directory). Every significant architectural decision must have an ADR.
+  _(advisory · phase: planning)_
 - **[doc-changelog]** Maintain a CHANGELOG.md following Keep a Changelog format. Every user-facing change must be documented under the appropriate section (Added, Changed, Deprecated, Removed, Fixed, Security). The changelog is updated as part of the PR, not after merge.
   _(advisory · phase: ship)_
-- **[doc-api-spec]** All public APIs must have corresponding documentation in docs/04*api/. API endpoints must include method, path, request/response schema, authentication requirements, and example requests. Keep API docs in sync with implementation.
-  *(advisory · phase: implementation, ship)\_
+- **[doc-api-spec]** All public APIs must have corresponding documentation in docs/api/. API endpoints must include method, path, request/response schema, authentication requirements, and example requests. Keep API docs in sync with implementation.
+  _(advisory · phase: implementation, ship)_
 
 ## Quality Gates
 

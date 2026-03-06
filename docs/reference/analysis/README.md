@@ -1,7 +1,7 @@
 # Analysis and Implementation Docs
 
 Supporting analysis and implementation guides for the LLM decision engine
-defined in [PRD-001](../../01_product/PRD-001-llm-decision-engine.md).
+defined in [PRD-001](../../product/PRD-001-llm-decision-engine.md).
 
 ## Documents
 
@@ -13,6 +13,6 @@ defined in [PRD-001](../../01_product/PRD-001-llm-decision-engine.md).
 
 ## Related
 
-- [PRD-001: LLM Decision Engine](../../01_product/PRD-001-llm-decision-engine.md)
-- [PRD-004: Technical API Contracts](../../02_specs/PRD-004-technical-api-contracts.md)
+- [PRD-001: LLM Decision Engine](../../product/PRD-001-llm-decision-engine.md)
+- [PRD-004: Technical API Contracts](../../architecture/specs/PRD-004-technical-api-contracts.md)
 - Phase tracking issues: [#220](https://github.com/JustAGhosT/agentkit-forge/issues/220), [#221](https://github.com/JustAGhosT/agentkit-forge/issues/221), [#222](https://github.com/JustAGhosT/agentkit-forge/issues/222), [#223](https://github.com/JustAGhosT/agentkit-forge/issues/223), [#224](https://github.com/JustAGhosT/agentkit-forge/issues/224), [#225](https://github.com/JustAGhosT/agentkit-forge/issues/225)

@@ -66,7 +66,14 @@
       "Bash(ls *.md)",
       "Bash(head -3 \"c:/Users/smitj/repos/agentkit-forge/.agentkit/docs\"/*.md)",
       "Bash(grep -l \"\\\\.agentkit.*docs\" \"c:/Users/smitj/repos/agentkit-forge\"/*.md \"c:/Users/smitj/repos/agentkit-forge\"/.github/workflows/*.yml)",
-      "Bash(ls -d .agentkit/templates/docs/*/)"
+      "Bash(ls -d .agentkit/templates/docs/*/)",
+      "Bash(gh api repos/JustAGhosT/agentkit-forge/pulls/297/comments --jq '.[] | select\\(.pull_request_review_id == 3906292772\\) | {path: .path, original_line: .original_line, body: .body}')",
+      "Bash(echo \"GENERATED: $f\")",
+      "Bash(echo \"USER-OWNED: $f\")",
+      "Bash(done)",
+      "Bash(xargs grep -l \"product/.*architecture.*engineering\\\\|doc-8-category\\\\|8-Category Structure\")",
+      "Bash(xargs grep -l \"product/.*architecture.*engineering\\\\|8-Category Structure\")",
+      "Bash(pnpm -C .agentkit agentkit:sync --overwrite)"
     ],
     "additionalDirectories": [
       "c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\engineering"

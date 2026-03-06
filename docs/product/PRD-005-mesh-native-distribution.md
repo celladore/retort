@@ -52,7 +52,7 @@ timeline below.
 Unified, frictionless delivery of AgentKit Forge via npm, GitHub Action, and a
 GA PWA UI — accelerating onboarding and enabling configuration by any team
 member with minimal operational burden. This PRD codifies the delivery strategy
-approved in [ADR-07](../03_architecture/02_decisions/07-delivery-strategy.md).
+approved in [ADR-07](../architecture/decisions/07-delivery-strategy.md).
 
 ## Problem Statement
 
@@ -576,10 +576,10 @@ drift detection across AI tooling. This is a first-mover opportunity.
 
 ### Related Documents
 
-- [ADR-07: Delivery Strategy (Refined)](../03_architecture/02_decisions/07-delivery-strategy.md)
-- [ADR-01: Adopt AgentKit Forge](../03_architecture/02_decisions/01-adopt-agentkit-forge.md)
-- [ADR-03: Tooling Strategy](../03_architecture/02_decisions/03-tooling-strategy.md)
-- [Architecture Overview](../03_architecture/01_overview.md)
+- [ADR-07: Delivery Strategy (Refined)](../architecture/decisions/07-delivery-strategy.md)
+- [ADR-01: Adopt AgentKit Forge](../architecture/decisions/01-adopt-agentkit-forge.md)
+- [ADR-03: Tooling Strategy](../architecture/decisions/03-tooling-strategy.md)
+- [Architecture Overview](../architecture/01_overview.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)
 - [PRD-007: Adopter Autoupdate](PRD-007-adopter-autoupdate.md) — follow-on CLI capability
   for keeping adopter repositories current with the latest forge version;

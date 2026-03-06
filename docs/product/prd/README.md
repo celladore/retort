@@ -20,11 +20,11 @@ Where `{NNN}` is a zero-padded sequential number and `{slug}` is a lowercase-hyp
 
 ## Available PRDs
 
-| PRD                                                                           | Title                                     | Status |
-| ----------------------------------------------------------------------------- | ----------------------------------------- | ------ |
-| [PRD-001](../01_product/PRD-001-llm-decision-engine.md)                       | LLM Decision Engine                       | Active |
-| [PRD-002](../01_product/PRD-002-llm-selection-scorecard-guide.md)             | LLM Selection Scorecard Guide             | Active |
-| [PRD-003](../01_product/PRD-003-agent-to-llm-weighted-matrix-config-guide.md) | Agent-to-LLM Weighted Matrix Config Guide | Active |
+| PRD                                                                | Title                                     | Status |
+| ------------------------------------------------------------------ | ----------------------------------------- | ------ |
+| [PRD-001](../PRD-001-llm-decision-engine.md)                       | LLM Decision Engine                       | Active |
+| [PRD-002](../PRD-002-llm-selection-scorecard-guide.md)             | LLM Selection Scorecard Guide             | Active |
+| [PRD-003](../PRD-003-agent-to-llm-weighted-matrix-config-guide.md) | Agent-to-LLM Weighted Matrix Config Guide | Active |
 
 ## Creating a New PRD
 
@@ -35,6 +35,6 @@ Where `{NNN}` is a zero-padded sequential number and `{slug}` is a lowercase-hyp
 
 ## Related Documentation
 
-- [Product Overview](../01_product/README.md) — Product vision and strategy
-- [User Stories](../01_product/02_user_stories.md) — User stories derived from PRDs
-- [Roadmap](../01_product/03_roadmap.md) — Feature timeline and prioritization
+- [Product Overview](../README.md) — Product vision and strategy
+- [User Stories](../02_user_stories.md) — User stories derived from PRDs
+- [Roadmap](../03_roadmap.md) — Feature timeline and prioritization

@@ -48,7 +48,7 @@ non-developers.
 In Development — General Availability (GA) launch coordinated with
 CLI/GitHub Action strategy per
 [PRD-005](PRD-005-mesh-native-distribution.md) and
-[ADR-07](../03_architecture/02_decisions/07-delivery-strategy.md).
+[ADR-07](../architecture/decisions/07-delivery-strategy.md).
 
 ## TL;DR
 
@@ -626,7 +626,7 @@ first-mover opportunity for non-developer personas.
 
 - [PRD-005: Mesh-Native Distribution](PRD-005-mesh-native-distribution.md) —
   parent PRD covering the full hybrid delivery strategy
-- [ADR-07: Delivery Strategy (Refined)](../03_architecture/02_decisions/07-delivery-strategy.md) —
+- [ADR-07: Delivery Strategy (Refined)](../architecture/decisions/07-delivery-strategy.md) —
   architectural decision record
-- [ADR-01: Adopt AgentKit Forge](../03_architecture/02_decisions/01-adopt-agentkit-forge.md)
+- [ADR-01: Adopt AgentKit Forge](../architecture/decisions/01-adopt-agentkit-forge.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)

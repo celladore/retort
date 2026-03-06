@@ -21,7 +21,7 @@ Add the following entry under the **Workflow Commands** section (after `project-
     Produces a structured gap report with prioritized remediation items.
   flags:
     - name: --scope
-      description: 'Limit audit to specific doc categories (e.g., 04_api, 03_architecture)'
+      description: 'Limit audit to specific doc categories (e.g., api, architecture)'
       type: string
       default: null
       required: false

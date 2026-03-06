@@ -20,14 +20,14 @@ The full contributing guide is available at:
 ### Getting Started
 
 1. Fork and clone the repository.
-2. Follow the [Development Setup](../06_engineering/01_setup.md) guide.
+2. Follow the [Development Setup](../engineering/01_setup.md) guide.
 3. Create a feature branch from `main`.
 
 ### Making Changes
 
-1. Write code following the [Coding Standards](../06_engineering/02_coding_standards.md).
-2. Add tests as described in the [Testing Guide](../06_engineering/03_testing.md).
-3. Follow the [Git Workflow](../06_engineering/04_git_workflow.md).
+1. Write code following the [Coding Standards](../engineering/02_coding_standards.md).
+2. Add tests as described in the [Testing Guide](../engineering/03_testing.md).
+3. Follow the [Git Workflow](../engineering/04_git_workflow.md).
 
 ### Submitting a Pull Request
 
@@ -42,5 +42,5 @@ The full contributing guide is available at:
 ## References
 
 - [CONTRIBUTING.md (root)](../../CONTRIBUTING.md)
-- [Git Workflow](../06_engineering/04_git_workflow.md)
-- [Coding Standards](../06_engineering/02_coding_standards.md)
+- [Git Workflow](../engineering/04_git_workflow.md)
+- [Coding Standards](../engineering/02_coding_standards.md)

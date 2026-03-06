@@ -41,6 +41,8 @@
   "_agentkit_theme": {
     "brand": "AgentKit Forge",
     "mode": "both",
+    "scheme": "dark",
+    "tier": "full",
     "version": "1.0.0"
   },
   "workbench.colorTheme": "Default Dark Modern"

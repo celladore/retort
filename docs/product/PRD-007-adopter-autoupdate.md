@@ -35,7 +35,7 @@ on a supported AgentKit Forge version without manual intervention.
 
 P1 — High. Required to close the adoption lifecycle loop and prevent version
 drift across the growing adopter base. Complements and depends on the delivery
-strategy defined in [ADR-07](../03_architecture/02_decisions/07-delivery-strategy.md)
+strategy defined in [ADR-07](../architecture/decisions/07-delivery-strategy.md)
 and [PRD-005](./PRD-005-mesh-native-distribution.md).
 
 ## License Tier
@@ -311,13 +311,13 @@ agentkit-forge update --check
 
 ## Dependencies and Related Issues
 
-| Issue                                                             | Title                                                  | Relationship                                                          |
-| ----------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
-| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)   | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
-| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194)   | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
-| [PRD-005](./PRD-005-mesh-native-distribution.md)                  | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
-| [ADR-07](../03_architecture/02_decisions/07-delivery-strategy.md) | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
-| [#241](https://github.com/JustAGhosT/agentkit-forge/issues/241)   | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
+| Issue                                                           | Title                                                  | Relationship                                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
+| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
+| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
+| [PRD-005](./PRD-005-mesh-native-distribution.md)                | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
+| [ADR-07](../architecture/decisions/07-delivery-strategy.md)     | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
+| [#241](https://github.com/JustAGhosT/agentkit-forge/issues/241) | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
 
 ## Milestone
 
@@ -344,7 +344,7 @@ issues to include in this milestone:
 
 ## References
 
-- [ADR-07: Delivery Strategy](../03_architecture/02_decisions/07-delivery-strategy.md)
+- [ADR-07: Delivery Strategy](../architecture/decisions/07-delivery-strategy.md)
 - [PRD-005: Mesh-Native Distribution](./PRD-005-mesh-native-distribution.md)
 - [PRD-006: PWA/Desktop Visual Configuration](./PRD-006-pwa-desktop-visual-configuration.md)
 - [Issue #196: CLI Toolchain Enforcement](https://github.com/JustAGhosT/agentkit-forge/issues/196)

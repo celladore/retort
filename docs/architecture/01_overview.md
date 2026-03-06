@@ -19,7 +19,7 @@
 
 <!-- Link to or embed a C4 Level 1 diagram from 01_diagrams/. -->
 
-See [diagrams/](./01_diagrams/) for visual representations.
+See [diagrams/](./diagrams/) for visual representations.
 
 ## High-Level Components
 
@@ -43,10 +43,10 @@ See [diagrams/](./01_diagrams/) for visual representations.
 ## Decision Records
 
 Architecture Decision Records (ADRs) are stored in
-[02_decisions/](./02_decisions/). See
-[ADR-01](./02_decisions/01-adopt-agentkit-forge.md) for the foundational decision.
+[decisions/](./decisions/). See
+[ADR-01](./decisions/01-adopt-agentkit-forge.md) for the foundational decision.
 
 ## References
 
-- [Technical Spec](../02_specs/02_technical_spec.md)
-- [Deployment Guide](../05_operations/01_deployment.md)
+- [Technical Spec](../architecture/specs/02_technical_spec.md)
+- [Deployment Guide](../operations/01_deployment.md)
