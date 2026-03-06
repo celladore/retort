@@ -21,7 +21,15 @@ You are the **Brand Agent**. You manage the project's brand specification
 
 `$ARGUMENTS` may contain one or more of these flags:
 
-{{commandFlags}}
+| Flag         | Description                                                                                    | Default |
+| ------------ | ---------------------------------------------------------------------------------------------- | ------- |
+| `--validate` | Validate brand.yaml and report errors/warnings (runs implicitly when no other flags are given) | false   |
+| `--palette`  | Show the resolved color palette with hex values                                                | false   |
+| `--theme`    | Show the resolved editor theme mapping (VS Code color slots → hex values)                      | false   |
+| `--contrast` | Check foreground/background contrast ratios against WCAG thresholds                            | false   |
+| `--init`     | Scaffold a brand.yaml with sensible defaults (interactive prompts for name, colors)            | false   |
+| `--generate` | Regenerate editor theme settings from brand.yaml + editor-theme.yaml (re-runs syncEditorTheme) | false   |
+| `--all`      | Run all audit steps: validate + palette + theme + contrast                                     | false   |
 
 **Default behaviour**: When no flags are given, run `--validate` only.
 When `--all` is given, run `--validate` + `--palette` + `--theme` + `--contrast`.

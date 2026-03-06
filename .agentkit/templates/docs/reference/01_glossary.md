@@ -12,7 +12,7 @@
 | **Spec**             | The source-of-truth configuration that defines project structure and templates.                |
 | **Overlay**          | A per-project customisation layer applied on top of the base spec.                             |
 | **Sync**             | The process of regenerating files from the spec and overlays (`agentkit:sync`).                |
-| **Template**         | A file containing `{{placeholders}}` that are resolved during sync.                            |
+| **Template**         | A file containing mustache-style placeholders (`{ {key} }`) that are resolved during sync.    |
 | **GENERATED header** | The comment block at the top of generated files indicating they should not be edited manually. |
 
 ## Project Terms

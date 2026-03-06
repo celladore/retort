@@ -775,7 +775,8 @@ async function syncClaudeCommands(
     if (cmdSpec && !isItemFeatureEnabled(cmdSpec, vars)) continue;
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);
-    const rendered = renderTemplate(content, vars, srcFile);
+    const cmdVars = cmdSpec ? buildCommandVars(cmdSpec, vars) : vars;
+    const rendered = renderTemplate(content, cmdVars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
     await writeOutput(join(tmpDir, '.claude', 'commands', fname), withHeader);
   }

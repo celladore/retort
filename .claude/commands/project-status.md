@@ -47,6 +47,11 @@ and note "cached at <computedAt>" in the output. Otherwise compute from raw data
 
 ## Output Format
 
+| **Flags:** | Flag                                      | Description | Default |
+| ---------- | ----------------------------------------- | ----------- | ------- |
+| `--format` | Output format: markdown (default) or json | markdown    |
+| `--team`   | Filter to a specific team                 | —           |
+
 Produce markdown (default) or JSON (with `--format json`) with these sections:
 
 ```markdown

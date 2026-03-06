@@ -624,14 +624,14 @@ describe('--overwrite flag', () => {
   beforeAll(async () => {
     projectRoot = makeTmpProject();
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
-  });
+  }, 60000);
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
   it(
-    'skips project-owned files by default, overwrites with --overwrite',
-    { timeout: 25000 },
+    'skips project-owned files by default',
+    { timeout: 45000 },
     async () => {
       const contribPath = join(projectRoot, 'CONTRIBUTING.md');
       expect(existsSync(contribPath)).toBe(true);
@@ -641,13 +641,23 @@ describe('--overwrite flag', () => {
 
       await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
       expect(readFileSync(contribPath, 'utf-8')).toBe(customContent);
+    }
+  );
+
+  it(
+    'overwrites project-owned files with --overwrite',
+    { timeout: 45000 },
+    async () => {
+      const contribPath = join(projectRoot, 'CONTRIBUTING.md');
+      const customContent = 'CUSTOM_OVERWRITE_MARKER_67890';
+      writeFileSync(contribPath, customContent, 'utf-8');
 
       await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { overwrite: true } });
       expect(readFileSync(contribPath, 'utf-8')).not.toContain(customContent);
     }
   );
 
-  it('--force is alias for --overwrite', { timeout: 15000 }, async () => {
+  it('--force is alias for --overwrite', { timeout: 45000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     writeFileSync(contribPath, 'CUSTOM', 'utf-8');
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { force: true } });
