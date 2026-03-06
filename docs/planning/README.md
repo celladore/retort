@@ -65,6 +65,7 @@ Items related to AgentKit Forge framework structure, template organization, and 
 | FW-003 | Documentation site generation — wiki & static site options   | P2       | not-started | [framework/docs-wiki-generation.md](framework/docs-wiki-generation.md)                     | None                                 |
 | FW-004 | Planning agent & automated planning workflow                 | P2       | not-started | [framework/planning-agent-automation.md](framework/planning-agent-automation.md)           | None                                 |
 | FW-005 | Dependency graph integration with orchestrator & agent teams | P2       | not-started | [framework/dependency-graph-orchestration.md](framework/dependency-graph-orchestration.md) | FW-004 (optional)                    |
+| FW-006 | Structured sync logging (info/warn/error levels)             | P2       | not-started | [framework/structured-sync-logging.md](framework/structured-sync-logging.md)               | None                                 |
 
 ## Completed / Archived
 
@@ -96,6 +97,7 @@ FW-002 (P2) ──────────────────────�
 FW-003 (P2) ────────────────────────────────── standalone
 FW-004 (P2) ────────────────────────────────── standalone
 FW-005 (P2) ──── optional dep on ──── FW-004
+FW-006 (P2) ────────────────────────────────── standalone
 ```
 
 ## Integration Notes
