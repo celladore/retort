@@ -68,8 +68,6 @@
       "Bash(grep -l \"\\\\.agentkit.*docs\" \"c:/Users/smitj/repos/agentkit-forge\"/*.md \"c:/Users/smitj/repos/agentkit-forge\"/.github/workflows/*.yml)",
       "Bash(ls -d .agentkit/templates/docs/*/)"
     ],
-    "additionalDirectories": [
-      "c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\engineering"
-    ]
+    "additionalDirectories": ["c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\engineering"]
   }
 }

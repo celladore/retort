@@ -81,16 +81,16 @@ Affected `.github/prompts/*` files:
 
 ## 5) Docs README merge-add/merge-add conflicts
 
-| Path                             | Proposed Decision | Motivation                                                           |
-| -------------------------------- | ----------------- | -------------------------------------------------------------------- |
-| `docs/product/README.md`      | KEEP_THEIRS       | Generated index file; prefer latest upstream generation baseline.    |
-| `docs/architecture/specs/README.md`        | KEEP_THEIRS       | Generated index file; upstream reflects current structure migration. |
-| `docs/architecture/README.md` | KEEP_THEIRS       | Generated index file and likely path-normalized upstream.            |
-| `docs/api/README.md`          | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/operations/README.md`   | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/engineering/README.md`  | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/integrations/README.md` | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/reference/README.md`    | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| Path                                | Proposed Decision | Motivation                                                           |
+| ----------------------------------- | ----------------- | -------------------------------------------------------------------- |
+| `docs/product/README.md`            | KEEP_THEIRS       | Generated index file; prefer latest upstream generation baseline.    |
+| `docs/architecture/specs/README.md` | KEEP_THEIRS       | Generated index file; upstream reflects current structure migration. |
+| `docs/architecture/README.md`       | KEEP_THEIRS       | Generated index file and likely path-normalized upstream.            |
+| `docs/api/README.md`                | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/operations/README.md`         | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/engineering/README.md`        | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/integrations/README.md`       | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/reference/README.md`          | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
 
 ## 6) Special note on `.agentkit/spec/docs.yaml`
 

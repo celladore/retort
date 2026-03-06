@@ -4,10 +4,10 @@ Completed, duplicate, or superseded planning items. Originals preserved for audi
 
 ## Completed Items
 
-| File | Original Location | Status | Notes |
-| ---- | ----------------- | ------ | ----- |
-| [finops-md-verification.md](finops-md-verification.md) | `docs/reference/issues/` | Completed | Content verified correct; no action needed |
-| [cost-budget-flag-duplicate.md](cost-budget-flag-duplicate.md) | `docs/reference/issues/` | Duplicate | Same scope as CG-002 in planning index |
+| File                                                           | Original Location        | Status    | Notes                                      |
+| -------------------------------------------------------------- | ------------------------ | --------- | ------------------------------------------ |
+| [finops-md-verification.md](finops-md-verification.md)         | `docs/reference/issues/` | Completed | Content verified correct; no action needed |
+| [cost-budget-flag-duplicate.md](cost-budget-flag-duplicate.md) | `docs/reference/issues/` | Duplicate | Same scope as CG-002 in planning index     |
 
 ## Original Issue Files
 
