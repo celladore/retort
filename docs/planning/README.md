@@ -54,6 +54,18 @@ Items scoped to agentkit-forge cost tooling.
 | CG-002 | Expose --budget flag in /cost command template | P2 | partial | [cost-governance/cost-budget-flag.md](cost-governance/cost-budget-flag.md) | Template protection (human maintainer edit) |
 | CG-003 | Add cost review gate to handoff chains | P2 | not-started | [cost-governance/cost-review-handoff.md](cost-governance/cost-review-handoff.md) | Interim: use data team; long-term: FO-004 |
 
+## Framework & Templates
+
+Items related to AgentKit Forge framework structure, template organization, and tooling.
+
+| ID | Title | Priority | Status | Plan File | Blockers |
+|----|-------|----------|--------|-----------|----------|
+| FW-001 | Template directory organization & restructuring | P3 | not-started | [framework/template-organization.md](framework/template-organization.md) | Requires engine changes (maintainer) |
+| FW-002 | Audit and refactor all scripts and configuration files | P2 | not-started | [framework/scripts-config-refactor.md](framework/scripts-config-refactor.md) | None |
+| FW-003 | Documentation site generation — wiki & static site options | P2 | not-started | [framework/docs-wiki-generation.md](framework/docs-wiki-generation.md) | None |
+| FW-004 | Planning agent & automated planning workflow | P2 | not-started | [framework/planning-agent-automation.md](framework/planning-agent-automation.md) | None |
+| FW-005 | Dependency graph integration with orchestrator & agent teams | P2 | not-started | [framework/dependency-graph-orchestration.md](framework/dependency-graph-orchestration.md) | FW-004 (optional) |
+
 ## Completed / Archived
 
 | ID | Title | Status | Archive Location |
@@ -79,6 +91,11 @@ FO-001 (P0) ──────────────────────�
 FO-002 (P1) ──── depends on ──── FO-001
 FO-003 (P2) ──── depends on ──── FO-001, FO-002
 FO-004 (P3) ──── depends on ──── FO-001, FO-002, FO-003
+FW-001 (P3) ────────────────────────────────── requires engine changes (maintainer)
+FW-002 (P2) ────────────────────────────────── standalone
+FW-003 (P2) ────────────────────────────────── standalone
+FW-004 (P2) ────────────────────────────────── standalone
+FW-005 (P2) ──── optional dep on ──── FW-004
 ```
 
 ## Integration Notes

@@ -37,7 +37,7 @@ Once `gh` access is restored, sync local issue docs to GitHub Issues:
 ./scripts/sync-issues.sh --apply          # Create GitHub Issues and mark synced
 ```
 
-See [ADR-08](../../03_architecture/02_decisions/08-issue-sync-strategy.md) for
+See [ADR-08](../../architecture/decisions/08-issue-sync-strategy.md) for
 the sync strategy and automation decisions.
 
 See [docs/history/README.md](../README.md) for naming conventions and usage.

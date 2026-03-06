@@ -64,4 +64,4 @@ creation at end-of-session (non-blocking — never gates delivery):
 ./scripts/create-doc.ps1 implementation "Feature Name" <pr-number>
 ```
 
-See [docs/engineering/06_pr_documentation.md](../06_engineering/06_pr_documentation.md) for the full documentation strategy.
+See [docs/engineering/06_pr_documentation.md](../engineering/06_pr_documentation.md) for the full documentation strategy.
