@@ -27,7 +27,7 @@ npm install -g pnpm
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/agentkit-forge.git
+git clone https://github.com/JustAGhosT/agentkit-forge.git
 cd agentkit-forge
 ```
 

@@ -32,10 +32,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- e2e/\*\*
-- playwright/\*\*
-- tests/integration/\*\*
-- tests/e2e/\*\*
+- e2e/**
+- playwright/**
+- tests/integration/**
+- tests/e2e/**
 - docker-compose.test.yml
 
 ## Responsibilities

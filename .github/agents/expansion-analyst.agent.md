@@ -32,7 +32,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- \*_/_
+- **/*
 
 ## Responsibilities
 

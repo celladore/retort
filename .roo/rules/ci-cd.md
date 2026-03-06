@@ -11,25 +11,27 @@ Conventions for continuous integration and deployment pipelines, quality gates, 
 
 ## Applies To
 
-.github/workflows/\*_
-\*\*/_.yml \*_/_.yaml
+.github/workflows/**
+**/*.yml
+**/*.yaml
 Dockerfile*
 docker-compose*
 
 ## Enforcement Rules
 
 - **[ci-quality-gates]** All PRs must pass the following quality gates before merge: lint, typecheck, unit tests, integration tests, spec validation, and drift check. Use the /check command to run all gates locally. Never skip CI checks or add [skip ci] to bypass validation.
-  _(enforcement · phase: validation)_
+ _(enforcement · phase: validation)_
 - **[ci-no-skip-hooks]** Never use --no-verify to skip git hooks or pre-commit checks. If a hook fails, fix the underlying issue. Hooks exist to catch problems early — bypassing them defeats the purpose.
-  _(enforcement)_
-- **[ci-no-secrets-in-workflows]** Never hardcode secrets in workflow files. Use GitHub Secrets or environment-scoped secrets. Reference secrets via the secrets context (secrets.MY*SECRET), never as plain text.
-  *(enforcement)\_
+ _(enforcement)_
+- **[ci-no-secrets-in-workflows]** Never hardcode secrets in workflow files. Use GitHub Secrets or environment-scoped secrets. Reference secrets via the secrets context (secrets.MY_SECRET), never as plain text.
+ _(enforcement)_
 - **[ci-reproducible-builds]** CI builds must be reproducible. Use frozen lockfiles (--frozen-lockfile for pnpm, --ci for npm). Pin Node.js and other runtime versions. Do not rely on latest tags for base images — pin specific versions.
-  _(enforcement · phase: validation)_
+ _(enforcement · phase: validation)_
 
 ## Advisory Rules
 
 - **[ci-pin-actions]** Pin all GitHub Actions to full commit SHAs, not tags or branch references. This prevents supply chain attacks via tag mutation. Renovate is configured to manage action version updates via PR.
-  _(advisory · phase: implementation)_
+ _(advisory · phase: implementation)_
 - **[ci-fail-fast]** Configure CI to fail fast on the first error in lint, typecheck, and test stages. Do not continue running expensive test suites after a compilation or lint failure.
-  _(advisory · phase: validation)_
+ _(advisory · phase: validation)_
+

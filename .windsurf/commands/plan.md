@@ -45,3 +45,4 @@ You are the **Planning Agent**. Produce detailed, structured implementation plan
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
+

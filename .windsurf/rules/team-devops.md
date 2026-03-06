@@ -5,7 +5,7 @@
 # Team: DEVOPS
 
 **Focus**: CI/CD, pipelines, automation
-**Scope**: .github/workflows/**, scripts/**, docker/**, **/Dockerfile\*
+**Scope**: .github/workflows/**, scripts/**, docker/**, **/Dockerfile*
 
 ## Persona
 

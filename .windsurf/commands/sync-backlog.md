@@ -81,3 +81,4 @@ Route issues to teams by area: `backend`→team-backend, `frontend`→team-front
 **Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
 **Severity (bugs):** critical · high · medium · low
 **Escalation:** severity=critical + area in [security,infra,backend] → cc security, devops; impact=all users + P0 → cc product
+

@@ -64,7 +64,7 @@
 ### Sync produces unexpected output
 
 - Run `DEBUG=1 agentkit sync` for verbose logging
-- Check for unresolved placeholder warnings (mustache-style `{ { key } }` tokens)
+- Check for unresolved placeholder warnings (mustache-style <code>&#123;&#123;key&#125;&#125;</code> tokens)
 - Verify overlay directory matches `.agentkit-repo` marker
 
 ### Validate reports permission issues

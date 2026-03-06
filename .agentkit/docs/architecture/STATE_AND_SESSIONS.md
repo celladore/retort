@@ -61,30 +61,31 @@ A typical `orchestrator.json` looks like this:
       "notes": "Task TASK-001: Create rate limit schema",
       "last_updated": "2026-02-23T14:20:00.000Z"
     },
-    "T4-infra": { "status": "idle", "notes": "" },
-    "T5-devops": { "status": "idle", "notes": "" },
-    "T6-testing": { "status": "idle", "notes": "" },
-    "T7-security": { "status": "idle", "notes": "" },
-    "T8-docs": { "status": "idle", "notes": "" },
-    "T9-product": { "status": "idle", "notes": "" },
-    "T10-quality": { "status": "idle", "notes": "" }
+      "T4-infra": { "status": "idle", "notes": "" },
+      "T5-devops": { "status": "idle", "notes": "" },
+      "T6-testing": { "status": "idle", "notes": "" },
+      "T7-security": { "status": "idle", "notes": "" },
+      "T8-docs": { "status": "idle", "notes": "" },
+      "T9-product": { "status": "idle", "notes": "" },
+      "T10-quality": { "status": "idle", "notes": "" }
   },
   "todo_items": [
     {
       "id": "TASK-002",
       "title": "Add rate limit to auth endpoints",
-      "team": "backend",
+       "team": "T1-backend",
       "priority": "P1",
       "status": "in-progress"
     },
     {
       "id": "TASK-003",
       "title": "Write rate limit unit tests",
-      "team": "testing",
+       "team": "T6-testing",
       "priority": "P1",
       "status": "pending"
     }
   ],
+    // Note: team_progress uses full team IDs as keys (e.g., "T1-backend"), while todo_items.team uses full team IDs for consistency.
   "recent_results": [
     {
       "action": "task_complete",

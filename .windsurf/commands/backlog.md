@@ -26,14 +26,14 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag         | Description                                                        | Default  |
-| ------------ | ------------------------------------------------------------------ | -------- |
-| `--format`   | Output format: table, json, yaml, csv                              | table    |
-| `--team`     | Filter by team                                                     | —        |
-| `--priority` | Filter by priority (P0, P1, P2, P3)                                | —        |
-| `--source`   | Filter by source (github, linear, discovery, todo, review, manual) | —        |
-| `--status`   | Filter by status (open, in-progress, completed, blocked)           | —        |
-| `--sort`     | Sort by field (priority, team, source, updated)                    | priority |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--format` | Output format: table, json, yaml, csv | table |
+| `--team` | Filter by team | — |
+| `--priority` | Filter by priority (P0, P1, P2, P3) | — |
+| `--source` | Filter by source (github, linear, discovery, todo, review, manual) | — |
+| `--status` | Filter by status (open, in-progress, completed, blocked) | — |
+| `--sort` | Sort by field (priority, team, source, updated) | priority |
 
 ## Implementation
 
@@ -45,3 +45,4 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/back
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
+
