@@ -150,4 +150,3 @@ jobs:
             echo "Checking $f..."
             SPEC_FILE="$f" node --input-type=module -e "import yaml from 'js-yaml'; import fs from 'fs'; yaml.load(fs.readFileSync(process.env.SPEC_FILE,'utf8'));"
           done
-

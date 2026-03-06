@@ -253,30 +253,30 @@ git commit -m "feat: adopt agentkit-forge for AI orchestration"
 
 Comprehensive guides for using AgentKit Forge:
 
-| Guide                                                                  | Description                                                         |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| **[Quick Start](.agentkit/docs/getting-started/QUICK_START.md)**                       | Your first 15 minutes — setup, first session, command overview      |
-| **[Command Reference](.agentkit/docs/guides/COMMAND_REFERENCE.md)**                    | All 23 commands with examples, flags, and expected outputs          |
-| **[Workflows](.agentkit/docs/guides/WORKFLOWS.md)**                                    | Worked examples: feature dev, bug fix, project audit, multi-session |
-| **[Team Guide](.agentkit/docs/guides/TEAM_GUIDE.md)**                                  | When to use which team, decision matrix, handoff patterns           |
-| **[State & Sessions](.agentkit/docs/architecture/STATE_AND_SESSIONS.md)**               | Orchestrator state, events log, session continuity, lock files      |
-| **[Customization](.agentkit/docs/configuration/CUSTOMIZATION.md)**                      | Overlays, settings reference, adding commands/rules/teams           |
-| **[Troubleshooting](.agentkit/docs/reference/TROUBLESHOOTING.md)**                      | Common errors, recovery procedures, FAQ                             |
-| **[Onboarding](.agentkit/docs/getting-started/ONBOARDING.md)**                          | Full adoption guide with CI integration                             |
-| **[Cost Tracking](.agentkit/docs/architecture/COST_TRACKING.md)**                       | Session tracking, usage reports, optimization tips                  |
-| **[AGENTS.md Guide](.agentkit/docs/configuration/AGENTS_MD_GUIDE.md)**                  | What AGENTS.md is, which tools read it, best practices              |
-| **[project.yaml Reference](.agentkit/docs/configuration/PROJECT_YAML_REFERENCE.md)**    | Full schema with examples for every field                           |
-| **[Migration Guide](.agentkit/docs/reference/MIGRATION_GUIDE.md)**                      | Upgrading from older versions of AgentKit Forge                     |
-| **[Architecture](.agentkit/docs/architecture/ARCHITECTURE.md)**                         | Sync engine, template rendering, CLI, orchestrator internals        |
-| **[Tools](.agentkit/docs/configuration/TOOLS.md)**                                      | All 11 render targets + AGENTS.md-only tools                        |
-| **[Security Model](.agentkit/docs/architecture/SECURITY_MODEL.md)**                     | Permission model, secret scanning, path traversal protection        |
-| **[MCP/A2A Guide](.agentkit/docs/configuration/MCP_A2A_GUIDE.md)**                      | Model Context Protocol and Agent-to-Agent integration               |
-| **[CLI Installation](.agentkit/docs/getting-started/CLI_INSTALLATION.md)**              | Installing and configuring the CLI                                  |
-| **[Agents vs Teams](.agentkit/docs/guides/AGENTS_VS_TEAMS.md)**                         | When to use agents vs teams, comparison guide                       |
-| **[Agents Reference](.agentkit/docs/guides/AGENTS_REFERENCE.md)**                       | All 19 agent personas — roles, scopes, conventions, dependencies    |
-| **[Roadmap](.agentkit/docs/reference/ROADMAP.md)**                                      | Planned features and development roadmap                            |
-| **[PRD Library](docs/prd/README.md)**                                                   | Product requirement docs and LLM-mapping PRD examples               |
-| **[Documentation Audit](.agentkit/docs/reference/DOCUMENTATION_AUDIT.md)**              | Gap analysis and documentation completeness report                  |
+| Guide                                                                                | Description                                                         |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| **[Quick Start](.agentkit/docs/getting-started/QUICK_START.md)**                     | Your first 15 minutes — setup, first session, command overview      |
+| **[Command Reference](.agentkit/docs/guides/COMMAND_REFERENCE.md)**                  | All 23 commands with examples, flags, and expected outputs          |
+| **[Workflows](.agentkit/docs/guides/WORKFLOWS.md)**                                  | Worked examples: feature dev, bug fix, project audit, multi-session |
+| **[Team Guide](.agentkit/docs/guides/TEAM_GUIDE.md)**                                | When to use which team, decision matrix, handoff patterns           |
+| **[State & Sessions](.agentkit/docs/architecture/STATE_AND_SESSIONS.md)**            | Orchestrator state, events log, session continuity, lock files      |
+| **[Customization](.agentkit/docs/configuration/CUSTOMIZATION.md)**                   | Overlays, settings reference, adding commands/rules/teams           |
+| **[Troubleshooting](.agentkit/docs/reference/TROUBLESHOOTING.md)**                   | Common errors, recovery procedures, FAQ                             |
+| **[Onboarding](.agentkit/docs/getting-started/ONBOARDING.md)**                       | Full adoption guide with CI integration                             |
+| **[Cost Tracking](.agentkit/docs/architecture/COST_TRACKING.md)**                    | Session tracking, usage reports, optimization tips                  |
+| **[AGENTS.md Guide](.agentkit/docs/configuration/AGENTS_MD_GUIDE.md)**               | What AGENTS.md is, which tools read it, best practices              |
+| **[project.yaml Reference](.agentkit/docs/configuration/PROJECT_YAML_REFERENCE.md)** | Full schema with examples for every field                           |
+| **[Migration Guide](.agentkit/docs/reference/MIGRATION_GUIDE.md)**                   | Upgrading from older versions of AgentKit Forge                     |
+| **[Architecture](.agentkit/docs/architecture/ARCHITECTURE.md)**                      | Sync engine, template rendering, CLI, orchestrator internals        |
+| **[Tools](.agentkit/docs/configuration/TOOLS.md)**                                   | All 11 render targets + AGENTS.md-only tools                        |
+| **[Security Model](.agentkit/docs/architecture/SECURITY_MODEL.md)**                  | Permission model, secret scanning, path traversal protection        |
+| **[MCP/A2A Guide](.agentkit/docs/configuration/MCP_A2A_GUIDE.md)**                   | Model Context Protocol and Agent-to-Agent integration               |
+| **[CLI Installation](.agentkit/docs/getting-started/CLI_INSTALLATION.md)**           | Installing and configuring the CLI                                  |
+| **[Agents vs Teams](.agentkit/docs/guides/AGENTS_VS_TEAMS.md)**                      | When to use agents vs teams, comparison guide                       |
+| **[Agents Reference](.agentkit/docs/guides/AGENTS_REFERENCE.md)**                    | All 19 agent personas — roles, scopes, conventions, dependencies    |
+| **[Roadmap](.agentkit/docs/reference/ROADMAP.md)**                                   | Planned features and development roadmap                            |
+| **[PRD Library](docs/product/prd/)**                                                 | Product requirement docs and LLM-mapping PRD examples               |
+| **[Documentation Audit](.agentkit/docs/reference/DOCUMENTATION_AUDIT.md)**           | Gap analysis and documentation completeness report                  |
 
 ---
 

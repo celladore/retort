@@ -1,6 +1,6 @@
 name: Quality Lint
 
-# Runs markdown lint and prettier checks on PRs.
+# Runs markdown lint checks on PRs. Prettier is validated in the test suite (ci.yml).
 # Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
 # Split from ci.yml so branch protection can enforce separately per branch.
 
