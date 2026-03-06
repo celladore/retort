@@ -13,17 +13,14 @@ These rules govern project documentation, ADRs, and generated file handling.
 
 All documentation lives in `docs/` under these categories:
 
-<<<<<<< HEAD
-=======
->>>>>>> e41030309a55073b2705ad86e718f3710c4cabe4
- `product/` — Product vision, strategy, personas, metrics
- `architecture/` — Specs, ADRs, diagrams, tech stack decisions
- `orchestration/` — Orchestration guide, PM guide, protocols
- `api/` — API reference, authentication, versioning
- `operations/` — Deployment, monitoring, SLAs
- `engineering/` — Setup, coding standards, testing, contributing
- `integrations/` — External services, third-party connections
- `reference/` — Glossary, acronyms, FAQ, tool config
+- `product/` — Product vision, strategy, personas, metrics
+- `architecture/` — Specs, ADRs, diagrams, tech stack decisions
+- `orchestration/` — Orchestration guide, PM guide, protocols
+- `api/` — API reference, authentication, versioning
+- `operations/` — Deployment, monitoring, SLAs
+- `engineering/` — Setup, coding standards, testing, contributing
+- `integrations/` — External services, third-party connections
+- `reference/` — Glossary, acronyms, FAQ, tool config
 
 ## Architecture Decision Records (ADRs)
 

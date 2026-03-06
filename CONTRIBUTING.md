@@ -21,7 +21,7 @@
 1. Fork and clone the repository
 2. Install dependencies for your stack (see `agentkit discover` output)
 3. Run `agentkit sync` to generate AI tool configurations
-4. Create a feature branch from `main`
+4. Create a feature branch from `develop` (or `main` for hotfixes)
 
 ---
 
