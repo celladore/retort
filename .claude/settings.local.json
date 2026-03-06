@@ -69,7 +69,7 @@
       "Bash(ls -d .agentkit/templates/docs/*/)"
     ],
     "additionalDirectories": [
-      "c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\06_engineering"
+      "c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\engineering"
     ]
   }
 }

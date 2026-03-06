@@ -86,7 +86,7 @@ categories:
 
   - id: security
     name: Security
-    path: 'docs/engineering/'
+    path: 'docs/security/'
     description: >
       Security documentation including threat models, compliance
       requirements, incident response procedures, and audit logs.
@@ -98,6 +98,10 @@ categories:
       - 'audit-log.md — Security audit history and findings'
       - 'secrets-management.md — Secrets management practices and tooling'
 
+  # NOTE: SLA content is logically part of operations. This category exists
+  # to separate operational SLA/on-call docs from deployment/CI-CD docs.
+  # Both share docs/operations/ — the sync engine handles this correctly
+  # because categories define logical grouping, not filesystem output.
   - id: operations-sla
     name: Operations SLA
     path: 'docs/operations/'
