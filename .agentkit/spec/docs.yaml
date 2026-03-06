@@ -13,7 +13,7 @@
 # =============================================================================
 
 categories:
-  - id: '01_product'
+  - id: product
     name: Product
     path: 'docs/product/'
     description: >
@@ -27,7 +27,7 @@ categories:
       - 'competitive-analysis.md — Competitive landscape and differentiation'
       - 'metrics.md — Key product metrics and success criteria'
 
-  - id: '02_architecture'
+  - id: architecture
     name: Architecture
     path: 'docs/architecture/'
     description: >
@@ -41,7 +41,7 @@ categories:
       - 'tech-stack.md — Technology choices and rationale'
       - 'ADR/ — Architecture Decision Records (see ADR numbering below)'
 
-  - id: '03_api'
+  - id: api
     name: API
     path: 'docs/api/'
     description: >
@@ -55,8 +55,8 @@ categories:
       - 'errors.md — Error response format and error code catalog'
       - 'openapi/ — OpenAPI specification files'
 
-  - id: '04_development'
-    name: Development
+  - id: engineering
+    name: Engineering
     path: 'docs/engineering/'
     description: >
       Developer guides, setup instructions, coding standards, and
@@ -70,8 +70,8 @@ categories:
       - 'debugging.md — Debugging tools, techniques, and common issues'
       - 'contributing.md — Contribution guidelines and code review process'
 
-  - id: '05_deployment'
-    name: Deployment
+  - id: operations
+    name: Operations
     path: 'docs/operations/'
     description: >
       Deployment procedures, environment configurations, CI/CD pipeline
@@ -84,7 +84,7 @@ categories:
       - 'monitoring.md — Monitoring, alerting, and observability setup'
       - 'runbooks/ — Operational runbooks for common scenarios'
 
-  - id: '06_security'
+  - id: security
     name: Security
     path: 'docs/engineering/'
     description: >
@@ -98,8 +98,8 @@ categories:
       - 'audit-log.md — Security audit history and findings'
       - 'secrets-management.md — Secrets management practices and tooling'
 
-  - id: '07_operations'
-    name: Operations
+  - id: operations-sla
+    name: Operations SLA
     path: 'docs/operations/'
     description: >
       Operational documentation including SLAs, on-call procedures,
@@ -111,7 +111,7 @@ categories:
       - 'performance.md — Performance benchmarks and optimization history'
       - 'cost-management.md — Cloud cost tracking and optimization'
 
-  - id: '08_reference'
+  - id: reference
     name: Reference
     path: 'docs/reference/'
     description: >

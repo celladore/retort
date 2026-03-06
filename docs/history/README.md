@@ -64,8 +64,4 @@ creation at end-of-session (non-blocking — never gates delivery):
 
 Or use the `/document-history` slash command for auto-detection of type and title from session context.
 
-> **Fallback:** When `gh` CLI is unavailable (proxy failures, air-gapped
-> environments), use `./scripts/create-doc.sh issue "Title"` to record issues
-> locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
-
 See [docs/engineering/06_pr_documentation.md](../engineering/06_pr_documentation.md) for the full documentation strategy.
