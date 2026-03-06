@@ -221,72 +221,48 @@ describe('P0: resolveTeamAgents', () => {
 describe('P0 + P2 Integration: sync generates agent personas and shared sections', () => {
   let projectRoot;
 
-  afterEach(() => {
-    if (projectRoot) {
-      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
-      projectRoot = null;
-    }
-  });
-
-  it('team-product.md contains agent personas after sync', async () => {
+  beforeAll(async () => {
     projectRoot = makeNamedTmpProject('agentkit-forge');
-
-    const logs = [];
     const originalLog = console.log;
-    console.log = (...args) => {
-      logs.push(args.map(String).join(' '));
-    };
-
+    console.log = () => {};
     try {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: false } });
+      await runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { quiet: false },
+      });
     } finally {
       console.log = originalLog;
     }
+  }, 60000);
 
+  afterAll(() => {
+    if (projectRoot) {
+      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
+    }
+  });
+
+  it('team-product.md contains agent personas after sync', () => {
     const teamProduct = readFileSync(
       resolve(projectRoot, '.claude', 'commands', 'team-product.md'),
       'utf-8'
     );
 
-    // Should contain agent personas section
     expect(teamProduct).toContain('## Agent Personas');
     expect(teamProduct).toContain('Product Manager');
     expect(teamProduct).toContain('**Role:**');
   });
 
-  it('team-backend.md does NOT contain agent personas (no backend agent category)', async () => {
-    projectRoot = makeNamedTmpProject('agentkit-forge');
-
-    const originalLog = console.log;
-    console.log = () => {};
-
-    try {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: false } });
-    } finally {
-      console.log = originalLog;
-    }
-
+  it('team-backend.md does NOT contain agent personas (no backend agent category)', () => {
     const teamBackend = readFileSync(
       resolve(projectRoot, '.claude', 'commands', 'team-backend.md'),
       'utf-8'
     );
 
-    // Should NOT contain agent personas section
     expect(teamBackend).not.toContain('## Agent Personas');
   });
 
-  it('generated agent files contain shared sections from sections.yaml', async () => {
-    projectRoot = makeNamedTmpProject('agentkit-forge');
-
-    const originalLog = console.log;
-    console.log = () => {};
-
-    try {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: false } });
-    } finally {
-      console.log = originalLog;
-    }
-
+  it('generated agent files contain shared sections from sections.yaml', () => {
     const agentFile = readFileSync(
       resolve(projectRoot, '.claude', 'agents', 'product-manager.md'),
       'utf-8'
@@ -308,18 +284,30 @@ describe('P0 + P2 Integration: sync generates agent personas and shared sections
 // ---------------------------------------------------------------------------
 
 describe('P7: Concurrency protocol simplification', () => {
-  it('agent files contain brief concurrency summary, not full protocol', async () => {
-    const projectRoot = makeNamedTmpProject('agentkit-forge');
+  let projectRoot;
 
+  beforeAll(async () => {
+    projectRoot = makeNamedTmpProject('agentkit-forge');
     const originalLog = console.log;
     console.log = () => {};
-
     try {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: false } });
+      await runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { quiet: false },
+      });
     } finally {
       console.log = originalLog;
     }
+  }, 60000);
 
+  afterAll(() => {
+    if (projectRoot) {
+      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
+    }
+  });
+
+  it('agent files contain brief concurrency summary, not full protocol', () => {
     const agentFile = readFileSync(
       resolve(projectRoot, '.claude', 'agents', 'product-manager.md'),
       'utf-8'
@@ -333,8 +321,6 @@ describe('P7: Concurrency protocol simplification', () => {
     expect(agentFile).not.toContain('flock');
     expect(agentFile).not.toContain('fstat');
     expect(agentFile).not.toContain('inode');
-
-    rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
   });
 
   it('full concurrency protocol reference doc exists', () => {
