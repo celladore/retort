@@ -965,14 +965,13 @@ rules:
     conventions:
       - id: doc-8-category-structure
         rule: >
-          All project documentation must follow the unified 8-category
-          structure under docs/. The canonical categories are: 01_product,
-          02_specs (architecture and specifications), 03_architecture
-          (system design, diagrams, ADRs), 04_api, 05_operations,
-          06_engineering, 07_integrations, 08_reference. New documentation
-          files must be placed in the appropriate category. If a repository
-          uses legacy names (e.g. 02_architecture instead of 02_specs),
-          respect the existing structure rather than renaming.
+          All project documentation must follow the domain-driven structure
+          under docs/. The canonical categories are: product (vision, strategy,
+          personas), architecture/ (specs, decisions, diagrams), orchestration
+          (guides, protocols), api, operations, engineering, integrations,
+          reference. Additional directories: agents (catalog), handoffs
+          (session handoffs), history (retrospectives). New documentation
+          files must be placed in the appropriate category.
         severity: warning
         type: advisory
         phase: implementation
@@ -983,7 +982,7 @@ rules:
           Architecture Decision Records must follow the format: title,
           status (proposed/accepted/deprecated/superseded), context,
           decision, consequences. ADRs are numbered sequentially and
-          stored in docs/03_architecture/02_decisions/ (or the repository's equivalent ADR directory). Every significant
+          stored in docs/architecture/decisions/ (or the repository's equivalent ADR directory). Every significant
           architectural decision must have an ADR.
         severity: error
         type: advisory
@@ -1018,7 +1017,7 @@ rules:
       - id: doc-api-spec
         rule: >
           All public APIs must have corresponding documentation in
-          docs/04_api/. API endpoints must include method, path,
+          docs/api/. API endpoints must include method, path,
           request/response schema, authentication requirements, and
           example requests. Keep API docs in sync with implementation.
         severity: error

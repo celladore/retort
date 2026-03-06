@@ -3,7 +3,7 @@ name: 'review'
 description: 'Performs a structured code review of staged changes, a specific PR, or a range of commits. Evaluates code quality, adherence to domain rules, security concerns, test coverage, and architectural alignment.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -41,12 +41,12 @@ Evaluate every changed file against:
 
 ## Severity Classification
 
-| Severity | Action |
-|----------|--------|
-| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path |
-| HIGH | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
-| MEDIUM | Suggest. Performance concern, missing edge case test, poor naming |
-| LOW | Note. Style inconsistency, minor readability, optional optimization |
+| Severity | Action                                                                          |
+| -------- | ------------------------------------------------------------------------------- |
+| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path         |
+| HIGH     | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
+| MEDIUM   | Suggest. Performance concern, missing edge case test, poor naming               |
+| LOW      | Note. Style inconsistency, minor readability, optional optimization             |
 
 ## Output Format
 

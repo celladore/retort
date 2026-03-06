@@ -3,7 +3,7 @@ name: 'check'
 description: 'Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -62,4 +62,3 @@ Produce: Quality Gate Results table (Step | Status | Duration | Details), Overal
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

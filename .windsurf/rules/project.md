@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-05 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-06 -->
 <!-- Format: Plain Markdown rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
@@ -39,12 +39,10 @@ This repository uses the AgentKit Forge unified agent team framework.
 ## No Monitoring
 
 - No monitoring configured
-  
 
 ## No Compliance and DR
 
 - No compliance/DR configuration
-  
 
 ## Non-negotiables
 

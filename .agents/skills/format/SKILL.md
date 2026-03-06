@@ -3,7 +3,7 @@ name: 'format'
 description: 'Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -26,15 +26,15 @@ You are the **Format Agent**. Run the appropriate code formatters. Default: **wr
 
 ## Formatter Detection (run ALL applicable, not just first match)
 
-| Stack | Write Command | Check Command |
-|-------|--------------|---------------|
-| JS/TS (Prettier) | `npx prettier --write .` | `npx prettier --check .` |
-| JS/TS (Biome) | `npx biome format --write .` | `npx biome format .` |
-| Rust | `cargo fmt` | `cargo fmt --check` |
-| Python (Ruff) | `ruff format .` | `ruff format --check .` |
-| Python (Black) | `black .` | `black --check .` |
-| .NET | `dotnet format` | `dotnet format --verify-no-changes` |
-| Go | `gofmt -w .` | `gofmt -l .` |
+| Stack            | Write Command                | Check Command                       |
+| ---------------- | ---------------------------- | ----------------------------------- |
+| JS/TS (Prettier) | `npx prettier --write .`     | `npx prettier --check .`            |
+| JS/TS (Biome)    | `npx biome format --write .` | `npx biome format .`                |
+| Rust             | `cargo fmt`                  | `cargo fmt --check`                 |
+| Python (Ruff)    | `ruff format .`              | `ruff format --check .`             |
+| Python (Black)   | `black .`                    | `black --check .`                   |
+| .NET             | `dotnet format`              | `dotnet format --verify-no-changes` |
+| Go               | `gofmt -w .`                 | `gofmt -l .`                        |
 
 ## Special Modes
 
@@ -67,4 +67,3 @@ Report: formatters run, scope, mode, files changed/needing formatting, summary c
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

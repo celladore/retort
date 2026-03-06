@@ -120,7 +120,7 @@ suggestions:
     alignment: high # docs.yaml defines ADR structure, agents.yaml has docs agent
     suggested_artifacts:
       - type: ADR
-        path: docs/03_architecture/02_decisions/
+        path: docs/architecture/decisions/
         template: adr-template
     depends_on: []
     blocks: []

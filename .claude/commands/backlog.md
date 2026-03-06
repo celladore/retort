@@ -3,7 +3,7 @@ description: 'View consolidated backlog from all sources'
 allowed-tools: Read, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -53,19 +53,19 @@ pnpm -C .agentkit agentkit:backlog -- [--format json] [--team backend] [--priori
 
 ## Fields per Item
 
-| Field | Description |
-|-------|-------------|
-| `id` | Local backlog item ID |
-| `externalId` | External tracker reference (e.g., GH#42) |
-| `title` | Issue title |
-| `priority` | P0–P3 |
-| `status` | open, in-progress, completed, blocked, deferred |
-| `team` | Assigned team |
-| `source` | Where the item came from |
-| `phase` | Discovery, Planning, Implementation, Validation, Ship |
-| `assignee` | Human assignee (if any) |
-| `labels` | Original tracker labels |
-| `milestone` | Milestone/sprint |
+| Field        | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| `id`         | Local backlog item ID                                 |
+| `externalId` | External tracker reference (e.g., GH#42)              |
+| `title`      | Issue title                                           |
+| `priority`   | P0–P3                                                 |
+| `status`     | open, in-progress, completed, blocked, deferred       |
+| `team`       | Assigned team                                         |
+| `source`     | Where the item came from                              |
+| `phase`      | Discovery, Planning, Implementation, Validation, Ship |
+| `assignee`   | Human assignee (if any)                               |
+| `labels`     | Original tracker labels                               |
+| `milestone`  | Milestone/sprint                                      |
 
 ## Rules
 

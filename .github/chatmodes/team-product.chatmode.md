@@ -3,7 +3,7 @@ name: 'PRODUCT'
 description: 'Team PRODUCT — Features, PRDs, roadmap'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -15,7 +15,7 @@ last_updated: '2026-03-05'
 # Team: PRODUCT
 
 **Focus**: Features, PRDs, roadmap
-**Scope**: docs/01_product/**, docs/prd/**
+**Scope**: docs/product/**, docs/prd/**
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: docs/01_product/**, docs/prd/**
+- Own all code within scope: docs/product/**, docs/prd/**
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

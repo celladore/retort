@@ -1,9 +1,9 @@
 ---
-mode: "agent"
-description: "Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/."
-generated_by: "agentkit-forge"
-last_model: "sync-engine"
-last_updated: "2026-03-04"
+mode: 'agent'
+description: 'Generates a structured handoff document for the current session. Captures what was accomplished, what remains, open questions, and context needed by the next session or developer. Writes to docs/ai_handoffs/.'
+generated_by: 'agentkit-forge'
+last_model: 'sync-engine'
+last_updated: '2026-03-04'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

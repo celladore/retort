@@ -1,3 +1,7 @@
+---
+agentkit:
+  scaffold: managed
+---
 # Lessons Learned
 
 Historical records of lessons learned during development sessions.

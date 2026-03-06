@@ -11,7 +11,12 @@ import { computeProjectCompleteness as computeProjectCompletenessBase } from './
 // Template rendering
 // ---------------------------------------------------------------------------
 
-const RAW_TEMPLATE_VARS = new Set(['commandFlags', 'agentConventions', 'agentExamples']);
+const RAW_TEMPLATE_VARS = new Set([
+  'commandFlags',
+  'agentConventions',
+  'agentExamples',
+  'teamAgentSummaries',
+]);
 
 /**
  * Checks whether a template variable should bypass shell sanitization.
@@ -19,7 +24,7 @@ const RAW_TEMPLATE_VARS = new Set(['commandFlags', 'agentConventions', 'agentExa
  * (they contain precomputed JSON that must not be escaped).
  */
 function isRawTemplateVar(key) {
-  return RAW_TEMPLATE_VARS.has(key) || key.endsWith('Json');
+  return RAW_TEMPLATE_VARS.has(key) || key.endsWith('Json') || key.startsWith('shared_');
 }
 
 function isShellScriptTarget(targetPath) {
@@ -636,6 +641,61 @@ export function insertHeader(content, ext, version, repoName) {
 }
 
 // ---------------------------------------------------------------------------
+// Template frontmatter parsing
+// ---------------------------------------------------------------------------
+
+/**
+ * Parses optional YAML frontmatter from a template string.
+ * Supports the `agentkit.scaffold` directive: always | managed | once.
+ * Frontmatter is stripped from the content before rendering so it never
+ * appears in generated output.
+ *
+ * @param {string} template - Raw template content
+ * @returns {{ meta: object|null, content: string }}
+ */
+export function parseTemplateFrontmatter(template) {
+  if (!template.startsWith('---')) return { meta: null, content: template };
+
+  const closingIdx = template.indexOf('\n---', 3);
+  if (closingIdx === -1) return { meta: null, content: template };
+
+  const yamlBlock = template.slice(4, closingIdx).trim();
+  const afterClose = closingIdx + 4; // past "\n---"
+  const content =
+    afterClose < template.length && template[afterClose] === '\n'
+      ? template.slice(afterClose + 1)
+      : template.slice(afterClose);
+
+  // Simple nested key-value parser (no YAML dependency).
+  // Supports one level of nesting: `agentkit:\n  scaffold: always`
+  const meta = {};
+  let currentSection = null;
+  for (const line of yamlBlock.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    if (!line.startsWith(' ') && !line.startsWith('\t') && trimmed.includes(':')) {
+      const colonIdx = trimmed.indexOf(':');
+      const key = trimmed.slice(0, colonIdx).trim();
+      const val = trimmed.slice(colonIdx + 1).trim();
+      if (!val) {
+        currentSection = key;
+        meta[currentSection] = {};
+      } else {
+        meta[key] = val;
+        currentSection = null;
+      }
+    } else if (currentSection && trimmed.includes(':')) {
+      const colonIdx = trimmed.indexOf(':');
+      const key = trimmed.slice(0, colonIdx).trim();
+      const val = trimmed.slice(colonIdx + 1).trim();
+      meta[currentSection][key] = val;
+    }
+  }
+
+  return { meta, content };
+}
+
+// ---------------------------------------------------------------------------
 // Scaffold-once file detection
 // ---------------------------------------------------------------------------
 
@@ -682,6 +742,28 @@ export function isScaffoldOnce(relPath, vars = {}) {
     if (normalized.startsWith(dir)) return true;
   }
   return false;
+}
+
+/**
+ * Determines the write action for a file during sync, combining template-level
+ * frontmatter directives with directory-level scaffold-once rules.
+ *
+ * @param {string} relPath - Relative path from project root
+ * @param {object} vars - Template variables (may contain override lists)
+ * @param {object|null} templateMeta - Parsed frontmatter from the template
+ * @returns {'write'|'skip'|'check-hash'} The action to take during atomic swap
+ */
+export function resolveScaffoldAction(relPath, vars = {}, templateMeta = null) {
+  const scaffold = templateMeta?.agentkit?.scaffold;
+
+  // Template-level directives take highest priority
+  if (scaffold === 'always') return 'write';
+  if (scaffold === 'managed') return 'check-hash';
+  if (scaffold === 'once') return 'skip';
+
+  // Fall through to existing isScaffoldOnce logic
+  if (isScaffoldOnce(relPath, vars)) return 'skip';
+  return 'write';
 }
 
 // ---------------------------------------------------------------------------

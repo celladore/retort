@@ -3,7 +3,7 @@ name: 'Test Lead'
 description: 'Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions. Ensures comprehensive coverage across unit, integration, and end-to-end testing.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,14 +32,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- **/*.test.*
-- **/*.spec.*
-- tests/**
-- e2e/**
-- playwright/**
-- jest.config.*
-- vitest.config.*
-- playwright.config.*
+- \*_/_.test.\*
+- \*_/_.spec.\*
+- tests/\*\*
+- e2e/\*\*
+- playwright/\*\*
+- jest.config.\*
+- vitest.config.\*
+- playwright.config.\*
 
 ## Responsibilities
 

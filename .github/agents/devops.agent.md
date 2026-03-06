@@ -3,7 +3,7 @@ name: 'DevOps Engineer'
 description: 'Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment workflows. Ensures reliable, repeatable, and fast delivery pipelines.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- .github/workflows/**
-- scripts/**
-- docker/**
-- Dockerfile*
+- .github/workflows/\*\*
+- scripts/\*\*
+- docker/\*\*
+- Dockerfile\*
 - .dockerignore
-- docker-compose*.yml
+- docker-compose\*.yml
 
 ## Responsibilities
 

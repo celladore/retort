@@ -3,7 +3,7 @@ name: 'infra-eval'
 description: 'Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -47,4 +47,3 @@ Invoke this skill when you need to perform the `infra-eval` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

@@ -3,7 +3,7 @@ description: 'Cost centre management — budget governance, resource group mappi
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -17,4 +17,3 @@ last_updated: '2026-03-05'
 > **This command requires a FinOps-enabled overlay.** To enable cost centre management, add the `finops` domain to your overlay's `rules.yaml`, then run `pnpm -C .agentkit agentkit:sync`.
 
 Stop here. Do not proceed.
-

@@ -24,7 +24,7 @@ All documentation lives in `docs/` under these categories:
 
 ## Architecture Decision Records (ADRs)
 
-- Stored in `docs/03_architecture/02_decisions/`
+- Stored in `docs/architecture/decisions/`
 - Numbered sequentially: `01-title.md`, `02-title.md`
 - Format: title, status, context, decision, consequences
 - Every significant architectural decision must have an ADR

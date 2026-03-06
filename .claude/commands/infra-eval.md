@@ -3,7 +3,7 @@ description: 'Risk-aware infrastructure and codebase evaluation against reliabil
 allowed-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -17,4 +17,3 @@ last_updated: '2026-03-05'
 > **This command is not enabled.** To enable infrastructure evaluation, set `evaluation.infraEval: true` in your project's `.agentkit/spec/project.yaml`, then run `pnpm -C .agentkit agentkit:sync` to regenerate.
 
 Stop here. Do not proceed with the evaluation.
-

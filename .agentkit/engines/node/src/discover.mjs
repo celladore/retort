@@ -217,13 +217,13 @@ const DOC_ARTIFACT_DETECTORS = [
   {
     name: 'adr',
     label: 'ADRs',
-    dirs: ['adr', 'docs/adr', 'docs/02_architecture/ADR'],
+    dirs: ['adr', 'docs/adr', 'docs/architecture/ADR'],
     files: ['ARCHITECTURE.md', 'docs/architecture.md'],
   },
   {
     name: 'apiSpec',
     label: 'API Specs',
-    dirs: ['docs/api', 'docs/03_api'],
+    dirs: ['docs/api', 'docs/api'],
     files: ['openapi.yaml', 'openapi.yml', 'openapi.json', 'swagger.json', 'swagger.yaml'],
   },
   {

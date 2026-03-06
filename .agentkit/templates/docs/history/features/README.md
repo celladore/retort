@@ -1,3 +1,7 @@
+---
+agentkit:
+  scaffold: managed
+---
 # Features
 
 Historical records of new feature launches.

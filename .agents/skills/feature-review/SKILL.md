@@ -3,7 +3,7 @@ name: 'feature-review'
 description: 'Reviews the current feature configuration for the repo. Analyzes which features are enabled/disabled, checks for misconfigured dependencies, identifies unused features (enabled but no matching code patterns), and recommends features to enable based on codebase analysis.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -47,4 +47,3 @@ Invoke this skill when you need to perform the `feature-review` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

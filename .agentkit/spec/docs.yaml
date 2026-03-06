@@ -15,7 +15,7 @@
 categories:
   - id: '01_product'
     name: Product
-    path: 'docs/01_product/'
+    path: 'docs/product/'
     description: >
       Product vision, strategy, market analysis, and competitive landscape.
       Contains high-level product direction and business context that
@@ -29,7 +29,7 @@ categories:
 
   - id: '02_architecture'
     name: Architecture
-    path: 'docs/03_architecture/'
+    path: 'docs/architecture/'
     description: >
       System architecture, design decisions, and technical foundations.
       Includes architecture diagrams, service boundaries, and integration
@@ -43,7 +43,7 @@ categories:
 
   - id: '03_api'
     name: API
-    path: 'docs/04_api/'
+    path: 'docs/api/'
     description: >
       API documentation including endpoint references, authentication
       flows, rate limiting, versioning strategy, and client SDK guides.
@@ -57,7 +57,7 @@ categories:
 
   - id: '04_development'
     name: Development
-    path: 'docs/06_engineering/'
+    path: 'docs/engineering/'
     description: >
       Developer guides, setup instructions, coding standards, and
       contribution workflows. Everything a new developer needs to
@@ -72,7 +72,7 @@ categories:
 
   - id: '05_deployment'
     name: Deployment
-    path: 'docs/05_deployment/'
+    path: 'docs/operations/'
     description: >
       Deployment procedures, environment configurations, CI/CD pipeline
       documentation, and release management processes.
@@ -86,7 +86,7 @@ categories:
 
   - id: '06_security'
     name: Security
-    path: 'docs/06_security/'
+    path: 'docs/engineering/'
     description: >
       Security documentation including threat models, compliance
       requirements, incident response procedures, and audit logs.
@@ -100,7 +100,7 @@ categories:
 
   - id: '07_operations'
     name: Operations
-    path: 'docs/07_operations/'
+    path: 'docs/operations/'
     description: >
       Operational documentation including SLAs, on-call procedures,
       capacity planning, and performance benchmarks.
@@ -113,7 +113,7 @@ categories:
 
   - id: '08_reference'
     name: Reference
-    path: 'docs/08_reference/'
+    path: 'docs/reference/'
     description: >
       Reference materials including glossary, acronym definitions,
       external resource links, and tool configuration references.
@@ -131,7 +131,7 @@ categories:
 specialDirectories:
   - id: prd
     name: Product Requirements Documents
-    path: 'docs/01_product/'
+    path: 'docs/product/'
     description: >
       Individual Product Requirements Documents (PRDs) for features,
       enhancements, and initiatives. Each PRD follows a standardized
@@ -257,8 +257,8 @@ externalSources:
     type: local-folder
     ingestionMode: metadata-overlays # metadata-overlays | direct-copy | hybrid
     targetDirectories:
-      - docs/06_engineering/
-      - docs/08_reference/
+      - docs/engineering/
+      - docs/reference/
     description: >
       Structured domain and template guidance used to seed project documentation
       metadata and overlay values during adoption/setup.
@@ -270,9 +270,9 @@ externalSources:
     type: local-folder
     ingestionMode: metadata-overlays
     targetDirectories:
-      - docs/01_product/
-      - docs/02_specs/
-      - docs/03_architecture/
+      - docs/product/
+      - docs/architecture/specs/
+      - docs/architecture/
     description: >
       Reference product/spec documentation that can be mapped into AgentKit
       template variables and generated docs structure.
@@ -285,7 +285,7 @@ externalSources:
 adrRanges:
   - range: '01-99'
     domain: Architecture
-    path: 'docs/03_architecture/02_decisions/'
+    path: 'docs/architecture/decisions/'
     description: >
       Core architecture decisions: system design, service boundaries,
       technology choices, data architecture, API design patterns,

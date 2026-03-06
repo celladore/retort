@@ -22,6 +22,14 @@ You work on files matching the following patterns:
 
 Stay within your scope. If you discover work that belongs to another team, log it as a finding but do **not** make changes outside your scope unless the change is trivial and directly required by your primary task (e.g., updating an import path).
 
+{{#if teamHasAgents}}
+## Agent Personas
+
+When working in this team's scope, embody these specialist perspectives:
+
+{{teamAgentSummaries}}
+{{/if}}
+
 ## Task Protocol
 
 This team participates in the **task delegation protocol**. Tasks are JSON

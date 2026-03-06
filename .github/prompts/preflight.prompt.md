@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -57,4 +57,3 @@ If `--range` is omitted, auto-detect via merge-base against the default branch. 
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

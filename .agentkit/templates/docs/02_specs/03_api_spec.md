@@ -14,7 +14,7 @@
 
 ## Authentication
 
-<!-- Summarise the authentication approach; see docs/04_api/03_authentication.md for details. -->
+<!-- Summarise the authentication approach; see docs/api/03_authentication.md for details. -->
 
 ## Conventions
 

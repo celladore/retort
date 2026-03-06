@@ -5,8 +5,9 @@
  * readYaml/readText use synchronous fs APIs for simplicity at startup.
  * Pure template helpers live in template-utils.mjs.
  */
+import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
@@ -25,9 +26,11 @@ import {
   insertHeader,
   isScaffoldOnce,
   mergePermissions,
+  parseTemplateFrontmatter,
   printSyncSummary,
   renderTemplate,
   resolveRenderTargets,
+  resolveScaffoldAction,
   simpleDiff,
 } from './template-utils.mjs';
 import {
@@ -38,6 +41,92 @@ import {
   validateBrandSpec,
   validateThemeSpec,
 } from './brand-resolver.mjs';
+
+// ---------------------------------------------------------------------------
+// Scaffold metadata map — populated during template rendering, consumed in Step 7
+// ---------------------------------------------------------------------------
+
+/** @type {Map<string, object>} relPath → parsed template frontmatter */
+const templateMetaMap = new Map();
+
+/**
+ * Retrieve parsed frontmatter metadata for a generated file.
+ * @param {string} relPath - Relative path from project root
+ * @returns {object|null}
+ */
+export function getTemplateMeta(relPath) {
+  return templateMetaMap.get(relPath.replace(/\\/g, '/')) || null;
+}
+
+// ---------------------------------------------------------------------------
+// Three-way merge for managed scaffold files
+// ---------------------------------------------------------------------------
+
+/**
+ * Performs a three-way merge using git merge-file.
+ * @param {string} oursContent - User's current version (disk)
+ * @param {string} baseContent - Last generated version (scaffold cache)
+ * @param {string} theirsContent - Newly generated version (template)
+ * @returns {{ merged: string, hasConflicts: boolean }|null} null if git unavailable
+ */
+function threeWayMerge(oursContent, baseContent, theirsContent) {
+  const prefix = join(
+    tmpdir(),
+    `agentkit-merge-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
+  const oursFile = `${prefix}-ours`;
+  const baseFile = `${prefix}-base`;
+  const theirsFile = `${prefix}-theirs`;
+
+  writeFileSync(oursFile, oursContent);
+  writeFileSync(baseFile, baseContent);
+  writeFileSync(theirsFile, theirsContent);
+
+  try {
+    const merged = execFileSync(
+      'git',
+      [
+        'merge-file',
+        '-p',
+        '--diff3',
+        '-L',
+        'YOUR_EDITS',
+        '-L',
+        'LAST_SYNC',
+        '-L',
+        'NEW_TEMPLATE',
+        oursFile,
+        baseFile,
+        theirsFile,
+      ],
+      { encoding: 'utf-8' }
+    );
+    return { merged, hasConflicts: false };
+  } catch (err) {
+    if (err.status === 1) {
+      // Merge completed but has conflicts
+      return { merged: err.stdout, hasConflicts: true };
+    }
+    // git merge-file not available or other error
+    return null;
+  } finally {
+    try {
+      unlinkSync(oursFile);
+    } catch {
+      /* ignore */
+    }
+    try {
+      unlinkSync(baseFile);
+    } catch {
+      /* ignore */
+    }
+    try {
+      unlinkSync(theirsFile);
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -217,6 +306,7 @@ export async function syncDirectCopy(
 
   await runConcurrent([...sourceFiles.entries()], async ([relPath, srcFile]) => {
     const destFile = destSubdir === '.' ? join(tmpDir, relPath) : join(tmpDir, destSubdir, relPath);
+    const destRelPath = destSubdir === '.' ? relPath : join(destSubdir, relPath);
     const ext = extname(srcFile).toLowerCase();
     let content;
     try {
@@ -231,7 +321,15 @@ export async function syncDirectCopy(
       }
       return;
     }
-    const rendered = renderTemplate(content, vars, srcFile);
+
+    // Parse and strip template frontmatter (agentkit scaffold directives)
+    const { meta, content: stripped } = parseTemplateFrontmatter(content);
+    if (meta) {
+      const normalizedRel = destRelPath.replace(/\\/g, '/');
+      templateMetaMap.set(normalizedRel, meta);
+    }
+
+    const rendered = renderTemplate(stripped, vars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
     await writeOutput(destFile, withHeader);
   });
@@ -655,7 +753,8 @@ async function syncClaudeCommands(
   version,
   repoName,
   teamsSpec,
-  commandsSpec
+  commandsSpec,
+  agentsSpec
 ) {
   const commandsDir = join(templatesDir, 'claude', 'commands');
   if (!existsSync(commandsDir)) return;
@@ -687,7 +786,7 @@ async function syncClaudeCommands(
   if (!existsSync(teamTemplatePath)) return;
   const teamTemplate = await readTemplateText(teamTemplatePath);
   for (const team of teamsSpec.teams || []) {
-    const teamVars = buildTeamVars(team, vars, teamsSpec);
+    const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, teamTemplatePath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.claude', 'commands', `team-${team.id}.md`), withHeader);
@@ -758,7 +857,15 @@ async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, c
 /**
  * Generates .cursor/rules/team-<id>.mdc for each team.
  */
-async function syncCursorTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+async function syncCursorTeams(
+  templatesDir,
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  teamsSpec,
+  agentsSpec
+) {
   if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'cursor', 'teams', 'TEMPLATE.mdc');
   const fallbackTemplate = `---
@@ -782,7 +889,7 @@ Scope all operations to the team's owned paths.
 `;
   const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
-    const teamVars = buildTeamVars(team, vars, teamsSpec);
+    const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.mdc', version, repoName);
     await writeOutput(join(tmpDir, '.cursor', 'rules', `team-${team.id}.mdc`), withHeader);
@@ -814,7 +921,15 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
 /**
  * Generates .windsurf/rules/team-<id>.md for each team.
  */
-async function syncWindsurfTeams(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+async function syncWindsurfTeams(
+  templatesDir,
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  teamsSpec,
+  agentsSpec
+) {
   if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'windsurf', 'teams', 'TEMPLATE.md');
   const fallbackTemplate = `# Team: {{teamName}}
@@ -829,7 +944,7 @@ Scope all operations to the team's owned paths.
 `;
   const teamTemplate = existsSync(tplPath) ? await readTemplateText(tplPath) : fallbackTemplate;
   for (const team of teamsSpec.teams || []) {
-    const teamVars = buildTeamVars(team, vars, teamsSpec);
+    const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.windsurf', 'rules', `team-${team.id}.md`), withHeader);
@@ -931,14 +1046,22 @@ async function syncCopilotAgents(
 /**
  * Generates .github/chatmodes/team-<id>.chatmode.md for each team.
  */
-async function syncCopilotChatModes(templatesDir, tmpDir, vars, version, repoName, teamsSpec) {
+async function syncCopilotChatModes(
+  templatesDir,
+  tmpDir,
+  vars,
+  version,
+  repoName,
+  teamsSpec,
+  agentsSpec
+) {
   if (!isFeatureEnabled('team-orchestration', vars)) return;
   const tplPath = join(templatesDir, 'copilot', 'chatmodes', 'TEMPLATE.chatmode.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
   for (const team of teamsSpec.teams || []) {
-    const teamVars = buildTeamVars(team, vars, teamsSpec);
+    const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(template, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(
@@ -1251,7 +1374,54 @@ function inferTestingCoverage(projectPhase) {
 // Variable builder helpers (private — used by tool-specific sync functions)
 // ---------------------------------------------------------------------------
 
-function buildTeamVars(team, vars, teamsSpec) {
+/**
+ * Resolves which agent personas should be loaded for a given team.
+ * Priority: 1) explicit `agents` list in teams.yaml, 2) category match.
+ * Returns an array of { id, name, role, category } objects.
+ */
+export function resolveTeamAgents(teamId, team, agentsSpec) {
+  const allAgents = agentsSpec?.agents || {};
+  const result = [];
+
+  // If the team has an explicit agents list, use it
+  if (Array.isArray(team.agents) && team.agents.length > 0) {
+    for (const agentId of team.agents) {
+      // Search across all categories for this agent ID
+      for (const [category, agents] of Object.entries(allAgents)) {
+        if (!Array.isArray(agents)) continue;
+        const found = agents.find((a) => a.id === agentId);
+        if (found) {
+          result.push({ id: found.id, name: found.name, role: found.role, category });
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  // Fallback: match agents whose category === teamId
+  if (Array.isArray(allAgents[teamId])) {
+    for (const agent of allAgents[teamId]) {
+      result.push({ id: agent.id, name: agent.name, role: agent.role, category: teamId });
+    }
+  }
+
+  return result;
+}
+
+function buildTeamVars(team, vars, teamsSpec, agentsSpec) {
+  // Resolve agent personas for this team
+  const teamAgents = resolveTeamAgents(team.id, team, agentsSpec);
+  const teamHasAgents = teamAgents.length > 0;
+  const teamAgentSummaries = teamHasAgents
+    ? teamAgents
+        .map(
+          (a) =>
+            `### ${a.name}\n\n**Role:** ${typeof a.role === 'string' ? a.role.trim() : a.role || 'N/A'}\n`
+        )
+        .join('\n')
+    : '';
+
   return {
     ...vars,
     teamName: team.name || team.id,
@@ -1266,6 +1436,8 @@ function buildTeamVars(team, vars, teamsSpec) {
     maxHandoffChainDepth:
       team['max-handoff-chain-depth'] ?? inferMaxHandoffChainDepth(teamsSpec?.teams?.length || 5),
     maxStagnationTurns: team['max-stagnation-turns'] ?? inferMaxStagnationTurns(vars.projectPhase),
+    teamHasAgents,
+    teamAgentSummaries,
   };
 }
 
@@ -1439,6 +1611,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const verbose = flags?.verbose || false;
   const noClean = flags?.['no-clean'] || false;
 
+  // Clear module-level state from any previous run (e.g. in tests)
+  templateMetaMap.clear();
+
   const log = (...args) => {
     if (!quiet) console.log(...args);
   };
@@ -1468,6 +1643,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const settingsSpec = readYaml(resolve(agentkitRoot, 'spec', 'settings.yaml')) || {};
   const agentsSpec = readYaml(resolve(agentkitRoot, 'spec', 'agents.yaml')) || {};
   const docsSpec = readYaml(resolve(agentkitRoot, 'spec', 'docs.yaml')) || {};
+  const sectionsSpec = readYaml(resolve(agentkitRoot, 'spec', 'sections.yaml')) || {};
   const projectSpec = readYaml(resolve(agentkitRoot, 'spec', 'project.yaml'));
 
   // 2. Detect overlay
@@ -1603,6 +1779,16 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
   }
 
+  // Inject shared sections from sections.yaml — feature-gated reusable blocks.
+  // Each section key becomes a template var: shared_<key>.
+  // If the section has a `gate` field, the var is populated only when that
+  // feature is enabled; otherwise the var is set to empty string.
+  for (const [key, section] of Object.entries(sectionsSpec.sections || {})) {
+    const gate = section.gate;
+    const isGateEnabled = !gate || vars[gate];
+    vars[`shared_${key}`] = isGateEnabled ? section.content || '' : '';
+  }
+
   // Resolve render targets — determines which tool outputs to generate
   let targets = resolveRenderTargets(overlaySettings.renderTargets, flags);
 
@@ -1710,7 +1896,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           version,
           headerRepoName,
           teamsSpec,
-          commandsSpec
+          commandsSpec,
+          agentsSpec
         ),
         syncClaudeAgents(
           templatesDir,
@@ -1762,7 +1949,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     if (targets.has('cursor')) {
       gatedTasks.push(
-        syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec),
+        syncCursorTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec, agentsSpec),
         syncCursorCommands(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
       );
       if (isFeatureEnabled('coding-rules', vars)) {
@@ -1804,7 +1991,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           version,
           headerRepoName
         ),
-        syncWindsurfTeams(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+        syncWindsurfTeams(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          teamsSpec,
+          agentsSpec
+        )
       );
       if (isFeatureEnabled('coding-rules', vars)) {
         gatedTasks.push(
@@ -1860,7 +2055,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           agentsSpec,
           rulesSpec
         ),
-        syncCopilotChatModes(templatesDir, tmpDir, vars, version, headerRepoName, teamsSpec)
+        syncCopilotChatModes(
+          templatesDir,
+          tmpDir,
+          vars,
+          version,
+          headerRepoName,
+          teamsSpec,
+          agentsSpec
+        )
       );
       if (isFeatureEnabled('coding-rules', vars)) {
         gatedTasks.push(
@@ -2051,15 +2254,28 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     // 7. Atomic swap: move temp outputs to project root & build new manifest
     log('[agentkit:sync] Writing outputs...');
     const resolvedRoot = resolve(projectRoot) + sep;
+    const scaffoldCacheDir = resolve(agentkitRoot, '.scaffold-cache');
 
-    // Use a shared counter and error list
+    // Use shared counters and tracking lists
     let count = 0;
     let skippedScaffold = 0;
     const failedFiles = [];
+    // NOTE: Safe for single-threaded async (Array.push is synchronous in V8).
+    // If runConcurrent ever uses worker threads, this needs synchronization.
+    const writtenFiles = []; // absolute paths of files written, for post-sync formatting
+    const scaffoldResults = {
+      alwaysRegenerated: [],
+      managedRegenerated: [],
+      managedMerged: [],
+      managedConflicts: [],
+      managedPreserved: [],
+      managedNoCache: [],
+    };
 
     await runConcurrent(allTmpFiles, async (srcFile) => {
       if (!existsSync(srcFile)) return;
       const relPath = relative(tmpDir, srcFile);
+      const normalizedRel = relPath.replace(/\\/g, '/');
       const destFile = resolve(projectRoot, relPath);
 
       // Path traversal protection: ensure all output stays within project root
@@ -2067,21 +2283,97 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         !resolve(destFile).startsWith(resolvedRoot) &&
         resolve(destFile) !== resolve(projectRoot)
       ) {
-        console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${relPath}`);
-        failedFiles.push({ file: relPath, error: 'path traversal blocked' });
+        console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${normalizedRel}`);
+        failedFiles.push({ file: normalizedRel, error: 'path traversal blocked' });
         return;
       }
 
-      // Scaffold-once: skip project-owned files that already exist (unless --overwrite)
+      // Scaffold action resolution: always | managed (check-hash) | once (skip)
+      const meta = getTemplateMeta(normalizedRel);
       const overwrite = flags?.overwrite || flags?.force;
-      if (!overwrite && isScaffoldOnce(relPath, vars) && existsSync(destFile)) {
-        skippedScaffold++;
-        return;
+      if (!overwrite && existsSync(destFile)) {
+        const action = resolveScaffoldAction(normalizedRel, vars, meta);
+
+        if (action === 'skip') {
+          skippedScaffold++;
+          return;
+        }
+
+        if (action === 'check-hash') {
+          const diskContent = await readFile(destFile);
+          const diskHash = createHash('sha256').update(diskContent).digest('hex').slice(0, 12);
+          const prevHash = previousManifest?.files?.[normalizedRel]?.hash;
+
+          if (prevHash && diskHash !== prevHash) {
+            // User edited this file — attempt three-way merge
+            const cachePath = resolve(scaffoldCacheDir, relPath);
+            const newContent = await readFile(srcFile, 'utf-8');
+
+            if (existsSync(cachePath)) {
+              const baseContent = readFileSync(cachePath, 'utf-8');
+              const diskText = diskContent.toString('utf-8');
+              const result = threeWayMerge(diskText, baseContent, newContent);
+
+              if (result) {
+                // Write merged result
+                await ensureDir(dirname(destFile));
+                await writeFile(destFile, result.merged, 'utf-8');
+                // Update scaffold cache with new generated content
+                await ensureDir(dirname(cachePath));
+                await writeFile(cachePath, newContent, 'utf-8');
+                count++;
+
+                writtenFiles.push(destFile);
+                if (result.hasConflicts) {
+                  scaffoldResults.managedConflicts.push(normalizedRel);
+                  console.warn(
+                    `[agentkit:sync] CONFLICT in ${normalizedRel} — resolve <<<< markers manually`
+                  );
+                } else {
+                  scaffoldResults.managedMerged.push(normalizedRel);
+                  logVerbose(`  merged ${normalizedRel} (user edits + template changes combined)`);
+                }
+                return;
+              }
+              // git merge-file unavailable — fall back to skip
+            }
+
+            // No cache or git unavailable — skip and preserve user edits
+            skippedScaffold++;
+            scaffoldResults.managedPreserved.push(normalizedRel);
+            if (!existsSync(resolve(scaffoldCacheDir, relPath))) {
+              scaffoldResults.managedNoCache.push(normalizedRel);
+            }
+            logVerbose(
+              `  skipped ${normalizedRel} (user edits detected, hash: ${prevHash} → ${diskHash})`
+            );
+            return;
+          }
+          // Hash matches or no previous hash — safe to overwrite (pristine)
+          scaffoldResults.managedRegenerated.push(normalizedRel);
+        } else {
+          // action === 'write' for scaffold: always
+          if (meta?.agentkit?.scaffold === 'always') {
+            scaffoldResults.alwaysRegenerated.push(normalizedRel);
+          }
+        }
       }
 
       try {
         await ensureDir(dirname(destFile));
         await cp(srcFile, destFile, { force: true, recursive: false });
+
+        // Update scaffold cache for managed files
+        if (meta?.agentkit?.scaffold === 'managed' || meta?.agentkit?.scaffold === 'always') {
+          const cachePath = resolve(scaffoldCacheDir, relPath);
+          try {
+            await ensureDir(dirname(cachePath));
+            const content = await readFile(srcFile, 'utf-8');
+            await writeFile(cachePath, content, 'utf-8');
+          } catch {
+            /* ignore cache write failures */
+          }
+        }
 
         // Make .sh files executable
         if (extname(srcFile) === '.sh') {
@@ -2092,10 +2384,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           }
         }
         count++;
-        logVerbose(`  wrote ${relPath.replace(/\\/g, '/')}`);
+        writtenFiles.push(destFile);
+        logVerbose(`  wrote ${normalizedRel}`);
       } catch (err) {
-        failedFiles.push({ file: relPath, error: err.message });
-        console.error(`[agentkit:sync] Failed to write: ${relPath} — ${err.message}`);
+        failedFiles.push({ file: normalizedRel, error: err.message });
+        console.error(`[agentkit:sync] Failed to write: ${normalizedRel} — ${err.message}`);
       }
     });
 
@@ -2105,6 +2398,51 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         console.error(`  - ${f.file}: ${f.error}`);
       }
       throw new Error(`Sync completed with ${failedFiles.length} write failure(s)`);
+    }
+
+    // 7b. Scaffold summary
+    const hasManagedActivity =
+      scaffoldResults.alwaysRegenerated.length > 0 ||
+      scaffoldResults.managedRegenerated.length > 0 ||
+      scaffoldResults.managedMerged.length > 0 ||
+      scaffoldResults.managedConflicts.length > 0 ||
+      scaffoldResults.managedPreserved.length > 0;
+
+    if (hasManagedActivity) {
+      log('[agentkit:sync] Scaffold summary:');
+      if (scaffoldResults.alwaysRegenerated.length > 0) {
+        log(`  ${scaffoldResults.alwaysRegenerated.length} file(s) always-regenerated`);
+      }
+      if (scaffoldResults.managedRegenerated.length > 0) {
+        log(
+          `  ${scaffoldResults.managedRegenerated.length} managed file(s) regenerated (pristine)`
+        );
+      }
+      if (scaffoldResults.managedMerged.length > 0) {
+        log(
+          `  ${scaffoldResults.managedMerged.length} managed file(s) merged (user edits + template changes)`
+        );
+      }
+      if (scaffoldResults.managedConflicts.length > 0) {
+        console.warn(
+          `  ${scaffoldResults.managedConflicts.length} managed file(s) with CONFLICTS — resolve manually:`
+        );
+        for (const f of scaffoldResults.managedConflicts) {
+          console.warn(`    - ${f}`);
+        }
+      }
+      if (scaffoldResults.managedPreserved.length > 0) {
+        log(
+          `  ${scaffoldResults.managedPreserved.length} managed file(s) preserved (user edits detected)`
+        );
+        for (const f of scaffoldResults.managedPreserved) {
+          logVerbose(`    - ${f}`);
+        }
+      }
+    }
+    const scaffoldOnceSkipped = skippedScaffold - scaffoldResults.managedPreserved.length;
+    if (scaffoldOnceSkipped > 0) {
+      logVerbose(`  ${scaffoldOnceSkipped} scaffold-once file(s) skipped`);
     }
 
     // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
@@ -2149,6 +2487,40 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
     } catch (err) {
       console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
+    }
+
+    // 10. Post-sync prettier formatting — ensure generated files are formatted
+    const prettierBin = resolve(agentkitRoot, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
+    if (existsSync(prettierBin) && writtenFiles.length > 0) {
+      try {
+        // Format in batches to avoid argument length limits
+        const BATCH_SIZE = 50;
+        let formattedCount = 0;
+        for (let i = 0; i < writtenFiles.length; i += BATCH_SIZE) {
+          const batch = writtenFiles.slice(i, i + BATCH_SIZE);
+          try {
+            execFileSync(process.execPath, [prettierBin, '--write', ...batch], {
+              cwd: projectRoot,
+              encoding: 'utf-8',
+              stdio: 'pipe',
+              timeout: 60_000,
+            });
+            formattedCount += batch.length;
+          } catch (err) {
+            if (err?.killed) {
+              logVerbose(`[agentkit:sync] Prettier batch timed out, continuing...`);
+            }
+            // prettier may fail on some files (e.g. non-parseable) — continue
+          }
+        }
+        if (formattedCount > 0) {
+          logVerbose(
+            `[agentkit:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
+          );
+        }
+      } catch {
+        // If prettier is not available or fails entirely, just continue
+      }
     }
 
     if (skippedScaffold > 0) {

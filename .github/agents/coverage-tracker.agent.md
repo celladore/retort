@@ -3,7 +3,7 @@ name: 'Coverage Tracker'
 description: 'Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing coverage thresholds across the codebase.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- coverage/**
-- **/*.test.*
-- **/*.spec.*
-- jest.config.*
-- vitest.config.*
-- .nycrc*
+- coverage/\*\*
+- \*_/_.test.\*
+- \*_/_.spec.\*
+- jest.config.\*
+- vitest.config.\*
+- .nycrc\*
 
 ## Responsibilities
 

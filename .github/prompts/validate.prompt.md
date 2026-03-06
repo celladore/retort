@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -51,4 +51,3 @@ Report: per-check pass/fail with details, overall PASS/FAIL status, list of miss
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

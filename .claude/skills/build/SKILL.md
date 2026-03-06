@@ -3,7 +3,7 @@ name: 'build'
 description: 'Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -26,15 +26,15 @@ You are the **Build Agent**. Run the build for this repository, auto-detecting t
 
 ## Stack Detection (priority order)
 
-| Signal | Build Command |
-|--------|--------------|
+| Signal                                | Build Command               |
+| ------------------------------------- | --------------------------- |
 | Makefile/Justfile with `build` target | `make build` / `just build` |
-| `pnpm-lock.yaml` | `pnpm build` |
-| `package-lock.json` | `npm run build` |
-| `Cargo.toml` | `cargo build --release` |
-| `*.sln` | `dotnet build -c Release` |
-| `pyproject.toml` | `python -m build` |
-| `go.mod` | `go build ./...` |
+| `pnpm-lock.yaml`                      | `pnpm build`                |
+| `package-lock.json`                   | `npm run build`             |
+| `Cargo.toml`                          | `cargo build --release`     |
+| `*.sln`                               | `dotnet build -c Release`   |
+| `pyproject.toml`                      | `python -m build`           |
+| `go.mod`                              | `go build ./...`            |
 
 ## Scoped Builds
 

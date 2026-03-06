@@ -497,7 +497,7 @@ agents:
       notifies:
         - product-manager
       focus:
-        - 'docs/01_product/**'
+        - 'docs/product/**'
         - 'analytics/**'
         - 'apps/marketing/**'
         - 'docs/metrics/**'
@@ -720,7 +720,7 @@ agents:
         - backend
         - frontend
       focus:
-        - 'docs/01_product/**'
+        - 'docs/product/**'
         - 'docs/prd/**'
         - 'docs/roadmap/**'
         - 'docs/features/**'
@@ -759,7 +759,7 @@ agents:
         - project-shipper
       focus:
         - 'docs/roadmap/**'
-        - 'docs/01_product/**'
+        - 'docs/product/**'
         - 'docs/milestones/**'
         - 'CHANGELOG.md'
       responsibilities:
@@ -974,10 +974,11 @@ agents:
       notifies:
         - release-manager
       focus:
-        - 'docs/**'
         - '.github/ISSUE_TEMPLATE/**'
         - '.github/PULL_REQUEST_TEMPLATE/**'
-        - 'docs/ai_handoffs/**'
+        - 'docs/handoffs/**'
+        - '.claude/state/**'
+        - 'AGENT_BACKLOG.md'
       responsibilities:
         - Break down features into deliverable tasks with clear definitions of done
         - Track task progress and remove blockers
@@ -986,6 +987,9 @@ agents:
         - Maintain project boards and issue triage processes
         - Produce delivery status reports and burndown tracking
         - Enforce work-in-progress limits and flow efficiency
+        - Maintain the project risk register in orchestrator.json
+        - Identify, assess, and track technical and delivery risks
+        - Ensure each risk has an owner, severity, mitigation plan, and status
       domain-rules:
         - 'Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles'
         - 'Follow documentation domain rules [doc-8-category-structure, doc-changelog, doc-adr-format] — handoff docs must be current and complete'

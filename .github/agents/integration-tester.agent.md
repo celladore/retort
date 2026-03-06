@@ -3,7 +3,7 @@ name: 'Integration Tester'
 description: 'Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and user workflow scenarios that span multiple system components.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,10 +32,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- e2e/**
-- playwright/**
-- tests/integration/**
-- tests/e2e/**
+- e2e/\*\*
+- playwright/\*\*
+- tests/integration/\*\*
+- tests/e2e/\*\*
 - docker-compose.test.yml
 
 ## Responsibilities

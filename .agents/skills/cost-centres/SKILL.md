@@ -3,7 +3,7 @@ name: 'cost-centres'
 description: 'Cost centre management for cloud infrastructure. Manages budget allocations, resource group mappings, tag compliance, and spend tracking. Requires a FinOps-enabled overlay (finops rule domain). For AI session cost tracking, use /cost instead.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -47,4 +47,3 @@ Invoke this skill when you need to perform the `cost-centres` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

@@ -49,7 +49,7 @@ Each gate is evaluated as:
 
 | #   | Gate                  | Criteria                                                                          | Verification                  |
 | --- | --------------------- | --------------------------------------------------------------------------------- | ----------------------------- |
-| D1  | Product docs updated  | `docs/01_product/` contains problem statement and user stories for this work item | File exists and is non-empty  |
+| D1  | Product docs updated  | `docs/product/` contains problem statement and user stories for this work item | File exists and is non-empty  |
 | D2  | Issue created         | A tracking issue exists in the issue tracker with labels, assignee, and milestone | Issue URL recorded in backlog |
 | D3  | Scope identified      | Affected teams and file scope patterns are documented                             | Listed in backlog entry       |
 | D4  | Stakeholders notified | Relevant teams have been tagged or notified of the upcoming work                  | Notification logged in state  |
@@ -59,12 +59,12 @@ Each gate is evaluated as:
 | #   | Gate                 | Criteria                                                          | Verification                   |
 | --- | -------------------- | ----------------------------------------------------------------- | ------------------------------ |
 | D5  | User research        | User interviews or data analysis supporting the problem statement | Link to research artifact      |
-| D6  | Competitive analysis | Review of how similar problems are solved elsewhere               | Document in `docs/01_product/` |
+| D6  | Competitive analysis | Review of how similar problems are solved elsewhere               | Document in `docs/product/` |
 
 ### Discovery Checklist
 
 ```markdown
-- [ ] Problem statement written in docs/01_product/
+- [ ] Problem statement written in docs/product/
 - [ ] User stories or acceptance criteria defined
 - [ ] Tracking issue created with appropriate labels
 - [ ] Affected teams identified (minimum: primary team)
@@ -81,9 +81,9 @@ Each gate is evaluated as:
 
 | #   | Gate                | Criteria                                                                                                | Verification                                       |
 | --- | ------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| P1  | ADRs authored       | Architecture Decision Records created for significant technical decisions                               | Files exist in `docs/adr/` or `docs/02_specs/adr/` |
+| P1  | ADRs authored       | Architecture Decision Records created for significant technical decisions                               | Files exist in `docs/adr/` or `docs/architecture/specs/adr/` |
 | P2  | ADRs approved       | ADRs have been reviewed and approved by relevant team leads                                             | Approval recorded (comment or status)              |
-| P3  | Specs complete      | Technical specification in `docs/02_specs/` covers approach, API contracts, data models, and edge cases | Spec document exists and reviewed                  |
+| P3  | Specs complete      | Technical specification in `docs/architecture/specs/` covers approach, API contracts, data models, and edge cases | Spec document exists and reviewed                  |
 | P4  | Tasks broken down   | Work is decomposed into tasks assigned to specific teams                                                | Tasks listed in AGENT_BACKLOG.md                   |
 | P5  | Dependencies mapped | Cross-team dependencies identified and sequenced                                                        | Dependency table updated                           |
 
@@ -100,7 +100,7 @@ Each gate is evaluated as:
 ```markdown
 - [ ] ADR(s) written for key decisions
 - [ ] ADR(s) approved by relevant reviewers
-- [ ] Technical spec complete in docs/02_specs/
+- [ ] Technical spec complete in docs/architecture/specs/
 - [ ] API contracts defined (if applicable)
 - [ ] Data model changes documented (if applicable)
 - [ ] Tasks created and assigned in AGENT_BACKLOG.md
@@ -192,7 +192,7 @@ Each gate is evaluated as:
 | #   | Gate                    | Criteria                                                                                                         | Verification         |
 | --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
 | S1  | PR merged               | Pull request merged to the target branch                                                                         | Merge commit exists  |
-| S2  | Operations docs updated | `docs/05_operations/` reflects any new operational procedures, configuration changes, or monitoring requirements | Docs updated         |
+| S2  | Operations docs updated | `docs/operations/` reflects any new operational procedures, configuration changes, or monitoring requirements | Docs updated         |
 | S3  | CHANGELOG updated       | CHANGELOG.md has an entry for this change under the appropriate section                                          | Entry exists         |
 | S4  | Deployment successful   | Change deployed to target environment without errors                                                             | Deployment log       |
 | S5  | Monitoring confirmed    | No anomalies in error rates, latency, or resource usage post-deploy                                              | Monitoring dashboard |
@@ -209,7 +209,7 @@ Each gate is evaluated as:
 
 ```markdown
 - [ ] Pull request merged
-- [ ] docs/05_operations/ updated (if applicable)
+- [ ] docs/operations/ updated (if applicable)
 - [ ] CHANGELOG.md entry added
 - [ ] Deployment completed successfully
 - [ ] Post-deploy monitoring reviewed (15-minute window minimum)

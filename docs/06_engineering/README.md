@@ -11,3 +11,6 @@
 - [03_testing.md](./03_testing.md)
 - [04_git_workflow.md](./04_git_workflow.md)
 - [05_security.md](./05_security.md)
+- [06_pr_documentation.md](./06_pr_documentation.md)
+- [07_changelog.md](./07_changelog.md)
+- [08_scaffold_management.md](./08_scaffold_management.md)

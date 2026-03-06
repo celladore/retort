@@ -181,7 +181,7 @@ criteria, activities, and exit criteria (quality gates).
 - **Objective**: Understand the problem space and gather requirements.
 - **Activities**:
   - Review related issues, discussions, and prior art
-  - Update `docs/01_product/` with problem statement and user stories
+  - Update `docs/product/` with problem statement and user stories
   - Create or link a tracking issue
   - Identify affected teams and scope
 - **Exit criteria**: Product docs updated, issue created, teams identified.
@@ -191,7 +191,7 @@ criteria, activities, and exit criteria (quality gates).
 - **Objective**: Design the solution and get alignment.
 - **Activities**:
   - Author ADR(s) for significant decisions
-  - Complete technical specification in `docs/02_specs/`
+  - Complete technical specification in `docs/architecture/specs/`
   - Break work into tasks and assign to teams
   - Identify risks and dependencies
 - **Exit criteria**: ADRs approved, specs complete, tasks assigned.
@@ -222,7 +222,7 @@ criteria, activities, and exit criteria (quality gates).
 - **Objective**: Deploy and document.
 - **Activities**:
   - Merge pull request
-  - Update `docs/05_operations/` with any operational changes
+  - Update `docs/operations/` with any operational changes
   - Update CHANGELOG.md
   - Monitor deployment for regressions
 - **Exit criteria**: Merged, operational docs updated, monitoring confirmed.

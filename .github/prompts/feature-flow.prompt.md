@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Traces a specific feature end-to-end through the kit: shows which spec files define it, which template vars it injects, which templates consume those vars, what generated output it produces, and what overlay settings control it. Use this to understand or debug a feature's behavior.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -48,4 +48,3 @@ When invoked, follow the AgentKit Forge orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

@@ -1,3 +1,7 @@
+---
+agentkit:
+  scaffold: managed
+---
 # Issues
 
 Historical records of issues encountered during development sessions.

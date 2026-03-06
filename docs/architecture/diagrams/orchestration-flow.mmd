@@ -1,0 +1,22 @@
+%% Orchestration Flow — Target State
+%% Shows how /orchestrate delegates through phases to team commands with agent personas
+
+flowchart TD
+    U[User] -->|"/orchestrate"| O[Orchestrator]
+    O -->|Phase 1| D["/discover"]
+    O -->|Phase 2| H["/plan"]
+    O -->|Phase 3| TC["/team-X command"]
+    O -->|Phase 4| V["/check + /review"]
+    O -->|Phase 5| S["/deploy + /document-history"]
+
+    TC -->|"reads teams.yaml"| TS[Team Scope + Globs]
+    TC -->|"injects via sync"| AP[Agent Personas]
+
+    AP --> PM["Product Manager\n(role, responsibilities, conventions)"]
+    AP --> PS["Project Shipper\n(role, responsibilities, conventions)"]
+    AP --> RM["Release Manager\n(role, responsibilities, conventions)"]
+
+    style AP fill:#9f9,stroke:#090
+    style PM fill:#e8f5e9
+    style PS fill:#e8f5e9
+    style RM fill:#e8f5e9

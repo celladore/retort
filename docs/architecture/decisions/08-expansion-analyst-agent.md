@@ -182,7 +182,7 @@ Development should **stop entirely** if any of the following are observed:
 
 ## References
 
-- Feasibility analysis: `docs/03_architecture/expansion-agent-analysis.md`
+- Feasibility analysis: `docs/architecture/expansion-agent-analysis.md`
 - Task protocol: `.agentkit/engines/node/src/task-protocol.mjs`
 - Discovery engine: `.agentkit/engines/node/src/discover.mjs`
 - Project completeness: `.agentkit/engines/node/src/project-completeness.mjs`

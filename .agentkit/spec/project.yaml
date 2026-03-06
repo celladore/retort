@@ -51,11 +51,11 @@ documentation:
   hasPrd: true
   prdPath: docs/prd/ # e.g. docs/prd/
   hasAdr: true
-  adrPath: docs/03_architecture/02_decisions/ # e.g. docs/03_architecture/03_decisions/
+  adrPath: docs/architecture/decisions/ # e.g. docs/architecture/decisions/
   hasApiSpec: true
-  apiSpecPath: docs/04_api/ # e.g. docs/api/openapi/
+  apiSpecPath: docs/api/ # e.g. docs/api/openapi/
   hasTechnicalSpec: true
-  technicalSpecPath: docs/02_specs/
+  technicalSpecPath: docs/architecture/specs/
   hasDesignSystem: false
   designSystemPath: null # e.g. packages/ui/
   storybook: false

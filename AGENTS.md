@@ -56,9 +56,9 @@ Always run the full test suite before creating a pull request. Never disable or 
 ## Documentation
 
 - **PRDs**: `docs/prd/`
-- **ADRs**: `docs/03_architecture/02_decisions/`
-- **API Spec**: `docs/04_api/`
-- **Technical Spec**: `docs/02_specs/`
+- **ADRs**: `docs/architecture/decisions/`
+- **API Spec**: `docs/api/`
+- **Technical Spec**: `docs/architecture/specs/`
 
 - **Brand Guide**: `.agentkit/spec/brand.yaml` — AgentKit Forge (primary: `#1976D2`)
 

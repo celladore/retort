@@ -459,6 +459,21 @@ features:
     templateVars:
       - hasProjectReview
 
+  - id: project-status
+    name: Project Status Dashboard
+    category: workflow
+    description: >-
+      Unified project management dashboard that aggregates orchestrator state,
+      backlog, task progress, risks, and delivery metrics into a markdown or
+      JSON report. Provides at-a-glance visibility into project health.
+    alwaysOn: false
+    default: false
+    dependencies: [team-orchestration]
+    templateVars:
+      - hasProjectStatus
+    affectsTemplates:
+      - claude/commands/project-status.md
+
 # =============================================================================
 # Feature presets — named bundles for common adoption patterns
 # =============================================================================
@@ -485,8 +500,9 @@ features:
 # mcp-integration          |         |      |          |  x
 # healthcheck              |         |      |          |  x
 # project-review           |         |      |          |  x
+# project-status           |         |      |    x     |  x
 # -------------------------|---------|------|----------|-----
-# Total (+ 2 core)         |   5     |  8   |   12     | 20
+# Total (+ 2 core)         |   5     |  8   |   13     | 22
 #
 # Note: Core features (spec-sync, project-context) are always-on in all presets.
 
@@ -543,8 +559,9 @@ presets:
       - permission-guards
       - sensitive-file-protection
       - ci-automation
+      - project-status
 
-  # FULL — 18 features + 2 core = 20 total
+  # FULL — 19 features + 2 core = 21 total
   # Use-case: Everything the kit offers. Includes cost tracking, MCP server
   # configs, dependency management automation, session handoff, external
   # knowledge integration, healthcheck, and project review.
@@ -574,3 +591,4 @@ presets:
       - healthcheck
       - infra-eval
       - project-review
+      - project-status

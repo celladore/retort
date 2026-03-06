@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -36,12 +36,12 @@ pnpm -C .agentkit agentkit:sync
 
 ## Flags
 
-| Flag | Effect |
-|------|--------|
+| Flag              | Effect                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------- |
 | `--only <target>` | Sync only one platform (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp) |
-| `--overwrite` | Overwrite project-owned (scaffold-once) files |
-| `--diff` | Preview changes without writing |
-| `--no-clean` | Keep orphaned files that would normally be removed |
+| `--overwrite`     | Overwrite project-owned (scaffold-once) files                                               |
+| `--diff`          | Preview changes without writing                                                             |
+| `--no-clean`      | Keep orphaned files that would normally be removed                                          |
 
 ## Post-Sync
 
@@ -82,4 +82,3 @@ This command requires shell access (Bash tool). On platforms with restricted too
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

@@ -3,7 +3,7 @@ name: 'Dependency Watcher'
 description: 'Dependency management specialist responsible for monitoring, updating, and auditing project dependencies across all tech stacks. Ensures supply chain security and version freshness. During code review, validates that new or updated dependencies are well-maintained, license-compatible, and free of known vulnerabilities.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -37,8 +37,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Cargo.toml
 - Cargo.lock
 - pyproject.toml
-- requirements*.txt
-- *.csproj
+- requirements\*.txt
+- \*.csproj
 - Directory.Packages.props
 
 ## Responsibilities

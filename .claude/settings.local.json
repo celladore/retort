@@ -43,7 +43,8 @@
       "Bash(xargs basename -a)",
       "Bash(ls -la /c/Users/smitj/repos/agentkit-forge/*.md)",
       "Bash(ls -d /c/Users/smitj/repos/agentkit-forge/.*)",
-      "Bash(grep -n \"\\\\.claude/state\\\\|\\\\.claude.*state\" .agentkit/engines/node/src/__tests__/*.mjs)"
+      "Bash(grep -n \"\\\\.claude/state\\\\|\\\\.claude.*state\" .agentkit/engines/node/src/__tests__/*.mjs)",
+      "Bash(pnpm -C .agentkit vitest run engines/node/src/__tests__/template-utils.test.mjs)"
     ]
   }
 }

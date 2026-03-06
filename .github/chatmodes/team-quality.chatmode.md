@@ -3,7 +3,7 @@ name: 'QUALITY'
 description: 'Team QUALITY — Code review, refactoring, bugs, reliability, session retrospectives'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -15,7 +15,7 @@ last_updated: '2026-03-05'
 # Team: QUALITY
 
 **Focus**: Code review, refactoring, bugs, reliability, session retrospectives
-**Scope**: **/*
+**Scope**: \*_/_
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: **/*
+- Own all code within scope: \*_/_
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

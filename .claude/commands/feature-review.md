@@ -1,9 +1,9 @@
 ---
-description: "Review kit feature configuration — audit, recommend, and analyze feature adoption"
-allowed-tools: ""
-generated_by: "agentkit-forge"
-last_model: "sync-engine"
-last_updated: "2026-03-05"
+description: 'Review kit feature configuration — audit, recommend, and analyze feature adoption'
+allowed-tools: ''
+generated_by: 'agentkit-forge'
+last_model: 'sync-engine'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -22,9 +22,9 @@ This repository uses **AgentKit Forge** feature management. Features are defined
 
 ### Current Feature Configuration
 
-- **Enabled**: 12 / 21 features
+- **Enabled**: 13 / 22 features
 - **core**: spec-sync, project-context
-- **workflow**: team-orchestration, agent-personas, slash-commands
+- **workflow**: team-orchestration, agent-personas, slash-commands, project-status
 - **quality**: quality-gates, code-review, coding-rules
 - **docs**: doc-scaffolding
 - **security**: permission-guards, sensitive-file-protection
@@ -76,16 +76,20 @@ Based on `$ARGUMENTS`, perform one or more of these review modes:
 ## Feature Review — agentkit-forge
 
 ### Configuration
+
 - Mode: [preset: <name> | explicit list | defaults]
 - Enabled: <N> / <total> features
 
 ### Status by Category
+
 [Category tables with enabled/disabled status]
 
 ### Findings
+
 [Issues, recommendations, audit results]
 
 ### Recommended Actions
+
 [Specific agentkit commands to run]
 ```
 

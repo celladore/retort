@@ -1,3 +1,7 @@
+---
+agentkit:
+  scaffold: managed
+---
 # Implementations
 
 Historical records of major implementations, architecture changes, and significant refactoring.

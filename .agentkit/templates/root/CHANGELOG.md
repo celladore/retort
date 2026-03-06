@@ -37,4 +37,4 @@ Activate the commit template: `git config commit.template .gitmessage`
 
 _Maintained by AgentKit Forge. Update this file as part of the Ship phase._
 _For significant changes, also create a history document: `./scripts/create-doc.sh <type> "<title>" <pr>`_
-_See [Changelog Best Practices](docs/06_engineering/07_changelog.md) for tooling options._
+_See [Changelog Best Practices](docs/engineering/07_changelog.md) for tooling options._

@@ -234,8 +234,8 @@ renderTargets:
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `.claude/` directory               | Back up, then let `sync` regenerate. Merge any custom commands into your overlay's `commands.yaml`           |
 | `.cursor/rules/`                   | Back up custom rules. Add them to `.agentkit/overlays/<repo>/rules.yaml` to have them rendered automatically |
-| `.github/PULL_REQUEST_TEMPLATE.md` | Keep yours — sync uses scaffold-once and won't overwrite existing files                                      |
-| `.editorconfig`                    | Keep yours — sync uses scaffold-once and won't overwrite existing files                                      |
+| `.github/PULL_REQUEST_TEMPLATE.md` | Keep yours — sync uses `once` mode and won't overwrite existing files                                        |
+| `.editorconfig`                    | Keep yours — sync uses `once` mode and won't overwrite existing files                                        |
 | `CLAUDE.md`                        | Move custom instructions into your overlay or into `.agentkit/spec/`                                         |
 
 ### Step 6 — Run sync, validate, and commit
@@ -399,7 +399,7 @@ git add .agentkit/ .gitignore .gitattributes
 git commit -m "chore: upgrade agentkit-forge to latest"
 ```
 
-> **Note:** If the upgrade adds new scaffold-once files (docs, templates, editor configs), they will appear as untracked after your first `sync`. This is expected — review them and `git add` the ones you want to keep. Subsequent syncs will not overwrite them. Use `pnpm -C .agentkit agentkit:sync --overwrite` to regenerate all project-owned files from templates.
+> **Note:** If the upgrade adds new files with `once` scaffold mode (docs, editor configs), they appear as untracked after your first `sync`. This is expected — review them and `git add` the ones you want to keep. Files with `managed` mode are regenerated if pristine or merged with your edits. Files with `always` mode are always overwritten. Use `--overwrite` to force-regenerate everything. See [Scaffold Management Guide](docs/06_engineering/08_scaffold_management.md) for details.
 
 Your overlay (`overlays/<your-repo>/`) is never touched by upstream merges. See the **[Migration Guide](.agentkit/docs/MIGRATION_GUIDE.md)** for detailed upgrade paths and conflict resolution.
 

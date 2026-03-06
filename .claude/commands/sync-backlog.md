@@ -3,7 +3,7 @@ description: 'Update AGENT_BACKLOG.md with current findings, state, and code TOD
 allowed-tools: Bash(git *), Bash(grep *), Bash(find *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -122,12 +122,12 @@ The area determines which team the item is routed to via `teams.yaml` intake rou
 
 When a backlog item originates from a bug report or incident, include a severity tag:
 
-| Severity     | Meaning                                              |
-| ------------ | ---------------------------------------------------- |
+| Severity     | Meaning                                                |
+| ------------ | ------------------------------------------------------ |
 | **critical** | Complete failure, data loss, or security vulnerability |
-| **high**     | Major functionality broken                            |
-| **medium**   | Partial functionality impaired                        |
-| **low**      | Minor issue, cosmetic or edge-case                    |
+| **high**     | Major functionality broken                             |
+| **medium**   | Partial functionality impaired                         |
+| **low**      | Minor issue, cosmetic or edge-case                     |
 
 ### Escalation Rules
 

@@ -3,7 +3,7 @@ name: 'cost'
 description: 'Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -29,12 +29,12 @@ Invoke this skill when you need to perform the `cost` operation.
 
 ## Available Views
 
-| Command | Description |
-|---------|-------------|
-| `--summary` | Recent session overview with durations and file counts |
-| `--sessions` | List all recent sessions |
-| `--report --month YYYY-MM` | Monthly aggregate report |
-| `--report --format json` | Export report as JSON |
+| Command                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| `--summary`                | Recent session overview with durations and file counts |
+| `--sessions`               | List all recent sessions                               |
+| `--report --month YYYY-MM` | Monthly aggregate report                               |
+| `--report --format json`   | Export report as JSON                                  |
 
 ## Notes
 

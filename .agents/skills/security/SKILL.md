@@ -3,7 +3,7 @@ name: 'security'
 description: 'Runs security-focused analysis: dependency vulnerability scanning, secret detection, OWASP compliance checks, and permission auditing. Generates a security report with severity ratings.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -44,12 +44,12 @@ Search for: API keys, AWS keys, private keys, connection strings, passwords, tok
 
 ## Severity Classification
 
-| Severity | Criteria |
-|----------|----------|
+| Severity | Criteria                                                            |
+| -------- | ------------------------------------------------------------------- |
 | CRITICAL | Exploitable remotely, no auth required, data breach or RCE possible |
-| HIGH | Low complexity exploit, auth bypass, significant data exposure |
-| MEDIUM | Requires specific conditions, limited impact, defense-in-depth gap |
-| LOW | Best practice violation, minimal direct impact |
+| HIGH     | Low complexity exploit, auth bypass, significant data exposure      |
+| MEDIUM   | Requires specific conditions, limited impact, defense-in-depth gap  |
+| LOW      | Best practice violation, minimal direct impact                      |
 
 ## Output
 
@@ -76,4 +76,3 @@ Produce: Executive Summary, Risk Score, Findings by severity (with ID, file:line
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

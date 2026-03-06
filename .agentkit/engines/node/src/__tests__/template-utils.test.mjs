@@ -7,6 +7,8 @@ import {
   mergePermissions,
   insertHeader,
   isScaffoldOnce,
+  parseTemplateFrontmatter,
+  resolveScaffoldAction,
   resolveConditionals,
   resolveEachBlocks,
   replacePlaceholders,
@@ -315,7 +317,7 @@ describe('isScaffoldOnce', () => {
 
   it('identifies docs/ directory files', () => {
     expect(isScaffoldOnce('docs/README.md')).toBe(true);
-    expect(isScaffoldOnce('docs/01_product/overview.md')).toBe(true);
+    expect(isScaffoldOnce('docs/product/overview.md')).toBe(true);
   });
 
   it('identifies .vscode/ directory files', () => {
@@ -354,6 +356,156 @@ describe('isScaffoldOnce', () => {
 
     expect(isScaffoldOnce('docs/README.md', vars)).toBe(false);
     expect(isScaffoldOnce('CLAUDE.md', vars)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseTemplateFrontmatter
+// ---------------------------------------------------------------------------
+describe('parseTemplateFrontmatter', () => {
+  it('returns null meta and original content when no frontmatter', () => {
+    const template = '# Hello World\nSome content here.';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toBeNull();
+    expect(result.content).toBe(template);
+  });
+
+  it('parses scaffold: always directive', () => {
+    const template = '---\nagentkit:\n  scaffold: always\n---\n# Hello';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toEqual({ agentkit: { scaffold: 'always' } });
+    expect(result.content).toBe('# Hello');
+  });
+
+  it('parses scaffold: managed directive', () => {
+    const template = '---\nagentkit:\n  scaffold: managed\n---\n# Hello';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toEqual({ agentkit: { scaffold: 'managed' } });
+    expect(result.content).toBe('# Hello');
+  });
+
+  it('parses scaffold: once directive', () => {
+    const template = '---\nagentkit:\n  scaffold: once\n---\n# Hello';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toEqual({ agentkit: { scaffold: 'once' } });
+    expect(result.content).toBe('# Hello');
+  });
+
+  it('strips frontmatter from content', () => {
+    const template =
+      '---\nagentkit:\n  scaffold: always\n---\n<!-- GENERATED -->\n# Title\nBody text';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.content).toBe('<!-- GENERATED -->\n# Title\nBody text');
+    expect(result.content).not.toContain('---');
+    expect(result.content).not.toContain('scaffold');
+  });
+
+  it('does not confuse horizontal rules with frontmatter', () => {
+    const template = '# Title\n\n---\nSome content\n---\nMore content';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toBeNull();
+    expect(result.content).toBe(template);
+  });
+
+  it('returns null meta when closing --- is missing', () => {
+    const template = '---\nagentkit:\n  scaffold: always\nNo closing marker';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toBeNull();
+    expect(result.content).toBe(template);
+  });
+
+  it('preserves unknown keys in meta (forward-compatible)', () => {
+    const template = '---\nagentkit:\n  scaffold: managed\n  version: 2\n---\n# Content';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta.agentkit.scaffold).toBe('managed');
+    expect(result.meta.agentkit.version).toBe('2');
+  });
+
+  it('handles top-level flat keys', () => {
+    const template = '---\ntitle: My Doc\nagentkit:\n  scaffold: always\n---\nBody';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta.title).toBe('My Doc');
+    expect(result.meta.agentkit.scaffold).toBe('always');
+  });
+
+  it('handles empty frontmatter block', () => {
+    const template = '---\n---\n# Content';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta).toEqual({});
+    expect(result.content).toBe('# Content');
+  });
+
+  it('handles frontmatter with comment lines', () => {
+    const template = '---\n# This is a comment\nagentkit:\n  scaffold: managed\n---\nBody';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta.agentkit.scaffold).toBe('managed');
+  });
+
+  it('handles values containing colons', () => {
+    const template = '---\nurl: http://example.com\n---\nBody';
+    const result = parseTemplateFrontmatter(template);
+    expect(result.meta.url).toBe('http://example.com');
+    expect(result.content).toBe('Body');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveScaffoldAction
+// ---------------------------------------------------------------------------
+describe('resolveScaffoldAction', () => {
+  it('returns write for scaffold: always', () => {
+    const meta = { agentkit: { scaffold: 'always' } };
+    expect(resolveScaffoldAction('docs/README.md', {}, meta)).toBe('write');
+  });
+
+  it('returns check-hash for scaffold: managed', () => {
+    const meta = { agentkit: { scaffold: 'managed' } };
+    expect(resolveScaffoldAction('docs/product/README.md', {}, meta)).toBe('check-hash');
+  });
+
+  it('returns skip for scaffold: once', () => {
+    const meta = { agentkit: { scaffold: 'once' } };
+    expect(resolveScaffoldAction('some/file.md', {}, meta)).toBe('skip');
+  });
+
+  it('falls through to isScaffoldOnce when no meta', () => {
+    // docs/ is scaffold-once by default
+    expect(resolveScaffoldAction('docs/README.md', {}, null)).toBe('skip');
+    // CLAUDE.md is not scaffold-once
+    expect(resolveScaffoldAction('CLAUDE.md', {}, null)).toBe('write');
+  });
+
+  it('falls through to isScaffoldOnce when meta has no agentkit key', () => {
+    const meta = { title: 'Some Doc' };
+    expect(resolveScaffoldAction('docs/README.md', {}, meta)).toBe('skip');
+  });
+
+  it('always overrides scaffold-once dirs when set to always', () => {
+    const meta = { agentkit: { scaffold: 'always' } };
+    // docs/ is normally scaffold-once, but always overrides it
+    expect(resolveScaffoldAction('docs/README.md', {}, meta)).toBe('write');
+    expect(resolveScaffoldAction('docs/product/README.md', {}, meta)).toBe('write');
+  });
+
+  it('managed overrides scaffold-once dirs', () => {
+    const meta = { agentkit: { scaffold: 'managed' } };
+    expect(resolveScaffoldAction('docs/engineering/README.md', {}, meta)).toBe('check-hash');
+  });
+
+  it('respects vars override lists when no frontmatter', () => {
+    const vars = {
+      languageProfileScaffoldAlwaysRegenerateList: ['docs/README.md'],
+    };
+    expect(resolveScaffoldAction('docs/README.md', vars, null)).toBe('write');
+  });
+
+  it('frontmatter takes priority over vars override lists', () => {
+    const meta = { agentkit: { scaffold: 'managed' } };
+    const vars = {
+      languageProfileScaffoldAlwaysRegenerateList: ['docs/README.md'],
+    };
+    // Frontmatter says managed, vars say always-regenerate — frontmatter wins
+    expect(resolveScaffoldAction('docs/README.md', vars, meta)).toBe('check-hash');
   });
 });
 

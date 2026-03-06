@@ -1,11 +1,11 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-05 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-06 -->
 <!-- Format: Plain Markdown team rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
 # Team: QUALITY
 
 **Focus**: Code review, refactoring, bugs, reliability, session retrospectives
-**Scope**: **/*
+**Scope**: \*_/_
 
 ## Persona
 

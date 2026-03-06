@@ -3,7 +3,7 @@ description: 'Manage the project brand spec — validate, preview palette, audit
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash(npx agentkit *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -32,7 +32,6 @@ When `--all` is given, run `--validate` + `--palette` + `--theme` + `--contrast`
 
 - **Brand Name**: AgentKit Forge
 - **Primary Color**: `#1976D2`
-  
   - **Editor Theme**: `.agentkit/spec/editor-theme.yaml` (enabled, source: brand)
 
 ---

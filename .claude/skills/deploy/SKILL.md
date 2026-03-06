@@ -3,7 +3,7 @@ name: 'deploy'
 description: 'Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -33,14 +33,14 @@ Invoke this skill when you need to perform the `deploy` operation.
 
 ## Deployment Detection
 
-| Signal | Platform | Deploy Command |
-|--------|----------|---------------|
-| `vercel.json` | Vercel | `vercel --prod` / `vercel` |
-| `netlify.toml` | Netlify | `netlify deploy --prod` |
-| `fly.toml` | Fly.io | `fly deploy` |
-| `wrangler.toml` | Cloudflare | `wrangler deploy` |
-| Dockerfile + k8s/ | Kubernetes | `kubectl apply -f k8s/` |
-| `package.json` deploy script | Custom | `pnpm deploy` |
+| Signal                       | Platform   | Deploy Command             |
+| ---------------------------- | ---------- | -------------------------- |
+| `vercel.json`                | Vercel     | `vercel --prod` / `vercel` |
+| `netlify.toml`               | Netlify    | `netlify deploy --prod`    |
+| `fly.toml`                   | Fly.io     | `fly deploy`               |
+| `wrangler.toml`              | Cloudflare | `wrangler deploy`          |
+| Dockerfile + k8s/            | Kubernetes | `kubectl apply -f k8s/`    |
+| `package.json` deploy script | Custom     | `pnpm deploy`              |
 
 ## Flow
 

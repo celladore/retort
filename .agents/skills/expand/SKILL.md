@@ -3,7 +3,7 @@ name: 'expand'
 description: 'Runs the expansion analyzer to identify gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces a ranked list of suggestions with rationale, impact scores, and effort estimates. Never creates tasks in analysis mode — all suggestions require explicit human approval. Use --save to persist suggestions to disk for later review.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -47,4 +47,3 @@ Invoke this skill when you need to perform the `expand` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

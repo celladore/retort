@@ -985,7 +985,7 @@ Review all changes made across both sessions (backend + frontend).
 ## Next 3 Actions
 1. Create pull request for feature/notifications branch
 2. Add E2E test for the full notification flow (send -> receive -> read)
-3. Update API documentation in docs/04_api/ with notification endpoints
+3. Update API documentation in docs/api/ with notification endpoints
 ```
 
 ---

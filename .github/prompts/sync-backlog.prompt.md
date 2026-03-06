@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -89,4 +89,3 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
 - Blocked cross-team escalation: `product`
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
-

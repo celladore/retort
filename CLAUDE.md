@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-05 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-06 -->
 <!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
 
@@ -13,40 +13,35 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 - **Repository**: agentkit-forge
 - **Default Branch**: main
 - **Framework Version**: 3.1.0
-  
 
 - **Phase**: active
 
 ## Tech Stack
 
 - **Languages**: javascript, yaml, markdown
-  
   - **Backend**: node.js
-  
   - **ORM**: none
   - **Database**: none
   - **Messaging**: none
   - **Architecture**: monolith
   - **API Style**: mixed
-  
-  
 
 ## Quick Reference
 
-| Command              | Purpose                                      |
-| -------------------- | -------------------------------------------- |
-| `/orchestrate`       | Master coordinator — assess, plan, delegate  |
-| `/discover`          | Scan codebase, detect tech stacks            |
-| `/review`            | Code review with quality gates               |
-| `/check`             | Universal quality gate (lint + test + build) |
-| `/plan`              | Structured planning before implementation    |
-| `/build`             | Build project (auto-detects stack)           |
-| `/test`              | Run tests (auto-detects stack)               |
-| `/format`            | Format code (auto-detects stack)             |
-| `/deploy`            | Deployment automation                        |
-| `/security`          | Security audit                               |
-| `/sync-backlog`      | Update AGENT_BACKLOG.md                      |
-| `/document-history`  | Create history doc for completed work        |
+| Command             | Purpose                                      |
+| ------------------- | -------------------------------------------- |
+| `/orchestrate`      | Master coordinator — assess, plan, delegate  |
+| `/discover`         | Scan codebase, detect tech stacks            |
+| `/review`           | Code review with quality gates               |
+| `/check`            | Universal quality gate (lint + test + build) |
+| `/plan`             | Structured planning before implementation    |
+| `/build`            | Build project (auto-detects stack)           |
+| `/test`             | Run tests (auto-detects stack)               |
+| `/format`           | Format code (auto-detects stack)             |
+| `/deploy`           | Deployment automation                        |
+| `/security`         | Security audit                               |
+| `/sync-backlog`     | Update AGENT_BACKLOG.md                      |
+| `/document-history` | Create history doc for completed work        |
 
 ## Team Commands
 
@@ -89,7 +84,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 ### Authentication
 
 Provider: custom-jwt, strategy: jwt-bearer.
- RBAC is enforced.
+RBAC is enforced.
 
 ### API
 
@@ -117,8 +112,8 @@ Always run the full test suite before creating a PR.
 ## Documentation
 
 - **PRDs**: `docs/prd/`
-- **ADRs**: `docs/03_architecture/02_decisions/`
-- **API Spec**: `docs/04_api/`
+- **ADRs**: `docs/architecture/decisions/`
+- **API Spec**: `docs/api/`
 
 - **Brand Guide**: `.agentkit/spec/brand.yaml` — AgentKit Forge (primary: `#1976D2`)
 
@@ -130,27 +125,30 @@ After completing significant work (bug fixes, features, implementations, or migr
 ./scripts/create-doc.sh <type> "<title>" [pr-number]
 ```
 
-| Work Type | Command | Trigger |
-| --- | --- | --- |
-| Bug fix (non-trivial) | `./scripts/create-doc.sh bugfix "Title"` | Any bug fix touching 2+ files or requiring root-cause analysis |
-| New feature | `./scripts/create-doc.sh feature "Title"` | Any user-facing feature or new capability |
-| Implementation | `./scripts/create-doc.sh implementation "Title"` | Architecture changes, refactors, new subsystems |
-| Migration | `./scripts/create-doc.sh migration "Title"` | Library upgrades, data migrations, infrastructure changes |
+| Work Type             | Command                                          | Trigger                                                        |
+| --------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
+| Bug fix (non-trivial) | `./scripts/create-doc.sh bugfix "Title"`         | Any bug fix touching 2+ files or requiring root-cause analysis |
+| New feature           | `./scripts/create-doc.sh feature "Title"`        | Any user-facing feature or new capability                      |
+| Implementation        | `./scripts/create-doc.sh implementation "Title"` | Architecture changes, refactors, new subsystems                |
+| Migration             | `./scripts/create-doc.sh migration "Title"`      | Library upgrades, data migrations, infrastructure changes      |
 
-Templates are in `docs/history/` — fill in all sections after generation. The `/review --focus=retrospective` command captures issues and lessons learned separately. See `docs/06_engineering/06_pr_documentation.md` for the full strategy.
+Templates are in `docs/history/` — fill in all sections after generation. The `/review --focus=retrospective` command captures issues and lessons learned separately. See `docs/engineering/06_pr_documentation.md` for the full strategy.
 
-All project documentation follows the unified 8-category structure in `docs/`:
+All project documentation follows a domain-driven structure in `docs/`:
 
-| Category           | Purpose                                        |
-| ------------------ | ---------------------------------------------- |
-| `01_product/`      | Product vision, strategy, personas, metrics    |
-| `02_specs/`        | Architecture specs, system design              |
-| `03_architecture/` | Diagrams, ADRs, tech stack decisions           |
-| `04_api/`          | API reference, authentication, versioning      |
-| `05_operations/`   | Deployment, monitoring, SLAs                   |
-| `06_engineering/`  | Setup, coding standards, testing, contributing |
-| `07_integrations/` | External services, third-party connections     |
-| `08_reference/`    | Glossary, acronyms, FAQ, tool config           |
+| Category         | Purpose                                        |
+| ---------------- | ---------------------------------------------- |
+| `product/`       | Product vision, strategy, personas, PRDs       |
+| `architecture/`  | Specs, ADRs, diagrams, tech stack decisions    |
+| `orchestration/` | Orchestration guide, PM guide, protocols       |
+| `agents/`        | Agent catalog, roles, team mappings            |
+| `api/`           | API reference, authentication, versioning      |
+| `operations/`    | Deployment, monitoring, SLAs                   |
+| `engineering/`   | Setup, coding standards, testing, contributing |
+| `integrations/`  | External services, third-party connections     |
+| `reference/`     | Glossary, acronyms, FAQ, tool config           |
+| `handoffs/`      | AI session handoff documents                   |
+| `history/`       | Bug fixes, features, implementations, lessons  |
 
 ## Infrastructure Conventions
 
@@ -158,16 +156,12 @@ All project documentation follows the unified 8-category structure in `docs/`:
   - **Default region**: global
   - **Organisation prefix**: akf
   - **Preferred IaC toolchain**: terraform, terragrunt
-  
-  
   - **Mandatory tags** (required on every taggable resource): `environment, project, owner, cost_center`
   - **Optional tags** (recommended): `team, created_by, managed_by`
 
 > **Tagging is enforced.** When creating or modifying IaC resources, always include
 > the mandatory tags listed above. Use a shared `locals` block or Terragrunt `inputs`
 > for consistency. See `.claude/rules/iac.md` for examples.
-> 
-> 
 
 ## Task Delegation Protocol
 

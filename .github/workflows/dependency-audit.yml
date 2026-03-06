@@ -110,4 +110,3 @@ jobs:
           echo "| Stack | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Node.js | ${{ needs.audit-node.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-

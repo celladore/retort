@@ -54,7 +54,7 @@ curl -X DELETE https://api.example.com/v1/resource/RESOURCE_ID \
 
 ## SDK Usage
 
-<!-- Add language-specific SDK examples here. See docs/07_integrations/03_sdk.md. -->
+<!-- Add language-specific SDK examples here. See docs/integrations/03_sdk.md. -->
 
 ## References
 

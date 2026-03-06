@@ -19,5 +19,8 @@ COMMAND_GUIDE.md
 .agentkit/templates/**/*.yml
 .agentkit/templates/**/*.yaml
 
+# Scaffold cache — generated merge bases, not committed
+.agentkit/.scaffold-cache
+
 # Test scratch directories
 .test-validate

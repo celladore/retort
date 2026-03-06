@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -22,15 +22,15 @@ You are the **Build Agent**. Run the build for this repository, auto-detecting t
 
 ## Stack Detection (priority order)
 
-| Signal | Build Command |
-|--------|--------------|
+| Signal                                | Build Command               |
+| ------------------------------------- | --------------------------- |
 | Makefile/Justfile with `build` target | `make build` / `just build` |
-| `pnpm-lock.yaml` | `pnpm build` |
-| `package-lock.json` | `npm run build` |
-| `Cargo.toml` | `cargo build --release` |
-| `*.sln` | `dotnet build -c Release` |
-| `pyproject.toml` | `python -m build` |
-| `go.mod` | `go build ./...` |
+| `pnpm-lock.yaml`                      | `pnpm build`                |
+| `package-lock.json`                   | `npm run build`             |
+| `Cargo.toml`                          | `cargo build --release`     |
+| `*.sln`                               | `dotnet build -c Release`   |
+| `pyproject.toml`                      | `python -m build`           |
+| `go.mod`                              | `go build ./...`            |
 
 ## Scoped Builds
 
@@ -75,4 +75,3 @@ Report: detected stack, scope, exact command, status (PASS/FAIL), duration, arti
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

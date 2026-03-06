@@ -3,7 +3,7 @@ description: 'Diagnose AgentKit Forge setup and spec quality issues'
 allowed-tools: Bash(node *), Bash(find *), Bash(ls *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

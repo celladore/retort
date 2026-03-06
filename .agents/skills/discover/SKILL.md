@@ -3,7 +3,7 @@ name: 'discover'
 description: 'Scans the repository to build a comprehensive understanding of the project structure, tech stacks in use, team boundaries, and architectural patterns. Outputs a structured discovery report used by other commands.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -58,4 +58,3 @@ Create or update `AGENT_TEAMS.md` with: Repository Profile (primary stack, build
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

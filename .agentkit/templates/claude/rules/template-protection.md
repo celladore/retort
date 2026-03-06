@@ -35,7 +35,8 @@ When you need to change AI tool behavior, generated rules, commands, or team def
 ## What You CAN Modify
 
 - **Project source code** — application code, tests, configs
-- **Scaffold-once files** — `docs/`, `AGENT_BACKLOG.md`, `CONTRIBUTING.md` (after initial generation, these are project-owned)
+- **User-owned files** (`once` scaffold mode) — `docs/`, `AGENT_BACKLOG.md`, `CONTRIBUTING.md` (written once, never overwritten by sync)
+- **Managed files** (`managed` scaffold mode) — category READMEs, generated guides (sync preserves user edits via hash comparison and three-way merge)
 - **`.claude/state/`** — orchestrator state and task files (these are runtime artifacts)
 
 ## Rationale

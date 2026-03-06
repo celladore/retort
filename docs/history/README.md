@@ -68,4 +68,4 @@ Or use the `/document-history` slash command for auto-detection of type and titl
 > environments), use `./scripts/create-doc.sh issue "Title"` to record issues
 > locally, then run `./scripts/sync-issues.sh --apply` once access is restored.
 
-See [docs/06_engineering/06_pr_documentation.md](../06_engineering/06_pr_documentation.md) for the full documentation strategy.
+See [docs/engineering/06_pr_documentation.md](../engineering/06_pr_documentation.md) for the full documentation strategy.

@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs security-focused analysis: dependency vulnerability scanning, secret detection, OWASP compliance checks, and permission auditing. Generates a security report with severity ratings.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -40,12 +40,12 @@ Search for: API keys, AWS keys, private keys, connection strings, passwords, tok
 
 ## Severity Classification
 
-| Severity | Criteria |
-|----------|----------|
+| Severity | Criteria                                                            |
+| -------- | ------------------------------------------------------------------- |
 | CRITICAL | Exploitable remotely, no auth required, data breach or RCE possible |
-| HIGH | Low complexity exploit, auth bypass, significant data exposure |
-| MEDIUM | Requires specific conditions, limited impact, defense-in-depth gap |
-| LOW | Best practice violation, minimal direct impact |
+| HIGH     | Low complexity exploit, auth bypass, significant data exposure      |
+| MEDIUM   | Requires specific conditions, limited impact, defense-in-depth gap  |
+| LOW      | Best practice violation, minimal direct impact                      |
 
 ## Output
 
@@ -81,4 +81,3 @@ Produce: Executive Summary, Risk Score, Findings by severity (with ID, file:line
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
-

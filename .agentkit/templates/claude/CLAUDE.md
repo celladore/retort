@@ -205,20 +205,23 @@ After completing significant work (bug fixes, features, implementations, or migr
 | Implementation | `./scripts/create-doc.sh implementation "Title"` | Architecture changes, refactors, new subsystems |
 | Migration | `./scripts/create-doc.sh migration "Title"` | Library upgrades, data migrations, infrastructure changes |
 
-Templates are in `docs/history/` — fill in all sections after generation. The `/review --focus=retrospective` command captures issues and lessons learned separately. See `docs/06_engineering/06_pr_documentation.md` for the full strategy.
+Templates are in `docs/history/` — fill in all sections after generation. The `/review --focus=retrospective` command captures issues and lessons learned separately. See `docs/engineering/06_pr_documentation.md` for the full strategy.
 
-All project documentation follows the unified 8-category structure in `docs/`:
+All project documentation follows a domain-driven structure in `docs/`:
 
 | Category           | Purpose                                        |
 | ------------------ | ---------------------------------------------- |
-| `01_product/`      | Product vision, strategy, personas, metrics    |
-| `02_specs/`        | Architecture specs, system design              |
-| `03_architecture/` | Diagrams, ADRs, tech stack decisions           |
-| `04_api/`          | API reference, authentication, versioning      |
-| `05_operations/`   | Deployment, monitoring, SLAs                   |
-| `06_engineering/`  | Setup, coding standards, testing, contributing |
-| `07_integrations/` | External services, third-party connections     |
-| `08_reference/`    | Glossary, acronyms, FAQ, tool config           |
+| `product/`         | Product vision, strategy, personas, PRDs       |
+| `architecture/`    | Specs, ADRs, diagrams, tech stack decisions    |
+| `orchestration/`   | Orchestration guide, PM guide, protocols       |
+| `agents/`          | Agent catalog, roles, team mappings            |
+| `api/`             | API reference, authentication, versioning      |
+| `operations/`      | Deployment, monitoring, SLAs                   |
+| `engineering/`     | Setup, coding standards, testing, contributing |
+| `integrations/`    | External services, third-party connections     |
+| `reference/`       | Glossary, acronyms, FAQ, tool config           |
+| `handoffs/`        | AI session handoff documents                   |
+| `history/`         | Bug fixes, features, implementations, lessons  |
 
 {{#if hasIntegrations}}
 

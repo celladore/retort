@@ -618,7 +618,7 @@ async function analyzeOpsGaps(context) {
   const opsCategory = context.docsSpec?.categories?.find(
     (c) => c.id?.includes('operations') || c.name?.toLowerCase() === 'operations'
   );
-  const opsPath = opsCategory?.path || 'docs/07_operations/';
+  const opsPath = opsCategory?.path || 'docs/operations/';
 
   if (
     discoveryReport?.frameworks?.backend?.length > 0 &&
@@ -649,7 +649,7 @@ async function analyzeArchitectureGaps(context) {
   const { projectRoot, projectSpec, discoveryReport } = context;
 
   // Check for architecture documentation
-  const archOverview = resolve(projectRoot, 'docs/03_architecture/01_overview.md');
+  const archOverview = resolve(projectRoot, 'docs/architecture/01_overview.md');
   if (!existsSync(archOverview)) {
     suggestions.push({
       category: 'architecture',
@@ -660,7 +660,7 @@ async function analyzeArchitectureGaps(context) {
       effort: 'M',
       riskIfSkipped: 'medium',
       alignment: 'high',
-      suggestedArtifacts: [{ type: 'docs', path: 'docs/03_architecture/01_overview.md' }],
+      suggestedArtifacts: [{ type: 'docs', path: 'docs/architecture/01_overview.md' }],
     });
   }
 
@@ -671,7 +671,7 @@ async function analyzeArchitectureGaps(context) {
 
   if (hasApi) {
     const hasApiDocs =
-      existsSync(resolve(projectRoot, 'docs/04_api')) ||
+      existsSync(resolve(projectRoot, 'docs/api')) ||
       existsSync(resolve(projectRoot, 'openapi.yaml')) ||
       existsSync(resolve(projectRoot, 'openapi.json')) ||
       existsSync(resolve(projectRoot, 'swagger.yaml')) ||
@@ -687,13 +687,13 @@ async function analyzeArchitectureGaps(context) {
         effort: 'M',
         riskIfSkipped: 'medium',
         alignment: 'high',
-        suggestedArtifacts: [{ type: 'docs', path: 'docs/04_api/' }],
+        suggestedArtifacts: [{ type: 'docs', path: 'docs/api/' }],
       });
     }
   }
 
   // Check for architecture diagrams
-  const diagramDir = resolve(projectRoot, 'docs/03_architecture/01_diagrams');
+  const diagramDir = resolve(projectRoot, 'docs/architecture/diagrams');
   if (!existsSync(diagramDir)) {
     suggestions.push({
       category: 'architecture',
@@ -704,7 +704,7 @@ async function analyzeArchitectureGaps(context) {
       effort: 'M',
       riskIfSkipped: 'low',
       alignment: 'medium',
-      suggestedArtifacts: [{ type: 'docs', path: 'docs/03_architecture/01_diagrams/' }],
+      suggestedArtifacts: [{ type: 'docs', path: 'docs/architecture/diagrams/' }],
     });
   }
 

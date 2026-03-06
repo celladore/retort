@@ -3,7 +3,7 @@ name: 'document-history'
 description: 'Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -47,4 +47,3 @@ Invoke this skill when you need to perform the `document-history` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

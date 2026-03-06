@@ -60,7 +60,7 @@ teams:
     scope:
       [
         'docs/**',
-        'docs/03_architecture/02_decisions/**',
+        'docs/architecture/decisions/**',
         '.github/**',
         'README.md',
         'CHANGELOG.md',
@@ -72,7 +72,7 @@ teams:
   - id: product
     name: PRODUCT
     focus: 'Features, PRDs, roadmap'
-    scope: ['docs/01_product/**', 'docs/prd/**']
+    scope: ['docs/product/**', 'docs/prd/**']
     accepts: [plan, review]
     handoff-chain: [backend, frontend]
 

@@ -3,7 +3,7 @@ name: 'Project Shipper'
 description: 'Delivery-focused project management specialist responsible for moving work through the pipeline from planning to production. Ensures tasks are properly scoped, tracked, and delivered.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,10 +32,11 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/**
-- .github/ISSUE_TEMPLATE/**
-- .github/PULL_REQUEST_TEMPLATE/**
-- docs/ai_handoffs/**
+- .github/ISSUE_TEMPLATE/\*\*
+- .github/PULL_REQUEST_TEMPLATE/\*\*
+- docs/handoffs/\*\*
+- .claude/state/\*\*
+- AGENT_BACKLOG.md
 
 ## Responsibilities
 
@@ -46,6 +47,9 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Maintain project boards and issue triage processes
 - Produce delivery status reports and burndown tracking
 - Enforce work-in-progress limits and flow efficiency
+- Maintain the project risk register in orchestrator.json
+- Identify, assess, and track technical and delivery risks
+- Ensure each risk has an owner, severity, mitigation plan, and status
 
 ## Tools
 

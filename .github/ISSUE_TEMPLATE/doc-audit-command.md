@@ -18,7 +18,7 @@ During the documentation audit session on 2026-03-04 (branch `claude/documentati
 - Cross-document counts were inconsistent (command counts, agent counts)
 - No automated way exists to detect these issues going forward
 
-A detailed proposal has been committed at `docs/06_engineering/doc-audit-command-proposal.md`.
+A detailed proposal has been committed at `docs/engineering/doc-audit-command-proposal.md`.
 
 ## What Needs To Be Done
 
@@ -62,12 +62,12 @@ Generates `.claude/commands/doc-audit.md` and equivalents for all 15+ platform t
 
 ## Implementation Details
 
-The full spec YAML entry and complete Handlebars template (with all 7 phases) are in `docs/06_engineering/doc-audit-command-proposal.md`. Copy-paste ready.
+The full spec YAML entry and complete Handlebars template (with all 7 phases) are in `docs/engineering/doc-audit-command-proposal.md`. Copy-paste ready.
 
 ## Acceptance Criteria
 
 - [ ] `commands.yaml` entry passes `spec-validate`
-- [ ] Template renders correctly via `agentkit sync`
+- [ ] Template renders correctly via `pnpm -C .agentkit agentkit:sync`
 - [ ] `/doc-audit` produces a structured report when run
 - [ ] `--fix` mode safely corrects count mismatches and broken links
 - [ ] `--scope` filters to specific doc categories

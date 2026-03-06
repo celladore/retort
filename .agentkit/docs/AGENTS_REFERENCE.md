@@ -340,7 +340,7 @@ Growth and analytics specialist focused on user acquisition, activation, retenti
 **Focus scope:**
 
 ```
-docs/01_product/**
+docs/product/**
 analytics/**
 apps/marketing/**
 docs/metrics/**
@@ -467,7 +467,7 @@ Product management specialist responsible for feature definition, prioritization
 **Focus scope:**
 
 ```
-docs/01_product/**
+docs/product/**
 docs/prd/**
 docs/roadmap/**
 docs/features/**
@@ -497,7 +497,7 @@ Roadmap and milestone tracking specialist maintaining visibility into project pr
 
 ```
 docs/roadmap/**
-docs/01_product/**
+docs/product/**
 docs/milestones/**
 CHANGELOG.md
 ```

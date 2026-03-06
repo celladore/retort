@@ -3,7 +3,7 @@ name: 'Brand Guardian'
 description: 'Brand consistency specialist ensuring all visual and written outputs align with the established brand identity, design tokens, and style guidelines across all touchpoints. The canonical brand source of truth is .agentkit/spec/brand.yaml; editor theming is configured in .agentkit/spec/editor-theme.yaml. Use /brand to validate, preview, scaffold, or regenerate brand assets.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-05'
+last_updated: '2026-03-06'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- styles/**
-- tokens/**
-- design/**
-- apps/marketing/**
-- public/assets/**
-- docs/brand/**
+- styles/\*\*
+- tokens/\*\*
+- design/\*\*
+- apps/marketing/\*\*
+- public/assets/\*\*
+- docs/brand/\*\*
 - .agentkit/spec/brand.yaml
 - .agentkit/spec/editor-theme.yaml
 - .vscode/settings.json
@@ -85,6 +85,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Valid brand.yaml color entry (simple hex)
+
 ```
 colors:
   primary:
@@ -94,6 +95,7 @@ colors:
 ```
 
 ### Valid brand.yaml color entry (detailed object)
+
 ```
 colors:
   semantic:
@@ -105,6 +107,7 @@ colors:
 ```
 
 ### Editor theme mapping (brand path reference)
+
 ```
 mappings:
   titleBar.activeBackground: colors.primary.dark
