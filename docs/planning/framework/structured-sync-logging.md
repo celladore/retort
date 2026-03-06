@@ -35,16 +35,16 @@ The sync engine currently outputs all messages through `console.log` and `consol
 
 ## Classification of Current Output
 
-| Current Output | Proposed Level |
-|---|---|
-| "Generating X for platform Y" | `info` |
-| "Skipping feature X (disabled)" | `debug` |
-| "Feature X: 13/22 enabled" | `info` |
-| "File unchanged, skipping write" | `debug` |
-| "Template not found, using fallback" | `warn` |
-| "Failed to render template" | `error` |
-| "Scaffold-once file exists, skipping" | `debug` |
-| Sync summary (files written/skipped) | `info` |
+| Current Output                        | Proposed Level |
+| ------------------------------------- | -------------- |
+| "Generating X for platform Y"         | `info`         |
+| "Skipping feature X (disabled)"       | `debug`        |
+| "Feature X: 13/22 enabled"            | `info`         |
+| "File unchanged, skipping write"      | `debug`        |
+| "Template not found, using fallback"  | `warn`         |
+| "Failed to render template"           | `error`        |
+| "Scaffold-once file exists, skipping" | `debug`        |
+| Sync summary (files written/skipped)  | `info`         |
 
 ## Acceptance Criteria
 
