@@ -164,11 +164,11 @@ budgetPolicy:
     maxTotalDurationMinutes: 480
     maxTotalCommands: 1000
     warnAtPercent: 80
-```
+```text
 
 **E. Add `/budget` CLI command** (or extend `/cost`):
 
-```
+```text
 cost --budget          # Show budget status (session + daily)
 cost --budget --set enforcement=enforce
 cost --budget --policy # Show active policy
@@ -376,7 +376,7 @@ Extend the existing `dashboard/` to show:
 
 **KQL Functions:**
 
-```
+```text
 cost_by_centre(_since)         — Aggregate cost per cost centre
 budget_utilization(_since)     — Spend vs budget per centre
 disabled_groups()              — List disabled resource groups

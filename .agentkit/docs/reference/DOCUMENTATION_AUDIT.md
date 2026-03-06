@@ -14,16 +14,16 @@ AgentKit Forge has a comprehensive documentation set across 20+ files in `.agent
 
 ### Key Findings
 
-| Category          | Status     | Details                                                                           |
-| ----------------- | ---------- | --------------------------------------------------------------------------------- |
-| README            | Good       | Clear purpose, adoption guides, navigation. One broken link.                      |
-| Command Reference | Good       | All commands documented (tasks, delegate, doctor, scaffold, preflight added)     |
-| Agent Reference   | Missing    | No dedicated reference for 19 agent personas; scattered across AGENTS_VS_TEAMS.md |
-| Team Guide        | Good       | Decision matrix, handoff patterns, edge cases covered                             |
-| Architecture      | Good       | Sync engine, template rendering, directory structure documented                   |
-| Security Model    | Good       | Threat model, hooks, permissions documented                                       |
-| Cross-linking     | Fair       | Some broken links, inconsistent command counts between docs                       |
-| PRD Library       | Broken     | README link in main README points to nonexistent `docs/prd/README.md`             |
+| Category          | Status  | Details                                                                           |
+| ----------------- | ------- | --------------------------------------------------------------------------------- |
+| README            | Good    | Clear purpose, adoption guides, navigation. One broken link.                      |
+| Command Reference | Good    | All commands documented (tasks, delegate, doctor, scaffold, preflight added)      |
+| Agent Reference   | Missing | No dedicated reference for 19 agent personas; scattered across AGENTS_VS_TEAMS.md |
+| Team Guide        | Good    | Decision matrix, handoff patterns, edge cases covered                             |
+| Architecture      | Good    | Sync engine, template rendering, directory structure documented                   |
+| Security Model    | Good    | Threat model, hooks, permissions documented                                       |
+| Cross-linking     | Fair    | Some broken links, inconsistent command counts between docs                       |
+| PRD Library       | Broken  | README link in main README points to nonexistent `docs/prd/README.md`             |
 
 ---
 

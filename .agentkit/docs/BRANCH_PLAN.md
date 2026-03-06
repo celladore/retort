@@ -55,13 +55,13 @@ mkdir -p .agentkit/docs/{getting-started,guides,architecture,configuration,refer
 
 ### Step 2: Move files (git mv)
 
-| Destination | Files |
-|---|---|
-| `getting-started/` | QUICK_START.md, CLI_INSTALLATION.md, ONBOARDING.md |
-| `guides/` | COMMAND_REFERENCE.md, TEAM_GUIDE.md, WORKFLOWS.md, AGENTS_REFERENCE.md, AGENTS_VS_TEAMS.md |
-| `architecture/` | ARCHITECTURE.md, STATE_AND_SESSIONS.md, SECURITY_MODEL.md, COST_TRACKING.md |
-| `configuration/` | PROJECT_YAML_REFERENCE.md, CUSTOMIZATION.md, TOOLS.md, AGENTS_MD_GUIDE.md, MCP_A2A_GUIDE.md |
-| `reference/` | MIGRATION_GUIDE.md, TROUBLESHOOTING.md, ROADMAP.md, FOLLOW_UP_ISSUES.md, DOCUMENTATION_AUDIT.md |
+| Destination        | Files                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| `getting-started/` | QUICK_START.md, CLI_INSTALLATION.md, ONBOARDING.md                                              |
+| `guides/`          | COMMAND_REFERENCE.md, TEAM_GUIDE.md, WORKFLOWS.md, AGENTS_REFERENCE.md, AGENTS_VS_TEAMS.md      |
+| `architecture/`    | ARCHITECTURE.md, STATE_AND_SESSIONS.md, SECURITY_MODEL.md, COST_TRACKING.md                     |
+| `configuration/`   | PROJECT_YAML_REFERENCE.md, CUSTOMIZATION.md, TOOLS.md, AGENTS_MD_GUIDE.md, MCP_A2A_GUIDE.md     |
+| `reference/`       | MIGRATION_GUIDE.md, TROUBLESHOOTING.md, ROADMAP.md, FOLLOW_UP_ISSUES.md, DOCUMENTATION_AUDIT.md |
 
 ### Step 3: Create stub README.md in each subdirectory
 
@@ -75,6 +75,7 @@ Update all 24 links from flat paths to subdirectory paths.
 
 Scan all moved files for `](*.md)` patterns and update relative paths.
 Key patterns:
+
 - Files in `guides/` referencing `architecture/` files: add `../architecture/` prefix
 - Files in `getting-started/` referencing `guides/` files: add `../guides/` prefix
 
