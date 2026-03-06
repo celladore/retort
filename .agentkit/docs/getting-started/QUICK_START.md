@@ -1,15 +1,15 @@
 # AgentKit Forge -- Quick Start Guide
-
-> Your first 15 minutes with AgentKit Forge. From zero to an AI-assisted
-> development workflow.
-
----
-
-## Table of Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Setup in 3 Steps](#setup-in-3-steps)
-3. [What Just Happened?](#what-just-happened)
+```
+docs/
+  product/           Product requirements, user stories, roadmap, personas
+  architecture/      Specs, system overview, architecture decision records (ADRs)
+  orchestration/     Orchestration guide, PM guide, concurrency protocols
+  api/               API overview, endpoints, authentication, examples
+  operations/        Deployment, monitoring, incident response, troubleshooting
+  engineering/       Dev setup, coding standards, testing, git workflow, security
+  integrations/      External APIs, webhooks, SDK documentation
+  reference/         Glossary, FAQ, changelog, contributing guide, AI handoffs
+```
 4. [Your First Session with Claude Code](#your-first-session-with-claude-code)
 5. [Command Quick Reference](#command-quick-reference)
 6. [Next Steps](#next-steps)
@@ -153,7 +153,10 @@ The `docs/` directory follows a standardized 8-category layout:
 docs/
   product/           Product requirements, user stories, roadmap, personas
   architecture/      Specs, system overview, architecture decision records (ADRs)
+<<<<<<< HEAD
   orchestration/     Orchestration guide, PM guide, concurrency protocols
+=======
+>>>>>>> e41030309a55073b2705ad86e718f3710c4cabe4
   api/               API overview, endpoints, authentication, examples
   operations/        Deployment, monitoring, incident response, troubleshooting
   engineering/       Dev setup, coding standards, testing, git workflow, security
