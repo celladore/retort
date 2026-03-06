@@ -25,12 +25,12 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 
 ## Available Views
 
-| Command | Description |
-|---------|-------------|
-| `--summary` | Recent session overview with durations and file counts |
-| `--sessions` | List all recent sessions |
-| `--report --month YYYY-MM` | Monthly aggregate report |
-| `--report --format json` | Export report as JSON |
+| Command                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| `--summary`                | Recent session overview with durations and file counts |
+| `--sessions`               | List all recent sessions                               |
+| `--report --month YYYY-MM` | Monthly aggregate report                               |
+| `--report --format json`   | Export report as JSON                                  |
 
 ## Notes
 
@@ -44,4 +44,3 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

@@ -55,4 +55,3 @@ Produce a summary with: Actions Taken, Files Changed, Validation Commands, Updat
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
-

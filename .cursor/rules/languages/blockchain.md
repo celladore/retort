@@ -69,13 +69,12 @@ The following conventions are enforced in **agentkit-forge** and derived from
 ### Advisory Rules
 
 - **[bc-solana]** Solana programs must use Anchor framework conventions. Validate all account constraints using Anchor macros. Use PDAs (Program Derived Addresses) for deterministic account addressing. All instructions must have explicit error codes and documentation.
- _(advisory · phase: implementation)_
+  _(advisory · phase: implementation)_
 - **[bc-etherlink]** EtherLink integrations must follow the bridge contract pattern. Validate all cross-chain messages. Implement replay protection. Use the canonical EtherLink SDK for L1-L2 communication. Handle finality differences between L1 and L2 explicitly.
- _(advisory · phase: implementation)_
+  _(advisory · phase: implementation)_
 - **[bc-x402]** x402 payment protocol implementations must follow the HTTP 402 payment-required flow. Implement proper payment verification before granting resource access. Support idempotent payment processing. Include receipt generation and verification. Handle payment timeout and retry scenarios.
- _(advisory · phase: implementation)_
+  _(advisory · phase: implementation)_
 - **[bc-gas-optimization]** Optimize for gas costs. Minimize storage operations, batch transactions where possible, and use calldata over memory for read-only function parameters. Document gas cost estimates for public functions.
- _(advisory · phase: implementation, validation)_
+  _(advisory · phase: implementation, validation)_
 - **[bc-audit-trail]** All state-changing operations must emit events for off-chain indexing. Include sufficient context in events for reconstruction of state transitions. Log transaction hashes for cross-reference.
- _(advisory · phase: implementation)_
-
+  _(advisory · phase: implementation)_

@@ -32,10 +32,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/product/**
-- analytics/**
-- apps/marketing/**
-- docs/metrics/**
+- docs/product/\*\*
+- analytics/\*\*
+- apps/marketing/\*\*
+- docs/metrics/\*\*
 
 ## Responsibilities
 

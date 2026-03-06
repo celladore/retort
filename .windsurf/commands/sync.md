@@ -36,12 +36,12 @@ pnpm -C .agentkit agentkit:sync
 
 ## Flags
 
-| Flag | Effect |
-|------|--------|
+| Flag              | Effect                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------- |
 | `--only <target>` | Sync only one platform (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp) |
-| `--overwrite` | Overwrite project-owned (scaffold-once) files |
-| `--diff` | Preview changes without writing |
-| `--no-clean` | Keep orphaned files that would normally be removed |
+| `--overwrite`     | Overwrite project-owned (scaffold-once) files                                               |
+| `--diff`          | Preview changes without writing                                                             |
+| `--no-clean`      | Keep orphaned files that would normally be removed                                          |
 
 ## Post-Sync
 
@@ -66,4 +66,3 @@ This command requires shell access (Bash tool). On platforms with restricted too
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

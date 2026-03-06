@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- styles/**
-- tokens/**
-- design/**
-- apps/marketing/**
-- public/assets/**
-- docs/brand/**
+- styles/\*\*
+- tokens/\*\*
+- design/\*\*
+- apps/marketing/\*\*
+- public/assets/\*\*
+- docs/brand/\*\*
 - .agentkit/spec/brand.yaml
 - .agentkit/spec/editor-theme.yaml
 - .vscode/settings.json
@@ -85,6 +85,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Valid brand.yaml color entry (simple hex)
+
 ```
 colors:
   primary:
@@ -94,6 +95,7 @@ colors:
 ```
 
 ### Valid brand.yaml color entry (detailed object)
+
 ```
 colors:
   semantic:
@@ -105,6 +107,7 @@ colors:
 ```
 
 ### Editor theme mapping (brand path reference)
+
 ```
 mappings:
   titleBar.activeBackground: colors.primary.dark

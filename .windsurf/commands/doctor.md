@@ -36,4 +36,3 @@ Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, templat
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

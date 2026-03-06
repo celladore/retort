@@ -5,7 +5,7 @@
 # Team: QUALITY
 
 **Focus**: Code review, refactoring, bugs, reliability, session retrospectives
-**Scope**: **/*
+**Scope**: \*_/_
 
 ## Persona
 

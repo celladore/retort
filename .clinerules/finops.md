@@ -11,13 +11,13 @@ Rules for cloud cost visibility, tagging, budget governance, and cost-centre man
 
 ## Applies To
 
-adx/**
-**/*.kql
+adx/\*_
+\*\*/_.kql
 grafana/**
-scripts/*cost*
-scripts/*tag*
+scripts/_cost_
+scripts/_tag_
 infra/**/budget*
-infra/**/policy*
+infra/\*\*/policy*
 
 ## Advisory Rules
 
@@ -34,4 +34,3 @@ infra/**/policy*
 - **[finops-adx-alternatives]** When ADX (Azure Data Explorer) is too expensive for the project scale, implement cost analytics using alternative backends: Log Analytics workspace with KQL, Azure Monitor workbooks, or direct Cost Management API queries. The same logical functions (cost_by_product, untagged_resources, budget_utilization) must be implemented regardless of backend. Document the chosen backend and migration path in the project's cost guide.
 
 - **[finops-budget-approval]** Budget increases and new cost centre creation require approval via GitHub Issue with the finops-approval label. The issue must include justification, current vs proposed budget, and expected duration. Emergency budget increases for production incidents may bypass approval with a post-incident review within 5 days.
-

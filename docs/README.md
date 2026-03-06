@@ -9,19 +9,19 @@ documentation category maintained by this repository.
 
 ## Categories
 
-| Category                               | Description                                           |
-| -------------------------------------- | ----------------------------------------------------- |
-| [Product](./product/)                  | Product vision, strategy, personas, PRDs              |
-| [Architecture](./architecture/)        | Specs, ADRs, diagrams, tech stack decisions           |
-| [Orchestration](./orchestration/)      | Orchestration guide, PM guide, concurrency protocol   |
-| [Agents](./agents/)                    | Agent catalog, roles, team mappings                   |
-| [API](./api/)                          | API reference, authentication, versioning, and errors |
-| [Operations](./operations/)            | CI/CD, deployments, monitoring, and troubleshooting   |
-| [Engineering](./engineering/)          | Setup, coding standards, testing, and contributing    |
-| [Integrations](./integrations/)        | External APIs, webhooks, and SDK                      |
-| [Reference](./reference/)              | Glossary, acronyms, FAQ, and tool config              |
-| [Handoffs](./handoffs/)               | AI session handoff documents                          |
-| [History](./history/)                  | Bug fixes, features, implementations, lessons         |
+| Category                          | Description                                           |
+| --------------------------------- | ----------------------------------------------------- |
+| [Product](./product/)             | Product vision, strategy, personas, PRDs              |
+| [Architecture](./architecture/)   | Specs, ADRs, diagrams, tech stack decisions           |
+| [Orchestration](./orchestration/) | Orchestration guide, PM guide, concurrency protocol   |
+| [Agents](./agents/)               | Agent catalog, roles, team mappings                   |
+| [API](./api/)                     | API reference, authentication, versioning, and errors |
+| [Operations](./operations/)       | CI/CD, deployments, monitoring, and troubleshooting   |
+| [Engineering](./engineering/)     | Setup, coding standards, testing, and contributing    |
+| [Integrations](./integrations/)   | External APIs, webhooks, and SDK                      |
+| [Reference](./reference/)         | Glossary, acronyms, FAQ, and tool config              |
+| [Handoffs](./handoffs/)           | AI session handoff documents                          |
+| [History](./history/)             | Bug fixes, features, implementations, lessons         |
 
 ## Quick Links
 
@@ -32,9 +32,7 @@ documentation category maintained by this repository.
 - [API Overview](./api/01_overview.md)
 - [Getting Started](./engineering/01_setup.md)
 - [Changelog](./reference/03_changelog.md)
-  
 - [PRD Library](./product/prd/README.md)
-  
 
 ## Conventions
 

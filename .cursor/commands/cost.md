@@ -18,12 +18,12 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 
 ## Available Views
 
-| Command | Description |
-|---------|-------------|
-| `--summary` | Recent session overview with durations and file counts |
-| `--sessions` | List all recent sessions |
-| `--report --month YYYY-MM` | Monthly aggregate report |
-| `--report --format json` | Export report as JSON |
+| Command                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| `--summary`                | Recent session overview with durations and file counts |
+| `--sessions`               | List all recent sessions                               |
+| `--report --month YYYY-MM` | Monthly aggregate report                               |
+| `--report --format json`   | Export report as JSON                                  |
 
 ## Notes
 
@@ -44,4 +44,3 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
-

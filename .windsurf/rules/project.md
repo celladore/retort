@@ -39,12 +39,10 @@ This repository uses the AgentKit Forge unified agent team framework.
 ## No Monitoring
 
 - No monitoring configured
-  
 
 ## No Compliance and DR
 
 - No compliance/DR configuration
-  
 
 ## Non-negotiables
 

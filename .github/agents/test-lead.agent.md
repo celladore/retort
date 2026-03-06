@@ -32,14 +32,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- **/*.test.*
-- **/*.spec.*
-- tests/**
-- e2e/**
-- playwright/**
-- jest.config.*
-- vitest.config.*
-- playwright.config.*
+- \*_/_.test.\*
+- \*_/_.spec.\*
+- tests/\*\*
+- e2e/\*\*
+- playwright/\*\*
+- jest.config.\*
+- vitest.config.\*
+- playwright.config.\*
 
 ## Responsibilities
 

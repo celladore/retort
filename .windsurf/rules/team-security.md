@@ -5,7 +5,7 @@
 # Team: SECURITY
 
 **Focus**: Auth, compliance, audit
-**Scope**: auth/**, security/**, middleware/auth*
+**Scope**: auth/**, security/**, middleware/auth\*
 
 ## Persona
 

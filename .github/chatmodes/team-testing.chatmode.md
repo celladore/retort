@@ -15,7 +15,7 @@ last_updated: '2026-03-06'
 # Team: TESTING
 
 **Focus**: Unit, E2E, integration tests
-**Scope**: **/*.test.*, **/*.spec.*, tests/**, e2e/**, playwright/**
+**Scope**: **/_.test._, **/_.spec._, tests/**, e2e/**, playwright/\*\*
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: **/*.test.*, **/*.spec.*, tests/**, e2e/**, playwright/**
+- Own all code within scope: **/_.test._, **/_.spec._, tests/**, e2e/**, playwright/\*\*
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

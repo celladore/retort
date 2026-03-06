@@ -30,12 +30,12 @@ Evaluate every changed file against:
 
 ## Severity Classification
 
-| Severity | Action |
-|----------|--------|
-| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path |
-| HIGH | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
-| MEDIUM | Suggest. Performance concern, missing edge case test, poor naming |
-| LOW | Note. Style inconsistency, minor readability, optional optimization |
+| Severity | Action                                                                          |
+| -------- | ------------------------------------------------------------------------------- |
+| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path         |
+| HIGH     | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
+| MEDIUM   | Suggest. Performance concern, missing edge case test, poor naming               |
+| LOW      | Note. Style inconsistency, minor readability, optional optimization             |
 
 ## Output Format
 
@@ -63,4 +63,3 @@ Produce: Summary, Required Changes (must fix, with file:line references), Sugges
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
-
