@@ -47,7 +47,7 @@ jobs:
       - name: Report validation results
         if: steps.doc-structure.outcome == 'failure' || steps.doc-numbering.outcome == 'failure'
         env:
-          TARGET_BRANCH: ${{ github.base_ref }}
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
         run: |
           {
             echo "## Documentation Validation Issues"
