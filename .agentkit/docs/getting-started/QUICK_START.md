@@ -151,14 +151,14 @@ The `docs/` directory follows a standardized 8-category layout:
 
 ```
 docs/
-  01_product/        Product requirements, user stories, roadmap, personas
-  02_specs/          Functional spec, technical spec, API spec, data models
-  03_architecture/   System overview, architecture decision records (ADRs)
-  04_api/            API overview, endpoints, authentication, examples
-  05_operations/     Deployment, monitoring, incident response, troubleshooting
-  06_engineering/    Dev setup, coding standards, testing, git workflow, security
-  07_integrations/   External APIs, webhooks, SDK documentation
-  08_reference/      Glossary, FAQ, changelog, contributing guide, AI handoffs
+  product/           Product requirements, user stories, roadmap, personas
+  architecture/      Specs, system overview, architecture decision records (ADRs)
+  orchestration/     Orchestration guide, PM guide, concurrency protocols
+  api/               API overview, endpoints, authentication, examples
+  operations/        Deployment, monitoring, incident response, troubleshooting
+  engineering/       Dev setup, coding standards, testing, git workflow, security
+  integrations/      External APIs, webhooks, SDK documentation
+  reference/         Glossary, FAQ, changelog, contributing guide, AI handoffs
 ```
 
 This structure gives AI assistants a consistent place to read and write documentation, regardless of your project's domain.

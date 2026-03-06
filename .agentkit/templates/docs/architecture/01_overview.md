@@ -43,7 +43,7 @@ See [diagrams/](./diagrams/) for visual representations.
 ## Decision Records
 
 Architecture Decision Records (ADRs) are stored in
-[02_decisions/](./decisions/). See
+[decisions/](./decisions/). See
 [ADR-01](./decisions/01-adopt-agentkit-forge.md) for the foundational decision.
 
 ## References

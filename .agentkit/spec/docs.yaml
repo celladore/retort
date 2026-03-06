@@ -115,6 +115,28 @@ categories:
       - 'performance.md — Performance benchmarks and optimization history'
       - 'cost-management.md — Cloud cost tracking and optimization'
 
+  - id: integrations
+    name: Integrations
+    path: 'docs/integrations/'
+    description: >
+      External service integrations, third-party API connections,
+      webhook configurations, and SDK documentation.
+    contents:
+      - 'external-apis.md — External API integration guides'
+      - 'webhooks.md — Webhook configuration and event handling'
+      - 'sdk.md — Client SDK documentation and examples'
+
+  - id: orchestration
+    name: Orchestration
+    path: 'docs/orchestration/'
+    description: >
+      AI agent orchestration guides, PM coordination protocols,
+      and multi-agent workflow documentation.
+    contents:
+      - 'orchestration-guide.md — Orchestration workflow overview'
+      - 'pm-guide.md — Product manager coordination guide'
+      - 'concurrency-protocol.md — Multi-agent concurrency controls'
+
   - id: reference
     name: Reference
     path: 'docs/reference/'
