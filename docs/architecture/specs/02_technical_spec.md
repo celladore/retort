@@ -53,6 +53,6 @@
 
 ## References
 
-- [Architecture Overview](../03_architecture/01_overview.md)
+- [Architecture Overview](../01_overview.md)
 - [Functional Spec](./01_functional_spec.md)
 - [Data Models](./04_data_models.md)

@@ -389,8 +389,8 @@ Adopting the Hybrid model unlocks growth and developer satisfaction, at the cost
 - Ecosystem Compatibility Matrix
 - Internal Security and Audit Policy
 - Mesh-Native Distribution Survey (March 2024)
-- [PRD-005: Mesh-Native Distribution](../../01_product/PRD-005-mesh-native-distribution.md)
-- [PRD-007: Adopter Autoupdate](../../01_product/PRD-007-adopter-autoupdate.md) — follow-up capability
+- [PRD-005: Mesh-Native Distribution](../../product/PRD-005-mesh-native-distribution.md)
+- [PRD-007: Adopter Autoupdate](../../product/PRD-007-adopter-autoupdate.md) — follow-up capability
   building on the npm CLI distribution channel defined in this ADR; specifically the "Immediate CLI
   and SDK access with autoupdate support" requirement from the Consumer Experience section.
 - [#196: adoption/startup-hooks: enforce required CLI toolchain availability](https://github.com/JustAGhosT/agentkit-forge/issues/196)

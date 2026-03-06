@@ -18,7 +18,7 @@ Security guidelines and practices for agentkit-forge.
 
 - <!-- Describe the authentication mechanism (e.g. OAuth 2.0, JWT). -->
 - <!-- Describe the authorisation model (e.g. RBAC, ABAC). -->
-- See [API Authentication](../04_api/03_authentication.md) for API-specific details.
+- See [API Authentication](../api/03_authentication.md) for API-specific details.
 
 ## Secrets Management
 
@@ -57,10 +57,10 @@ Security guidelines and practices for agentkit-forge.
 ## Incident Reporting
 
 Report security vulnerabilities to <!-- SECURITY_EMAIL --> or via the process
-defined in [Incident Response](../05_operations/03_incident_response.md).
+defined in [Incident Response](../operations/03_incident_response.md).
 
 ## References
 
-- [API Authentication](../04_api/03_authentication.md)
-- [Incident Response](../05_operations/03_incident_response.md)
+- [API Authentication](../api/03_authentication.md)
+- [Incident Response](../operations/03_incident_response.md)
 - [Coding Standards](./02_coding_standards.md)

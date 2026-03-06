@@ -35,4 +35,4 @@
 ## References
 
 - [FAQ](./02_faq.md)
-- [Architecture Decisions](../03_architecture/02_decisions/)
+- [Architecture Decisions](../architecture/decisions/)

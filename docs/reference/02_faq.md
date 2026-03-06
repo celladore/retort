@@ -12,7 +12,7 @@
 
 ### How do I get started?
 
-See the [Development Setup](../06_engineering/01_setup.md) guide.
+See the [Development Setup](../engineering/01_setup.md) guide.
 
 ## AgentKit Forge
 
@@ -41,11 +41,11 @@ These will not be overwritten by the sync process.
 pnpm test
 ```
 
-See the [Testing Guide](../06_engineering/03_testing.md) for details.
+See the [Testing Guide](../engineering/03_testing.md) for details.
 
 ### How do I submit a change?
 
-Follow the process described in the [Git Workflow](../06_engineering/04_git_workflow.md)
+Follow the process described in the [Git Workflow](../engineering/04_git_workflow.md)
 and [Contributing](./04_contributing.md) guides.
 
 ### Where do I report a bug?
@@ -56,4 +56,4 @@ and [Contributing](./04_contributing.md) guides.
 
 - [Glossary](./01_glossary.md)
 - [Contributing](./04_contributing.md)
-- [Development Setup](../06_engineering/01_setup.md)
+- [Development Setup](../engineering/01_setup.md)

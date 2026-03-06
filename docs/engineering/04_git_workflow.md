@@ -92,4 +92,4 @@ Promotion guidance:
 
 - [Coding Standards](./02_coding_standards.md)
 - [Testing Guide](./03_testing.md)
-- [Contributing](../08_reference/04_contributing.md)
+- [Contributing](../reference/04_contributing.md)

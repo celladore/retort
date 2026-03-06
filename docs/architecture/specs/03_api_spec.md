@@ -47,6 +47,6 @@
 
 ## References
 
-- [API Overview](../04_api/01_overview.md)
-- [Endpoint Reference](../04_api/02_endpoints.md)
-- [API Examples](../04_api/04_examples.md)
+- [API Overview](../../api/01_overview.md)
+- [Endpoint Reference](../../api/02_endpoints.md)
+- [API Examples](../../api/04_examples.md)
