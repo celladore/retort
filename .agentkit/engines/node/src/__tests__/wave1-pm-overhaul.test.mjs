@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { resolveTeamAgents, readYaml, runSync } from '../synchronize.mjs';
 import { renderTemplate, replacePlaceholders } from '../template-utils.mjs';
 
