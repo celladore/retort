@@ -12,14 +12,14 @@ Historical documentation for significant PRs and implementations in {{repoName}}
 
 ## Directory Structure
 
-| Directory                                    | Description                                        |
-| -------------------------------------------- | -------------------------------------------------- |
-| [implementations/](./implementations/)       | Major implementations and architecture changes     |
-| [bug-fixes/](./bug-fixes/)                   | Complex or critical bug resolutions                |
-| [features/](./features/)                     | New feature launches                               |
-| [migrations/](./migrations/)                 | Major migrations and upgrades                      |
-| [issues/](./issues/)                         | Issues encountered during development sessions     |
-| [lessons-learned/](./lessons-learned/)       | Lessons learned from retrospectives                |
+| Directory                              | Description                                    |
+| -------------------------------------- | ---------------------------------------------- |
+| [implementations/](./implementations/) | Major implementations and architecture changes |
+| [bug-fixes/](./bug-fixes/)             | Complex or critical bug resolutions            |
+| [features/](./features/)               | New feature launches                           |
+| [migrations/](./migrations/)           | Major migrations and upgrades                  |
+| [issues/](./issues/)                   | Issues encountered during development sessions |
+| [lessons-learned/](./lessons-learned/) | Lessons learned from retrospectives            |
 
 ## Naming Convention
 
@@ -65,5 +65,7 @@ creation at end-of-session (non-blocking — never gates delivery):
 # PowerShell
 ./scripts/create-doc.ps1 implementation "Feature Name" <pr-number>
 ```
+
+Or use the `/document-history` slash command for auto-detection of type and title from session context.
 
 See [docs/engineering/06_pr_documentation.md](../engineering/06_pr_documentation.md) for the full documentation strategy.
