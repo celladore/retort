@@ -9,7 +9,9 @@ on:
 # Branch protection depends on these check names. If you rename a job's `name:`
 # field, update branch protection rules for dev and main to match.
 # Current required checks: Test (ubuntu-latest), Validate, YAML Lint,
-# Markdown Lint, branch-rules (from branch-protection.yml).
+# branch-rules (from branch-protection.yml).
+# Quality checks (Markdown Lint, Prettier) are in quality-lint.yml —
+# required on main, warning-only on dev.
 jobs:
   test:
     name: Test (${{ matrix.os }})
@@ -97,8 +99,27 @@ jobs:
       - name: Check for drift
         run: |
           if ! git diff --quiet; then
-            echo "::error::Generated files are out of sync. Run 'pnpm -C .agentkit agentkit:sync' and commit."
+            echo "::group::Sync drift — changed files"
             git diff --stat
+            echo "::endgroup::"
+            {
+              echo "## Sync Drift Detected"
+              echo ""
+              echo "Generated outputs are out of sync with spec sources."
+              echo "Run \`pnpm -C .agentkit agentkit:sync\` locally and commit the changes."
+              echo ""
+              echo "### Changed files"
+              echo '```'
+              git diff --stat
+              echo '```'
+              echo ""
+              echo "### Fix"
+              echo '```bash'
+              echo "pnpm -C .agentkit agentkit:sync"
+              echo "git add -A && git commit -m 'chore(sync): regenerate outputs'"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::Sync produced uncommitted changes — generated outputs are out of sync with sources."
             exit 1
           fi
 
@@ -130,26 +151,3 @@ jobs:
             SPEC_FILE="$f" node --input-type=module -e "import yaml from 'js-yaml'; import fs from 'fs'; yaml.load(fs.readFileSync(process.env.SPEC_FILE,'utf8'));"
           done
 
-  markdown-lint:
-    name: Markdown Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          package_json_file: package.json
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'pnpm'
-          cache-dependency-path: .agentkit/pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: .agentkit
-
-      - name: Lint Markdown files
-        run: pnpm lint:md
-        working-directory: .agentkit
