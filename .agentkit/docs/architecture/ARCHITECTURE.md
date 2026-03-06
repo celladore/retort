@@ -390,8 +390,8 @@ gracefully. Results are logged as orchestrator events. Flags: `--fix`, `--fast`,
 
 ## References
 
-- [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) -- Full command documentation
-- [WORKFLOWS.md](./WORKFLOWS.md) -- Standard workflow patterns
-- [CUSTOMIZATION.md](./CUSTOMIZATION.md) -- Overlay and spec customization
+- [COMMAND_REFERENCE.md](../guides/COMMAND_REFERENCE.md) -- Full command documentation
+- [WORKFLOWS.md](../guides/WORKFLOWS.md) -- Standard workflow patterns
+- [CUSTOMIZATION.md](../configuration/CUSTOMIZATION.md) -- Overlay and spec customization
 - [STATE_AND_SESSIONS.md](./STATE_AND_SESSIONS.md) -- Orchestrator state details
-- [TEAM_GUIDE.md](./TEAM_GUIDE.md) -- Team definitions and delegation
+- [TEAM_GUIDE.md](../guides/TEAM_GUIDE.md) -- Team definitions and delegation

@@ -81,4 +81,4 @@ Either way, the forge must not duplicate the repo’s KQL or scripts—only poin
 
 - Router-specialist ownership and downstream analytics: [UPSTREAM_MIGRATION_SPEC.md](UPSTREAM_MIGRATION_SPEC.md), [UPSTREAM_ISSUE_BODY.md](UPSTREAM_ISSUE_BODY.md).
 - pvc-costops-analytics (implementation): `phoenixvc/pvc-costops-analytics` — `adx/kql/`, `grafana/dashboards/`, `advisor/app/`, `scripts/`, `docs/`.
-- Forge architecture and sync: `.agentkit/docs/ARCHITECTURE.md`, `.agentkit/docs/CUSTOMIZATION.md`.
+- Forge architecture and sync: `.agentkit/docs/architecture/ARCHITECTURE.md`, `.agentkit/docs/configuration/CUSTOMIZATION.md`.

@@ -460,7 +460,7 @@ unbudgeted_resources(_since)   — Resources not in any cost centre
 | `.agentkit/overlays/pvc-costops-analytics/commands.yaml`     | Enable cost-centres command                   | P1       |
 | `.agentkit/templates/claude/commands/cost.md`                | Add `--budget` flag documentation             | P2       |
 | `.agentkit/templates/claude/commands/infra-eval.md`          | Add cost sub-evaluation details               | P2       |
-| `.agentkit/docs/COST_TRACKING.md`                            | Update to reflect enforcement layer           | P2       |
+| `.agentkit/docs/architecture/COST_TRACKING.md`                            | Update to reflect enforcement layer           | P2       |
 
 ### 7.2 ai-gateway Changes (Separate PR)
 

@@ -149,6 +149,6 @@ Compare with the upstream version to see if an upgrade is available.
 
 ## References
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — Internal architecture details
-- [CUSTOMIZATION.md](./CUSTOMIZATION.md) — Overlay system and settings
-- [PROJECT_YAML_REFERENCE.md](./PROJECT_YAML_REFERENCE.md) — project.yaml schema
+- [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) — Internal architecture details
+- [CUSTOMIZATION.md](../configuration/CUSTOMIZATION.md) — Overlay system and settings
+- [PROJECT_YAML_REFERENCE.md](../configuration/PROJECT_YAML_REFERENCE.md) — project.yaml schema

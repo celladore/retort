@@ -761,7 +761,7 @@ All share the same `brand.yaml` source, different mapping/output targets.
 | `.agentkit/engines/node/src/__tests__/editor-theme.test.mjs`   | **Create** | Tests for theme merge into settings.json   |
 | `.agentkit/overlays/__TEMPLATE__/brand.yaml`                   | **Create** | Overlay template for brand                 |
 | `.agentkit/overlays/__TEMPLATE__/editor-theme.yaml`            | **Create** | Overlay template for editor theme          |
-| `.agentkit/docs/BRAND_YAML_REFERENCE.md`                       | **Create** | Reference docs for brand spec schema       |
+| `.agentkit/docs/configuration/BRAND_YAML_REFERENCE.md`                       | **Create** | Reference docs for brand spec schema       |
 
 ---
 

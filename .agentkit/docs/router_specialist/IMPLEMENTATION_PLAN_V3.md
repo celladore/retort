@@ -24,8 +24,8 @@
 ## Upstream sync scope note
 
 - This migration pass also requires upstream alignment for AgentKit command/hook contract updates across:
-  - `.agentkit/docs/COMMAND_REFERENCE.md`
-  - `.agentkit/docs/QUICK_START.md`
+  - `.agentkit/docs/guides/COMMAND_REFERENCE.md`
+  - `.agentkit/docs/getting-started/QUICK_START.md`
   - `.agentkit/spec/commands.yaml`
   - `.agentkit/templates/claude/hooks/guard-destructive-commands.sh`
   - `.agentkit/templates/claude/hooks/protect-sensitive.sh`

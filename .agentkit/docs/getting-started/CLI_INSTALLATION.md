@@ -283,6 +283,6 @@ global directory permissions or use a Node version manager like `nvm`.
 ## Further Reading
 
 - [Quick Start](./QUICK_START.md) -- First 15 minutes walkthrough
-- [Command Reference](./COMMAND_REFERENCE.md) -- Full flag and output documentation
-- [Workflows](./WORKFLOWS.md) -- Worked examples for common scenarios
-- [Troubleshooting](./TROUBLESHOOTING.md) -- Extended error catalog and recovery steps
+- [Command Reference](../guides/COMMAND_REFERENCE.md) -- Full flag and output documentation
+- [Workflows](../guides/WORKFLOWS.md) -- Worked examples for common scenarios
+- [Troubleshooting](../reference/TROUBLESHOOTING.md) -- Extended error catalog and recovery steps
