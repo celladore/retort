@@ -26,7 +26,7 @@ When the orchestrator delegates to these teams, there is no agent definition to 
   scope:
     [
       'docs/**',
-      'docs/03_architecture/02_decisions/**',
+      'docs/architecture/decisions/**',
       '.github/**',
       'README.md',
       'CHANGELOG.md',
@@ -41,7 +41,7 @@ When the orchestrator delegates to these teams, there is no agent definition to 
 - Backend and frontend teams hand off to `docs` — but docs has no agent to receive
 - ADR creation has no agent-guided quality criteria
 - CHANGELOG updates have no structured convention enforcement
-- API documentation (`docs/04_api/`) has no review agent
+- API documentation (`docs/api/`) has no review agent
 - The `document` accept type is unique to this team but has no agent implementing it
 
 ### Proposed Agent: `docs-writer`
@@ -72,12 +72,12 @@ operations:
       - 'README.md'
     responsibilities:
       - Write and maintain technical documentation following the 8-category structure
-      - Create and update Architecture Decision Records (ADRs) in docs/03_architecture/02_decisions/
-      - Maintain API documentation in docs/04_api/ in sync with implementation
+      - Create and update Architecture Decision Records (ADRs) in docs/architecture/decisions/
+      - Maintain API documentation in docs/api/ in sync with implementation
       - Update CHANGELOG.md following Keep a Changelog format for every user-facing change
       - Review documentation for accuracy, completeness, and clarity
       - Generate history documents for significant work using docs/history/ templates
-      - Maintain developer setup guides in docs/06_engineering/
+      - Maintain developer setup guides in docs/engineering/
       - Ensure generated file headers are not manually edited
     domain-rules:
       - 'Follow documentation domain rules [doc-8-category-structure, doc-adr-format, doc-changelog, doc-api-spec]'

@@ -265,7 +265,7 @@ Acceptance criteria:
 - Internal config API for reading and writing mapping files.
 - CLI commands for mapping and scorecards.
 - Model metadata endpoints for latest capability and cost data.
-- Detailed contracts: `docs/02_specs/PRD-004-technical-api-contracts.md`
+- Detailed contracts: `docs/architecture/specs/PRD-004-technical-api-contracts.md`
 
 ### External Dependencies
 
@@ -424,7 +424,7 @@ Project start date: **2026-03-03**
   - Vendor release notes and model cards
   - Internal CI telemetry (pass rate, latency, cost-per-success)
 - **Source registry:** capture sources and fetch timestamp in
-  `docs/08_reference/model-families/*.md` and scorecard ingestion logs.
+  `docs/reference/model-families/*.md` and scorecard ingestion logs.
 - **New model onboarding process:**
   1. Intake request by Platform Lead.
   2. Required benchmark set executed (SWE-bench slice, Aider subset, latency and cost run).

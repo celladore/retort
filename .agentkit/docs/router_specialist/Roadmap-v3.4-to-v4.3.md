@@ -11,15 +11,15 @@
 
 ## Upstream links (fill when created)
 
-- Upstream roadmap path: `TBD`
-- Upstream issue: `TBD`
-- Upstream PR(s): `TBD`
+- Upstream roadmap path: `[deferred]`
+- Upstream issue: `[deferred]`
+- Upstream PR(s): `[deferred]`
 
 ## Local routing references
 
 - Implementation tracking pointer: `IMPLEMENTATION_PLAN_V3.md`
 - Local linkage checklist: `IMPLEMENTATION_CHECKLIST.md`
-- Ownership/migration policy: `../PLAN-sync-ownership-v0.2.2.md`
+- Ownership/migration policy: `UPSTREAM_MIGRATION_SPEC.md` <!-- Originally ../PLAN-sync-ownership-v0.2.2.md, file was never created -->
 
 ## Scope note (upstream command/hook sync)
 

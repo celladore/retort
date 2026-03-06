@@ -340,7 +340,7 @@ Agents raise alerts via script call (one command). They don't carry alert system
 
 #### Technical Requirements
 
-**TR-029.1 — Registry**: `docs/06_engineering/poka-yoke-registry.md`:
+**TR-029.1 — Registry**: `docs/engineering/poka-yoke-registry.md`:
 
 ```markdown
 # Poka-yoke Registry

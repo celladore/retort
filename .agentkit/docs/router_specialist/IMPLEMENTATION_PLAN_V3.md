@@ -11,9 +11,9 @@
 
 ## Upstream links (fill when created)
 
-- Upstream issue: `TBD`
-- Upstream PR(s): `TBD`
-- Runtime handoff tracking (`phoenixvc/ai-gateway`): `TBD`
+- Upstream issue: `[deferred]`
+- Upstream PR(s): `[deferred]`
+- Runtime handoff tracking (`phoenixvc/ai-gateway`): `[deferred]`
 
 ## Local purpose in `phoenixvc/chaufher`
 

@@ -28,10 +28,10 @@ This is an organizational epic and orchestrates sub-issues `#160`–`#170`.
 
 Epic-level impacted files/components:
 
-- `docs/08_reference/router_integration_governance_rollout.md` (tracking)
-- `docs/08_reference/governance_issue_file_impact_map.md` (mapping)
-- `docs/08_reference/agentkit_adopter_branch_governance_checklist.md` (adopter process)
-- `docs/08_reference/agentkit_sync_integration_patch_plan.md` (sync integration blueprint)
+- `docs/reference/router_integration_governance_rollout.md` (tracking)
+- `docs/reference/governance_issue_file_impact_map.md` (mapping)
+- `docs/reference/agentkit_adopter_branch_governance_checklist.md` (adopter process)
+- `docs/reference/agentkit_sync_integration_patch_plan.md` (sync integration blueprint)
 
 Ownership:
 
@@ -51,8 +51,8 @@ Primary files:
 
 Supporting outputs:
 
-- `docs/08_reference/router_integration_governance_rollout.md`
-- `docs/08_reference/governance_issue_file_impact_map.md`
+- `docs/reference/router_integration_governance_rollout.md`
+- `docs/reference/governance_issue_file_impact_map.md`
 
 ## #161 — Command contract governance (`/mode` `/delegate` `/tasks`) + hook audit
 
@@ -85,7 +85,7 @@ Potential new/updated docs/templates:
 
 - `.agentkit/docs/FINOPS_PHASE1_SPEC.md` (or equivalent docs template target)
 - `.agentkit/spec/commands.yaml` (if adding a dedicated finops command/skill link)
-- `docs/08_reference/router_integration_governance_rollout.md`
+- `docs/reference/router_integration_governance_rollout.md`
 
 ## #163 — ai-gateway guidance + command-docs integration contract
 
@@ -98,14 +98,14 @@ Primary files:
 
 Potential policy/docs touchpoints:
 
-- `docs/07_integrations/` docs for adopter-facing guidance
+- `docs/integrations/` docs for adopter-facing guidance
 
 ## #164 — Dependency + blocker mapping
 
 Primary files:
 
-- `docs/08_reference/router_integration_governance_rollout.md`
-- `docs/08_reference/governance_issue_file_impact_map.md`
+- `docs/reference/router_integration_governance_rollout.md`
+- `docs/reference/governance_issue_file_impact_map.md`
 
 Tracking integration note:
 
@@ -125,15 +125,15 @@ Primary files:
 Primary files:
 
 - `QUALITY_GATES.md`
-- `docs/08_reference/router_integration_governance_rollout.md`
-- `docs/08_reference/governance_issue_file_impact_map.md`
+- `docs/reference/router_integration_governance_rollout.md`
+- `docs/reference/governance_issue_file_impact_map.md`
 
 ## #167 — Branch governance rollout tracker
 
 Primary files:
 
-- `docs/08_reference/router_integration_governance_rollout.md`
-- `docs/08_reference/agentkit_adopter_branch_governance_checklist.md`
+- `docs/reference/router_integration_governance_rollout.md`
+- `docs/reference/agentkit_adopter_branch_governance_checklist.md`
 
 ## #168 — Policy: block direct `.agentkit/**` changes on `dev`/`main`
 
@@ -162,7 +162,7 @@ Primary files:
 
 - `.github/workflows/branch-protection.yml`
 - `CONTRIBUTING.md`
-- `docs/08_reference/agentkit_adopter_branch_governance_checklist.md`
+- `docs/reference/agentkit_adopter_branch_governance_checklist.md`
 
 Expected enforcement behavior:
 

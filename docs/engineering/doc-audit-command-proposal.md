@@ -148,8 +148,8 @@ Flag: `DOC-STALE-*` for each outdated item.
 
 Evaluate:
 
-- **Completeness**: Are all public APIs documented in `docs/04_api/`?
-- **ADR coverage**: Do significant architecture decisions have ADRs in `docs/03_architecture/02_decisions/`?
+- **Completeness**: Are all public APIs documented in `docs/api/`?
+- **ADR coverage**: Do significant architecture decisions have ADRs in `docs/architecture/decisions/`?
 - **Onboarding path**: Can a new developer follow QUICK_START → setup → first contribution?
 - **Consistency**: Do all docs use the same terminology, formatting, and structure?
 

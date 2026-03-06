@@ -78,7 +78,7 @@ routing:
 - id: product
   name: PRODUCT
   focus: 'Features, PRDs, roadmap, content strategy, growth analytics'
-  scope: ['docs/01_product/**', 'docs/prd/**', 'marketing/**', 'analytics/**', 'content/**']
+  scope: ['docs/product/**', 'docs/prd/**', 'marketing/**', 'analytics/**', 'content/**']
   accepts: [plan, review, investigate] # ADD investigate
   handoff-chain: [backend, frontend]
 ```

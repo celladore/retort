@@ -375,7 +375,7 @@ teams:
   - id: product
     name: PRODUCT
     focus: 'Features, PRDs, roadmap'
-    scope: ['docs/01_product/**', 'docs/prd/**']
+    scope: ['docs/product/**', 'docs/prd/**']
     accepts: [plan, review, decide]
     authority:
       - sprint-goal-approval

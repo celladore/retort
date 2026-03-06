@@ -480,7 +480,7 @@ Dedicate 10-15% of each sprint to technical debt reduction, focused on:
 **Knowledge sharing:**
 
 - Add complexity metrics to the PR template ("Complexity delta: +/-")
-- Document refactoring patterns specific to the codebase in `docs/06_engineering/`
+- Document refactoring patterns specific to the codebase in `docs/engineering/`
 - Run quarterly "complexity audits" comparing metrics over time
 
 ### 4.4 Architecture Recommendations

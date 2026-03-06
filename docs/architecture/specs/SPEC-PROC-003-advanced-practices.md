@@ -192,7 +192,7 @@ teams:
   - id: frontend
     name: FRONTEND
     scope: ['apps/web/**', 'components/**']
-    secondary-scope: ['docs/01_product/**'] # Can contribute to product docs
+    secondary-scope: ['docs/product/**'] # Can contribute to product docs
     secondary-requires-review-from: docs
 ```
 
@@ -424,7 +424,7 @@ Action:
   If tech-debt / total > 0.30: emit "TECH DEBT WARNING: 35% of backlog is tech debt. Consider dedicated sprint."
 ```
 
-**TR-018.4 — Tech Debt Register**: `docs/06_engineering/tech-debt-register.md`
+**TR-018.4 — Tech Debt Register**: `docs/engineering/tech-debt-register.md`
 
 ```markdown
 # Tech Debt Register
@@ -625,7 +625,7 @@ scripts/backlog-health.mjs       # Tech debt threshold monitoring
 scripts/generate-status.mjs      # STATUS.md generation
 scripts/code-ownership.mjs       # Bus factor analysis
 STATUS.md                        # Auto-generated project status (repo root)
-docs/06_engineering/tech-debt-register.md  # Tech debt register
+docs/engineering/tech-debt-register.md  # Tech debt register
 docs/history/sprint-reviews/     # Directory for sprint reviews
 ```
 

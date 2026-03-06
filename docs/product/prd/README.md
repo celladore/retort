@@ -10,7 +10,7 @@ PRDs (Product Requirement Documents) define the "what" and "why" of features bef
 
 ## PRD Location
 
-PRDs are stored in `docs/01_product/` using the naming convention:
+PRDs are stored in `docs/product/` using the naming convention:
 
 ```text
 PRD-{NNN}-{slug}.md
@@ -29,7 +29,7 @@ Where `{NNN}` is a zero-padded sequential number and `{slug}` is a lowercase-hyp
 ## Creating a New PRD
 
 1. Copy the numbering convention: `PRD-{next number}-{descriptive-slug}.md`
-2. Place the file in `docs/01_product/`
+2. Place the file in `docs/product/`
 3. Include at minimum: Problem Statement, Goals, Non-Goals, Requirements, Success Criteria, and Acceptance Tests
 4. Link the PRD from this index
 

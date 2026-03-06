@@ -52,15 +52,15 @@ engineering: # or new 'architecture' category
       - infra
       - data
     focus:
-      - 'docs/03_architecture/**'
-      - 'docs/02_specs/**'
+      - 'docs/architecture/**'
+      - 'docs/architecture/specs/**'
       - 'src/**'
       - 'apps/**'
       - 'services/**'
       - 'infra/**'
     responsibilities:
       - Define and maintain system architecture and component boundaries
-      - Create and review Architecture Decision Records (ADRs) in docs/03_architecture/02_decisions/
+      - Create and review Architecture Decision Records (ADRs) in docs/architecture/decisions/
       - Review cross-service integration points for consistency and coupling
       - Evaluate technology stack decisions and document rationale
       - Define non-functional requirements (performance, scalability, reliability targets)
@@ -106,7 +106,7 @@ engineering: # or new 'architecture' category
 - id: architecture
   name: ARCHITECTURE
   focus: 'System design, ADRs, cross-cutting architecture review'
-  scope: ['docs/03_architecture/**', 'docs/02_specs/**', 'src/**', 'apps/**', 'services/**']
+  scope: ['docs/architecture/**', 'docs/architecture/specs/**', 'src/**', 'apps/**', 'services/**']
   accepts: [review, plan, investigate]
   handoff-chain: [quality]
 ```
@@ -143,5 +143,5 @@ Before implementing, the following analysis should be performed:
 
 - Current agents: `.agentkit/spec/agents.yaml` (24 agents, 6 categories)
 - Teams: `.agentkit/spec/teams.yaml` (10 teams)
-- ADR directory: `docs/03_architecture/02_decisions/`
+- ADR directory: `docs/architecture/decisions/`
 - Quality gates: `QUALITY_GATES.md`

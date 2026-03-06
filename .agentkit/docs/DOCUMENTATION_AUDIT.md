@@ -1,5 +1,7 @@
 # Documentation Audit — AgentKit Forge
 
+> **Status: ARCHIVED** — All remediation items (1-17) have been completed. Remaining recommendations (troubleshooting entries, Docker install, shell completion, platform comparison) are tracked as backlog items. Archived 2026-03-06.
+
 **Audit date:** 2026-03-04
 **Version audited:** v3.1.0 (runtime) / v0.2.1 (framework)
 **Auditor:** Automated documentation audit
@@ -15,7 +17,7 @@ AgentKit Forge has a comprehensive documentation set across 20+ files in `.agent
 | Category          | Status     | Details                                                                           |
 | ----------------- | ---------- | --------------------------------------------------------------------------------- |
 | README            | Good       | Clear purpose, adoption guides, navigation. One broken link.                      |
-| Command Reference | Incomplete | 5 commands completely undocumented; several missing flags from CLI source         |
+| Command Reference | Good       | All commands documented (tasks, delegate, doctor, scaffold, preflight added)     |
 | Agent Reference   | Missing    | No dedicated reference for 19 agent personas; scattered across AGENTS_VS_TEAMS.md |
 | Team Guide        | Good       | Decision matrix, handoff patterns, edge cases covered                             |
 | Architecture      | Good       | Sync engine, template rendering, directory structure documented                   |

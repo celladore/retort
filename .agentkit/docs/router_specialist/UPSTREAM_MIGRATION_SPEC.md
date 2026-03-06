@@ -19,7 +19,7 @@ Move router-specialist authoritative planning/docs ownership to `justaghost/agen
 ### Architecture sync ownership docs
 
 - `.agentkit/docs/ARCHITECTURE.md`
-- `.agentkit/docs/PLAN-sync-ownership-v0.2.2.md`
+- `.agentkit/docs/PLAN-sync-ownership-v0.2.2.md` <!-- File was never created; remove from scope -->
 
 ### AgentKit command/hook contract alignment (upstream authoritative updates)
 

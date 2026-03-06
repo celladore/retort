@@ -21,7 +21,7 @@ body:
         - Cross-document counts were inconsistent (command counts, agent counts)
         - No automated way exists to detect these issues going forward
 
-        A detailed proposal has been committed at `docs/06_engineering/doc-audit-command-proposal.md`.
+        A detailed proposal has been committed at `docs/engineering/doc-audit-command-proposal.md`.
 
   - type: dropdown
     id: area
@@ -144,7 +144,7 @@ body:
 
         3. Run `pnpm -C .agentkit agentkit:sync` to generate outputs for all 15+ platform targets.
 
-        The full spec YAML entry and complete Handlebars template (with all 7 phases) are in `docs/06_engineering/doc-audit-command-proposal.md`.
+        The full spec YAML entry and complete Handlebars template (with all 7 phases) are in `docs/engineering/doc-audit-command-proposal.md`.
     validations:
       required: false
 

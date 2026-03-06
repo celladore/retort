@@ -37,7 +37,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 | Intake ownership flow         | `teams.yaml` → `intake.ownerTeam`, `operationsTeam`, `routing`, `escalation`                           | Already defined — reuse as-is for team assignment during normalization |
 | Task protocol (A2A-lite)      | `.claude/state/tasks/` JSON files with lifecycle states                                                | Use same schema for ingested issues to enable orchestrator integration |
 | Template variable propagation | `project-mapping.mjs` flattens `project.yaml` → Handlebars vars                                        | Extend with new intake/import vars                                     |
-| Post-sync validation matrix   | Documented in `docs/08_reference/issue_intake_ownership_and_invocation_flow.md`                        | Extend the matrix with the new command/feature checks                  |
+| Post-sync validation matrix   | Documented in `docs/reference/issue_intake_ownership_and_invocation_flow.md`                        | Extend the matrix with the new command/feature checks                  |
 | Command definition pattern    | `commands.yaml` → template → sync → multi-platform output                                              | Follow exactly for the new `import-issues` command                     |
 | History document pattern      | `/document-history` creates institutional memory                                                       | Auto-create a history doc after bulk import                            |
 
@@ -459,7 +459,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 ### Phase 11: Documentation & Validation
 
-24. **`docs/08_reference/issue_intake_ownership_and_invocation_flow.md`** — Update:
+24. **`docs/reference/issue_intake_ownership_and_invocation_flow.md`** — Update:
     - Add `import-issues` and `backlog` to the invocation flow
     - Add to the smoke matrix
     - Document the `autoImport` flag behavior

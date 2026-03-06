@@ -151,15 +151,15 @@ process:
 chapters:
   - id: code-review
     members: [backend, frontend, quality, security]
-    standards: docs/06_engineering/standards/code-review-standards.md
+    standards: docs/engineering/standards/code-review-standards.md
 
   - id: testing
     members: [testing, backend, frontend]
-    standards: docs/06_engineering/standards/testing-standards.md
+    standards: docs/engineering/standards/testing-standards.md
 
   - id: documentation
     members: [docs, product, quality]
-    standards: docs/06_engineering/standards/documentation-standards.md
+    standards: docs/engineering/standards/documentation-standards.md
 ```
 
 **TR-042.2 — Standards Enforcement**: Chapter standards are enforced via linter rules and CI checks — NOT via agent instructions. The standards files define the rules; tooling enforces them.
@@ -536,7 +536,7 @@ One rule in rules.yaml, applied to all agents. Not repeated per agent. The rule 
 
 #### Technical Requirements
 
-**TR-054.1 — Experiment Log**: `docs/06_engineering/experiments.md`:
+**TR-054.1 — Experiment Log**: `docs/engineering/experiments.md`:
 
 ```markdown
 # Process Experiments

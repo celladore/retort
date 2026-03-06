@@ -399,7 +399,7 @@ git add .agentkit/ .gitignore .gitattributes
 git commit -m "chore: upgrade agentkit-forge to latest"
 ```
 
-> **Note:** If the upgrade adds new files with `once` scaffold mode (docs, editor configs), they appear as untracked after your first `sync`. This is expected — review them and `git add` the ones you want to keep. Files with `managed` mode are regenerated if pristine or merged with your edits. Files with `always` mode are always overwritten. Use `--overwrite` to force-regenerate everything. See [Scaffold Management Guide](docs/06_engineering/08_scaffold_management.md) for details.
+> **Note:** If the upgrade adds new files with `once` scaffold mode (docs, editor configs), they appear as untracked after your first `sync`. This is expected — review them and `git add` the ones you want to keep. Files with `managed` mode are regenerated if pristine or merged with your edits. Files with `always` mode are always overwritten. Use `--overwrite` to force-regenerate everything. See [Scaffold Management Guide](docs/engineering/08_scaffold_management.md) for details.
 
 Your overlay (`overlays/<your-repo>/`) is never touched by upstream merges. See the **[Migration Guide](.agentkit/docs/MIGRATION_GUIDE.md)** for detailed upgrade paths and conflict resolution.
 

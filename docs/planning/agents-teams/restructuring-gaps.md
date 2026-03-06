@@ -86,8 +86,8 @@ Create a `docs-writer` agent in the `operations` or new `documentation` category
     - 'CONTRIBUTING.md'
   responsibilities:
     - Write and maintain technical documentation following the 8-category structure
-    - Create and update Architecture Decision Records (ADRs) in docs/03_architecture/02_decisions/
-    - Maintain API documentation in docs/04_api/
+    - Create and update Architecture Decision Records (ADRs) in docs/architecture/decisions/
+    - Maintain API documentation in docs/api/
     - Update CHANGELOG.md following Keep a Changelog format
     - Review documentation accuracy after code changes
     - Ensure documentation builds without warnings

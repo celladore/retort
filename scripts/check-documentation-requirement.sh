@@ -97,7 +97,7 @@ if [[ "$IMPACT_HIGH" == true ]]; then
     exit 0
   else
     echo "   Run: ./scripts/create-doc.sh <type> \"<title>\" <pr-number>"
-    echo "   See: docs/06_engineering/06_pr_documentation.md"
+    echo "   See: docs/engineering/06_pr_documentation.md"
     if [[ "$STRICT" == "true" ]]; then
       exit 1
     fi

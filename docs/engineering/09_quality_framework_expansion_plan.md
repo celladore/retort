@@ -22,7 +22,7 @@
 
 ### What Exists Today
 
-The code quality assessment (`docs/06_engineering/08_code_quality_assessment.md`)
+The code quality assessment (`docs/engineering/08_code_quality_assessment.md`)
 currently covers **four language stacks** that mirror `teams.yaml` `techStacks`:
 
 | Stack              | Linting                              | Formatting            | Testing             | Complexity                    |
@@ -639,7 +639,7 @@ However, the `devops` team scope should explicitly include shell scripts:
 
 ### 6.1 Primary Document: Code Quality Assessment
 
-**File:** `docs/06_engineering/08_code_quality_assessment.md`
+**File:** `docs/engineering/08_code_quality_assessment.md`
 
 Add **Section 7: Extended Language Support** covering:
 
@@ -660,15 +660,15 @@ reviewed for consistency with the expanded framework:
 
 | File                                                                                  | Type                | Relevance                                            | Update Needed                                     |
 | ------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------- | ------------------------------------------------- |
-| `docs/06_engineering/02_coding_standards.md`                                          | Generated template  | Placeholder content for language/style/linter fields | Fill in based on detected stack                   |
-| `docs/06_engineering/03_testing.md`                                                   | Generated template  | Testing standards                                    | Reference new testing frameworks (Bats, Pester)   |
-| `docs/03_architecture/02_decisions/03-tooling-strategy.md`                            | ADR template        | Tooling selection ADR                                | Reference expanded tool baselines                 |
-| `docs/03_architecture/02_decisions/06-code-quality-maintainability-signal-tooling.md` | ADR template        | Quality tool ADR                                     | Fill weighted matrix with actual tool evaluations |
-| `docs/08_reference/model-guides/model-guide-quality.md`                               | Generated reference | Quality team guide                                   | Reference Section 7 baselines                     |
-| `docs/08_reference/model-guides/model-guide-devops.md`                                | Generated reference | DevOps team guide                                    | Reference shell/PS quality standards              |
-| `docs/08_reference/model-guides/model-guide-frontend.md`                              | Generated reference | Frontend team guide                                  | Reference CSS/HTML quality standards              |
-| `docs/08_reference/model-guides/model-guide-testing.md`                               | Generated reference | Testing team guide                                   | Reference Bats, Pester, axe-core                  |
-| `docs/01_product/PRD-001-llm-decision-engine.md`                                      | PRD                 | References quality scoring                           | Ensure alignment with expanded metrics            |
+| `docs/engineering/02_coding_standards.md`                                          | Generated template  | Placeholder content for language/style/linter fields | Fill in based on detected stack                   |
+| `docs/engineering/03_testing.md`                                                   | Generated template  | Testing standards                                    | Reference new testing frameworks (Bats, Pester)   |
+| `docs/architecture/decisions/03-tooling-strategy.md`                            | ADR template        | Tooling selection ADR                                | Reference expanded tool baselines                 |
+| `docs/architecture/decisions/06-code-quality-maintainability-signal-tooling.md` | ADR template        | Quality tool ADR                                     | Fill weighted matrix with actual tool evaluations |
+| `docs/reference/model-guides/model-guide-quality.md`                               | Generated reference | Quality team guide                                   | Reference Section 7 baselines                     |
+| `docs/reference/model-guides/model-guide-devops.md`                                | Generated reference | DevOps team guide                                    | Reference shell/PS quality standards              |
+| `docs/reference/model-guides/model-guide-frontend.md`                              | Generated reference | Frontend team guide                                  | Reference CSS/HTML quality standards              |
+| `docs/reference/model-guides/model-guide-testing.md`                               | Generated reference | Testing team guide                                   | Reference Bats, Pester, axe-core                  |
+| `docs/product/PRD-001-llm-decision-engine.md`                                      | PRD                 | References quality scoring                           | Ensure alignment with expanded metrics            |
 | `CONTRIBUTING.md`                                                                     | Contributor guide   | Code quality expectations                            | Add shell/PS linting requirements                 |
 
 ### 6.3 Generated Files (Updated via Spec → Sync)

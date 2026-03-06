@@ -5,7 +5,7 @@
 | Attribute     | Value                   |
 | ------------- | ----------------------- |
 | Focus         | Features, PRDs, roadmap |
-| Scope         | `docs/01_product/**`    |
+| Scope         | `docs/product/**`    |
 | Handoff Chain | backend, frontend       |
 
 ## Weighting Profile
@@ -158,4 +158,4 @@ ranking tables until benchmark metrics are validated.
 - PRD-001: LLM Decision Engine
 - PRD-002: LLM Selection Scorecard Guide
 - PRD-003: Weighted Matrix example
-- Model Family Benchmark Dossiers: `docs/08_reference/model-families/README.md`
+- Model Family Benchmark Dossiers: `docs/reference/model-families/README.md`

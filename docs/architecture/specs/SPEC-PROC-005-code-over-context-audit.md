@@ -484,8 +484,8 @@ examples:
       export function registerBillingServices(container) { ... }
 
 # AFTER (in agents.yaml — reference only)
-examples-ref: docs/06_engineering/examples/backend-examples.md
-anti-patterns-ref: docs/06_engineering/anti-patterns/backend-anti-patterns.md
+examples-ref: docs/engineering/examples/backend-examples.md
+anti-patterns-ref: docs/engineering/anti-patterns/backend-anti-patterns.md
 ```
 
 When an agent needs examples (implementation tasks), the orchestrator includes the reference file. For review tasks, it doesn't.

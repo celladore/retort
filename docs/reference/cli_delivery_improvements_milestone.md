@@ -87,10 +87,10 @@ adopter repos accumulate version drift, triggering avoidable CI failures when
 new forge versions introduce breaking template changes.
 
 This issue tracks delivery of the autoupdate capability as described in
-[PRD-007](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-007-adopter-autoupdate.md), building on the
+[PRD-007](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/product/PRD-007-adopter-autoupdate.md), building on the
 delivery channel established in
-[ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/03_architecture/02_decisions/07-delivery-strategy.md) and
-[PRD-005](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-005-mesh-native-distribution.md).
+[ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/architecture/decisions/07-delivery-strategy.md) and
+[PRD-005](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/product/PRD-005-mesh-native-distribution.md).
 
 ## Scope
 
@@ -121,8 +121,8 @@ delivery channel established in
 
 - Prereq: #196 — CLI toolchain enforcement (preflight check dependency)
 - Prereq: #194 — agentkit sync pre-PR enforcement (sync gate dependency)
-- Parent PRD: [PRD-007: Adopter Autoupdate](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/01_product/PRD-007-adopter-autoupdate.md)
-- Delivery strategy: [ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/03_architecture/02_decisions/07-delivery-strategy.md)
+- Parent PRD: [PRD-007: Adopter Autoupdate](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/product/PRD-007-adopter-autoupdate.md)
+- Delivery strategy: [ADR-07](https://github.com/JustAGhosT/agentkit-forge/blob/dev/docs/architecture/decisions/07-delivery-strategy.md)
 - Analytics: #241 (telemetry events for version tracking)
 ```
 

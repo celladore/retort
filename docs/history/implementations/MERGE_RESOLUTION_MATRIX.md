@@ -83,14 +83,14 @@ Affected `.github/prompts/*` files:
 
 | Path                             | Proposed Decision | Motivation                                                           |
 | -------------------------------- | ----------------- | -------------------------------------------------------------------- |
-| `docs/01_product/README.md`      | KEEP_THEIRS       | Generated index file; prefer latest upstream generation baseline.    |
-| `docs/02_specs/README.md`        | KEEP_THEIRS       | Generated index file; upstream reflects current structure migration. |
-| `docs/03_architecture/README.md` | KEEP_THEIRS       | Generated index file and likely path-normalized upstream.            |
-| `docs/04_api/README.md`          | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/05_operations/README.md`   | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/06_engineering/README.md`  | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/07_integrations/README.md` | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
-| `docs/08_reference/README.md`    | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/product/README.md`      | KEEP_THEIRS       | Generated index file; prefer latest upstream generation baseline.    |
+| `docs/architecture/specs/README.md`        | KEEP_THEIRS       | Generated index file; upstream reflects current structure migration. |
+| `docs/architecture/README.md` | KEEP_THEIRS       | Generated index file and likely path-normalized upstream.            |
+| `docs/api/README.md`          | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/operations/README.md`   | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/engineering/README.md`  | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/integrations/README.md` | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
+| `docs/reference/README.md`    | KEEP_THEIRS       | Generated index file; preserve upstream consistency.                 |
 
 ## 6) Special note on `.agentkit/spec/docs.yaml`
 
@@ -99,7 +99,7 @@ This is the only non-generated policy file in conflict where prior intentional c
 ### Proposed merge intent
 
 - Keep upstream structural/spec improvements from `origin/main`.
-- Preserve branch intent that corrected ADR path references to `docs/03_architecture/02_decisions/` where still valid.
+- Preserve branch intent that corrected ADR path references to `docs/architecture/decisions/` where still valid.
 - Resolve by hand and explicitly verify all `categories` and `adrRanges` paths are internally consistent.
 
 ## 7) What this matrix avoids

@@ -122,7 +122,7 @@ The Product Manager agent and Product team **already exist** in the spec:
 ### Product Manager Capabilities
 
 - **Accepts**: `plan`, `review` (cannot implement code)
-- **Scope**: `docs/01_product/**`, `docs/prd/**`
+- **Scope**: `docs/product/**`, `docs/prd/**`
 - **Handoff**: `backend`, `frontend`
 - **Notifies**: `backend`, `frontend`
 - **Responsibilities**: Write PRDs, define acceptance criteria, prioritize backlog, coordinate planning, maintain roadmap
@@ -150,7 +150,7 @@ In `.agentkit/engines/node/src/discover.mjs` line 215:
 { name: 'prd', label: 'PRDs', dirs: ['docs/prd', 'docs/PRD'], files: ['PRD.md', 'docs/PRD.md'] }
 ```
 
-But actual PRDs live in `docs/01_product/`. The detector will **never find them**.
+But actual PRDs live in `docs/product/`. The detector will **never find them**.
 
 ---
 
@@ -164,12 +164,12 @@ By the time this branch merges, a dedicated **Intake Agent** will exist. Rather 
 
 | Document Type                           | Short ID    | Typical Location                             | What Gets Extracted                                                                                          |
 | --------------------------------------- | ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Product Requirements Document (PRD)** | `prd`       | `docs/01_product/PRD-*.md`                   | Phases, milestones, deliverables, acceptance criteria, personas, success metrics                             |
-| **Functional Specification**            | `func-spec` | `docs/02_specs/FUNC-*.md`                    | Feature descriptions, business rules, input/output contracts, edge cases, validation rules                   |
-| **UI/UX Design Specification**          | `ui-spec`   | `docs/05_design/UI-*.md`                     | Screens/flows, component hierarchy, interaction patterns, responsive breakpoints, accessibility requirements |
-| **User Stories**                        | `stories`   | `docs/01_product/stories/` or inline in PRDs | As-a/I-want/So-that, acceptance criteria, story points, dependencies                                         |
-| **Technical Specification**             | `tech-spec` | `docs/02_specs/TECH-*.md`                    | Architecture decisions, API contracts, data models, sequence diagrams, performance budgets                   |
-| **Process Flow**                        | `process`   | `docs/06_processes/FLOW-*.md`                | Swimlane steps, decision points, error paths, SLAs, integration touchpoints                                  |
+| **Product Requirements Document (PRD)** | `prd`       | `docs/product/PRD-*.md`                   | Phases, milestones, deliverables, acceptance criteria, personas, success metrics                             |
+| **Functional Specification**            | `func-spec` | `docs/architecture/specs/FUNC-*.md`                    | Feature descriptions, business rules, input/output contracts, edge cases, validation rules                   |
+| **UI/UX Design Specification**          | `ui-spec`   | `docs/design/UI-*.md`                     | Screens/flows, component hierarchy, interaction patterns, responsive breakpoints, accessibility requirements |
+| **User Stories**                        | `stories`   | `docs/product/stories/` or inline in PRDs | As-a/I-want/So-that, acceptance criteria, story points, dependencies                                         |
+| **Technical Specification**             | `tech-spec` | `docs/architecture/specs/TECH-*.md`                    | Architecture decisions, API contracts, data models, sequence diagrams, performance budgets                   |
+| **Process Flow**                        | `process`   | `docs/processes/FLOW-*.md`                | Swimlane steps, decision points, error paths, SLAs, integration touchpoints                                  |
 
 ### `/intake` Command Design
 
@@ -179,15 +179,15 @@ Usage: /intake <doc-type> <ID-or-path> [flags]
 Examples:
   /intake prd PRD-005
   /intake func-spec FUNC-012
-  /intake tech-spec docs/02_specs/TECH-003-json-rpc-api.md
+  /intake tech-spec docs/architecture/specs/TECH-003-json-rpc-api.md
   /intake ui-spec UI-001 --phase 2
-  /intake stories docs/01_product/stories/sprint-14.md
+  /intake stories docs/product/stories/sprint-14.md
   /intake process FLOW-007 --team backend
 
 Behavior:
 1. Resolve document from type + ID or path
-   - prd PRD-005 → docs/01_product/PRD-005-*.md (glob match)
-   - func-spec FUNC-012 → docs/02_specs/FUNC-012-*.md
+   - prd PRD-005 → docs/product/PRD-005-*.md (glob match)
+   - func-spec FUNC-012 → docs/architecture/specs/FUNC-012-*.md
    - Fallback: treat argument as literal file path
 2. Detect document structure (headings, tables, lists)
 3. Extract deliverables using type-specific extractors:
@@ -236,10 +236,10 @@ Flags:
     - product-manager
     - roadmap-tracker
   focus:
-    - 'docs/01_product/**'
-    - 'docs/02_specs/**'
-    - 'docs/05_design/**'
-    - 'docs/06_processes/**'
+    - 'docs/product/**'
+    - 'docs/architecture/specs/**'
+    - 'docs/design/**'
+    - 'docs/processes/**'
     - 'docs/prd/**'
     - 'AGENT_BACKLOG.md'
   responsibilities:
@@ -281,7 +281,7 @@ When the intake agent is built, it should be analyzed for these potential issues
 
 | #   | Bug                                         | Where to Check                                                                                                                   |
 | --- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **PRD detector paths wrong**                | `discover.mjs:215` — must include `docs/01_product`                                                                              |
+| 1   | **PRD detector paths wrong**                | `discover.mjs:215` — must include `docs/product`                                                                              |
 | 2   | **Glob resolution failures**                | `prd PRD-005` must resolve `PRD-005-mesh-native-distribution.md`, not fail on partial match                                      |
 | 3   | **Markdown table parsing edge cases**       | PRD phase tables with merged cells, empty columns, or multi-line cells                                                           |
 | 4   | **Priority mapping off-by-one**             | Phase 1 → P0, Phase 2 → P1, Phase 3 → P2 — verify boundary when PRD has 5+ phases (P3 is lowest, phases 4+ should all map to P3) |
@@ -296,7 +296,7 @@ When the intake agent is built, it should be analyzed for these potential issues
 | 2   | **Conflict detection across doc types**                                 | Flag when a tech spec contradicts a PRD (e.g., PRD says "REST API" but tech spec says "GraphQL") |
 | 3   | **Intake history / changelog**                                          | Log every intake run to `events.log` with document hash, items created, teams affected           |
 | 4   | **Reverse traceability** — from backlog item back to source doc section | Enable "why does this task exist?" queries                                                       |
-| 5   | **Auto-detect document type**                                           | If user just says `/intake docs/02_specs/TECH-003.md`, infer `tech-spec` from path/content       |
+| 5   | **Auto-detect document type**                                           | If user just says `/intake docs/architecture/specs/TECH-003.md`, infer `tech-spec` from path/content       |
 | 6   | **Batch intake**                                                        | `/intake prd --all` to intake all PRDs at once for initial backlog population                    |
 | 7   | **Staleness detection**                                                 | Flag backlog items whose source document has been modified since last intake                     |
 | 8   | **Integration with roadmap-tracker**                                    | After intake, auto-update the roadmap-tracker agent with new milestones                          |
@@ -334,8 +334,8 @@ The orchestrator remains untouched. The intake agent is a **pre-orchestration in
 | 1   | **`/intake` command**           | `.agentkit/templates/claude/commands/intake.md`                             | Slash command definition for multi-doc-type intake                          | **P0** — this is the missing input stage |
 | 2   | **Intake agent definition**     | `.agentkit/spec/agents.yaml` (new `intake-analyst` entry)                   | Agent spec for the intake analyst                                           | **P0**                                   |
 | 3   | **Document type extractors**    | `.agentkit/engines/node/src/extractors/`                                    | Per-doc-type parsing logic (prd.mjs, func-spec.mjs, etc.)                   | **P0**                                   |
-| 4   | **PRD Index**                   | `docs/01_product/INDEX.md`                                                  | Lists all PRDs with status, affected teams, last intake date                | **P1**                                   |
-| 5   | **PRD-to-Team Matrix**          | Section in `UNIFIED_AGENT_TEAMS.md` or `docs/01_product/PRD_TEAM_MATRIX.md` | Which teams are affected by which PRDs                                      | **P1**                                   |
+| 4   | **PRD Index**                   | `docs/product/INDEX.md`                                                  | Lists all PRDs with status, affected teams, last intake date                | **P1**                                   |
+| 5   | **PRD-to-Team Matrix**          | Section in `UNIFIED_AGENT_TEAMS.md` or `docs/product/PRD_TEAM_MATRIX.md` | Which teams are affected by which PRDs                                      | **P1**                                   |
 | 6   | **Spec directory conventions**  | `docs/README.md` or `docs/CONVENTIONS.md`                                   | Documents expected directory layout, naming, and template for each doc type | **P1**                                   |
 | 7   | **Roadmap Tracker enhancement** | `.agentkit/spec/agents.yaml` (roadmap-tracker section)                      | Add intake-triggered milestone updates                                      | **P2**                                   |
 
@@ -353,7 +353,7 @@ The orchestrator remains untouched. The intake agent is a **pre-orchestration in
 | `testing`       | Testing             | Unit, E2E, integration tests         | `**/*.test.*`, `tests/**`, `e2e/**`                     | All (test coverage)                 | quality                  |
 | `security`      | Security            | Auth, compliance, audit              | `auth/**`, `security/**`                                | PRD-006 (API keys)                  | —                        |
 | `docs`          | Documentation       | Docs, ADRs, guides                   | `docs/**`, `*.md`                                       | All (documentation)                 | —                        |
-| `product`       | Product             | Features, PRDs, roadmap              | `docs/01_product/**`, `docs/prd/**`                     | All (defines them)                  | backend, frontend        |
+| `product`       | Product             | Features, PRDs, roadmap              | `docs/product/**`, `docs/prd/**`                     | All (defines them)                  | backend, frontend        |
 | `quality`       | Quality             | Code review, refactoring             | `**/*`                                                  | All (quality gates)                 | —                        |
 | **`cli`** (new) | **CLI & Packaging** | **CLI, npm packaging, distribution** | **`bin/**`, `src/cli\*`, `engines/**`, `package.json`** | **PRD-005 Phase 1 (critical path)** | **testing, infra, docs** |
 
@@ -374,7 +374,7 @@ The orchestrator remains untouched. The intake agent is a **pre-orchestration in
 
 ### Must-do (P0) — CLI & Packaging Agent
 
-1. **Fix PRD detector bug** — add `docs/01_product` to `DOC_ARTIFACT_DETECTORS` dirs in `discover.mjs:215`
+1. **Fix PRD detector bug** — add `docs/product` to `DOC_ARTIFACT_DETECTORS` dirs in `discover.mjs:215`
 2. **Add `cli` team to `teams.yaml`** — new entry after `quality`
 3. **Add `cli-engineer` agent to `agents.yaml`** — new entry under `engineering` category
 4. **Generate `/team-cli` command** — instantiate `team-TEMPLATE.md` with `cli` team values
@@ -394,7 +394,7 @@ The orchestrator remains untouched. The intake agent is a **pre-orchestration in
 
 ### Should-do (P1) — Supporting Artifacts
 
-15. **Create `docs/01_product/INDEX.md`** — PRD index with status, affected teams, last intake date
+15. **Create `docs/product/INDEX.md`** — PRD index with status, affected teams, last intake date
 16. **Create `docs/CONVENTIONS.md`** — directory layout and naming conventions for each doc type
 17. **Generate `/team-product` command file** — currently missing despite spec existing
 18. **Create PRD-to-Team matrix** — either in `UNIFIED_AGENT_TEAMS.md` or standalone
