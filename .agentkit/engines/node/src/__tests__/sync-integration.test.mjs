@@ -629,33 +629,25 @@ describe('--overwrite flag', () => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it(
-    'skips project-owned files by default',
-    { timeout: 45000 },
-    async () => {
-      const contribPath = join(projectRoot, 'CONTRIBUTING.md');
-      expect(existsSync(contribPath)).toBe(true);
+  it('skips project-owned files by default', { timeout: 45000 }, async () => {
+    const contribPath = join(projectRoot, 'CONTRIBUTING.md');
+    expect(existsSync(contribPath)).toBe(true);
 
-      const customContent = 'CUSTOM_CONTENT_MARKER_12345';
-      writeFileSync(contribPath, customContent, 'utf-8');
+    const customContent = 'CUSTOM_CONTENT_MARKER_12345';
+    writeFileSync(contribPath, customContent, 'utf-8');
 
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
-      expect(readFileSync(contribPath, 'utf-8')).toBe(customContent);
-    }
-  );
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
+    expect(readFileSync(contribPath, 'utf-8')).toBe(customContent);
+  });
 
-  it(
-    'overwrites project-owned files with --overwrite',
-    { timeout: 45000 },
-    async () => {
-      const contribPath = join(projectRoot, 'CONTRIBUTING.md');
-      const customContent = 'CUSTOM_OVERWRITE_MARKER_67890';
-      writeFileSync(contribPath, customContent, 'utf-8');
+  it('overwrites project-owned files with --overwrite', { timeout: 45000 }, async () => {
+    const contribPath = join(projectRoot, 'CONTRIBUTING.md');
+    const customContent = 'CUSTOM_OVERWRITE_MARKER_67890';
+    writeFileSync(contribPath, customContent, 'utf-8');
 
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { overwrite: true } });
-      expect(readFileSync(contribPath, 'utf-8')).not.toContain(customContent);
-    }
-  );
+    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { overwrite: true } });
+    expect(readFileSync(contribPath, 'utf-8')).not.toContain(customContent);
+  });
 
   it('--force is alias for --overwrite', { timeout: 45000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
