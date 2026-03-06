@@ -27,7 +27,7 @@ npm install -g pnpm
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/agentkit-forge.git
+git clone https://github.com/JustAGhosT/agentkit-forge.git
 cd agentkit-forge
 ```
 
@@ -283,6 +283,6 @@ global directory permissions or use a Node version manager like `nvm`.
 ## Further Reading
 
 - [Quick Start](./QUICK_START.md) -- First 15 minutes walkthrough
-- [Command Reference](./COMMAND_REFERENCE.md) -- Full flag and output documentation
-- [Workflows](./WORKFLOWS.md) -- Worked examples for common scenarios
-- [Troubleshooting](./TROUBLESHOOTING.md) -- Extended error catalog and recovery steps
+- [Command Reference](../guides/COMMAND_REFERENCE.md) -- Full flag and output documentation
+- [Workflows](../guides/WORKFLOWS.md) -- Worked examples for common scenarios
+- [Troubleshooting](../reference/TROUBLESHOOTING.md) -- Extended error catalog and recovery steps

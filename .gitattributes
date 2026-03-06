@@ -1,10 +1,12 @@
 # Default: auto-detect, normalize to LF in repo
 * text=auto eol=lf
 
-# Windows-first: CRLF for Windows scripts
+# Windows batch scripts require CRLF
 *.cmd text eol=crlf
-*.ps1 text eol=crlf
 *.bat text eol=crlf
+# PowerShell works with LF on all platforms — use repo default (LF)
+# This prevents sync drift between Windows (CRLF) and Linux CI (LF)
+*.ps1 text eol=lf
 
 # Force LF for shell scripts
 *.sh text eol=lf

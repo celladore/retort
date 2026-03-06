@@ -1,6 +1,7 @@
 # FW-001: Template Directory Organization & Restructuring
 
 ## Metadata
+
 - **ID**: FW-001
 - **Priority**: P3
 - **Status**: not-started

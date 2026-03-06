@@ -73,18 +73,19 @@ A typical `orchestrator.json` looks like this:
     {
       "id": "TASK-002",
       "title": "Add rate limit to auth endpoints",
-      "team": "backend",
+      "team": "T1-backend",
       "priority": "P1",
       "status": "in-progress"
     },
     {
       "id": "TASK-003",
       "title": "Write rate limit unit tests",
-      "team": "testing",
+      "team": "T6-testing",
       "priority": "P1",
       "status": "pending"
     }
   ],
+  // Note: team_progress uses full team IDs as keys (e.g., "T1-backend"), while todo_items.team uses full team IDs for consistency.
   "recent_results": [
     {
       "action": "task_complete",

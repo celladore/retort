@@ -3,11 +3,15 @@
 # Regenerate: pnpm -C .agentkit agentkit:sync
 #
 # Lints and validates documentation quality for history records.
+# Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
 
 name: Documentation Quality
 
 on:
   push:
+    paths:
+      - 'docs/history/**'
+  pull_request:
     paths:
       - 'docs/history/**'
 
@@ -18,13 +22,13 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
         with:
           package_json_file: .agentkit/package.json
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: lts/*
           cache: 'pnpm'
@@ -35,18 +39,59 @@ jobs:
         working-directory: .agentkit
 
       - name: Lint history markdown
+        id: mdlint
+        continue-on-error: true
         run: >
           pnpm markdownlint-cli2
           --config ../.markdownlint.json
           "../docs/history/**/*.md"
+          2>&1 | tee /tmp/mdlint-output.txt
         working-directory: .agentkit
 
       - name: Validate document structure
+        id: doc-structure
+        continue-on-error: true
         run: |
           chmod +x ./scripts/validate-documentation.sh
-          ./scripts/validate-documentation.sh
+          ./scripts/validate-documentation.sh 2>&1 | tee /tmp/doc-structure.txt
 
       - name: Validate sequential numbering
+        id: doc-numbering
+        continue-on-error: true
         run: |
           chmod +x ./scripts/validate-numbering.sh
-          ./scripts/validate-numbering.sh
+          ./scripts/validate-numbering.sh 2>&1 | tee /tmp/doc-numbering.txt
+
+      - name: Report results
+        if: steps.mdlint.outcome == 'failure' || steps.doc-structure.outcome == 'failure' || steps.doc-numbering.outcome == 'failure'
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: |
+          {
+            echo "## Documentation Quality Issues"
+            echo ""
+            if [ "${{ steps.mdlint.outcome }}" = "failure" ]; then
+              echo "### Markdown lint"
+              echo '```'
+              head -30 /tmp/mdlint-output.txt
+              echo '```'
+            fi
+            if [ "${{ steps.doc-structure.outcome }}" = "failure" ]; then
+              echo "### Structure validation"
+              echo '```'
+              head -30 /tmp/doc-structure.txt
+              echo '```'
+            fi
+            if [ "${{ steps.doc-numbering.outcome }}" = "failure" ]; then
+              echo "### Sequential numbering"
+              echo '```'
+              head -30 /tmp/doc-numbering.txt
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$TARGET_BRANCH" = "main" ]; then
+            echo "::error::Documentation quality checks failed on main."
+            exit 1
+          else
+            echo "::warning::Documentation quality issues found. These must be fixed before merging to main."
+          fi

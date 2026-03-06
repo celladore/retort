@@ -37,7 +37,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 | Intake ownership flow         | `teams.yaml` → `intake.ownerTeam`, `operationsTeam`, `routing`, `escalation`                           | Already defined — reuse as-is for team assignment during normalization |
 | Task protocol (A2A-lite)      | `.claude/state/tasks/` JSON files with lifecycle states                                                | Use same schema for ingested issues to enable orchestrator integration |
 | Template variable propagation | `project-mapping.mjs` flattens `project.yaml` → Handlebars vars                                        | Extend with new intake/import vars                                     |
-| Post-sync validation matrix   | Documented in `docs/reference/issue_intake_ownership_and_invocation_flow.md`                        | Extend the matrix with the new command/feature checks                  |
+| Post-sync validation matrix   | Documented in `docs/reference/issue_intake_ownership_and_invocation_flow.md`                           | Extend the matrix with the new command/feature checks                  |
 | Command definition pattern    | `commands.yaml` → template → sync → multi-platform output                                              | Follow exactly for the new `import-issues` command                     |
 | History document pattern      | `/document-history` creates institutional memory                                                       | Auto-create a history doc after bulk import                            |
 
@@ -58,7 +58,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 ### Data Flow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    project.yaml                         │
 │  process.intake.autoImport: true                        │
@@ -280,7 +280,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 **Files to modify:**
 
-4. **`.agentkit/engines/node/src/spec-validator.mjs`** — Add validation rules:
+1. **`.agentkit/engines/node/src/spec-validator.mjs`** — Add validation rules:
    - `process.intake.autoImport` must be boolean
    - `process.intake.importLabelsMap` values must be valid priorities (P0-P3)
    - `process.intake.importStateMap` values must be valid statuses
@@ -288,7 +288,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
      `teams.yaml`
    - Warn if `autoImport: true` but `issueTracker: none`
 
-5. **`.agentkit/engines/node/src/project-mapping.mjs`** — Add variable mappings:
+2. **`.agentkit/engines/node/src/project-mapping.mjs`** — Add variable mappings:
    - `process.intake.autoImport` → `hasAutoImport`
    - `process.intake.importLabelsMap` → `importLabelsMap` (serialized)
    - `process.intake.importStateMap` → `importStateMap`
@@ -296,7 +296,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 ### Phase 3: Runtime Adapters (engine layer — new files)
 
-6. **`.agentkit/engines/node/src/tracker-adapter.mjs`** — Adapter interface:
+1. **`.agentkit/engines/node/src/tracker-adapter.mjs`** — Adapter interface:
 
    ```javascript
    // Tracker adapter contract
@@ -306,7 +306,7 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
    export function createAdapter(tracker, projectRoot) { ... }
    ```
 
-7. **`.agentkit/engines/node/src/github-adapter.mjs`** — GitHub implementation:
+2. **`.agentkit/engines/node/src/github-adapter.mjs`** — GitHub implementation:
    - Uses `gh issue list --json` to fetch issues with all fields
    - Handles pagination via `--limit`
    - Supports `--state`, `--label`, `--since` filters
@@ -314,14 +314,14 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
    - Checks `gh auth status` before executing
    - Graceful error handling when `gh` is not installed
 
-8. **`.agentkit/engines/node/src/linear-adapter.mjs`** — Linear stub:
+3. **`.agentkit/engines/node/src/linear-adapter.mjs`** — Linear stub:
    - Implements the same interface
    - Throws a clear "not yet implemented" error with guidance
    - Documents the expected MCP/CLI integration point
 
 ### Phase 4: Normalizer (engine layer — new file)
 
-9. **`.agentkit/engines/node/src/issue-normalizer.mjs`**:
+1. **`.agentkit/engines/node/src/issue-normalizer.mjs`**:
    - `normalizeIssue(rawIssue, config)` → `BacklogItem`
    - Priority inference: check labels against `importLabelsMap`, fall back to
      heuristics (e.g., "bug" → P1, "enhancement" → P2)
@@ -336,140 +336,141 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
 
 ### Phase 5: Backlog Persistence (engine layer — new file)
 
-10. **`.agentkit/engines/node/src/backlog-store.mjs`**:
-    - `readBacklog(projectRoot)` → parse `AGENT_BACKLOG.md` into structured data
-    - `writeBacklog(projectRoot, items)` → render `AGENT_BACKLOG.md` from data
-    - `mergeItems(existing, incoming)` → merge with dedup + preserve manual items
-    - `readBacklogJson(projectRoot)` → read `.claude/state/backlog.json` (new
-      structured store)
-    - `writeBacklogJson(projectRoot, items)` → write structured JSON alongside
-      markdown
-    - The JSON store (`backlog.json`) is the machine-readable source; the
-      markdown is the human-readable view
+1. **`.agentkit/engines/node/src/backlog-store.mjs`**:
+   - `readBacklog(projectRoot)` → parse `AGENT_BACKLOG.md` into structured data
+   - `writeBacklog(projectRoot, items)` → render `AGENT_BACKLOG.md` from data
+   - `mergeItems(existing, incoming)` → merge with dedup + preserve manual items
+   - `readBacklogJson(projectRoot)` → read `.claude/state/backlog.json` (new
+     structured store)
+   - `writeBacklogJson(projectRoot, items)` → write structured JSON alongside
+     markdown
+   - The JSON store (`backlog.json`) is the machine-readable source; the
+     markdown is the human-readable view
 
 ### Phase 6: CLI Handlers (engine layer)
 
-11. **`.agentkit/engines/node/src/import-issues.mjs`** — Runtime handler:
-    - Read project config to determine tracker
-    - Check if `autoImport` is enabled (or if `--force` flag is passed)
-    - Create adapter for configured tracker
-    - Fetch issues with filters
-    - Normalize each issue
-    - Deduplicate against existing backlog
-    - Write merged backlog (both JSON and Markdown)
-    - Append to `events.log`
-    - Print summary (imported N, skipped M duplicates, assigned to K teams)
+1. **`.agentkit/engines/node/src/import-issues.mjs`** — Runtime handler:
+   - Read project config to determine tracker
+   - Check if `autoImport` is enabled (or if `--force` flag is passed)
+   - Create adapter for configured tracker
+   - Fetch issues with filters
+   - Normalize each issue
+   - Deduplicate against existing backlog
+   - Write merged backlog (both JSON and Markdown)
+   - Append to `events.log`
+   - Print summary (imported N, skipped M duplicates, assigned to K teams)
 
-12. **`.agentkit/engines/node/src/backlog-viewer.mjs`** — Consolidated view:
-    - Read backlog JSON
-    - Apply filters (team, priority, source, status)
-    - Sort by selected field
-    - Output in selected format:
-      - `table`: formatted ASCII table for terminal
-      - `json`: raw JSON array
-      - `yaml`: YAML document
-      - `csv`: CSV for spreadsheet import
+2. **`.agentkit/engines/node/src/backlog-viewer.mjs`** — Consolidated view:
+   - Read backlog JSON
+   - Apply filters (team, priority, source, status)
+   - Sort by selected field
+   - Output in selected format:
+     - `table`: formatted ASCII table for terminal
+     - `json`: raw JSON array
+     - `yaml`: YAML document
+     - `csv`: CSV for spreadsheet import
 
-13. **`.agentkit/engines/node/src/cli.mjs`** — Add CLI routes:
-    ```javascript
-    case 'import-issues': {
-      const { runImportIssues } = await import('./import-issues.mjs');
-      await runImportIssues({ agentkitRoot, projectRoot, flags });
-      break;
-    }
-    case 'backlog': {
-      const { runBacklogViewer } = await import('./backlog-viewer.mjs');
-      await runBacklogViewer({ agentkitRoot, projectRoot, flags });
-      break;
-    }
-    case 'sync-backlog': {
-      const { runSyncBacklog } = await import('./sync-backlog-runner.mjs');
-      await runSyncBacklog({ agentkitRoot, projectRoot, flags });
-      break;
-    }
-    ```
+3. **`.agentkit/engines/node/src/cli.mjs`** — Add CLI routes:
+
+   ```javascript
+   case 'import-issues': {
+     const { runImportIssues } = await import('./import-issues.mjs');
+     await runImportIssues({ agentkitRoot, projectRoot, flags });
+     break;
+   }
+   case 'backlog': {
+     const { runBacklogViewer } = await import('./backlog-viewer.mjs');
+     await runBacklogViewer({ agentkitRoot, projectRoot, flags });
+     break;
+   }
+   case 'sync-backlog': {
+     const { runSyncBacklog } = await import('./sync-backlog-runner.mjs');
+     await runSyncBacklog({ agentkitRoot, projectRoot, flags });
+     break;
+   }
+   ```
 
 ### Phase 7: Init Integration (adoption trigger)
 
-14. **`.agentkit/engines/node/src/init.mjs`** — Add adoption hook:
-    - After overlay creation, check if `process.intake.autoImport` is true
-    - If true and `issueTracker` is not `none`:
-      - Prompt user: "Import existing issues from GitHub? (Y/n)"
-      - If yes, run `import-issues` with default options
-      - Show summary and allow user to review before committing
+1. **`.agentkit/engines/node/src/init.mjs`** — Add adoption hook:
+   - After overlay creation, check if `process.intake.autoImport` is true
+   - If true and `issueTracker` is not `none`:
+     - Prompt user: "Import existing issues from GitHub? (Y/n)"
+     - If yes, run `import-issues` with default options
+     - Show summary and allow user to review before committing
 
 ### Phase 8: Sync-Backlog Runtime (extends existing template)
 
-15. **`.agentkit/engines/node/src/sync-backlog-runner.mjs`** — Orchestrated sync:
-    - Combines all sources (calls individual collectors):
-      1. External tracker (via `import-issues` logic)
-      2. Discovery findings (via `agentkit discover` structured output)
-      3. Healthcheck results (parse `orchestrator.json`)
-      4. Code TODOs (grep codebase)
-      5. Review findings (parse `events.log`)
-    - Runs normalization and dedup
-    - Writes consolidated backlog
-    - Supports `--direction push` to create issues from local-only items
+1. **`.agentkit/engines/node/src/sync-backlog-runner.mjs`** — Orchestrated sync:
+   - Combines all sources (calls individual collectors):
+     1. External tracker (via `import-issues` logic)
+     2. Discovery findings (via `agentkit discover` structured output)
+     3. Healthcheck results (parse `orchestrator.json`)
+     4. Code TODOs (grep codebase)
+     5. Review findings (parse `events.log`)
+   - Runs normalization and dedup
+   - Writes consolidated backlog
+   - Supports `--direction push` to create issues from local-only items
 
 ### Phase 9: Templates & Multi-Platform Parity
 
-16. **`.agentkit/templates/claude/commands/import-issues.md`** — Claude command template
-17. **`.agentkit/templates/claude/commands/backlog.md`** — Claude command template
-18. Update all platform templates to include the new commands:
-    - Copilot: `.github/prompts/import-issues.prompt.md`, `.github/prompts/backlog.prompt.md`
-    - Cursor: `.cursor/commands/import-issues.md`, `.cursor/commands/backlog.md`
-    - Windsurf: `.windsurf/commands/import-issues.md`, `.windsurf/commands/backlog.md`
-    - Codex: `.agents/skills/import-issues/SKILL.md`, `.agents/skills/backlog/SKILL.md`
+1. **`.agentkit/templates/claude/commands/import-issues.md`** — Claude command template
+2. **`.agentkit/templates/claude/commands/backlog.md`** — Claude command template
+3. Update all platform templates to include the new commands:
+   - Copilot: `.github/prompts/import-issues.prompt.md`, `.github/prompts/backlog.prompt.md`
+   - Cursor: `.cursor/commands/import-issues.md`, `.cursor/commands/backlog.md`
+   - Windsurf: `.windsurf/commands/import-issues.md`, `.windsurf/commands/backlog.md`
+   - Codex: `.agents/skills/import-issues/SKILL.md`, `.agents/skills/backlog/SKILL.md`
 
-    (These are auto-generated by `agentkit sync` from the command templates.)
+   (These are auto-generated by `agentkit sync` from the command templates.)
 
 ### Phase 10: Tests
 
-19. **`.agentkit/engines/node/src/__tests__/issue-normalizer.test.mjs`**:
-    - Test priority inference from labels
-    - Test team assignment from labels
-    - Test status mapping
-    - Test acceptance criteria extraction from issue body
-    - Test deduplication logic
-    - Test handling of missing/malformed fields
+1. **`.agentkit/engines/node/src/__tests__/issue-normalizer.test.mjs`**:
+   - Test priority inference from labels
+   - Test team assignment from labels
+   - Test status mapping
+   - Test acceptance criteria extraction from issue body
+   - Test deduplication logic
+   - Test handling of missing/malformed fields
 
-20. **`.agentkit/engines/node/src/__tests__/github-adapter.test.mjs`**:
-    - Test `gh` CLI argument construction
-    - Test JSON parsing of `gh issue list` output
-    - Test error handling (gh not installed, not authenticated, API errors)
-    - Test pagination and limit handling
+2. **`.agentkit/engines/node/src/__tests__/github-adapter.test.mjs`**:
+   - Test `gh` CLI argument construction
+   - Test JSON parsing of `gh issue list` output
+   - Test error handling (gh not installed, not authenticated, API errors)
+   - Test pagination and limit handling
 
-21. **`.agentkit/engines/node/src/__tests__/backlog-store.test.mjs`**:
-    - Test markdown parsing of AGENT_BACKLOG.md
-    - Test markdown rendering
-    - Test JSON read/write
-    - Test merge with dedup
-    - Test preservation of manual items
+3. **`.agentkit/engines/node/src/__tests__/backlog-store.test.mjs`**:
+   - Test markdown parsing of AGENT_BACKLOG.md
+   - Test markdown rendering
+   - Test JSON read/write
+   - Test merge with dedup
+   - Test preservation of manual items
 
-22. **`.agentkit/engines/node/src/__tests__/backlog-viewer.test.mjs`**:
-    - Test filter combinations
-    - Test sort ordering
-    - Test output format correctness (table, json, yaml, csv)
+4. **`.agentkit/engines/node/src/__tests__/backlog-viewer.test.mjs`**:
+   - Test filter combinations
+   - Test sort ordering
+   - Test output format correctness (table, json, yaml, csv)
 
-23. **`.agentkit/engines/node/src/__tests__/import-issues.test.mjs`**:
-    - Integration test: mock gh → normalize → write backlog
-    - Test dry-run mode
-    - Test autoImport flag gating
-    - Test events.log append
+5. **`.agentkit/engines/node/src/__tests__/import-issues.test.mjs`**:
+   - Integration test: mock gh → normalize → write backlog
+   - Test dry-run mode
+   - Test autoImport flag gating
+   - Test events.log append
 
 ### Phase 11: Documentation & Validation
 
-24. **`docs/reference/issue_intake_ownership_and_invocation_flow.md`** — Update:
-    - Add `import-issues` and `backlog` to the invocation flow
-    - Add to the smoke matrix
-    - Document the `autoImport` flag behavior
+1. **`docs/reference/issue_intake_ownership_and_invocation_flow.md`** — Update:
+   - Add `import-issues` and `backlog` to the invocation flow
+   - Add to the smoke matrix
+   - Document the `autoImport` flag behavior
 
-25. Run the full validation matrix:
-    - `pnpm -C .agentkit agentkit:spec-validate`
-    - `pnpm -C .agentkit agentkit:sync`
-    - `pnpm -C .agentkit agentkit:validate`
-    - `pnpm -C .agentkit test`
-    - Verify determinism (sync twice, no drift)
+2. Run the full validation matrix:
+   - `pnpm -C .agentkit agentkit:spec-validate`
+   - `pnpm -C .agentkit agentkit:sync`
+   - `pnpm -C .agentkit agentkit:validate`
+   - `pnpm -C .agentkit test`
+   - Verify determinism (sync twice, no drift)
 
 ---
 
@@ -532,7 +533,7 @@ Following the `infraEval` pattern:
 
 ## Implementation Order
 
-```
+```text
 Phase 1-2: Schema + Validation     ← Foundation (no runtime changes)
 Phase 3-4: Adapters + Normalizer   ← Core logic (testable in isolation)
 Phase 5:   Backlog Store           ← Persistence layer

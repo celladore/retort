@@ -685,7 +685,7 @@ Runs a comprehensive project-wide audit combining discovery, healthcheck, securi
 
 ### `/cost`
 
-Displays AI token usage summaries, session costs, and budget status. See [COST_TRACKING.md](./COST_TRACKING.md) for full details on cost tracking configuration.
+Displays AI token usage summaries, session costs, and budget status. See [COST_TRACKING.md](../architecture/COST_TRACKING.md) for full details on cost tracking configuration.
 
 **Flags:**
 

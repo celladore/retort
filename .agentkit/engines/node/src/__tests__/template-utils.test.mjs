@@ -18,6 +18,8 @@ import {
   resolveRenderTargets,
   ALL_RENDER_TARGETS,
   collapseBlankLines,
+  escapeYamlString,
+  resolveHelpers,
 } from '../template-utils.mjs';
 import { transform } from '../project-mapping.mjs';
 
@@ -140,6 +142,86 @@ describe('replacePlaceholders', () => {
     replacePlaceholders('{{known}}', { known: 'value' });
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// escapeYamlString
+// ---------------------------------------------------------------------------
+describe('escapeYamlString', () => {
+  it('wraps a simple string in single quotes', () => {
+    expect(escapeYamlString('hello world')).toBe("'hello world'");
+  });
+
+  it('doubles internal single quotes per YAML spec', () => {
+    expect(escapeYamlString("it's a test")).toBe("'it''s a test'");
+  });
+
+  it('handles multiple single quotes', () => {
+    expect(escapeYamlString("a'b'c")).toBe("'a''b''c'");
+  });
+
+  it('returns empty quoted string for undefined', () => {
+    expect(escapeYamlString(undefined)).toBe("''");
+  });
+
+  it('returns empty quoted string for null', () => {
+    expect(escapeYamlString(null)).toBe("''");
+  });
+
+  it('converts non-string values to string', () => {
+    expect(escapeYamlString(42)).toBe("'42'");
+  });
+
+  it('handles empty string', () => {
+    expect(escapeYamlString('')).toBe("''");
+  });
+
+  it('handles strings with colons and special YAML chars', () => {
+    expect(escapeYamlString('key: value')).toBe("'key: value'");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveHelpers
+// ---------------------------------------------------------------------------
+describe('resolveHelpers', () => {
+  it('resolves {{escapeYamlString varName}} with the helper', () => {
+    const result = resolveHelpers('description: {{escapeYamlString desc}}', {
+      desc: 'A simple description',
+    });
+    expect(result).toBe("description: 'A simple description'");
+  });
+
+  it('escapes single quotes in helper output', () => {
+    const result = resolveHelpers('val: {{escapeYamlString title}}', {
+      title: "it's here",
+    });
+    expect(result).toBe("val: 'it''s here'");
+  });
+
+  it('returns empty quotes when variable is undefined', () => {
+    const result = resolveHelpers('val: {{escapeYamlString missing}}', {});
+    expect(result).toBe("val: ''");
+  });
+
+  it('leaves non-helper double-brace expressions untouched', () => {
+    const result = resolveHelpers('{{normalVar}}', { normalVar: 'keep' });
+    expect(result).toBe('{{normalVar}}');
+  });
+
+  it('handles multiple helper calls in one template', () => {
+    const result = resolveHelpers('{{escapeYamlString a}} and {{escapeYamlString b}}', {
+      a: 'foo',
+      b: 'bar',
+    });
+    expect(result).toBe("'foo' and 'bar'");
+  });
+
+  it('does not match helper syntax without a space', () => {
+    // {{escapeYamlStringfoo}} is not valid helper syntax
+    const result = resolveHelpers('{{escapeYamlStringfoo}}', { foo: 'val' });
+    expect(result).toBe('{{escapeYamlStringfoo}}');
   });
 });
 

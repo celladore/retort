@@ -1,6 +1,7 @@
 # FW-004: Planning Agent & Automated Planning Workflow
 
 ## Metadata
+
 - **ID**: FW-004
 - **Priority**: P2
 - **Status**: not-started
@@ -17,6 +18,7 @@ Additionally, future tasks (like FW-001 through FW-003) are created ad-hoc durin
 ### 1. Planning Agent Capabilities
 
 A dedicated planning agent could:
+
 - **Create plan files** from templates when a new work item is identified
 - **Update the planning index** automatically when plan files are added/modified
 - **Track status transitions** by scanning git history and task states
@@ -26,17 +28,18 @@ A dedicated planning agent could:
 
 ### 2. Integration with Existing Systems
 
-| System | Integration Point |
-|--------|-------------------|
-| Orchestrator | Route planning work to the planning agent |
-| Task protocol | Planning agent accepts `plan`, `review`, `triage` work types |
-| `/sync-backlog` | Two-way sync between planning folder and AGENT_BACKLOG.md |
-| `/import-issues` | Auto-create planning items from imported GitHub issues |
-| Dependency graph | Planning agent validates and updates the graph |
+| System           | Integration Point                                            |
+| ---------------- | ------------------------------------------------------------ |
+| Orchestrator     | Route planning work to the planning agent                    |
+| Task protocol    | Planning agent accepts `plan`, `review`, `triage` work types |
+| `/sync-backlog`  | Two-way sync between planning folder and AGENT_BACKLOG.md    |
+| `/import-issues` | Auto-create planning items from imported GitHub issues       |
+| Dependency graph | Planning agent validates and updates the graph               |
 
 ### 3. Relationship to Existing Agents
 
 Currently there is no dedicated planning agent. The closest are:
+
 - **Orchestrator** — coordinates work but doesn't manage planning artifacts
 - **Product Manager** (product category) — PRD-focused, not general planning
 - **Architect** (AT-005, proposed) — architecture decisions, not project planning
@@ -45,11 +48,11 @@ A planning agent would be a new agent in the `operations` or a new `planning` ca
 
 ### 4. Automated vs. Semi-Automated
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **Fully automated** | No manual maintenance | Risk of noise, needs good heuristics |
-| **Semi-automated** | Human reviews changes | Still requires manual approval step |
-| **Agent-assisted** | Agent proposes, human decides | Best of both; lower risk |
+| Approach            | Pros                          | Cons                                 |
+| ------------------- | ----------------------------- | ------------------------------------ |
+| **Fully automated** | No manual maintenance         | Risk of noise, needs good heuristics |
+| **Semi-automated**  | Human reviews changes         | Still requires manual approval step  |
+| **Agent-assisted**  | Agent proposes, human decides | Best of both; lower risk             |
 
 Recommendation: Start with agent-assisted (agent proposes changes, human reviews).
 

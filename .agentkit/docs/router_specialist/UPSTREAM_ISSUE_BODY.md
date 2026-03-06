@@ -22,13 +22,13 @@ These router-core documents are upstream-only authoritative artifacts and are no
 
 ### Architecture sync ownership docs
 
-- `.agentkit/docs/ARCHITECTURE.md`
+- `.agentkit/docs/architecture/ARCHITECTURE.md`
 - `.agentkit/docs/PLAN-sync-ownership-v0.2.2.md`
 
 ### AgentKit command/hook contract alignment (upstream authoritative updates)
 
-- `.agentkit/docs/COMMAND_REFERENCE.md`
-- `.agentkit/docs/QUICK_START.md`
+- `.agentkit/docs/guides/COMMAND_REFERENCE.md`
+- `.agentkit/docs/getting-started/QUICK_START.md`
 - `.agentkit/spec/commands.yaml`
 - `.agentkit/templates/claude/hooks/guard-destructive-commands.sh`
 - `.agentkit/templates/claude/hooks/protect-sensitive.sh`

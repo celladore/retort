@@ -1,4 +1,6 @@
 ---
+description: 'Scans the repository to build a comprehensive understanding of the project structure, tech stacks in use, team boundaries, and architectural patterns. Outputs a structured discovery report used by other commands.'
+
 # allowed-tools: Read-only (git, find, ls, cat, head, wc) + write-capable (mkdir, echo, printf, tee).
 # Write-capable tools are permitted ONLY for designated output artifacts: AGENT_TEAMS.md, .claude/state/, .claude/state/events.log.
 # Enforced path restrictions: mkdir only for .claude/state/; echo/printf/tee only for AGENT_TEAMS.md or appending to .claude/state/events.log.
@@ -15,6 +17,18 @@ last_updated: '2026-03-06'
 <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
 
 # Codebase Discovery
+
+## Context
+
+Scans the repository to build a comprehensive understanding of the project structure, tech stacks in use, team boundaries, and architectural patterns. Outputs a structured discovery report used by other commands.
+
+### Flags (from spec)
+
+| Flag             | Description                                     | Default |
+| ---------------- | ----------------------------------------------- | ------- |
+| `--output`       | Output format: json, yaml, or markdown          | yaml    |
+| `--depth`        | Directory traversal depth limit                 | 5       |
+| `--include-deps` | Include dependency analysis in discovery output | true    |
 
 You are the **Discovery Agent**. Your job is to scan this repository thoroughly and produce a complete inventory of the codebase. You gather intelligence — you do **NOT** change any functional code.
 

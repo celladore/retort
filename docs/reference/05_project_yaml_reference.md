@@ -38,20 +38,20 @@
 
 ### Documentation
 
-| Field                             | Type    | Example                              |
-| --------------------------------- | ------- | ------------------------------------ |
-| `documentation.hasPrd`            | boolean | `true`                               |
-| `documentation.prdPath`           | string  | `docs/product/`                   |
-| `documentation.hasAdr`            | boolean | `false`                              |
+| Field                             | Type    | Example                        |
+| --------------------------------- | ------- | ------------------------------ |
+| `documentation.hasPrd`            | boolean | `true`                         |
+| `documentation.prdPath`           | string  | `docs/product/`                |
+| `documentation.hasAdr`            | boolean | `false`                        |
 | `documentation.adrPath`           | string  | `docs/architecture/decisions/` |
-| `documentation.hasApiSpec`        | boolean | `false`                              |
-| `documentation.apiSpecPath`       | string  | `docs/api/openapi/`                  |
-| `documentation.hasTechnicalSpec`  | boolean | `false`                              |
-| `documentation.technicalSpecPath` | string  | —                                    |
-| `documentation.hasDesignSystem`   | boolean | `false`                              |
-| `documentation.designSystemPath`  | string  | `packages/ui/`                       |
-| `documentation.storybook`         | boolean | `false`                              |
-| `documentation.designTokensPath`  | string  | `styles/tokens/`                     |
+| `documentation.hasApiSpec`        | boolean | `false`                        |
+| `documentation.apiSpecPath`       | string  | `docs/api/openapi/`            |
+| `documentation.hasTechnicalSpec`  | boolean | `false`                        |
+| `documentation.technicalSpecPath` | string  | —                              |
+| `documentation.hasDesignSystem`   | boolean | `false`                        |
+| `documentation.designSystemPath`  | string  | `packages/ui/`                 |
+| `documentation.storybook`         | boolean | `false`                        |
+| `documentation.designTokensPath`  | string  | `styles/tokens/`               |
 
 ### Deployment
 

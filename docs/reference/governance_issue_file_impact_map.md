@@ -46,8 +46,8 @@ Primary files:
 
 - `.agentkit/engines/node/src/template-utils.mjs`
 - `.agentkit/engines/node/src/synchronize.mjs`
-- `.agentkit/docs/COMMAND_REFERENCE.md`
-- `.agentkit/docs/QUICK_START.md`
+- `.agentkit/docs/guides/COMMAND_REFERENCE.md`
+- `.agentkit/docs/getting-started/QUICK_START.md`
 
 Supporting outputs:
 
@@ -60,8 +60,8 @@ Primary files:
 
 - `.agentkit/spec/commands.yaml`
 - `.agentkit/engines/node/src/validate.mjs`
-- `.agentkit/docs/COMMAND_REFERENCE.md`
-- `.agentkit/docs/QUICK_START.md`
+- `.agentkit/docs/guides/COMMAND_REFERENCE.md`
+- `.agentkit/docs/getting-started/QUICK_START.md`
 
 Template contract files (expected):
 
@@ -93,8 +93,8 @@ Primary files:
 
 - `.agentkit/docs/router_specialist/UPSTREAM_MIGRATION_SPEC.md`
 - `.agentkit/docs/router_specialist/UPSTREAM_ISSUE_BODY.md`
-- `.agentkit/docs/COMMAND_REFERENCE.md`
-- `.agentkit/docs/QUICK_START.md`
+- `.agentkit/docs/guides/COMMAND_REFERENCE.md`
+- `.agentkit/docs/getting-started/QUICK_START.md`
 
 Potential policy/docs touchpoints:
 
@@ -116,8 +116,8 @@ Tracking integration note:
 Primary files:
 
 - `COMMAND_GUIDE.md`
-- `.agentkit/docs/COMMAND_REFERENCE.md`
-- `.agentkit/docs/QUICK_START.md`
+- `.agentkit/docs/guides/COMMAND_REFERENCE.md`
+- `.agentkit/docs/getting-started/QUICK_START.md`
 - `.agentkit/spec/commands.yaml`
 
 ## #166 — Release-readiness gate verification

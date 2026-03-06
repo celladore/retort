@@ -14,7 +14,7 @@ last_updated: '2026-03-06'
 
 # /preflight
 
-{{commandDescription}}
+Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.
 
 ## Purpose
 

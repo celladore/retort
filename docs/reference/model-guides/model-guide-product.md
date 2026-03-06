@@ -5,7 +5,7 @@
 | Attribute     | Value                   |
 | ------------- | ----------------------- |
 | Focus         | Features, PRDs, roadmap |
-| Scope         | `docs/product/**`    |
+| Scope         | `docs/product/**`       |
 | Handoff Chain | backend, frontend       |
 
 ## Weighting Profile

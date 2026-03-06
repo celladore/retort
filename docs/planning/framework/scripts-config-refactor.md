@@ -1,6 +1,7 @@
 # FW-002: Investigate and Refactor All Scripts and Configuration Files
 
 ## Metadata
+
 - **ID**: FW-002
 - **Priority**: P2
 - **Status**: not-started
@@ -13,6 +14,7 @@ The repository has accumulated scripts and configuration files across multiple l
 ## Scope
 
 ### Scripts to Audit
+
 - `scripts/` directory — shell scripts (`.sh`, `.ps1`)
 - `.agentkit/bin/` — CLI scripts (protected — requires maintainer)
 - Root-level scripts or config referenced in `package.json`
@@ -20,6 +22,7 @@ The repository has accumulated scripts and configuration files across multiple l
 - Any ad-hoc scripts in `docs/` or other locations
 
 ### Configuration to Audit
+
 - `.agentkit/spec/*.yaml` — spec configuration files
 - Root-level configs (`package.json`, `tsconfig.json`, `vitest.config.*`, etc.)
 - Tool-specific configs (`.eslintrc`, `.prettierrc`, `renovate.json`, etc.)

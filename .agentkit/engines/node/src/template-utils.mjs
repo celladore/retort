@@ -91,6 +91,9 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
     result = result.split(placeholder).join(safeValue);
   }
 
+  // Resolve {{helperName varName}} helper syntax (e.g., {{escapeYamlString commandDescription}})
+  result = resolveHelpers(result, vars);
+
   // Resolve {{var|default}} pipe syntax — uses the default value when var is unresolved
   result = result.replace(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\|([^}]*)\}\}/g, (_match, key, fallback) => {
     const value = vars[key];
@@ -115,6 +118,40 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
     console.warn(`[agentkit:sync] Warning: unresolved placeholders: ${unique.join(', ')}`);
   }
   return result;
+}
+
+/**
+ * Escapes a string for safe embedding in a YAML single-quoted value.
+ * Single quotes are escaped by doubling them per the YAML spec.
+ */
+export function escapeYamlString(value) {
+  if (value === undefined || value === null) return "''";
+  const str = String(value);
+  // Wrap in single quotes, escaping internal single quotes by doubling them
+  return `'${str.replace(/'/g, "''")}'`;
+}
+
+/**
+ * Registry of template helpers. Each helper takes a string value and returns a transformed string.
+ */
+const TEMPLATE_HELPERS = {
+  escapeYamlString,
+};
+
+/**
+ * Resolves {{helperName varName}} helper expressions.
+ * Matches patterns like {{escapeYamlString commandDescription}} where the helper
+ * is a known function and the var is resolved from the vars object.
+ */
+export function resolveHelpers(template, vars) {
+  const helperNames = Object.keys(TEMPLATE_HELPERS).join('|');
+  if (!helperNames) return template;
+  const regex = new RegExp(`\\{\\{(${helperNames})\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\}\\}`, 'g');
+  return template.replace(regex, (_match, helperName, varName) => {
+    const value = vars[varName];
+    const helper = TEMPLATE_HELPERS[helperName];
+    return helper(value);
+  });
 }
 
 /**

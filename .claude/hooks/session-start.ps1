@@ -59,14 +59,9 @@ Test-Tool -Name "Node.js"  -Command "node"
 Test-Tool -Name "pnpm"     -Command "pnpm"
 Test-Tool -Name "npm"      -Command "npm"
 
-
-
-
-
 Test-Tool -Name "Docker"   -Command "docker"
 Test-Tool -Name "Azure CLI" -Command "az"
 Test-Tool -Name "Terraform" -Command "terraform"
-
 
 if ($toolsFound.Count -gt 0) {
     $toolsSummary = $toolsFound -join "`n"
@@ -100,7 +95,6 @@ Session: $sessionId
 Working directory: $cwd
 
 Language profile source: mixed (confidence: high)
-
 
 Toolchains:
 $toolsSummary
