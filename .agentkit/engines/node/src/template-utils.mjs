@@ -147,11 +147,25 @@ export function resolveHelpers(template, vars) {
   const helperNames = Object.keys(TEMPLATE_HELPERS).join('|');
   if (!helperNames) return template;
   const regex = new RegExp(`\\{\\{(${helperNames})\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\}\\}`, 'g');
-  return template.replace(regex, (_match, helperName, varName) => {
+  const result = template.replace(regex, (_match, helperName, varName) => {
     const value = vars[varName];
     const helper = TEMPLATE_HELPERS[helperName];
     return helper(value);
   });
+
+  // Warn about remaining helper-like syntax with unknown helper names
+  const unknownHelperRegex = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\s+([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
+  let match;
+  while ((match = unknownHelperRegex.exec(result)) !== null) {
+    const [, candidateHelper] = match;
+    // Skip built-in block helpers (if, each, else, etc.)
+    if (['if', 'else', 'each', 'unless'].includes(candidateHelper)) continue;
+    console.warn(
+      `[template] Unknown helper '${candidateHelper}' in expression '${match[0]}' — did you mean one of: ${Object.keys(TEMPLATE_HELPERS).join(', ')}?`
+    );
+  }
+
+  return result;
 }
 
 /**

@@ -223,6 +223,30 @@ describe('resolveHelpers', () => {
     const result = resolveHelpers('{{escapeYamlStringfoo}}', { foo: 'val' });
     expect(result).toBe('{{escapeYamlStringfoo}}');
   });
+
+  it('warns about unknown helper names in helper-like syntax', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = resolveHelpers('{{unknownHelper someVar}}', { someVar: 'val' });
+    // Unknown helper expression is left untouched in output
+    expect(result).toBe('{{unknownHelper someVar}}');
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Unknown helper 'unknownHelper'"));
+    warnSpy.mockRestore();
+  });
+
+  it('does not warn for built-in block helpers like if/each/unless', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // These look like {{word word}} but are block helpers, not template helpers
+    const result = resolveHelpers('{{if someVar}}', { someVar: true });
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('warns with suggestion listing known helpers', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    resolveHelpers('{{badHelper foo}}', {});
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('escapeYamlString'));
+    warnSpy.mockRestore();
+  });
 });
 
 // ---------------------------------------------------------------------------
