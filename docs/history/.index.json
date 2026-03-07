@@ -3,10 +3,10 @@
   "sequences": {
     "implementation": 7,
     "bugfix": 1,
-    "feature": 1,
-    "migration": 1,
-    "issue": 1,
-    "lesson": 1
+    "feature": 0,
+    "migration": 0,
+    "issue": 0,
+    "lesson": 0
   },
   "entries": [
     {

@@ -1,17 +1,10 @@
 # AgentKit Forge -- Quick Start Guide
 
-```
-docs/
-  product/           Product requirements, user stories, roadmap, personas
-  architecture/      Specs, system overview, architecture decision records (ADRs)
-  orchestration/     Orchestration guide, PM guide, concurrency protocols
-  api/               API overview, endpoints, authentication, examples
-  operations/        Deployment, monitoring, incident response, troubleshooting
-  engineering/       Dev setup, coding standards, testing, git workflow, security
-  integrations/      External APIs, webhooks, SDK documentation
-  reference/         Glossary, FAQ, changelog, contributing guide, AI handoffs
-```
+## Table of Contents
 
+1. [Prerequisites](#prerequisites)
+2. [Setup in 3 Steps](#setup-in-3-steps)
+3. [What Just Happened?](#what-just-happened)
 4. [Your First Session with Claude Code](#your-first-session-with-claude-code)
 5. [Command Quick Reference](#command-quick-reference)
 6. [Next Steps](#next-steps)
@@ -128,13 +121,13 @@ The `sync` command generated several directories and files in your repository ro
 
 ### Generated Directories
 
-| Path         | Purpose                                                                                                                                                                                                |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.                 |
-| `.cursor/`   | **Cursor AI rules** -- Rules files in `.mdc` format that Cursor uses for context-aware code generation.                                                                                                |
-| `.windsurf/` | **Windsurf AI rules and workflows** -- Rules and workflow definitions for Windsurf's AI assistant.                                                                                                     |
-| `.ai/`       | **Portable rules** -- A tool-agnostic rules format compatible with Continue and other AI tools that support the `.ai/` convention.                                                                     |
-| `docs/`      | **8-category documentation structure** -- A complete project documentation scaffold organized into product, specs, architecture, API, operations, engineering, integrations, and reference categories. |
+| Path         | Purpose                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.                         |
+| `.cursor/`   | **Cursor AI rules** -- Rules files in `.mdc` format that Cursor uses for context-aware code generation.                                                                                                        |
+| `.windsurf/` | **Windsurf AI rules and workflows** -- Rules and workflow definitions for Windsurf's AI assistant.                                                                                                             |
+| `.ai/`       | **Portable rules** -- A tool-agnostic rules format compatible with Continue and other AI tools that support the `.ai/` convention.                                                                             |
+| `docs/`      | **8-category documentation structure** -- A complete project documentation scaffold organized into product, architecture, orchestration, API, operations, engineering, integrations, and reference categories. |
 
 ### Generated Root Files
 
@@ -155,10 +148,7 @@ The `docs/` directory follows a standardized 8-category layout:
 docs/
   product/           Product requirements, user stories, roadmap, personas
   architecture/      Specs, system overview, architecture decision records (ADRs)
-<<<<<<< HEAD
   orchestration/     Orchestration guide, PM guide, concurrency protocols
-=======
->>>>>>> e41030309a55073b2705ad86e718f3710c4cabe4
   api/               API overview, endpoints, authentication, examples
   operations/        Deployment, monitoring, incident response, troubleshooting
   engineering/       Dev setup, coding standards, testing, git workflow, security

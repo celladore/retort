@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # Shortcut script for AgentKit Forge setup
 
 # Install dependencies

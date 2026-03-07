@@ -17,7 +17,7 @@
 
 ## System Context Diagram
 
-<!-- Link to or embed a C4 Level 1 diagram from 01_diagrams/. -->
+<!-- Link to or embed a C4 Level 1 diagram from diagrams/. -->
 
 See [diagrams/](./diagrams/) for visual representations.
 
