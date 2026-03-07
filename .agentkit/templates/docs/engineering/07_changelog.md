@@ -102,7 +102,7 @@ on:
     branches: [main]
 jobs:
   release-please:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: write
       pull-requests: write

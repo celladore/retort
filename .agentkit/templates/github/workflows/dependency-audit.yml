@@ -33,7 +33,7 @@ on:
 jobs:
   audit-node:
     name: Node.js dependency audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
@@ -111,7 +111,7 @@ jobs:
 {{#if hasLanguageRust}}
   audit-rust:
     name: Rust dependency audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: hashFiles('Cargo.toml') != '' || hashFiles('**/Cargo.toml') != ''
     steps:
@@ -139,7 +139,7 @@ jobs:
 {{#if hasLanguagePython}}
   audit-python:
     name: Python dependency audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: hashFiles('pyproject.toml') != '' || hashFiles('requirements*.txt') != ''
     steps:
@@ -173,7 +173,7 @@ jobs:
 
   summary:
     name: Audit summary
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [audit-node{{#if hasLanguageRust}}, audit-rust{{/if}}{{#if hasLanguagePython}}, audit-python{{/if}}]
     if: always()
     steps:

@@ -86,7 +86,8 @@
       "Bash(echo:*)",
       "Bash(az vm:*)",
       "Bash(ssh:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(grep:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\engineering"
