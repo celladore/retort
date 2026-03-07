@@ -26,9 +26,7 @@ last_updated: '{{syncDate}}'
 
 ## Flags
 
-{{#each commandFlags}}
-- `{{this.name}}` — {{this.description}} (default: `{{this.default}}`)
-{{/each}}
+{{commandFlags}}
 
 ## Analysis Categories
 

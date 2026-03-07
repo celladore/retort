@@ -25,6 +25,14 @@ Runs the expansion analyzer to identify gaps, missing capabilities, undocumented
 
 ## Flags
 
+| Flag                | Description                                                                                                | Default  |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- | -------- |
+| `--category`        | Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature | —        |
+| `--max-suggestions` | Maximum number of suggestions to return                                                                    | 10       |
+| `--min-impact`      | Minimum impact level to include: critical, high, medium, low                                               | low      |
+| `--output`          | Output format: markdown, yaml, or json                                                                     | markdown |
+| `--save`            | Save suggestions to .claude/state/suggestions/ for later review                                            | false    |
+
 ## Analysis Categories
 
 - **documentation** — Missing docs, outdated README, incomplete ADRs
