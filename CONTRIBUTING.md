@@ -21,7 +21,7 @@
 1. Fork and clone the repository
 2. Install dependencies for your stack (see `agentkit discover` output)
 3. Run `agentkit sync` to generate AI tool configurations
-4. Create a feature branch from `dev` (or `main` for hotfixes)
+4. Create a feature branch from `main`
 
 ---
 
@@ -64,18 +64,16 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ## Pull Request Process
 
-1. Ensure your branch is up to date with `dev` (CI runs on both `main` and `dev`)
+1. Ensure your branch is up to date with `main`
 2. Run all quality gates locally: `agentkit validate`
 3. If you changed `.agentkit/spec/*.yaml`, run `pnpm -C .agentkit agentkit:sync` and commit the regenerated outputs
 4. Create a PR — **title MUST use Conventional Commits format**: `type(scope): description`
    - Example: `feat(auth): add OAuth2 login flow` — NOT `Plan: Add OAuth2 login flow`
    - CI enforces this and will reject non-conforming titles
-5. PR body must include a **summary** of the change and a **test plan**
-6. All CI checks must pass (including drift check for generated files)
-7. PRs modifying `.agentkit/` require **CODEOWNERS approval**
-8. Request review from the relevant team (see [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md))
-9. Address review feedback
-10. Squash-merge when approved
+5. All CI checks must pass (including drift check for generated files)
+6. Request review from the relevant team (see [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md))
+7. Address review feedback
+8. Squash-merge when approved
 
 ---
 
