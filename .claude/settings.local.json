@@ -73,7 +73,20 @@
       "Bash(done)",
       "Bash(xargs grep -l \"product/.*architecture.*engineering\\\\|doc-8-category\\\\|8-Category Structure\")",
       "Bash(xargs grep -l \"product/.*architecture.*engineering\\\\|8-Category Structure\")",
-      "Bash(pnpm -C .agentkit agentkit:sync --overwrite)"
+      "Bash(pnpm -C .agentkit agentkit:sync --overwrite)",
+      "Bash(gh api:*)",
+      "Read(//c/Users/smitj/.local/bin/**)",
+      "Bash(where jq)",
+      "Bash(curl:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)",
+      "Bash(jq:*)",
+      "Bash(git config:*)",
+      "Bash(gh config:*)",
+      "Bash(echo:*)",
+      "Bash(az vm:*)",
+      "Bash(ssh:*)",
+      "Bash(sed:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\smitj\\repos\\agentkit-forge\\docs\\engineering"

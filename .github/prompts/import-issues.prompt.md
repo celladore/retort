@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Imports issues from the configured external tracker (GitHub or Linear), normalizes fields to the canonical backlog schema, deduplicates against existing items, assigns teams via intake routing rules, and merges into AGENT_BACKLOG.md and .claude/state/backlog.json. Gated behind the process.intake.autoImport flag (can be overridden with --force).'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-06'
+last_updated: '2026-03-07'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

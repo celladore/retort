@@ -5,7 +5,7 @@ on:
 
 jobs:
   create-issue-and-fix:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       issues: write
       checks: write

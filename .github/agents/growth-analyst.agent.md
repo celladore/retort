@@ -3,7 +3,7 @@ name: 'Growth Analyst'
 description: 'Growth and analytics specialist focused on user acquisition, activation, retention, and revenue metrics. Translates data into actionable product and marketing recommendations.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-06'
+last_updated: '2026-03-07'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

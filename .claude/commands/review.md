@@ -3,7 +3,7 @@ description: 'Structured review across 10 quality criteria — correctness, secu
 allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-06'
+last_updated: '2026-03-07'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
