@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- .github/workflows/**
-- scripts/**
-- docker/**
-- Dockerfile*
+- .github/workflows/\*\*
+- scripts/\*\*
+- docker/\*\*
+- Dockerfile\*
 - .dockerignore
-- docker-compose*.yml
+- docker-compose\*.yml
 
 ## Responsibilities
 

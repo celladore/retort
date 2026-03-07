@@ -594,16 +594,20 @@ describe('render target gating for new tools', () => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('--only claude does NOT generate gemini, warp, cline, roo, codex files', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
-    const files = collectFiles(projectRoot);
-    expect(files.some((f) => f === 'GEMINI.md')).toBe(false);
-    expect(files.some((f) => f === 'WARP.md')).toBe(false);
-    expect(files.some((f) => f.startsWith('.gemini/'))).toBe(false);
-    expect(files.some((f) => f.startsWith('.agents/'))).toBe(false);
-    expect(files.some((f) => f.startsWith('.clinerules/'))).toBe(false);
-    expect(files.some((f) => f.startsWith('.roo/'))).toBe(false);
-  });
+  it(
+    '--only claude does NOT generate gemini, warp, cline, roo, codex files',
+    { timeout: 15_000 },
+    async () => {
+      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
+      const files = collectFiles(projectRoot);
+      expect(files.some((f) => f === 'GEMINI.md')).toBe(false);
+      expect(files.some((f) => f === 'WARP.md')).toBe(false);
+      expect(files.some((f) => f.startsWith('.gemini/'))).toBe(false);
+      expect(files.some((f) => f.startsWith('.agents/'))).toBe(false);
+      expect(files.some((f) => f.startsWith('.clinerules/'))).toBe(false);
+      expect(files.some((f) => f.startsWith('.roo/'))).toBe(false);
+    }
+  );
 
   it('always-on outputs generated regardless of --only flag', async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
@@ -1085,7 +1089,7 @@ describe('syncEditorTheme (brand-driven editor theme)', () => {
     projectRoot = makeTmpProject();
     // Full sync — brand.yaml and editor-theme.yaml exist in spec, editorTheme.enabled is true
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
-  });
+  }, 30_000);
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });

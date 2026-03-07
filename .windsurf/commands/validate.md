@@ -35,4 +35,3 @@ Report: per-check pass/fail with details, overall PASS/FAIL status, list of miss
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- apps/api/**
-- services/**
-- src/server/**
-- controllers/**
-- middleware/**
-- routes/**
+- apps/api/\*\*
+- services/\*\*
+- src/server/\*\*
+- controllers/\*\*
+- middleware/\*\*
+- routes/\*\*
 
 ## Responsibilities
 
@@ -73,6 +73,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Service registration pattern
+
 ```
 export function registerBillingServices(container) {
   container.register('invoiceService', () => new InvoiceService(container.resolve('invoiceRepo')));

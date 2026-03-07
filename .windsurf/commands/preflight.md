@@ -41,4 +41,3 @@ If `--range` is omitted, auto-detect via merge-base against the default branch. 
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

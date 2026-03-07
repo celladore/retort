@@ -5,7 +5,7 @@
 # Team: TESTING
 
 **Focus**: Unit, E2E, integration tests
-**Scope**: **/*.test.*, **/*.spec.*, tests/**, e2e/**, playwright/**
+**Scope**: **/_.test._, **/_.spec._, tests/**, e2e/**, playwright/\*\*
 
 ## Persona
 

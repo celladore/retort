@@ -32,9 +32,9 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/roadmap/**
-- docs/product/**
-- docs/milestones/**
+- docs/roadmap/\*\*
+- docs/product/\*\*
+- docs/milestones/\*\*
 - CHANGELOG.md
 
 ## Responsibilities

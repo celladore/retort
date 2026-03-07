@@ -5,7 +5,7 @@
 # Team: DOCUMENTATION
 
 **Focus**: Docs, ADRs, guides
-**Scope**: docs/**, docs/architecture/decisions/**, .github/**, README.md, CHANGELOG.md, CONTRIBUTING.md
+**Scope**: docs/**, docs/architecture/decisions/**, .github/\*\*, README.md, CHANGELOG.md, CONTRIBUTING.md
 
 ## Persona
 

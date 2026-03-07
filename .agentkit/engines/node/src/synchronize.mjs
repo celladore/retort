@@ -1790,6 +1790,21 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     vars[`shared_${key}`] = isGateEnabled ? section.content || '' : '';
   }
 
+  // Teams list for root templates (AGENT_TEAMS.md {{#each}} iteration)
+  const rawTeams = teamsSpec?.teams || [];
+  vars.teamsList = rawTeams.map((t) => ({
+    id: t.id || '',
+    name: t.name || '',
+    focus: t.focus || '',
+    scopeDisplay: Array.isArray(t.scope) ? t.scope.map((s) => `\`${s}\``).join(', ') : '',
+    acceptsDisplay: Array.isArray(t.accepts) ? t.accepts.join(', ') : '',
+    handoffDisplay: Array.isArray(t['handoff-chain'])
+      ? t['handoff-chain'].join(' → ')
+      : t['handoff-chain'] || '—',
+  }));
+  vars.hasTeams = rawTeams.length > 0;
+  vars.teamCount = rawTeams.length;
+
   // Resolve render targets — determines which tool outputs to generate
   let targets = resolveRenderTargets(overlaySettings.renderTargets, flags);
 

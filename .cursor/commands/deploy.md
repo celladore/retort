@@ -22,14 +22,14 @@ Triggers a deployment pipeline or generates deployment artifacts. Validates pre-
 
 ## Deployment Detection
 
-| Signal | Platform | Deploy Command |
-|--------|----------|---------------|
-| `vercel.json` | Vercel | `vercel --prod` / `vercel` |
-| `netlify.toml` | Netlify | `netlify deploy --prod` |
-| `fly.toml` | Fly.io | `fly deploy` |
-| `wrangler.toml` | Cloudflare | `wrangler deploy` |
-| Dockerfile + k8s/ | Kubernetes | `kubectl apply -f k8s/` |
-| `package.json` deploy script | Custom | `pnpm deploy` |
+| Signal                       | Platform   | Deploy Command             |
+| ---------------------------- | ---------- | -------------------------- |
+| `vercel.json`                | Vercel     | `vercel --prod` / `vercel` |
+| `netlify.toml`               | Netlify    | `netlify deploy --prod`    |
+| `fly.toml`                   | Fly.io     | `fly deploy`               |
+| `wrangler.toml`              | Cloudflare | `wrangler deploy`          |
+| Dockerfile + k8s/            | Kubernetes | `kubectl apply -f k8s/`    |
+| `package.json` deploy script | Custom     | `pnpm deploy`              |
 
 ## Flow
 
@@ -65,4 +65,3 @@ Report: service, environment, platform, status, timeline, command output, post-d
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
-
