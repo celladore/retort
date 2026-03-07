@@ -101,16 +101,30 @@ fi
 
 PR_REF="${PR_NUMBER:+#${PR_NUMBER}}"
 
-sed \
-  -e "s/\[Feature\/Change Name\]/$TITLE/g" \
-  -e "s/\[Bug Description\]/$TITLE/g" \
-  -e "s/\[Feature Name\]/$TITLE/g" \
-  -e "s/\[Migration Name\]/$TITLE/g" \
-  -e "s/\[Issue Title\]/$TITLE/g" \
-  -e "s/\[Lesson Title\]/$TITLE/g" \
-  -e "s/\[YYYY-MM-DD\]/$DATE/g" \
-  -e "s/\[#PR-Number\]/${PR_REF:-[#PR-Number]}/g" \
-  "$TEMPLATE_SRC" > "$DEST_FILE"
+# Perform literal replacements using Node.js to avoid sed injection
+TITLE_VAL="$TITLE" DATE_VAL="$DATE" PR_REF_VAL="${PR_REF:-[#PR-Number]}" \
+node - "$TEMPLATE_SRC" "$DEST_FILE" << 'NODEEOF'
+  const fs = require('fs');
+  const [,, src, dest] = process.argv;
+  let content = fs.readFileSync(src, 'utf8');
+
+  const replacements = {
+    '[Feature/Change Name]': process.env.TITLE_VAL,
+    '[Bug Description]':      process.env.TITLE_VAL,
+    '[Feature Name]':         process.env.TITLE_VAL,
+    '[Migration Name]':       process.env.TITLE_VAL,
+    '[Issue Title]':          process.env.TITLE_VAL,
+    '[Lesson Title]':         process.env.TITLE_VAL,
+    '[YYYY-MM-DD]':           process.env.DATE_VAL,
+    '[#PR-Number]':           process.env.PR_REF_VAL
+  };
+
+  for (const [placeholder, value] of Object.entries(replacements)) {
+    content = content.split(placeholder).join(value);
+  }
+
+  fs.writeFileSync(dest, content, 'utf8');
+NODEEOF
 
 # ---------------------------------------------------------------------------
 # Update index
