@@ -80,7 +80,7 @@ PAYLOAD=$(cat <<ENDJSON
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["CI / test (ubuntu-latest, 24)","CI / validate","Branch Protection / branch-rules"]
+    "contexts": ["Test","Validate","Branch Protection / branch-rules"]
   },
   "enforce_admins": false,
   "required_pull_request_reviews": {

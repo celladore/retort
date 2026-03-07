@@ -3,7 +3,7 @@ description: 'Trace a feature end-to-end — from spec through templates to gene
 allowed-tools: ''
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-06'
+last_updated: '2026-03-07'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

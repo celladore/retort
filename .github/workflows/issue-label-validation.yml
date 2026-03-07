@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   validate-issue-fields:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Validate issue fields
         uses: actions/github-script@v7

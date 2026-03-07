@@ -38,4 +38,4 @@ This project uses [Semantic Versioning](https://semver.org/):
 ## References
 
 - [CHANGELOG.md (root)](../../CHANGELOG.md)
-- [Roadmap](../01_product/03_roadmap.md)
+- [Roadmap](../product/03_roadmap.md)

@@ -63,4 +63,4 @@
 
 - [Monitoring](./02_monitoring.md)
 - [Incident Response](./03_incident_response.md)
-- [Architecture Overview](../03_architecture/01_overview.md)
+- [Architecture Overview](../architecture/01_overview.md)

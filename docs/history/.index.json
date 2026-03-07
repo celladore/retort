@@ -1,11 +1,12 @@
 {
+  "nextNumber": 8,
   "sequences": {
-    "implementation": 5,
-    "bugfix": 2,
-    "feature": 1,
-    "migration": 1,
-    "issue": 1,
-    "lesson": 1
+    "implementation": 7,
+    "bugfix": 1,
+    "feature": 0,
+    "migration": 0,
+    "issue": 0,
+    "lesson": 0
   },
   "entries": [
     {
@@ -35,6 +36,27 @@
       "date": "2026-03-04",
       "title": "Infra-Eval Template Integration",
       "file": "implementations/0004-2026-03-04-infra-eval-template-integration-implementation.md"
+    },
+    {
+      "number": 5,
+      "type": "implementation",
+      "date": "2026-03-06",
+      "title": "Cost Management Plan",
+      "file": "implementations/0005-2026-03-06-cost-management-plan-implementation.md"
+    },
+    {
+      "number": 6,
+      "type": "implementation",
+      "date": "2026-03-06",
+      "title": "Merge Resolution Matrix",
+      "file": "implementations/0006-2026-03-06-merge-resolution-matrix-implementation.md"
+    },
+    {
+      "number": 7,
+      "type": "implementation",
+      "date": "2026-03-06",
+      "title": "Standardize GitHub Issues",
+      "file": "implementations/0007-2026-03-06-standardize-github-issues-implementation.md"
     },
     {
       "number": 1,

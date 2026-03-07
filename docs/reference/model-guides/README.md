@@ -2,8 +2,8 @@
 
 Per-team guidance on which LLM models to use, including weighting profiles,
 ranked model tiers, and rationale. These guides are generated from
-[PRD-001](../../01_product/PRD-001-llm-decision-engine.md) and
-[PRD-002](../../01_product/PRD-002-llm-selection-scorecard-guide.md).
+[PRD-001](../../product/PRD-001-llm-decision-engine.md) and
+[PRD-002](../../product/PRD-002-llm-selection-scorecard-guide.md).
 
 ## Guides
 
@@ -23,5 +23,5 @@ ranked model tiers, and rationale. These guides are generated from
 ## Related
 
 - [Model Family Benchmark Dossiers](../model-families/README.md)
-- [PRD-001: LLM Decision Engine](../../01_product/PRD-001-llm-decision-engine.md)
-- [PRD-002: LLM Selection Scorecard Guide](../../01_product/PRD-002-llm-selection-scorecard-guide.md)
+- [PRD-001: LLM Decision Engine](../../product/PRD-001-llm-decision-engine.md)
+- [PRD-002: LLM Selection Scorecard Guide](../../product/PRD-002-llm-selection-scorecard-guide.md)

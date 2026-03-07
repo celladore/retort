@@ -2459,7 +2459,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       await runConcurrent(staleFiles, async (prevFile) => {
         const orphanPath = resolve(projectRoot, prevFile);
         // Path traversal protection: ensure orphan path stays within project root
-        if (!orphanPath.startsWith(resolvedRoot) && orphanPath !== resolve(projectRoot)) {
+        if (!orphanPath.startsWith(resolvedRoot)) {
           console.warn(`[agentkit:sync] BLOCKED: path traversal in manifest — ${prevFile}`);
           return;
         }

@@ -66,4 +66,4 @@ curl -X POST https://api.example.com/v1/auth/token \
 
 - [API Overview](./01_overview.md)
 - [Endpoints Reference](./02_endpoints.md)
-- [Security Practices](../06_engineering/05_security.md)
+- [Security Practices](../engineering/05_security.md)

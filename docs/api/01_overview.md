@@ -43,4 +43,4 @@ curl https://api.example.com/v1/resource \
 - [Endpoints Reference](./02_endpoints.md)
 - [Authentication](./03_authentication.md)
 - [Examples](./04_examples.md)
-- [API Spec](../02_specs/03_api_spec.md)
+- [API Spec](../architecture/specs/03_api_spec.md)

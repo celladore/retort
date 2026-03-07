@@ -1,6 +1,7 @@
 export const PROJECT_MAPPING = [
   // Top-level
   { src: 'name', dest: 'projectName' },
+  { src: 'githubSlug', dest: 'githubSlug' },
   { src: 'description', dest: 'projectDescription' },
   { src: 'phase', dest: 'projectPhase' },
 

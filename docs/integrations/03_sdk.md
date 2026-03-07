@@ -60,6 +60,6 @@ const resources = await client.resources.list({ limit: 10 });
 
 ## References
 
-- [API Overview](../04_api/01_overview.md)
-- [Authentication](../04_api/03_authentication.md)
-- [API Examples](../04_api/04_examples.md)
+- [API Overview](../api/01_overview.md)
+- [Authentication](../api/03_authentication.md)
+- [API Examples](../api/04_examples.md)

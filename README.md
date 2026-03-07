@@ -41,14 +41,23 @@ Every developer runs `sync` after cloning. The generated files are gitignored â€
 **Prerequisites:** Node.js 22.x LTS (>=22.0.0) and pnpm 9+.
 
 ```bash
-# Install runtime
-pnpm -C .agentkit install
+# Quick setup (runs install, sync, validate)
+pnpm run ak:setup
+
+# Install dependencies only
+pnpm run ak:install
+
+# Sync tool configs
+pnpm run ak:sync
+
+# Validate setup
+pnpm run ak:validate
 
 # Initialize (scans your repo, generates project.yaml, runs sync)
 pnpm -C .agentkit agentkit:init -- --repoName MyProject
 
 # That's it â€” init already runs sync. To re-sync later:
-pnpm -C .agentkit agentkit:sync
+pnpm run ak:sync
 ```
 
 For a non-interactive setup (CI or scripting), use `--non-interactive` or `--preset`:

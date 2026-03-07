@@ -3,7 +3,7 @@ name: 'Retrospective Analyst'
 description: 'Session retrospective specialist activated via /review --focus=retrospective. Reviews conversation history and session activity to extract issues encountered and lessons learned. Produces structured, non-blocking records in docs/history/issues/ and docs/history/lessons-learned/ using project templates and sequential numbering. Cross-references findings with existing rules, ADRs, and history records to avoid duplication and surface patterns.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-06'
+last_updated: '2026-03-07'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

@@ -58,5 +58,5 @@ HMAC-SHA256(webhook_secret, raw_body) == X-Signature header
 ## References
 
 - [External APIs](./01_external_apis.md)
-- [API Endpoints](../04_api/02_endpoints.md)
-- [Security Practices](../06_engineering/05_security.md)
+- [API Endpoints](../api/02_endpoints.md)
+- [Security Practices](../engineering/05_security.md)

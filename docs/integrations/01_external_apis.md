@@ -49,6 +49,6 @@ This document catalogues the external APIs that agentkit-forge integrates with.
 
 ## References
 
-- [API Overview](../04_api/01_overview.md)
+- [API Overview](../api/01_overview.md)
 - [Webhooks](./02_webhooks.md)
-- [Monitoring](../05_operations/02_monitoring.md)
+- [Monitoring](../operations/02_monitoring.md)

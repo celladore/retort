@@ -15,7 +15,7 @@ on:
 jobs:
   coverage-node:
     name: Node.js coverage
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
@@ -136,7 +136,7 @@ jobs:
 {{#if hasLanguageRust}}
   coverage-rust:
     name: Rust coverage
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: hashFiles('Cargo.toml') != ''
     steps:
@@ -168,7 +168,7 @@ jobs:
 
   summary:
     name: Coverage summary
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [coverage-node{{#if hasLanguageRust}}, coverage-rust{{/if}}]
     if: always()
     steps:

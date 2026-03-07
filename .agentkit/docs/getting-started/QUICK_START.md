@@ -1,10 +1,5 @@
 # AgentKit Forge -- Quick Start Guide
 
-> Your first 15 minutes with AgentKit Forge. From zero to an AI-assisted
-> development workflow.
-
----
-
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -126,13 +121,13 @@ The `sync` command generated several directories and files in your repository ro
 
 ### Generated Directories
 
-| Path         | Purpose                                                                                                                                                                                                |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.                 |
-| `.cursor/`   | **Cursor AI rules** -- Rules files in `.mdc` format that Cursor uses for context-aware code generation.                                                                                                |
-| `.windsurf/` | **Windsurf AI rules and workflows** -- Rules and workflow definitions for Windsurf's AI assistant.                                                                                                     |
-| `.ai/`       | **Portable rules** -- A tool-agnostic rules format compatible with Continue and other AI tools that support the `.ai/` convention.                                                                     |
-| `docs/`      | **8-category documentation structure** -- A complete project documentation scaffold organized into product, specs, architecture, API, operations, engineering, integrations, and reference categories. |
+| Path         | Purpose                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.claude/`   | **Claude Code configs** -- Slash commands, lifecycle hooks, specialized agents, coding rules, and orchestrator state. This is where commands like `/discover` and `/orchestrate` live.                         |
+| `.cursor/`   | **Cursor AI rules** -- Rules files in `.mdc` format that Cursor uses for context-aware code generation.                                                                                                        |
+| `.windsurf/` | **Windsurf AI rules and workflows** -- Rules and workflow definitions for Windsurf's AI assistant.                                                                                                             |
+| `.ai/`       | **Portable rules** -- A tool-agnostic rules format compatible with Continue and other AI tools that support the `.ai/` convention.                                                                             |
+| `docs/`      | **8-category documentation structure** -- A complete project documentation scaffold organized into product, architecture, orchestration, API, operations, engineering, integrations, and reference categories. |
 
 ### Generated Root Files
 
@@ -151,14 +146,14 @@ The `docs/` directory follows a standardized 8-category layout:
 
 ```
 docs/
-  01_product/        Product requirements, user stories, roadmap, personas
-  02_specs/          Functional spec, technical spec, API spec, data models
-  03_architecture/   System overview, architecture decision records (ADRs)
-  04_api/            API overview, endpoints, authentication, examples
-  05_operations/     Deployment, monitoring, incident response, troubleshooting
-  06_engineering/    Dev setup, coding standards, testing, git workflow, security
-  07_integrations/   External APIs, webhooks, SDK documentation
-  08_reference/      Glossary, FAQ, changelog, contributing guide, AI handoffs
+  product/           Product requirements, user stories, roadmap, personas
+  architecture/      Specs, system overview, architecture decision records (ADRs)
+  orchestration/     Orchestration guide, PM guide, concurrency protocols
+  api/               API overview, endpoints, authentication, examples
+  operations/        Deployment, monitoring, incident response, troubleshooting
+  engineering/       Dev setup, coding standards, testing, git workflow, security
+  integrations/      External APIs, webhooks, SDK documentation
+  reference/         Glossary, FAQ, changelog, contributing guide, AI handoffs
 ```
 
 This structure gives AI assistants a consistent place to read and write documentation, regardless of your project's domain.

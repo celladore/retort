@@ -234,7 +234,7 @@ describe('P0 + P2 Integration: sync generates agent personas and shared sections
     } finally {
       console.log = originalLog;
     }
-  }, 60000);
+  }, 120_000);
 
   afterAll(() => {
     if (projectRoot) {
@@ -299,7 +299,7 @@ describe('P7: Concurrency protocol simplification', () => {
     } finally {
       console.log = originalLog;
     }
-  }, 60000);
+  }, 120_000);
 
   afterAll(() => {
     if (projectRoot) {

@@ -7,6 +7,21 @@
 # Engine injects: vars[`shared_${key}`] = gateEnabled ? content : ''
 
 sections:
+  # --- Documentation shared sections ---
+
+  docCategoryList:
+    gate: null # always included
+    target: rules # used in documentation rule templates and CLAUDE.md
+    content: |
+      - `product/` — Product vision, strategy, personas, metrics
+      - `architecture/` — Specs, ADRs, diagrams, tech stack decisions
+      - `orchestration/` — Orchestration guide, PM guide, protocols
+      - `api/` — API reference, authentication, versioning
+      - `operations/` — Deployment, monitoring, SLAs
+      - `engineering/` — Setup, coding standards, testing, contributing
+      - `integrations/` — External services, third-party connections
+      - `reference/` — Glossary, acronyms, FAQ, tool config
+
   # --- Agent persona shared sections ---
 
   sharedState:

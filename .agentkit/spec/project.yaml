@@ -14,6 +14,7 @@
 
 # Project identity
 name: agentkit-forge # e.g. "chaufher", "phoenix", "my-api"
+githubSlug: JustAGhosT/agentkit-forge # e.g. "my-org/my-repo" — used in GitHub URLs (security advisories, etc.)
 description: AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
 phase: active # greenfield | active | maintenance | legacy
 
@@ -192,8 +193,8 @@ branchProtection:
   # Status checks
   strictStatusChecks: true # branch must be up-to-date before merge
   requiredStatusChecks: # CI job names that must pass
-    - 'CI / test (ubuntu-latest, 24)'
-    - 'CI / validate'
+    - 'Test'
+    - 'Validate'
     - 'Branch Protection / branch-rules'
 
   # Branch rules
