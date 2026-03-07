@@ -3,7 +3,7 @@ name: 'brand'
 description: 'Manage the project brand spec (brand.yaml) and editor theme. Supports validation, palette preview, theme mapping, contrast auditing, scaffolding, and regeneration of editor theme files.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-06'
+last_updated: '2026-03-07'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
