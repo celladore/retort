@@ -3,7 +3,7 @@
  * Creates a structured session handoff document with git state,
  * orchestrator state, and recent activity.
  */
-// ...existing code...
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { appendEvent, readEvents } from './events.mjs';
 import { loadState } from './orchestrator.mjs';
