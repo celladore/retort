@@ -1,4 +1,5 @@
 #!/bin/sh
+set -euo pipefail
 # Shortcut script for AgentKit Forge setup
 
 # Install dependencies

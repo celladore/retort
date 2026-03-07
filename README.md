@@ -42,22 +42,22 @@ Every developer runs `sync` after cloning. The generated files are gitignored â€
 
 ```bash
 # Quick setup (runs install, sync, validate)
-pnpm run setup
+pnpm run ak:setup
 
 # Install dependencies only
-pnpm run install
+pnpm run ak:install
 
 # Sync tool configs
-pnpm run sync
+pnpm run ak:sync
 
 # Validate setup
-pnpm run validate
+pnpm run ak:validate
 
 # Initialize (scans your repo, generates project.yaml, runs sync)
 pnpm -C .agentkit agentkit:init -- --repoName MyProject
 
 # That's it â€” init already runs sync. To re-sync later:
-pnpm run sync
+pnpm run ak:sync
 ```
 
 For a non-interactive setup (CI or scripting), use `--non-interactive` or `--preset`:
