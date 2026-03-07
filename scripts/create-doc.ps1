@@ -88,15 +88,15 @@ if (-not (Test-Path $TemplateSrc)) {
 
 $PrRef = if ($PrNumber) { "#$PrNumber" } else { '[#PR-Number]' }
 
-(Get-Content $TemplateSrc -Raw) `
-  -replace '\[Feature\/Change Name\]', $Title `
-  -replace '\[Bug Description\]',      $Title `
-  -replace '\[Feature Name\]',         $Title `
-  -replace '\[Migration Name\]',       $Title `
-  -replace '\[Issue Title\]',          $Title `
-  -replace '\[Lesson Title\]',         $Title `
-  -replace '\[YYYY-MM-DD\]',           $Date  `
-  -replace '\[#PR-Number\]',           $PrRef |
+(Get-Content $TemplateSrc -Raw).
+  Replace('[Feature/Change Name]', $Title).
+  Replace('[Bug Description]',      $Title).
+  Replace('[Feature Name]',         $Title).
+  Replace('[Migration Name]',       $Title).
+  Replace('[Issue Title]',          $Title).
+  Replace('[Lesson Title]',         $Title).
+  Replace('[YYYY-MM-DD]',           $Date).
+  Replace('[#PR-Number]',           $PrRef) |
   Set-Content -Encoding UTF8 $DestFile
 
 # ---------------------------------------------------------------------------
