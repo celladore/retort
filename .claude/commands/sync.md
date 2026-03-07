@@ -1,6 +1,5 @@
 ---
 description: 'Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
-
 allowed-tools: Bash(node *), Bash(pnpm *), Bash(git *), Read, Glob
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

@@ -1,7 +1,7 @@
 ---
 {{#if commandDescription}}
 description: {{escapeYamlString commandDescription}}
-{{/if}}
+{{/if~}}
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *), Bash(vitest *), Bash(jest *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

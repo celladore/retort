@@ -1,7 +1,7 @@
 ---
 {{#if commandDescription}}
 description: {{escapeYamlString commandDescription}}
-{{/if}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

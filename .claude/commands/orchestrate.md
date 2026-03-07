@@ -1,6 +1,5 @@
 ---
 description: 'Top-level orchestration command. Assesses the current repository state, identifies work to be done, delegates to appropriate team agents, and synthesizes results. The primary entry point for multi-step workflows.'
-
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(dotnet *), Bash(cargo *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

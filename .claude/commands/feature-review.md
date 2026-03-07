@@ -1,6 +1,5 @@
 ---
 description: 'Reviews the current feature configuration for the repo. Analyzes which features are enabled/disabled, checks for misconfigured dependencies, identifies unused features (enabled but no matching code patterns), and recommends features to enable based on codebase analysis.'
-
 allowed-tools: ''
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

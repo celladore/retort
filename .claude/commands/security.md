@@ -1,6 +1,5 @@
 ---
 description: 'Runs security-focused analysis: dependency vulnerability scanning, secret detection, OWASP compliance checks, and permission auditing. Generates a security report with severity ratings.'
-
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(pip *), Bash(go *), Bash(grep *), Bash(find *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

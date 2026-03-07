@@ -1,7 +1,7 @@
 ---
 {{#if commandDescription}}
 description: {{escapeYamlString commandDescription}}
-{{/if}}
+{{/if~}}
 allowed-tools: Bash(node *), Bash(find *), Bash(ls *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

@@ -1,6 +1,5 @@
 ---
 description: 'Cost centre management for cloud infrastructure. Manages budget allocations, resource group mappings, tag compliance, and spend tracking. Requires a FinOps-enabled overlay (finops rule domain). For AI session cost tracking, use /cost instead.'
-
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

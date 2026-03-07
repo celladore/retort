@@ -42,8 +42,43 @@ function isShellScriptTarget(targetPath) {
  * - Sanitizes string values to prevent shell metacharacter injection
  * - Warns on unresolved placeholders
  */
-export function renderTemplate(template, vars, targetPath = '') {
+/**
+ * Applies Handlebars-style whitespace control (~) to template tags.
+ *
+ * A tilde inside a tag strips adjacent whitespace (including newlines):
+ *   ~}} — strips all whitespace AFTER the tag (trailing spaces + one newline)
+ *   {{~ — strips all whitespace BEFORE the tag (one newline + leading spaces)
+ *
+ * Supports all block tags: {{#if}}, {{/if}}, {{#unless}}, {{/unless}},
+ * {{#each}}, {{/each}}, {{else}}.
+ *
+ * This runs as Phase 0 before any template resolution, converting tilde-
+ * annotated tags into standard tags with whitespace already stripped.
+ */
+export function applyWhitespaceControl(template) {
+  // Pattern matching the "body" of any block tag (openers with var, closers, else)
+  const bodyPat = '(?:#(?:if|unless|each)\\s+[a-zA-Z_][a-zA-Z0-9_]*|\\/(?:if|unless|each)|else)';
+
   let result = template;
+
+  // Pass 1: Right tilde — {{ body ~}} strips trailing whitespace + newline
+  result = result.replace(
+    new RegExp(`\\{\\{\\s*(${bodyPat})\\s*~\\}\\}[ \\t]*\\r?\\n?`, 'g'),
+    (_, body) => `{{${body.trim()}}}`
+  );
+
+  // Pass 2: Left tilde — {{~ body }} strips preceding newline + whitespace
+  result = result.replace(
+    new RegExp(`\\r?\\n[ \\t]*\\{\\{~\\s*(${bodyPat})\\s*\\}\\}`, 'g'),
+    (_, body) => `{{${body.trim()}}}`
+  );
+
+  return result;
+}
+
+export function renderTemplate(template, vars, targetPath = '') {
+  // Phase 0: Apply whitespace control (Handlebars ~ syntax)
+  let result = applyWhitespaceControl(template);
   const sanitizeStrings = isShellScriptTarget(targetPath);
 
   // Phase 1: Resolve {{#if var}}...{{/if}} blocks (supports nesting)

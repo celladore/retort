@@ -1,7 +1,7 @@
 ---
 {{#if commandDescription}}
 description: {{escapeYamlString commandDescription}}
-{{/if}}
+{{/if~}}
 allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

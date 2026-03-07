@@ -1,6 +1,5 @@
 ---
 description: 'Performs a structured code review of staged changes, a specific PR, or a range of commits. Evaluates code quality, adherence to domain rules, security concerns, test coverage, and architectural alignment.'
-
 allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

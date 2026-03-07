@@ -1,7 +1,7 @@
 ---
 {{#if commandDescription}}
 description: {{escapeYamlString commandDescription}}
-{{/if}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep, Bash(git log*), Bash(gh issue list*)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

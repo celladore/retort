@@ -1507,3 +1507,107 @@ describe('collapseBlankLines', () => {
     expect(collapseBlankLines(input)).toBe('A\n\nB\n\nC');
   });
 });
+
+// ---------------------------------------------------------------------------
+// applyWhitespaceControl
+// ---------------------------------------------------------------------------
+import { applyWhitespaceControl } from '../template-utils.mjs';
+
+describe('applyWhitespaceControl', () => {
+  it('strips trailing whitespace + newline for right tilde on {{/if~}}', () => {
+    const input = '{{/if~}}\nallowed-tools: Read';
+    expect(applyWhitespaceControl(input)).toBe('{{/if}}allowed-tools: Read');
+  });
+
+  it('strips trailing whitespace + newline for right tilde on {{/each~}}', () => {
+    const input = '{{/each~}}\nnext line';
+    expect(applyWhitespaceControl(input)).toBe('{{/each}}next line');
+  });
+
+  it('strips trailing whitespace + newline for right tilde on {{/unless~}}', () => {
+    const input = '{{/unless~}}\nnext line';
+    expect(applyWhitespaceControl(input)).toBe('{{/unless}}next line');
+  });
+
+  it('strips trailing whitespace + newline for right tilde on {{else~}}', () => {
+    const input = '{{else~}}\nnext line';
+    expect(applyWhitespaceControl(input)).toBe('{{else}}next line');
+  });
+
+  it('strips trailing spaces and tabs before newline for right tilde', () => {
+    const input = '{{/if~}}  \t \nallowed-tools: Read';
+    expect(applyWhitespaceControl(input)).toBe('{{/if}}allowed-tools: Read');
+  });
+
+  it('strips preceding newline + whitespace for left tilde on {{~#if}}', () => {
+    const input = 'some text\n  {{~#if myVar}}';
+    expect(applyWhitespaceControl(input)).toBe('some text{{#if myVar}}');
+  });
+
+  it('strips preceding newline + whitespace for left tilde on {{~/if}}', () => {
+    const input = 'description: value\n  {{~/if}}';
+    expect(applyWhitespaceControl(input)).toBe('description: value{{/if}}');
+  });
+
+  it('strips preceding newline + whitespace for left tilde on {{~else}}', () => {
+    const input = 'content\n  {{~else}}';
+    expect(applyWhitespaceControl(input)).toBe('content{{else}}');
+  });
+
+  it('strips preceding newline for left tilde on {{~#each}}', () => {
+    const input = 'header\n{{~#each items}}';
+    expect(applyWhitespaceControl(input)).toBe('header{{#each items}}');
+  });
+
+  it('handles right tilde on opening tag {{#if var~}}', () => {
+    const input = '{{#if myVar~}}\ndescription: value';
+    expect(applyWhitespaceControl(input)).toBe('{{#if myVar}}description: value');
+  });
+
+  it('leaves tags without tilde unchanged', () => {
+    const input = '{{#if myVar}}\ndescription: value\n{{/if}}\nallowed-tools: Read';
+    expect(applyWhitespaceControl(input)).toBe(input);
+  });
+
+  it('handles both tildes in a single template', () => {
+    const input = 'before\n{{~#if x}}\ncontent\n{{/if~}}\nafter';
+    expect(applyWhitespaceControl(input)).toBe('before{{#if x}}\ncontent\n{{/if}}after');
+  });
+
+  it('handles CRLF line endings for right tilde', () => {
+    const input = '{{/if~}}\r\nallowed-tools: Read';
+    expect(applyWhitespaceControl(input)).toBe('{{/if}}allowed-tools: Read');
+  });
+
+  it('handles CRLF line endings for left tilde', () => {
+    const input = 'text\r\n{{~/if}}';
+    expect(applyWhitespaceControl(input)).toBe('text{{/if}}');
+  });
+
+  it('strips trailing newline at end of file for right tilde', () => {
+    const input = '{{/if~}}\n';
+    expect(applyWhitespaceControl(input)).toBe('{{/if}}');
+  });
+
+  it('works with the YAML frontmatter pattern from command templates', () => {
+    const input =
+      '---\n{{#if commandDescription}}\ndescription: value\n{{/if~}}\nallowed-tools: Read';
+    const expected =
+      '---\n{{#if commandDescription}}\ndescription: value\n{{/if}}allowed-tools: Read';
+    expect(applyWhitespaceControl(input)).toBe(expected);
+  });
+
+  it('integrates with renderTemplate end-to-end (right tilde)', () => {
+    const template = '---\n{{#if x}}\ndescription: hello\n{{/if~}}\nallowed: yes';
+    const vars = { x: true };
+    const result = renderTemplate(template, vars);
+    expect(result).toBe('---\n\ndescription: hello\nallowed: yes');
+  });
+
+  it('integrates with renderTemplate end-to-end (falsy removes block cleanly)', () => {
+    const template = '---\n{{#if x}}\ndescription: hello\n{{/if~}}\nallowed: yes';
+    const vars = { x: false };
+    const result = renderTemplate(template, vars);
+    expect(result).toBe('---\nallowed: yes');
+  });
+});

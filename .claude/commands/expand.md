@@ -1,6 +1,5 @@
 ---
 description: 'Runs the expansion analyzer to identify gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces a ranked list of suggestions with rationale, impact scores, and effort estimates. Never creates tasks in analysis mode — all suggestions require explicit human approval. Use --save to persist suggestions to disk for later review.'
-
 allowed-tools: Read, Write, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
