@@ -296,6 +296,11 @@ export function flattenProjectYaml(project, docsSpec = null) {
 
   // --- Post-processing / Complex derivations ---
 
+  // githubOwner — org or user from githubSlug (e.g. "JustAGhosT/repo" → "JustAGhosT")
+  if (vars.githubSlug && typeof vars.githubSlug === 'string' && vars.githubSlug.includes('/')) {
+    vars.githubOwner = vars.githubSlug.split('/')[0];
+  }
+
   // hasAnyPattern
   vars.hasAnyPattern =
     vars.hasPatternRepository ||
@@ -771,7 +776,10 @@ const SCAFFOLD_ONCE_DIRS = [
 ];
 
 // GitHub root files that are scaffold-once (matched by full relative path)
-const SCAFFOLD_ONCE_GITHUB_FILES = new Set(['.github/PULL_REQUEST_TEMPLATE.md']);
+const SCAFFOLD_ONCE_GITHUB_FILES = new Set([
+  '.github/PULL_REQUEST_TEMPLATE.md',
+  '.github/CODEOWNERS',
+]);
 
 /**
  * Check if a relative path is a scaffold-once file (project-owned content).
