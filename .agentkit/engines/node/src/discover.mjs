@@ -223,7 +223,7 @@ const DOC_ARTIFACT_DETECTORS = [
   {
     name: 'apiSpec',
     label: 'API Specs',
-    dirs: ['docs/api', 'docs/api'],
+    dirs: ['docs/api'],
     files: ['openapi.yaml', 'openapi.yml', 'openapi.json', 'swagger.json', 'swagger.yaml'],
   },
   {

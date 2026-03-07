@@ -91,10 +91,14 @@ for issue_file in "$ISSUES_DIR"/*-issue.md; do
 
   # Extract severity for labeling
   SEVERITY="$(grep -m1 '^\*\*Severity\*\*:' "$issue_file" | sed 's/.*: *//' | tr '[:upper:]' '[:lower:]')" || true
+  if [[ -z "$SEVERITY" ]]; then
+    echo "  [warn] No severity found in $basename_file — defaulting to unlabelled"
+  fi
 
   # Extract summary section as the issue body
   BODY="$(sed -n '/^## Summary$/,/^## /{/^## Summary$/d;/^## /d;p}' "$issue_file" | sed '/^$/N;/^\n$/d')"
   if [[ -z "$BODY" ]]; then
+    echo "  [warn] No ## Summary section found in $basename_file — using fallback body"
     BODY="Synced from local issue doc: $basename_file"
   fi
 

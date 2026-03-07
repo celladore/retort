@@ -749,11 +749,12 @@ export function validateFeatureSpec(features, presets) {
     }
   }
 
-  // Detect dependency cycles (DFS with visiting/visited sets)
+  // Detect dependency cycles (single DFS pass with shared visiting/visited sets)
   const visiting = new Set();
   const visited = new Set();
+  const stack = [];
 
-  function detectCycle(featureId, stack = []) {
+  function detectCycle(featureId) {
     if (visiting.has(featureId)) {
       const cycleStart = stack.indexOf(featureId);
       const cycle = [...stack.slice(cycleStart), featureId];
@@ -767,9 +768,10 @@ export function validateFeatureSpec(features, presets) {
     const feature = index.get(featureId);
     if (feature) {
       for (const dep of feature.dependencies || []) {
-        if (index.has(dep)) detectCycle(dep, [...stack]);
+        if (index.has(dep)) detectCycle(dep);
       }
     }
+    stack.pop();
     visiting.delete(featureId);
     visited.add(featureId);
   }

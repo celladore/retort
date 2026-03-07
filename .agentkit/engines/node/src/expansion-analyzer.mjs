@@ -179,15 +179,22 @@ function scoreSuggestion(suggestion) {
 // Deduplication
 // ---------------------------------------------------------------------------
 
+function normalizeTitle(str) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 function deduplicateAgainstBacklog(suggestions, backlogItems) {
   if (!backlogItems || backlogItems.length === 0) return suggestions;
 
-  const backlogLower = backlogItems.map((item) => item.toLowerCase());
+  const backlogNormalized = new Set(backlogItems.map((item) => normalizeTitle(item)));
 
   return suggestions.filter((s) => {
-    const titleLower = s.title.toLowerCase();
-    // Simple substring matching — future phases can use embeddings
-    return !backlogLower.some((item) => item.includes(titleLower) || titleLower.includes(item));
+    const normalized = normalizeTitle(s.title);
+    // Exact match after normalization — avoids false positives from substring matching
+    return !backlogNormalized.has(normalized);
   });
 }
 
