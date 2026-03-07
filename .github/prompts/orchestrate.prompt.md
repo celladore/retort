@@ -71,3 +71,4 @@ Produce a summary with: Actions Taken, Files Changed, Validation Commands, Updat
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

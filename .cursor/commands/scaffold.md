@@ -41,3 +41,4 @@ Generates implementation skeletons aligned with project conventions. Supports en
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+

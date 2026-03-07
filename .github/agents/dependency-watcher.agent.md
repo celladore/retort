@@ -37,8 +37,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Cargo.toml
 - Cargo.lock
 - pyproject.toml
-- requirements\*.txt
-- \*.csproj
+- requirements*.txt
+- *.csproj
 - Directory.Packages.props
 
 ## Responsibilities

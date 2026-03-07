@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- coverage/\*\*
-- \*_/_.test.\*
-- \*_/_.spec.\*
-- jest.config.\*
-- vitest.config.\*
-- .nycrc\*
+- coverage/**
+- **/*.test.*
+- **/*.spec.*
+- jest.config.*
+- vitest.config.*
+- .nycrc*
 
 ## Responsibilities
 

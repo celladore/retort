@@ -41,3 +41,4 @@ If `--range` is omitted, auto-detect via merge-base against the default branch. 
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+

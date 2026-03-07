@@ -12,6 +12,7 @@ on:
     branches: [main, dev]
 
 jobs:
+
   terraform-fmt:
     name: Terraform format check
     runs-on: self-hosted

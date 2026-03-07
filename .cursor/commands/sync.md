@@ -29,12 +29,12 @@ pnpm -C .agentkit agentkit:sync
 
 ## Flags
 
-| Flag              | Effect                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------- |
+| Flag | Effect |
+|------|--------|
 | `--only <target>` | Sync only one platform (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp) |
-| `--overwrite`     | Overwrite project-owned (scaffold-once) files                                               |
-| `--diff`          | Preview changes without writing                                                             |
-| `--no-clean`      | Keep orphaned files that would normally be removed                                          |
+| `--overwrite` | Overwrite project-owned (scaffold-once) files |
+| `--diff` | Preview changes without writing |
+| `--no-clean` | Keep orphaned files that would normally be removed |
 
 ## Post-Sync
 
@@ -66,3 +66,4 @@ This command requires shell access (Bash tool). On platforms with restricted too
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+
