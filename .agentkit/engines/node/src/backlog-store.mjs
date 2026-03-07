@@ -84,17 +84,17 @@ export function readBacklogMarkdown(projectRoot) {
       id: null,
       externalId: null,
       externalUrl: null,
-      title: task.trim(),
-      priority: priority.trim(),
-      status: status.trim().toLowerCase().replace(/\s+/g, '-'),
-      phase: phase.trim(),
-      team: team
+      title: (task || '').trim(),
+      priority: (priority || 'P3').trim(),
+      status: (status || 'open').trim().toLowerCase().replace(/\s+/g, '-'),
+      phase: (phase || '').trim(),
+      team: (team || '')
         .trim()
         .toLowerCase()
         .replace(/^t\d+-/i, ''),
       assignee: null,
-      source: source.trim().toLowerCase() || 'manual',
-      what: notes.trim(),
+      source: (source || '').trim().toLowerCase() || 'manual',
+      what: (notes || '').trim(),
       why: '',
       acceptance: [],
       files: [],
@@ -116,17 +116,17 @@ export function readBacklogMarkdown(projectRoot) {
         id: null,
         externalId: null,
         externalUrl: null,
-        title: task.trim(),
-        priority: priority.trim(),
-        status: status.trim().toLowerCase().replace(/\s+/g, '-'),
-        phase: phase.trim(),
-        team: team
+        title: (task || '').trim(),
+        priority: (priority || 'P3').trim(),
+        status: (status || 'open').trim().toLowerCase().replace(/\s+/g, '-'),
+        phase: (phase || '').trim(),
+        team: (team || '')
           .trim()
           .toLowerCase()
           .replace(/^t\d+-/i, ''),
         assignee: null,
         source: 'manual',
-        what: notes.trim(),
+        what: (notes || '').trim(),
         why: '',
         acceptance: [],
         files: [],

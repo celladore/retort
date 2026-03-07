@@ -198,7 +198,9 @@ if (selectedTier === 'full') {
 const filtered = filterThemeByTier(content, selectedTier);
 const afterCount = countKeys(filtered);
 
-console.log(`Tier: ${selectedTier} — ${beforeCount} keys → ${afterCount} keys (removed ${beforeCount - afterCount})`);
+console.log(
+  `Tier: ${selectedTier} — ${beforeCount} keys → ${afterCount} keys (removed ${beforeCount - afterCount})`
+);
 
 if (dryRun) {
   process.stdout.write(filtered);

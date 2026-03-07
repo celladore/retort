@@ -129,7 +129,7 @@ jobs:
         run: |
           THRESHOLD="${COVERAGE_THRESHOLD:-{{testingCoverage}}}"
           ACTUAL="${{ steps.coverage.outputs.lines }}"
-          if [ -n "$ACTUAL" ] && [ "$THRESHOLD" -gt 0 ] 2>/dev/null && [ "$(echo "$ACTUAL < $THRESHOLD" | bc -l 2>/dev/null)" = "1" ]; then
+          if [ -n "$ACTUAL" ] && [ "$THRESHOLD" -gt 0 ] 2>/dev/null && awk "BEGIN {exit !($ACTUAL < $THRESHOLD)}" 2>/dev/null; then
             echo "::warning::Line coverage ${ACTUAL}% is below threshold ${THRESHOLD}%"
           fi
 

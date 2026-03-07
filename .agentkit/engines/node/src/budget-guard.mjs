@@ -99,11 +99,11 @@ function extractBudgetPolicyRegex(content) {
   if (!/^budgetPolicy:/m.test(content)) return null;
 
   const getNum = (key) => {
-    const m = content.match(new RegExp(`${key}:\\s*(\\d+)`));
+    const m = content.match(new RegExp(`${key}:\\s*['"]?(\\d+)['"]?`));
     return m ? parseInt(m[1], 10) : undefined;
   };
   const getStr = (key) => {
-    const m = content.match(new RegExp(`${key}:\\s*([\\w]+)`));
+    const m = content.match(new RegExp(`${key}:\\s*['"]?([\\w]+)['"]?`));
     return m ? m[1] : undefined;
   };
 

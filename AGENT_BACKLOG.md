@@ -41,8 +41,8 @@
 
 Items not yet scheduled for the active sprint.
 
-| Priority | Team              | Task                                | Phase          | Status | Notes                   |
-| -------- | ----------------- | ----------------------------------- | -------------- | ------ | ----------------------- |
+| Priority | Team              | Task                                        | Phase          | Status | Notes                                                 |
+| -------- | ----------------- | ------------------------------------------- | -------------- | ------ | ----------------------------------------------------- |
 | P1       | T1-Backend        | Implement health check endpoint             | Implementation | Todo   | `/api/health`                                         |
 | P1       | T3-Data           | Create migration tooling setup              | Planning       | Todo   | Prisma or Drizzle                                     |
 | P1       | T4-Infrastructure | Set up staging environment                  | Planning       | Todo   | Docker Compose                                        |

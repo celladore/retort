@@ -82,7 +82,7 @@ for pattern in "${GENERATED_PATTERNS[@]}"; do
       ok "Auto-resolved (accept upstream): $file"
       auto_resolved=$((auto_resolved + 1))
     fi
-  done < <(git diff --name-only --diff-filter=U | grep -E "^$(echo "$pattern" | sed 's/\*/[^\/]*/g')" 2>/dev/null || true)
+  done < <(git diff --name-only --diff-filter=U | grep -E "^$(echo "$pattern" | sed 's/[.+?^${}()|[\]\\]/\\&/g; s/\*/[^\/]*/g')" 2>/dev/null || true)
 done
 
 # ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@ import { appendFile, mkdir } from 'fs/promises';
 import { resolve } from 'path';
 
 function stateDir(projectRoot) {
-  return resolve(projectRoot, '.claude', 'state');
+  return resolve(projectRoot, '.agentkit', 'state');
 }
 
 function eventsPath(projectRoot) {
