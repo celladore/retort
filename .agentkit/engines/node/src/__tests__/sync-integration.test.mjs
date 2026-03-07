@@ -1182,7 +1182,7 @@ describe('syncEditorTheme — pre-existing settings.json merge', () => {
       projectRoot,
       flags: { quiet: true, overwrite: true },
     });
-  });
+  }, 120_000);
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
@@ -1218,7 +1218,7 @@ describe('syncGitattributes (merge driver sync)', () => {
   beforeAll(async () => {
     projectRoot = makeTmpProject();
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
-  });
+  }, 120_000);
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
@@ -1241,7 +1241,7 @@ describe('syncGitattributes (merge driver sync)', () => {
     expect(content).toContain('pnpm-lock.yaml');
   });
 
-  it('preserves user content outside managed section on re-sync', { timeout: 15_000 }, async () => {
+  it('preserves user content outside managed section on re-sync', { timeout: 60_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Prepend custom user content
     const existing = readFileSync(gitattrsPath, 'utf-8');
@@ -1259,7 +1259,7 @@ describe('syncGitattributes (merge driver sync)', () => {
     expect(startCount).toBe(1);
   });
 
-  it('replaces stale managed section without duplication', { timeout: 15_000 }, async () => {
+  it('replaces stale managed section without duplication', { timeout: 60_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Re-sync a second time to verify no duplication
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });

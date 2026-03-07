@@ -1,4 +1,5 @@
 # AgentKit Forge -- Quick Start Guide
+
 ```
 docs/
   product/           Product requirements, user stories, roadmap, personas
@@ -10,6 +11,7 @@ docs/
   integrations/      External APIs, webhooks, SDK documentation
   reference/         Glossary, FAQ, changelog, contributing guide, AI handoffs
 ```
+
 4. [Your First Session with Claude Code](#your-first-session-with-claude-code)
 5. [Command Quick Reference](#command-quick-reference)
 6. [Next Steps](#next-steps)

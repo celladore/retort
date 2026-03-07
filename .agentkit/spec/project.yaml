@@ -192,8 +192,8 @@ branchProtection:
   # Status checks
   strictStatusChecks: true # branch must be up-to-date before merge
   requiredStatusChecks: # CI job names that must pass
-    - 'CI / test (ubuntu-latest, 24)'
-    - 'CI / validate'
+    - 'Test'
+    - 'Validate'
     - 'Branch Protection / branch-rules'
 
   # Branch rules
