@@ -1,0 +1,957 @@
+# =============================================================================
+# Repo-specific editor theme override
+# =============================================================================
+# This file is copied by `agentkit init` and customized per repo.
+# Uncomment and fill in to override the shared editor-theme.yaml spec.
+# Only include fields you want to override — everything else inherits.
+#
+# Values use brand token references (dot-notation paths into brand.yaml):
+#   colors.primary.brand      — Core brand color
+#   colors.primary.coral      — Collaboration warmth accent
+#   colors.primary.teal       — Inviting accent / success
+#   colors.primary.surface    — Light surface background
+#   colors.primary.dark       — Dark mode brand surface
+#   colors.primary.accent     — Highlight / attention
+#   colors.secondary.lilac    — Modern accent
+#   colors.secondary.mint     — Inclusive touch
+#   colors.semantic.success   — Success states
+#   colors.semantic.warning   — Warning states
+#   colors.semantic.error     — Error states
+#   colors.semantic.info      — Info states (= brand)
+#   colors.neutral.900        — Deep neutral (headings)
+#   colors.neutral.700        — Body text / secondary UI
+#   colors.neutral.400        — Dividers / disabled
+#   colors.neutral.100        — Softest background
+#   colors.darkMode.background — Deep muted background
+#   colors.darkMode.surface    — Layered surface (cards/panels)
+#   colors.darkMode.textPrimary  — High-contrast text
+#   colors.darkMode.textSecondary — Muted hints
+# =============================================================================
+
+# ─── Master toggle ───────────────────────────────────────────────────────────
+# enabled: true
+
+# ─── Mode ────────────────────────────────────────────────────────────────────
+# light | dark | both — which mode(s) to generate
+# mode: both
+
+# ─── Brand density tier ──────────────────────────────────────────────────────
+# full    — All 20+ surface groups (title bar through menus)
+# medium  — Key chrome: title bar, activity bar, status bar, sidebar
+# minimal — Title bar only — one glanceable surface to identify the project
+# tier: full
+
+# ─── Color scheme preference ─────────────────────────────────────────────────
+# dark  — Deep muted hues with brand accent on title bar
+# light — Light surfaces with brand color on chrome elements
+# scheme: dark
+
+# ─── Output targets ──────────────────────────────────────────────────────────
+# Set a path to null to skip that target.
+# outputs:
+#   vscode: '.vscode/settings.json'
+#   cursor: '.cursor/settings.json'
+#   windsurf: '.windsurf/settings.json'
+
+# ─── Base themes ─────────────────────────────────────────────────────────────
+# baseTheme:
+#   light: 'Default Light Modern'
+#   dark: 'Default Dark Modern'
+
+# ─── Font injection ──────────────────────────────────────────────────────────
+# fontFromBrand: true  # Sets editor.fontFamily from brand.yaml typography.mono
+
+# =============================================================================
+# Light mode overrides
+# =============================================================================
+# Uncomment any key to override the inherited value from the base spec.
+# Keys are organized by tier (minimal ⊂ medium ⊂ full) and surface group.
+#
+# light:
+#
+#   # ── TIER: MINIMAL ──────────────────────────────────────────────────────
+#
+#   # Title bar
+#   titleBar.activeBackground:
+#   titleBar.activeForeground:
+#   titleBar.inactiveBackground:
+#   titleBar.inactiveForeground:
+#   titleBar.border:
+#
+#   # ── TIER: MEDIUM ───────────────────────────────────────────────────────
+#
+#   # Activity bar
+#   activityBar.background:
+#   activityBar.foreground:
+#   activityBar.activeBorder:
+#   activityBar.activeBackground:
+#   activityBar.inactiveForeground:
+#   activityBar.border:
+#   activityBar.dropBorder:
+#   activityBarBadge.background:
+#   activityBarBadge.foreground:
+#
+#   # Status bar
+#   statusBar.background:
+#   statusBar.foreground:
+#   statusBar.border:
+#   statusBar.debuggingBackground:
+#   statusBar.debuggingForeground:
+#   statusBar.debuggingBorder:
+#   statusBar.noFolderBackground:
+#   statusBar.noFolderForeground:
+#   statusBar.noFolderBorder:
+#   statusBarItem.activeBackground:
+#   statusBarItem.hoverBackground:
+#   statusBarItem.prominentBackground:
+#   statusBarItem.prominentForeground:
+#   statusBarItem.prominentHoverBackground:
+#   statusBarItem.remoteBackground:
+#   statusBarItem.remoteForeground:
+#   statusBarItem.errorBackground:
+#   statusBarItem.errorForeground:
+#   statusBarItem.warningBackground:
+#   statusBarItem.warningForeground:
+#
+#   # Sidebar
+#   sideBar.background:
+#   sideBar.foreground:
+#   sideBar.border:
+#   sideBar.dropBackground:
+#   sideBarTitle.foreground:
+#   sideBarSectionHeader.background:
+#   sideBarSectionHeader.foreground:
+#   sideBarSectionHeader.border:
+#
+#   # ── TIER: FULL ─────────────────────────────────────────────────────────
+#
+#   # Editor
+#   editor.background:
+#   editor.foreground:
+#   editor.selectionBackground:
+#   editor.selectionForeground:
+#   editor.selectionHighlightBackground:
+#   editor.selectionHighlightBorder:
+#   editor.inactiveSelectionBackground:
+#   editor.wordHighlightBackground:
+#   editor.wordHighlightBorder:
+#   editor.wordHighlightStrongBackground:
+#   editor.wordHighlightStrongBorder:
+#   editor.findMatchBackground:
+#   editor.findMatchHighlightBackground:
+#   editor.findMatchBorder:
+#   editor.findMatchHighlightBorder:
+#   editor.hoverHighlightBackground:
+#   editor.lineHighlightBackground:
+#   editor.lineHighlightBorder:
+#   editor.rangeHighlightBackground:
+#   editor.rangeHighlightBorder:
+#   editorCursor.background:
+#   editorCursor.foreground:
+#   editorWhitespace.foreground:
+#   editorIndentGuide.background:
+#   editorIndentGuide.activeBackground:
+#   editorLineNumber.foreground:
+#   editorLineNumber.activeForeground:
+#   editorRuler.foreground:
+#   editorBracketMatch.background:
+#   editorBracketMatch.border:
+#   editorBracketHighlight.foreground1:
+#   editorBracketHighlight.foreground2:
+#   editorBracketHighlight.foreground3:
+#   editorBracketHighlight.foreground4:
+#   editorBracketHighlight.foreground5:
+#   editorBracketHighlight.foreground6:
+#   editorOverviewRuler.border:
+#   editorOverviewRuler.findMatchForeground:
+#   editorOverviewRuler.errorForeground:
+#   editorOverviewRuler.warningForeground:
+#   editorOverviewRuler.infoForeground:
+#   editorError.foreground:
+#   editorError.border:
+#   editorWarning.foreground:
+#   editorWarning.border:
+#   editorInfo.foreground:
+#   editorInfo.border:
+#   editorHint.foreground:
+#   editorHint.border:
+#   editorGutter.background:
+#   editorGutter.modifiedBackground:
+#   editorGutter.addedBackground:
+#   editorGutter.deletedBackground:
+#   editorGroupHeader.tabsBackground:
+#   editorGroupHeader.tabsBorder:
+#   editorGroup.border:
+#   editorGroup.dropBackground:
+#   editorWidget.background:
+#   editorWidget.foreground:
+#   editorWidget.border:
+#   editorWidget.resizeBorder:
+#   editorSuggestWidget.background:
+#   editorSuggestWidget.border:
+#   editorSuggestWidget.foreground:
+#   editorSuggestWidget.highlightForeground:
+#   editorSuggestWidget.selectedBackground:
+#   editorCodeLens.foreground:
+#   editorLightBulb.foreground:
+#   editorLightBulbAutoFix.foreground:
+#
+#   # Diff editor
+#   diffEditor.insertedTextBackground:
+#   diffEditor.insertedTextBorder:
+#   diffEditor.removedTextBackground:
+#   diffEditor.removedTextBorder:
+#   diffEditor.border:
+#   diffEditor.diagonalFill:
+#
+#   # Tabs
+#   tab.activeBackground:
+#   tab.activeForeground:
+#   tab.inactiveBackground:
+#   tab.inactiveForeground:
+#   tab.border:
+#   tab.activeBorder:
+#   tab.activeBorderTop:
+#   tab.unfocusedActiveBackground:
+#   tab.unfocusedActiveForeground:
+#   tab.unfocusedInactiveBackground:
+#   tab.unfocusedInactiveForeground:
+#   tab.unfocusedActiveBorder:
+#   tab.unfocusedActiveBorderTop:
+#   tab.hoverBackground:
+#   tab.hoverForeground:
+#   tab.hoverBorder:
+#   tab.unfocusedHoverBackground:
+#   tab.unfocusedHoverForeground:
+#   tab.unfocusedHoverBorder:
+#   tab.lastPinnedBorder:
+#
+#   # Badges
+#   badge.background:
+#   badge.foreground:
+#
+#   # Lists & trees
+#   list.activeSelectionBackground:
+#   list.activeSelectionForeground:
+#   list.activeSelectionIconForeground:
+#   list.inactiveSelectionBackground:
+#   list.inactiveSelectionForeground:
+#   list.inactiveSelectionIconForeground:
+#   list.hoverBackground:
+#   list.hoverForeground:
+#   list.focusBackground:
+#   list.focusForeground:
+#   list.focusOutline:
+#   list.focusHighlightForeground:
+#   list.dropBackground:
+#   list.highlightForeground:
+#   list.invalidItemForeground:
+#   list.errorForeground:
+#   list.warningForeground:
+#   list.filterMatchBackground:
+#   list.filterMatchBorder:
+#   list.deemphasizedForeground:
+#   tree.indentGuidesStroke:
+#   tree.tableColumnsBorder:
+#   tree.tableOddRowsBackground:
+#
+#   # Buttons
+#   button.background:
+#   button.foreground:
+#   button.hoverBackground:
+#   button.border:
+#   button.secondaryBackground:
+#   button.secondaryForeground:
+#   button.secondaryHoverBackground:
+#   button.separator:
+#
+#   # Panel (terminal area)
+#   panel.background:
+#   panel.border:
+#   panel.dropBorder:
+#   panelTitle.activeBorder:
+#   panelTitle.activeForeground:
+#   panelTitle.inactiveForeground:
+#   panelInput.border:
+#   panelSection.border:
+#   panelSection.dropBackground:
+#   panelSectionHeader.background:
+#   panelSectionHeader.foreground:
+#   panelSectionHeader.border:
+#
+#   # Terminal
+#   terminal.background:
+#   terminal.foreground:
+#   terminal.border:
+#   terminal.selectionBackground:
+#   terminal.selectionForeground:
+#   terminal.inactiveSelectionBackground:
+#   terminalCursor.background:
+#   terminalCursor.foreground:
+#   terminal.ansiBlack:
+#   terminal.ansiRed:
+#   terminal.ansiGreen:
+#   terminal.ansiYellow:
+#   terminal.ansiBlue:
+#   terminal.ansiMagenta:
+#   terminal.ansiCyan:
+#   terminal.ansiWhite:
+#   terminal.ansiBrightBlack:
+#   terminal.ansiBrightRed:
+#   terminal.ansiBrightGreen:
+#   terminal.ansiBrightYellow:
+#   terminal.ansiBrightBlue:
+#   terminal.ansiBrightMagenta:
+#   terminal.ansiBrightCyan:
+#   terminal.ansiBrightWhite:
+#   terminal.tab.activeBorder:
+#
+#   # Input fields
+#   input.background:
+#   input.foreground:
+#   input.border:
+#   input.placeholderForeground:
+#   inputOption.activeBackground:
+#   inputOption.activeBorder:
+#   inputOption.activeForeground:
+#   inputOption.hoverBackground:
+#   inputValidation.errorBackground:
+#   inputValidation.errorBorder:
+#   inputValidation.errorForeground:
+#   inputValidation.infoBackground:
+#   inputValidation.infoBorder:
+#   inputValidation.infoForeground:
+#   inputValidation.warningBackground:
+#   inputValidation.warningBorder:
+#   inputValidation.warningForeground:
+#
+#   # Dropdowns
+#   dropdown.background:
+#   dropdown.foreground:
+#   dropdown.border:
+#   dropdown.listBackground:
+#
+#   # Breadcrumbs
+#   breadcrumb.foreground:
+#   breadcrumb.focusForeground:
+#   breadcrumb.activeSelectionForeground:
+#   breadcrumbPicker.background:
+#
+#   # Scrollbar
+#   scrollbar.shadow:
+#   scrollbarSlider.background:
+#   scrollbarSlider.hoverBackground:
+#   scrollbarSlider.activeBackground:
+#
+#   # Notifications
+#   notifications.background:
+#   notifications.foreground:
+#   notifications.border:
+#   notificationCenterHeader.background:
+#   notificationCenterHeader.foreground:
+#   notificationLink.foreground:
+#   notificationToast.border:
+#
+#   # Quick input (command palette)
+#   quickInput.background:
+#   quickInput.foreground:
+#   quickInputTitle.background:
+#   quickInputList.focusBackground:
+#   quickInputList.focusForeground:
+#   quickInputList.focusIconForeground:
+#
+#   # Peek view
+#   peekView.border:
+#   peekViewEditor.background:
+#   peekViewEditor.matchHighlightBackground:
+#   peekViewEditor.matchHighlightBorder:
+#   peekViewResult.background:
+#   peekViewResult.fileForeground:
+#   peekViewResult.lineForeground:
+#   peekViewResult.matchHighlightBackground:
+#   peekViewResult.selectionBackground:
+#   peekViewResult.selectionForeground:
+#   peekViewTitle.background:
+#   peekViewTitleDescription.foreground:
+#   peekViewTitleLabel.foreground:
+#
+#   # Minimap
+#   minimap.background:
+#   minimap.selectionHighlight:
+#   minimap.errorHighlight:
+#   minimap.warningHighlight:
+#   minimap.findMatchHighlight:
+#   minimap.selectionOccurrenceHighlight:
+#   minimapSlider.background:
+#   minimapSlider.hoverBackground:
+#   minimapSlider.activeBackground:
+#   minimapGutter.addedBackground:
+#   minimapGutter.modifiedBackground:
+#   minimapGutter.deletedBackground:
+#
+#   # Menu
+#   menu.background:
+#   menu.foreground:
+#   menu.selectionBackground:
+#   menu.selectionForeground:
+#   menu.selectionBorder:
+#   menu.separatorBackground:
+#   menubar.selectionBackground:
+#   menubar.selectionForeground:
+#   menubar.selectionBorder:
+#
+#   # Git decorations
+#   gitDecoration.addedResourceForeground:
+#   gitDecoration.modifiedResourceForeground:
+#   gitDecoration.deletedResourceForeground:
+#   gitDecoration.renamedResourceForeground:
+#   gitDecoration.untrackedResourceForeground:
+#   gitDecoration.ignoredResourceForeground:
+#   gitDecoration.conflictingResourceForeground:
+#   gitDecoration.submoduleResourceForeground:
+#   gitDecoration.stageDeletedResourceForeground:
+#   gitDecoration.stageModifiedResourceForeground:
+#
+#   # Merge conflicts
+#   merge.currentHeaderBackground:
+#   merge.currentContentBackground:
+#   merge.incomingHeaderBackground:
+#   merge.incomingContentBackground:
+#   merge.border:
+#   merge.commonHeaderBackground:
+#   merge.commonContentBackground:
+#   editorOverviewRuler.currentContentForeground:
+#   editorOverviewRuler.incomingContentForeground:
+#   editorOverviewRuler.commonContentForeground:
+#
+#   # Debug
+#   debugToolBar.background:
+#   debugToolBar.border:
+#   debugExceptionWidget.background:
+#   debugExceptionWidget.border:
+#   debugTokenExpression.name:
+#   debugTokenExpression.value:
+#   debugTokenExpression.string:
+#   debugTokenExpression.boolean:
+#   debugTokenExpression.number:
+#   debugTokenExpression.error:
+#
+#   # Testing
+#   testing.iconFailed:
+#   testing.iconErrored:
+#   testing.iconPassed:
+#   testing.iconQueued:
+#   testing.iconUnset:
+#   testing.iconSkipped:
+#   testing.runAction:
+#   testing.peekBorder:
+#   testing.peekHeaderBackground:
+#
+#   # Welcome page
+#   welcomePage.background:
+#   welcomePage.tileBackground:
+#   welcomePage.tileHoverBackground:
+#   welcomePage.tileBorder:
+#   welcomePage.progress.background:
+#   welcomePage.progress.foreground:
+#   walkThrough.embeddedEditorBackground:
+#
+#   # Settings editor
+#   settings.headerForeground:
+#   settings.modifiedItemIndicator:
+#   settings.dropdownBackground:
+#   settings.dropdownForeground:
+#   settings.dropdownBorder:
+#   settings.checkboxBackground:
+#   settings.checkboxForeground:
+#   settings.checkboxBorder:
+#   settings.textInputBackground:
+#   settings.textInputForeground:
+#   settings.textInputBorder:
+#   settings.numberInputBackground:
+#   settings.numberInputForeground:
+#   settings.numberInputBorder:
+#   settings.focusedRowBackground:
+#   settings.focusedRowBorder:
+#   settings.rowHoverBackground:
+#
+#   # Keybinding label
+#   keybindingLabel.background:
+#   keybindingLabel.foreground:
+#   keybindingLabel.border:
+#   keybindingLabel.bottomBorder:
+#
+#   # Focus / selection / global
+#   focusBorder:
+#   foreground:
+#   disabledForeground:
+#   descriptionForeground:
+#   errorForeground:
+#   icon.foreground:
+#   selection.background:
+#   textLink.foreground:
+#   textLink.activeForeground:
+#   textBlockQuote.background:
+#   textBlockQuote.border:
+#   textCodeBlock.background:
+#   textPreformat.foreground:
+#   textSeparator.foreground:
+#   toolbar.hoverBackground:
+#   toolbar.activeBackground:
+#   widget.shadow:
+#   widget.border:
+#   sash.hoverBorder:
+
+# =============================================================================
+# Dark mode overrides
+# =============================================================================
+# Same structure as light mode. Uncomment any key to override.
+#
+# dark:
+#
+#   # ── TIER: MINIMAL ──────────────────────────────────────────────────────
+#
+#   # Title bar
+#   titleBar.activeBackground:
+#   titleBar.activeForeground:
+#   titleBar.inactiveBackground:
+#   titleBar.inactiveForeground:
+#   titleBar.border:
+#
+#   # ── TIER: MEDIUM ───────────────────────────────────────────────────────
+#
+#   # Activity bar
+#   activityBar.background:
+#   activityBar.foreground:
+#   activityBar.activeBorder:
+#   activityBar.activeBackground:
+#   activityBar.inactiveForeground:
+#   activityBar.border:
+#   activityBar.dropBorder:
+#   activityBarBadge.background:
+#   activityBarBadge.foreground:
+#
+#   # Status bar
+#   statusBar.background:
+#   statusBar.foreground:
+#   statusBar.border:
+#   statusBar.debuggingBackground:
+#   statusBar.debuggingForeground:
+#   statusBar.debuggingBorder:
+#   statusBar.noFolderBackground:
+#   statusBar.noFolderForeground:
+#   statusBar.noFolderBorder:
+#   statusBarItem.activeBackground:
+#   statusBarItem.hoverBackground:
+#   statusBarItem.prominentBackground:
+#   statusBarItem.prominentForeground:
+#   statusBarItem.prominentHoverBackground:
+#   statusBarItem.remoteBackground:
+#   statusBarItem.remoteForeground:
+#   statusBarItem.errorBackground:
+#   statusBarItem.errorForeground:
+#   statusBarItem.warningBackground:
+#   statusBarItem.warningForeground:
+#
+#   # Sidebar
+#   sideBar.background:
+#   sideBar.foreground:
+#   sideBar.border:
+#   sideBar.dropBackground:
+#   sideBarTitle.foreground:
+#   sideBarSectionHeader.background:
+#   sideBarSectionHeader.foreground:
+#   sideBarSectionHeader.border:
+#
+#   # ── TIER: FULL ─────────────────────────────────────────────────────────
+#
+#   # Editor
+#   editor.background:
+#   editor.foreground:
+#   editor.selectionBackground:
+#   editor.selectionForeground:
+#   editor.selectionHighlightBackground:
+#   editor.selectionHighlightBorder:
+#   editor.inactiveSelectionBackground:
+#   editor.wordHighlightBackground:
+#   editor.wordHighlightBorder:
+#   editor.wordHighlightStrongBackground:
+#   editor.wordHighlightStrongBorder:
+#   editor.findMatchBackground:
+#   editor.findMatchHighlightBackground:
+#   editor.findMatchBorder:
+#   editor.findMatchHighlightBorder:
+#   editor.hoverHighlightBackground:
+#   editor.lineHighlightBackground:
+#   editor.lineHighlightBorder:
+#   editor.rangeHighlightBackground:
+#   editor.rangeHighlightBorder:
+#   editorCursor.background:
+#   editorCursor.foreground:
+#   editorWhitespace.foreground:
+#   editorIndentGuide.background:
+#   editorIndentGuide.activeBackground:
+#   editorLineNumber.foreground:
+#   editorLineNumber.activeForeground:
+#   editorRuler.foreground:
+#   editorBracketMatch.background:
+#   editorBracketMatch.border:
+#   editorBracketHighlight.foreground1:
+#   editorBracketHighlight.foreground2:
+#   editorBracketHighlight.foreground3:
+#   editorBracketHighlight.foreground4:
+#   editorBracketHighlight.foreground5:
+#   editorBracketHighlight.foreground6:
+#   editorOverviewRuler.border:
+#   editorOverviewRuler.findMatchForeground:
+#   editorOverviewRuler.errorForeground:
+#   editorOverviewRuler.warningForeground:
+#   editorOverviewRuler.infoForeground:
+#   editorError.foreground:
+#   editorError.border:
+#   editorWarning.foreground:
+#   editorWarning.border:
+#   editorInfo.foreground:
+#   editorInfo.border:
+#   editorHint.foreground:
+#   editorHint.border:
+#   editorGutter.background:
+#   editorGutter.modifiedBackground:
+#   editorGutter.addedBackground:
+#   editorGutter.deletedBackground:
+#   editorGroupHeader.tabsBackground:
+#   editorGroupHeader.tabsBorder:
+#   editorGroup.border:
+#   editorGroup.dropBackground:
+#   editorWidget.background:
+#   editorWidget.foreground:
+#   editorWidget.border:
+#   editorWidget.resizeBorder:
+#   editorSuggestWidget.background:
+#   editorSuggestWidget.border:
+#   editorSuggestWidget.foreground:
+#   editorSuggestWidget.highlightForeground:
+#   editorSuggestWidget.selectedBackground:
+#   editorCodeLens.foreground:
+#   editorLightBulb.foreground:
+#   editorLightBulbAutoFix.foreground:
+#
+#   # Diff editor
+#   diffEditor.insertedTextBackground:
+#   diffEditor.insertedTextBorder:
+#   diffEditor.removedTextBackground:
+#   diffEditor.removedTextBorder:
+#   diffEditor.border:
+#   diffEditor.diagonalFill:
+#
+#   # Tabs
+#   tab.activeBackground:
+#   tab.activeForeground:
+#   tab.inactiveBackground:
+#   tab.inactiveForeground:
+#   tab.border:
+#   tab.activeBorder:
+#   tab.activeBorderTop:
+#   tab.unfocusedActiveBackground:
+#   tab.unfocusedActiveForeground:
+#   tab.unfocusedInactiveBackground:
+#   tab.unfocusedInactiveForeground:
+#   tab.unfocusedActiveBorder:
+#   tab.unfocusedActiveBorderTop:
+#   tab.hoverBackground:
+#   tab.hoverForeground:
+#   tab.hoverBorder:
+#   tab.unfocusedHoverBackground:
+#   tab.unfocusedHoverForeground:
+#   tab.unfocusedHoverBorder:
+#   tab.lastPinnedBorder:
+#
+#   # Badges
+#   badge.background:
+#   badge.foreground:
+#
+#   # Lists & trees
+#   list.activeSelectionBackground:
+#   list.activeSelectionForeground:
+#   list.activeSelectionIconForeground:
+#   list.inactiveSelectionBackground:
+#   list.inactiveSelectionForeground:
+#   list.inactiveSelectionIconForeground:
+#   list.hoverBackground:
+#   list.hoverForeground:
+#   list.focusBackground:
+#   list.focusForeground:
+#   list.focusOutline:
+#   list.focusHighlightForeground:
+#   list.dropBackground:
+#   list.highlightForeground:
+#   list.invalidItemForeground:
+#   list.errorForeground:
+#   list.warningForeground:
+#   list.filterMatchBackground:
+#   list.filterMatchBorder:
+#   list.deemphasizedForeground:
+#   tree.indentGuidesStroke:
+#   tree.tableColumnsBorder:
+#   tree.tableOddRowsBackground:
+#
+#   # Buttons
+#   button.background:
+#   button.foreground:
+#   button.hoverBackground:
+#   button.border:
+#   button.secondaryBackground:
+#   button.secondaryForeground:
+#   button.secondaryHoverBackground:
+#   button.separator:
+#
+#   # Panel (terminal area)
+#   panel.background:
+#   panel.border:
+#   panel.dropBorder:
+#   panelTitle.activeBorder:
+#   panelTitle.activeForeground:
+#   panelTitle.inactiveForeground:
+#   panelInput.border:
+#   panelSection.border:
+#   panelSection.dropBackground:
+#   panelSectionHeader.background:
+#   panelSectionHeader.foreground:
+#   panelSectionHeader.border:
+#
+#   # Terminal
+#   terminal.background:
+#   terminal.foreground:
+#   terminal.border:
+#   terminal.selectionBackground:
+#   terminal.selectionForeground:
+#   terminal.inactiveSelectionBackground:
+#   terminalCursor.background:
+#   terminalCursor.foreground:
+#   terminal.ansiBlack:
+#   terminal.ansiRed:
+#   terminal.ansiGreen:
+#   terminal.ansiYellow:
+#   terminal.ansiBlue:
+#   terminal.ansiMagenta:
+#   terminal.ansiCyan:
+#   terminal.ansiWhite:
+#   terminal.ansiBrightBlack:
+#   terminal.ansiBrightRed:
+#   terminal.ansiBrightGreen:
+#   terminal.ansiBrightYellow:
+#   terminal.ansiBrightBlue:
+#   terminal.ansiBrightMagenta:
+#   terminal.ansiBrightCyan:
+#   terminal.ansiBrightWhite:
+#   terminal.tab.activeBorder:
+#
+#   # Input fields
+#   input.background:
+#   input.foreground:
+#   input.border:
+#   input.placeholderForeground:
+#   inputOption.activeBackground:
+#   inputOption.activeBorder:
+#   inputOption.activeForeground:
+#   inputOption.hoverBackground:
+#   inputValidation.errorBackground:
+#   inputValidation.errorBorder:
+#   inputValidation.errorForeground:
+#   inputValidation.infoBackground:
+#   inputValidation.infoBorder:
+#   inputValidation.infoForeground:
+#   inputValidation.warningBackground:
+#   inputValidation.warningBorder:
+#   inputValidation.warningForeground:
+#
+#   # Dropdowns
+#   dropdown.background:
+#   dropdown.foreground:
+#   dropdown.border:
+#   dropdown.listBackground:
+#
+#   # Breadcrumbs
+#   breadcrumb.foreground:
+#   breadcrumb.focusForeground:
+#   breadcrumb.activeSelectionForeground:
+#   breadcrumbPicker.background:
+#
+#   # Scrollbar
+#   scrollbar.shadow:
+#   scrollbarSlider.background:
+#   scrollbarSlider.hoverBackground:
+#   scrollbarSlider.activeBackground:
+#
+#   # Notifications
+#   notifications.background:
+#   notifications.foreground:
+#   notifications.border:
+#   notificationCenterHeader.background:
+#   notificationCenterHeader.foreground:
+#   notificationLink.foreground:
+#   notificationToast.border:
+#
+#   # Quick input (command palette)
+#   quickInput.background:
+#   quickInput.foreground:
+#   quickInputTitle.background:
+#   quickInputList.focusBackground:
+#   quickInputList.focusForeground:
+#   quickInputList.focusIconForeground:
+#
+#   # Peek view
+#   peekView.border:
+#   peekViewEditor.background:
+#   peekViewEditor.matchHighlightBackground:
+#   peekViewEditor.matchHighlightBorder:
+#   peekViewResult.background:
+#   peekViewResult.fileForeground:
+#   peekViewResult.lineForeground:
+#   peekViewResult.matchHighlightBackground:
+#   peekViewResult.selectionBackground:
+#   peekViewResult.selectionForeground:
+#   peekViewTitle.background:
+#   peekViewTitleDescription.foreground:
+#   peekViewTitleLabel.foreground:
+#
+#   # Minimap
+#   minimap.background:
+#   minimap.selectionHighlight:
+#   minimap.errorHighlight:
+#   minimap.warningHighlight:
+#   minimap.findMatchHighlight:
+#   minimap.selectionOccurrenceHighlight:
+#   minimapSlider.background:
+#   minimapSlider.hoverBackground:
+#   minimapSlider.activeBackground:
+#   minimapGutter.addedBackground:
+#   minimapGutter.modifiedBackground:
+#   minimapGutter.deletedBackground:
+#
+#   # Menu
+#   menu.background:
+#   menu.foreground:
+#   menu.selectionBackground:
+#   menu.selectionForeground:
+#   menu.selectionBorder:
+#   menu.separatorBackground:
+#   menubar.selectionBackground:
+#   menubar.selectionForeground:
+#   menubar.selectionBorder:
+#
+#   # Git decorations
+#   gitDecoration.addedResourceForeground:
+#   gitDecoration.modifiedResourceForeground:
+#   gitDecoration.deletedResourceForeground:
+#   gitDecoration.renamedResourceForeground:
+#   gitDecoration.untrackedResourceForeground:
+#   gitDecoration.ignoredResourceForeground:
+#   gitDecoration.conflictingResourceForeground:
+#   gitDecoration.submoduleResourceForeground:
+#   gitDecoration.stageDeletedResourceForeground:
+#   gitDecoration.stageModifiedResourceForeground:
+#
+#   # Merge conflicts
+#   merge.currentHeaderBackground:
+#   merge.currentContentBackground:
+#   merge.incomingHeaderBackground:
+#   merge.incomingContentBackground:
+#   merge.border:
+#   merge.commonHeaderBackground:
+#   merge.commonContentBackground:
+#   editorOverviewRuler.currentContentForeground:
+#   editorOverviewRuler.incomingContentForeground:
+#   editorOverviewRuler.commonContentForeground:
+#
+#   # Debug
+#   debugToolBar.background:
+#   debugToolBar.border:
+#   debugExceptionWidget.background:
+#   debugExceptionWidget.border:
+#   debugTokenExpression.name:
+#   debugTokenExpression.value:
+#   debugTokenExpression.string:
+#   debugTokenExpression.boolean:
+#   debugTokenExpression.number:
+#   debugTokenExpression.error:
+#
+#   # Testing
+#   testing.iconFailed:
+#   testing.iconErrored:
+#   testing.iconPassed:
+#   testing.iconQueued:
+#   testing.iconUnset:
+#   testing.iconSkipped:
+#   testing.runAction:
+#   testing.peekBorder:
+#   testing.peekHeaderBackground:
+#
+#   # Welcome page
+#   welcomePage.background:
+#   welcomePage.tileBackground:
+#   welcomePage.tileHoverBackground:
+#   welcomePage.tileBorder:
+#   welcomePage.progress.background:
+#   welcomePage.progress.foreground:
+#   walkThrough.embeddedEditorBackground:
+#
+#   # Settings editor
+#   settings.headerForeground:
+#   settings.modifiedItemIndicator:
+#   settings.dropdownBackground:
+#   settings.dropdownForeground:
+#   settings.dropdownBorder:
+#   settings.checkboxBackground:
+#   settings.checkboxForeground:
+#   settings.checkboxBorder:
+#   settings.textInputBackground:
+#   settings.textInputForeground:
+#   settings.textInputBorder:
+#   settings.numberInputBackground:
+#   settings.numberInputForeground:
+#   settings.numberInputBorder:
+#   settings.focusedRowBackground:
+#   settings.focusedRowBorder:
+#   settings.rowHoverBackground:
+#
+#   # Keybinding label
+#   keybindingLabel.background:
+#   keybindingLabel.foreground:
+#   keybindingLabel.border:
+#   keybindingLabel.bottomBorder:
+#
+#   # Focus / selection / global
+#   focusBorder:
+#   foreground:
+#   disabledForeground:
+#   descriptionForeground:
+#   errorForeground:
+#   icon.foreground:
+#   selection.background:
+#   textLink.foreground:
+#   textLink.activeForeground:
+#   textBlockQuote.background:
+#   textBlockQuote.border:
+#   textCodeBlock.background:
+#   textPreformat.foreground:
+#   textSeparator.foreground:
+#   toolbar.hoverBackground:
+#   toolbar.activeBackground:
+#   widget.shadow:
+#   widget.border:
+#   sash.hoverBorder:
+
+# =============================================================================
+# Per-tool overrides
+# =============================================================================
+# These merge on top of the base light/dark mapping for that tool only.
+# Use brand token references (dot-notation paths into brand.yaml).
+#
+# cursor:
+#   sideBar.background: colors.neutral.900
+#   activityBar.background: colors.primary.dark
+#   statusBar.background: colors.secondary.lilac
+#
+# windsurf:
+#   sideBar.background: colors.darkMode.surface
