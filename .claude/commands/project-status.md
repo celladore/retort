@@ -1,5 +1,6 @@
 ---
-description: 'Unified PM dashboard — project health, team status, risks, and metrics'
+description: 'Unified PM dashboard that aggregates orchestrator state, backlog, task progress, risks, and delivery metrics into a markdown or JSON report. Provides at-a-glance visibility into project health across all teams.'
+
 allowed-tools: Read, Glob, Grep, Bash(git log*), Bash(gh issue list*)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

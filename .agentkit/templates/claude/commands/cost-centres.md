@@ -1,5 +1,7 @@
 ---
-description: 'Cost centre management — budget governance, resource group mapping, and spend tracking'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if}}
 allowed-tools: Read, Glob, Grep, Bash, Write, Edit
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

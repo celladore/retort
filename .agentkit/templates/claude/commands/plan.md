@@ -1,5 +1,7 @@
 ---
-description: 'Produce a structured implementation plan before writing any code'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if}}
 allowed-tools: Bash(git *), Bash(find *), Bash(ls *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

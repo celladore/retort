@@ -1,5 +1,6 @@
 ---
-description: 'Create a history document from templates for significant work (bug fixes, features, implementations, migrations)'
+description: 'Creates a structured history document from templates for significant work completed in the current session. Supports bug fixes, features, implementations, and migrations. Auto-detects type and title from git history when invoked without arguments. Fills in all template sections with concrete details from session context.'
+
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

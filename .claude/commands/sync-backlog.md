@@ -1,5 +1,6 @@
 ---
-description: 'Update AGENT_BACKLOG.md with current findings, state, and code TODOs'
+description: 'Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.'
+
 allowed-tools: Bash(git *), Bash(grep *), Bash(find *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

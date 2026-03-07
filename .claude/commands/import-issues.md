@@ -1,5 +1,6 @@
 ---
-description: 'Import issues from external tracker into local backlog'
+description: 'Imports issues from the configured external tracker (GitHub or Linear), normalizes fields to the canonical backlog schema, deduplicates against existing items, assigns teams via intake routing rules, and merges into AGENT_BACKLOG.md and .claude/state/backlog.json. Gated behind the process.intake.autoImport flag (can be overridden with --force).'
+
 allowed-tools: Bash(gh *), Bash(linear *), Read, Write, Edit, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

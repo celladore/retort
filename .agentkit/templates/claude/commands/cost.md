@@ -1,5 +1,7 @@
 ---
-description: 'Session cost and usage tracking — summaries, session lists, and monthly reports'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if}}
 allowed-tools: Bash(node *), Read, Glob, Grep
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

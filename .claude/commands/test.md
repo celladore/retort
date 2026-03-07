@@ -1,5 +1,6 @@
 ---
-description: 'Run tests — auto-detects framework, accepts optional scope or filter'
+description: "Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available."
+
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *), Bash(vitest *), Bash(jest *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

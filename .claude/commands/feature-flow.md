@@ -1,5 +1,6 @@
 ---
-description: 'Trace a feature end-to-end — from spec through templates to generated output'
+description: "Traces a specific feature end-to-end through the kit: shows which spec files define it, which template vars it injects, which templates consume those vars, what generated output it produces, and what overlay settings control it. Use this to understand or debug a feature's behavior."
+
 allowed-tools: ''
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

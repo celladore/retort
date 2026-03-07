@@ -1,5 +1,7 @@
 ---
-description: 'Master orchestrator — coordinate work across unified teams with state persistence'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if}}
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(dotnet *), Bash(cargo *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
