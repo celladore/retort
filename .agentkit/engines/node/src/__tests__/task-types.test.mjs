@@ -11,15 +11,10 @@ describe('VALID_TASK_TYPES', () => {
     expect(VALID_TASK_TYPES).toContain('document');
   });
 
-  it('is exactly the expected array', () => {
-    expect(VALID_TASK_TYPES).toEqual([
-      'implement',
-      'review',
-      'plan',
-      'investigate',
-      'test',
-      'document',
-    ]);
+  it('contains exactly the expected set of task types', () => {
+    const expected = ['implement', 'review', 'plan', 'investigate', 'test', 'document'];
+    expect(VALID_TASK_TYPES).toHaveLength(expected.length);
+    expect(VALID_TASK_TYPES).toEqual(expect.arrayContaining(expected));
   });
 
   it('is frozen to prevent accidental modification', () => {
