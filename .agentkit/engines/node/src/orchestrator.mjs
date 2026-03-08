@@ -16,7 +16,7 @@ import {
 } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
-import { emitEvent, readEvents as readEventsFiltered } from './event-emitter.mjs';
+import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
 import { formatTimestamp } from './runner.mjs';
 import {
   checkDependencies,
@@ -26,7 +26,6 @@ import {
   processHandoffs,
   TERMINAL_STATES,
 } from './task-protocol.mjs';
-import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -413,7 +412,8 @@ export function acquireLock(projectRoot, holder = {}) {
         return { acquired: false, existingLock: null };
       }
     }
-    const age = Date.now() - new Date(existing.started_at).getTime();
+    const startedAt = new Date(existing.started_at).getTime();
+    const age = Number.isFinite(startedAt) ? Date.now() - startedAt : Number.POSITIVE_INFINITY;
     if (age < LOCK_STALE_MS) {
       return { acquired: false, existingLock: existing };
     }
@@ -444,36 +444,6 @@ export function acquireLock(projectRoot, holder = {}) {
   }
 }
 
-function getHostname() {
-  try {
-    return execFileSync('hostname', [], {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim();
-  } catch {
-    return 'unknown';
-  }
-}
-
-/**
- * Release the session lock.
- * @param {string} projectRoot
- * @returns {boolean} true if lock was released, false if no lock existed
- */
-export function releaseLock(projectRoot) {
-  const path = lockPath(projectRoot);
-  if (existsSync(path)) {
-    try {
-      unlinkSync(path);
-    } catch (err) {
-      console.warn(`[agentkit:orchestrate] Failed to release lock: ${err.message}`);
-      return false;
-    }
-    return true;
-  }
-  return false;
-}
-
 /**
  * Check lock status without acquiring.
  * @param {string} projectRoot
@@ -491,7 +461,8 @@ export function checkLock(projectRoot) {
     // Corrupted lock file — treat as unlocked
     return { locked: false, stale: false };
   }
-  const age = Date.now() - new Date(lock.started_at).getTime();
+  const startedAt = new Date(lock.started_at).getTime();
+  const age = Number.isFinite(startedAt) ? Date.now() - startedAt : Number.POSITIVE_INFINITY;
   return {
     locked: true,
     stale: age >= LOCK_STALE_MS,
@@ -505,139 +476,6 @@ export function checkLock(projectRoot) {
 // ---------------------------------------------------------------------------
 
 /**
- * Append an event to the events log.
- * @param {string} projectRoot
- * @param {string} action - What happened (e.g. 'phase_advanced', 'check_completed')
- * @param {object} data - Event data
- */
-export function appendEvent(projectRoot, action, data = {}) {
-  emitEvent(projectRoot, action, data, { source: 'orchestrator' });
-}
-
-/**
- * Read recent events from the log.
- * @param {string} projectRoot
- * @param {number} limit - Max events to return (default 20)
- * @returns {object[]}
- */
-export function readEvents(projectRoot, limit = 20) {
-  return readEventsFiltered(projectRoot, { limit });
-}
-
-// ---------------------------------------------------------------------------
-// Phase Transitions
-// ---------------------------------------------------------------------------
-
-/**
- * Advance the orchestrator to the next phase.
- * @param {object} state - Current state
- * @returns {{ state: object, advanced: boolean, error?: string }}
- */
-export function advancePhase(state) {
-  if (state.completed) {
-    return { state, advanced: false, error: 'All phases are already complete' };
-  }
-
-  const current = state.current_phase;
-  if (current >= 5) {
-    const newState = {
-      ...state,
-      completed: true,
-      next_action: 'Project workflow complete. All phases finished.',
-    };
-    return { state: newState, advanced: true };
-  }
-
-  const next = current + 1;
-  const newState = {
-    ...state,
-    current_phase: next,
-    phase_name: PHASES[next],
-    last_phase_completed: current,
-    next_action: getNextAction(next),
-  };
-  return { state: newState, advanced: true };
-}
-
-/**
- * Set the orchestrator to a specific phase (for --phase flag).
- * @param {object} state
- * @param {number} phase - Phase number (1-5)
- * @returns {{ state: object, error?: string }}
- */
-export function setPhase(state, phase) {
-  if (phase < 1 || phase > 5 || !Number.isInteger(phase)) {
-    return { state, error: `Invalid phase: ${phase}. Must be 1-5.` };
-  }
-  const newState = {
-    ...state,
-    current_phase: phase,
-    phase_name: PHASES[phase],
-    last_phase_completed: phase - 1,
-    next_action: getNextAction(phase),
-    completed: false,
-  };
-  return { state: newState };
-}
-
-function getNextAction(phase) {
-  switch (phase) {
-    case 1:
-      return 'Run /discover to scan the repository and identify tech stacks';
-    case 2:
-      return 'Run /plan to create implementation plans for identified work items';
-    case 3:
-      return 'Delegate to team agents (/team-*) to implement planned changes';
-    case 4:
-      return 'Run /check to validate all changes pass quality gates';
-    case 5:
-      return 'Run /review for final review, then prepare deployment';
-    default:
-      return '';
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Team Status
-// ---------------------------------------------------------------------------
-
-/**
- * Update a team's status.
- * @param {object} state
- * @param {string} teamId - e.g. 'team-backend'
- * @param {string} status - One of: idle, in_progress, blocked, done
- * @param {string} [notes]
- * @returns {{ state: object, error?: string }}
- */
-export function updateTeamStatus(state, teamId, status, notes, agentkitRoot) {
-  if (agentkitRoot) ensureTeamIds(agentkitRoot);
-  if (!VALID_TEAM_IDS.includes(teamId)) {
-    return { state, error: `Unknown team: ${teamId}. Valid teams: ${VALID_TEAM_IDS.join(', ')}` };
-  }
-  if (!VALID_TEAM_STATUSES.includes(status)) {
-    return { state, error: `Invalid status: ${status}. Valid: ${VALID_TEAM_STATUSES.join(', ')}` };
-  }
-
-  const newState = {
-    ...state,
-    team_progress: {
-      ...state.team_progress,
-      [teamId]: {
-        ...state.team_progress[teamId],
-        status,
-        notes: notes ?? state.team_progress[teamId]?.notes ?? '',
-        last_updated: new Date().toISOString(),
-      },
-    },
-  };
-  return { state: newState };
-}
-
-// ---------------------------------------------------------------------------
-// Status Display
-// ---------------------------------------------------------------------------
-
-/**
  * Generate a human-readable status summary.
  * @param {string} projectRoot
  * @returns {string}
@@ -647,6 +485,7 @@ export function getStatus(projectRoot, agentkitRoot) {
   const state = loadState(projectRoot);
   const lockStatus = checkLock(projectRoot);
   const events = readEvents(projectRoot, 5);
+  const teamProgress = state.team_progress || {};
 
   const lines = [
     `=== AgentKit Forge — Orchestrator Status ===`,
@@ -671,7 +510,7 @@ export function getStatus(projectRoot, agentkitRoot) {
   // Team progress
   lines.push(`--- Team Progress ---`);
   for (const teamId of VALID_TEAM_IDS) {
-    const team = state.team_progress[teamId] || { status: 'idle' };
+    const team = teamProgress[teamId] || { status: 'idle' };
     const icon = { idle: ' ', in_progress: '▶', blocked: '!', done: '✓' }[team.status] || ' ';
     const line = `  [${icon}] ${teamId.padEnd(16)} ${team.status}${team.notes ? ` — ${team.notes}` : ''}`;
     lines.push(line);
@@ -1148,14 +987,14 @@ export {
 
 // Re-export agent integration for convenience
 export {
-  processTaskCompletion,
-  routeTestFailureToTestingTeam,
-  loadAgentNotifies,
-  loadTeamHandoffChains,
-  validateTestAcceptanceCriteria,
-  getIncrementalTestCommands,
-  resolveCoverageCommand,
-  parseCoveragePercentage,
   autoCreateDependencyAuditTask,
   autoCreateQualityReviewTask,
+  getIncrementalTestCommands,
+  loadAgentNotifies,
+  loadTeamHandoffChains,
+  parseCoveragePercentage,
+  processTaskCompletion,
+  resolveCoverageCommand,
+  routeTestFailureToTestingTeam,
+  validateTestAcceptanceCriteria,
 } from './agent-integration.mjs';

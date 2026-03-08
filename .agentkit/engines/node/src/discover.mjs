@@ -382,7 +382,7 @@ async function fileExists(projectRoot, pattern) {
   }
   if (pattern.startsWith('*')) {
     // Check for any file matching the extension
-    const ext = pattern.replace('*', '');
+    const ext = pattern.slice(1);
     try {
       const entries = await readdir(projectRoot);
       return entries.some((f) => f.endsWith(ext));

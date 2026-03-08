@@ -4,10 +4,10 @@
  * and runs build/test/lint to report overall repo health.
  */
 import { existsSync, readFileSync, readdirSync } from 'fs';
-import { resolve } from 'path';
 import yaml from 'js-yaml';
-import { execCommand, commandExists, formatDuration, isValidCommand } from './runner.mjs';
+import { resolve } from 'path';
 import { appendEvent, loadState, saveState } from './orchestrator.mjs';
+import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
 import { createTask } from './task-protocol.mjs';
 
 // ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
       const detected = (stack.detect || []).some((marker) => {
         if (marker.startsWith('*')) {
           try {
-            return readdirSync(projectRoot).some((f) => f.endsWith(marker.replace('*', '')));
+            return readdirSync(projectRoot).some((f) => f.endsWith(marker.slice(1)));
           } catch {
             return false;
           }

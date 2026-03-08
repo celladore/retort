@@ -13,6 +13,14 @@ import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 import {
+  filterByTier,
+  mergeThemeIntoSettings,
+  resolveColor,
+  resolveThemeMapping,
+  validateBrandSpec,
+  validateThemeSpec,
+} from './brand-resolver.mjs';
+import {
   buildFeatureVars,
   buildHookFeatureMap,
   loadFeatureSpec,
@@ -33,14 +41,6 @@ import {
   resolveScaffoldAction,
   simpleDiff,
 } from './template-utils.mjs';
-import {
-  filterByTier,
-  mergeThemeIntoSettings,
-  resolveColor,
-  resolveThemeMapping,
-  validateBrandSpec,
-  validateThemeSpec,
-} from './brand-resolver.mjs';
 
 // ---------------------------------------------------------------------------
 // Scaffold metadata map — populated during template rendering, consumed in Step 7
@@ -105,7 +105,10 @@ function threeWayMerge(oursContent, baseContent, theirsContent) {
   } catch (err) {
     if (err.status === 1) {
       // Merge completed but has conflicts
-      return { merged: err.stdout, hasConflicts: true };
+      return {
+        merged: typeof err.stdout === 'string' ? err.stdout : oursContent,
+        hasConflicts: true,
+      };
     }
     // git merge-file not available or other error
     return null;
@@ -1631,6 +1634,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
   // Clear module-level state from any previous run (e.g. in tests)
   templateMetaMap.clear();
+  templateTextCache.clear();
 
   const log = (...args) => {
     if (!quiet) console.log(...args);

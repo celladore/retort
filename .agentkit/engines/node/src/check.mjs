@@ -4,12 +4,12 @@
  * Outputs a structured results table and logs to events.
  */
 import { existsSync, readFileSync } from 'fs';
-import { readdir, readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import yaml from 'js-yaml';
 import { join, resolve } from 'path';
+import { parseCoveragePercentage, resolveCoverageCommand } from './agent-integration.mjs';
 import { appendEvent } from './orchestrator.mjs';
 import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
-import { resolveCoverageCommand, parseCoveragePercentage } from './agent-integration.mjs';
 
 // ---------------------------------------------------------------------------
 // Step definitions per tech stack
@@ -251,7 +251,7 @@ async function detectStacks(agentkitRoot, projectRoot, filterStack) {
       if (marker.startsWith('*')) {
         // Wildcard: check for files with this extension at root using cached file list
         if (!projectFiles) return false;
-        const ext = marker.replace('*', '');
+        const ext = marker.slice(1);
         return projectFiles.some((f) => f.endsWith(ext));
       }
       return existsSync(resolve(projectRoot, marker));
