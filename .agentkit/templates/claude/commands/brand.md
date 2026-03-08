@@ -1,5 +1,7 @@
 ---
-description: 'Manage the project brand spec — validate, preview palette, audit contrast, scaffold, or regenerate editor theme'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash(npx agentkit *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

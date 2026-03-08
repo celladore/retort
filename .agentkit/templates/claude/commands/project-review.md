@@ -1,5 +1,7 @@
 ---
-description: 'Comprehensive production-grade project review and assessment'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep, Bash, Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), WebSearch, WebFetch
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

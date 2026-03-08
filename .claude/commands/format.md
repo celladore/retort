@@ -1,5 +1,5 @@
 ---
-description: 'Run code formatters — auto-detects tools, accepts optional scope'
+description: "Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed."
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(prettier *), Bash(rustfmt *), Bash(black *), Bash(ruff *), Bash(gofmt *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

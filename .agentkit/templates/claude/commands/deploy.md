@@ -1,5 +1,7 @@
 ---
-description: 'Deployment automation — run deployment steps with safety checks and confirmation'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(docker *), Bash(kubectl *), Bash(az *), Bash(aws *), Bash(gcloud *), Bash(vercel *), Bash(netlify *), Bash(fly *), Bash(wrangler *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

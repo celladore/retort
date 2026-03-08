@@ -1,5 +1,5 @@
 ---
-description: 'View consolidated backlog from all sources'
+description: 'Displays a consolidated backlog view from all sources (external tracker, discovery, healthcheck, code TODOs, review findings, manual entries). Supports filtering and multiple output formats for CLI and future UI consumption.'
 allowed-tools: Read, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

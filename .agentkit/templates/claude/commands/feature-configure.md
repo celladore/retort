@@ -1,5 +1,7 @@
 ---
-description: "Configure kit features — enable, disable, or apply presets with guided workflow"
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(node *agentkit* features*)
 generated_by: "{{lastAgent}}"
 last_model: "{{lastModel}}"

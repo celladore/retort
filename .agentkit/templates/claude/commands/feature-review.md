@@ -1,5 +1,7 @@
 ---
-description: "Review kit feature configuration — audit, recommend, and analyze feature adoption"
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: ""
 generated_by: "{{lastAgent}}"
 last_model: "{{lastModel}}"

@@ -1,5 +1,5 @@
 ---
-description: 'Run release-readiness checks beyond /check before merge/ship'
+description: 'Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(pytest *), Bash(go *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

@@ -1,5 +1,7 @@
 ---
-description: 'Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

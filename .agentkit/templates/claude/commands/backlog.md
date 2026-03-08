@@ -1,5 +1,7 @@
 ---
-description: 'View consolidated backlog from all sources'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

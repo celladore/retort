@@ -1,5 +1,7 @@
 ---
-description: 'Import issues from external tracker into local backlog'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(gh *), Bash(linear *), Read, Write, Edit, Glob, Grep
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

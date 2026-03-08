@@ -1,6 +1,6 @@
 ---
-description: 'Security audit — OWASP top 10, dependency vulnerabilities, auth flows, hardcoded secrets'
-allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(pip *), Bash(go *), Bash(grep *), Bash(find *)
+description: 'Runs security-focused analysis: dependency vulnerability scanning, secret detection, OWASP compliance checks, and permission auditing. Generates a security report with severity ratings.'
+allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(pip *), Bash(pip-audit *), Bash(safety *), Bash(go *), Bash(govulncheck *), Bash(grep *), Bash(find *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
 last_updated: '2026-03-08'
@@ -102,7 +102,7 @@ Run the appropriate dependency vulnerability scanner:
 | npm/pnpm | `npm audit` / `pnpm audit`         | `npx audit-ci`            |
 | Cargo    | `cargo audit` (if installed)       | Check advisories manually |
 | .NET     | `dotnet list package --vulnerable` | —                         |
-| Python   | `pip audit` or `safety check`      | —                         |
+| Python   | `pip-audit` or `safety check`      | —                         |
 | Go       | `govulncheck ./...` (if installed) | —                         |
 
 Report:

@@ -1,5 +1,5 @@
 ---
-description: 'Configure kit features — enable, disable, or apply presets with guided workflow'
+description: 'Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.'
 allowed-tools: Bash(node *agentkit* features*)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

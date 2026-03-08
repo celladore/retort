@@ -1,5 +1,7 @@
 ---
-description: 'Unified PM dashboard — project health, team status, risks, and metrics'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Read, Glob, Grep, Bash(git log*), Bash(gh issue list*)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

@@ -1,5 +1,7 @@
 ---
-description: 'Diagnose AgentKit Forge setup and spec quality issues'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(node *), Bash(find *), Bash(ls *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

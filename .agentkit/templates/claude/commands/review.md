@@ -1,5 +1,7 @@
 ---
-description: 'Structured review across 10 quality criteria — correctness, security, performance, tests, docs, compatibility, completeness, doc gaps, bugs, enhancements — plus session retrospectives'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

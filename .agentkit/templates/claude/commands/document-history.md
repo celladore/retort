@@ -1,5 +1,7 @@
 ---
-description: 'Create a history document from templates for significant work (bug fixes, features, implementations, migrations)'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

@@ -1,5 +1,5 @@
 ---
-description: 'Session cost and usage tracking — summaries, session lists, and monthly reports'
+description: 'Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.'
 allowed-tools: Bash(node *), Read, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

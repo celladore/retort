@@ -32,7 +32,7 @@ Check for: Broken Access Control (unprotected endpoints, IDOR), Cryptographic Fa
 
 ### 2. Dependency Audit
 
-Run the stack-appropriate scanner: `npm audit`, `cargo audit`, `pip audit`, `govulncheck`. Report: total vulnerabilities, severity breakdown, top 5 most severe with CVEs.
+Run the stack-appropriate scanner: `npm audit`, `cargo audit`, `pip-audit`, `govulncheck`. Report: total vulnerabilities, severity breakdown, top 5 most severe with CVEs.
 
 ### 3. Authentication & Authorization Flow
 

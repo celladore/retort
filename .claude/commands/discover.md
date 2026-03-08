@@ -1,6 +1,5 @@
 ---
 description: 'Scans the repository to build a comprehensive understanding of the project structure, tech stacks in use, team boundaries, and architectural patterns. Outputs a structured discovery report used by other commands.'
-
 # allowed-tools: Read-only (git, find, ls, cat, head, wc) + write-capable (mkdir, echo, printf, tee).
 # Write-capable tools are permitted ONLY for designated output artifacts: AGENT_TEAMS.md, .claude/state/, .claude/state/events.log.
 # Enforced path restrictions: mkdir only for .claude/state/; echo/printf/tee only for AGENT_TEAMS.md or appending to .claude/state/events.log.

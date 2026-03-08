@@ -1,5 +1,5 @@
 ---
-description: 'Produce a structured implementation plan before writing any code'
+description: 'Creates a detailed implementation plan for a feature, bug fix, or refactoring task. Analyzes the codebase, identifies affected files and teams, estimates complexity, and produces a step-by-step plan with acceptance criteria.'
 allowed-tools: Bash(git *), Bash(find *), Bash(ls *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

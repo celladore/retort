@@ -1,5 +1,7 @@
 ---
-description: 'Run tests — auto-detects framework, accepts optional scope or filter'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *), Bash(vitest *), Bash(jest *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

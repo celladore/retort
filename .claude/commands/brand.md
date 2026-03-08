@@ -1,5 +1,5 @@
 ---
-description: 'Manage the project brand spec — validate, preview palette, audit contrast, scaffold, or regenerate editor theme'
+description: 'Manage the project brand spec (brand.yaml) and editor theme. Supports validation, palette preview, theme mapping, contrast auditing, scaffolding, and regeneration of editor theme files.'
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash(npx agentkit *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'

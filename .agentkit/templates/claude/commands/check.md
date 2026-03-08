@@ -1,5 +1,7 @@
 ---
-description: 'Universal quality gate — format, lint, typecheck, test, build in one pass'
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pip *), Bash(pytest *), Bash(go *), Bash(rustfmt *), Bash(prettier *), Bash(eslint *), Bash(ruff *), Bash(black *), Bash(mypy *)
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'

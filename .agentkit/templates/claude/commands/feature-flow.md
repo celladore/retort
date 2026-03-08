@@ -1,5 +1,7 @@
 ---
-description: "Trace a feature end-to-end — from spec through templates to generated output"
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
 allowed-tools: ""
 generated_by: "{{lastAgent}}"
 last_model: "{{lastModel}}"

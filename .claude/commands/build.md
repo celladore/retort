@@ -1,5 +1,5 @@
 ---
-description: 'Build the project — auto-detects stack, accepts optional scope'
+description: "Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace."
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(go *), Bash(make *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
