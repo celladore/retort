@@ -5,6 +5,10 @@ on:
     branches: [main, dev]
     types: [opened, synchronize, reopened, edited]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 # Enforce that all PRs to main pass required checks before merge.
 # Configure GitHub branch protection rules to require these status checks:
 #   - AgentKit Forge CI / Test (ubuntu-latest)

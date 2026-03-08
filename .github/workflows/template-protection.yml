@@ -9,6 +9,10 @@ on:
       - '.agentkit/overlays/**'
       - '.agentkit/bin/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   label-and-gate:
     runs-on: self-hosted

@@ -16,6 +16,10 @@ on:
       - 'docs/history/lessons-learned/**'
       - 'docs/history/.index.json'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-retrospective:
     runs-on: self-hosted

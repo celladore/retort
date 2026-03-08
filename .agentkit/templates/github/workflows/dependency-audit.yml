@@ -30,6 +30,10 @@ on:
       - 'Directory.Packages.props'
 {{/if}}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit-node:
     name: Node.js dependency audit

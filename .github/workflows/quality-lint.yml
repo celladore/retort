@@ -7,8 +7,22 @@ name: Quality Lint
 on:
   push:
     branches: [main, dev]
+    paths:
+      - '**/*.md'
+      - '.markdownlint*'
+      - '.prettierrc*'
+      - 'package.json'
   pull_request:
     branches: [main, dev]
+    paths:
+      - '**/*.md'
+      - '.markdownlint*'
+      - '.prettierrc*'
+      - 'package.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   markdown-lint:

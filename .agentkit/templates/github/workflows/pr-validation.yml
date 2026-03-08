@@ -11,6 +11,10 @@ on:
   pull_request:
     branches: [{{protectedBranches}}]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
 {{#if hasAnyInfraConfig}}
   terraform-fmt:

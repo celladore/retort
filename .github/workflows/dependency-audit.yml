@@ -18,6 +18,10 @@ on:
       - 'yarn.lock'
       - 'package-lock.json'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit-node:
     name: Node.js dependency audit

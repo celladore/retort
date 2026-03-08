@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, dev]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 # Branch protection depends on these check names. If you rename a job's `name:`
 # field, update branch protection rules for dev and main to match.
 # Current required checks: Test, Validate, YAML Lint,
