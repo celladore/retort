@@ -5,7 +5,7 @@
  * messages, artifacts, dependency tracking, and chained handoffs.
  */
 import { existsSync } from 'fs';
-import { access, mkdir, open, readdir, readFile, rename, unlink, writeFile } from 'fs/promises';
+import { access, mkdir, open, readdir, readFile, rename, unlink } from 'fs/promises';
 import { resolve } from 'path';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
@@ -125,10 +125,10 @@ function sanitizeText(text) {
 
   // Check for dangerous content before stripping
   const dangerousPatterns = [
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
-    /javascript:/gi,
-    /on\w+\s*=/gi,
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i,
+    /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/i,
+    /javascript:/i,
+    /on\w+\s*=/i,
   ];
 
   for (const pattern of dangerousPatterns) {
@@ -261,7 +261,13 @@ async function writeTaskFile(projectRoot, taskId, data) {
 
   // Use atomic file creation with O_EXCL to prevent race conditions
   try {
-    await writeFile(tmpPath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+    // Create temp file with exclusive semantics
+    const fileHandle = await open(tmpPath, 'wx');
+    try {
+      await fileHandle.writeFile(JSON.stringify(data, null, 2) + '\n', 'utf-8');
+    } finally {
+      await fileHandle.close();
+    }
     await rename(tmpPath, path);
   } catch (err) {
     // Clean up temp file on any error

@@ -167,6 +167,9 @@ function loadTeamsSpec(agentkitRoot) {
   // Check cache first
   const cached = _teamsSpecCache.get(key);
   if (cached && !cached.isExpired()) {
+    // Update LRU order: delete and re-insert to make this entry newest
+    _teamsSpecCache.delete(key);
+    _teamsSpecCache.set(key, cached);
     return cached.data;
   }
 
