@@ -124,8 +124,23 @@ const DEFAULT_AREA_ROUTING = {
 /**
  * Cache for parsed teams.yaml to avoid re-reading on every call.
  * Keyed by resolved agentkitRoot path. Invalidated by process lifetime.
+ * Implements LRU eviction to prevent memory leaks.
  */
 const _teamsSpecCache = new Map();
+const MAX_CACHE_SIZE = 10;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/** Cache entry with timestamp for TTL */
+class CacheEntry {
+  constructor(data) {
+    this.data = data;
+    this.timestamp = Date.now();
+  }
+
+  isExpired() {
+    return Date.now() - this.timestamp > CACHE_TTL_MS;
+  }
+}
 
 /**
  * Load and cache teams.yaml spec from disk.
@@ -135,18 +150,38 @@ const _teamsSpecCache = new Map();
 function loadTeamsSpec(agentkitRoot) {
   if (!agentkitRoot) return null;
   const key = resolve(agentkitRoot);
-  if (_teamsSpecCache.has(key)) return _teamsSpecCache.get(key);
+
+  // Check cache first
+  const cached = _teamsSpecCache.get(key);
+  if (cached && !cached.isExpired()) {
+    return cached.data;
+  }
+
+  // Remove expired entries
+  for (const [cacheKey, entry] of _teamsSpecCache.entries()) {
+    if (entry.isExpired()) {
+      _teamsSpecCache.delete(cacheKey);
+    }
+  }
+
+  // Enforce cache size limit (LRU eviction)
+  if (_teamsSpecCache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = _teamsSpecCache.keys().next().value;
+    _teamsSpecCache.delete(oldestKey);
+  }
+
   try {
     const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
     if (existsSync(teamsPath)) {
       const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
-      _teamsSpecCache.set(key, spec);
+      _teamsSpecCache.set(key, new CacheEntry(spec));
       return spec;
     }
   } catch {
     /* fall through */
   }
-  _teamsSpecCache.set(key, null);
+
+  _teamsSpecCache.set(key, new CacheEntry(null));
   return null;
 }
 

@@ -12,61 +12,61 @@
         "capabilities": ["delegate", "aggregate", "monitor"]
       },
       {
-        "id": "team-backend",
+        "id": "backend",
         "role": "executor",
         "domain": "api,services",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-frontend",
+        "id": "frontend",
         "role": "executor",
         "domain": "ui,components",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-data",
+        "id": "data",
         "role": "executor",
         "domain": "database,models",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-infra",
+        "id": "infra",
         "role": "executor",
         "domain": "iac,cloud",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-devops",
+        "id": "devops",
         "role": "executor",
         "domain": "ci,cd,automation",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-testing",
+        "id": "testing",
         "role": "executor",
         "domain": "tests,quality",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-security",
+        "id": "security",
         "role": "executor",
         "domain": "auth,compliance",
         "capabilities": ["implement", "test", "review"]
       },
       {
-        "id": "team-docs",
+        "id": "docs",
         "role": "executor",
         "domain": "documentation",
         "capabilities": ["implement", "review"]
       },
       {
-        "id": "team-product",
+        "id": "product",
         "role": "executor",
         "domain": "features,prd",
         "capabilities": ["implement", "review"]
       },
       {
-        "id": "team-quality",
+        "id": "quality",
         "role": "executor",
         "domain": "review,refactor",
         "capabilities": ["implement", "test", "review"]

@@ -1481,23 +1481,23 @@ function buildTeamVars(team, vars, teamsSpec, agentsSpec) {
  */
 function buildAreaRoutingTable(teamsIntake) {
   const defaultRouting = {
-    backend: 'team-backend',
-    frontend: 'team-frontend',
-    data: 'team-data',
-    infra: 'team-infra',
-    devops: 'team-devops',
-    testing: 'team-testing',
-    security: 'team-security',
-    docs: 'team-docs',
-    product: 'team-product',
-    quality: 'team-quality',
-    cli: 'team-backend',
-    'sync-engine': 'team-devops',
+    backend: 'backend',
+    frontend: 'frontend',
+    data: 'data',
+    infra: 'infra',
+    devops: 'devops',
+    testing: 'testing',
+    security: 'security',
+    docs: 'docs',
+    product: 'product',
+    quality: 'quality',
+    cli: 'backend',
+    'sync-engine': 'devops',
   };
   const routing = teamsIntake?.routing || {};
   const merged = { ...defaultRouting };
   for (const [area, team] of Object.entries(routing)) {
-    merged[area] = getTeamCommandStem(team);
+    merged[area] = team; // Use bare team IDs consistently
   }
   return Object.entries(merged)
     .map(([area, team]) => `\`${area}\`→${team}`)
