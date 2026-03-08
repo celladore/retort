@@ -522,6 +522,9 @@ export function checkLock(projectRoot) {
 // Re-exported here for backward compatibility.
 // ---------------------------------------------------------------------------
 
+// Re-export event functions for backward compatibility
+export { appendEvent, readEvents } from './events.mjs';
+
 /**
  * Generate a human-readable status summary.
  * @param {string} projectRoot
