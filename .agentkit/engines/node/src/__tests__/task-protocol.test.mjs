@@ -238,7 +238,7 @@ describe('createTask', () => {
     expect(result.task.description).toBe('Task with bold content');
   });
 
-  it('rejects dependencies in terminal states', async () => {
+  it('allows dependencies on completed tasks but rejects other terminal states', async () => {
     // Create and complete a task first
     const completedTask = await createTask(tmpRoot, {
       title: 'Completed Task',
@@ -253,15 +253,36 @@ describe('createTask', () => {
     const completedCheck = await getTask(tmpRoot, completedTask.task.id);
     expect(completedCheck.task.status).toBe('completed');
 
-    // Try to create a task depending on the completed task
+    // Should be able to create a task depending on the completed task
     const result = await createTask(tmpRoot, {
       title: 'Dependent Task',
       delegator: 'test',
       assignees: ['team-backend'],
       dependsOn: [completedTask.task.id],
     });
-    expect(result.task).toBe(null);
-    expect(result.error).toContain('terminal state');
+    expect(result.task).not.toBe(null);
+    expect(result.task.dependsOn).toEqual([completedTask.task.id]);
+    expect(result.task.blockedBy).toEqual([]); // Completed tasks don't block
+
+    // Create a failed task
+    const failedTask = await createTask(tmpRoot, {
+      title: 'Failed Task',
+      delegator: 'test',
+      assignees: ['team-backend'],
+    });
+    await updateTaskStatus(tmpRoot, failedTask.task.id, 'accepted');
+    await updateTaskStatus(tmpRoot, failedTask.task.id, 'working');
+    await updateTaskStatus(tmpRoot, failedTask.task.id, 'failed');
+
+    // Should NOT be able to depend on failed task
+    const failedDepResult = await createTask(tmpRoot, {
+      title: 'Depends on Failed',
+      delegator: 'test',
+      assignees: ['team-backend'],
+      dependsOn: [failedTask.task.id],
+    });
+    expect(failedDepResult.task).toBe(null);
+    expect(failedDepResult.error).toContain('terminal state');
   });
 });
 

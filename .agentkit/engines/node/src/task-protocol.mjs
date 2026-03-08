@@ -374,16 +374,24 @@ export async function createTask(projectRoot, taskData) {
         return { task: null, error: `Dependency task not found: ${depId}` };
       }
 
-      // Check if dependency is in a terminal state (completed, failed, rejected, canceled)
+      // Check if dependency is in an inappropriate terminal state
+      // Allow completed dependencies, but reject failed/rejected/canceled
       const depTask = await getTask(projectRoot, depId);
       if (depTask.task) {
         const depStatus = depTask.task.status;
-        if (TERMINAL_STATES.includes(depStatus)) {
+        const inappropriateTerminalStates = [
+          'failed',
+          'rejected',
+          'canceled',
+          'BLOCKED_ON_CANCELED',
+        ];
+        if (inappropriateTerminalStates.includes(depStatus)) {
           return {
             task: null,
             error: `Cannot depend on task in terminal state: ${depId} (status: ${depStatus})`,
           };
         }
+        // Note: completed dependencies are allowed and will be handled by the blocking logic
       }
     }
   }
