@@ -21,7 +21,7 @@ Validates generated outputs for correctness. Checks that all required directorie
 1. Verify all required directories exist for active render targets
 2. Validate JSON files are well-formed (settings.json, orchestrator.json)
 3. Verify all expected command files exist and have valid frontmatter
-4. Check hook scripts exist and are well-formed
+4. Check hook scripts exist and are executable
 5. Scan for forbidden patterns (hardcoded secrets, absolute paths)
 6. Verify settings.json hooks configuration matches spec
 
