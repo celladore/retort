@@ -3,7 +3,7 @@ description: 'Deployment automation — run deployment steps with safety checks 
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(docker *), Bash(kubectl *), Bash(az *), Bash(aws *), Bash(gcloud *), Bash(vercel *), Bash(netlify *), Bash(fly *), Bash(wrangler *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-07'
+last_updated: '2026-03-08'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

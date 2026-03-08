@@ -4,7 +4,7 @@ globs: []
 alwaysApply: false
 generated_by: "agentkit-forge"
 last_model: "sync-engine"
-last_updated: "2026-03-07"
+last_updated: "2026-03-08"
 # Format: MDC (Markdown with YAML frontmatter). Cursor team rule.
 # Docs: https://docs.cursor.com/context/rules
 ---
