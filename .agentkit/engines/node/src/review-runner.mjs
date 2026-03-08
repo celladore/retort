@@ -4,18 +4,18 @@
  * TODO/FIXME scanning, and lint on changed files.
  * This is NOT the AI review — that's the /review slash command.
  */
-import { existsSync, readFileSync, promises as fsPromises, realpathSync, statSync } from 'node:fs';
-import { extname, resolve, sep } from 'node:path';
 import yaml from 'js-yaml';
-import { emitEvent, readEvents } from './event-emitter.mjs';
-import { appendEvent } from './orchestrator.mjs';
-import { execCommand, runInPool } from './runner.mjs';
-import { addTaskArtifact, createTask } from './task-protocol.mjs';
+import { existsSync, promises as fsPromises, readFileSync, realpathSync, statSync } from 'node:fs';
+import { extname, resolve, sep } from 'node:path';
 import {
   getIncrementalTestCommands,
-  resolveCoverageCommand,
   parseCoveragePercentage,
+  resolveCoverageCommand,
 } from './agent-integration.mjs';
+import { emitEvent, readEvents } from './event-emitter.mjs';
+import { appendEvent } from './events.mjs';
+import { execCommand, runInPool } from './runner.mjs';
+import { addTaskArtifact, createTask } from './task-protocol.mjs';
 
 // ---------------------------------------------------------------------------
 // Secret patterns — compiled once at module level to avoid per-call overhead.

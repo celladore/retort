@@ -6,7 +6,8 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
-import { appendEvent, loadState, saveState } from './orchestrator.mjs';
+import { appendEvent } from './events.mjs';
+import { loadState, saveState } from './orchestrator.mjs';
 import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
 import { createTask } from './task-protocol.mjs';
 

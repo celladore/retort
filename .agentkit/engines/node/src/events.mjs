@@ -1,57 +1,29 @@
 /**
- * AgentKit Forge — Event Logging
- * Extracted from orchestrator.mjs to break circular imports.
- * (orchestrator.mjs ↔ agent-integration.mjs both need appendEvent)
+ * AgentKit Forge — Event Logging Compatibility Adapter
+ * Wraps event-emitter.mjs to preserve legacy appendEvent/readEvents signatures.
+ * New code should import from event-emitter.mjs directly.
  */
-import { existsSync, readFileSync } from 'fs';
-import { appendFile, mkdir } from 'fs/promises';
-import { resolve } from 'path';
-
-function stateDir(projectRoot) {
-  return resolve(projectRoot, '.agentkit', 'state');
-}
-
-function eventsPath(projectRoot) {
-  return resolve(stateDir(projectRoot), 'events.log');
-}
+import { emitEvent, readEvents as readEventsCanonical } from './event-emitter.mjs';
 
 /**
- * Append an event to the events log.
+ * Legacy compatibility wrapper for emitEvent.
  * @param {string} projectRoot
  * @param {string} action - What happened (e.g. 'phase_advanced', 'check_completed')
  * @param {object} data - Event data
  */
 export async function appendEvent(projectRoot, action, data = {}) {
-  const dir = stateDir(projectRoot);
-  if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true });
-  }
-  const event = {
-    timestamp: new Date().toISOString(),
-    action,
-    ...data,
-  };
-  await appendFile(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
+  // Legacy appendEvent is async but does not support source metadata.
+  // Forward to emitEvent without source to preserve existing behavior.
+  emitEvent(projectRoot, action, data);
 }
 
 /**
- * Read recent events from the log.
+ * Legacy compatibility wrapper for readEvents.
  * @param {string} projectRoot
  * @param {number} limit - Max events to return (default 20)
  * @returns {object[]}
  */
 export function readEvents(projectRoot, limit = 20) {
-  const path = eventsPath(projectRoot);
-  if (!existsSync(path)) return [];
-  const lines = readFileSync(path, 'utf-8').trim().split('\n').filter(Boolean);
-  const events = lines
-    .map((line) => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-  return events.slice(-limit);
+  // Legacy readEvents takes a numeric limit; forward to canonical with options object.
+  return readEventsCanonical(projectRoot, { limit });
 }

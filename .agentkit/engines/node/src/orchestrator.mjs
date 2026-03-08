@@ -17,6 +17,7 @@ import {
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
+import { appendEvent } from './events.mjs';
 import { formatTimestamp } from './runner.mjs';
 import {
   checkDependencies,
@@ -40,16 +41,16 @@ const PHASES = {
 };
 
 const DEFAULT_TEAM_IDS = [
-  'team-backend',
-  'team-frontend',
-  'team-data',
-  'team-infra',
-  'team-devops',
-  'team-testing',
-  'team-security',
-  'team-docs',
-  'team-product',
-  'team-quality',
+  'backend',
+  'frontend',
+  'data',
+  'infra',
+  'devops',
+  'testing',
+  'security',
+  'docs',
+  'product',
+  'quality',
 ];
 
 // Overridable via loadTeamIdsFromSpec(). Starts with defaults; initialized on first use.
@@ -106,18 +107,18 @@ export function ensureTeamIds(agentkitRoot) {
  * Matches the canonical issue template area values.
  */
 const DEFAULT_AREA_ROUTING = {
-  backend: 'team-backend',
-  frontend: 'team-frontend',
-  data: 'team-data',
-  infra: 'team-infra',
-  devops: 'team-devops',
-  testing: 'team-testing',
-  security: 'team-security',
-  docs: 'team-docs',
-  product: 'team-product',
-  quality: 'team-quality',
-  cli: 'team-backend',
-  'sync-engine': 'team-devops',
+  backend: 'backend',
+  frontend: 'frontend',
+  data: 'data',
+  infra: 'infra',
+  devops: 'devops',
+  testing: 'testing',
+  security: 'security',
+  docs: 'docs',
+  product: 'product',
+  quality: 'quality',
+  cli: 'backend',
+  'sync-engine': 'devops',
 };
 
 /**
@@ -161,16 +162,15 @@ export function clearTeamsSpecCache() {
  * Reads intake.routing from teams.yaml if available, falls back to defaults.
  * @param {string} area - One of the canonical issue area values
  * @param {string} [agentkitRoot] - Path to .agentkit directory for reading teams.yaml
- * @returns {string} Team ID (e.g. 'team-backend')
+ * @returns {string} Team ID (e.g. 'backend')
  */
 export function resolveTeamByArea(area, agentkitRoot) {
   const spec = loadTeamsSpec(agentkitRoot);
   const routing = spec?.intake?.routing;
   if (routing && routing[area]) {
-    const team = routing[area];
-    return team.startsWith('team-') ? team : `team-${team}`;
+    return routing[area];
   }
-  return DEFAULT_AREA_ROUTING[area] || 'team-quality';
+  return DEFAULT_AREA_ROUTING[area] || 'quality';
 }
 
 /**
@@ -189,19 +189,19 @@ export function computeEscalation({ area, priority, severity, impact }, agentkit
   const spec = loadTeamsSpec(agentkitRoot);
   const esc = spec?.intake?.escalation;
 
-  let securityTeams = ['team-security', 'team-devops'];
-  let blockedTeams = ['team-product'];
-  let opsTeam = 'team-quality';
+  let securityTeams = ['security', 'devops'];
+  let blockedTeams = ['product'];
+  let opsTeam = 'quality';
 
   if (esc?.securityCritical) {
-    securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+    securityTeams = esc.securityCritical;
   }
   if (esc?.blockedCrossTeam) {
-    blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+    blockedTeams = esc.blockedCrossTeam;
   }
   const configOps = spec?.intake?.operationsTeam;
   if (configOps) {
-    opsTeam = configOps.startsWith('team-') ? configOps : `team-${configOps}`;
+    opsTeam = configOps;
   }
 
   // Rule 1: Critical severity in security-sensitive areas → security escalation
