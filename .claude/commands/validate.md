@@ -27,7 +27,7 @@ Validates generated outputs for correctness. Checks that all required directorie
 1. **Directory Structure** — Verify all required directories exist for active render targets
 2. **JSON Validity** — Validate JSON files are well-formed (`settings.json`, `orchestrator.json`)
 3. **Command Files** — Verify all expected command files exist and have valid YAML frontmatter
-4. **Hook Scripts** — Check hook scripts exist and are executable
+4. **Hook Scripts** — Check hook scripts exist and are well-formed
 5. **Forbidden Patterns** — Scan for hardcoded secrets, absolute paths, and other violations
 6. **Settings Configuration** — Verify `settings.json` hooks configuration matches spec
 

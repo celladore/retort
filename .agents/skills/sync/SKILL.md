@@ -42,7 +42,7 @@ pnpm -C .agentkit agentkit:sync
 
 | Flag              | Effect                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------- |
-| `--only <target>` | Sync only one platform (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp) |
+| `--only <target>` | Sync only one platform (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp, ai, mcp) |
 | `--overwrite`     | Overwrite project-owned (scaffold-once) files                                               |
 | `--diff`          | Preview changes without writing                                                             |
 | `--no-clean`      | Keep orphaned files that would normally be removed                                          |
