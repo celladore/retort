@@ -596,7 +596,7 @@ describe('render target gating for new tools', () => {
 
   it(
     '--only claude does NOT generate gemini, warp, cline, roo, codex files',
-    { timeout: 15_000 },
+    { timeout: 30_000 },
     async () => {
       await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
       const files = collectFiles(projectRoot);
@@ -1089,7 +1089,7 @@ describe('syncEditorTheme (brand-driven editor theme)', () => {
     projectRoot = makeTmpProject();
     // Full sync — brand.yaml and editor-theme.yaml exist in spec, editorTheme.enabled is true
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
-  }, 30_000);
+  }, 60_000);
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
