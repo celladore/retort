@@ -513,13 +513,13 @@ export function checkLock(projectRoot) {
 /**
  * Generate a human-readable status summary.
  * @param {string} projectRoot
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export function getStatus(projectRoot, agentkitRoot) {
+export async function getStatus(projectRoot, agentkitRoot) {
   if (agentkitRoot) ensureTeamIds(agentkitRoot);
   const state = loadState(projectRoot);
   const lockStatus = checkLock(projectRoot);
-  const events = readEvents(projectRoot, 5);
+  const events = await readEvents(projectRoot, 5);
   const teamProgress = state.team_progress || {};
 
   const lines = [
@@ -941,7 +941,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
 
   // --status: show current state
   if (flags.status) {
-    console.log(getStatus(projectRoot));
+    console.log(await getStatus(projectRoot));
     return;
   }
 
@@ -991,7 +991,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
     }
 
     // Default: show status and advance phase if requested
-    console.log(getStatus(projectRoot));
+    console.log(await getStatus(projectRoot));
     console.log('');
     console.log('Use this command within your AI tool as a slash command for full orchestration.');
     console.log(`Current phase: ${state.current_phase}/5 — ${state.phase_name}`);

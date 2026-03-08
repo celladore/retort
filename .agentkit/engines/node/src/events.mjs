@@ -14,7 +14,7 @@ import { emitEvent, readEvents as readEventsCanonical } from './event-emitter.mj
 export async function appendEvent(projectRoot, action, data = {}) {
   // Legacy appendEvent is async but does not support source metadata.
   // Forward to emitEvent without source to preserve existing behavior.
-  emitEvent(projectRoot, action, data);
+  await emitEvent(projectRoot, action, data);
 }
 
 /**
