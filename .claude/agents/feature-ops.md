@@ -52,12 +52,12 @@ feature-management
 ## Focus Areas
 
 - .agentkit/spec/features.yaml
-- .agentkit/overlays/\*/settings.yaml
+- .agentkit/overlays/*/settings.yaml
 - .agentkit/engines/node/src/feature-manager.mjs
 - CLAUDE.md
-- .claude/commands/\*\*
-- .claude/agents/\*\*
-- .claude/skills/\*\*
+- .claude/commands/**
+- .claude/agents/**
+- .claude/skills/**
 
 ## Responsibilities
 
@@ -86,7 +86,6 @@ feature-management
 ## Examples
 
 ### Review current feature configuration
-
 ```
 # Check which features are active and their status
 agentkit features --verbose
@@ -96,7 +95,6 @@ agentkit features --verbose
 ```
 
 ### Trace a feature end-to-end
-
 ```
 # Understand exactly what team-orchestration does
 /feature-flow --feature team-orchestration --show-templates
@@ -106,7 +104,6 @@ agentkit features --verbose
 ```
 
 ### Configure features for a solo developer
-
 ```
 # Apply lean preset (no team orchestration overhead)
 agentkit features preset lean
@@ -142,3 +139,4 @@ agentkit features disable team-orchestration agent-personas
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
+

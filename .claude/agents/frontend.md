@@ -51,12 +51,12 @@ engineering
 
 ## Focus Areas
 
-- apps/web/\*\*
-- apps/marketing/\*\*
-- src/client/\*\*
-- components/\*\*
-- styles/\*\*
-- public/\*\*
+- apps/web/**
+- apps/marketing/**
+- src/client/**
+- components/**
+- styles/**
+- public/**
 
 ## Responsibilities
 
@@ -93,7 +93,6 @@ engineering
 ## Examples
 
 ### Accessible interactive component
-
 ```
 <button
   type="button"
@@ -130,3 +129,4 @@ engineering
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
+

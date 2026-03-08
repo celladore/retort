@@ -33,14 +33,14 @@ Invoke this skill when you need to perform the `deploy` operation.
 
 ## Deployment Detection
 
-| Signal                       | Platform   | Deploy Command             |
-| ---------------------------- | ---------- | -------------------------- |
-| `vercel.json`                | Vercel     | `vercel --prod` / `vercel` |
-| `netlify.toml`               | Netlify    | `netlify deploy --prod`    |
-| `fly.toml`                   | Fly.io     | `fly deploy`               |
-| `wrangler.toml`              | Cloudflare | `wrangler deploy`          |
-| Dockerfile + k8s/            | Kubernetes | `kubectl apply -f k8s/`    |
-| `package.json` deploy script | Custom     | `pnpm deploy`              |
+| Signal | Platform | Deploy Command |
+|--------|----------|---------------|
+| `vercel.json` | Vercel | `vercel --prod` / `vercel` |
+| `netlify.toml` | Netlify | `netlify deploy --prod` |
+| `fly.toml` | Fly.io | `fly deploy` |
+| `wrangler.toml` | Cloudflare | `wrangler deploy` |
+| Dockerfile + k8s/ | Kubernetes | `kubectl apply -f k8s/` |
+| `package.json` deploy script | Custom | `pnpm deploy` |
 
 ## Flow
 
@@ -76,3 +76,4 @@ Report: service, environment, platform, status, timeline, command output, post-d
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

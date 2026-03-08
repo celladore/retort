@@ -52,11 +52,11 @@ operations
 ## Focus Areas
 
 - .env.example
-- docker-compose\*.yml
-- infra/\*\*
-- .github/workflows/\*\*
-- scripts/setup\*
-- docs/setup/\*\*
+- docker-compose*.yml
+- infra/**
+- .github/workflows/**
+- scripts/setup*
+- docs/setup/**
 
 ## Responsibilities
 
@@ -103,3 +103,4 @@ operations
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
+

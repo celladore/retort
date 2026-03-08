@@ -51,10 +51,10 @@ testing
 
 ## Focus Areas
 
-- e2e/\*\*
-- playwright/\*\*
-- tests/integration/\*\*
-- tests/e2e/\*\*
+- e2e/**
+- playwright/**
+- tests/integration/**
+- tests/e2e/**
 - docker-compose.test.yml
 
 ## Responsibilities
@@ -103,3 +103,4 @@ testing
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
+
