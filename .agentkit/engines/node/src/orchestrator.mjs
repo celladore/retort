@@ -61,6 +61,18 @@ const VALID_TEAM_STATUSES = ['idle', 'in_progress', 'blocked', 'done'];
 const LOCK_STALE_MS = 30 * 60 * 1000; // 30 minutes
 
 /**
+ * Get system hostname with fallback.
+ * @returns {string}
+ */
+function getHostname() {
+  try {
+    return hostname();
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
  * Load team IDs from teams.yaml spec file.
  * Falls back to the hardcoded defaults if the file doesn't exist or is invalid.
  * @param {string} agentkitRoot
