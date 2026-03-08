@@ -3,7 +3,7 @@ description: 'Displays a consolidated backlog view from all sources (external tr
 allowed-tools: Read, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-07'
+last_updated: '2026-03-08'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

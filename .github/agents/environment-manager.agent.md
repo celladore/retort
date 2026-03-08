@@ -3,7 +3,7 @@ name: 'Environment Manager'
 description: 'Environment configuration specialist ensuring consistent, secure, and documented environment setups across development, CI, staging, and production.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-07'
+last_updated: '2026-03-08'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

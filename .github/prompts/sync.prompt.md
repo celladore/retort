@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-07'
+last_updated: '2026-03-08'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
