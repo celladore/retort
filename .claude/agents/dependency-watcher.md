@@ -56,8 +56,8 @@ operations
 - Cargo.toml
 - Cargo.lock
 - pyproject.toml
-- requirements*.txt
-- *.csproj
+- requirements\*.txt
+- \*.csproj
 - Directory.Packages.props
 
 ## Responsibilities
@@ -105,4 +105,3 @@ operations
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
-

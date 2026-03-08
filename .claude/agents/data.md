@@ -51,14 +51,14 @@ engineering
 
 ## Focus Areas
 
-- db/**
-- migrations/**
-- models/**
-- prisma/**
-- seeds/**
-- scripts/db/**
-- adx/**
-- grafana/**
+- db/\*\*
+- migrations/\*\*
+- models/\*\*
+- prisma/\*\*
+- seeds/\*\*
+- scripts/db/\*\*
+- adx/\*\*
+- grafana/\*\*
 
 ## Responsibilities
 
@@ -97,6 +97,7 @@ engineering
 ## Examples
 
 ### Safe migration skeleton
+
 ```
 -- add nullable column first
 ALTER TABLE users ADD COLUMN timezone TEXT NULL;
@@ -130,4 +131,3 @@ ALTER TABLE users ADD COLUMN timezone TEXT NULL;
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
-

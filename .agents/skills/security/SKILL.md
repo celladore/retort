@@ -44,12 +44,12 @@ Search for: API keys, AWS keys, private keys, connection strings, passwords, tok
 
 ## Severity Classification
 
-| Severity | Criteria |
-|----------|----------|
+| Severity | Criteria                                                            |
+| -------- | ------------------------------------------------------------------- |
 | CRITICAL | Exploitable remotely, no auth required, data breach or RCE possible |
-| HIGH | Low complexity exploit, auth bypass, significant data exposure |
-| MEDIUM | Requires specific conditions, limited impact, defense-in-depth gap |
-| LOW | Best practice violation, minimal direct impact |
+| HIGH     | Low complexity exploit, auth bypass, significant data exposure      |
+| MEDIUM   | Requires specific conditions, limited impact, defense-in-depth gap  |
+| LOW      | Best practice violation, minimal direct impact                      |
 
 ## Output
 
@@ -76,4 +76,3 @@ Produce: Executive Summary, Risk Score, Findings by severity (with ID, file:line
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

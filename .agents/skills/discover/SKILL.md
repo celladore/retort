@@ -58,4 +58,3 @@ Create or update `AGENT_TEAMS.md` with: Repository Profile (primary stack, build
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

@@ -47,4 +47,3 @@ Invoke this skill when you need to perform the `cost-centres` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

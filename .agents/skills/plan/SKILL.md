@@ -56,4 +56,3 @@ You are the **Planning Agent**. Produce detailed, structured implementation plan
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

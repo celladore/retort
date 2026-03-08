@@ -51,14 +51,14 @@ engineering
 
 ## Focus Areas
 
-- infra/**
-- terraform/**
-- terragrunt/**
-- bicep/**
-- pulumi/**
-- k8s/**
-- helm/**
-- modules/**
+- infra/\*\*
+- terraform/\*\*
+- terragrunt/\*\*
+- bicep/\*\*
+- pulumi/\*\*
+- k8s/\*\*
+- helm/\*\*
+- modules/\*\*
 
 ## Responsibilities
 
@@ -104,6 +104,7 @@ engineering
 ## Examples
 
 ### Resource naming local
+
 ```
 locals {
   resource_name = "${var.org}-${var.environment}-${var.project}-${var.resource_type}-${var.region}"
@@ -136,4 +137,3 @@ locals {
   - Modify the source spec in `.agentkit/spec/` and run `pnpm -C .agentkit agentkit:sync`
   - Commit the spec change and regenerated outputs together
   - CI runs a drift check and will fail if generated files are out of sync
-
