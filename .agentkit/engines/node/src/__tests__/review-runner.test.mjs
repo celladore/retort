@@ -3,6 +3,7 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as eventEmitter from '../event-emitter.mjs';
+import * as events from '../events.mjs';
 import {
   convertFindingsToTasks,
   normalizeSeverity,

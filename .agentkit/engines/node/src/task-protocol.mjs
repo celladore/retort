@@ -86,19 +86,11 @@ function tasksDir(projectRoot) {
   return resolve(projectRoot, '.agentkit', 'state', 'tasks');
 }
 
-const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/;
-
-/** Additional characters that could indicate path traversal attempts */
-const PATH_TRAVERSAL_CHARS = /[.\/\\]/;
+const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/; // Defense-in-depth: blocks path traversal chars (., /, \)
 
 export function normalizeTaskId(taskId) {
   if (typeof taskId !== 'string' || !TASK_ID_PATH_PATTERN.test(taskId)) {
     throw new Error(`Invalid task ID: ${taskId}`);
-  }
-
-  // Additional check for path traversal attempts
-  if (PATH_TRAVERSAL_CHARS.test(taskId)) {
-    throw new Error(`Task ID contains invalid characters: ${taskId}`);
   }
 
   return taskId;
@@ -145,9 +137,11 @@ function sanitizeText(text) {
     }
   }
 
-  // Remove HTML tags and clean up
+  // Remove only real HTML tags, preserve literal angle brackets
   return text
-    .replace(/<[^>]*>/g, '') // Remove all HTML tags
+    .replace(/<[A-Za-z\/][^>]*>/g, '') // Remove HTML tags starting with letter or slash
+    .replace(/</g, '&lt;') // Escape remaining <
+    .replace(/>/g, '&gt;') // Escape remaining >
     .trim();
 }
 

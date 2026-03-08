@@ -3,7 +3,8 @@
  * Shared event logging helper. All agents and handlers should use this module
  * to write structured JSONL events to .agentkit/state/events.log.
  */
-import { appendFile, existsSync, mkdir, readFile } from 'fs/promises';
+import { existsSync } from 'fs';
+import { appendFile, mkdir, readFile } from 'fs/promises';
 import { resolve } from 'path';
 
 // ---------------------------------------------------------------------------

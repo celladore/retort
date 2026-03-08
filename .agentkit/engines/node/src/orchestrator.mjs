@@ -15,6 +15,7 @@ import {
   writeFileSync,
 } from 'fs';
 import yaml from 'js-yaml';
+import { hostname } from 'os';
 import { resolve } from 'path';
 import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
 import { appendEvent } from './events.mjs';

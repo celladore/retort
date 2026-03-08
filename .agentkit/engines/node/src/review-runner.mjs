@@ -359,7 +359,7 @@ export async function convertFindingsToTasks(projectRoot, findings) {
  * @param {object[]} currentFindings
  */
 export async function trackUnfixedFindings(projectRoot, currentFindings) {
-  const previousEvents = readEvents(projectRoot, {
+  const previousEvents = await readEvents(projectRoot, {
     action: 'review_completed',
     limit: 1,
   });
@@ -376,7 +376,7 @@ export async function trackUnfixedFindings(projectRoot, currentFindings) {
   const unfixed = currentFindings.filter((f) => prevSet.has(fingerprint(f)));
 
   if (unfixed.length > 0) {
-    emitEvent(
+    await emitEvent(
       projectRoot,
       'review_unfixed_findings',
       {
@@ -581,7 +581,7 @@ export async function runReview({
         console.log(`\n[agentkit:review] Created ${createdTasks.length} task(s) from findings`);
         for (const task of createdTasks) {
           console.log(`  → ${task.id}: ${task.title}`);
-          emitEvent(
+          await emitEvent(
             projectRoot,
             'review_auto_task',
             {

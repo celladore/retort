@@ -21,9 +21,9 @@ export async function appendEvent(projectRoot, action, data = {}) {
  * Legacy compatibility wrapper for readEvents.
  * @param {string} projectRoot
  * @param {number} limit - Max events to return (default 20)
- * @returns {object[]}
+ * @returns {Promise<object[]>}
  */
-export function readEvents(projectRoot, limit = 20) {
+export async function readEvents(projectRoot, limit = 20) {
   // Legacy readEvents takes a numeric limit; forward to canonical with options object.
-  return readEventsCanonical(projectRoot, { limit });
+  return await readEventsCanonical(projectRoot, { limit });
 }

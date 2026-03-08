@@ -46,24 +46,28 @@ Extend agent scoring with dynamic factors:
 
 ```yaml
 scoring:
-  # Static scores (from mission framework)
-  technical-expertise: 0.9
-  architectural-fit: 0.85
-  code-quality: 0.8
-  
-  # Dynamic factors
-  current-workload: 0.3  # 0.0 = fully booked, 1.0 = available
-  recent-success-rate: 0.85  # Based on recent task outcomes
-  domain-relevance: 0.9  # How well agent matches task domain
+  # Static scores (0-10 scale)
+  technical-expertise: 9
+  architectural-fit: 8.5
+  code-quality: 8
+
+  # Dynamic factors (converted to 0-10 scale)
+  current-workload: 3  # 0 = fully booked, 10 = available
+  recent-success-rate: 8.5  # Based on recent task outcomes
+  domain-relevance: 9  # How well agent matches task domain
 ```
+
+Note: weighted-scorer.mjs normalizes weights so only relative proportions matter.
 
 ### Assignment algorithm
 
 Implement weighted scoring:
 
 ```
-agent_score = Σ(dimension_weight * agent_score) * availability_factor * domain_relevance
+agent_score = Σ(dimension_weight * factor_score)
 ```
+
+Note: Remove extra multipliers (availability_factor and domain_relevance) - these should be incorporated as first-class dimensions in the weighted sum.
 
 ### Assignment suggestions API
 
@@ -98,22 +102,25 @@ agentkit suggest-team --task "Add authentication API" --consider-workload
 
 ## Decision matrix factors
 
-| Factor | Weight | Description | Data source |
-|--------|--------|-------------|-------------|
-| Technical expertise | 0.30 | Agent's domain knowledge | Agent scoring |
-| Current workload | 0.25 | Availability and capacity | State tracking |
-| Task complexity fit | 0.20 | Match between task and agent skills | Task classification |
-| Recent performance | 0.15 | Success rate on similar tasks | Event history |
-| Collaboration needs | 0.10 | Cross-team coordination requirements | Task metadata |
+| Factor              | Weight | Description                          | Data source         |
+| ------------------- | ------ | ------------------------------------ | ------------------- |
+| Technical expertise | 0.30   | Agent's domain knowledge             | Agent scoring       |
+| Current workload    | 0.25   | Availability and capacity            | State tracking      |
+| Task complexity fit | 0.20   | Match between task and agent skills  | Task classification |
+| Recent performance  | 0.15   | Success rate on similar tasks        | Event history       |
+| Collaboration needs | 0.10   | Cross-team coordination requirements | Task metadata       |
 
 ## Acceptance criteria
 
 - [ ] Add task classification framework to spec
-- [ ] Implement assignment scoring algorithm
+- [ ] Implement assignment scoring algorithm (advisory only)
 - [ ] Add CLI command for assignment suggestions
-- [ ] Integrate suggestions into orchestrator delegation
+- [ ] Integrate suggestions into orchestrator delegation (post-escalation filtering)
 - [ ] Add assignment tracking and success metrics
 - [ ] Update documentation with assignment strategy
+- [ ] Clarify that scoring cannot override mandatory escalation logic
+
+**Important**: The assignment scoring algorithm and suggestions are advisory only and must be applied after the orchestrator's mandatory escalation logic. Ranking from the scorer cannot override or bypass resolveTeamByArea() and computeEscalation() - suggestions are filtered/ordered post-escalation and cannot remove required teams.
 
 ## Additional context
 
