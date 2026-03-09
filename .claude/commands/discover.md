@@ -6,7 +6,7 @@ description: 'Scans the repository to build a comprehensive understanding of the
 allowed-tools: Bash(git *), Bash(find *), Bash(ls *), Bash(cat *), Bash(head *), Bash(wc *), Bash(mkdir *), Bash(echo *), Bash(printf *), Bash(tee *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-08'
+last_updated: '2026-03-09'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
