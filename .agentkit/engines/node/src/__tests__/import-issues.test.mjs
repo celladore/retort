@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'fs';
-import { resolve } from 'path';
-import { tmpdir } from 'os';
 import { randomBytes } from 'crypto';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { resolve } from 'path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Create isolated temp dirs for each test
 function makeTempDirs() {
@@ -139,7 +139,9 @@ describe('runImportIssues', () => {
     const eventsPath = resolve(dirs.stateDir, 'events.log');
     expect(existsSync(eventsPath)).toBe(true);
     const log = readFileSync(eventsPath, 'utf-8').trim();
-    const event = JSON.parse(log);
+    const lines = log.split('\n').filter((line) => line.trim());
+    expect(lines.length).toBeGreaterThan(0);
+    const event = JSON.parse(lines[lines.length - 1]); // Get the last event
     expect(event.action).toBe('import_issues');
     expect(event.tracker).toBe('GITHUB');
     expect(event.source).toBe('import-issues');

@@ -15,8 +15,10 @@ import {
   writeFileSync,
 } from 'fs';
 import yaml from 'js-yaml';
+import { hostname } from 'os';
 import { resolve } from 'path';
 import { processTaskCompletion, routeTestFailureToTestingTeam } from './agent-integration.mjs';
+import { appendEvent } from './events.mjs';
 import { formatTimestamp } from './runner.mjs';
 import {
   checkDependencies,
@@ -58,6 +60,18 @@ let _teamIdsInitialized = false;
 
 const VALID_TEAM_STATUSES = ['idle', 'in_progress', 'blocked', 'done'];
 const LOCK_STALE_MS = 30 * 60 * 1000; // 30 minutes
+
+/**
+ * Get system hostname with fallback.
+ * @returns {string}
+ */
+function getHostname() {
+  try {
+    return hostname();
+  } catch {
+    return 'unknown';
+  }
+}
 
 /**
  * Load team IDs from teams.yaml spec file.
@@ -106,25 +120,40 @@ export function ensureTeamIds(agentkitRoot) {
  * Matches the canonical issue template area values.
  */
 const DEFAULT_AREA_ROUTING = {
-  backend: 'team-backend',
-  frontend: 'team-frontend',
-  data: 'team-data',
-  infra: 'team-infra',
-  devops: 'team-devops',
-  testing: 'team-testing',
-  security: 'team-security',
-  docs: 'team-docs',
-  product: 'team-product',
-  quality: 'team-quality',
-  cli: 'team-backend',
-  'sync-engine': 'team-devops',
+  backend: 'backend',
+  frontend: 'frontend',
+  data: 'data',
+  infra: 'infra',
+  devops: 'devops',
+  testing: 'testing',
+  security: 'security',
+  docs: 'docs',
+  product: 'product',
+  quality: 'quality',
+  cli: 'backend',
+  'sync-engine': 'devops',
 };
 
 /**
  * Cache for parsed teams.yaml to avoid re-reading on every call.
  * Keyed by resolved agentkitRoot path. Invalidated by process lifetime.
+ * Implements LRU eviction to prevent memory leaks.
  */
 const _teamsSpecCache = new Map();
+const MAX_CACHE_SIZE = 10;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/** Cache entry with timestamp for TTL */
+class CacheEntry {
+  constructor(data) {
+    this.data = data;
+    this.timestamp = Date.now();
+  }
+
+  isExpired() {
+    return Date.now() - this.timestamp > CACHE_TTL_MS;
+  }
+}
 
 /**
  * Load and cache teams.yaml spec from disk.
@@ -134,18 +163,41 @@ const _teamsSpecCache = new Map();
 function loadTeamsSpec(agentkitRoot) {
   if (!agentkitRoot) return null;
   const key = resolve(agentkitRoot);
-  if (_teamsSpecCache.has(key)) return _teamsSpecCache.get(key);
+
+  // Check cache first
+  const cached = _teamsSpecCache.get(key);
+  if (cached && !cached.isExpired()) {
+    // Update LRU order: delete and re-insert to make this entry newest
+    _teamsSpecCache.delete(key);
+    _teamsSpecCache.set(key, cached);
+    return cached.data;
+  }
+
+  // Remove expired entries
+  for (const [cacheKey, entry] of _teamsSpecCache.entries()) {
+    if (entry.isExpired()) {
+      _teamsSpecCache.delete(cacheKey);
+    }
+  }
+
+  // Enforce cache size limit (LRU eviction)
+  if (_teamsSpecCache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = _teamsSpecCache.keys().next().value;
+    _teamsSpecCache.delete(oldestKey);
+  }
+
   try {
     const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
     if (existsSync(teamsPath)) {
       const spec = yaml.load(readFileSync(teamsPath, 'utf-8'));
-      _teamsSpecCache.set(key, spec);
+      _teamsSpecCache.set(key, new CacheEntry(spec));
       return spec;
     }
   } catch {
     /* fall through */
   }
-  _teamsSpecCache.set(key, null);
+
+  _teamsSpecCache.set(key, new CacheEntry(null));
   return null;
 }
 
@@ -161,16 +213,15 @@ export function clearTeamsSpecCache() {
  * Reads intake.routing from teams.yaml if available, falls back to defaults.
  * @param {string} area - One of the canonical issue area values
  * @param {string} [agentkitRoot] - Path to .agentkit directory for reading teams.yaml
- * @returns {string} Team ID (e.g. 'team-backend')
+ * @returns {string} Team ID (e.g. 'backend')
  */
 export function resolveTeamByArea(area, agentkitRoot) {
   const spec = loadTeamsSpec(agentkitRoot);
   const routing = spec?.intake?.routing;
   if (routing && routing[area]) {
-    const team = routing[area];
-    return team.startsWith('team-') ? team : `team-${team}`;
+    return routing[area];
   }
-  return DEFAULT_AREA_ROUTING[area] || 'team-quality';
+  return DEFAULT_AREA_ROUTING[area] || 'quality';
 }
 
 /**
@@ -189,19 +240,19 @@ export function computeEscalation({ area, priority, severity, impact }, agentkit
   const spec = loadTeamsSpec(agentkitRoot);
   const esc = spec?.intake?.escalation;
 
-  let securityTeams = ['team-security', 'team-devops'];
-  let blockedTeams = ['team-product'];
-  let opsTeam = 'team-quality';
+  let securityTeams = ['security', 'devops'];
+  let blockedTeams = ['product'];
+  let opsTeam = 'quality';
 
   if (esc?.securityCritical) {
-    securityTeams = esc.securityCritical.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+    securityTeams = esc.securityCritical;
   }
   if (esc?.blockedCrossTeam) {
-    blockedTeams = esc.blockedCrossTeam.map((t) => (t.startsWith('team-') ? t : `team-${t}`));
+    blockedTeams = esc.blockedCrossTeam;
   }
   const configOps = spec?.intake?.operationsTeam;
   if (configOps) {
-    opsTeam = configOps.startsWith('team-') ? configOps : `team-${configOps}`;
+    opsTeam = configOps;
   }
 
   // Rule 1: Critical severity in security-sensitive areas → security escalation
@@ -471,20 +522,124 @@ export function checkLock(projectRoot) {
 }
 
 // ---------------------------------------------------------------------------
+// Phase Management
+// ---------------------------------------------------------------------------
+
+/**
+ * Advance to the next phase in the lifecycle.
+ * @param {object} state - Current orchestrator state
+ * @returns {{ state: object, advanced?: boolean, error?: string }}
+ */
+export function advancePhase(state) {
+  if (state.completed) {
+    return { state, advanced: false, error: 'already complete' };
+  }
+
+  const currentPhase = state.current_phase || 0;
+  const nextPhase = currentPhase + 1;
+
+  if (nextPhase > 5) {
+    // PHASES goes from 1-5
+    // Mark as completed when advancing past the last phase
+    const newState = cloneState(state);
+    newState.current_phase = nextPhase;
+    newState.phase_name = 'completed';
+    newState.completed = true;
+    newState.phase_updated_at = new Date().toISOString();
+    return { state: newState, advanced: true };
+  }
+
+  return setPhase(state, nextPhase);
+}
+
+/**
+ * Set orchestrator to a specific phase.
+ * @param {object} state - Current orchestrator state
+ * @param {number} phase - Target phase number (1-5)
+ * @returns {{ state: object, error?: string }}
+ */
+export function setPhase(state, phase) {
+  if (!Number.isInteger(phase) || phase < 1 || phase > 5) {
+    return { state, error: `Invalid phase: ${phase}. Valid phases: 1-5` };
+  }
+
+  const newState = cloneState(state);
+  newState.current_phase = phase;
+  newState.phase_name = PHASES[phase];
+  newState.phase_updated_at = new Date().toISOString();
+
+  return { state: newState, advanced: true };
+}
+
+/**
+ * Update a team's status in the orchestrator state.
+ * @param {object} state - Current orchestrator state
+ * @param {string} teamId - Team ID (e.g., 'backend')
+ * @param {string} status - New status ('idle', 'in_progress', 'blocked', 'done')
+ * @param {string} notes - Optional notes about the status change
+ * @returns {{ state: object, error?: string }}
+ */
+export function updateTeamStatus(state, teamId, status, notes = '') {
+  const validStatuses = ['idle', 'in_progress', 'blocked', 'done'];
+  if (!validStatuses.includes(status)) {
+    return { state, error: `Invalid status: ${status}. Valid: ${validStatuses.join(', ')}` };
+  }
+
+  if (!VALID_TEAM_IDS.includes(teamId)) {
+    return { state, error: `Unknown team: ${teamId}` };
+  }
+
+  const newState = cloneState(state);
+  if (!newState.team_progress) {
+    newState.team_progress = {};
+  }
+
+  newState.team_progress[teamId] = {
+    status,
+    notes,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { state: newState };
+}
+
+/**
+ * Release the orchestrator lock.
+ * @param {string} projectRoot
+ * @returns {boolean} True if lock was released
+ */
+export function releaseLock(projectRoot) {
+  const path = lockPath(projectRoot);
+  try {
+    if (existsSync(path)) {
+      unlinkSync(path);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Event Logging — delegated to events.mjs to avoid circular imports.
 // Re-exported here for backward compatibility.
 // ---------------------------------------------------------------------------
 
+// Re-export event functions for backward compatibility
+export { appendEvent, readEvents } from './events.mjs';
+
 /**
  * Generate a human-readable status summary.
  * @param {string} projectRoot
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export function getStatus(projectRoot, agentkitRoot) {
+export async function getStatus(projectRoot, agentkitRoot) {
   if (agentkitRoot) ensureTeamIds(agentkitRoot);
   const state = loadState(projectRoot);
   const lockStatus = checkLock(projectRoot);
-  const events = readEvents(projectRoot, 5);
+  const { readEvents } = await import('./events.mjs');
+  const events = await readEvents(projectRoot, 5);
   const teamProgress = state.team_progress || {};
 
   const lines = [
@@ -906,7 +1061,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
 
   // --status: show current state
   if (flags.status) {
-    console.log(getStatus(projectRoot));
+    console.log(await getStatus(projectRoot));
     return;
   }
 
@@ -956,7 +1111,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
     }
 
     // Default: show status and advance phase if requested
-    console.log(getStatus(projectRoot));
+    console.log(await getStatus(projectRoot));
     console.log('');
     console.log('Use this command within your AI tool as a slash command for full orchestration.');
     console.log(`Current phase: ${state.current_phase}/5 — ${state.phase_name}`);

@@ -3,7 +3,7 @@ name: 'BACKEND'
 description: 'Team BACKEND — API, services, core logic'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-08'
+last_updated: '2026-03-09'
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

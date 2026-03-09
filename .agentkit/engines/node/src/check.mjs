@@ -8,7 +8,7 @@ import { readFile, readdir } from 'fs/promises';
 import yaml from 'js-yaml';
 import { join, resolve } from 'path';
 import { parseCoveragePercentage, resolveCoverageCommand } from './agent-integration.mjs';
-import { appendEvent } from './orchestrator.mjs';
+import { appendEvent } from './events.mjs';
 import { commandExists, execCommand, formatDuration, isValidCommand } from './runner.mjs';
 
 // ---------------------------------------------------------------------------

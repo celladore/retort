@@ -3,7 +3,8 @@
  * Shared event logging helper. All agents and handlers should use this module
  * to write structured JSONL events to .agentkit/state/events.log.
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
+import { appendFile, mkdir, readFile } from 'fs/promises';
 import { resolve } from 'path';
 
 // ---------------------------------------------------------------------------
@@ -31,11 +32,11 @@ function eventsPath(projectRoot) {
  * @param {object} [data={}]   - Arbitrary event payload
  * @param {{ source?: string }} [opts={}] - Options. `source` identifies the emitting module.
  */
-export function emitEvent(projectRoot, action, data = {}, opts = {}) {
+export async function emitEvent(projectRoot, action, data = {}, opts = {}) {
   const dir = eventsDir(projectRoot);
   try {
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
+      await mkdir(dir, { recursive: true });
     }
     const event = {
       ...data,
@@ -43,7 +44,7 @@ export function emitEvent(projectRoot, action, data = {}, opts = {}) {
       action,
       ...(opts.source ? { source: opts.source } : {}),
     };
-    appendFileSync(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
+    await appendFile(eventsPath(projectRoot), JSON.stringify(event) + '\n', 'utf-8');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn(`[agentkit:events] Failed to emit '${action}': ${message}`);
@@ -59,30 +60,37 @@ export function emitEvent(projectRoot, action, data = {}, opts = {}) {
  *
  * @param {string} projectRoot
  * @param {{ limit?: number, action?: string, source?: string }} [opts={}]
- * @returns {object[]}
+ * @returns {Promise<object[]>}
  */
-export function readEvents(projectRoot, opts = {}) {
+export async function readEvents(projectRoot, opts = {}) {
   const { limit = 50, action, source } = opts;
   const path = eventsPath(projectRoot);
   if (!existsSync(path)) return [];
 
-  const lines = readFileSync(path, 'utf-8').trim().split('\n').filter(Boolean);
-  let events = lines
-    .map((line) => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
+  try {
+    const content = await readFile(path, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    let events = lines
+      .map((line) => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
 
-  if (action) {
-    events = events.filter((e) => e.action === action);
-  }
-  if (source) {
-    events = events.filter((e) => e.source === source);
-  }
+    if (action) {
+      events = events.filter((e) => e.action === action);
+    }
+    if (source) {
+      events = events.filter((e) => e.source === source);
+    }
 
-  return events.slice(-limit);
+    // Return most recent events first (reverse chronological order)
+    return events.slice(-limit).reverse();
+  } catch (error) {
+    console.warn(`[agentkit:events] Failed to read events: ${error}`);
+    return [];
+  }
 }

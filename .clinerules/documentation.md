@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-08 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-09 -->
 <!-- Format: Plain Markdown rule. Cline reads .clinerules/ directory. -->
 <!-- Docs: https://docs.cline.bot/customization/cline-rules -->
 

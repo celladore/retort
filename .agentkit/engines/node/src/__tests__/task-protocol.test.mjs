@@ -16,6 +16,7 @@ import {
   generateTaskId,
   getTask,
   listTasks,
+  normalizeTaskId,
   processHandoffs,
   updateTaskStatus,
 } from '../task-protocol.mjs';
@@ -35,17 +36,34 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('generateTaskId', () => {
-  it('generates sequential IDs for the same day', async () => {
+  it('generates timestamp-based IDs', async () => {
     const id1 = await generateTaskId(tmpRoot);
-    expect(id1).toMatch(/^task-\d{8}-001-[a-z0-9]{6}$/);
+    expect(id1).toMatch(/^task-\d{8}-\d{6}-[a-z0-9]{6}$/);
 
-    await createTask(tmpRoot, {
-      title: 'First',
-      delegator: 'test',
-      assignees: ['team-backend'],
-    });
     const id2 = await generateTaskId(tmpRoot);
-    expect(id2).toMatch(/^task-\d{8}-002-[a-z0-9]{6}$/);
+    expect(id2).toMatch(/^task-\d{8}-\d{6}-[a-z0-9]{6}$/);
+    expect(id1).not.toBe(id2); // Should be unique due to time/random
+  });
+});
+
+describe('normalizeTaskId', () => {
+  it('accepts valid task IDs', () => {
+    expect(() => normalizeTaskId('task-123')).not.toThrow();
+    expect(() => normalizeTaskId('valid_task_id')).not.toThrow();
+    expect(() => normalizeTaskId('Task123')).not.toThrow();
+  });
+
+  it('rejects invalid characters', () => {
+    expect(() => normalizeTaskId('task/123')).toThrow('Invalid task ID: task/123');
+    expect(() => normalizeTaskId('task\\123')).toThrow('Invalid task ID: task\\123');
+    expect(() => normalizeTaskId('task.123')).toThrow('Invalid task ID: task.123');
+    expect(() => normalizeTaskId('../task')).toThrow('Invalid task ID: ../task');
+  });
+
+  it('rejects non-string inputs', () => {
+    expect(() => normalizeTaskId(123)).toThrow('Invalid task ID');
+    expect(() => normalizeTaskId(null)).toThrow('Invalid task ID');
+    expect(() => normalizeTaskId(undefined)).toThrow('Invalid task ID');
   });
 });
 
@@ -68,7 +86,7 @@ describe('createTask', () => {
 
     expect(result.error).toBeUndefined();
     expect(result.task).toBeDefined();
-    expect(result.task.id).toMatch(/^task-\d{8}-\d{3}-[a-z0-9]{6}$/);
+    expect(result.task.id).toMatch(/^task-\d{8}-\d{6}-[a-z0-9]{6}$/);
     expect(result.task.status).toBe('submitted');
     expect(result.task.type).toBe('implement');
     expect(result.task.priority).toBe('P1');
@@ -173,6 +191,98 @@ describe('createTask', () => {
       dependsOn: [dep.task.id],
     });
     expect(result.task.blockedBy).toContain(dep.task.id);
+  });
+
+  it('rejects task titles that are too long', async () => {
+    const longTitle = 'a'.repeat(501); // Exceeds MAX_TITLE_LENGTH
+    const result = await createTask(tmpRoot, {
+      title: longTitle,
+      delegator: 'test',
+      assignees: ['team-backend'],
+    });
+    expect(result.task).toBe(null);
+    expect(result.error).toContain('Task title too long');
+  });
+
+  it('rejects malicious script content in title', async () => {
+    const maliciousTitle = '<script>alert("xss")</script>Test Task';
+    const result = await createTask(tmpRoot, {
+      title: maliciousTitle,
+      delegator: 'test',
+      assignees: ['team-backend'],
+    });
+    expect(result.task).toBe(null);
+    expect(result.error).toContain('invalid content');
+  });
+
+  it('rejects oversized context object', async () => {
+    const largeContext = { data: 'x'.repeat(10241) }; // Exceeds MAX_CONTEXT_SIZE
+    const result = await createTask(tmpRoot, {
+      title: 'Test Task',
+      delegator: 'test',
+      assignees: ['team-backend'],
+      context: largeContext,
+    });
+    expect(result.task).toBe(null);
+    expect(result.error).toContain('Context object too large');
+  });
+
+  it('sanitizes HTML content from description', async () => {
+    const result = await createTask(tmpRoot, {
+      title: 'Test Task',
+      description: '<p>Task with <b>bold</b> content</p>',
+      delegator: 'test',
+      assignees: ['team-backend'],
+    });
+    expect(result.task).not.toBe(null);
+    expect(result.task.description).toBe('Task with bold content');
+  });
+
+  it('allows dependencies on completed tasks but rejects other terminal states', async () => {
+    // Create and complete a task first
+    const completedTask = await createTask(tmpRoot, {
+      title: 'Completed Task',
+      delegator: 'test',
+      assignees: ['team-backend'],
+    });
+    await updateTaskStatus(tmpRoot, completedTask.task.id, 'accepted');
+    await updateTaskStatus(tmpRoot, completedTask.task.id, 'working');
+    await updateTaskStatus(tmpRoot, completedTask.task.id, 'completed');
+
+    // Verify the task is actually completed
+    const completedCheck = await getTask(tmpRoot, completedTask.task.id);
+    expect(completedCheck.task.status).toBe('completed');
+
+    // Should be able to create a task depending on the completed task
+    const result = await createTask(tmpRoot, {
+      title: 'Dependent Task',
+      delegator: 'test',
+      assignees: ['team-backend'],
+      dependsOn: [completedTask.task.id],
+    });
+    expect(result.task).not.toBe(null);
+    expect(result.task.dependsOn).toEqual([completedTask.task.id]);
+    expect(result.task.blockedBy).toEqual([]); // Completed tasks don't block
+
+    // Create a failed task
+    const failedTask = await createTask(tmpRoot, {
+      title: 'Failed Task',
+      delegator: 'test',
+      assignees: ['team-backend'],
+    });
+    await updateTaskStatus(tmpRoot, failedTask.task.id, 'accepted');
+    await updateTaskStatus(tmpRoot, failedTask.task.id, 'working');
+    await updateTaskStatus(tmpRoot, failedTask.task.id, 'failed');
+
+    // Should NOT be able to depend on failed task
+    const failedDepResult = await createTask(tmpRoot, {
+      title: 'Depends on Failed',
+      delegator: 'test',
+      assignees: ['team-backend'],
+      dependsOn: [failedTask.task.id],
+    });
+    expect(failedDepResult.task).toBe(null);
+    expect(failedDepResult.error).toContain('terminal state');
   });
 });
 

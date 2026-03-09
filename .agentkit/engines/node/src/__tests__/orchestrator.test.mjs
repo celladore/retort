@@ -1,25 +1,25 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  loadState,
-  saveState,
-  acquireLock,
-  releaseLock,
-  checkLock,
-  appendEvent,
-  readEvents,
-  advancePhase,
-  setPhase,
-  updateTeamStatus,
-  getStatus,
   PHASES,
   VALID_TEAM_IDS,
-  getTasksSummary,
-  resolveTeamByArea,
-  computeEscalation,
+  acquireLock,
+  advancePhase,
+  appendEvent,
+  checkLock,
   clearTeamsSpecCache,
+  computeEscalation,
+  getStatus,
+  getTasksSummary,
+  loadState,
+  readEvents,
+  releaseLock,
+  resolveTeamByArea,
+  saveState,
+  setPhase,
+  updateTeamStatus,
 } from '../orchestrator.mjs';
 
 // Use a temporary directory for tests
@@ -205,9 +205,11 @@ describe('orchestrator', () => {
 
       const events = await readEvents(TEST_ROOT);
       expect(events).toHaveLength(2);
-      expect(events[0].action).toBe('test_action');
-      expect(events[0].team).toBe('team-backend');
-      expect(events[1].action).toBe('test_action_2');
+      expect(events[0].action).toBe('test_action_2'); // Most recent first
+      expect(events[0].data).toBe('world');
+      expect(events[1].action).toBe('test_action'); // Earlier event
+      expect(events[1].team).toBe('team-backend');
+      expect(events[1].data).toBe('hello');
       expect(events[0].timestamp).toBeDefined();
     });
 
@@ -222,8 +224,10 @@ describe('orchestrator', () => {
       }
       const events = await readEvents(TEST_ROOT, 3);
       expect(events).toHaveLength(3);
-      // Should return the LAST 3 events
-      expect(events[0].action).toBe('action_7');
+      // Should return the LAST 3 events (most recent first)
+      expect(events[0].action).toBe('action_9'); // Most recent
+      expect(events[1].action).toBe('action_8'); // Middle
+      expect(events[2].action).toBe('action_7'); // Oldest of the 3
     });
   });
 
@@ -418,14 +422,14 @@ describe('orchestrator', () => {
     });
 
     it('returns default routing for known areas without config', () => {
-      expect(resolveTeamByArea('backend')).toBe('team-backend');
-      expect(resolveTeamByArea('frontend')).toBe('team-frontend');
-      expect(resolveTeamByArea('cli')).toBe('team-backend');
-      expect(resolveTeamByArea('sync-engine')).toBe('team-devops');
+      expect(resolveTeamByArea('backend')).toBe('backend');
+      expect(resolveTeamByArea('frontend')).toBe('frontend');
+      expect(resolveTeamByArea('cli')).toBe('backend');
+      expect(resolveTeamByArea('sync-engine')).toBe('devops');
     });
 
-    it('falls back to team-quality for unknown areas', () => {
-      expect(resolveTeamByArea('unknown-area')).toBe('team-quality');
+    it('falls back to quality for unknown areas', () => {
+      expect(resolveTeamByArea('unknown-area')).toBe('quality');
     });
 
     it('reads routing from teams.yaml when available', () => {
@@ -435,12 +439,12 @@ describe('orchestrator', () => {
         'intake:\n  routing:\n    backend: custom-backend-team\n',
         'utf-8'
       );
-      expect(resolveTeamByArea('backend', AGENTKIT_ROOT)).toBe('team-custom-backend-team');
+      expect(resolveTeamByArea('backend', AGENTKIT_ROOT)).toBe('custom-backend-team');
       // Other areas still use defaults
-      expect(resolveTeamByArea('frontend', AGENTKIT_ROOT)).toBe('team-frontend');
+      expect(resolveTeamByArea('frontend', AGENTKIT_ROOT)).toBe('frontend');
     });
 
-    it('handles teams.yaml with team- prefix already present', () => {
+    it('preserves teams.yaml routing values as-is', () => {
       clearTeamsSpecCache();
       mkdirSync(resolve(AGENTKIT_ROOT, 'spec'), { recursive: true });
       writeFileSync(
@@ -466,34 +470,34 @@ describe('orchestrator', () => {
 
     it('escalates critical security issues to security teams', () => {
       const result = computeEscalation({ area: 'security', priority: 'P0', severity: 'critical' });
-      expect(result).toContain('team-security');
-      expect(result).toContain('team-devops');
+      expect(result).toContain('security');
+      expect(result).toContain('devops');
     });
 
     it('escalates critical backend issues to security teams', () => {
       const result = computeEscalation({ area: 'backend', priority: 'P1', severity: 'critical' });
-      expect(result).toContain('team-security');
+      expect(result).toContain('security');
     });
 
     it('does not escalate critical docs issues to security teams', () => {
       const result = computeEscalation({ area: 'docs', priority: 'P0', severity: 'critical' });
       // P0 still triggers ops team, but not security escalation for docs area
-      expect(result).not.toContain('team-security');
+      expect(result).not.toContain('security');
     });
 
     it('escalates all-users P0 to blocked cross-team', () => {
       const result = computeEscalation({ area: 'frontend', priority: 'P0', impact: 'all users' });
-      expect(result).toContain('team-product');
+      expect(result).toContain('product');
     });
 
     it('does not escalate P1 all-users impact', () => {
       const result = computeEscalation({ area: 'frontend', priority: 'P1', impact: 'all users' });
-      expect(result).not.toContain('team-product');
+      expect(result).not.toContain('product');
     });
 
     it('notifies operations team for any P0', () => {
       const result = computeEscalation({ area: 'docs', priority: 'P0' });
-      expect(result).toContain('team-quality');
+      expect(result).toContain('quality');
     });
 
     it('reads operations team from config', () => {
@@ -507,9 +511,9 @@ describe('orchestrator', () => {
         { area: 'backend', priority: 'P0', severity: 'critical', impact: 'all users' },
         AGENTKIT_ROOT
       );
-      expect(result).toContain('team-devops');
-      expect(result).toContain('team-infra');
-      expect(result).toContain('team-engineering');
+      expect(result).toContain('devops');
+      expect(result).toContain('infra');
+      expect(result).toContain('engineering');
     });
   });
 });

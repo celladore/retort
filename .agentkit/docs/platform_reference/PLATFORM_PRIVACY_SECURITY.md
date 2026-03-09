@@ -227,23 +227,23 @@ and control over where code is processed.
 
 ## References
 
-| ID  | Source                         | URL                                                |
-| --- | ------------------------------ | -------------------------------------------------- |
-| S1  | Cursor Privacy & Security      | https://cursor.com/privacy                         |
-| S2  | Windsurf Privacy Policy        | https://windsurf.com/privacy                       |
-| S3  | Warp Privacy & Security        | https://www.warp.dev/security                      |
-| S4  | GitHub Copilot Trust Center    | https://resources.github.com/copilot-trust-center/ |
-| S5  | Cline Privacy                  | https://docs.cline.bot/                            |
-| S6  | Roo Code Privacy               | https://docs.roocode.com/                          |
-| S7  | Sourcegraph Security           | https://sourcegraph.com/security                   |
-| S8  | Amazon Q Security & Compliance | https://aws.amazon.com/q/developer/security/       |
-| S9  | Continue Privacy               | https://docs.continue.dev/                         |
-| S10 | Anthropic Security             | https://www.anthropic.com/security                 |
-| S11 | OpenAI Security                | https://openai.com/security                        |
-| S12 | Aider Privacy (BYOK)           | https://aider.chat/docs/config.html                |
-| S13 | Google Gemini Privacy          | https://ai.google.dev/terms                        |
-| S14 | Amp / Sourcegraph Security     | https://sourcegraph.com/security                   |
-| S15 | OpenCode (open-source)         | https://github.com/opencode-ai/opencode            |
+| ID  | Source                         | URL                                                  |
+| --- | ------------------------------ | ---------------------------------------------------- |
+| S1  | Cursor Privacy & Security      | <https://cursor.com/privacy>                         |
+| S2  | Windsurf Privacy Policy        | <https://windsurf.com/privacy>                       |
+| S3  | Warp Privacy & Security        | <https://www.warp.dev/security>                      |
+| S4  | GitHub Copilot Trust Center    | <https://resources.github.com/copilot-trust-center/> |
+| S5  | Cline Privacy                  | <https://docs.cline.bot/>                            |
+| S6  | Roo Code Privacy               | <https://docs.roocode.com/>                          |
+| S7  | Sourcegraph Security           | <https://sourcegraph.com/security>                   |
+| S8  | Amazon Q Security & Compliance | <https://aws.amazon.com/q/developer/security/>       |
+| S9  | Continue Privacy               | <https://docs.continue.dev/>                         |
+| S10 | Anthropic Security             | <https://www.anthropic.com/security>                 |
+| S11 | OpenAI Security                | <https://openai.com/security>                        |
+| S12 | Aider Privacy (BYOK)           | <https://aider.chat/docs/config.html>                |
+| S13 | Google Gemini Privacy          | <https://ai.google.dev/terms>                        |
+| S14 | Amp / Sourcegraph Security     | <https://sourcegraph.com/security>                   |
+| S15 | OpenCode (open-source)         | <https://github.com/opencode-ai/opencode>            |
 
 ---
 

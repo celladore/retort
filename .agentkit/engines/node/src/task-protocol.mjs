@@ -5,13 +5,19 @@
  * messages, artifacts, dependency tracking, and chained handoffs.
  */
 import { existsSync } from 'fs';
-import { access, mkdir, open, readdir, readFile, rename, unlink, writeFile } from 'fs/promises';
+import { access, mkdir, open, readdir, readFile, rename, unlink } from 'fs/promises';
 import { resolve } from 'path';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
+
+/** Maximum task title length to prevent DoS */
+const MAX_TITLE_LENGTH = 500;
+
+/** Maximum context object size (serialized) to prevent memory exhaustion */
+const MAX_CONTEXT_SIZE = 10240; // 10KB
 
 /** Valid task lifecycle states. */
 export const TASK_STATES = [
@@ -80,12 +86,13 @@ function tasksDir(projectRoot) {
   return resolve(projectRoot, '.agentkit', 'state', 'tasks');
 }
 
-const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/;
+const TASK_ID_PATH_PATTERN = /^[A-Za-z0-9_-]+$/; // Defense-in-depth: blocks path traversal chars (., /, \)
 
-function normalizeTaskId(taskId) {
+export function normalizeTaskId(taskId) {
   if (typeof taskId !== 'string' || !TASK_ID_PATH_PATTERN.test(taskId)) {
     throw new Error(`Invalid task ID: ${taskId}`);
   }
+
   return taskId;
 }
 
@@ -102,6 +109,68 @@ async function ensureTasksDir(projectRoot) {
   // existsSync is fine for a quick check, but mkdir with recursive: true is safe to call anyway
   await mkdir(dir, { recursive: true });
   return dir;
+}
+
+// ---------------------------------------------------------------------------
+// Input Validation and Sanitization
+// ---------------------------------------------------------------------------
+
+/**
+ * Sanitize text content to prevent injection attacks.
+ * @param {string} text - Input text to sanitize
+ * @returns {string} Sanitized text
+ */
+function sanitizeText(text) {
+  if (typeof text !== 'string') return '';
+
+  // Check for dangerous content before stripping
+  const dangerousPatterns = [
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i,
+    /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/i,
+    /javascript:/i,
+    /on\w+\s*=/i,
+  ];
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(text)) {
+      return ''; // Reject dangerous content entirely
+    }
+  }
+
+  // Remove only real HTML tags, preserve literal angle brackets
+  return text
+    .replace(/<[A-Za-z\/][^>]*>/g, '') // Remove HTML tags starting with letter or slash
+    .replace(/</g, '&lt;') // Escape remaining <
+    .replace(/>/g, '&gt;') // Escape remaining >
+    .trim();
+}
+
+/**
+ * Validate context object size and structure.
+ * @param {object} context - Context object to validate
+ * @returns {{ valid: boolean, error?: string }}
+ */
+function validateContext(context) {
+  if (!context || typeof context !== 'object') {
+    return { valid: true }; // Empty or null context is fine
+  }
+
+  try {
+    const serialized = JSON.stringify(context);
+    if (Buffer.byteLength(serialized, 'utf8') > MAX_CONTEXT_SIZE) {
+      return {
+        valid: false,
+        error: `Context object too large (max ${MAX_CONTEXT_SIZE} bytes)`,
+      };
+    }
+  } catch (error) {
+    return {
+      valid: false,
+      error: 'Context object contains non-serializable data',
+    };
+  }
+
+  return { valid: true };
 }
 
 /**
@@ -167,64 +236,18 @@ function generateRandomSuffix() {
 }
 
 /**
- * Generate a task ID in the format: task-YYYYMMDD-NNN-XXXXXX
- * NNN is a zero-padded sequence number based on existing tasks for that day.
- * XXXXXX is a short collision-resistant suffix.
+ * Generate a unique task ID using timestamp + random approach.
+ * Format: task-YYYYMMDD-HHMMSS-XXXXXX
  * @param {string} projectRoot
  * @returns {Promise<string>}
  */
 export async function generateTaskId(projectRoot) {
   const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const prefix = `task-${dateStr}-`;
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+  const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, ''); // HHMMSS
+  const randomSuffix = generateRandomSuffix();
 
-  const dir = tasksDir(projectRoot);
-  let seq = 1;
-
-  try {
-    const dirExists = await access(dir)
-      .then(() => true)
-      .catch(() => false);
-    if (dirExists) {
-      const files = await readdir(dir);
-      // Single pass to find max sequence number
-      let maxSeq = 0;
-      for (const f of files) {
-        if (f.startsWith(prefix) && f.endsWith('.json')) {
-          const remainder = f.substring(prefix.length);
-          const seqStr = remainder.split('-')[0];
-          const n = parseInt(seqStr, 10);
-          if (!isNaN(n) && n > maxSeq) {
-            maxSeq = n;
-          }
-        }
-      }
-      seq = maxSeq + 1;
-    }
-  } catch {
-    // Directory might not exist or other error, fallback to seq=1
-  }
-
-  const maxRetries = 1000;
-  let attempts = 0;
-  let candidate = `${prefix}${String(seq).padStart(3, '0')}-${generateRandomSuffix()}`;
-
-  while (attempts < maxRetries) {
-    const p = taskPath(projectRoot, candidate);
-    const exists = await access(p)
-      .then(() => true)
-      .catch(() => false);
-    if (!exists) {
-      return candidate;
-    }
-    attempts += 1;
-    seq += 1;
-    candidate = `${prefix}${String(seq).padStart(3, '0')}-${generateRandomSuffix()}`;
-  }
-
-  throw new Error(
-    `generateTaskId: exceeded max retries (${maxRetries}) resolving collision in ${projectRoot}`
-  );
+  return `task-${dateStr}-${timeStr}-${randomSuffix}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -235,55 +258,29 @@ async function writeTaskFile(projectRoot, taskId, data) {
   await ensureTasksDir(projectRoot);
   const path = taskPath(projectRoot, taskId);
   const tmpPath = `${path}.${process.pid}.${Date.now()}.${generateRandomSuffix()}.tmp`;
-  await writeFile(tmpPath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+
+  // Use atomic file creation with O_EXCL to prevent race conditions
   try {
+    // Create temp file with exclusive semantics
+    const fileHandle = await open(tmpPath, 'wx');
+    try {
+      await fileHandle.writeFile(JSON.stringify(data, null, 2) + '\n', 'utf-8');
+    } finally {
+      await fileHandle.close();
+    }
     await rename(tmpPath, path);
   } catch (err) {
-    if (err?.code === 'EEXIST') {
-      // Retry with exponential backoff without unlinking first
-      let retryCount = 0;
-      const maxRetries = 4;
-      const baseDelay = 50;
+    // Clean up temp file on any error
+    try {
+      await unlink(tmpPath);
+    } catch {
+      /* ignore cleanup errors */
+    }
 
-      while (retryCount < maxRetries) {
-        try {
-          // On Windows, attempt atomic replace by removing target first
-          if (process.platform === 'win32') {
-            try {
-              await unlink(path);
-            } catch (unlinkErr) {
-              if (unlinkErr?.code !== 'ENOENT') {
-                throw unlinkErr;
-              }
-              // ENOENT is fine - target doesn't exist, continue with rename
-            }
-          }
-          // Attempt atomic replace directly
-          await rename(tmpPath, path);
-          return;
-        } catch (retryErr) {
-          if (retryErr?.code === 'EEXIST' && retryCount < maxRetries - 1) {
-            retryCount++;
-            const delay = baseDelay * Math.pow(2, retryCount) + Math.random() * 50;
-            await new Promise((resolve) => setTimeout(resolve, delay));
-            continue;
-          }
-          // Final cleanup on last retry or different error
-          try {
-            await unlink(tmpPath);
-          } catch {
-            /* ignore cleanup errors */
-          }
-          throw retryErr;
-        }
-      }
+    if (err?.code === 'EEXIST') {
+      // File already exists, this should be rare with our new ID generation
+      throw new Error(`Task file already exists: ${taskId}`);
     } else {
-      // Non-EEXIST error, cleanup temp file
-      try {
-        await unlink(tmpPath);
-      } catch {
-        /* ignore cleanup errors */
-      }
       throw err;
     }
   }
@@ -315,12 +312,33 @@ export async function createTask(projectRoot, taskData) {
   if (!taskData.title || typeof taskData.title !== 'string') {
     return { task: null, error: 'Task title is required' };
   }
+  if (taskData.title.length > MAX_TITLE_LENGTH) {
+    return {
+      task: null,
+      error: `Task title too long (max ${MAX_TITLE_LENGTH} characters)`,
+    };
+  }
   if (!taskData.delegator || typeof taskData.delegator !== 'string') {
     return { task: null, error: 'Task delegator is required' };
   }
   if (!Array.isArray(taskData.assignees) || taskData.assignees.length === 0) {
     return { task: null, error: 'At least one assignee is required' };
   }
+
+  // Validate and sanitize context
+  const contextValidation = validateContext(taskData.context);
+  if (!contextValidation.valid) {
+    return { task: null, error: contextValidation.error };
+  }
+
+  // Sanitize text fields
+  const sanitizedTitle = sanitizeText(taskData.title);
+  const sanitizedDescription = sanitizeText(taskData.description || '');
+
+  if (!sanitizedTitle) {
+    return { task: null, error: 'Task title contains invalid content' };
+  }
+
   if (taskData.type && !TASK_TYPES.includes(taskData.type)) {
     return {
       task: null,
@@ -346,7 +364,7 @@ export async function createTask(projectRoot, taskData) {
     };
   }
 
-  // Validate dependsOn references exist
+  // Validate dependsOn references exist and are in valid states
   if (Array.isArray(taskData.dependsOn)) {
     for (const depId of taskData.dependsOn) {
       if (!TASK_ID_PATH_PATTERN.test(depId)) {
@@ -354,6 +372,26 @@ export async function createTask(projectRoot, taskData) {
       }
       if (!existsSync(taskPath(projectRoot, depId))) {
         return { task: null, error: `Dependency task not found: ${depId}` };
+      }
+
+      // Check if dependency is in an inappropriate terminal state
+      // Allow completed dependencies, but reject failed/rejected/canceled
+      const depTask = await getTask(projectRoot, depId);
+      if (depTask.task) {
+        const depStatus = depTask.task.status;
+        const inappropriateTerminalStates = [
+          'failed',
+          'rejected',
+          'canceled',
+          'BLOCKED_ON_CANCELED',
+        ];
+        if (inappropriateTerminalStates.includes(depStatus)) {
+          return {
+            task: null,
+            error: `Cannot depend on task in terminal state: ${depId} (status: ${depStatus})`,
+          };
+        }
+        // Note: completed dependencies are allowed and will be handled by the blocking logic
       }
     }
   }
@@ -376,8 +414,8 @@ export async function createTask(projectRoot, taskData) {
     dependsOn: taskData.dependsOn || [],
     blockedBy: [],
 
-    title: taskData.title,
-    description: taskData.description || '',
+    title: sanitizedTitle,
+    description: sanitizedDescription,
     acceptanceCriteria: taskData.acceptanceCriteria || [],
     scope: taskData.scope || [],
     context: taskData.context || {},
@@ -387,7 +425,7 @@ export async function createTask(projectRoot, taskData) {
         role: 'delegator',
         from: taskData.delegator,
         timestamp: now,
-        content: taskData.description || taskData.title,
+        content: sanitizedDescription || sanitizedTitle,
       },
     ],
 
@@ -404,6 +442,7 @@ export async function createTask(projectRoot, taskData) {
       const dep = await getTask(projectRoot, depId);
       if (!dep.task) continue;
       const depStatus = dep.task.status;
+      // Only block on non-completed tasks (terminal states are already validated above)
       if (depStatus !== 'completed') {
         blockers.add(depId);
       }

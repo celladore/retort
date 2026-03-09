@@ -3,7 +3,7 @@ description: 'Imports issues from the configured external tracker (GitHub or Lin
 allowed-tools: Bash(gh *), Bash(linear *), Read, Write, Edit, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-08'
+last_updated: '2026-03-09'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

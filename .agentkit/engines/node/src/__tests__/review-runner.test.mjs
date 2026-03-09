@@ -2,14 +2,14 @@ import { existsSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import * as orchestrator from '../orchestrator.mjs';
+import * as eventEmitter from '../event-emitter.mjs';
+import * as events from '../events.mjs';
 import {
-  runReview,
-  normalizeSeverity,
   convertFindingsToTasks,
+  normalizeSeverity,
+  runReview,
   trackUnfixedFindings,
 } from '../review-runner.mjs';
-import * as eventEmitter from '../event-emitter.mjs';
 import * as runner from '../runner.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -45,7 +45,7 @@ describe('review-runner', () => {
       if (cmd.includes('git diff')) return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
       return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
     });
-    vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+    vi.spyOn(events, 'appendEvent').mockImplementation(() => {});
   }
 
   describe('secret scanning', () => {
@@ -263,7 +263,7 @@ describe('review-runner', () => {
             };
           return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
         });
-        vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+        vi.spyOn(events, 'appendEvent').mockImplementation(() => {});
         vi.spyOn(console, 'log').mockImplementation(() => {});
 
         await expect(

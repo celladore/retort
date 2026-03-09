@@ -57,8 +57,8 @@ Without that, memory support risks becoming inconsistent, overly implicit, or un
 
 ## Sub-Issues
 
-| #   | File                                   | Title                                              | Priority | Status |
-| --- | -------------------------------------- | -------------------------------------------------- | -------- | ------ |
-| 020 | `020-memory-model-and-storage.md`      | Define memory model, storage boundaries, and scope | P1       | Open   |
-| 021 | `021-memory-governance-and-controls.md`| Add memory governance, privacy, and user controls  | P1       | Open   |
-| 022 | `022-memory-generated-output-support.md` | Integrate memory guidance into generated outputs  | P2       | Open   |
+| #   | File                                     | Title                                              | Priority | Status |
+| --- | ---------------------------------------- | -------------------------------------------------- | -------- | ------ |
+| 020 | `020-memory-model-and-storage.md`        | Define memory model, storage boundaries, and scope | P1       | Open   |
+| 021 | `021-memory-governance-and-controls.md`  | Add memory governance, privacy, and user controls  | P1       | Open   |
+| 022 | `022-memory-generated-output-support.md` | Integrate memory guidance into generated outputs   | P2       | Open   |

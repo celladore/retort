@@ -9,12 +9,12 @@ import { resolve } from 'path';
 import {
   readBacklogJson,
   readBacklogMarkdown,
+  sortItems,
   writeBacklogJson,
   writeBacklogMarkdown,
-  sortItems,
 } from './backlog-store.mjs';
 import { emitEvent } from './event-emitter.mjs';
-import { normalizeIssue, deduplicateItems, inferCategoryScores } from './issue-normalizer.mjs';
+import { deduplicateItems, inferCategoryScores, normalizeIssue } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
 import { calculateScore } from './weighted-scorer.mjs';
 
@@ -121,7 +121,7 @@ export async function runImportIssues({ agentkitRoot, projectRoot, flags }) {
   await writeBacklogMarkdown(projectRoot, sorted, repoName);
 
   // Emit structured event
-  emitEvent(
+  await emitEvent(
     projectRoot,
     'import_issues',
     {

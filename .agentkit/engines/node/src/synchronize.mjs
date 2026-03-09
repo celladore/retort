@@ -58,6 +58,10 @@ export function getTemplateMeta(relPath) {
   return templateMetaMap.get(relPath.replace(/\\/g, '/')) || null;
 }
 
+function getTeamCommandStem(teamId) {
+  return teamId.startsWith('team-') ? teamId : `team-${teamId}`;
+}
+
 // ---------------------------------------------------------------------------
 // Three-way merge for managed scaffold files
 // ---------------------------------------------------------------------------
@@ -793,7 +797,10 @@ async function syncClaudeCommands(
     const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, teamTemplatePath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.claude', 'commands', `team-${team.id}.md`), withHeader);
+    await writeOutput(
+      join(tmpDir, '.claude', 'commands', `${getTeamCommandStem(team.id)}.md`),
+      withHeader
+    );
   }
 }
 
@@ -847,7 +854,7 @@ async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, c
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
     if (!isItemFeatureEnabled(cmd, vars)) continue;
-    const cmdVars = buildCommandVars(cmd, vars);
+    const cmdVars = buildCommandVars(cmd, vars, '.claude/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(join(tmpDir, '.claude', 'skills', cmd.name, 'SKILL.md'), withHeader);
@@ -896,7 +903,10 @@ Scope all operations to the team's owned paths.
     const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.mdc', version, repoName);
-    await writeOutput(join(tmpDir, '.cursor', 'rules', `team-${team.id}.mdc`), withHeader);
+    await writeOutput(
+      join(tmpDir, '.cursor', 'rules', `${getTeamCommandStem(team.id)}.mdc`),
+      withHeader
+    );
   }
 }
 
@@ -951,7 +961,10 @@ Scope all operations to the team's owned paths.
     const teamVars = buildTeamVars(team, vars, teamsSpec, agentsSpec);
     const rendered = renderTemplate(teamTemplate, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.windsurf', 'rules', `team-${team.id}.md`), withHeader);
+    await writeOutput(
+      join(tmpDir, '.windsurf', 'rules', `${getTeamCommandStem(team.id)}.md`),
+      withHeader
+    );
   }
 }
 
@@ -1069,7 +1082,7 @@ async function syncCopilotChatModes(
     const rendered = renderTemplate(template, teamVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     await writeOutput(
-      join(tmpDir, '.github', 'chatmodes', `team-${team.id}.chatmode.md`),
+      join(tmpDir, '.github', 'chatmodes', `${getTeamCommandStem(team.id)}.chatmode.md`),
       withHeader
     );
   }
@@ -1468,23 +1481,23 @@ function buildTeamVars(team, vars, teamsSpec, agentsSpec) {
  */
 function buildAreaRoutingTable(teamsIntake) {
   const defaultRouting = {
-    backend: 'team-backend',
-    frontend: 'team-frontend',
-    data: 'team-data',
-    infra: 'team-infra',
-    devops: 'team-devops',
-    testing: 'team-testing',
-    security: 'team-security',
-    docs: 'team-docs',
-    product: 'team-product',
-    quality: 'team-quality',
-    cli: 'team-backend',
-    'sync-engine': 'team-devops',
+    backend: 'backend',
+    frontend: 'frontend',
+    data: 'data',
+    infra: 'infra',
+    devops: 'devops',
+    testing: 'testing',
+    security: 'security',
+    docs: 'docs',
+    product: 'product',
+    quality: 'quality',
+    cli: 'backend',
+    'sync-engine': 'devops',
   };
   const routing = teamsIntake?.routing || {};
   const merged = { ...defaultRouting };
   for (const [area, team] of Object.entries(routing)) {
-    merged[area] = team.startsWith('team-') ? team : `team-${team}`;
+    merged[area] = team; // Use bare team IDs consistently
   }
   return Object.entries(merged)
     .map(([area, team]) => `\`${area}\`→${team}`)
