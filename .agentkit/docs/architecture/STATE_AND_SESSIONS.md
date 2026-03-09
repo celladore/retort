@@ -213,9 +213,11 @@ This removes the lock file regardless of its age or owner.
 If the orchestrator state file becomes corrupted (malformed JSON, inconsistent phase data, etc.):
 
 1. Delete the state file:
+
    ```bash
    rm .claude/state/orchestrator.json
    ```
+
 2. Re-run `/orchestrate` to start a fresh orchestration session.
 
 The events log is not affected and can still be used for auditing what happened before the reset.

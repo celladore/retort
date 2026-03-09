@@ -355,33 +355,33 @@ All platforms ranked by weighted score, regardless of category.
 
 ## References
 
-| ID  | Source                                             | URL                                                                                                             |
-| --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| R1  | Cursor official documentation                      | https://docs.cursor.com/                                                                                        |
-| R2  | Cursor model selection and benchmarks              | https://cursor.com/blog                                                                                         |
-| R3  | Cursor Rules deep dive — design.dev                | https://design.dev/guides/cursor-rules/                                                                         |
-| R4  | Windsurf Cascade documentation                     | https://docs.windsurf.com/windsurf/cascade                                                                      |
-| R5  | Windsurf vs Cursor comparison — independent review | https://www.builder.io/blog/cursor-vs-windsurf                                                                  |
-| R6  | Warp Rules documentation                           | https://docs.warp.dev/agent-platform/capabilities/rules                                                         |
-| R7  | GitHub Copilot custom instructions                 | https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot |
-| R8  | GitHub Copilot coding agent changelog              | https://github.blog/changelog/2025-08-28-copilot-coding-agent-now-supports-agents-md-custom-instructions/       |
-| R9  | Cline Rules documentation                          | https://docs.cline.bot/customization/cline-rules                                                                |
-| R10 | Roo Code features documentation                    | https://docs.roocode.com/features/                                                                              |
-| R11 | Sourcegraph Cody documentation                     | https://sourcegraph.com/docs/cody                                                                               |
-| R12 | Amazon Q Developer documentation                   | https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html                                           |
-| R13 | Continue Rules documentation                       | https://docs.continue.dev/customize/rules                                                                       |
-| R14 | Claude Code documentation — Extending Claude       | https://docs.anthropic.com/en/docs/claude-code                                                                  |
-| R15 | SWE-bench Verified leaderboard                     | https://www.swebench.com/                                                                                       |
-| R16 | OpenAI Codex — AGENTS.md guides                    | https://developers.openai.com/codex/guides/agents-md                                                            |
-| R17 | OpenAI Codex benchmarks — Codex-1 model            | https://openai.com/index/introducing-codex/                                                                     |
-| R18 | Aider documentation                                | https://aider.chat/                                                                                             |
-| R19 | Aider polyglot leaderboard                         | https://aider.chat/docs/leaderboards/                                                                           |
-| R20 | Gemini CLI configuration docs                      | https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html                                  |
-| R21 | Amp by Sourcegraph                                 | https://ampcode.com/docs                                                                                        |
-| R22 | OpenCode GitHub repository                         | https://github.com/opencode-ai/opencode                                                                         |
-| R23 | Google Jules                                       | https://jules.google/                                                                                           |
-| R24 | Factory — autonomous coding                        | https://www.factory.ai/                                                                                         |
-| R25 | GitHub Copilot Coding Agent                        | https://docs.github.com/en/copilot/using-github-copilot/using-the-github-copilot-coding-agent                   |
+| ID  | Source                                             | URL                                                                                                               |
+| --- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| R1  | Cursor official documentation                      | <https://docs.cursor.com/>                                                                                        |
+| R2  | Cursor model selection and benchmarks              | <https://cursor.com/blog>                                                                                         |
+| R3  | Cursor Rules deep dive — design.dev                | <https://design.dev/guides/cursor-rules/>                                                                         |
+| R4  | Windsurf Cascade documentation                     | <https://docs.windsurf.com/windsurf/cascade>                                                                      |
+| R5  | Windsurf vs Cursor comparison — independent review | <https://www.builder.io/blog/cursor-vs-windsurf>                                                                  |
+| R6  | Warp Rules documentation                           | <https://docs.warp.dev/agent-platform/capabilities/rules>                                                         |
+| R7  | GitHub Copilot custom instructions                 | <https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot> |
+| R8  | GitHub Copilot coding agent changelog              | <https://github.blog/changelog/2025-08-28-copilot-coding-agent-now-supports-agents-md-custom-instructions/>       |
+| R9  | Cline Rules documentation                          | <https://docs.cline.bot/customization/cline-rules>                                                                |
+| R10 | Roo Code features documentation                    | <https://docs.roocode.com/features/>                                                                              |
+| R11 | Sourcegraph Cody documentation                     | <https://sourcegraph.com/docs/cody>                                                                               |
+| R12 | Amazon Q Developer documentation                   | <https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html>                                           |
+| R13 | Continue Rules documentation                       | <https://docs.continue.dev/customize/rules>                                                                       |
+| R14 | Claude Code documentation — Extending Claude       | <https://docs.anthropic.com/en/docs/claude-code>                                                                  |
+| R15 | SWE-bench Verified leaderboard                     | <https://www.swebench.com/>                                                                                       |
+| R16 | OpenAI Codex — AGENTS.md guides                    | <https://developers.openai.com/codex/guides/agents-md>                                                            |
+| R17 | OpenAI Codex benchmarks — Codex-1 model            | <https://openai.com/index/introducing-codex/>                                                                     |
+| R18 | Aider documentation                                | <https://aider.chat/>                                                                                             |
+| R19 | Aider polyglot leaderboard                         | <https://aider.chat/docs/leaderboards/>                                                                           |
+| R20 | Gemini CLI configuration docs                      | <https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html>                                  |
+| R21 | Amp by Sourcegraph                                 | <https://ampcode.com/docs>                                                                                        |
+| R22 | OpenCode GitHub repository                         | <https://github.com/opencode-ai/opencode>                                                                         |
+| R23 | Google Jules                                       | <https://jules.google/>                                                                                           |
+| R24 | Factory — autonomous coding                        | <https://www.factory.ai/>                                                                                         |
+| R25 | GitHub Copilot Coding Agent                        | <https://docs.github.com/en/copilot/using-github-copilot/using-the-github-copilot-coding-agent>                   |
 
 ---
 

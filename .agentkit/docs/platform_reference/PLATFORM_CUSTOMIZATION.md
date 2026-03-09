@@ -219,21 +219,21 @@ and organizational policies.
 
 ## References
 
-| ID  | Source                       | URL                                                     |
-| --- | ---------------------------- | ------------------------------------------------------- |
-| E1  | Cursor Rules docs            | https://docs.cursor.com/                                |
-| E2  | Windsurf Cascade docs        | https://docs.windsurf.com/                              |
-| E3  | Warp Rules docs              | https://docs.warp.dev/agent-platform/capabilities/rules |
-| E4  | GitHub Copilot customization | https://docs.github.com/en/copilot/customizing-copilot  |
-| E5  | Cline rules & MCP            | https://docs.cline.bot/                                 |
-| E6  | Roo Code modes & rules       | https://docs.roocode.com/features/                      |
-| E7  | Sourcegraph Cody config      | https://sourcegraph.com/docs/cody                       |
-| E8  | Amazon Q customizations      | https://docs.aws.amazon.com/amazonq/                    |
-| E9  | Continue rules & config      | https://docs.continue.dev/customize/rules               |
-| E10 | Claude Code extensibility    | https://docs.anthropic.com/en/docs/claude-code          |
-| E11 | Codex AGENTS.md & skills     | https://developers.openai.com/codex/guides/agents-md    |
-| E12 | Aider model support          | https://aider.chat/docs/leaderboards/                   |
-| E13 | Gemini CLI configuration     | https://google-gemini.github.io/gemini-cli/             |
+| ID  | Source                       | URL                                                       |
+| --- | ---------------------------- | --------------------------------------------------------- |
+| E1  | Cursor Rules docs            | <https://docs.cursor.com/>                                |
+| E2  | Windsurf Cascade docs        | <https://docs.windsurf.com/>                              |
+| E3  | Warp Rules docs              | <https://docs.warp.dev/agent-platform/capabilities/rules> |
+| E4  | GitHub Copilot customization | <https://docs.github.com/en/copilot/customizing-copilot>  |
+| E5  | Cline rules & MCP            | <https://docs.cline.bot/>                                 |
+| E6  | Roo Code modes & rules       | <https://docs.roocode.com/features/>                      |
+| E7  | Sourcegraph Cody config      | <https://sourcegraph.com/docs/cody>                       |
+| E8  | Amazon Q customizations      | <https://docs.aws.amazon.com/amazonq/>                    |
+| E9  | Continue rules & config      | <https://docs.continue.dev/customize/rules>               |
+| E10 | Claude Code extensibility    | <https://docs.anthropic.com/en/docs/claude-code>          |
+| E11 | Codex AGENTS.md & skills     | <https://developers.openai.com/codex/guides/agents-md>    |
+| E12 | Aider model support          | <https://aider.chat/docs/leaderboards/>                   |
+| E13 | Gemini CLI configuration     | <https://google-gemini.github.io/gemini-cli/>             |
 
 ---
 

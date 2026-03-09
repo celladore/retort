@@ -66,9 +66,11 @@ Template rendering failed during sync, typically due to malformed YAML in your o
 
 1. Check the YAML syntax in your overlay files. Common issues include incorrect indentation, missing colons, and unquoted special characters.
 2. Run the spec validator to identify the problem:
+
    ```bash
    agentkit spec-validate
    ```
+
 3. Fix the reported issues and re-run `agentkit sync`.
 
 ## Runtime Errors
@@ -92,9 +94,11 @@ The orchestrator fails to start or behaves unexpectedly because the state file c
 **Fix:**
 
 1. Delete the corrupted state file:
+
    ```bash
    rm .claude/state/orchestrator.json
    ```
+
 2. Re-run `/orchestrate` to begin a fresh orchestration session.
 
 The events log (`.claude/state/events.log`) is not affected by this operation and retains the full history of past actions.

@@ -246,25 +246,25 @@ day-to-day — from first install to productive daily workflow.
 
 ## References
 
-| ID  | Source                           | URL                                            |
-| --- | -------------------------------- | ---------------------------------------------- |
-| D1  | Cursor documentation             | https://docs.cursor.com/                       |
-| D2  | Windsurf documentation           | https://docs.windsurf.com/                     |
-| D3  | Warp documentation               | https://docs.warp.dev/                         |
-| D4  | GitHub Copilot documentation     | https://docs.github.com/en/copilot             |
-| D5  | Cline documentation              | https://docs.cline.bot/                        |
-| D6  | Roo Code documentation           | https://docs.roocode.com/                      |
-| D7  | Sourcegraph Cody documentation   | https://sourcegraph.com/docs/cody              |
-| D8  | Amazon Q Developer documentation | https://docs.aws.amazon.com/amazonq/           |
-| D9  | Continue documentation           | https://docs.continue.dev/                     |
-| D10 | Claude Code documentation        | https://docs.anthropic.com/en/docs/claude-code |
-| D11 | Aider documentation              | https://aider.chat/                            |
-| D12 | Gemini CLI documentation         | https://google-gemini.github.io/gemini-cli/    |
-| D13 | OpenAI Codex documentation       | https://developers.openai.com/codex/           |
-| D14 | Amp documentation                | https://ampcode.com/docs                       |
-| D15 | OpenCode repository              | https://github.com/opencode-ai/opencode        |
-| D16 | Google Jules                     | https://jules.google/                          |
-| D17 | Factory documentation            | https://docs.factory.ai/                       |
+| ID  | Source                           | URL                                              |
+| --- | -------------------------------- | ------------------------------------------------ |
+| D1  | Cursor documentation             | <https://docs.cursor.com/>                       |
+| D2  | Windsurf documentation           | <https://docs.windsurf.com/>                     |
+| D3  | Warp documentation               | <https://docs.warp.dev/>                         |
+| D4  | GitHub Copilot documentation     | <https://docs.github.com/en/copilot>             |
+| D5  | Cline documentation              | <https://docs.cline.bot/>                        |
+| D6  | Roo Code documentation           | <https://docs.roocode.com/>                      |
+| D7  | Sourcegraph Cody documentation   | <https://sourcegraph.com/docs/cody>              |
+| D8  | Amazon Q Developer documentation | <https://docs.aws.amazon.com/amazonq/>           |
+| D9  | Continue documentation           | <https://docs.continue.dev/>                     |
+| D10 | Claude Code documentation        | <https://docs.anthropic.com/en/docs/claude-code> |
+| D11 | Aider documentation              | <https://aider.chat/>                            |
+| D12 | Gemini CLI documentation         | <https://google-gemini.github.io/gemini-cli/>    |
+| D13 | OpenAI Codex documentation       | <https://developers.openai.com/codex/>           |
+| D14 | Amp documentation                | <https://ampcode.com/docs>                       |
+| D15 | OpenCode repository              | <https://github.com/opencode-ai/opencode>        |
+| D16 | Google Jules                     | <https://jules.google/>                          |
+| D17 | Factory documentation            | <https://docs.factory.ai/>                       |
 
 ---
 

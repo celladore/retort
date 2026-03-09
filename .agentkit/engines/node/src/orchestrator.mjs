@@ -42,16 +42,16 @@ const PHASES = {
 };
 
 const DEFAULT_TEAM_IDS = [
-  'backend',
-  'frontend',
-  'data',
-  'infra',
-  'devops',
-  'testing',
-  'security',
-  'docs',
-  'product',
-  'quality',
+  'team-backend',
+  'team-frontend',
+  'team-data',
+  'team-infra',
+  'team-devops',
+  'team-testing',
+  'team-security',
+  'team-docs',
+  'team-product',
+  'team-quality',
 ];
 
 // Overridable via loadTeamIdsFromSpec(). Starts with defaults; initialized on first use.
@@ -522,6 +522,106 @@ export function checkLock(projectRoot) {
 }
 
 // ---------------------------------------------------------------------------
+// Phase Management
+// ---------------------------------------------------------------------------
+
+/**
+ * Advance to the next phase in the lifecycle.
+ * @param {object} state - Current orchestrator state
+ * @returns {{ state: object, advanced?: boolean, error?: string }}
+ */
+export function advancePhase(state) {
+  if (state.completed) {
+    return { state, advanced: false, error: 'already complete' };
+  }
+
+  const currentPhase = state.current_phase || 0;
+  const nextPhase = currentPhase + 1;
+
+  if (nextPhase > 5) {
+    // PHASES goes from 1-5
+    // Mark as completed when advancing past the last phase
+    const newState = cloneState(state);
+    newState.current_phase = nextPhase;
+    newState.phase_name = 'completed';
+    newState.completed = true;
+    newState.phase_updated_at = new Date().toISOString();
+    return { state: newState, advanced: true };
+  }
+
+  return setPhase(state, nextPhase);
+}
+
+/**
+ * Set orchestrator to a specific phase.
+ * @param {object} state - Current orchestrator state
+ * @param {number} phase - Target phase number (1-5)
+ * @returns {{ state: object, error?: string }}
+ */
+export function setPhase(state, phase) {
+  if (!Number.isInteger(phase) || phase < 1 || phase > 5) {
+    return { state, error: `Invalid phase: ${phase}. Valid phases: 1-5` };
+  }
+
+  const newState = cloneState(state);
+  newState.current_phase = phase;
+  newState.phase_name = PHASES[phase];
+  newState.phase_updated_at = new Date().toISOString();
+
+  return { state: newState, advanced: true };
+}
+
+/**
+ * Update a team's status in the orchestrator state.
+ * @param {object} state - Current orchestrator state
+ * @param {string} teamId - Team ID (e.g., 'backend')
+ * @param {string} status - New status ('idle', 'in_progress', 'blocked', 'done')
+ * @param {string} notes - Optional notes about the status change
+ * @returns {{ state: object, error?: string }}
+ */
+export function updateTeamStatus(state, teamId, status, notes = '') {
+  const validStatuses = ['idle', 'in_progress', 'blocked', 'done'];
+  if (!validStatuses.includes(status)) {
+    return { state, error: `Invalid status: ${status}. Valid: ${validStatuses.join(', ')}` };
+  }
+
+  if (!VALID_TEAM_IDS.includes(teamId)) {
+    return { state, error: `Unknown team: ${teamId}` };
+  }
+
+  const newState = cloneState(state);
+  if (!newState.team_progress) {
+    newState.team_progress = {};
+  }
+
+  newState.team_progress[teamId] = {
+    status,
+    notes,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { state: newState };
+}
+
+/**
+ * Release the orchestrator lock.
+ * @param {string} projectRoot
+ * @returns {boolean} True if lock was released
+ */
+export function releaseLock(projectRoot) {
+  const path = lockPath(projectRoot);
+  try {
+    if (existsSync(path)) {
+      unlinkSync(path);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Event Logging — delegated to events.mjs to avoid circular imports.
 // Re-exported here for backward compatibility.
 // ---------------------------------------------------------------------------
@@ -538,6 +638,7 @@ export async function getStatus(projectRoot, agentkitRoot) {
   if (agentkitRoot) ensureTeamIds(agentkitRoot);
   const state = loadState(projectRoot);
   const lockStatus = checkLock(projectRoot);
+  const { readEvents } = await import('./events.mjs');
   const events = await readEvents(projectRoot, 5);
   const teamProgress = state.team_progress || {};
 

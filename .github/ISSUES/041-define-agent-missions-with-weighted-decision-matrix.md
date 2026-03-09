@@ -26,15 +26,15 @@ Add new optional fields to each agent:
 
 ```yaml
 mission:
-  statement: "Deliver robust, scalable backend APIs with clean architecture and comprehensive error handling"
+  statement: 'Deliver robust, scalable backend APIs with clean architecture and comprehensive error handling'
   objectives:
-    - "Design and implement maintainable service architectures"
-    - "Ensure API contracts are versioned and backwards compatible"
-    - "Optimize for performance, security, and testability"
+    - 'Design and implement maintainable service architectures'
+    - 'Ensure API contracts are versioned and backwards compatible'
+    - 'Optimize for performance, security, and testability'
   success-metrics:
-    - "API availability > 99.9%"
-    - "Test coverage > 80%"
-    - "Zero security vulnerabilities in production"
+    - 'API availability > 99.9%'
+    - 'Test coverage > 80%'
+    - 'Zero security vulnerabilities in production'
 ```
 
 ### Weighted decision matrix for agent evaluation
@@ -46,19 +46,19 @@ decision-matrix:
   dimensions:
     - id: technical-expertise
       weight: 0.30
-      description: "Depth of technical knowledge in the domain"
+      description: 'Depth of technical knowledge in the domain'
     - id: architectural-fit
       weight: 0.25
-      description: "Alignment with project architecture patterns"
+      description: 'Alignment with project architecture patterns'
     - id: code-quality
       weight: 0.20
-      description: "Consistency with coding standards and best practices"
+      description: 'Consistency with coding standards and best practices'
     - id: domain-knowledge
       weight: 0.15
-      description: "Understanding of business domain requirements"
+      description: 'Understanding of business domain requirements'
     - id: collaboration
       weight: 0.10
-      description: "Ability to work effectively with other teams"
+      description: 'Ability to work effectively with other teams'
 ```
 
 ### Agent scoring matrix
@@ -77,21 +77,25 @@ scoring:
 ## Framework alternatives considered
 
 ### 1. OKR-style objectives
+
 - **Pros**: Familiar framework, measurable outcomes
 - **Cons**: Corporate-heavy, may not fit AI agent context
 - **Weight**: 0.6
 
 ### 2. Mission statement + success metrics
+
 - **Pros**: Clear purpose, quantifiable success criteria
 - **Cons**: Requires manual scoring updates
 - **Weight**: 0.8
 
 ### 3. Capability-based scoring
+
 - **Pros**: Data-driven, can be automated
 - **Cons**: Complex to maintain, may miss qualitative aspects
 - **Weight**: 0.7
 
 ### 4. Hybrid approach (recommended)
+
 - **Pros**: Combines mission clarity with quantitative scoring
 - **Cons**: More complex schema
 - **Weight**: 0.9
@@ -108,6 +112,7 @@ scoring:
 ## Additional context
 
 This framework enables:
+
 - Clearer agent onboarding and definition
 - Systematic agent comparison and selection
 - Performance tracking against mission objectives

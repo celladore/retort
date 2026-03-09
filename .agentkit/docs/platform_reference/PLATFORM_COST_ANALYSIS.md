@@ -302,25 +302,25 @@ All platforms ranked by cost-value score.
 
 ## References
 
-| ID  | Source                         | URL                                         |
-| --- | ------------------------------ | ------------------------------------------- |
-| C1  | Cursor Pricing                 | https://cursor.com/pricing                  |
-| C2  | Windsurf Pricing               | https://windsurf.com/pricing                |
-| C3  | Warp Pricing                   | https://www.warp.dev/pricing                |
-| C4  | GitHub Copilot Pricing         | https://github.com/features/copilot#pricing |
-| C5  | Cline — Open-source, BYOK      | https://github.com/cline/cline              |
-| C6  | Roo Code — Open-source, BYOK   | https://github.com/RooVetGit/Roo-Code       |
-| C7  | Continue Pricing               | https://www.continue.dev/pricing            |
-| C8  | Sourcegraph Cody Pricing       | https://sourcegraph.com/pricing             |
-| C9  | Amazon Q Developer Pricing     | https://aws.amazon.com/q/developer/pricing/ |
-| C10 | Anthropic Claude Pricing       | https://www.anthropic.com/pricing           |
-| C11 | OpenAI Codex / ChatGPT Pricing | https://openai.com/chatgpt/pricing/         |
-| C12 | Gemini CLI — Free tier         | https://ai.google.dev/pricing               |
-| C13 | Aider — Open-source            | https://github.com/Aider-AI/aider           |
-| C14 | Amp Pricing                    | https://ampcode.com/                        |
-| C15 | OpenCode — Open-source         | https://github.com/opencode-ai/opencode     |
-| C16 | Google Jules Pricing           | https://jules.google/                       |
-| C17 | Factory Pricing                | https://www.factory.ai/pricing              |
+| ID  | Source                         | URL                                           |
+| --- | ------------------------------ | --------------------------------------------- |
+| C1  | Cursor Pricing                 | <https://cursor.com/pricing>                  |
+| C2  | Windsurf Pricing               | <https://windsurf.com/pricing>                |
+| C3  | Warp Pricing                   | <https://www.warp.dev/pricing>                |
+| C4  | GitHub Copilot Pricing         | <https://github.com/features/copilot#pricing> |
+| C5  | Cline — Open-source, BYOK      | <https://github.com/cline/cline>              |
+| C6  | Roo Code — Open-source, BYOK   | <https://github.com/RooVetGit/Roo-Code>       |
+| C7  | Continue Pricing               | <https://www.continue.dev/pricing>            |
+| C8  | Sourcegraph Cody Pricing       | <https://sourcegraph.com/pricing>             |
+| C9  | Amazon Q Developer Pricing     | <https://aws.amazon.com/q/developer/pricing/> |
+| C10 | Anthropic Claude Pricing       | <https://www.anthropic.com/pricing>           |
+| C11 | OpenAI Codex / ChatGPT Pricing | <https://openai.com/chatgpt/pricing/>         |
+| C12 | Gemini CLI — Free tier         | <https://ai.google.dev/pricing>               |
+| C13 | Aider — Open-source            | <https://github.com/Aider-AI/aider>           |
+| C14 | Amp Pricing                    | <https://ampcode.com/>                        |
+| C15 | OpenCode — Open-source         | <https://github.com/opencode-ai/opencode>     |
+| C16 | Google Jules Pricing           | <https://jules.google/>                       |
+| C17 | Factory Pricing                | <https://www.factory.ai/pricing>              |
 
 ---
 

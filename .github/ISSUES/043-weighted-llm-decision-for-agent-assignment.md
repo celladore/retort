@@ -116,33 +116,37 @@ task-llm-mapping:
 ## LLM selection strategies considered
 
 ### 1. Static per-agent LLM assignment
+
 - **Pros**: Simple, predictable
 - **Cons**: Doesn't adapt to task type
 - **Weight**: 0.5
 
 ### 2. Task-based LLM routing
+
 - **Pros**: Optimizes for task requirements
 - **Cons**: Complex to maintain routing rules
 - **Weight**: 0.7
 
 ### 3. Capability-based scoring (recommended)
+
 - **Pros**: Flexible, data-driven, considers multiple factors
 - **Cons**: Requires capability matrix maintenance
 - **Weight**: 0.9
 
 ### 4. Performance-based learning
+
 - **Pros**: Adapts based on actual outcomes
 - **Cons**: Requires extensive tracking, complex
 - **Weight**: 0.8
 
 ## Decision factors
 
-| Factor | Weight | Description | Data source |
-|--------|--------|-------------|-------------|
-| Agent-LLM affinity | 0.35 | Historical agent performance with LLM | Event tracking |
-| Task capability match | 0.30 | LLM strengths vs task requirements | Capability matrix |
-| Cost efficiency | 0.20 | Token cost vs performance ratio | Pricing data |
-| Availability/latency | 0.15 | Model uptime and response times | Health checks |
+| Factor                | Weight | Description                           | Data source       |
+| --------------------- | ------ | ------------------------------------- | ----------------- |
+| Agent-LLM affinity    | 0.35   | Historical agent performance with LLM | Event tracking    |
+| Task capability match | 0.30   | LLM strengths vs task requirements    | Capability matrix |
+| Cost efficiency       | 0.20   | Token cost vs performance ratio       | Pricing data      |
+| Availability/latency  | 0.15   | Model uptime and response times       | Health checks     |
 
 ## Acceptance criteria
 
@@ -157,6 +161,7 @@ task-llm-mapping:
 ## Additional context
 
 This enables:
+
 - Optimal agent-LLM pairings for different task types
 - Cost-effective LLM selection based on task complexity
 - Performance tracking to refine assignments over time

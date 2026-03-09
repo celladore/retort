@@ -12,7 +12,7 @@ The user requested support consideration for:
 
 - Droid
 - Kilo
-n- Kiro
+  n- Kiro
 
 These platforms are not yet tracked by a dedicated issue.
 

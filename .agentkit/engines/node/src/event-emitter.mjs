@@ -87,7 +87,8 @@ export async function readEvents(projectRoot, opts = {}) {
       events = events.filter((e) => e.source === source);
     }
 
-    return events.slice(-limit);
+    // Return most recent events first (reverse chronological order)
+    return events.slice(-limit).reverse();
   } catch (error) {
     console.warn(`[agentkit:events] Failed to read events: ${error}`);
     return [];

@@ -212,11 +212,11 @@ The monthly report includes:
 
 #### Breakdown by User
 
-| User              | Sessions | Input Tokens  | Output Tokens | Est. Cost  |
-| ----------------- | -------- | ------------- | ------------- | ---------- |
-| alice@example.com | 42       | 1,250,000     | 380,000       | $45.20     |
-| bob@example.com   | 35       | 980,000       | 290,000       | $34.10     |
-| **Total**         | **77**   | **2,230,000** | **670,000**   | **$79.30** |
+| User                | Sessions | Input Tokens  | Output Tokens | Est. Cost  |
+| ------------------- | -------- | ------------- | ------------- | ---------- |
+| <alice@example.com> | 42       | 1,250,000     | 380,000       | $45.20     |
+| <bob@example.com>   | 35       | 980,000       | 290,000       | $34.10     |
+| **Total**           | **77**   | **2,230,000** | **670,000**   | **$79.30** |
 
 #### Breakdown by Command
 

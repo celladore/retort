@@ -52,9 +52,9 @@ scoring:
   code-quality: 8
 
   # Dynamic factors (converted to 0-10 scale)
-  current-workload: 3  # 0 = fully booked, 10 = available
-  recent-success-rate: 8.5  # Based on recent task outcomes
-  domain-relevance: 9  # How well agent matches task domain
+  current-workload: 3 # 0 = fully booked, 10 = available
+  recent-success-rate: 8.5 # Based on recent task outcomes
+  domain-relevance: 9 # How well agent matches task domain
 ```
 
 Note: weighted-scorer.mjs normalizes weights so only relative proportions matter.
@@ -81,21 +81,25 @@ agentkit suggest-team --task "Add authentication API" --consider-workload
 ## Assignment alternatives considered
 
 ### 1. Round-robin with capability filter
+
 - **Pros**: Simple, balances workload
 - **Cons**: Ignores task complexity and agent strengths
 - **Weight**: 0.4
 
 ### 2. Expertise-based routing only
+
 - **Pros**: Maximizes technical fit
 - **Cons**: Can overload expert agents, ignores workload
 - **Weight**: 0.6
 
 ### 3. Machine learning assignment
+
 - **Pros**: Learns from patterns, optimizes over time
 - **Cons**: Complex, requires training data, opaque decisions
 - **Weight**: 0.7
 
 ### 4. Weighted matrix approach (recommended)
+
 - **Pros**: Transparent, balances multiple factors, configurable
 - **Cons**: Requires manual weight tuning
 - **Weight**: 0.9
@@ -125,6 +129,7 @@ agentkit suggest-team --task "Add authentication API" --consider-workload
 ## Additional context
 
 This system enables:
+
 - More efficient task distribution across teams
 - Better matching of complex work to expert agents
 - Workload balancing to prevent bottlenecks

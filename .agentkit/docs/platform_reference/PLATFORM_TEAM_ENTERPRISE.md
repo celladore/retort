@@ -206,21 +206,21 @@ team adoption and organization-wide deployment.
 
 | ID  | Source                     | URL                                                                                              |
 | --- | -------------------------- | ------------------------------------------------------------------------------------------------ |
-| T1  | Cursor Business Features   | https://cursor.com/pricing                                                                       |
-| T2  | Windsurf Enterprise        | https://windsurf.com/pricing                                                                     |
-| T3  | Warp Teams & Warp Drive    | https://www.warp.dev/warp-drive                                                                  |
-| T4  | GitHub Copilot Enterprise  | https://docs.github.com/en/copilot/managing-copilot/managing-github-copilot-in-your-organization |
-| T5  | Cline (open-source)        | https://github.com/cline/cline                                                                   |
-| T6  | Roo Code (open-source)     | https://github.com/RooVetGit/Roo-Code                                                            |
-| T7  | Sourcegraph Enterprise     | https://sourcegraph.com/enterprise                                                               |
-| T8  | Amazon Q Enterprise        | https://aws.amazon.com/q/developer/                                                              |
-| T9  | Continue Mission Control   | https://www.continue.dev/pricing                                                                 |
-| T10 | Anthropic Enterprise       | https://www.anthropic.com/enterprise                                                             |
-| T11 | OpenAI Enterprise          | https://openai.com/enterprise                                                                    |
-| T12 | Google Cloud AI Enterprise | https://cloud.google.com/ai                                                                      |
-| T13 | Aider (open-source)        | https://github.com/Aider-AI/aider                                                                |
-| T14 | Factory Enterprise         | https://www.factory.ai/                                                                          |
-| T15 | Google Jules               | https://jules.google/                                                                            |
+| T1  | Cursor Business Features   | <https://cursor.com/pricing>                                                                       |
+| T2  | Windsurf Enterprise        | <https://windsurf.com/pricing>                                                                     |
+| T3  | Warp Teams & Warp Drive    | <https://www.warp.dev/warp-drive>                                                                  |
+| T4  | GitHub Copilot Enterprise  | <https://docs.github.com/en/copilot/managing-copilot/managing-github-copilot-in-your-organization> |
+| T5  | Cline (open-source)        | <https://github.com/cline/cline>                                                                   |
+| T6  | Roo Code (open-source)     | <https://github.com/RooVetGit/Roo-Code>                                                            |
+| T7  | Sourcegraph Enterprise     | <https://sourcegraph.com/enterprise>                                                               |
+| T8  | Amazon Q Enterprise        | <https://aws.amazon.com/q/developer/>                                                              |
+| T9  | Continue Mission Control   | <https://www.continue.dev/pricing>                                                                 |
+| T10 | Anthropic Enterprise       | <https://www.anthropic.com/enterprise>                                                             |
+| T11 | OpenAI Enterprise          | <https://openai.com/enterprise>                                                                    |
+| T12 | Google Cloud AI Enterprise | <https://cloud.google.com/ai>                                                                      |
+| T13 | Aider (open-source)        | <https://github.com/Aider-AI/aider>                                                                |
+| T14 | Factory Enterprise         | <https://www.factory.ai/>                                                                          |
+| T15 | Google Jules               | <https://jules.google/>                                                                            |
 
 ---
 

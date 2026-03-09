@@ -247,8 +247,8 @@ describe('orchestrator', () => {
 
     it('defines all 10 team IDs', () => {
       expect(VALID_TEAM_IDS).toHaveLength(10);
-      expect(VALID_TEAM_IDS).toContain('backend');
-      expect(VALID_TEAM_IDS).toContain('quality');
+      expect(VALID_TEAM_IDS).toContain('team-backend');
+      expect(VALID_TEAM_IDS).toContain('team-quality');
     });
   });
 
