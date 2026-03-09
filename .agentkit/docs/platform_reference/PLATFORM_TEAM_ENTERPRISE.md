@@ -204,8 +204,8 @@ team adoption and organization-wide deployment.
 
 ## References
 
-| ID  | Source                     | URL                                                                                              |
-| --- | -------------------------- | ------------------------------------------------------------------------------------------------ |
+| ID  | Source                     | URL                                                                                                |
+| --- | -------------------------- | -------------------------------------------------------------------------------------------------- |
 | T1  | Cursor Business Features   | <https://cursor.com/pricing>                                                                       |
 | T2  | Windsurf Enterprise        | <https://windsurf.com/pricing>                                                                     |
 | T3  | Warp Teams & Warp Drive    | <https://www.warp.dev/warp-drive>                                                                  |

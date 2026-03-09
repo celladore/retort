@@ -10,12 +10,12 @@ import { resolve } from 'path';
 import {
   readBacklogJson,
   readBacklogMarkdown,
+  sortItems,
   writeBacklogJson,
   writeBacklogMarkdown,
-  sortItems,
 } from './backlog-store.mjs';
 import { emitEvent } from './event-emitter.mjs';
-import { normalizeIssue, deduplicateItems, inferCategoryScores } from './issue-normalizer.mjs';
+import { deduplicateItems, inferCategoryScores, normalizeIssue } from './issue-normalizer.mjs';
 import { createAdapter } from './tracker-adapter.mjs';
 import { calculateScore } from './weighted-scorer.mjs';
 
@@ -178,7 +178,7 @@ export async function runSyncBacklog({ agentkitRoot, projectRoot, flags }) {
   // 6. Emit structured event
   const p0 = sorted.filter((i) => i.priority === 'P0').length;
   const p1 = sorted.filter((i) => i.priority === 'P1').length;
-  emitEvent(
+  await emitEvent(
     projectRoot,
     'backlog_sync',
     {

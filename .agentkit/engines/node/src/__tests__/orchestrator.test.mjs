@@ -205,9 +205,11 @@ describe('orchestrator', () => {
 
       const events = await readEvents(TEST_ROOT);
       expect(events).toHaveLength(2);
-      expect(events[0].action).toBe('test_action');
-      expect(events[0].team).toBe('team-backend');
-      expect(events[1].action).toBe('test_action_2');
+      expect(events[0].action).toBe('test_action_2'); // Most recent first
+      expect(events[0].data).toBe('world');
+      expect(events[1].action).toBe('test_action'); // Earlier event
+      expect(events[1].team).toBe('team-backend');
+      expect(events[1].data).toBe('hello');
       expect(events[0].timestamp).toBeDefined();
     });
 
@@ -222,8 +224,10 @@ describe('orchestrator', () => {
       }
       const events = await readEvents(TEST_ROOT, 3);
       expect(events).toHaveLength(3);
-      // Should return the LAST 3 events
-      expect(events[0].action).toBe('action_7');
+      // Should return the LAST 3 events (most recent first)
+      expect(events[0].action).toBe('action_9'); // Most recent
+      expect(events[1].action).toBe('action_8'); // Middle
+      expect(events[2].action).toBe('action_7'); // Oldest of the 3
     });
   });
 
