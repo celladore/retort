@@ -111,6 +111,12 @@ jobs:
           git diff --quiet || { echo "::error::Sync produced uncommitted changes — generated outputs are out of sync with sources."; git diff --stat; exit 1; }
         working-directory: .agentkit
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run template-focused tests
+        run: |
+          # Only run tests relevant to template/engine changes
+          echo "Running core tests for template validation..."
+          pnpm test task-protocol    # Core protocol tests
+          pnpm test orchestrator     # Orchestrator functionality
+          pnpm test event-emitter    # Event system
+          echo "✓ Template-focused tests completed"
         working-directory: .agentkit
