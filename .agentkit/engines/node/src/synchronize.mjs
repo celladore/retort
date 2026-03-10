@@ -2485,6 +2485,21 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       logVerbose(`  ${scaffoldOnceSkipped} scaffold-once file(s) skipped`);
     }
 
+    // 7b. Carry forward scaffold-once files from previous manifest.
+    // When a file was generated in a previous sync but skipped this time (scaffold-once),
+    // it must remain in the new manifest so orphan cleanup does not delete it.
+    if (previousManifest?.files) {
+      for (const [prevFile, prevMeta] of Object.entries(previousManifest.files)) {
+        if (!newManifestFiles[prevFile]) {
+          const prevPath = resolve(projectRoot, prevFile);
+          if (existsSync(prevPath)) {
+            // File exists on disk but was not regenerated — carry forward its manifest entry
+            newManifestFiles[prevFile] = prevMeta;
+          }
+        }
+      }
+    }
+
     // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
     let cleanedCount = 0;
     if (!noClean && previousManifest?.files) {

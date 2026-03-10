@@ -2,8 +2,8 @@
 # ---------------------------------------------------------------------------
 # Hook: PreToolUse (matcher: Write|Edit)
 # Purpose: Block AI writes to AgentKit Forge source files (templates, spec,
-#          engines, overlays). Changes to these files must go through a PR
-#          to the agentkit-forge repository, not be made directly by agents.
+#          engines, overlays) in DOWNSTREAM repos. In the agentkit-forge source
+#          repo itself, agents ARE the maintainers and need full access.
 # Stdin:   JSON with session_id, cwd, hook_event_name, tool_name, tool_input
 # Stdout:  JSON deny response on match, empty otherwise
 # ---------------------------------------------------------------------------
@@ -17,9 +17,25 @@ if [[ -z "$FILE_PATH" ]]; then
     exit 0
 fi
 
+# -- Source repo detection -----------------------------------------------------
+# If we are in the agentkit-forge source repo, agents are maintaining the
+# templates and engine — protection is not needed. Detection: check if
+# .agentkit/package.json name is "agentkit-forge" (the upstream source repo).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AGENTKIT_PKG="${SCRIPT_DIR}/../../.agentkit/package.json"
+
+if [[ -f "$AGENTKIT_PKG" ]]; then
+    PKG_NAME=$(jq -r '.name // empty' "$AGENTKIT_PKG" 2>/dev/null || true)
+    if [[ "$PKG_NAME" == "agentkit-forge" ]]; then
+        # This IS the agentkit-forge source repo — agents maintain these files.
+        exit 0
+    fi
+fi
+
 # -- Protected directory patterns ---------------------------------------------
-# These are the source-of-truth paths for AgentKit Forge. AI agents must not
-# modify them directly. Instead, propose changes via a PR to the forge repo.
+# In downstream repos, these are the upstream source-of-truth paths. AI agents
+# must not modify them directly. Instead, propose changes via a PR to the forge
+# repo, or modify .agentkit/spec/ and run sync to regenerate.
 PROTECTED_PATTERNS=(
     '\.agentkit/templates/'
     '\.agentkit/spec/'
@@ -31,7 +47,7 @@ PROTECTED_PATTERNS=(
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
     if echo "$FILE_PATH" | grep -qE "$pattern"; then
         jq -n \
-            --arg reason "Blocked: '${FILE_PATH}' is an AgentKit Forge source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template." \
+            --arg reason "Blocked: '${FILE_PATH}' is an AgentKit Forge source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run 'pnpm -C .agentkit agentkit:sync'." \
             '{
                 hookSpecificOutput: {
                     hookEventName: "PreToolUse",

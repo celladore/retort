@@ -5,6 +5,7 @@
  */
 import { spawnSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
+import yaml from 'js-yaml';
 import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -57,7 +58,11 @@ const WORKFLOW_COMMANDS = ['orchestrate', 'plan', 'check', 'review', 'handoff', 
 // Commands that are slash-command-only (no CLI handler)
 const SLASH_ONLY_COMMANDS = ['project-review', 'scaffold', 'preflight'];
 
-const VALID_FLAGS = {
+// ---------------------------------------------------------------------------
+// Dynamic flag loading from commands.yaml
+// ---------------------------------------------------------------------------
+// Flags for CLI-internal commands not defined in commands.yaml
+const CLI_INTERNAL_FLAGS = {
   init: [
     'repoName',
     'force',
@@ -86,37 +91,7 @@ const VALID_FLAGS = {
     'help',
   ],
   validate: ['auto-task', 'help'],
-  discover: ['output', 'depth', 'include-deps', 'help'],
   'spec-validate': ['help'],
-  orchestrate: [
-    'assess-only',
-    'scope',
-    'dry-run',
-    'team',
-    'phase',
-    'status',
-    'force-unlock',
-    'help',
-  ],
-  plan: ['issue', 'output', 'depth', 'help'],
-  check: ['fix', 'fast', 'stack', 'bail', 'coverage', 'project', 'help'],
-  review: [
-    'pr',
-    'branch',
-    'range',
-    'file',
-    'focus',
-    'severity',
-    'coverage',
-    'project',
-    'open-issues',
-    'dry-run',
-    'auto-task',
-    'help',
-  ],
-  handoff: ['format', 'include-diff', 'tag', 'save', 'help'],
-  healthcheck: ['stack', 'fix', 'verbose', 'project', 'auto-task', 'help'],
-  cost: ['summary', 'sessions', 'report', 'month', 'format', 'last', 'help'],
   tasks: ['status', 'assignee', 'type', 'priority', 'id', 'process-handoffs', 'help'],
   delegate: [
     'to',
@@ -129,41 +104,14 @@ const VALID_FLAGS = {
     'scope',
     'help',
   ],
-  doctor: ['verbose', 'help'],
-  'import-issues': ['tracker', 'state', 'labels', 'since', 'dry-run', 'limit', 'force', 'help'],
-  backlog: ['format', 'team', 'priority', 'source', 'status', 'sort', 'help'],
-  'sync-backlog': [
-    'tracker',
-    'state',
-    'direction',
-    'labels',
-    'owner-team',
-    'team',
-    'since',
-    'limit',
-    'force',
-    'help',
-  ],
-  scaffold: ['type', 'name', 'stack', 'path', 'help'],
-  preflight: ['stack', 'branch', 'range', 'base', 'strict', 'help'],
-  'project-review': ['scope', 'focus', 'phase', 'help'],
   add: ['help'],
   remove: ['clean', 'help'],
   list: ['help'],
   features: ['verbose', 'help'],
 };
 
-// Global flags that apply to all commands
-const GLOBAL_FLAGS = ['help', 'quiet', 'verbose'];
-
-// Explicit flag types to ensure correct parsing via node:util parseArgs
-const FLAG_TYPES = {
-  // Global
-  help: 'boolean',
-  quiet: 'boolean',
-  verbose: 'boolean',
-
-  // Strings
+const CLI_INTERNAL_FLAG_TYPES = {
+  // init flags
   repoName: 'string',
   preset: 'string',
   'external-mode': 'string',
@@ -172,76 +120,97 @@ const FLAG_TYPES = {
   'external-markdown-files': 'string',
   'external-git-repos': 'string',
   'external-target-platforms': 'string',
-  only: 'string', // comma-separated
-  output: 'string',
-  depth: 'string',
-  scope: 'string',
-  team: 'string',
-  phase: 'string',
-  issue: 'string',
-  pr: 'string',
-  range: 'string',
-  file: 'string',
-  focus: 'string',
-  severity: 'string',
-  format: 'string',
-  tag: 'string',
-  month: 'string',
-  last: 'string',
-  assignee: 'string',
-  type: 'string',
-  priority: 'string',
-  id: 'string',
-  to: 'string',
-  title: 'string',
-  description: 'string',
-  'depends-on': 'string',
-  'handoff-to': 'string',
-  name: 'string',
-  stack: 'string',
-  path: 'string',
-  base: 'string',
-  branch: 'string',
-  project: 'string',
-  overlay: 'string',
-  tracker: 'string',
-  state: 'string',
-  labels: 'string',
-  since: 'string',
-  limit: 'string',
-  sort: 'string',
-  direction: 'string',
-  'owner-team': 'string',
-  source: 'string',
-
-  // Booleans
-  force: 'boolean',
   'non-interactive': 'boolean',
   ci: 'boolean',
   'external-knowledge': 'boolean',
-  'dry-run': 'boolean',
+  // sync flags
+  overlay: 'string',
+  only: 'string',
   overwrite: 'boolean',
+  force: 'boolean',
+  'dry-run': 'boolean',
   'no-clean': 'boolean',
   diff: 'boolean',
-  'include-deps': 'boolean',
-  'assess-only': 'boolean',
-  'force-unlock': 'boolean',
-  fix: 'boolean',
-  fast: 'boolean',
-  bail: 'boolean',
-  coverage: 'boolean',
-  'include-diff': 'boolean',
-  save: 'boolean',
-  summary: 'boolean',
-  sessions: 'boolean',
-  report: 'boolean',
-  'open-issues': 'boolean',
+  // validate flags
   'auto-task': 'boolean',
+  // tasks flags
+  assignee: 'string',
+  id: 'string',
   'process-handoffs': 'boolean',
+  // delegate flags
+  to: 'string',
+  title: 'string',
+  description: 'string',
+  type: 'string',
+  priority: 'string',
+  scope: 'string',
+  'depends-on': 'string',
+  'handoff-to': 'string',
+  // remove flags
   clean: 'boolean',
-  strict: 'boolean',
 };
 
+/**
+ * Load command flag definitions from commands.yaml.
+ * Returns { validFlags, flagTypes } merged with CLI-internal definitions.
+ */
+function loadCommandFlags(agentkitRoot) {
+  const validFlags = { ...CLI_INTERNAL_FLAGS };
+  const flagTypes = {
+    help: 'boolean',
+    quiet: 'boolean',
+    verbose: 'boolean',
+    ...CLI_INTERNAL_FLAG_TYPES,
+  };
+
+  const specPath = resolve(agentkitRoot, 'spec', 'commands.yaml');
+  if (!existsSync(specPath)) return { validFlags, flagTypes };
+
+  try {
+    const raw = readFileSync(specPath, 'utf-8');
+    const spec = yaml.load(raw);
+    if (!spec?.commands || !Array.isArray(spec.commands)) return { validFlags, flagTypes };
+
+    for (const cmd of spec.commands) {
+      if (!cmd.name || !Array.isArray(cmd.flags)) continue;
+      const names = [];
+      for (const flag of cmd.flags) {
+        const name = (flag.name || '').replace(/^--/, '');
+        if (!name) continue;
+        names.push(name);
+        const yamlType = (flag.type || 'string').toLowerCase();
+        const parseType = yamlType === 'boolean' ? 'boolean' : 'string';
+        if (!flagTypes[name]) flagTypes[name] = parseType;
+      }
+      if (!names.includes('help')) names.push('help');
+      const existing = validFlags[cmd.name] ?? [];
+      validFlags[cmd.name] = [...new Set([...existing, ...names])];
+    }
+  } catch {
+    // If YAML parsing fails, fall back to whatever we have
+  }
+
+  // Self-validation: ensure every flag in validFlags has a type in flagTypes.
+  // 'status' is special-cased in parseFlags and doesn't need a FLAG_TYPES entry.
+  const specialCased = new Set(['status']);
+  for (const [cmd, flags] of Object.entries(validFlags)) {
+    for (const flag of flags) {
+      if (!flagTypes[flag] && !specialCased.has(flag)) {
+        console.warn(
+          `[agentkit] Warning: flag "--${flag}" is listed for command "${cmd}" ` +
+            `but has no type definition. Add it to CLI_INTERNAL_FLAG_TYPES or commands.yaml.`
+        );
+      }
+    }
+  }
+
+  return { validFlags, flagTypes };
+}
+
+const { validFlags: VALID_FLAGS, flagTypes: FLAG_TYPES } = loadCommandFlags(AGENTKIT_ROOT);
+
+// Global flags that apply to all commands
+const GLOBAL_FLAGS = ['help', 'quiet', 'verbose'];
 const args = process.argv.slice(2);
 const command = args[0];
 // Strip the bare `--` separator injected by `npm run`/`pnpm run` when the
