@@ -82,6 +82,27 @@ Enhancements to the `/brand` feature and design token generation.
 | BR-004 | Theme preview command (agentkit theme:preview)  | P3       | not-started | [brand/brand-enhancements.md](brand/brand-enhancements.md)             | None     | —        |
 | BR-005 | WCAG contrast ratio validation in brand.yaml    | P2       | not-started | [brand/brand-enhancements.md](brand/brand-enhancements.md)             | None     | —        |
 
+## Cognitive Mesh — Agent Teams (cross-repo)
+
+Agent team tickets in `phoenixvc/cognitive-mesh`. Tracked here for cross-project visibility.
+
+| ID     | Title                                                        | Priority | Status      | Plan File | Blockers         | GH Issue (cognitive-mesh)    |
+| ------ | ------------------------------------------------------------ | -------- | ----------- | --------- | ---------------- | ---------------------------- |
+| CM-001 | Memory integrations — mem0 + `IExternalMemoryPort`           | P1       | not-started | —         | None             | phoenixvc/cognitive-mesh#339 |
+| CM-002 | BacklogCrew — automated issue triage & enrichment            | P2       | not-started | —         | Optional: CM-001 | phoenixvc/cognitive-mesh#340 |
+| CM-003 | CommsCrew — communication classification & response          | P3       | not-started | —         | Optional: CM-001 | phoenixvc/cognitive-mesh#341 |
+| CM-004 | RepoGuardian Phase 1 — dependency mapping & layer violations | P1       | not-started | —         | None             | phoenixvc/cognitive-mesh#342 |
+| CM-005 | RepoGuardian Phase 2 — tree maintenance & test coverage      | P2       | not-started | —         | CM-004           | phoenixvc/cognitive-mesh#343 |
+| CM-006 | RepoGuardian Phase 3 — file & agent activity monitoring      | P2       | not-started | —         | CM-005           | phoenixvc/cognitive-mesh#344 |
+
+### Implementation Phases
+
+```text
+Phase 1 (parallel):  CM-001 (Memory) + CM-004 (RepoGuardian P1)
+Phase 2 (after P1):  CM-005 (RepoGuardian P2) + CM-002 (BacklogCrew)
+Phase 3 (after P2):  CM-006 (RepoGuardian P3) + CM-003 (CommsCrew)
+```
+
 ## FinOps & Cost Management
 
 Multi-repo cost governance spanning agentkit-forge, ai-gateway, and pvc-costops-analytics.
@@ -257,6 +278,12 @@ GV-003 (P2) ──── depends on ──── GV-001
 GV-004 (P2) ──── depends on ──── GV-001
 PS-001 (P1) ────────────────────────────── standalone (#342)
 SD-001 (P2) ────────────────────────────── epic (#307)
+CM-001 (P1) ────────────────────────────── standalone (cognitive-mesh#339)
+CM-002 (P2) ──── optional dep on ──── CM-001 (cognitive-mesh#340)
+CM-003 (P3) ──── optional dep on ──── CM-001 (cognitive-mesh#341)
+CM-004 (P1) ────────────────────────────── standalone (cognitive-mesh#342)
+CM-005 (P2) ──── depends on ──── CM-004 (cognitive-mesh#343)
+CM-006 (P2) ──── depends on ──── CM-005 (cognitive-mesh#344)
 ```
 
 ## Roadmap Items (Aspirational)
