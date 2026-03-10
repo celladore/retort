@@ -1790,6 +1790,30 @@ commands:
       - Grep
       - Bash
 
+  - name: analyze-agents
+    type: utility
+    description: >
+      Generates a comprehensive agent/team relationship matrix. Analyzes
+      dependencies, notifications, handoffs, coverage gaps, bottlenecks,
+      and consolidation opportunities across all teams and agents.
+    flags:
+      - name: --output
+        description: 'Output file path'
+        type: string
+        default: 'docs/agents/agent-team-matrix.md'
+      - name: --matrix
+        description: 'Specific matrix to generate (1-8, supplementary, or all)'
+        type: string
+        default: 'all'
+      - name: --format
+        description: 'Output format'
+        type: string
+        default: 'markdown'
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+
   # ===========================================================================
   # Team Commands — Scoped to team domains defined in teams.yaml
   # ===========================================================================

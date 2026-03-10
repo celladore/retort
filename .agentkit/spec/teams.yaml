@@ -89,6 +89,7 @@ teams:
     scope: ['.agentkit/spec/**', 'docs/planning/agents-teams/**', 'docs/architecture/**']
     accepts: [plan, review, investigate, document]
     handoff-chain: [quality, docs]
+    agents: [input-clarifier, mission-definer, role-architect, prompt-engineer, flow-designer, team-validator]
 
   - id: strategic-ops
     name: STRATEGIC OPS
@@ -96,6 +97,7 @@ teams:
     scope: ['docs/planning/**', 'docs/architecture/**', '.agentkit/spec/**', '**/*']
     accepts: [plan, review, investigate, document]
     handoff-chain: [product, quality]
+    agents: [portfolio-analyst, governance-advisor, adoption-strategist, impact-assessor, release-coordinator]
 
 intake:
   ownerTeam: product

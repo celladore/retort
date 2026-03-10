@@ -47,7 +47,7 @@ Full protocol reference: see `docs/orchestration/concurrency-protocol.md`
 
 ## Category
 
-team-creation
+strategic-operations
 
 ## Focus Areas
 
@@ -61,6 +61,9 @@ team-creation
 - Detect drift between upstream templates and downstream outputs
 - Produce a portfolio health dashboard with adoption metrics
 - Identify repos that are behind on sync or missing critical features
+- Detect overlapping functionality between downstream repos (duplicate agents, redundant scopes, similar scripts)
+- Produce consolidation opportunity reports ranking overlaps by effort reduction potential
+- Recommend merge/deduplicate/keep-separate for each overlap
 
 ## Preferred Tools
 

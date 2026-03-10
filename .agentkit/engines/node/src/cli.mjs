@@ -50,6 +50,7 @@ const VALID_COMMANDS = [
   'doctor',
   'scaffold',
   'preflight',
+  'analyze-agents',
 ];
 
 // Workflow commands with runtime handlers
@@ -108,6 +109,7 @@ const CLI_INTERNAL_FLAGS = {
   remove: ['clean', 'help'],
   list: ['help'],
   features: ['verbose', 'help'],
+  'analyze-agents': ['output', 'matrix', 'format', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -148,6 +150,10 @@ const CLI_INTERNAL_FLAG_TYPES = {
   'handoff-to': 'string',
   // remove flags
   clean: 'boolean',
+  // analyze-agents flags
+  output: 'string',
+  matrix: 'string',
+  format: 'string',
 };
 
 /**
@@ -383,6 +389,10 @@ Backlog & Issue Tracking:
 
 Utility Commands:
   cost            Session cost and usage tracking
+  analyze-agents  Generate agent/team relationship matrix
+                  --output <path>     Output file (default: docs/agents/agent-team-matrix.md)
+                  --matrix <n>        Specific matrix (1-8, supplementary, all; default: all)
+                  --format <fmt>      Output format: markdown, json (default: markdown)
 
 Slash-Command Only:
   project-review  Comprehensive project audit (use as /project-review in AI tool)
@@ -646,6 +656,29 @@ async function main() {
           const { runFeatures } = await import('./feature-manager.mjs');
           await runFeatures({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
         }
+        break;
+      }
+      case 'analyze-agents': {
+        const { loadFullAgentGraph, renderAllMatrices, renderMatrix, renderAllAsJson } = await import('./agent-analysis.mjs');
+        const graph = loadFullAgentGraph(AGENTKIT_ROOT);
+        const matrixArg = flags.matrix || 'all';
+        const formatArg = flags.format || 'markdown';
+        const outputPath = flags.output
+          ? resolve(PROJECT_ROOT, flags.output)
+          : resolve(PROJECT_ROOT, 'docs', 'agents', 'agent-team-matrix.md');
+
+        let content;
+        if (formatArg === 'json') {
+          content = JSON.stringify(renderAllAsJson(graph), null, 2);
+        } else {
+          content = renderMatrix(graph, matrixArg);
+        }
+
+        const { mkdirSync, writeFileSync } = await import('fs');
+        mkdirSync(dirname(outputPath), { recursive: true });
+        writeFileSync(outputPath, content, 'utf-8');
+        console.log(`[agentkit:analyze-agents] Matrix written to ${outputPath}`);
+        console.log(`  ${graph.agents.length} agents, ${graph.teams.length} teams, ${graph.categories.length} categories`);
         break;
       }
       default: {

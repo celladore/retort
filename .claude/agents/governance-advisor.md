@@ -47,7 +47,7 @@ Full protocol reference: see `docs/orchestration/concurrency-protocol.md`
 
 ## Category
 
-team-creation
+strategic-operations
 
 ## Focus Areas
 

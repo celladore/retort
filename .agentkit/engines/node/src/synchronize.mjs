@@ -1310,6 +1310,18 @@ async function syncRooRules(templatesDir, tmpDir, vars, version, repoName, rules
  * Copies templates/mcp/ → tmpDir/.mcp/
  * agentsSpec and teamsSpec are accepted for API symmetry and future use.
  */
+async function syncAgentAnalysis(agentkitRoot, tmpDir) {
+  try {
+    const { loadFullAgentGraph, renderAllMatrices } = await import('./agent-analysis.mjs');
+    const graph = loadFullAgentGraph(agentkitRoot);
+    if (graph.agents.length === 0) return;
+    const content = renderAllMatrices(graph);
+    await writeOutput(join(tmpDir, 'docs', 'agents', 'agent-team-matrix.md'), content);
+  } catch {
+    // Agent analysis is non-critical — skip silently if it fails
+  }
+}
+
 async function syncA2aConfig(
   tmpDir,
   vars,
@@ -2196,6 +2208,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       gatedTasks.push(
         syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir)
       );
+    }
+
+    // Agent/team relationship matrix (auto-generated during sync)
+    if (isFeatureEnabled('agent-personas', vars)) {
+      gatedTasks.push(syncAgentAnalysis(agentkitRoot, tmpDir));
     }
 
     await Promise.all(gatedTasks);

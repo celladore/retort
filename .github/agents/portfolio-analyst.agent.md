@@ -42,6 +42,9 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Detect drift between upstream templates and downstream outputs
 - Produce a portfolio health dashboard with adoption metrics
 - Identify repos that are behind on sync or missing critical features
+- Detect overlapping functionality between downstream repos (duplicate agents, redundant scopes, similar scripts)
+- Produce consolidation opportunity reports ranking overlaps by effort reduction potential
+- Recommend merge/deduplicate/keep-separate for each overlap
 
 ## Tools
 
