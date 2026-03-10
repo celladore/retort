@@ -3,7 +3,7 @@ name: 'QUALITY'
 description: 'Team QUALITY — Code review, refactoring, bugs, reliability, session retrospectives'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-09'
+last_updated: '2026-03-10'
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

@@ -3,7 +3,7 @@ name: 'project-status'
 description: 'Unified PM dashboard that aggregates orchestrator state, backlog, task progress, risks, and delivery metrics into a markdown or JSON report. Provides at-a-glance visibility into project health across all teams.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-09'
+last_updated: '2026-03-10'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
