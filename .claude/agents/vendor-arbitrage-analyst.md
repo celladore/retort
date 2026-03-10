@@ -70,6 +70,8 @@ cost-operations
 - Read
 - Glob
 - Grep
+- WebSearch
+- WebFetch
 
 ## Conventions
 

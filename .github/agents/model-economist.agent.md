@@ -51,6 +51,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - Read
 - Glob
 - Grep
+- WebSearch
+- WebFetch
 
 ## Agent Conventions
 
