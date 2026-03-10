@@ -10,9 +10,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Preflight: verify gh CLI is available
+# Preflight: verify gh CLI is available and authenticated
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     Write-Error "gh CLI is not installed or not in PATH. Install from https://cli.github.com/"
+    exit 1
+}
+try {
+    gh auth status 2>&1 | Out-Null
+} catch {
+    Write-Error "gh CLI is not authenticated. Run 'gh auth login' first."
     exit 1
 }
 

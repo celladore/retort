@@ -91,7 +91,8 @@ if (sectionIdx === -1) {
     insertAt < blockEnd &&
     lines[insertAt].trim() !== '' &&
     !lines[insertAt].startsWith('###') &&
-    !lines[insertAt].startsWith('##')
+    !lines[insertAt].startsWith('##') &&
+    lines[insertAt].trim() !== '---'
   ) {
     insertAt++;
   }
