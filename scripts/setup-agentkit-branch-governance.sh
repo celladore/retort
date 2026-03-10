@@ -77,10 +77,9 @@ PAYLOAD=$(cat <<'JSON'
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "CI / test (ubuntu-latest, 24)",
-      "CI / validate",
-      "Branch Protection / branch-rules",
-      "block-agentkit-changes / check_agentkit_changes"
+      "Test",
+      "Validate",
+      "Branch Protection / branch-rules"
     ]
   },
   "enforce_admins": false,

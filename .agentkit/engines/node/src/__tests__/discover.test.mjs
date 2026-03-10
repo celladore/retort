@@ -29,20 +29,42 @@ function writeFile(filePath, content = '') {
 }
 
 describe('runDiscover()', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+    // Set up a controlled project fixture
+    writeFile(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test-project', version: '1.0.0' })
+    );
+    writeFile(
+      join(tmpDir, '.github', 'workflows', 'ci.yml'),
+      'name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n'
+    );
+    writeFile(join(tmpDir, 'src', 'index.js'), '// entry point\n');
+    // Init git repo with conventional commits
+    execSync('git init', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git config user.email "test@test.com"', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git config user.name "Test"', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git add -A', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git commit -m "feat: initial commit"', { cwd: tmpDir, stdio: 'ignore' });
   });
 
-  it('returns a discovery report for the current repo', async () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('returns a discovery report with expected structure', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const report = await runDiscover({
       agentkitRoot: AGENTKIT_ROOT,
-      projectRoot: PROJECT_ROOT,
+      projectRoot: tmpDir,
       flags: { output: 'json' },
     });
 
-    // Report should have expected structure
     expect(report).toHaveProperty('techStacks');
     expect(report).toHaveProperty('infrastructure');
     expect(report).toHaveProperty('cicd');
@@ -52,14 +74,8 @@ describe('runDiscover()', () => {
     expect(report).toHaveProperty('repository');
     expect(report).toHaveProperty('commitConvention');
 
-    // Should detect this repo is a git repo
     expect(report.repository.isGit).toBe(true);
-
-    // techStacks should be an array (may or may not detect Node depending on project layout)
     expect(Array.isArray(report.techStacks)).toBe(true);
-
-    // structure should include top-level dirs array
-    // (may be empty in template repo since .agentkit/ is a dotfile)
     expect(Array.isArray(report.structure.topLevelDirs)).toBe(true);
   });
 
@@ -68,11 +84,10 @@ describe('runDiscover()', () => {
 
     const report = await runDiscover({
       agentkitRoot: AGENTKIT_ROOT,
-      projectRoot: PROJECT_ROOT,
+      projectRoot: tmpDir,
       flags: { output: 'json' },
     });
 
-    // Should detect our CI workflow
     expect(report.cicd).toContain('github-actions');
   });
 });
