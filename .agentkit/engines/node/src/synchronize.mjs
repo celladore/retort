@@ -404,6 +404,24 @@ async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) 
   );
 }
 
+/**
+ * Copies templates/scripts to tmpDir/scripts — managed-mode utility scripts.
+ * Each template uses frontmatter `agentkit: scaffold: managed` so downstream
+ * repos receive updates via three-way merge while preserving local customizations.
+ */
+async function syncScripts(templatesDir, tmpDir, vars, version, repoName) {
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'scripts',
+    tmpDir,
+    'scripts',
+    vars,
+    version,
+    repoName
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Git merge driver sync
 // ---------------------------------------------------------------------------
@@ -1888,6 +1906,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
     if (isFeatureEnabled('dependency-management', vars)) {
       alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+    if (isFeatureEnabled('doc-scaffolding', vars)) {
+      alwaysOnTasks.push(syncScripts(templatesDir, tmpDir, vars, version, headerRepoName));
     }
 
     await Promise.all(alwaysOnTasks);
