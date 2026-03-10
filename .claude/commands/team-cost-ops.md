@@ -80,7 +80,7 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 2. Append a message: `"Stagnation detected: no measurable progress in 10 turns. Requesting human guidance."`.
 3. Emit an events.log entry: `{"eventType": "STAGNATION_DETECTED", "taskId": "<id>", "turnsSinceProgress": <N>, "timestamp": "<ISO>"}`.
 
-**Accepted task types:** investigate, review, plan, document
+**Accepted task types:** investigate, review, plan, document, implement
 
 **Default handoff chain:** infra → product
 
