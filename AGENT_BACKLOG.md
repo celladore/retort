@@ -54,6 +54,7 @@ Items not yet scheduled for the active sprint.
 | P3       | T8-DevEx          | Set up git hooks with Husky                 | Implementation | Todo   | Pre-commit + pre-push                                 |
 | P3       | T9-Platform       | Create shared logging module                | Planning       | Todo   | Structured JSON logs                                  |
 | P3       | T6-Integration    | Define webhook payload schemas              | Discovery      | Todo   | Event-driven patterns                                 |
+| P1       | T13-Cost-Ops      | Multi-provider infra cost & routing         | Planning       | Todo   | [Ticket](docs/planning/cost-governance/multi-provider-infra-cost.md) |
 
 > Autoupdate task (#196, #194 prereqs; milestone: CLI Distribution & Delivery Improvements)
 > — see [cli_delivery_improvements_milestone.md](docs/reference/cli_delivery_improvements_milestone.md).
@@ -150,6 +151,9 @@ Track inter-team dependencies here for visibility during orchestration.
 | T5-Auth       | T1-Backend      | Auth middleware interface       | Pending  |
 | T4-Infra      | T10-Quality     | CI pipeline for test execution  | Resolved |
 | T8-DevEx      | All Teams       | Linting configuration           | Resolved |
+| T4-Infra      | T13-Cost-Ops    | Resource tagging for cost attr  | Pending  |
+| T13-Cost-Ops  | T12-Strategic   | Provider cost visibility        | Pending  |
+| T13-Cost-Ops  | T9-Product      | Cost constraints for roadmap    | Pending  |
 
 ---
 
