@@ -12,7 +12,7 @@ Rules for AI infrastructure cost management — model routing, token budgets, pr
 
 ```
 docs/cost-ops/**
-docs/planning/cost/**
+docs/planning/cost-governance/**
 config/models/**
 config/pricing/**
 **/*.prompt

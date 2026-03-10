@@ -27,6 +27,13 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Area labels (`area:backend`, `area:frontend`, etc.) for issue triage
 - P0-P4 priority labels aligned across agentkit-forge and cognitive-mesh
 - Form-template detection in issue label validation (skip non-form issues)
+- Strategic Ops team (T12) for cross-project coordination and framework governance
+- Cost Ops team (T13) with 5 agent personas: Model Economist, Token Efficiency Engineer, Vendor Arbitrage Analyst, Grant Hunter, Cost Ops Monitor
+- Forge meta-team (T11) for creating and validating new agent team specifications
+- Agent/team relationship matrix analysis engine (`scripts/analyze-agents.mjs`)
+- `WebSearch` and `WebFetch` tools for cost-ops agents (ad-hoc pricing research)
+- Multi-provider infrastructure cost planning docs and web intake expansion ticket
+- Spec-compliance-auditor agent for detecting agent/spec drift
 
 ### Changed
 

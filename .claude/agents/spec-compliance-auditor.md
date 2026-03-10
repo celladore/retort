@@ -71,6 +71,7 @@ operations
 ## Preferred Tools
 
 - Read
+- Write
 - Glob
 - Grep
 

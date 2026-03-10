@@ -1,7 +1,4 @@
----
-agentkit:
-  scaffold: managed
----
+<# agentkit: scaffold: managed #>
 [CmdletBinding()]
 param(
   [string]$Base,
@@ -12,6 +9,12 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Preflight: verify gh CLI is available
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+    Write-Error "gh CLI is not installed or not in PATH. Install from https://cli.github.com/"
+    exit 1
+}
 
 function Write-UsageLog {
   param([hashtable]$Payload)

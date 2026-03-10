@@ -104,6 +104,12 @@ JSON
 
 if [[ "$SKIP_PROTECTION" == false ]]; then
   for BRANCH in main main; do
+    # Skip if the branch does not exist on the remote
+    if ! gh api "/repos/$REPO/branches/$BRANCH" --silent 2>/dev/null; then
+      echo "[skip] Branch '$BRANCH' does not exist on $REPO — skipping protection."
+      continue
+    fi
+
     if [[ "$DRY_RUN" == true ]]; then
       echo "[dry-run] Would apply branch protection to $REPO/$BRANCH"
       continue

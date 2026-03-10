@@ -5,7 +5,7 @@
 # Team: STRATEGIC OPS
 
 **Focus**: Cross-project coordination, framework governance, portfolio-level planning
-**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/**, **/\*
+**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/\*\*, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 
 ## Persona
 

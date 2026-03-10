@@ -52,6 +52,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Tools
 
 - Read
+- Write
 - Glob
 - Grep
 

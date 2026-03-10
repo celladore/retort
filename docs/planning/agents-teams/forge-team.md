@@ -20,14 +20,14 @@ Input → InputClarifier → MissionDefiner → RoleArchitect → PromptEngineer
 
 ## Agents (team-creation category)
 
-| Agent | Role |
-|-------|------|
+| Agent           | Role                                                                                    |
+| --------------- | --------------------------------------------------------------------------------------- |
 | input-clarifier | Assess raw team creation requests, extract constraints, validate against existing teams |
-| mission-definer | Lock team definition: ID, name, focus, scope, accepts, handoff-chain |
-| role-architect | Design agent roles, dependencies, notification chains |
-| prompt-engineer | Write agent descriptions, domain rules, conventions |
-| flow-designer | Design team command, flags, integration points |
-| team-validator | Quality gate — cross-reference agents/teams/commands for consistency |
+| mission-definer | Lock team definition: ID, name, focus, scope, accepts, handoff-chain                    |
+| role-architect  | Design agent roles, dependencies, notification chains                                   |
+| prompt-engineer | Write agent descriptions, domain rules, conventions                                     |
+| flow-designer   | Design team command, flags, integration points                                          |
+| team-validator  | Quality gate — cross-reference agents/teams/commands for consistency                    |
 
 ## Team Definition
 

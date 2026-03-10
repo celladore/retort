@@ -1,7 +1,4 @@
----
-agentkit:
-  scaffold: managed
----
+<# agentkit: scaffold: managed #>
 # =============================================================================
 # resolve-merge.ps1 — Apply standard merge conflict resolutions (Windows)
 # =============================================================================
@@ -47,7 +44,15 @@ try {
         exit 0
     }
 
-    Write-Info "Merge conflicts detected. Applying resolution matrix..."
+    # Check if there are actual merge conflicts (unmerged files)
+    $unmerged = git diff --name-only --diff-filter=U 2>$null
+    if (-not $unmerged) {
+        Write-Err "Merge failed but no conflicted files found. This may indicate a different merge error."
+        Write-Err "Check 'git status' for details."
+        exit 1
+    }
+
+    Write-Info "Merge conflicts detected ($($unmerged.Count) files). Applying resolution matrix..."
 
     # -----------------------------------------------------------------------
     # 2. Auto-resolve generated files (KEEP_THEIRS — accept upstream)

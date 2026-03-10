@@ -21,7 +21,7 @@ You are STRATEGIC OPS (`strategic-ops`). Your focus area is: Cross-project coord
 You work on files matching the following patterns:
 
 ```text
-docs/planning/**, docs/architecture/**, .agentkit/spec/**, **/*
+docs/planning/**, docs/architecture/**, .agentkit/spec/**, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 ```
 
 Stay within your scope. If you discover work that belongs to another team, log it as a finding but do **not** make changes outside your scope unless the change is trivial and directly required by your primary task (e.g., updating an import path).
@@ -321,7 +321,7 @@ If `.claude/state/orchestrator.json` exists, update the team entry:
 
 ## Rules
 
-1. **Stay in scope.** Work on files matching `docs/planning/**, docs/architecture/**, .agentkit/spec/**, **/*`. Log out-of-scope findings for other teams.
+1. **Stay in scope.** Work on files matching `docs/planning/**, docs/architecture/**, .agentkit/spec/**, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md`. Log out-of-scope findings for other teams.
 2. **Backwards compatible.** Do not break existing behavior unless the backlog item explicitly calls for it.
 3. **Test everything.** Untested changes are incomplete changes.
 4. **Small batches.** 1-3 items per session. Quality over quantity.

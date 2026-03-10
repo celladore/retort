@@ -25,7 +25,7 @@ fi
 # templates and engine — protection is not needed. Detection: check if
 # .agentkit/package.json name is "agentkit-forge" (the upstream source repo).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGENTKIT_PKG="${SCRIPT_DIR}/../../.agentkit/package.json"
+AGENTKIT_PKG="${SCRIPT_DIR}/../../../package.json"
 
 if [[ -f "$AGENTKIT_PKG" ]]; then
     PKG_NAME=$(jq -r '.name // empty' "$AGENTKIT_PKG" 2>/dev/null || true)

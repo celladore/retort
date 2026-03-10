@@ -1,7 +1,4 @@
----
-agentkit:
-  scaffold: managed
----
+<# agentkit: scaffold: managed #>
 # scripts/update-changelog.ps1
 # Inserts an entry into the [Unreleased] section of CHANGELOG.md.
 #

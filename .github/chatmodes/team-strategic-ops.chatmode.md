@@ -15,7 +15,7 @@ last_updated: '2026-03-10'
 # Team: STRATEGIC OPS
 
 **Focus**: Cross-project coordination, framework governance, portfolio-level planning
-**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/**, **/\*
+**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/\*\*, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: docs/planning/**, docs/architecture/**, .agentkit/spec/**, **/\*
+- Own all code within scope: docs/planning/**, docs/architecture/**, .agentkit/spec/\*\*, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing
