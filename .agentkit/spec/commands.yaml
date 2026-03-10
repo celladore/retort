@@ -708,6 +708,7 @@ commands:
         - Wave 1: Critical bugs, security, blocking UX, highest-impact FEAT-INC completions
         - Wave 2: Core refactors, remaining FEAT-INC, feature PRDs
         - Wave 3: FEAT-NEW features, polish, remaining documentation
+      - **Phase 2.5** _(only when `--generate-plans` is passed)_: Plan Generation — for each critical/high finding, scaffold a plan file using TEMPLATE-plan.md into `docs/planning/review-findings/<finding-id>.md` and update `docs/planning/README.md` with new entries (status: `not-started`).
 
       ## Rules
 
@@ -731,6 +732,10 @@ commands:
         default: null
         required: false
         enum: [0, 1, 2, 3, 4]
+      - name: --generate-plans
+        description: 'After Phase 2, scaffold plan files from critical/high findings into docs/planning/review-findings/'
+        type: boolean
+        default: true
     allowed-tools:
       - Read
       - Glob
