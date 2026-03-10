@@ -105,7 +105,7 @@ fs.writeFileSync(changelogPath, lines.join('\n'), 'utf8');
 console.log(`Updated CHANGELOG.md — ${section}: ${entry}`);
 '@
 
-$TmpScript = [System.IO.Path]::GetTempFileName() + '.mjs'
+$TmpScript = [System.IO.Path]::GetTempFileName() + '.cjs'
 Set-Content -Path $TmpScript -Value $NodeScript -Encoding UTF8
 try {
   node $TmpScript $Changelog $Section $Entry
