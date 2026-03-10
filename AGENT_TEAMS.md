@@ -35,6 +35,7 @@ orchestrator skips them during dispatch.
 | QUALITY       | quality       | Code review, refactoring, bugs, reliability, session retrospectives        | `**/*`                                                                                                    | review, investigate                  | —                  | Active | —          |
 | TEAMFORGE     | forge         | Meta-team — creates, validates, and deploys new agent team specifications  | `.agentkit/spec/**`, `docs/planning/agents-teams/**`, `docs/architecture/**`                              | plan, review, investigate, document  | quality → docs     | Active | —          |
 | STRATEGIC OPS | strategic-ops | Cross-project coordination, framework governance, portfolio-level planning | `docs/planning/**`, `docs/architecture/**`, `.agentkit/spec/**`, `**/*`                                   | plan, review, investigate, document  | product → quality  | Active | —          |
+| COST OPS      | cost-ops      | AI infrastructure cost reduction, vendor optimization, token efficiency    | `docs/cost-ops/**`, `docs/planning/cost/**`, `config/models/**`, `config/pricing/**`                      | investigate, review, plan, document  | infra → product    | Active | —          |
 
 ---
 

@@ -99,6 +99,14 @@ teams:
     handoff-chain: [product, quality]
     agents: [portfolio-analyst, governance-advisor, adoption-strategist, impact-assessor, release-coordinator]
 
+  - id: cost-ops
+    name: COST OPS
+    focus: 'AI infrastructure cost reduction, vendor optimization, token efficiency'
+    scope: ['docs/cost-ops/**', 'docs/planning/cost/**', 'config/models/**', 'config/pricing/**']
+    accepts: [investigate, review, plan, document]
+    handoff-chain: [infra, product]
+    agents: [model-economist, token-efficiency-engineer, vendor-arbitrage-analyst, grant-hunter, cost-ops-monitor]
+
 intake:
   ownerTeam: product
   operationsTeam: quality
@@ -115,6 +123,8 @@ intake:
     quality: quality
     forge: forge # Team creation requests route to forge team
     strategic-ops: strategic-ops # Cross-project coordination routes to strategic ops
+    cost-ops: cost-ops # AI cost optimization routes to cost ops team
+    agent-performance: quality # Agent performance evaluation routes to quality team
     cli: backend # CLI issues route to backend team
     sync-engine: devops # Sync engine issues route to devops team
   escalation:

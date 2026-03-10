@@ -2070,3 +2070,35 @@ commands:
       - Glob
       - Grep
       - Bash
+
+  - name: team-cost-ops
+    type: team
+    team: cost-ops
+    description: >
+      Activates the COST OPS team context. Handles AI infrastructure cost
+      reduction, model selection optimization, token efficiency auditing,
+      vendor arbitrage analysis, grant and program discovery, and cost
+      monitoring across AI operations.
+    flags:
+      - name: --task
+        description: 'Cost ops task type'
+        type: string
+        default: null
+        enum: [model-audit, token-audit, vendor-compare, grant-scan, cost-report, full-review]
+      - name: --period
+        description: 'Reporting period for cost analysis'
+        type: string
+        default: week
+        enum: [week, month, quarter]
+      - name: --provider
+        description: 'Target AI provider for analysis'
+        type: string
+        default: null
+        enum: [anthropic, openai, google, mistral, cohere, self-hosted]
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash

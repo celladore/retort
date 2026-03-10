@@ -76,7 +76,7 @@ Run sync-backlog against the configured tracker with ownership-based routing and
 
 ### Issue Field Routing
 
-Route issues to teams by area: `backend`→backend, `frontend`→frontend, `data`→data, `infra`→infra, `devops`→devops, `testing`→testing, `security`→security, `docs`→docs, `product`→product, `quality`→quality, `cli`→backend, `sync-engine`→devops, `forge`→forge, `strategic-ops`→strategic-ops
+Route issues to teams by area: `backend`→backend, `frontend`→frontend, `data`→data, `infra`→infra, `devops`→devops, `testing`→testing, `security`→security, `docs`→docs, `product`→product, `quality`→quality, `cli`→backend, `sync-engine`→devops, `forge`→forge, `strategic-ops`→strategic-ops, `cost-ops`→cost-ops, `agent-performance`→quality
 
 **Priority:** P0 (Critical) · P1 (High) · P2 (Medium) · P3 (Low) · P4 (Trivial)
 **Severity (bugs):** critical · high · medium · low
