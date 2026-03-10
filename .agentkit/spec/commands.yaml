@@ -1997,3 +1997,25 @@ commands:
       - Glob
       - Grep
       - Bash
+
+  - name: team-forge
+    type: team
+    team: forge
+    description: >
+      Activates the TEAMFORGE meta-team context. Creates, validates, and
+      deploys new agent team specifications through a structured pipeline.
+      Uses a sequential agent pipeline: InputClarifier → MissionDefiner →
+      RoleArchitect → PromptEngineer → FlowDesigner → TeamValidator.
+    flags:
+      - name: --task
+        description: 'TeamForge task type'
+        type: string
+        default: null
+        enum: [create-team, validate-team, audit-teams, update-team]
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash

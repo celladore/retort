@@ -83,6 +83,13 @@ teams:
     accepts: [review, investigate]
     handoff-chain: []
 
+  - id: forge
+    name: TEAMFORGE
+    focus: 'Meta-team — creates, validates, and deploys new agent team specifications'
+    scope: ['.agentkit/spec/**', 'docs/planning/agents-teams/**', 'docs/architecture/**']
+    accepts: [plan, review, investigate, document]
+    handoff-chain: [quality, docs]
+
 intake:
   ownerTeam: product
   operationsTeam: quality
@@ -97,6 +104,7 @@ intake:
     docs: docs
     product: product
     quality: quality
+    forge: forge # Team creation requests route to forge team
     cli: backend # CLI issues route to backend team
     sync-engine: devops # Sync engine issues route to devops team
   escalation:
