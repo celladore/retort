@@ -90,6 +90,13 @@ teams:
     accepts: [plan, review, investigate, document]
     handoff-chain: [quality, docs]
 
+  - id: strategic-ops
+    name: STRATEGIC OPS
+    focus: 'Cross-project coordination, framework governance, portfolio-level planning'
+    scope: ['docs/planning/**', 'docs/architecture/**', '.agentkit/spec/**', '**/*']
+    accepts: [plan, review, investigate, document]
+    handoff-chain: [product, quality]
+
 intake:
   ownerTeam: product
   operationsTeam: quality
@@ -105,6 +112,7 @@ intake:
     product: product
     quality: quality
     forge: forge # Team creation requests route to forge team
+    strategic-ops: strategic-ops # Cross-project coordination routes to strategic ops
     cli: backend # CLI issues route to backend team
     sync-engine: devops # Sync engine issues route to devops team
   escalation:

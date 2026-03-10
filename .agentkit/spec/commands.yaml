@@ -2019,3 +2019,30 @@ commands:
       - Glob
       - Grep
       - Bash
+
+  - name: team-strategic-ops
+    type: team
+    team: strategic-ops
+    description: >
+      Activates the STRATEGIC OPS team context. Handles cross-project
+      coordination, framework governance, portfolio analysis, adoption
+      strategy, impact assessment, and release coordination across all
+      repos using AgentKit Forge.
+    flags:
+      - name: --task
+        description: 'Strategic ops task type'
+        type: string
+        default: null
+        enum: [portfolio-scan, governance-review, adoption-plan, impact-assess, release-plan]
+      - name: --scope
+        description: 'Scope: single repo, portfolio-wide, or upstream-only'
+        type: string
+        default: null
+        enum: [repo, portfolio, upstream]
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash
