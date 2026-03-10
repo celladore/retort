@@ -1579,6 +1579,8 @@ agents:
         - Read
         - Glob
         - Grep
+        - WebSearch
+        - WebFetch
 
     - id: token-efficiency-engineer
       category: cost-operations
@@ -1668,6 +1670,8 @@ agents:
         - Read
         - Glob
         - Grep
+        - WebSearch
+        - WebFetch
 
     - id: grant-hunter
       category: cost-operations
@@ -1709,6 +1713,8 @@ agents:
         - Read
         - Glob
         - Grep
+        - WebSearch
+        - WebFetch
 
     - id: cost-ops-monitor
       category: cost-operations
