@@ -31,9 +31,9 @@ Add `docs/product` to the `dirs` array:
 
 ## Files to Modify
 
-| File                                         | Change                                     |
-| -------------------------------------------- | ------------------------------------------ |
-| `.agentkit/engines/node/src/discover.mjs`    | Add `docs/product` to PRD detector dirs    |
+| File                                      | Change                                  |
+| ----------------------------------------- | --------------------------------------- |
+| `.agentkit/engines/node/src/discover.mjs` | Add `docs/product` to PRD detector dirs |
 
 ## Acceptance Criteria
 
