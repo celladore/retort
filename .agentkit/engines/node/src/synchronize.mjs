@@ -62,6 +62,23 @@ function getTeamCommandStem(teamId) {
   return teamId.startsWith('team-') ? teamId : `team-${teamId}`;
 }
 
+/**
+ * Resolves the output path components for a command, applying the optional
+ * command prefix. Two strategies:
+ *  - 'subdirectory': puts commands in a prefix-named subfolder (Claude Code)
+ *  - 'filename':     prepends prefix with hyphen to the filename (all others)
+ *
+ * @param {string} cmdName - Original command name (e.g. 'check')
+ * @param {string|null} prefix - Command prefix (e.g. 'kits') or null/undefined
+ * @param {'subdirectory'|'filename'} [strategy='filename'] - Platform strategy
+ * @returns {{ dir: string, stem: string }}
+ */
+export function resolveCommandPath(cmdName, prefix, strategy = 'filename') {
+  if (!prefix) return { dir: '', stem: cmdName };
+  if (strategy === 'subdirectory') return { dir: prefix, stem: cmdName };
+  return { dir: '', stem: `${prefix}-${cmdName}` };
+}
+
 // ---------------------------------------------------------------------------
 // Three-way merge for managed scaffold files
 // ---------------------------------------------------------------------------
@@ -790,7 +807,10 @@ async function syncClaudeCommands(
     cmdByName.set(cmd.name, cmd);
   }
 
-  // Copy non-template command files, skipping feature-gated commands
+  // Copy non-template command files, skipping feature-gated commands.
+  // NOTE: All files in the commands directory (including non-spec files not
+  // declared in commands.yaml) are subject to prefix namespacing when set.
+  const prefix = vars.commandPrefix || null;
   for await (const srcFile of walkDir(commandsDir)) {
     const fname = basename(srcFile);
     if (fname === 'team-TEMPLATE.md') continue; // skip template
@@ -803,10 +823,13 @@ async function syncClaudeCommands(
     const cmdVars = cmdSpec ? buildCommandVars(cmdSpec, vars) : vars;
     const rendered = renderTemplate(content, cmdVars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
-    await writeOutput(join(tmpDir, '.claude', 'commands', fname), withHeader);
+    // Claude Code: use subdirectory strategy for prefix (e.g. kits/check.md)
+    const { dir, stem } = resolveCommandPath(cmdName, prefix, 'subdirectory');
+    await writeOutput(join(tmpDir, '.claude', 'commands', dir, `${stem}${ext}`), withHeader);
   }
 
   // Generate team commands from team-TEMPLATE.md (gated by team-orchestration)
+  // Team commands are NOT prefixed — they already have a team- namespace
   if (!isFeatureEnabled('team-orchestration', vars)) return;
   const teamTemplatePath = join(commandsDir, 'team-TEMPLATE.md');
   if (!existsSync(teamTemplatePath)) return;
@@ -869,13 +892,16 @@ async function syncClaudeSkills(templatesDir, tmpDir, vars, version, repoName, c
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
+  const prefix = vars.commandPrefix || null;
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
     if (!isItemFeatureEnabled(cmd, vars)) continue;
     const cmdVars = buildCommandVars(cmd, vars, '.claude/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.claude', 'skills', cmd.name, 'SKILL.md'), withHeader);
+    // Skills use filename prefix strategy (directory-per-skill)
+    const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
+    await writeOutput(join(tmpDir, '.claude', 'skills', stem, 'SKILL.md'), withHeader);
   }
 }
 
@@ -935,6 +961,7 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
   const tplPath = join(templatesDir, 'cursor', 'commands', 'TEMPLATE.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
+  const prefix = vars.commandPrefix || null;
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -942,7 +969,8 @@ async function syncCursorCommands(templatesDir, tmpDir, vars, version, repoName,
     const cmdVars = buildCommandVars(cmd, vars, '.cursor/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.cursor', 'commands', `${cmd.name}.md`), withHeader);
+    const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
+    await writeOutput(join(tmpDir, '.cursor', 'commands', `${stem}.md`), withHeader);
   }
 }
 
@@ -993,6 +1021,7 @@ async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoNam
   const tplPath = join(templatesDir, 'windsurf', 'templates', 'command.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
+  const prefix = vars.commandPrefix || null;
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -1000,7 +1029,8 @@ async function syncWindsurfCommands(templatesDir, tmpDir, vars, version, repoNam
     const cmdVars = buildCommandVars(cmd, vars, '.windsurf/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.windsurf', 'commands', `${cmd.name}.md`), withHeader);
+    const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
+    await writeOutput(join(tmpDir, '.windsurf', 'commands', `${stem}.md`), withHeader);
   }
 }
 
@@ -1040,6 +1070,7 @@ async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName,
   const tplPath = join(templatesDir, 'copilot', 'prompts', 'TEMPLATE.prompt.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
+  const prefix = vars.commandPrefix || null;
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -1047,7 +1078,8 @@ async function syncCopilotPrompts(templatesDir, tmpDir, vars, version, repoName,
     const cmdVars = buildCommandVars(cmd, vars, '.github/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.github', 'prompts', `${cmd.name}.prompt.md`), withHeader);
+    const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
+    await writeOutput(join(tmpDir, '.github', 'prompts', `${stem}.prompt.md`), withHeader);
   }
 }
 
@@ -1235,6 +1267,7 @@ async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, co
   const tplPath = join(templatesDir, 'codex', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
+  const prefix = vars.commandPrefix || null;
 
   for (const cmd of commandsSpec.commands || []) {
     if (cmd.type === 'team') continue;
@@ -1242,7 +1275,8 @@ async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, co
     const cmdVars = buildCommandVars(cmd, vars, '.agents/state');
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
-    await writeOutput(join(tmpDir, '.agents', 'skills', cmd.name, 'SKILL.md'), withHeader);
+    const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
+    await writeOutput(join(tmpDir, '.agents', 'skills', stem, 'SKILL.md'), withHeader);
   }
 }
 
@@ -1561,9 +1595,12 @@ function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
   if (prompt) {
     prompt = prompt.replaceAll('{{stateDir}}', stateDir);
   }
+  const prefix = vars.commandPrefix || null;
+  const prefixedName = prefix ? `${prefix}-${cmd.name}` : cmd.name;
   return {
     ...vars,
     commandName: cmd.name,
+    commandPrefixedName: prefixedName,
     isSyncBacklog: cmd.name === 'sync-backlog',
     commandDescription:
       typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
@@ -1791,6 +1828,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
+    commandPrefix: overlaySettings.commandPrefix || null,
     syncDate: new Date().toISOString().slice(0, 10),
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'agentkit-forge',
