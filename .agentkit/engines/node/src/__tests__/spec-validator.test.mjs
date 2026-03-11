@@ -196,6 +196,24 @@ describe('validateCrossReferences()', () => {
     expect(errors.filter((e) => e.includes('unknown tool'))).toEqual([]);
   });
 
+  it('accepts AskUserQuestion, TodoWrite, Agent, and NotebookEdit as valid tools', () => {
+    const errors = validateCrossReferences({
+      teams: { teams: [] },
+      commands: {
+        commands: [
+          {
+            name: 'interactive-cmd',
+            type: 'utility',
+            'allowed-tools': ['Read', 'AskUserQuestion', 'TodoWrite', 'Agent', 'NotebookEdit'],
+          },
+        ],
+      },
+      agents: { agents: {} },
+      rules: { rules: [] },
+    });
+    expect(errors.filter((e) => e.includes('unknown tool'))).toEqual([]);
+  });
+
   it('rejects non-Bash decorated tool patterns', () => {
     const errors = validateCrossReferences({
       teams: { teams: [] },
