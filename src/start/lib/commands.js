@@ -120,6 +120,7 @@ export const COMMANDS = [
  * @returns {Command[]}
  */
 export function getAllCommands(ctx) {
+  // Exclude meta-teams that coordinate other teams rather than doing direct work
   const teamCommands = ctx.teams
     .filter((t) => !['forge', 'strategic-ops'].includes(t.id))
     .map((t) => ({

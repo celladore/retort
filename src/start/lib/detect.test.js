@@ -16,10 +16,10 @@ describe('detect', () => {
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'ak-detect-'));
-    // Default: git returns sensible values
+    // Default: git returns sensible values (commands now use -C flag)
     execSync.mockImplementation((cmd) => {
-      if (cmd === 'git branch --show-current') return 'main\n';
-      if (cmd === 'git status --porcelain') return '\n';
+      if (cmd.includes('branch --show-current')) return 'main\n';
+      if (cmd.includes('status --porcelain')) return '\n';
       return '';
     });
   });
@@ -205,18 +205,31 @@ describe('detect', () => {
   describe('git state', () => {
     it('should read branch name from git', () => {
       execSync.mockImplementation((cmd) => {
-        if (cmd === 'git branch --show-current') return 'feat/my-feature\n';
-        if (cmd === 'git status --porcelain') return '\n';
+        if (cmd.includes('branch --show-current')) return 'feat/my-feature\n';
+        if (cmd.includes('status --porcelain')) return '\n';
         return '';
       });
       const ctx = detect(root);
       expect(ctx.branch).toBe('feat/my-feature');
     });
 
+    it('should pass root to git via -C flag', () => {
+      const capturedCmds = [];
+      execSync.mockImplementation((cmd) => {
+        capturedCmds.push(cmd);
+        if (cmd.includes('branch --show-current')) return 'main\n';
+        if (cmd.includes('status --porcelain')) return '\n';
+        return '';
+      });
+      detect(root);
+      const branchCall = capturedCmds.find((c) => c.includes('branch --show-current'));
+      expect(branchCall).toContain(`-C "${root}"`);
+    });
+
     it('should detect clean working tree', () => {
       execSync.mockImplementation((cmd) => {
-        if (cmd === 'git branch --show-current') return 'main\n';
-        if (cmd === 'git status --porcelain') return '';
+        if (cmd.includes('branch --show-current')) return 'main\n';
+        if (cmd.includes('status --porcelain')) return '';
         return '';
       });
       const ctx = detect(root);
@@ -226,8 +239,8 @@ describe('detect', () => {
 
     it('should count uncommitted changes', () => {
       execSync.mockImplementation((cmd) => {
-        if (cmd === 'git branch --show-current') return 'main\n';
-        if (cmd === 'git status --porcelain') return 'M file1.js\nA file2.js\n?? file3.js\n';
+        if (cmd.includes('branch --show-current')) return 'main\n';
+        if (cmd.includes('status --porcelain')) return 'M file1.js\nA file2.js\n?? file3.js\n';
         return '';
       });
       const ctx = detect(root);
@@ -321,8 +334,8 @@ describe('detect', () => {
 
     it('should return uncommitted when there are changes', () => {
       execSync.mockImplementation((cmd) => {
-        if (cmd === 'git branch --show-current') return 'main\n';
-        if (cmd === 'git status --porcelain') return 'M file.js\n';
+        if (cmd.includes('branch --show-current')) return 'main\n';
+        if (cmd.includes('status --porcelain')) return 'M file.js\n';
         return '';
       });
       const ctx = detect(root);
@@ -336,8 +349,8 @@ describe('detect', () => {
         JSON.stringify({ currentPhase: 3 })
       );
       execSync.mockImplementation((cmd) => {
-        if (cmd === 'git branch --show-current') return 'main\n';
-        if (cmd === 'git status --porcelain') return 'M file.js\n';
+        if (cmd.includes('branch --show-current')) return 'main\n';
+        if (cmd.includes('status --porcelain')) return 'M file.js\n';
         return '';
       });
       const ctx = detect(root);

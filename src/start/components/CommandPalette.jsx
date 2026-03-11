@@ -32,6 +32,12 @@ const CATEGORY_LABELS = {
 
 const CATEGORY_ORDER = ['workflow', 'quality', 'info', 'team'];
 
+/** Fuse.js match tolerance — 0 = exact, 1 = anything. 0.4 balances typo tolerance vs. noise. */
+const FUSE_THRESHOLD = 0.4;
+
+/** Minimum score for a command to be shown with the ★ recommended indicator. */
+const RECOMMENDED_SCORE = 70;
+
 /**
  * @param {{
  *   ctx: import('../lib/detect.js').RepoContext,
@@ -52,7 +58,7 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
     () =>
       new Fuse(allCommands, {
         keys: ['id', 'label', 'desc', 'tags'],
-        threshold: 0.4,
+        threshold: FUSE_THRESHOLD,
         includeScore: true,
       }),
     [allCommands]
@@ -170,7 +176,7 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
 
           const thisIndex = commandIndices.get(item) ?? 0;
           const isActive = thisIndex === clampedCursor;
-          const isRecommended = item.score >= topScore && item.score >= 70;
+          const isRecommended = item.score >= topScore && item.score >= RECOMMENDED_SCORE;
 
           return (
             <Box key={`cmd-${item.id}`} gap={1}>

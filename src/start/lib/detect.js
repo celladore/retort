@@ -152,9 +152,9 @@ export function detect(root = process.cwd()) {
     activeTaskCount = readdirSync(tasksDir).filter((f) => f.endsWith('.json')).length;
   }
 
-  // Git state
-  const branch = run('git branch --show-current', 'unknown');
-  const status = run('git status --porcelain');
+  // Git state — use -C to target the correct repo when root !== cwd
+  const branch = run(`git -C "${root}" branch --show-current`, 'unknown');
+  const status = run(`git -C "${root}" status --porcelain`);
   const uncommittedCount = status ? status.split('\n').filter(Boolean).length : 0;
   const isClean = uncommittedCount === 0;
 

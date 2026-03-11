@@ -50,20 +50,25 @@ if (args.includes('--help') || args.includes('-h')) {
   process.exit(0);
 }
 
-// JSON mode for scripting / piping
-if (args.includes('--json')) {
+/** Detect context and write JSON to stdout. */
+function dumpContextJson() {
   const ctx = detect();
   process.stdout.write(JSON.stringify(ctx, null, 2) + '\n');
+  return ctx;
+}
+
+// JSON mode for scripting / piping
+if (args.includes('--json')) {
+  dumpContextJson();
   process.exit(0);
 }
 
 // TTY check — Ink requires an interactive terminal
 if (!process.stdin.isTTY) {
-  const ctx = detect();
   process.stderr.write(
     'ak-start: not a terminal. Use --json for non-interactive output.\n'
   );
-  process.stdout.write(JSON.stringify(ctx, null, 2) + '\n');
+  dumpContextJson();
   process.exit(1);
 }
 

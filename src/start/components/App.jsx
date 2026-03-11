@@ -66,13 +66,15 @@ function AppInner({ ctx }) {
 
   function handleCommandSelected(command) {
     setResult(command);
+    // Allow the result screen to render, then exit the Ink process
+    setTimeout(() => exit(), 100);
   }
 
   // If a command was selected, show the result and exit
   if (result) {
     return (
       <Box flexDirection="column" gap={1}>
-        <Header ctx={ctx} mode={mode} />
+        <Header mode={mode} />
 
         <Box paddingX={2} flexDirection="column" gap={1}>
           <Text color="green" bold>→ Run this in your Claude session:</Text>
@@ -92,7 +94,7 @@ function AppInner({ ctx }) {
 
   return (
     <Box flexDirection="column" gap={1}>
-      <Header ctx={ctx} mode={mode} />
+      <Header mode={mode} />
 
       {/* Uncommitted changes warning */}
       {ctx.flow === 'uncommitted' && (
@@ -126,7 +128,7 @@ function AppInner({ ctx }) {
   );
 }
 
-function Header({ ctx, mode }) {
+function Header({ mode }) {
   return (
     <Box flexDirection="column" paddingX={1}>
       <Box gap={1}>

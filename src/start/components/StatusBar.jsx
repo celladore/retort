@@ -11,6 +11,9 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 
+/** Max displayed branch name length before truncation. */
+const MAX_BRANCH_LENGTH = 24;
+
 /**
  * @param {{ ctx: import('../lib/detect.js').RepoContext }} props
  */
@@ -60,7 +63,7 @@ export default function StatusBar({ ctx }) {
 
       {/* Branch */}
       <Segment color="blue">
-        {truncate(ctx.branch, 24)}
+        {truncate(ctx.branch, MAX_BRANCH_LENGTH)}
       </Segment>
 
       <Divider />
