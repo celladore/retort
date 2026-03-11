@@ -40,6 +40,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 
 | Command              | Purpose                                      |
 | -------------------- | -------------------------------------------- |
+| `/start`             | New user entry point — guided next steps     |
 {{#if hasTeamOrchestration}}| `/orchestrate`       | Master coordinator — assess, plan, delegate  |
 {{/if}}| `/discover`          | Scan codebase, detect tech stacks            |
 {{#if hasHealthcheck}}| `/healthcheck`       | Pre-flight validation                        |
