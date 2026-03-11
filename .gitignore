@@ -34,6 +34,7 @@
 # Runtime & dependencies
 # =============================================================================
 node_modules/
+dist/
 
 # Test fixture directory (ephemeral, created by vitest)
 .test-tmp/
