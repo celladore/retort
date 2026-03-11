@@ -807,7 +807,9 @@ async function syncClaudeCommands(
     cmdByName.set(cmd.name, cmd);
   }
 
-  // Copy non-template command files, skipping feature-gated commands
+  // Copy non-template command files, skipping feature-gated commands.
+  // NOTE: All files in the commands directory (including non-spec files not
+  // declared in commands.yaml) are subject to prefix namespacing when set.
   const prefix = vars.commandPrefix || null;
   for await (const srcFile of walkDir(commandsDir)) {
     const fname = basename(srcFile);

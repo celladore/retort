@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
-import { afterAll, afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { resolveCommandPath, runSync } from '../synchronize.mjs';
 
 // ---------------------------------------------------------------------------
@@ -181,6 +181,72 @@ describe('resolveCommandPath', () => {
   it('should handle multi-word prefix', () => {
     const result = resolveCommandPath('check', 'my-kit', 'filename');
     expect(result).toEqual({ dir: '', stem: 'my-kit-check' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Integration tests: commandPrefixedName template variable
+// ---------------------------------------------------------------------------
+
+describe('commandPrefixedName template variable', () => {
+  let agentkitRoot;
+  let projectRoot;
+
+  afterEach(() => {
+    if (projectRoot) {
+      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
+      projectRoot = null;
+    }
+    if (agentkitRoot) {
+      rmSync(agentkitRoot, { recursive: true, force: true });
+      agentkitRoot = null;
+    }
+  });
+
+  it('should render commandPrefixedName in skill templates when prefix is set', { timeout: 15000 }, async () => {
+    // Arrange — use a template that renders {{commandPrefixedName}}
+    agentkitRoot = makeMinimalAgentkitRootWithPrefix({
+      overlayName: 'test-repo',
+      commandPrefix: 'kits',
+    });
+    // Override the skill template to include commandPrefixedName
+    writeTestFile(
+      resolve(agentkitRoot, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
+      '# {{commandPrefixedName}}\nOriginal: {{commandName}}\n'
+    );
+    projectRoot = makeNamedTmpProject('test-repo');
+
+    // Act
+    await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
+
+    // Assert
+    const content = readFileSync(
+      resolve(projectRoot, '.claude', 'skills', 'kits-build', 'SKILL.md'),
+      'utf-8'
+    );
+    expect(content).toContain('# kits-build');
+    expect(content).toContain('Original: build');
+  });
+
+  it('should render commandPrefixedName as commandName when no prefix', { timeout: 15000 }, async () => {
+    agentkitRoot = makeMinimalAgentkitRootWithPrefix({
+      overlayName: 'test-repo',
+      commandPrefix: null,
+    });
+    writeTestFile(
+      resolve(agentkitRoot, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
+      '# {{commandPrefixedName}}\nOriginal: {{commandName}}\n'
+    );
+    projectRoot = makeNamedTmpProject('test-repo');
+
+    await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
+
+    const content = readFileSync(
+      resolve(projectRoot, '.claude', 'skills', 'build', 'SKILL.md'),
+      'utf-8'
+    );
+    expect(content).toContain('# build');
+    expect(content).toContain('Original: build');
   });
 });
 
