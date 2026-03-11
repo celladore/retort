@@ -3,7 +3,7 @@ name: 'Team Validator'
 description: 'Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references agents, teams, and commands to ensure everything is properly wired.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-10'
+last_updated: '2026-03-11'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

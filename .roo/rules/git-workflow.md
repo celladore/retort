@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-10 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-11 -->
 <!-- Format: Plain Markdown rule. Roo reads .roo/rules/ directory. -->
 <!-- Docs: https://docs.roocode.com/features/custom-instructions -->
 

@@ -9,15 +9,16 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Ensure native command failures (git, pnpm, gh) are treated as terminating errors.
+$PSNativeCommandUseErrorActionPreference = $true
 
 # Preflight: verify gh CLI is available and authenticated
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     Write-Error "gh CLI is not installed or not in PATH. Install from https://cli.github.com/"
     exit 1
 }
-try {
-    gh auth status 2>&1 | Out-Null
-} catch {
+gh auth status 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
     Write-Error "gh CLI is not authenticated. Run 'gh auth login' first."
     exit 1
 }

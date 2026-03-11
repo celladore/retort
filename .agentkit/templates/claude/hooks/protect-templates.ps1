@@ -27,7 +27,7 @@ if (-not $filePath) {
 # If we are in the agentkit-forge source repo, agents are maintaining the
 # templates and engine — protection is not needed.
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$agentkitPkg = Join-Path $scriptDir '..\..\..\package.json'
+$agentkitPkg = Join-Path $scriptDir '..\..\.agentkit\package.json'
 if (Test-Path $agentkitPkg) {
     try {
         $pkg = Get-Content $agentkitPkg -Raw | ConvertFrom-Json

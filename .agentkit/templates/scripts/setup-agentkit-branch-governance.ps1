@@ -90,5 +90,6 @@ if (-not $SkipProtection) {
 
 Write-Host ""
 Write-Host "Done."
-Write-Host "Verify with: gh api /repos/$Repo/branches/{{defaultBranch}}/protection"
-Write-Host "             gh api /repos/$Repo/branches/main/protection"
+foreach ($b in $branches) {
+    Write-Host "Verify with: gh api /repos/$Repo/branches/$b/protection"
+}
