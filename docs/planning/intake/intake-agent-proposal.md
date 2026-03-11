@@ -44,14 +44,14 @@ Create a dedicated intake agent (`intake-analyst`) and `/intake` command that co
 
 ### Supported Document Types
 
-| Type        | Short ID    | Location                     | Extracts                                        |
-| ----------- | ----------- | ---------------------------- | ----------------------------------------------- |
-| PRD         | `prd`       | `docs/product/PRD-*.md`      | Phases, deliverables, acceptance criteria        |
-| Func Spec   | `func-spec` | `docs/architecture/specs/`   | Features, business rules, contracts             |
-| UI/UX Spec  | `ui-spec`   | `docs/design/UI-*.md`        | Screens, components, interaction flows          |
-| User Stories | `stories`  | `docs/product/stories/`      | Epics, stories, acceptance criteria             |
-| Tech Spec   | `tech-spec` | `docs/architecture/specs/`   | Modules, API contracts, data models             |
-| Process Flow | `process`  | `docs/processes/FLOW-*.md`   | Steps, decision points, integration touchpoints |
+| Type         | Short ID    | Location                       | Extracts                                        |
+| ------------ | ----------- | ------------------------------ | ----------------------------------------------- |
+| PRD          | `prd`       | `docs/product/PRD-*.md`        | Phases, deliverables, acceptance criteria       |
+| Func Spec    | `func-spec` | `docs/architecture/specs/`     | Features, business rules, contracts             |
+| UI/UX Spec   | `ui-spec`   | `docs/product/UI-*.md`         | Screens, components, interaction flows          |
+| User Stories | `stories`   | `docs/product/stories/`        | Epics, stories, acceptance criteria             |
+| Tech Spec    | `tech-spec` | `docs/architecture/specs/`     | Modules, API contracts, data models             |
+| Process Flow | `process`   | `docs/orchestration/FLOW-*.md` | Steps, decision points, integration touchpoints |
 
 ### Command Usage
 
@@ -93,33 +93,33 @@ Flags:
 
 ### Known Gaps & Risks
 
-| # | Gap                                     | Mitigation                                                  |
-| - | --------------------------------------- | ----------------------------------------------------------- |
-| 1 | No document format validation           | Validate structure before extraction; warn on missing sections |
-| 2 | No idempotency (duplicate intake runs)  | Track provenance via source tags, deduplicate on re-intake  |
-| 3 | No cross-document dependency detection  | Cross-reference `dependsOn` against previously intaken docs |
-| 4 | No partial re-intake after doc edits    | Diff-based re-intake against last-intaken snapshot          |
-| 5 | No effort estimation                    | Optional `--estimate` flag for T-shirt sizing               |
-| 6 | Team assignment may be wrong            | Confidence scores; flag low-confidence for human review     |
+| #   | Gap                                    | Mitigation                                                     |
+| --- | -------------------------------------- | -------------------------------------------------------------- |
+| 1   | No document format validation          | Validate structure before extraction; warn on missing sections |
+| 2   | No idempotency (duplicate intake runs) | Track provenance via source tags, deduplicate on re-intake     |
+| 3   | No cross-document dependency detection | Cross-reference `dependsOn` against previously intaken docs    |
+| 4   | No partial re-intake after doc edits   | Diff-based re-intake against last-intaken snapshot             |
+| 5   | No effort estimation                   | Optional `--estimate` flag for T-shirt sizing                  |
+| 6   | Team assignment may be wrong           | Confidence scores; flag low-confidence for human review        |
 
 ## Files to Modify
 
-| File                              | Change                                  |
-| --------------------------------- | --------------------------------------- |
-| `.agentkit/spec/agents.yaml`      | Add `intake-analyst` agent entry        |
-| `.agentkit/spec/commands.yaml`    | Add `intake` command spec               |
+| File                           | Change                           |
+| ------------------------------ | -------------------------------- |
+| `.agentkit/spec/agents.yaml`   | Add `intake-analyst` agent entry |
+| `.agentkit/spec/commands.yaml` | Add `intake` command spec        |
 
 ## Files to Create
 
-| File                                                    | Purpose                        |
-| ------------------------------------------------------- | ------------------------------ |
-| `.agentkit/templates/claude/commands/intake.md`         | Command template               |
-| `.agentkit/engines/node/src/extractors/prd.mjs`         | PRD extractor                  |
-| `.agentkit/engines/node/src/extractors/func-spec.mjs`   | Functional spec extractor      |
-| `.agentkit/engines/node/src/extractors/tech-spec.mjs`   | Technical spec extractor       |
-| `.agentkit/engines/node/src/extractors/ui-spec.mjs`     | UI/UX spec extractor           |
-| `.agentkit/engines/node/src/extractors/stories.mjs`     | User stories extractor         |
-| `.agentkit/engines/node/src/extractors/process.mjs`     | Process flow extractor         |
+| File                                                  | Purpose                   |
+| ----------------------------------------------------- | ------------------------- |
+| `.agentkit/templates/claude/commands/intake.md`       | Command template          |
+| `.agentkit/engines/node/src/extractors/prd.mjs`       | PRD extractor             |
+| `.agentkit/engines/node/src/extractors/func-spec.mjs` | Functional spec extractor |
+| `.agentkit/engines/node/src/extractors/tech-spec.mjs` | Technical spec extractor  |
+| `.agentkit/engines/node/src/extractors/ui-spec.mjs`   | UI/UX spec extractor      |
+| `.agentkit/engines/node/src/extractors/stories.mjs`   | User stories extractor    |
+| `.agentkit/engines/node/src/extractors/process.mjs`   | Process flow extractor    |
 
 ## Acceptance Criteria
 

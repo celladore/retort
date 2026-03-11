@@ -83,6 +83,60 @@ teams:
     accepts: [review, investigate]
     handoff-chain: []
 
+  - id: forge
+    name: TEAMFORGE
+    focus: 'Meta-team — creates, validates, and deploys new agent team specifications'
+    scope: ['.agentkit/spec/**', 'docs/planning/agents-teams/**', 'docs/architecture/**']
+    accepts: [plan, review, investigate, document]
+    handoff-chain: [quality, docs]
+    agents:
+      [
+        input-clarifier,
+        mission-definer,
+        role-architect,
+        prompt-engineer,
+        flow-designer,
+        team-validator,
+      ]
+
+  - id: strategic-ops
+    name: STRATEGIC OPS
+    focus: 'Cross-project coordination, framework governance, portfolio-level planning'
+    scope:
+      [
+        'docs/planning/**',
+        'docs/architecture/**',
+        '.agentkit/spec/**',
+        'AGENT_BACKLOG.md',
+        'UNIFIED_AGENT_TEAMS.md',
+        'AGENT_TEAMS.md',
+      ]
+    accepts: [plan, review, investigate, document]
+    handoff-chain: [product, quality]
+    agents:
+      [
+        portfolio-analyst,
+        governance-advisor,
+        adoption-strategist,
+        impact-assessor,
+        release-coordinator,
+      ]
+
+  - id: cost-ops
+    name: COST OPS
+    focus: 'AI infrastructure cost reduction, vendor optimization, token efficiency'
+    scope: ['docs/cost-ops/**', 'docs/planning/cost/**', 'config/models/**', 'config/pricing/**']
+    accepts: [investigate, review, plan, document, implement]
+    handoff-chain: [infra, product, strategic-ops]
+    agents:
+      [
+        model-economist,
+        token-efficiency-engineer,
+        vendor-arbitrage-analyst,
+        grant-hunter,
+        cost-ops-monitor,
+      ]
+
 intake:
   ownerTeam: product
   operationsTeam: quality
@@ -97,6 +151,10 @@ intake:
     docs: docs
     product: product
     quality: quality
+    forge: forge # Team creation requests route to forge team
+    strategic-ops: strategic-ops # Cross-project coordination routes to strategic ops
+    cost-ops: cost-ops # AI cost optimization routes to cost ops team
+    agent-performance: quality # Agent performance evaluation routes to quality team
     cli: backend # CLI issues route to backend team
     sync-engine: devops # Sync engine issues route to devops team
   escalation:

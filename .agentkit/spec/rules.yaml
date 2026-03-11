@@ -1370,3 +1370,76 @@ rules:
           may bypass approval with a post-incident review within 5 days.
         severity: warning
         autofix: false
+
+  # ---------------------------------------------------------------------------
+  # AI Cost Operations — rules for AI-specific cost optimization
+  # ---------------------------------------------------------------------------
+  - domain: ai-cost-ops
+    description: >
+      Rules for AI infrastructure cost management — model routing, token
+      budgets, prompt caching, batch processing, vendor abstraction, and
+      credit lifecycle tracking. Distinct from cloud FinOps (finops domain)
+      which covers traditional infrastructure costs.
+    applies-to:
+      - 'docs/cost-ops/**'
+      - 'docs/planning/cost-governance/**'
+      - 'config/models/**'
+      - 'config/pricing/**'
+      - '**/*.prompt'
+      - '**/*.prompt.md'
+    conventions:
+      - id: aicost-model-routing
+        rule: >
+          Select AI models based on quality-cost tradeoffs per use case.
+          Use smaller, cheaper models (Haiku, GPT-4o-mini) for simple tasks
+          like formatting, classification, and extraction. Reserve large
+          models (Opus, GPT-4o) for complex reasoning, code generation,
+          and multi-step planning. Document model selection rationale in
+          config/models/ and review quarterly.
+        severity: warning
+        autofix: false
+
+      - id: aicost-token-budget
+        rule: >
+          Establish estimated token budgets per command or agent operation.
+          Track input and output token counts. Flag operations that
+          consistently exceed 2x their estimated budget. Budget overruns
+          should trigger a prompt efficiency review, not a budget increase.
+        severity: warning
+        autofix: false
+
+      - id: aicost-cache-first
+        rule: >
+          Use provider prompt caching (Anthropic prompt caching, OpenAI
+          cached context) for stable system prompts and frequently repeated
+          instructions. Target a cache hit rate above 60% for system-level
+          prompts. Measure and report cache hit rates in cost monitoring.
+        severity: warning
+        autofix: false
+
+      - id: aicost-batch-eligible
+        rule: >
+          Use batch APIs (Anthropic Message Batches, OpenAI Batch API) for
+          non-latency-sensitive operations such as bulk analysis, report
+          generation, and offline processing. Batch APIs typically offer
+          50% cost reduction. Tag eligible operations in command metadata.
+        severity: warning
+        autofix: false
+
+      - id: aicost-vendor-lock
+        rule: >
+          Maintain an abstraction layer for AI provider switching. Do not
+          hardcode provider-specific API calls in business logic. Use a
+          model routing configuration that maps task types to providers,
+          enabling seamless failover and cost arbitrage between vendors.
+        severity: warning
+        autofix: false
+
+      - id: aicost-credit-tracking
+        rule: >
+          Track all AI vendor credits, grants, and promotional allocations
+          with expiration dates. Maintain a credit ledger in config/pricing/
+          with provider, amount, expiry, and utilization percentage. Alert
+          when credits reach 80% utilization or 30 days before expiry.
+        severity: warning
+        autofix: false

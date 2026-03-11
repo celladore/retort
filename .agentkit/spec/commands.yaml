@@ -708,6 +708,7 @@ commands:
         - Wave 1: Critical bugs, security, blocking UX, highest-impact FEAT-INC completions
         - Wave 2: Core refactors, remaining FEAT-INC, feature PRDs
         - Wave 3: FEAT-NEW features, polish, remaining documentation
+      - **Phase 2.5** _(only when `--generate-plans` is passed)_: Plan Generation — for each critical/high finding, scaffold a plan file using TEMPLATE-plan.md into `docs/planning/review-findings/<finding-id>.md` and update `docs/planning/README.md` with new entries (status: `not-started`).
 
       ## Rules
 
@@ -731,6 +732,10 @@ commands:
         default: null
         required: false
         enum: [0, 1, 2, 3, 4]
+      - name: --generate-plans
+        description: 'After Phase 2, scaffold plan files from critical/high findings into docs/planning/review-findings/'
+        type: boolean
+        default: true
     allowed-tools:
       - Read
       - Glob
@@ -1785,6 +1790,30 @@ commands:
       - Grep
       - Bash
 
+  - name: analyze-agents
+    type: utility
+    description: >
+      Generates a comprehensive agent/team relationship matrix. Analyzes
+      dependencies, notifications, handoffs, coverage gaps, bottlenecks,
+      and consolidation opportunities across all teams and agents.
+    flags:
+      - name: --output
+        description: 'Output file path'
+        type: string
+        default: 'docs/agents/agent-team-matrix.md'
+      - name: --matrix
+        description: 'Specific matrix to generate (1-8, supplementary, or all)'
+        type: string
+        default: 'all'
+      - name: --format
+        description: 'Output format'
+        type: string
+        default: 'markdown'
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+
   # ===========================================================================
   # Team Commands — Scoped to team domains defined in teams.yaml
   # ===========================================================================
@@ -1992,3 +2021,86 @@ commands:
       - Glob
       - Grep
       - Bash
+
+  - name: team-forge
+    type: team
+    team: forge
+    description: >
+      Activates the TEAMFORGE meta-team context. Creates, validates, and
+      deploys new agent team specifications through a structured pipeline.
+      Uses a sequential agent pipeline: InputClarifier → MissionDefiner →
+      RoleArchitect → PromptEngineer → FlowDesigner → TeamValidator.
+    flags:
+      - name: --task
+        description: 'TeamForge task type'
+        type: string
+        default: null
+        enum: [create-team, validate-team, audit-teams, update-team]
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash
+
+  - name: team-strategic-ops
+    type: team
+    team: strategic-ops
+    description: >
+      Activates the STRATEGIC OPS team context. Handles cross-project
+      coordination, framework governance, portfolio analysis, adoption
+      strategy, impact assessment, and release coordination across all
+      repos using AgentKit Forge.
+    flags:
+      - name: --task
+        description: 'Strategic ops task type'
+        type: string
+        default: null
+        enum: [portfolio-scan, governance-review, adoption-plan, impact-assess, release-plan]
+      - name: --scope
+        description: 'Scope: single repo, portfolio-wide, or upstream-only'
+        type: string
+        default: null
+        enum: [repo, portfolio, upstream]
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash
+
+  - name: team-cost-ops
+    type: team
+    team: cost-ops
+    description: >
+      Activates the COST OPS team context. Handles AI infrastructure cost
+      reduction, model selection optimization, token efficiency auditing,
+      vendor arbitrage analysis, grant and program discovery, and cost
+      monitoring across AI operations.
+    flags:
+      - name: --task
+        description: 'Cost ops task type'
+        type: string
+        default: null
+        enum: [model-audit, token-audit, vendor-compare, grant-scan, cost-report, full-review]
+      - name: --period
+        description: 'Reporting period for cost analysis'
+        type: string
+        default: week
+        enum: [week, month, quarter]
+      - name: --provider
+        description: 'Target AI provider for analysis'
+        type: string
+        default: null
+        enum: [anthropic, openai, google, mistral, cohere, self-hosted]
+    allowed-tools:
+      - Read
+      - Write
+      - Edit
+      - Glob
+      - Grep
+      - Bash
+      - WebSearch
+      - WebFetch

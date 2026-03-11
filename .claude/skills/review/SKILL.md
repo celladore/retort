@@ -3,7 +3,7 @@ name: 'review'
 description: 'Performs a structured code review of staged changes, a specific PR, or a range of commits. Evaluates code quality, adherence to domain rules, security concerns, test coverage, and architectural alignment.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-10'
+last_updated: '2026-03-11'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

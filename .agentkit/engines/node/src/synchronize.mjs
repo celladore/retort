@@ -404,6 +404,24 @@ async function syncEditorConfigs(templatesDir, tmpDir, vars, version, repoName) 
   );
 }
 
+/**
+ * Copies templates/scripts to tmpDir/scripts — managed-mode utility scripts.
+ * Each template uses frontmatter `agentkit: scaffold: managed` so downstream
+ * repos receive updates via three-way merge while preserving local customizations.
+ */
+async function syncScripts(templatesDir, tmpDir, vars, version, repoName) {
+  await syncDirectCopy(
+    templatesDir,
+    vars.overlayTemplatesDir,
+    'scripts',
+    tmpDir,
+    'scripts',
+    vars,
+    version,
+    repoName
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Git merge driver sync
 // ---------------------------------------------------------------------------
@@ -1292,6 +1310,18 @@ async function syncRooRules(templatesDir, tmpDir, vars, version, repoName, rules
  * Copies templates/mcp/ → tmpDir/.mcp/
  * agentsSpec and teamsSpec are accepted for API symmetry and future use.
  */
+async function syncAgentAnalysis(agentkitRoot, tmpDir) {
+  try {
+    const { loadFullAgentGraph, renderAllMatrices } = await import('./agent-analysis.mjs');
+    const graph = loadFullAgentGraph(agentkitRoot);
+    if (graph.agents.length === 0) return;
+    const content = renderAllMatrices(graph);
+    await writeOutput(join(tmpDir, 'docs', 'agents', 'agent-team-matrix.md'), content);
+  } catch {
+    // Agent analysis is non-critical — skip silently if it fails
+  }
+}
+
 async function syncA2aConfig(
   tmpDir,
   vars,
@@ -1889,6 +1919,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (isFeatureEnabled('dependency-management', vars)) {
       alwaysOnTasks.push(syncEditorConfigs(templatesDir, tmpDir, vars, version, headerRepoName));
     }
+    if (isFeatureEnabled('doc-scaffolding', vars)) {
+      alwaysOnTasks.push(syncScripts(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
 
     await Promise.all(alwaysOnTasks);
 
@@ -2175,6 +2208,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       gatedTasks.push(
         syncA2aConfig(tmpDir, vars, version, headerRepoName, agentsSpec, teamsSpec, templatesDir)
       );
+    }
+
+    // Agent/team relationship matrix (auto-generated during sync)
+    if (isFeatureEnabled('agent-personas', vars)) {
+      gatedTasks.push(syncAgentAnalysis(agentkitRoot, tmpDir));
     }
 
     await Promise.all(gatedTasks);
@@ -2483,6 +2521,21 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     const scaffoldOnceSkipped = skippedScaffold - scaffoldResults.managedPreserved.length;
     if (scaffoldOnceSkipped > 0) {
       logVerbose(`  ${scaffoldOnceSkipped} scaffold-once file(s) skipped`);
+    }
+
+    // 7b. Carry forward scaffold-once files from previous manifest.
+    // When a file was generated in a previous sync but skipped this time (scaffold-once),
+    // it must remain in the new manifest so orphan cleanup does not delete it.
+    if (previousManifest?.files) {
+      for (const [prevFile, prevMeta] of Object.entries(previousManifest.files)) {
+        if (!newManifestFiles[prevFile]) {
+          const prevPath = resolve(projectRoot, prevFile);
+          if (existsSync(prevPath)) {
+            // File exists on disk but was not regenerated — carry forward its manifest entry
+            newManifestFiles[prevFile] = prevMeta;
+          }
+        }
+      }
     }
 
     // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)

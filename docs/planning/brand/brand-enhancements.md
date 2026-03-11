@@ -55,12 +55,12 @@ Extend `validateBrandSpec()` to compute actual contrast ratios and warn on failu
 
 ## Files to Modify
 
-| File                                                | Change                              |
-| --------------------------------------------------- | ----------------------------------- |
-| `.agentkit/engines/node/src/brand-resolver.mjs`     | Add HTML generation, token export   |
-| `.agentkit/engines/node/src/synchronize.mjs`        | Wire new sync outputs               |
-| `.agentkit/spec/project.yaml`                       | Add feature toggles                 |
-| `.agentkit/templates/brand/index.html`              | New HTML template (BR-001)          |
+| File                                            | Change                            |
+| ----------------------------------------------- | --------------------------------- |
+| `.agentkit/engines/node/src/brand-resolver.mjs` | Add HTML generation, token export |
+| `.agentkit/engines/node/src/synchronize.mjs`    | Wire new sync outputs             |
+| `.agentkit/spec/project.yaml`                   | Add feature toggles               |
+| `.agentkit/templates/brand/index.html`          | New HTML template (BR-001)        |
 
 ## Acceptance Criteria
 
