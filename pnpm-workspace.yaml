@@ -1,0 +1,6 @@
+packages:
+  - '.'
+  - '.agentkit'
+
+onlyBuiltDependencies:
+  - esbuild

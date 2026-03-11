@@ -89,7 +89,7 @@ Sync integration suite became stable and significantly faster in hotspot cases w
 
 ## Related Documentation
 
-- **PR**: <https://github.com/JustAGhosT/agentkit-forge/pull/72>
+- **PR**: <https://github.com/phoenixvc/agentkit-forge/pull/72>
 - **Engine Source**: `.agentkit/engines/node/src/synchronize.mjs`
 - **Tests**: `.agentkit/engines/node/src/__tests__/sync-integration.test.mjs`
 

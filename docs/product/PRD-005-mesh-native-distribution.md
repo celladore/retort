@@ -584,5 +584,5 @@ drift detection across AI tooling. This is a first-mover opportunity.
 - [PRD-007: Adopter Autoupdate](PRD-007-adopter-autoupdate.md) — follow-on CLI capability
   for keeping adopter repositories current with the latest forge version;
   builds on the npm/CLI delivery channel established by this PRD.
-  See also: [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196),
-  [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194).
+  See also: [#196](https://github.com/phoenixvc/agentkit-forge/issues/196),
+  [#194](https://github.com/phoenixvc/agentkit-forge/issues/194).

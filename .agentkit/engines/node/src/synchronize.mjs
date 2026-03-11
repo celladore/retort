@@ -1723,6 +1723,42 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (verbose && !quiet) console.log(...args);
   };
 
+  // --- Pre-sync commit guard ---
+  // Warns or blocks when protected directories have uncommitted changes.
+  // Skipped for --force, --dry-run, --diff, and test environments.
+  if (!flags?.force && !dryRun && !diff && !isTestEnv) {
+    let checkDirtyProtectedFiles, promptDirtyFileAction;
+    try {
+      ({ checkDirtyProtectedFiles, promptDirtyFileAction } =
+        await import('./sync-guard.mjs'));
+    } catch (err) {
+      log(`[agentkit:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
+    }
+    const { dirty, files } = checkDirtyProtectedFiles
+      ? checkDirtyProtectedFiles(projectRoot, [
+          '.agentkit/engines',
+          '.agentkit/overlays',
+          '.agentkit/bin',
+        ])
+      : { dirty: false, files: [] };
+    if (dirty) {
+      const isTTY = process.stdout.isTTY && process.stdin.isTTY;
+      if (isTTY) {
+        const action = await promptDirtyFileAction(files);
+        if (action === 'abort') {
+          log('[agentkit:sync] Aborted — commit or stash your changes first.');
+          return;
+        }
+        // 'stash' handled inside promptDirtyFileAction; 'continue' falls through
+      } else {
+        console.warn(
+          '[agentkit:sync] Warning: uncommitted changes in protected directories:'
+        );
+        for (const f of files) console.warn(`  ${f}`);
+      }
+    }
+  }
+
   if (dryRun) {
     log('[agentkit:sync] Dry-run mode — no files will be written.');
   }
@@ -1878,6 +1914,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (brandSpec) {
       vars.brandName = brandSpec.identity?.name || '';
       vars.brandPrimaryColor = resolveColor(brandSpec.colors?.primary?.brand) || '';
+      vars.brandCoralColor = resolveColor(brandSpec.colors?.primary?.coral) || '';
+      vars.brandTealColor = resolveColor(brandSpec.colors?.primary?.teal) || '';
+      vars.brandAccentColor = resolveColor(brandSpec.colors?.primary?.accent) || '';
+      vars.brandDarkColor = resolveColor(brandSpec.colors?.primary?.dark) || '';
+      vars.brandSurfaceColor = resolveColor(brandSpec.colors?.primary?.surface) || '';
       vars.brandMono = brandSpec.typography?.mono || '';
     }
   }
@@ -2356,6 +2397,85 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       return;
     }
 
+    // --- Interactive apply mode ---
+    // In TTY mode (unless --yes/--no-prompt/--force), show what would change
+    // and let the user choose: apply all / skip all / prompt each.
+    const noPrompt = flags?.yes || flags?.['no-prompt'] || flags?.force || false;
+    const isInteractive = !noPrompt && !isTestEnv && process.stdout.isTTY && process.stdin.isTTY;
+
+    if (isInteractive) {
+      const resolvedRootForDiff = resolve(projectRoot) + sep;
+      const overwriteForDiff = flags?.overwrite || flags?.force;
+      const changeList = [];
+
+      for (const srcFile of allTmpFiles) {
+        if (!existsSync(srcFile)) continue;
+        const relPath = relative(tmpDir, srcFile);
+        const destFile = resolve(projectRoot, relPath);
+        const normPath = relPath.replace(/\\/g, '/');
+        if (
+          !resolve(destFile).startsWith(resolvedRootForDiff) &&
+          resolve(destFile) !== resolve(projectRoot)
+        )
+          continue;
+        const wouldSkip =
+          !overwriteForDiff && isScaffoldOnce(normPath, vars) && existsSync(destFile);
+        if (wouldSkip) continue;
+
+        let newContent;
+        try {
+          newContent = await readFile(srcFile, 'utf-8');
+        } catch (err) {
+          if (err?.code === 'ENOENT') continue;
+          throw err;
+        }
+
+        if (!existsSync(destFile)) {
+          changeList.push({ relPath: normPath, action: 'create', newContent });
+        } else {
+          const oldContent = await readFile(destFile, 'utf-8');
+          if (oldContent !== newContent) {
+            changeList.push({ relPath: normPath, action: 'update', oldContent, newContent });
+          }
+        }
+      }
+
+      if (changeList.length > 0) {
+        const { promptApplyMode, promptSingleFile } = await import('./sync-guard.mjs');
+
+        const creates = changeList.filter((c) => c.action === 'create').length;
+        const updates = changeList.filter((c) => c.action === 'update').length;
+
+        const mode = await promptApplyMode({ creates, updates });
+
+        if (mode === 'none') {
+          log('[agentkit:sync] Skipped — no files written.');
+          return;
+        }
+
+        if (mode === 'each') {
+          const skipSet = new Set();
+          let applyRest = false;
+          for (const change of changeList) {
+            if (applyRest) continue;
+            const decision = await promptSingleFile(
+              change,
+              simpleDiff,
+              change.oldContent || null,
+              change.newContent
+            );
+            if (decision === 'skip') skipSet.add(change.relPath);
+            else if (decision === 'apply-rest') applyRest = true;
+          }
+          if (skipSet.size > 0) {
+            flags._skipPaths = skipSet;
+            log(`[agentkit:sync] Skipping ${skipSet.size} file(s) by user choice.`);
+          }
+        }
+        // mode === 'all' falls through to normal swap
+      }
+    }
+
     // 6. Load previous manifest for stale file cleanup
     const manifestPath = resolve(agentkitRoot, '.manifest.json');
     let previousManifest = null;
@@ -2393,6 +2513,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       const relPath = relative(tmpDir, srcFile);
       const normalizedRel = relPath.replace(/\\/g, '/');
       const destFile = resolve(projectRoot, relPath);
+
+      // Interactive skip: user chose to skip this file in "prompt each" mode
+      if (flags?._skipPaths?.has(normalizedRel)) {
+        logVerbose(`  skipped ${normalizedRel} (user chose to skip)`);
+        return;
+      }
 
       // Path traversal protection: ensure all output stays within project root
       if (
