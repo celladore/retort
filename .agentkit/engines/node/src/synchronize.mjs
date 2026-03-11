@@ -1914,6 +1914,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (brandSpec) {
       vars.brandName = brandSpec.identity?.name || '';
       vars.brandPrimaryColor = resolveColor(brandSpec.colors?.primary?.brand) || '';
+      vars.brandCoralColor = resolveColor(brandSpec.colors?.primary?.coral) || '';
+      vars.brandTealColor = resolveColor(brandSpec.colors?.primary?.teal) || '';
+      vars.brandAccentColor = resolveColor(brandSpec.colors?.primary?.accent) || '';
+      vars.brandDarkColor = resolveColor(brandSpec.colors?.primary?.dark) || '';
+      vars.brandSurfaceColor = resolveColor(brandSpec.colors?.primary?.surface) || '';
       vars.brandMono = brandSpec.typography?.mono || '';
     }
   }
