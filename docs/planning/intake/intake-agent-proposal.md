@@ -44,14 +44,14 @@ Create a dedicated intake agent (`intake-analyst`) and `/intake` command that co
 
 ### Supported Document Types
 
-| Type         | Short ID    | Location                         | Extracts                                        |
-| ------------ | ----------- | -------------------------------- | ----------------------------------------------- |
-| PRD          | `prd`       | `docs/product/PRD-*.md`          | Phases, deliverables, acceptance criteria       |
-| Func Spec    | `func-spec` | `docs/architecture/specs/`       | Features, business rules, contracts             |
-| UI/UX Spec   | `ui-spec`   | `docs/product/UI-*.md`           | Screens, components, interaction flows          |
-| User Stories | `stories`   | `docs/product/stories/`          | Epics, stories, acceptance criteria             |
-| Tech Spec    | `tech-spec` | `docs/architecture/specs/`       | Modules, API contracts, data models             |
-| Process Flow | `process`   | `docs/orchestration/FLOW-*.md`   | Steps, decision points, integration touchpoints |
+| Type         | Short ID    | Location                       | Extracts                                        |
+| ------------ | ----------- | ------------------------------ | ----------------------------------------------- |
+| PRD          | `prd`       | `docs/product/PRD-*.md`        | Phases, deliverables, acceptance criteria       |
+| Func Spec    | `func-spec` | `docs/architecture/specs/`     | Features, business rules, contracts             |
+| UI/UX Spec   | `ui-spec`   | `docs/product/UI-*.md`         | Screens, components, interaction flows          |
+| User Stories | `stories`   | `docs/product/stories/`        | Epics, stories, acceptance criteria             |
+| Tech Spec    | `tech-spec` | `docs/architecture/specs/`     | Modules, API contracts, data models             |
+| Process Flow | `process`   | `docs/orchestration/FLOW-*.md` | Steps, decision points, integration touchpoints |
 
 ### Command Usage
 
