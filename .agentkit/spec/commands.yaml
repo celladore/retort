@@ -99,6 +99,20 @@ commands:
       - Write
       - Edit
 
+  - name: start
+    type: workflow
+    description: >
+      New user entry point. Detects repository state, shows contextual status,
+      and guides users to the right command or team for their goal. Read-only —
+      suggests commands but does not execute them.
+    flags: []
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+      - AskUserQuestion
+
   - name: discover
     type: workflow
     description: >
