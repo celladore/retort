@@ -1,4 +1,7 @@
-<# agentkit: scaffold: managed #>
+---
+agentkit:
+  scaffold: managed
+---
 # scripts/analyze-agents.ps1
 # Generates agent/team relationship matrices from spec files.
 #

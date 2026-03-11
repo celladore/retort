@@ -10,9 +10,6 @@ import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
-// Lazy-loaded after ensureDependencies() — js-yaml may not be installed yet
-let yaml;
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..');
@@ -153,6 +150,10 @@ const CLI_INTERNAL_FLAG_TYPES = {
   'handoff-to': 'string',
   // remove flags
   clean: 'boolean',
+  // analyze-agents flags
+  output: 'string',
+  matrix: 'string',
+  format: 'string',
 };
 
 /**
@@ -489,14 +490,6 @@ async function main() {
     process.exit(1);
   }
 
-  // Load js-yaml now that dependencies are guaranteed to be installed
-  yaml = (await import('js-yaml')).default;
-
-  // Now that yaml is available, load command flags from spec
-  const loaded = loadCommandFlags(AGENTKIT_ROOT);
-  VALID_FLAGS = loaded.validFlags;
-  FLAG_TYPES = loaded.flagTypes;
-
   // Record command invocation for cost tracking (best-effort)
   try {
     const { recordCommand } = await import('./cost-tracker.mjs');
@@ -666,8 +659,7 @@ async function main() {
         break;
       }
       case 'analyze-agents': {
-        const { loadFullAgentGraph, renderAllMatrices, renderMatrix, renderAllAsJson } =
-          await import('./agent-analysis.mjs');
+        const { loadFullAgentGraph, renderAllMatrices, renderMatrix, renderAllAsJson } = await import('./agent-analysis.mjs');
         const graph = loadFullAgentGraph(AGENTKIT_ROOT);
         const matrixArg = flags.matrix || 'all';
         const formatArg = flags.format || 'markdown';
@@ -686,9 +678,7 @@ async function main() {
         mkdirSync(dirname(outputPath), { recursive: true });
         writeFileSync(outputPath, content, 'utf-8');
         console.log(`[agentkit:analyze-agents] Matrix written to ${outputPath}`);
-        console.log(
-          `  ${graph.agents.length} agents, ${graph.teams.length} teams, ${graph.categories.length} categories`
-        );
+        console.log(`  ${graph.agents.length} agents, ${graph.teams.length} teams, ${graph.categories.length} categories`);
         break;
       }
       default: {

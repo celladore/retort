@@ -3,7 +3,7 @@ name: 'Vendor Arbitrage Analyst'
 description: 'Multi-vendor cost arbitrage specialist. Maximizes free tiers, committed use discounts, spot/preemptible pricing, and time-based rate variations. Manages vendor credit programs, startup benefit packages, and negotiated enterprise agreements.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-10'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -49,11 +49,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Tools
 
 - Read
-- Write
 - Glob
 - Grep
-- WebSearch
-- WebFetch
 
 ## Agent Conventions
 

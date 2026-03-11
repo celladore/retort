@@ -27,8 +27,8 @@ Without this, model selection is ad-hoc, spend attribution is fragmented, and co
 
 ### AI — Self-Hosted
 
-| Provider                            | Key Cost Dimensions                                         |
-| ----------------------------------- | ----------------------------------------------------------- |
+| Provider                          | Key Cost Dimensions                                     |
+| --------------------------------- | ------------------------------------------------------- |
 | Open-source (Llama, DeepSeek, Qwen) | GPU compute ($/hr), VRAM requirements, inference throughput |
 
 ### Cloud Providers
@@ -36,7 +36,7 @@ Without this, model selection is ad-hoc, spend attribution is fragmented, and co
 | Provider | Key Cost Dimensions                                            |
 | -------- | -------------------------------------------------------------- |
 | Azure    | VM/AKS compute, storage, networking, managed AI (Azure OpenAI) |
-| AWS      | EC2/EKS, S3, Bedrock (Anthropic/Mistral), SageMaker endpoints  |
+| AWS      | EC2/EKS, S3, Bedrock (Anthropic/Mistral), SageMaker endpoints |
 | GCP      | GKE, Cloud Storage, Vertex AI (Gemini/Claude), TPU pricing     |
 
 ## Deliverables
@@ -79,14 +79,14 @@ Without this, model selection is ad-hoc, spend attribution is fragmented, and co
 
 ## Integration Points
 
-| System                 | Integration                                              | Owner                        |
-| ---------------------- | -------------------------------------------------------- | ---------------------------- |
-| `/cost` command        | Add `--by-provider` and `--by-model` flags for breakdown | T13-Cost-Ops                 |
-| `/cost-centres`        | Map AI provider spend to cost centres via resource tags  | T13-Cost-Ops                 |
-| `budget-guard.mjs`     | Per-provider budget limits and circuit breaker           | T13-Cost-Ops                 |
-| `cost-tracker.mjs`     | Emit provider/model metadata in session logs             | T13-Cost-Ops + T4-Infra      |
-| `routing.yaml`         | Consumed by orchestrator for model selection             | T13-Cost-Ops + T12-Strategic |
-| IaC modules (`infra/`) | Cloud provider cost tags on all resources                | T4-Infra                     |
+| System                | Integration                                              | Owner                        |
+| --------------------- | -------------------------------------------------------- | ---------------------------- |
+| `/cost` command       | Add `--by-provider` and `--by-model` flags for breakdown | T13-Cost-Ops                 |
+| `/cost-centres`       | Map AI provider spend to cost centres via resource tags   | T13-Cost-Ops                 |
+| `budget-guard.mjs`    | Per-provider budget limits and circuit breaker            | T13-Cost-Ops                 |
+| `cost-tracker.mjs`    | Emit provider/model metadata in session logs             | T13-Cost-Ops + T4-Infra      |
+| `routing.yaml`        | Consumed by orchestrator for model selection             | T13-Cost-Ops + T12-Strategic |
+| IaC modules (`infra/`) | Cloud provider cost tags on all resources               | T4-Infra                     |
 
 ## Acceptance Criteria
 
@@ -106,8 +106,8 @@ Without this, model selection is ad-hoc, spend attribution is fragmented, and co
 
 ## Estimated Effort
 
-| Phase                    | Duration  |
-| ------------------------ | --------- |
-| Phase 1 (Planning)       | 1 sprint  |
+| Phase                    | Duration |
+| ------------------------ | -------- |
+| Phase 1 (Planning)       | 1 sprint |
 | Phase 2 (Implementation) | 2 sprints |
-| Phase 3 (Validation)     | 1 sprint  |
+| Phase 3 (Validation)     | 1 sprint |

@@ -3,7 +3,7 @@ description: 'COST OPS (cost-ops) — AI infrastructure cost reduction, vendor o
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-10'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -82,7 +82,7 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 
 **Accepted task types:** investigate, review, plan, document, implement
 
-**Default handoff chain:** infra → product → strategic-ops
+**Default handoff chain:** infra → product
 
 ## Workflow
 
@@ -292,7 +292,7 @@ If you were working on a delegated task from `.claude/state/tasks/`:
 6. If no `handoffTo` is set but you identified downstream work, set
    `handoffTo` to the appropriate team(s) from your handoff chain:
 
-   infra → product → strategic-ops
+   infra → product
 
 ### Events and Orchestrator State
 

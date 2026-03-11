@@ -11,7 +11,7 @@ release coordination across all repos using AgentKit Forge.
 As AgentKit Forge scales to manage multiple downstream repos, the need for
 portfolio-level visibility and governance becomes critical. Individual teams
 (backend, frontend, etc.) operate within a single repo — Strategic Ops operates
-_across_ repos, ensuring consistency, managing breaking changes, and coordinating
+*across* repos, ensuring consistency, managing breaking changes, and coordinating
 sync waves.
 
 ## Pipeline Architecture
@@ -23,13 +23,13 @@ PortfolioAnalyst → GovernanceAdvisor → AdoptionStrategist
 
 ## Agents (strategic-operations category)
 
-| Agent               | Role                                                                  |
-| ------------------- | --------------------------------------------------------------------- |
-| portfolio-analyst   | Inventory downstream repos, compare spec versions, detect drift       |
-| governance-advisor  | Versioning strategy, breaking change protocols, deprecation timelines |
-| adoption-strategist | Onboarding workflows, migration paths, phased rollouts                |
-| impact-assessor     | Blast radius analysis for template/spec/engine changes                |
-| release-coordinator | Version bumps, changelog, sync waves, release communication           |
+| Agent | Role |
+|-------|------|
+| portfolio-analyst | Inventory downstream repos, compare spec versions, detect drift |
+| governance-advisor | Versioning strategy, breaking change protocols, deprecation timelines |
+| adoption-strategist | Onboarding workflows, migration paths, phased rollouts |
+| impact-assessor | Blast radius analysis for template/spec/engine changes |
+| release-coordinator | Version bumps, changelog, sync waves, release communication |
 
 ## Team Definition
 
@@ -50,7 +50,7 @@ PortfolioAnalyst → GovernanceAdvisor → AdoptionStrategist
 
 - **5 agents**: Pipeline follows the natural governance lifecycle — understand,
   govern, adopt, assess, release
-- **Broad scope (`**/\*`)\*\*: Strategic ops can touch any file when doing
+- **Broad scope (`**/*`)**: Strategic ops can touch any file when doing
   portfolio-level analysis, but primary focus dirs are listed first
 - **Handoff to product + quality**: Strategic decisions flow to product for
   prioritization and quality for validation

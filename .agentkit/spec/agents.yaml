@@ -753,7 +753,6 @@ agents:
         - Conflating session-level retrospective findings with agent-level performance
       preferred-tools:
         - Read
-        - Write
         - Glob
         - Grep
 
@@ -1580,8 +1579,6 @@ agents:
         - Read
         - Glob
         - Grep
-        - WebSearch
-        - WebFetch
 
     - id: token-efficiency-engineer
       category: cost-operations
@@ -1669,11 +1666,8 @@ agents:
         - Ignoring free tier reset dates (monthly vs annual)
       preferred-tools:
         - Read
-        - Write
         - Glob
         - Grep
-        - WebSearch
-        - WebFetch
 
     - id: grant-hunter
       category: cost-operations
@@ -1713,11 +1707,8 @@ agents:
         - Neglecting to track program renewal dates after initial approval
       preferred-tools:
         - Read
-        - Write
         - Glob
         - Grep
-        - WebSearch
-        - WebFetch
 
     - id: cost-ops-monitor
       category: cost-operations

@@ -61,13 +61,13 @@ export function loadFullAgentGraph(agentkitRoot) {
 
   // Build relationships
   const relationships = {
-    dependsOn: new Map(), // agentId → Set<agentId>
-    dependedOnBy: new Map(), // agentId → Set<agentId>
-    notifies: new Map(), // agentId → Set<agentId>
-    notifiedBy: new Map(), // agentId → Set<agentId>
-    teamHandoffs: new Map(), // teamId → string[] (handoff-chain)
-    agentToTeam: new Map(), // agentId → teamId
-    teamToAgents: new Map(), // teamId → agentId[]
+    dependsOn: new Map(),      // agentId → Set<agentId>
+    dependedOnBy: new Map(),   // agentId → Set<agentId>
+    notifies: new Map(),       // agentId → Set<agentId>
+    notifiedBy: new Map(),     // agentId → Set<agentId>
+    teamHandoffs: new Map(),   // teamId → string[] (handoff-chain)
+    agentToTeam: new Map(),    // agentId → teamId
+    teamToAgents: new Map(),   // teamId → agentId[]
   };
 
   // Map agents to teams
@@ -693,9 +693,7 @@ export function renderSupplementaryAnalyses(graph) {
   lines.push('| Agent | Total | Deps Out | Deps In | Notifs Out | Notifs In |');
   lines.push('|-------|-------|----------|---------|------------|-----------|');
   for (const hub of hubs.slice(0, 10)) {
-    lines.push(
-      `| ${hub.id} | ${hub.total} | ${hub.depsOut} | ${hub.depsIn} | ${hub.notifsOut} | ${hub.notifsIn} |`
-    );
+    lines.push(`| ${hub.id} | ${hub.total} | ${hub.depsOut} | ${hub.depsIn} | ${hub.notifsOut} | ${hub.notifsIn} |`);
   }
   lines.push('');
 
@@ -742,9 +740,7 @@ export function renderSupplementaryAnalyses(graph) {
     lines.push('| Team A | Team B | Overlap Ratio | Overlapping Scopes |');
     lines.push('|--------|--------|---------------|--------------------|');
     for (const opp of opps.slice(0, 15)) {
-      lines.push(
-        `| ${opp.teamA} | ${opp.teamB} | ${(opp.overlapRatio * 100).toFixed(0)}% | ${opp.overlappingScopes.join(', ')} |`
-      );
+      lines.push(`| ${opp.teamA} | ${opp.teamB} | ${(opp.overlapRatio * 100).toFixed(0)}% | ${opp.overlappingScopes.join(', ')} |`);
     }
   }
   lines.push('');
@@ -786,13 +782,11 @@ export function renderSupplementaryAnalyses(graph) {
   } else {
     lines.push('| Team Pair | Dependencies | Notifications | Total |');
     lines.push('|-----------|-------------|---------------|-------|');
-    const sorted = [...coupling.entries()].sort(
-      (a, b) => b[1].dependsOn + b[1].notifies - (a[1].dependsOn + a[1].notifies)
+    const sorted = [...coupling.entries()].sort((a, b) =>
+      (b[1].dependsOn + b[1].notifies) - (a[1].dependsOn + a[1].notifies)
     );
     for (const [pair, vals] of sorted) {
-      lines.push(
-        `| ${pair} | ${vals.dependsOn} | ${vals.notifies} | ${vals.dependsOn + vals.notifies} |`
-      );
+      lines.push(`| ${pair} | ${vals.dependsOn} | ${vals.notifies} | ${vals.dependsOn + vals.notifies} |`);
     }
   }
 
@@ -863,15 +857,15 @@ export function renderAllMatrices(graph) {
  */
 export function renderMatrix(graph, matrix) {
   const renderers = {
-    1: renderAgentTeamMembership,
-    2: renderTeamHandoffIncoming,
-    3: renderTeamHandoffOutgoing,
-    4: renderAgentDependencyIncoming,
-    5: renderAgentDependencyOutgoing,
-    6: renderAgentNotificationIncoming,
-    7: renderAgentNotificationOutgoing,
-    8: renderAgentTeamCrossBoundary,
-    supplementary: renderSupplementaryAnalyses,
+    '1': renderAgentTeamMembership,
+    '2': renderTeamHandoffIncoming,
+    '3': renderTeamHandoffOutgoing,
+    '4': renderAgentDependencyIncoming,
+    '5': renderAgentDependencyOutgoing,
+    '6': renderAgentNotificationIncoming,
+    '7': renderAgentNotificationOutgoing,
+    '8': renderAgentTeamCrossBoundary,
+    'supplementary': renderSupplementaryAnalyses,
   };
 
   if (matrix === 'all') return renderAllMatrices(graph);

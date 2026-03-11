@@ -41,21 +41,20 @@
 
 Items not yet scheduled for the active sprint.
 
-| Priority | Team              | Task                                        | Phase          | Status | Notes                                                              |
-| -------- | ----------------- | ------------------------------------------- | -------------- | ------ | ------------------------------------------------------------------ |
-| P1       | T1-Backend        | Implement health check endpoint             | Implementation | Todo   | `/api/health`                                                      |
-| P1       | T3-Data           | Create migration tooling setup              | Planning       | Todo   | Prisma or Drizzle                                                  |
-| P1       | T4-Infrastructure | Set up staging environment                  | Planning       | Todo   | Docker Compose                                                     |
-| P1       | T1-Backend        | Implement adopter autoupdate CLI capability | Planning       | Todo   | [PRD-007](docs/product/PRD-007-adopter-autoupdate.md)              |
-| P1       | T13-Cost-Ops      | Multi-provider infra cost & routing         | Planning       | Todo   | [Plan](docs/planning/cost-governance/multi-provider-infra-cost.md) |
-| P2       | T2-Frontend       | Implement error boundary components         | Planning       | Todo   | React Error Boundary                                               |
-| P2       | T5-Auth           | Implement JWT token refresh flow            | Planning       | Todo   | Access + refresh tokens                                            |
-| P2       | T10-Quality       | Write E2E test scaffolding                  | Planning       | Todo   | Playwright config                                                  |
-| P2       | T13-Cost-Ops      | Web intake & crawler expansion for cost ops | Discovery      | Todo   | [Plan](docs/planning/cost-governance/web-intake-expansion.md)      |
-| P3       | T7-Documentation  | Create API documentation template           | Planning       | Todo   | OpenAPI/Swagger                                                    |
-| P3       | T8-DevEx          | Set up git hooks with Husky                 | Implementation | Todo   | Pre-commit + pre-push                                              |
-| P3       | T9-Platform       | Create shared logging module                | Planning       | Todo   | Structured JSON logs                                               |
-| P3       | T6-Integration    | Define webhook payload schemas              | Discovery      | Todo   | Event-driven patterns                                              |
+| Priority | Team              | Task                                        | Phase          | Status | Notes                                                 |
+| -------- | ----------------- | ------------------------------------------- | -------------- | ------ | ----------------------------------------------------- |
+| P1       | T1-Backend        | Implement health check endpoint             | Implementation | Todo   | `/api/health`                                         |
+| P1       | T3-Data           | Create migration tooling setup              | Planning       | Todo   | Prisma or Drizzle                                     |
+| P1       | T4-Infrastructure | Set up staging environment                  | Planning       | Todo   | Docker Compose                                        |
+| P1       | T1-Backend        | Implement adopter autoupdate CLI capability | Planning       | Todo   | [PRD-007](docs/product/PRD-007-adopter-autoupdate.md) |
+| P2       | T2-Frontend       | Implement error boundary components         | Planning       | Todo   | React Error Boundary                                  |
+| P2       | T5-Auth           | Implement JWT token refresh flow            | Planning       | Todo   | Access + refresh tokens                               |
+| P2       | T10-Quality       | Write E2E test scaffolding                  | Planning       | Todo   | Playwright config                                     |
+| P3       | T7-Documentation  | Create API documentation template           | Planning       | Todo   | OpenAPI/Swagger                                       |
+| P3       | T8-DevEx          | Set up git hooks with Husky                 | Implementation | Todo   | Pre-commit + pre-push                                 |
+| P3       | T9-Platform       | Create shared logging module                | Planning       | Todo   | Structured JSON logs                                  |
+| P3       | T6-Integration    | Define webhook payload schemas              | Discovery      | Todo   | Event-driven patterns                                 |
+| P1       | T13-Cost-Ops      | Multi-provider infra cost & routing         | Planning       | Todo   | [Ticket](docs/planning/cost-governance/multi-provider-infra-cost.md) |
 
 > Autoupdate task (#196, #194 prereqs; milestone: CLI Distribution & Delivery Improvements)
 > — see [cli_delivery_improvements_milestone.md](docs/reference/cli_delivery_improvements_milestone.md).

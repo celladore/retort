@@ -1382,11 +1382,12 @@ rules:
       which covers traditional infrastructure costs.
     applies-to:
       - 'docs/cost-ops/**'
-      - 'docs/planning/cost-governance/**'
+      - 'docs/planning/cost/**'
       - 'config/models/**'
       - 'config/pricing/**'
       - '**/*.prompt'
       - '**/*.prompt.md'
+    phase: [planning, implementation]
     conventions:
       - id: aicost-model-routing
         rule: >
