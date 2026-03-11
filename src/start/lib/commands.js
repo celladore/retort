@@ -128,7 +128,7 @@ export function getAllCommands(ctx) {
       label: t.name,
       desc: t.focus || `${t.name} team`,
       category: 'team',
-      tags: [t.id, t.name.toLowerCase(), t.focus.toLowerCase()],
+      tags: [t.id, t.name.toLowerCase(), (t.focus || '').toLowerCase()],
       rank: () => 50,
     }));
 

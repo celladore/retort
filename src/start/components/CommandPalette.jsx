@@ -107,11 +107,11 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
       return;
     }
     if (key.upArrow) {
-      setCursor(Math.max(0, clampedCursor - 1));
+      setCursor((prev) => Math.max(0, Math.min(prev, commandItems.length - 1) - 1));
       return;
     }
     if (key.downArrow) {
-      setCursor(Math.min(commandItems.length - 1, clampedCursor + 1));
+      setCursor((prev) => Math.min(commandItems.length - 1, Math.min(prev, commandItems.length - 1) + 1));
       return;
     }
     if (key.return && commandItems[clampedCursor]) {
@@ -122,13 +122,13 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
 
   const topScore = allCommands[0]?.score ?? 0;
 
-  // Pre-compute command indices for cursor tracking
+  // Pre-compute command indices for cursor tracking (keyed by id for stability)
   const commandIndices = useMemo(() => {
     const indices = new Map();
     let ci = 0;
     for (const item of flatList) {
       if (item.type === 'command') {
-        indices.set(item, ci++);
+        indices.set(item.id, ci++);
       }
     }
     return indices;
@@ -174,7 +174,7 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
             );
           }
 
-          const thisIndex = commandIndices.get(item) ?? 0;
+          const thisIndex = commandIndices.get(item.id) ?? 0;
           const isActive = thisIndex === clampedCursor;
           const isRecommended = item.score >= topScore && item.score >= RECOMMENDED_SCORE;
 

@@ -12,7 +12,7 @@
  *   Ctrl+C — exit
  */
 
-import React, { useState, Component } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import StatusBar from './StatusBar.jsx';
 import ConversationFlow from './ConversationFlow.jsx';
@@ -66,9 +66,14 @@ function AppInner({ ctx }) {
 
   function handleCommandSelected(command) {
     setResult(command);
-    // Allow the result screen to render, then exit the Ink process
-    setTimeout(() => exit(), 100);
   }
+
+  // Exit after the result screen has rendered
+  useEffect(() => {
+    if (result) {
+      exit();
+    }
+  }, [result, exit]);
 
   // If a command was selected, show the result and exit
   if (result) {

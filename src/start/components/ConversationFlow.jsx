@@ -10,22 +10,29 @@
  */
 
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import { TREE } from '../lib/conversation-tree.js';
 
 /**
  * @param {{ onSelect: (command: string) => void, ctx: import('../lib/detect.js').RepoContext }} props
  */
-export default function ConversationFlow({ onSelect }) {
+export default function ConversationFlow({ ctx, onSelect }) {
   const [path, setPath] = useState(['root']);
   const [selected, setSelected] = useState(null);
 
   const currentNodeId = path[path.length - 1];
   const currentNode = TREE[currentNodeId];
 
+  // Back-navigation: Escape pops the last path segment
+  useInput((input, key) => {
+    if (key.escape && !selected && path.length > 1) {
+      setPath((p) => p.slice(0, -1));
+    }
+  });
+
   if (!currentNode) {
-    return <Text color="red">Flow error: unknown node "{currentNodeId}"</Text>;
+    return <Text color="red">Flow error: unknown node &quot;{currentNodeId}&quot;</Text>;
   }
 
   function handleSelect(item) {
@@ -34,6 +41,7 @@ export default function ConversationFlow({ onSelect }) {
 
     if (option.command) {
       setSelected(option);
+      onSelect(option.command);
     } else if (option.next) {
       setPath([...path, option.next]);
     }
@@ -106,6 +114,12 @@ export default function ConversationFlow({ onSelect }) {
         </Text>
 
         <SelectInput items={items} onSelect={handleSelect} />
+
+        {path.length > 1 && (
+          <Text color="gray" dimColor>
+            Press esc to go back
+          </Text>
+        )}
       </Box>
     </Box>
   );

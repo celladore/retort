@@ -2,27 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render } from 'ink-testing-library';
 import CommandPalette from './CommandPalette.jsx';
-
-function makeCtx(overrides = {}) {
-  return {
-    forgeInitialised: false,
-    syncRun: false,
-    discoveryDone: false,
-    hasOrchestratorState: false,
-    orchestratorPhase: null,
-    phaseName: null,
-    hasBacklog: false,
-    backlogCount: 0,
-    activeTaskCount: 0,
-    branch: 'main',
-    isClean: true,
-    uncommittedCount: 0,
-    lockHeld: false,
-    flow: 'brand-new',
-    teams: [],
-    ...overrides,
-  };
-}
+import { makeCtx, waitFor } from '../test-utils.js';
 
 describe('CommandPalette', () => {
   it('should render all static commands on empty search', () => {
@@ -49,19 +29,17 @@ describe('CommandPalette', () => {
     expect(frame).toContain('info');
   });
 
-  it('should filter commands when typing a query', async () => {
+  it('should filter commands when typing a query', () => {
     const onSelect = vi.fn();
     const onBack = vi.fn();
     const { lastFrame, stdin } = render(
       React.createElement(CommandPalette, { ctx: makeCtx(), onSelect, onBack })
     );
 
-    // Type "discover"
     stdin.write('discover');
 
     const frame = lastFrame();
     expect(frame).toContain('/discover');
-    // Other commands should be filtered out or less prominent
   });
 
   it('should show "No matching commands" for unmatched query', async () => {
@@ -72,9 +50,7 @@ describe('CommandPalette', () => {
     );
 
     stdin.write('xyznonexistentqueryzzz');
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(lastFrame()).toContain('No matching commands');
+    await waitFor(() => expect(lastFrame()).toContain('No matching commands'));
   });
 
   it('should show star indicator for recommended commands', () => {
@@ -83,7 +59,6 @@ describe('CommandPalette', () => {
     const { lastFrame } = render(
       React.createElement(CommandPalette, { ctx: makeCtx(), onSelect, onBack })
     );
-    // On a brand-new repo, /discover scores 95 which should be starred
     expect(lastFrame()).toContain('★');
   });
 
@@ -105,11 +80,8 @@ describe('CommandPalette', () => {
     );
 
     // Ink detects escape via \u001B followed by no further escape sequence chars
-    // ink-testing-library sends raw bytes; Ink's stdin handler treats lone \x1B as escape
     stdin.write('\u001B');
-    await new Promise((r) => setTimeout(r, 100));
-
-    expect(onBack).toHaveBeenCalled();
+    await waitFor(() => expect(onBack).toHaveBeenCalled());
   });
 
   it('should call onSelect with command id when Enter is pressed', () => {
@@ -119,11 +91,9 @@ describe('CommandPalette', () => {
       React.createElement(CommandPalette, { ctx: makeCtx(), onSelect, onBack })
     );
 
-    // Press enter on the first command (cursor starts at 0)
     stdin.write('\r');
 
     expect(onSelect).toHaveBeenCalled();
-    // The first command in a brand-new context (ranked by score) should be /discover
     expect(onSelect).toHaveBeenCalledWith('/discover');
   });
 
@@ -149,10 +119,8 @@ describe('CommandPalette', () => {
       React.createElement(CommandPalette, { ctx: makeCtx(), onSelect, onBack })
     );
 
-    // Move down once
     stdin.write('\u001B[B');
 
-    // The cursor indicator ❯ should have moved
     const frame = lastFrame();
     expect(frame).toContain('❯');
   });

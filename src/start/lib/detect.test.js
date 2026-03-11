@@ -3,12 +3,12 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-// Mock execSync for git commands
+// Mock execFileSync for git commands
 vi.mock('node:child_process', () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }));
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { detect } from './detect.js';
 
 describe('detect', () => {
@@ -16,10 +16,10 @@ describe('detect', () => {
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'ak-detect-'));
-    // Default: git returns sensible values (commands now use -C flag)
-    execSync.mockImplementation((cmd) => {
-      if (cmd.includes('branch --show-current')) return 'main\n';
-      if (cmd.includes('status --porcelain')) return '\n';
+    // Default: git returns sensible values
+    execFileSync.mockImplementation((cmd, args) => {
+      if (args.includes('--show-current')) return 'main\n';
+      if (args.includes('--porcelain')) return '\n';
       return '';
     });
   });
@@ -130,14 +130,25 @@ describe('detect', () => {
       expect(ctx.orchestratorPhase).toBeNull();
     });
 
-    it('should return null phaseName for invalid phase numbers', () => {
+    it('should return null for invalid phase numbers', () => {
       mkdirSync(join(root, '.claude', 'state'), { recursive: true });
       writeFileSync(
         join(root, '.claude', 'state', 'orchestrator.json'),
         JSON.stringify({ currentPhase: 99 })
       );
       const ctx = detect(root);
-      expect(ctx.orchestratorPhase).toBe(99);
+      expect(ctx.orchestratorPhase).toBeNull();
+      expect(ctx.phaseName).toBeNull();
+    });
+
+    it('should return null for non-numeric phase values', () => {
+      mkdirSync(join(root, '.claude', 'state'), { recursive: true });
+      writeFileSync(
+        join(root, '.claude', 'state', 'orchestrator.json'),
+        JSON.stringify({ currentPhase: 'three' })
+      );
+      const ctx = detect(root);
+      expect(ctx.orchestratorPhase).toBeNull();
       expect(ctx.phaseName).toBeNull();
     });
   });
@@ -149,7 +160,7 @@ describe('detect', () => {
       expect(ctx.backlogCount).toBe(0);
     });
 
-    it('should count table rows in AGENT_BACKLOG.md', () => {
+    it('should count open table rows in AGENT_BACKLOG.md', () => {
       writeFileSync(
         join(root, 'AGENT_BACKLOG.md'),
         [
@@ -162,7 +173,23 @@ describe('detect', () => {
       );
       const ctx = detect(root);
       expect(ctx.hasBacklog).toBe(true);
-      expect(ctx.backlogCount).toBe(3);
+      // Only open items counted (completed/done excluded)
+      expect(ctx.backlogCount).toBe(2);
+    });
+
+    it('should exclude completed and closed items', () => {
+      writeFileSync(
+        join(root, 'AGENT_BACKLOG.md'),
+        [
+          '| ID | Title | Status |',
+          '| --- | --- | --- |',
+          '| 1 | Task A | completed |',
+          '| 2 | Task B | closed |',
+          '| 3 | Task C | open |',
+        ].join('\n')
+      );
+      const ctx = detect(root);
+      expect(ctx.backlogCount).toBe(1);
     });
 
     it('should return 0 for empty backlog file', () => {
@@ -204,32 +231,34 @@ describe('detect', () => {
 
   describe('git state', () => {
     it('should read branch name from git', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('branch --show-current')) return 'feat/my-feature\n';
-        if (cmd.includes('status --porcelain')) return '\n';
+      execFileSync.mockImplementation((cmd, args) => {
+        if (args.includes('--show-current')) return 'feat/my-feature\n';
+        if (args.includes('--porcelain')) return '\n';
         return '';
       });
       const ctx = detect(root);
       expect(ctx.branch).toBe('feat/my-feature');
     });
 
-    it('should pass root to git via -C flag', () => {
-      const capturedCmds = [];
-      execSync.mockImplementation((cmd) => {
-        capturedCmds.push(cmd);
-        if (cmd.includes('branch --show-current')) return 'main\n';
-        if (cmd.includes('status --porcelain')) return '\n';
+    it('should pass root as cwd option to git', () => {
+      const capturedOpts = [];
+      execFileSync.mockImplementation((cmd, args, opts) => {
+        capturedOpts.push(opts);
+        if (args.includes('--show-current')) return 'main\n';
+        if (args.includes('--porcelain')) return '\n';
         return '';
       });
       detect(root);
-      const branchCall = capturedCmds.find((c) => c.includes('branch --show-current'));
-      expect(branchCall).toContain(`-C "${root}"`);
+      // All git calls should use the root as cwd
+      for (const opts of capturedOpts) {
+        expect(opts.cwd).toBe(root);
+      }
     });
 
     it('should detect clean working tree', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('branch --show-current')) return 'main\n';
-        if (cmd.includes('status --porcelain')) return '';
+      execFileSync.mockImplementation((cmd, args) => {
+        if (args.includes('--show-current')) return 'main\n';
+        if (args.includes('--porcelain')) return '';
         return '';
       });
       const ctx = detect(root);
@@ -238,9 +267,9 @@ describe('detect', () => {
     });
 
     it('should count uncommitted changes', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('branch --show-current')) return 'main\n';
-        if (cmd.includes('status --porcelain')) return 'M file1.js\nA file2.js\n?? file3.js\n';
+      execFileSync.mockImplementation((cmd, args) => {
+        if (args.includes('--show-current')) return 'main\n';
+        if (args.includes('--porcelain')) return 'M file1.js\nA file2.js\n?? file3.js\n';
         return '';
       });
       const ctx = detect(root);
@@ -248,12 +277,11 @@ describe('detect', () => {
       expect(ctx.uncommittedCount).toBe(3);
     });
 
-    it('should fallback to empty string when git fails', () => {
-      execSync.mockImplementation(() => {
+    it('should fallback to defaults when git fails', () => {
+      execFileSync.mockImplementation(() => {
         throw new Error('git not found');
       });
       const ctx = detect(root);
-      // run() uses 'unknown' as default fallback for branch, '' for status
       expect(ctx.branch).toBe('unknown');
       expect(ctx.isClean).toBe(true);
     });
@@ -290,6 +318,20 @@ describe('detect', () => {
       expect(ctx.teams[0].name).toBe('Backend');
       expect(ctx.teams[0].focus).toBe('API, services');
       expect(ctx.teams[0].command).toBe('/team-backend');
+    });
+
+    it('should handle tables with different header labels', () => {
+      writeFileSync(
+        join(root, 'AGENT_TEAMS.md'),
+        [
+          '| Label | ID | Description |',
+          '| :--- | :--- | :--- |',
+          '| Backend | backend | API, services |',
+        ].join('\n')
+      );
+      const ctx = detect(root);
+      expect(ctx.teams).toHaveLength(1);
+      expect(ctx.teams[0].id).toBe('backend');
     });
 
     it('should fallback to scanning team-* command files', () => {
@@ -333,9 +375,9 @@ describe('detect', () => {
     });
 
     it('should return uncommitted when there are changes', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('branch --show-current')) return 'main\n';
-        if (cmd.includes('status --porcelain')) return 'M file.js\n';
+      execFileSync.mockImplementation((cmd, args) => {
+        if (args.includes('--show-current')) return 'main\n';
+        if (args.includes('--porcelain')) return 'M file.js\n';
         return '';
       });
       const ctx = detect(root);
@@ -348,9 +390,9 @@ describe('detect', () => {
         join(root, '.claude', 'state', 'orchestrator.json'),
         JSON.stringify({ currentPhase: 3 })
       );
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('branch --show-current')) return 'main\n';
-        if (cmd.includes('status --porcelain')) return 'M file.js\n';
+      execFileSync.mockImplementation((cmd, args) => {
+        if (args.includes('--show-current')) return 'main\n';
+        if (args.includes('--porcelain')) return 'M file.js\n';
         return '';
       });
       const ctx = detect(root);

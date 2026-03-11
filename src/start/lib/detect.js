@@ -8,7 +8,7 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 /**
  * @typedef {'brand-new' | 'discovered' | 'mid-session' | 'uncommitted'} FlowType
@@ -40,11 +40,15 @@ const PHASE_NAMES = {
 };
 
 /**
- * Run a shell command and return trimmed stdout, or fallback on error.
+ * Run a git command safely using execFileSync (no shell interpolation).
+ *
+ * @param {string[]} args - Git subcommand arguments
+ * @param {string} cwd - Working directory for git
+ * @param {string} fallback - Value to return on error
  */
-function run(cmd, fallback = '') {
+function runGit(args, cwd, fallback = '') {
   try {
-    return execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   } catch {
     return fallback;
   }
@@ -57,9 +61,14 @@ function countBacklogItems(root) {
   const backlogPath = join(root, 'AGENT_BACKLOG.md');
   if (!existsSync(backlogPath)) return 0;
   const content = readFileSync(backlogPath, 'utf8');
-  // Count table rows (lines starting with |) that aren't header separators
+  // Count table rows (lines starting with |) that aren't header separators or completed items
+  const completedPattern = /\b(done|completed|closed)\b/i;
   const rows = content.split('\n').filter(
-    (line) => line.startsWith('|') && !line.match(/^\|\s*-/) && !line.match(/^\|\s*#/)
+    (line) =>
+      line.startsWith('|') &&
+      !line.match(/^\|\s*-/) &&
+      !line.match(/^\|\s*#/) &&
+      !completedPattern.test(line)
   );
   // Subtract header row
   return Math.max(0, rows.length - 1);
@@ -76,12 +85,11 @@ function parseTeams(root) {
     const content = readFileSync(teamsPath, 'utf8');
     // Table format: | Name | id | focus | scope | accepts | handoff | Status | Lead |
     // Skip header rows and separator rows
-    const lines = content.split('\n').filter(
-      (l) =>
-        l.startsWith('|') &&
-        !l.match(/^\|\s*-/) &&
-        !l.match(/^\|\s*(Team|Name)/i)
+    const tableRows = content.split('\n').filter(
+      (l) => l.startsWith('|') && !l.match(/^\|\s*[-:]+\s*\|/)
     );
+    // Drop the first row (header) if any rows exist
+    const lines = tableRows.slice(1);
     for (const line of lines) {
       const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
       if (cells.length >= 3) {
@@ -134,7 +142,8 @@ export function detect(root = process.cwd()) {
   if (hasOrchestratorState) {
     try {
       const state = JSON.parse(readFileSync(orchPath, 'utf8'));
-      orchestratorPhase = state.currentPhase ?? null;
+      const raw = state.currentPhase;
+      orchestratorPhase = typeof raw === 'number' && raw >= 1 && raw <= 5 ? raw : null;
     } catch {
       // Malformed JSON — treat as no state
     }
@@ -152,9 +161,9 @@ export function detect(root = process.cwd()) {
     activeTaskCount = readdirSync(tasksDir).filter((f) => f.endsWith('.json')).length;
   }
 
-  // Git state — use -C to target the correct repo when root !== cwd
-  const branch = run(`git -C "${root}" branch --show-current`, 'unknown');
-  const status = run(`git -C "${root}" status --porcelain`);
+  // Git state — use cwd option to target the correct repo
+  const branch = runGit(['branch', '--show-current'], root, 'unknown');
+  const status = runGit(['status', '--porcelain'], root);
   const uncommittedCount = status ? status.split('\n').filter(Boolean).length : 0;
   const isClean = uncommittedCount === 0;
 

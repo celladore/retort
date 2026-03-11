@@ -1,27 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { COMMANDS, getAllCommands, rankCommands } from './commands.js';
-
-/** Helper to create a minimal context object */
-function makeCtx(overrides = {}) {
-  return {
-    forgeInitialised: false,
-    syncRun: false,
-    discoveryDone: false,
-    hasOrchestratorState: false,
-    orchestratorPhase: null,
-    phaseName: null,
-    hasBacklog: false,
-    backlogCount: 0,
-    activeTaskCount: 0,
-    branch: 'main',
-    isClean: true,
-    uncommittedCount: 0,
-    lockHeld: false,
-    flow: 'brand-new',
-    teams: [],
-    ...overrides,
-  };
-}
+import { makeCtx } from '../test-utils.js';
 
 describe('COMMANDS', () => {
   it('should have unique ids', () => {
@@ -86,6 +65,16 @@ describe('getAllCommands', () => {
     const cmds = getAllCommands(ctx);
     const teamCmd = cmds.find((c) => c.id === '/team-backend');
     expect(teamCmd.category).toBe('team');
+  });
+
+  it('should handle teams with empty focus without crashing', () => {
+    const ctx = makeCtx({
+      teams: [
+        { id: 'backend', name: 'Backend', focus: '', command: '/team-backend' },
+        { id: 'custom', name: 'Custom', command: '/team-custom' },
+      ],
+    });
+    expect(() => getAllCommands(ctx)).not.toThrow();
   });
 });
 

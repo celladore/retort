@@ -2,27 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render } from 'ink-testing-library';
 import App from './App.jsx';
-
-function makeCtx(overrides = {}) {
-  return {
-    forgeInitialised: false,
-    syncRun: false,
-    discoveryDone: false,
-    hasOrchestratorState: false,
-    orchestratorPhase: null,
-    phaseName: null,
-    hasBacklog: false,
-    backlogCount: 0,
-    activeTaskCount: 0,
-    branch: 'main',
-    isClean: true,
-    uncommittedCount: 0,
-    lockHeld: false,
-    flow: 'brand-new',
-    teams: [],
-    ...overrides,
-  };
-}
+import { makeCtx, waitFor } from '../test-utils.js';
 
 describe('App', () => {
   it('should start in conversation mode for first-run context', () => {
@@ -68,22 +48,17 @@ describe('App', () => {
   it('should toggle to palette mode on Tab', async () => {
     const { lastFrame, stdin } = render(React.createElement(App, { ctx: makeCtx() }));
 
-    // Tab key
     stdin.write('\t');
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(lastFrame()).toContain('● Palette');
+    await waitFor(() => expect(lastFrame()).toContain('● Palette'));
   });
 
   it('should toggle back to conversation mode on second Tab', async () => {
     const { lastFrame, stdin } = render(React.createElement(App, { ctx: makeCtx() }));
 
     stdin.write('\t');
-    await new Promise((r) => setTimeout(r, 50));
+    await waitFor(() => expect(lastFrame()).toContain('● Palette'));
     stdin.write('\t');
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(lastFrame()).toContain('● Guide');
+    await waitFor(() => expect(lastFrame()).toContain('● Guide'));
   });
 
   it('should show uncommitted changes warning when flow is uncommitted', () => {
@@ -135,7 +110,6 @@ describe('App', () => {
 
   it('should always show the StatusBar', () => {
     const { lastFrame } = render(React.createElement(App, { ctx: makeCtx() }));
-    // StatusBar always shows AK status
     expect(lastFrame()).toContain('AK');
   });
 });
