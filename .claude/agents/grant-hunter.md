@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-10 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-11 -->
 <!-- Format: Plain Markdown agent persona definition. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory -->
 
@@ -68,6 +68,7 @@ cost-operations
 ## Preferred Tools
 
 - Read
+- Write
 - Glob
 - Grep
 - WebSearch

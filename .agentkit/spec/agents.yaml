@@ -753,6 +753,7 @@ agents:
         - Conflating session-level retrospective findings with agent-level performance
       preferred-tools:
         - Read
+        - Write
         - Glob
         - Grep
 
@@ -1668,6 +1669,7 @@ agents:
         - Ignoring free tier reset dates (monthly vs annual)
       preferred-tools:
         - Read
+        - Write
         - Glob
         - Grep
         - WebSearch
@@ -1711,6 +1713,7 @@ agents:
         - Neglecting to track program renewal dates after initial approval
       preferred-tools:
         - Read
+        - Write
         - Glob
         - Grep
         - WebSearch

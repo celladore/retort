@@ -1,7 +1,4 @@
----
-agentkit:
-  scaffold: managed
----
+<# agentkit: scaffold: managed #>
 [CmdletBinding()]
 param(
     [string]$Repo = '',
@@ -73,7 +70,15 @@ $payload = @"
 "@
 
 if (-not $SkipProtection) {
-    foreach ($branch in @('{{defaultBranch}}', 'main')) {
+    # Deduplicate: if defaultBranch is 'main', don't apply twice
+    $branches = @('{{defaultBranch}}', 'main') | Select-Object -Unique
+    foreach ($branch in $branches) {
+        # Check if the branch exists on the remote
+        $branchExists = gh api "/repos/$Repo/branches/$branch" 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "[skip] Branch '$branch' does not exist on $Repo — skipping protection."
+            continue
+        }
         if ($DryRun) {
             Write-Host "[dry-run] Would apply branch protection to $Repo/$branch"
             continue
@@ -85,5 +90,6 @@ if (-not $SkipProtection) {
 
 Write-Host ""
 Write-Host "Done."
-Write-Host "Verify with: gh api /repos/$Repo/branches/{{defaultBranch}}/protection"
-Write-Host "             gh api /repos/$Repo/branches/main/protection"
+foreach ($b in $branches) {
+    Write-Host "Verify with: gh api /repos/$Repo/branches/$b/protection"
+}

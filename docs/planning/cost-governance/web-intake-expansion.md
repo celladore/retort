@@ -23,13 +23,13 @@ Native `WebFetch`/`WebSearch` tools are sufficient for one-off research but lack
 
 ## Current Capabilities
 
-| Layer | Tool | What It Does | Limitation |
-| ----- | ---- | ------------ | ---------- |
-| Native | `WebFetch` | HTTP GET, returns text content | No JS rendering, no structured extraction |
-| Native | `WebSearch` | Web search via provider | Results only, no deep crawl |
-| MCP | `puppeteer` | Full browser automation | Configured but not wired to cost-ops agents |
-| MCP | `fetch` | HTTP fetch server | Basic, similar to native WebFetch |
-| MCP | `context7` | Library doc retrieval | Scoped to code library docs only |
+| Layer  | Tool        | What It Does                   | Limitation                                  |
+| ------ | ----------- | ------------------------------ | ------------------------------------------- |
+| Native | `WebFetch`  | HTTP GET, returns text content | No JS rendering, no structured extraction   |
+| Native | `WebSearch` | Web search via provider        | Results only, no deep crawl                 |
+| MCP    | `puppeteer` | Full browser automation        | Configured but not wired to cost-ops agents |
+| MCP    | `fetch`     | HTTP fetch server              | Basic, similar to native WebFetch           |
+| MCP    | `context7`  | Library doc retrieval          | Scoped to code library docs only            |
 
 ## Proposed Expansion Phases
 
@@ -49,14 +49,15 @@ Evaluate and integrate a dedicated crawler MCP server for structured web extract
 
 **Candidates to evaluate:**
 
-| MCP Server | Capability | License | Notes |
-| ---------- | ---------- | ------- | ----- |
-| [Firecrawl MCP](https://github.com/mendableai/firecrawl) | Crawl + structured extraction | MIT | Best structured output, requires API key |
-| [Crawl4AI MCP](https://github.com/unclecode/crawl4ai) | LLM-optimised crawling | Apache 2.0 | Good markdown output, self-hosted |
-| [Browserbase MCP](https://github.com/browserbase/mcp-server-browserbase) | Cloud browser sessions | Commercial | Managed infrastructure, anti-bot handling |
-| Custom (Puppeteer-based) | Tailored to pricing pages | Internal | Full control, no external dependency |
+| MCP Server                                                               | Capability                    | License    | Notes                                     |
+| ------------------------------------------------------------------------ | ----------------------------- | ---------- | ----------------------------------------- |
+| [Firecrawl MCP](https://github.com/mendableai/firecrawl)                 | Crawl + structured extraction | MIT        | Best structured output, requires API key  |
+| [Crawl4AI MCP](https://github.com/unclecode/crawl4ai)                    | LLM-optimised crawling        | Apache 2.0 | Good markdown output, self-hosted         |
+| [Browserbase MCP](https://github.com/browserbase/mcp-server-browserbase) | Cloud browser sessions        | Commercial | Managed infrastructure, anti-bot handling |
+| Custom (Puppeteer-based)                                                 | Tailored to pricing pages     | Internal   | Full control, no external dependency      |
 
 **Evaluation criteria:**
+
 - [ ] Structured data extraction quality (can it parse pricing tables accurately?)
 - [ ] Self-hosted vs API key dependency (prefer no external API keys)
 - [ ] Rate limiting and caching support
@@ -107,9 +108,9 @@ broader MCP categories.
 
 ## Estimated Effort
 
-| Phase | Duration | Dependency |
-| ----- | -------- | ---------- |
-| Phase B (Puppeteer) | 1 sprint | None — Puppeteer MCP already configured |
-| Phase C (Crawler MCP) | 1 sprint | Evaluation only; implementation in Phase D |
-| Phase D (Automation) | 2 sprints | Pricing YAMLs from multi-provider ticket Phase 2 |
-| Phase E (Persistence) | 1 sprint | Memory MCP already configured |
+| Phase                 | Duration  | Dependency                                       |
+| --------------------- | --------- | ------------------------------------------------ |
+| Phase B (Puppeteer)   | 1 sprint  | None — Puppeteer MCP already configured          |
+| Phase C (Crawler MCP) | 1 sprint  | Evaluation only; implementation in Phase D       |
+| Phase D (Automation)  | 2 sprints | Pricing YAMLs from multi-provider ticket Phase 2 |
+| Phase E (Persistence) | 1 sprint  | Memory MCP already configured                    |

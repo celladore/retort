@@ -89,15 +89,53 @@ teams:
     scope: ['.agentkit/spec/**', 'docs/planning/agents-teams/**', 'docs/architecture/**']
     accepts: [plan, review, investigate, document]
     handoff-chain: [quality, docs]
-    agents: [input-clarifier, mission-definer, role-architect, prompt-engineer, flow-designer, team-validator]
+    agents:
+      [
+        input-clarifier,
+        mission-definer,
+        role-architect,
+        prompt-engineer,
+        flow-designer,
+        team-validator,
+      ]
 
   - id: strategic-ops
     name: STRATEGIC OPS
     focus: 'Cross-project coordination, framework governance, portfolio-level planning'
-    scope: ['docs/planning/**', 'docs/architecture/**', '.agentkit/spec/**', '**/*']
+    scope:
+      [
+        'docs/planning/**',
+        'docs/architecture/**',
+        '.agentkit/spec/**',
+        'AGENT_BACKLOG.md',
+        'UNIFIED_AGENT_TEAMS.md',
+        'AGENT_TEAMS.md',
+      ]
     accepts: [plan, review, investigate, document]
     handoff-chain: [product, quality]
-    agents: [portfolio-analyst, governance-advisor, adoption-strategist, impact-assessor, release-coordinator]
+    agents:
+      [
+        portfolio-analyst,
+        governance-advisor,
+        adoption-strategist,
+        impact-assessor,
+        release-coordinator,
+      ]
+
+  - id: cost-ops
+    name: COST OPS
+    focus: 'AI infrastructure cost reduction, vendor optimization, token efficiency'
+    scope: ['docs/cost-ops/**', 'docs/planning/cost/**', 'config/models/**', 'config/pricing/**']
+    accepts: [investigate, review, plan, document, implement]
+    handoff-chain: [infra, product, strategic-ops]
+    agents:
+      [
+        model-economist,
+        token-efficiency-engineer,
+        vendor-arbitrage-analyst,
+        grant-hunter,
+        cost-ops-monitor,
+      ]
 
   - id: cost-ops
     name: COST OPS
