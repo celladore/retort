@@ -2102,3 +2102,5 @@ commands:
       - Glob
       - Grep
       - Bash
+      - WebSearch
+      - WebFetch
