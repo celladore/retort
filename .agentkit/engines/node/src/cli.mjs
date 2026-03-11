@@ -5,6 +5,7 @@
  */
 import { spawnSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
+import yaml from 'js-yaml';
 import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -152,10 +153,6 @@ const CLI_INTERNAL_FLAG_TYPES = {
   'handoff-to': 'string',
   // remove flags
   clean: 'boolean',
-  // analyze-agents flags
-  output: 'string',
-  matrix: 'string',
-  format: 'string',
 };
 
 /**
@@ -215,14 +212,7 @@ function loadCommandFlags(agentkitRoot) {
   return { validFlags, flagTypes };
 }
 
-// Populated lazily in main() after ensureDependencies + yaml import
-let VALID_FLAGS = { ...CLI_INTERNAL_FLAGS };
-let FLAG_TYPES = {
-  help: 'boolean',
-  quiet: 'boolean',
-  verbose: 'boolean',
-  ...CLI_INTERNAL_FLAG_TYPES,
-};
+const { validFlags: VALID_FLAGS, flagTypes: FLAG_TYPES } = loadCommandFlags(AGENTKIT_ROOT);
 
 // Global flags that apply to all commands
 const GLOBAL_FLAGS = ['help', 'quiet', 'verbose'];

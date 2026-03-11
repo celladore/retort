@@ -29,7 +29,7 @@ AGENTKIT_PKG="${SCRIPT_DIR}/../../.agentkit/package.json"
 
 if [[ -f "$AGENTKIT_PKG" ]]; then
     PKG_NAME=$(jq -r '.name // empty' "$AGENTKIT_PKG" 2>/dev/null || true)
-    if [[ "$PKG_NAME" == "agentkit-forge-runtime" ]]; then
+    if [[ "$PKG_NAME" == "agentkit-forge" ]]; then
         # This IS the agentkit-forge source repo — agents maintain these files.
         exit 0
     fi

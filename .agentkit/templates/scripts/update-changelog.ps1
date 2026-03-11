@@ -1,4 +1,7 @@
-<# agentkit: scaffold: managed #>
+---
+agentkit:
+  scaffold: managed
+---
 # scripts/update-changelog.ps1
 # Inserts an entry into the [Unreleased] section of CHANGELOG.md.
 #
@@ -91,8 +94,7 @@ if (sectionIdx === -1) {
     insertAt < blockEnd &&
     lines[insertAt].trim() !== '' &&
     !lines[insertAt].startsWith('###') &&
-    !lines[insertAt].startsWith('##') &&
-    lines[insertAt].trim() !== '---'
+    !lines[insertAt].startsWith('##')
   ) {
     insertAt++;
   }
@@ -103,7 +105,7 @@ fs.writeFileSync(changelogPath, lines.join('\n'), 'utf8');
 console.log(`Updated CHANGELOG.md — ${section}: ${entry}`);
 '@
 
-$TmpScript = [System.IO.Path]::GetTempFileName() + '.cjs'
+$TmpScript = [System.IO.Path]::GetTempFileName() + '.mjs'
 Set-Content -Path $TmpScript -Value $NodeScript -Encoding UTF8
 try {
   node $TmpScript $Changelog $Section $Entry

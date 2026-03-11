@@ -103,14 +103,7 @@ JSON
 )
 
 if [[ "$SKIP_PROTECTION" == false ]]; then
-  # Deduplicate: if defaultBranch is 'main', don't apply twice
-  for BRANCH in $(echo "main main" | tr ' ' '\n' | awk '!seen[$0]++'); do
-    # Skip if the branch does not exist on the remote
-    if ! gh api "/repos/$REPO/branches/$BRANCH" --silent 2>/dev/null; then
-      echo "[skip] Branch '$BRANCH' does not exist on $REPO — skipping protection."
-      continue
-    fi
-
+  for BRANCH in main main; do
     if [[ "$DRY_RUN" == true ]]; then
       echo "[dry-run] Would apply branch protection to $REPO/$BRANCH"
       continue
@@ -123,6 +116,5 @@ fi
 
 echo
 echo "Done."
-for BRANCH in $(echo "main main" | tr ' ' '\n' | awk '!seen[$0]++'); do
-  echo "Verify with: gh api /repos/$REPO/branches/$BRANCH/protection"
-done
+echo "Verify with: gh api /repos/$REPO/branches/main/protection"
+echo "             gh api /repos/$REPO/branches/main/protection"

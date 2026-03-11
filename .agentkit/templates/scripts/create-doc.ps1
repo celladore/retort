@@ -1,4 +1,7 @@
-<# agentkit: scaffold: managed #>
+---
+agentkit:
+  scaffold: managed
+---
 # scripts/create-doc.ps1
 # Creates a new history document from the appropriate template.
 #

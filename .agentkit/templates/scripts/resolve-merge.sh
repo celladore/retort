@@ -14,7 +14,7 @@ agentkit:
 # =============================================================================
 set -euo pipefail
 
-TARGET="${1:-{{defaultBranch|main}}}"
+TARGET="${1:-{{defaultBranch}}}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -85,7 +85,7 @@ for pattern in "${GENERATED_PATTERNS[@]}"; do
       ok "Auto-resolved (accept upstream): $file"
       auto_resolved=$((auto_resolved + 1))
     fi
-  done < <(git diff --name-only --diff-filter=U | grep -E "$pattern" 2>/dev/null || true)
+  done < <(git diff --name-only --diff-filter=U | grep -F "$(echo "$pattern" | sed 's/\*//g')" 2>/dev/null || true)
 done
 
 # ---------------------------------------------------------------------------
