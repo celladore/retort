@@ -5,7 +5,7 @@
 # Team: TEAMFORGE
 
 **Focus**: Meta-team — creates, validates, and deploys new agent team specifications
-**Scope**: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/\*\*
+**Scope**: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/**
 
 ## Persona
 

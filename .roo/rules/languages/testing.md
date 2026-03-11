@@ -61,4 +61,4 @@ Before committing changes in this domain:
 - Verify coverage meets the **80%** threshold.
 
 - Confirm the linter reports zero new errors.
-- Ensure no secrets or credentials appear in the diff.
+- Ensure no secrets or credentials appear in

@@ -28,23 +28,23 @@ renovate.json
 
 These rules are hard constraints — violations block CI or are prevented by hooks.
 
-- **[dep-pin-versions]** Pin all dependency versions in package manifests. Use exact versions or narrow ranges. Rely on Renovate for automated version bumps via PR. Never use latest, \*, or wide ranges like >=.
-  _(enforcement · phase: implementation)_
+- **[dep-pin-versions]** Pin all dependency versions in package manifests. Use exact versions or narrow ranges. Rely on Renovate for automated version bumps via PR. Never use latest, *, or wide ranges like >=.
+ _(enforcement · phase: implementation)_
 - **[dep-lockfile-committed]** Lockfiles (pnpm-lock.yaml, Cargo.lock, poetry.lock) must be committed to version control. Install with --frozen-lockfile in CI. Never delete or regenerate lockfiles without reviewing the diff.
-  _(enforcement · phase: validation)_
+ _(enforcement · phase: validation)_
 - **[dep-regular-audit]** Run dependency vulnerability audits regularly (npm audit, cargo audit, pip-audit). Critical and high vulnerabilities must be addressed within one sprint. Renovate vulnerability alerts are configured to auto-create PRs for known CVEs.
-  _(enforcement · phase: validation)_
+ _(enforcement · phase: validation)_
 - **[dep-engine-protected]** Dependencies in .agentkit/package.json are part of the forge engine and require maintainer review. Renovate is configured to label these PRs with forge-source-change. Do not modify engine dependencies without understanding the sync pipeline.
-  _(enforcement)_
+ _(enforcement)_
 
 ## Advisory Rules
 
 These rules are guidance for agents — violations are flagged but do not block CI.
 
 - **[dep-audit-before-adopt]** Before adding a new dependency, check: maintenance status (last release date, open issues), security advisories, license compatibility, bundle size impact, and transitive dependency count. Prefer well-maintained packages with small dependency trees.
-  _(advisory · phase: planning)_
+ _(advisory · phase: planning)_
 - **[dep-no-duplicate]** Avoid duplicate dependencies that serve the same purpose. Before adding a new package, check if an existing dependency already provides the needed functionality. Document the rationale for choosing between competing packages.
-  _(advisory · phase: planning)_
+ _(advisory · phase: planning)_
 
 ## Quality Gates
 

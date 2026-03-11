@@ -82,7 +82,7 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 
 **Accepted task types:** investigate, review, plan, document, implement
 
-**Default handoff chain:** infra → product → strategic-ops
+**Default handoff chain:** infra → product
 
 ## Workflow
 
@@ -292,7 +292,7 @@ If you were working on a delegated task from `.claude/state/tasks/`:
 6. If no `handoffTo` is set but you identified downstream work, set
    `handoffTo` to the appropriate team(s) from your handoff chain:
 
-   infra → product → strategic-ops
+   infra → product
 
 ### Events and Orchestrator State
 

@@ -55,4 +55,4 @@ defined in the YAML flow automatically into the generated docs.
 - **Project config**: `stack.languages` in `.agentkit/spec/project.yaml`
 - **Rule specs**: per-domain entries in `.agentkit/spec/rules.yaml`
 - **Shared templates**: `.agentkit/templates/language-instructions/`
-- **Platform overlays**: `.agentkit/templates/<platform>/language-instructions/`
+- **Platform overlays**: `.agentkit/templates/<platform>/language-

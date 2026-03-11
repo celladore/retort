@@ -26,13 +26,13 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag                | Description                                                                                                | Default  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------- | -------- |
-| `--category`        | Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature | —        |
-| `--max-suggestions` | Maximum number of suggestions to return                                                                    | 10       |
-| `--min-impact`      | Minimum impact level to include: critical, high, medium, low                                               | low      |
-| `--output`          | Output format: markdown, yaml, or json                                                                     | markdown |
-| `--save`            | Save suggestions to .claude/state/suggestions/ for later review                                            | false    |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--category` | Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature | — |
+| `--max-suggestions` | Maximum number of suggestions to return | 10 |
+| `--min-impact` | Minimum impact level to include: critical, high, medium, low | low |
+| `--output` | Output format: markdown, yaml, or json | markdown |
+| `--save` | Save suggestions to .claude/state/suggestions/ for later review | false |
 
 ## Implementation
 
@@ -44,3 +44,4 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/expa
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
+

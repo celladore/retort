@@ -77,4 +77,4 @@ The following conventions are enforced in **agentkit-forge** and derived from
 - **[bc-gas-optimization]** Optimize for gas costs. Minimize storage operations, batch transactions where possible, and use calldata over memory for read-only function parameters. Document gas cost estimates for public functions.
   _(advisory · phase: implementation, validation)_
 - **[bc-audit-trail]** All state-changing operations must emit events for off-chain indexing. Include sufficient context in events for reconstruction of state transitions. Log transaction hashes for cross-reference.
-  _(advisory · phase: implementation)_
+  _(advisory · phase: implementatio

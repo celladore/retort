@@ -37,12 +37,12 @@ Evaluate every changed file against:
 
 ## Severity Classification
 
-| Severity | Action                                                                          |
-| -------- | ------------------------------------------------------------------------------- |
-| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path         |
-| HIGH     | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
-| MEDIUM   | Suggest. Performance concern, missing edge case test, poor naming               |
-| LOW      | Note. Style inconsistency, minor readability, optional optimization             |
+| Severity | Action |
+|----------|--------|
+| CRITICAL | Block. Security vulnerability, data loss risk, crash in production path |
+| HIGH | Block. Incorrect behavior, missing error handling, test gaps for critical paths |
+| MEDIUM | Suggest. Performance concern, missing edge case test, poor naming |
+| LOW | Note. Style inconsistency, minor readability, optional optimization |
 
 ## Output Format
 
@@ -63,3 +63,4 @@ Produce: Summary, Required Changes (must fix, with file:line references), Sugges
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
+
