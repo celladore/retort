@@ -14,9 +14,9 @@
     "sync:split-pr:dry": "pwsh -NoLogo -NoProfile -NonInteractive -File scripts/sync-split-pr.ps1 -DryRun",
     "sync:split-pr:sh": "bash scripts/sync-split-pr.sh",
     "sync:split-pr:sh:dry": "bash scripts/sync-split-pr.sh --dry-run",
-    "ak:setup": "pnpm -C .agentkit install && pnpm -C .agentkit agentkit:sync && pnpm -C .agentkit agentkit:validate",
     "ak:install": "pnpm -C .agentkit install",
     "ak:sync": "pnpm -C .agentkit agentkit:sync",
-    "ak:validate": "pnpm -C .agentkit agentkit:validate"
+    "ak:validate": "pnpm -C .agentkit agentkit:validate",
+    "ak:setup": "pnpm -C .agentkit install && pnpm -C .agentkit agentkit:sync && pnpm -C .agentkit agentkit:validate"
   }
 }

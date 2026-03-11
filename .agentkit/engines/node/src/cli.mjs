@@ -91,6 +91,8 @@ const CLI_INTERNAL_FLAGS = {
     'verbose',
     'no-clean',
     'diff',
+    'yes',
+    'no-prompt',
     'help',
   ],
   validate: ['auto-task', 'help'],
@@ -135,6 +137,8 @@ const CLI_INTERNAL_FLAG_TYPES = {
   'dry-run': 'boolean',
   'no-clean': 'boolean',
   diff: 'boolean',
+  yes: 'boolean',
+  'no-prompt': 'boolean',
   // validate flags
   'auto-task': 'boolean',
   // tasks flags
@@ -326,6 +330,7 @@ Commands:
                   -v, --verbose       List each file written
                   --no-clean          Don't delete orphaned files from previous sync
                   --diff              Show what would change without writing
+                  --yes, --no-prompt  Skip interactive prompts (apply all changes)
   validate        Validate generated outputs
   discover        Scan repo to detect tech stacks and structure
   spec-validate   Validate YAML spec files for schema correctness

@@ -393,7 +393,7 @@ Adopting the Hybrid model unlocks growth and developer satisfaction, at the cost
 - [PRD-007: Adopter Autoupdate](../../product/PRD-007-adopter-autoupdate.md) — follow-up capability
   building on the npm CLI distribution channel defined in this ADR; specifically the "Immediate CLI
   and SDK access with autoupdate support" requirement from the Consumer Experience section.
-- [#196: adoption/startup-hooks: enforce required CLI toolchain availability](https://github.com/JustAGhosT/agentkit-forge/issues/196)
+- [#196: adoption/startup-hooks: enforce required CLI toolchain availability](https://github.com/phoenixvc/agentkit-forge/issues/196)
   — prerequisite for the autoupdate preflight checks.
-- [#194: governance: enforce agentkit sync pre-PR for adopters](https://github.com/JustAGhosT/agentkit-forge/issues/194)
+- [#194: governance: enforce agentkit sync pre-PR for adopters](https://github.com/phoenixvc/agentkit-forge/issues/194)
   — sync enforcement gate that autoupdate must satisfy.

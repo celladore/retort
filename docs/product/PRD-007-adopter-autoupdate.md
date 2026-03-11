@@ -82,10 +82,10 @@ Specific pain points in the current state:
   forge version is more than N versions behind the current release.
 - **CLI toolchain dependency gap** — related issue: adopter repos may not
   have the required CLI tools installed to even perform an upgrade
-  (see issue [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196)).
+  (see issue [#196](https://github.com/phoenixvc/agentkit-forge/issues/196)).
 - **Sync enforcement gap** — autoupdate is tightly coupled with the enforced
   sync contract described in issue
-  [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194); upgrading
+  [#194](https://github.com/phoenixvc/agentkit-forge/issues/194); upgrading
   the forge version must trigger a re-sync before the PR passes validation.
 
 ## Core Challenge
@@ -313,11 +313,11 @@ agentkit-forge update --check
 
 | Issue                                                           | Title                                                  | Relationship                                                          |
 | --------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
-| [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
-| [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
+| [#196](https://github.com/phoenixvc/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
+| [#194](https://github.com/phoenixvc/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
 | [PRD-005](./PRD-005-mesh-native-distribution.md)                | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
 | [ADR-07](../architecture/decisions/07-delivery-strategy.md)     | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
-| [#241](https://github.com/JustAGhosT/agentkit-forge/issues/241) | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
+| [#241](https://github.com/phoenixvc/agentkit-forge/issues/241) | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
 
 ## Milestone
 
@@ -326,8 +326,8 @@ which groups delivery-method improvements for adopter repositories. Related
 issues to include in this milestone:
 
 - This autoupdate feature issue
-- [#196](https://github.com/JustAGhosT/agentkit-forge/issues/196) — CLI toolchain enforcement
-- [#194](https://github.com/JustAGhosT/agentkit-forge/issues/194) — agentkit sync enforcement
+- [#196](https://github.com/phoenixvc/agentkit-forge/issues/196) — CLI toolchain enforcement
+- [#194](https://github.com/phoenixvc/agentkit-forge/issues/194) — agentkit sync enforcement
 
 ## Acceptance Criteria
 
@@ -347,5 +347,5 @@ issues to include in this milestone:
 - [ADR-07: Delivery Strategy](../architecture/decisions/07-delivery-strategy.md)
 - [PRD-005: Mesh-Native Distribution](./PRD-005-mesh-native-distribution.md)
 - [PRD-006: PWA/Desktop Visual Configuration](./PRD-006-pwa-desktop-visual-configuration.md)
-- [Issue #196: CLI Toolchain Enforcement](https://github.com/JustAGhosT/agentkit-forge/issues/196)
-- [Issue #194: agentkit sync Enforcement for Adopters](https://github.com/JustAGhosT/agentkit-forge/issues/194)
+- [Issue #196: CLI Toolchain Enforcement](https://github.com/phoenixvc/agentkit-forge/issues/196)
+- [Issue #194: agentkit sync Enforcement for Adopters](https://github.com/phoenixvc/agentkit-forge/issues/194)

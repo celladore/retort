@@ -3,7 +3,7 @@
 **Completed**: 2026-03-01
 **Duration**: Multi-pass validation and corrective updates
 **Status**: ✅ **SUCCESSFULLY COMPLETED**
-**PR**: [#72](https://github.com/JustAGhosT/agentkit-forge/pull/72) ⚡ optimize sync command with async I/O and concurrency
+**PR**: [#72](https://github.com/phoenixvc/agentkit-forge/pull/72) ⚡ optimize sync command with async I/O and concurrency
 
 ## Overview
 
@@ -70,7 +70,7 @@ This phase restored CI alignment and reduced recurrence risk for test and genera
 
 - **Previous baseline**: `docs/history/implementations/0001-2026-03-01-origin-main-merge-reconciliation-implementation.md`
 - **Previous baseline**: `docs/history/implementations/0002-2026-03-01-sync-test-performance-stabilization-implementation.md`
-- **PR**: <https://github.com/JustAGhosT/agentkit-forge/pull/72>
+- **PR**: <https://github.com/phoenixvc/agentkit-forge/pull/72>
 
 ---
 
