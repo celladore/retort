@@ -80,7 +80,8 @@ describe('ConversationFlow', () => {
     await waitFor(() => expect(lastFrame()).toContain('What kind of thing?'));
 
     stdin.write(ENTER);
-    await waitFor(() => expect(lastFrame()).toContain('Backend team handles API'));
+    await waitFor(() => expect(lastFrame()).toContain('Got it'));
+    expect(lastFrame()).toContain('Backend team handles API');
   });
 
   it('should show breadcrumbs after navigating deeper', async () => {
