@@ -12,16 +12,44 @@
  *   Ctrl+C — exit
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, Component } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import StatusBar from './StatusBar.jsx';
 import ConversationFlow from './ConversationFlow.jsx';
 import CommandPalette from './CommandPalette.jsx';
 
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return React.createElement(Box, { flexDirection: 'column', padding: 1 },
+        React.createElement(Text, { color: 'red', bold: true }, 'ak-start encountered an error:'),
+        React.createElement(Text, { color: 'red' }, String(this.state.error.message || this.state.error)),
+        React.createElement(Text, { color: 'gray', dimColor: true }, 'Try: ak-start --json'),
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /**
  * @param {{ ctx: import('../lib/detect.js').RepoContext }} props
  */
 export default function App({ ctx }) {
+  return (
+    <ErrorBoundary>
+      <AppInner ctx={ctx} />
+    </ErrorBoundary>
+  );
+}
+
+function AppInner({ ctx }) {
   const { exit } = useApp();
 
   // Determine initial mode based on context

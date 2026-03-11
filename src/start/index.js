@@ -23,6 +23,33 @@ import App from './components/App.jsx';
 
 const args = process.argv.slice(2);
 
+// Help flag
+if (args.includes('--help') || args.includes('-h')) {
+  process.stdout.write(
+    [
+      'ak-start — interactive entry point for AgentKit Forge',
+      '',
+      'Usage:',
+      '  ak-start          Interactive TUI (requires a terminal)',
+      '  ak-start --json   Output context as JSON (for scripts)',
+      '  ak-start --help   Show this help message',
+      '',
+      'Modes:',
+      '  Guide    Guided dialogue tree for choosing the right command',
+      '  Palette  Fuzzy-searchable, context-ranked command list',
+      '',
+      'Keyboard:',
+      '  Tab      Toggle between Guide and Palette modes',
+      '  ↑/↓     Navigate options',
+      '  Enter    Select',
+      '  Esc      Go back (Palette mode)',
+      '  Ctrl+C   Exit',
+      '',
+    ].join('\n')
+  );
+  process.exit(0);
+}
+
 // JSON mode for scripting / piping
 if (args.includes('--json')) {
   const ctx = detect();
@@ -30,8 +57,23 @@ if (args.includes('--json')) {
   process.exit(0);
 }
 
+// TTY check — Ink requires an interactive terminal
+if (!process.stdin.isTTY) {
+  const ctx = detect();
+  process.stderr.write(
+    'ak-start: not a terminal. Use --json for non-interactive output.\n'
+  );
+  process.stdout.write(JSON.stringify(ctx, null, 2) + '\n');
+  process.exit(1);
+}
+
 // Detect context (Phase 1 — silent)
 const ctx = detect();
+
+// Clean exit on signals
+const cleanup = () => process.exit(0);
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
 
 // Render interactive TUI (Phase 2 + 3)
 render(React.createElement(App, { ctx }));
