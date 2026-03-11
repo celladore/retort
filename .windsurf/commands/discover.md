@@ -47,4 +47,3 @@ Create or update `AGENT_TEAMS.md` with: Repository Profile (primary stack, build
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

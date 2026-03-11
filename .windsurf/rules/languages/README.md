@@ -25,7 +25,7 @@ platform:
 ## Active Languages
 
 | File | Language | Applies to | Globs |
-| --- | --- | --- | --- |
+| ---- | -------- | ---------- | ----- |
 
 ## How It Works
 

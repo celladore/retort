@@ -26,13 +26,13 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--scope` | Limit evaluation to specific paths or modules | — |
-| `--focus` | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops | all |
-| `--output` | Output format: markdown, json, or yaml | markdown |
-| `--save` | Save evaluation report to docs/evaluations/ | true |
-| `--gates-only` | Run hard gate checks only without full dimensional scoring | false |
+| Flag           | Description                                                                               | Default  |
+| -------------- | ----------------------------------------------------------------------------------------- | -------- |
+| `--scope`      | Limit evaluation to specific paths or modules                                             | —        |
+| `--focus`      | Focus area: all, reliability, cost, security, infra, scalability, architecture, code, ops | all      |
+| `--output`     | Output format: markdown, json, or yaml                                                    | markdown |
+| `--save`       | Save evaluation report to docs/evaluations/                                               | true     |
+| `--gates-only` | Run hard gate checks only without full dimensional scoring                                | false    |
 
 ## Implementation
 
@@ -44,4 +44,3 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/infr
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

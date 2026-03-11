@@ -26,11 +26,11 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--category` | Configure only features in a specific category | — |
-| `--preset` | Apply a named feature preset instead of interactive selection | — |
-| `--dry-run` | Show what would change without applying | false |
+| Flag         | Description                                                   | Default |
+| ------------ | ------------------------------------------------------------- | ------- |
+| `--category` | Configure only features in a specific category                | —       |
+| `--preset`   | Apply a named feature preset instead of interactive selection | —       |
+| `--dry-run`  | Show what would change without applying                       | false   |
 
 ## Implementation
 
@@ -42,4 +42,3 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/feat
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

@@ -26,11 +26,11 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--output` | Output file path | docs/agents/agent-team-matrix.md |
-| `--matrix` | Specific matrix to generate (1-8, supplementary, or all) | all |
-| `--format` | Output format | markdown |
+| Flag       | Description                                              | Default                          |
+| ---------- | -------------------------------------------------------- | -------------------------------- |
+| `--output` | Output file path                                         | docs/agents/agent-team-matrix.md |
+| `--matrix` | Specific matrix to generate (1-8, supplementary, or all) | all                              |
+| `--format` | Output format                                            | markdown                         |
 
 ## Implementation
 
@@ -42,4 +42,3 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/anal
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

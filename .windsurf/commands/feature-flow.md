@@ -26,11 +26,11 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--feature` | Feature ID to trace (e.g., team-orchestration, quality-gates) |  |
-| `--show-templates` | Show the raw template content that uses this feature | false |
-| `--show-output` | Show the rendered output for this feature | false |
+| Flag               | Description                                                   | Default |
+| ------------------ | ------------------------------------------------------------- | ------- |
+| `--feature`        | Feature ID to trace (e.g., team-orchestration, quality-gates) |         |
+| `--show-templates` | Show the raw template content that uses this feature          | false   |
+| `--show-output`    | Show the rendered output for this feature                     | false   |
 
 ## Implementation
 
@@ -42,4 +42,3 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/feat
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-
