@@ -86,7 +86,7 @@ Add an 11th team (`cli`) with a dedicated `cli-engineer` agent to own CLI entry 
 | `engines/**` (runtime)       | `cli`         | `platform` | `cli` owns module boundaries & exports; `platform` owns shared internals  |
 | `package.json` (deps)        | `cli`         | `devops`   | `cli` owns `files`, `exports`, `bin`, publish scripts; `devops` owns rest |
 | `.github/workflows/publish*` | `cli`         | `devops`   | `cli` owns publish workflow logic; `devops` owns runner config & secrets  |
-| `scripts/publish*`           | `cli`         | `devops`   | `cli` primary; `devops` owns CI integration                              |
+| `scripts/publish*`           | `cli`         | `devops`   | `cli` primary; `devops` owns CI integration                               |
 
 ### Handoff Chain
 
@@ -98,12 +98,12 @@ cli → docs       (CLI usage docs, --help text, README install instructions)
 
 ## Files to Modify
 
-| File                        | Change                                  |
-| --------------------------- | --------------------------------------- |
-| `.agentkit/spec/teams.yaml` | Add `cli` team entry                    |
-| `.agentkit/spec/agents.yaml`| Add `cli-engineer` agent entry          |
-| `UNIFIED_AGENT_TEAMS.md`    | Add T11 row + full team definition      |
-| `AGENT_BACKLOG.md`          | Add T11-CLI items for PRD-005 Phase 1   |
+| File                         | Change                                |
+| ---------------------------- | ------------------------------------- |
+| `.agentkit/spec/teams.yaml`  | Add `cli` team entry                  |
+| `.agentkit/spec/agents.yaml` | Add `cli-engineer` agent entry        |
+| `UNIFIED_AGENT_TEAMS.md`     | Add T11 row + full team definition    |
+| `AGENT_BACKLOG.md`           | Add T11-CLI items for PRD-005 Phase 1 |
 
 ## Acceptance Criteria
 

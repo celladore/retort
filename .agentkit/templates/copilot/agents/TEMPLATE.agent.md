@@ -1,6 +1,6 @@
 ---
 name: '{{agentName}}'
-description: '{{agentRole}}'
+description: "{{agentRole}}"
 generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
 last_updated: '{{syncDate}}'

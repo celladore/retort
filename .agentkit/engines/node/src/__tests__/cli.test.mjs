@@ -79,13 +79,13 @@ describe('CLI', () => {
   });
 
   describe('VALID_FLAGS / FLAG_TYPES consistency', () => {
-    it('every flag in VALID_FLAGS has a corresponding FLAG_TYPES entry or is special-cased', () => {
+    it('every CLI-internal flag has a corresponding type entry (dynamic flags loaded from commands.yaml)', () => {
       // Parse cli.mjs source to extract VALID_FLAGS and FLAG_TYPES
       const src = readFileSync(CLI_PATH, 'utf-8');
 
       // Extract FLAG_TYPES keys
-      const ftMatch = src.match(/const FLAG_TYPES = \{([\s\S]*?)\n\};/);
-      expect(ftMatch, 'Could not find FLAG_TYPES in cli.mjs').toBeTruthy();
+      const ftMatch = src.match(/const CLI_INTERNAL_FLAG_TYPES = \{([\s\S]*?)\n\};/);
+      expect(ftMatch, 'Could not find CLI_INTERNAL_FLAG_TYPES in cli.mjs').toBeTruthy();
       const flagTypeKeys = new Set();
       for (const line of ftMatch[1].split('\n')) {
         const m = line.match(/^\s*'([a-zA-Z][\w-]*)'\s*:/);
@@ -95,12 +95,17 @@ describe('CLI', () => {
       }
 
       // Extract VALID_FLAGS per-command arrays
-      const vfMatch = src.match(/const VALID_FLAGS = \{([\s\S]*?)\n\};/);
-      expect(vfMatch, 'Could not find VALID_FLAGS in cli.mjs').toBeTruthy();
+      const vfMatch = src.match(/const CLI_INTERNAL_FLAGS = \{([\s\S]*?)\n\};/);
+      expect(vfMatch, 'Could not find CLI_INTERNAL_FLAGS in cli.mjs').toBeTruthy();
       const cmdPattern = /['"]?([\w-]+)['"]?\s*:\s*\[([\s\S]*?)\]/g;
       let match;
       const missing = [];
-      // Special-cased flags that are handled inline in parseArgs (not in FLAG_TYPES)
+      // Global flags defined in loadCommandFlags() (not in CLI_INTERNAL_FLAG_TYPES)
+      flagTypeKeys.add('help');
+      flagTypeKeys.add('quiet');
+      flagTypeKeys.add('verbose');
+
+      // Special-cased flags that are handled inline in parseFlags (not in FLAG_TYPES)
       const specialCased = new Set(['status']);
       while ((match = cmdPattern.exec(vfMatch[1])) !== null) {
         const cmd = match[1];
@@ -114,7 +119,7 @@ describe('CLI', () => {
 
       expect(
         missing,
-        `Flags in VALID_FLAGS missing from FLAG_TYPES:\n${missing.join('\n')}`
+        `Flags in CLI_INTERNAL_FLAGS missing from CLI_INTERNAL_FLAG_TYPES:\n${missing.join('\n')}`
       ).toHaveLength(0);
     });
 

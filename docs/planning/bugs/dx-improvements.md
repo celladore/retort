@@ -20,6 +20,7 @@ Two DX improvements for test reliability and platform coverage.
 The project linter strips `spawnSync` from `child_process` in test files, causing `ReferenceError` failures. A workaround (separate test file) is in place, but the root cause (linter config) is not fixed.
 
 **Fix options**:
+
 - Add ESLint rule or `.eslintrc` override to prevent auto-removal of `child_process` imports in test files
 - Configure `eslint-plugin-unused-imports` exceptions for test files using `spawnSync`
 - Document in CONTRIBUTING.md
@@ -36,10 +37,10 @@ The `{{stateDir}}` template variable is tested for Claude, Cursor, Copilot, Code
 
 ## Files to Modify
 
-| File                     | Change                                       |
-| ------------------------ | -------------------------------------------- |
-| `.eslintrc` / ESLint config | Add exception for child_process in tests  |
-| Test files               | Add parameterized stateDir test              |
+| File                        | Change                                   |
+| --------------------------- | ---------------------------------------- |
+| `.eslintrc` / ESLint config | Add exception for child_process in tests |
+| Test files                  | Add parameterized stateDir test          |
 
 ## References
 
