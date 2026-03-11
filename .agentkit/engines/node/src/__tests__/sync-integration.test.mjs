@@ -587,10 +587,10 @@ describe('syncRooRules (via runSync --only roo)', () => {
 describe('render target gating for new tools', () => {
   let projectRoot;
 
-  beforeAll(() => {
+  beforeEach(() => {
     projectRoot = makeTmpProject();
   });
-  afterAll(() => {
+  afterEach(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
