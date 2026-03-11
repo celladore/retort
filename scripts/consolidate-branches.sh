@@ -185,9 +185,12 @@ for branch in "${UNMERGED[@]}"; do
   info "Merging ${branch} ($(( ${#MERGED[@]} + ${#FAILED[@]} + 1 ))/${#UNMERGED[@]})..."
 
   # Check for uncommitted changes before each merge
+  local_stashed=false
   if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
     warn "Uncommitted changes detected. Stashing before merge..."
-    git stash push -m "consolidate-branches: before merging ${branch}" 2>/dev/null
+    if git stash push -m "consolidate-branches: before merging ${branch}" 2>/dev/null; then
+      local_stashed=true
+    fi
   fi
 
   # Try merging from remote first, fall back to local
@@ -214,7 +217,7 @@ for branch in "${UNMERGED[@]}"; do
         .claude/*|.cursor/*|.windsurf/*|.roo/*|.clinerules/*|.github/instructions/*|\
         .github/copilot-instructions.md|.github/PULL_REQUEST_TEMPLATE.md|\
         .github/agents/*|.github/chatmodes/*|.github/prompts/*|\
-        .agents/*|.gemini/*|docs/*/README.md|scripts/*.sh|scripts/*.ps1|\
+        .agents/*|.gemini/*|docs/*/README.md|\
         AGENTS.md|UNIFIED_AGENT_TEAMS.md|COMMAND_GUIDE.md|QUALITY_GATES.md|\
         RUNBOOK_AI.md|CONTRIBUTING.md)
           git checkout --theirs -- "$file" 2>/dev/null && git add "$file" 2>/dev/null
@@ -232,9 +235,14 @@ for branch in "${UNMERGED[@]}"; do
     # Check if any conflicts remain
     remaining=$(git diff --name-only --diff-filter=U 2>/dev/null || true)
     if [ -z "$remaining" ]; then
-      git commit --no-edit 2>/dev/null
-      ok "Merged ${branch} (${auto_resolved} auto-resolved)."
-      MERGED+=("$branch")
+      if git commit --no-edit 2>/dev/null; then
+        ok "Merged ${branch} (${auto_resolved} auto-resolved)."
+        MERGED+=("$branch")
+      else
+        err "Commit failed after auto-resolving ${branch} (exit code $?)."
+        git merge --abort 2>/dev/null || true
+        FAILED+=("$branch")
+      fi
     else
       err "Unresolved conflicts merging ${branch}:"
       echo "$remaining" | while IFS= read -r f; do
@@ -249,6 +257,11 @@ for branch in "${UNMERGED[@]}"; do
     echo "  $merge_output"
     git merge --abort 2>/dev/null || true
     FAILED+=("$branch")
+  fi
+
+  # Restore stashed changes if we stashed before this merge
+  if $local_stashed; then
+    git stash pop 2>/dev/null || warn "Failed to restore stash for ${branch}"
   fi
 done
 
@@ -275,7 +288,7 @@ if [ ${#FAILED[@]} -gt 0 ]; then
     echo -e "    ${RED}✗${NC} $b"
   done
   echo ""
-  warn "Re-run with: scripts/consolidate-branches.sh ${BASE_BRANCH} --skip=$(IFS=,; echo "${MERGED[*]}")"
+  warn "Re-run with: scripts/consolidate-branches.sh ${BASE_BRANCH} --skip=$(IFS=,; echo "${MERGED[*]:-}")"
 fi
 
 echo ""

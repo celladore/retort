@@ -50,8 +50,12 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
   const [cursor, setCursor] = useState(0);
 
   const allCommands = useMemo(() => {
-    const cmds = getAllCommands(ctx);
-    return rankCommands(cmds, ctx);
+    try {
+      const cmds = getAllCommands(ctx);
+      return rankCommands(cmds, ctx);
+    } catch {
+      return [];
+    }
   }, [ctx]);
 
   const fuse = useMemo(
@@ -88,6 +92,13 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
       const items = [];
       for (const cat of CATEGORY_ORDER) {
         if (grouped[cat]) {
+          items.push({ type: 'header', category: cat });
+          items.push(...grouped[cat].map((cmd) => ({ type: 'command', ...cmd })));
+        }
+      }
+      // Include any categories not in CATEGORY_ORDER (e.g. 'other')
+      for (const cat of Object.keys(grouped)) {
+        if (!CATEGORY_ORDER.includes(cat)) {
           items.push({ type: 'header', category: cat });
           items.push(...grouped[cat].map((cmd) => ({ type: 'command', ...cmd })));
         }

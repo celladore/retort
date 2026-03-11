@@ -1727,13 +1727,20 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // Warns or blocks when protected directories have uncommitted changes.
   // Skipped for --force, --dry-run, --diff, and test environments.
   if (!flags?.force && !dryRun && !diff && !isTestEnv) {
-    const { checkDirtyProtectedFiles, promptDirtyFileAction } =
-      await import('./sync-guard.mjs');
-    const { dirty, files } = checkDirtyProtectedFiles(projectRoot, [
-      '.agentkit/engines',
-      '.agentkit/spec',
-      '.agentkit/overlays',
-    ]);
+    let checkDirtyProtectedFiles, promptDirtyFileAction;
+    try {
+      ({ checkDirtyProtectedFiles, promptDirtyFileAction } =
+        await import('./sync-guard.mjs'));
+    } catch (err) {
+      log(`[agentkit:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
+    }
+    const { dirty, files } = checkDirtyProtectedFiles
+      ? checkDirtyProtectedFiles(projectRoot, [
+          '.agentkit/engines',
+          '.agentkit/overlays',
+          '.agentkit/bin',
+        ])
+      : { dirty: false, files: [] };
     if (dirty) {
       const isTTY = process.stdout.isTTY && process.stdin.isTTY;
       if (isTTY) {

@@ -39,7 +39,7 @@ if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.m
         # Check for drift
         if ! git -C "$CWD" diff --quiet 2>/dev/null; then
             DRIFT_FILES=$(git -C "$CWD" diff --name-only 2>/dev/null | head -20)
-            ERRORS="${ERRORS}GENERATED FILE DRIFT DETECTED — Run 'pnpm -C .agentkit agentkit:sync' and commit before pushing.\nOut-of-sync files:\n${DRIFT_FILES}\n\n"
+            ERRORS="${ERRORS}GENERATED FILE DRIFT DETECTED — Run '{{packageManager}} -C .agentkit agentkit:sync' and commit before pushing.\nOut-of-sync files:\n${DRIFT_FILES}\n\n"
             # Restore the working tree since we're blocking
             git -C "$CWD" checkout -- $DRIFT_FILES 2>/dev/null || true
         fi

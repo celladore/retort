@@ -137,14 +137,6 @@ teams:
         cost-ops-monitor,
       ]
 
-  - id: cost-ops
-    name: COST OPS
-    focus: 'AI infrastructure cost reduction, vendor optimization, token efficiency'
-    scope: ['docs/cost-ops/**', 'docs/planning/cost/**', 'config/models/**', 'config/pricing/**']
-    accepts: [investigate, review, plan, document, implement]
-    handoff-chain: [infra, product]
-    agents: [model-economist, token-efficiency-engineer, vendor-arbitrage-analyst, grant-hunter, cost-ops-monitor]
-
 intake:
   ownerTeam: product
   operationsTeam: quality
