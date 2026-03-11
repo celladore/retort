@@ -76,26 +76,28 @@ Show current phase, task, and branch. Suggest: /orchestrate (continue), /orchest
 **Flow D — Uncommitted work detected:**
 Remind about uncommitted changes. Suggest git diff, commit, or stash. Note they can also proceed.
 
-## Decision Guidance
+## Decision Guidance — Dynamic Team Routing
 
-If the user describes a task or asks which team to use, route them:
+If the user describes a task or asks which team to use, **build the routing table dynamically** from the repo's actual team configuration:
 
-| Task involves...                    | Primary team  | Supporting team |
-| ----------------------------------- | ------------- | --------------- |
-| API endpoints, services, core logic | backend       | testing         |
-| UI components, pages, styling       | frontend      | testing         |
-| Database schema, models, migrations | data          | backend         |
-| Terraform, cloud resources, IaC     | infra         | security        |
-| CI/CD pipelines, Docker, automation | devops        | infra           |
-| Test coverage, test strategy        | testing       | (varies)        |
-| Auth, RBAC, vulnerability fixes     | security      | backend         |
-| READMEs, guides, API docs           | docs          | (varies)        |
-| Feature specs, user stories, PRDs   | product       | backend         |
-| Code review, refactoring, tech debt | quality       | (varies)        |
-| Cross-team coordination             | strategic-ops | (varies)        |
-| Cost optimization for AI/LLM usage  | cost-ops      | infra           |
+1. **Read `AGENT_TEAMS.md`** (if it exists — created by `/discover`). Parse team names, focus areas, and scope patterns from the team assignment sections.
+2. **If `AGENT_TEAMS.md` doesn't exist**, fall back to reading `.agentkit/spec/teams.yaml`. Parse each team's `id`, `name`, `description`, `scope`, and `handoff-chain` fields.
+3. **If neither exists**, use the `/team-*` command files in `.claude/commands/` — extract team names and descriptions from the YAML frontmatter `description` field.
 
-For multi-team tasks, recommend /orchestrate.
+From the discovered teams, build a routing table with three columns:
+
+| I want to...                           | Team        | Command      |
+| -------------------------------------- | ----------- | ------------ |
+| (inferred from team description/scope) | (team name) | `/team-<id>` |
+
+Map the team's `description` and `scope` patterns to plain-language "I want to..." rows. For example:
+
+- A team with scope `apps/api/**, services/**` and description "API, services, core logic" → "Build or fix backend/API logic"
+- A team with scope `src/components/**, src/pages/**` and description "UI, components, PWA" → "Build or fix UI components"
+
+Omit meta-teams (like `forge`) unless the user specifically asks about creating new teams.
+
+For tasks that span multiple teams, recommend `/orchestrate` which handles cross-team delegation automatically.
 
 ## State Management
 
