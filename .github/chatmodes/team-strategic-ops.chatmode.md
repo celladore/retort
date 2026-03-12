@@ -3,7 +3,7 @@ name: 'STRATEGIC OPS'
 description: 'Team STRATEGIC OPS — Cross-project coordination, framework governance, portfolio-level planning'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

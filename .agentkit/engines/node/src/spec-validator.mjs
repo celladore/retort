@@ -121,7 +121,10 @@ const agentSchema = {
 // Schema: commands.yaml
 // ---------------------------------------------------------------------------
 const VALID_COMMAND_TYPES = ['workflow', 'team', 'utility'];
-const VALID_TOOLS = ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash', 'WebSearch', 'WebFetch'];
+const VALID_TOOLS = [
+  'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash', 'WebSearch', 'WebFetch',
+  'AskUserQuestion', 'TodoWrite', 'Agent', 'NotebookEdit',
+];
 const VALID_FLAG_TYPES = ['string', 'boolean', 'integer', 'number'];
 
 const commandFlagSchema = {

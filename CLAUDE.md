@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-11 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-12 -->
 <!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
 
@@ -30,6 +30,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 
 | Command             | Purpose                                      |
 | ------------------- | -------------------------------------------- |
+| `/start`            | New user entry point — guided next steps     |
 | `/orchestrate`      | Master coordinator — assess, plan, delegate  |
 | `/discover`         | Scan codebase, detect tech stacks            |
 | `/review`           | Code review with quality gates               |

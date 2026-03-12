@@ -36,7 +36,7 @@ Detect the test framework in the following priority order:
 | -------- | --------------------------------------------------------------------- | ------------------------ |
 | 1        | `vitest` in devDependencies or vitest config file                     | `npx vitest run`         |
 | 2        | `jest` in devDependencies or jest config file                         | `npx jest`               |
-| 3        | `test` script in `package.json`                                       | `pnpm test` / `npm test` |
+| 3        | `test` script in `package.json`                                       | `{{pmRun}} test`         |
 | 4        | `Cargo.toml`                                                          | `cargo test`             |
 | 5        | `*.csproj` with test framework references                             | `dotnet test`            |
 | 6        | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest`                 |
@@ -64,8 +64,7 @@ Detect the test framework in the following priority order:
 
 ### Monorepo Scope
 
-- **pnpm workspaces:** `pnpm --filter <scope> test`
-- **npm workspaces:** `npm test --workspace=<scope>`
+- **Workspaces:** `{{packageManager}} --filter <scope> test`
 - **Cargo workspaces:** `cargo test -p <package>`
 - **dotnet solutions:** `dotnet test <project>.csproj`
 

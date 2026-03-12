@@ -157,15 +157,15 @@ This sequence preserves current correctness while adding bootstrap resilience wi
 
 ### Phase 2 issues (Templates)
 
-- #220 — https://github.com/JustAGhosT/agentkit-forge/issues/220 — `OPEN`
-- #221 — https://github.com/JustAGhosT/agentkit-forge/issues/221 — `OPEN`
-- #222 — https://github.com/JustAGhosT/agentkit-forge/issues/222 — `OPEN`
+- #220 — https://github.com/phoenixvc/agentkit-forge/issues/220 — `OPEN`
+- #221 — https://github.com/phoenixvc/agentkit-forge/issues/221 — `OPEN`
+- #222 — https://github.com/phoenixvc/agentkit-forge/issues/222 — `OPEN`
 
 ### Phase 3 issues (CSS & HTML)
 
-- #223 — https://github.com/JustAGhosT/agentkit-forge/issues/223 — `OPEN`
-- #224 — https://github.com/JustAGhosT/agentkit-forge/issues/224 — `OPEN`
-- #225 — https://github.com/JustAGhosT/agentkit-forge/issues/225 — `OPEN`
+- #223 — https://github.com/phoenixvc/agentkit-forge/issues/223 — `OPEN`
+- #224 — https://github.com/phoenixvc/agentkit-forge/issues/224 — `OPEN`
+- #225 — https://github.com/phoenixvc/agentkit-forge/issues/225 — `OPEN`
 
 ### Current implementation alignment
 
