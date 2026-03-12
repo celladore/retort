@@ -98,6 +98,14 @@ jobs:
               return value;
             }
 
+            // Skip validation for issues not created from form templates.
+            // Form templates render fields as ### headings; CLI-created issues don't have these.
+            const hasFormFields = /### (Area|Priority)/i.test(body);
+            if (!hasFormFields) {
+              core.info(`Issue #${issue.number}: no form template fields detected — skipping validation`);
+              return;
+            }
+
             const errors = [];
 
             // Validate area (required)

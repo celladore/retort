@@ -1,0 +1,84 @@
+---
+agentkit:
+  scaffold: managed
+---
+#!/usr/bin/env bash
+# scripts/validate-documentation.sh
+# Validates that history documents meet structural requirements.
+#
+# Usage:
+#   ./scripts/validate-documentation.sh [file...]
+#
+# If no files are given, validates all markdown files under docs/history/.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HISTORY_DIR="$REPO_ROOT/docs/history"
+
+ERRORS=0
+
+validate_file() {
+  local file="$1"
+  local base
+  base="$(basename "$file")"
+
+  # Skip template and README files
+  if [[ "$base" == TEMPLATE-* || "$base" == README.md ]]; then
+    return 0
+  fi
+
+  # Validate naming convention: XXXX-YYYY-MM-DD-*-{type}.md
+  if ! [[ "$base" =~ ^[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}-.+-(implementation|bugfix|feature|migration)\.md$ ]]; then
+    echo "❌ $file"
+    echo "   Invalid filename format. Expected: XXXX-YYYY-MM-DD-[title]-[type].md"
+    ERRORS=$((ERRORS + 1))
+    return 0
+  fi
+
+  # Check that required placeholder sections have been filled in
+  if grep -q '\[YYYY-MM-DD\]' "$file"; then
+    echo "❌ $file"
+    echo "   Unfilled placeholder: [YYYY-MM-DD]"
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  if grep -q '\[#PR-Number\]' "$file"; then
+    echo "⚠️  $file"
+    echo "   Missing PR number: [#PR-Number] not replaced"
+  fi
+
+  # Check that file is non-empty beyond the title line
+  local line_count
+  line_count=$(wc -l < "$file")
+  if [[ "$line_count" -lt 10 ]]; then
+    echo "❌ $file"
+    echo "   Document too short ($line_count lines). Please fill in the template."
+    ERRORS=$((ERRORS + 1))
+  fi
+}
+
+# Determine files to validate
+if [[ $# -gt 0 ]]; then
+  FILES=("$@")
+else
+  mapfile -t FILES < <(find "$HISTORY_DIR" -name "*.md" -not -name "README.md" -not -name "TEMPLATE-*" 2>/dev/null || true)
+fi
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "ℹ️  No history documents found to validate."
+  exit 0
+fi
+
+for f in "${FILES[@]}"; do
+  validate_file "$f"
+done
+
+if [[ "$ERRORS" -gt 0 ]]; then
+  echo ""
+  echo "Found $ERRORS validation error(s)."
+  exit 1
+else
+  echo "✅ All history documents are valid."
+fi

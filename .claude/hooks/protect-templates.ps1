@@ -4,8 +4,8 @@
 # ---------------------------------------------------------------------------
 # Hook: PreToolUse (matcher: Write|Edit)
 # Purpose: Block AI writes to AgentKit Forge source files (templates, spec,
-#          engines, overlays). Changes to these files must go through a PR
-#          to the agentkit-forge repository, not be made directly by agents.
+#          engines, overlays) in DOWNSTREAM repos. In the agentkit-forge source
+#          repo itself, agents ARE the maintainers and need full access.
 # Stdin:   JSON with session_id, cwd, hook_event_name, tool_name, tool_input
 # Stdout:  JSON deny response on match, empty otherwise
 # ---------------------------------------------------------------------------
@@ -26,7 +26,25 @@ if (-not $filePath) {
     exit 0
 }
 
+# -- Source repo detection -----------------------------------------------------
+# If we are in the agentkit-forge source repo, agents are maintaining the
+# templates and engine — protection is not needed.
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$agentkitPkg = Join-Path $scriptDir '..\..\.agentkit\package.json'
+if (Test-Path $agentkitPkg) {
+    try {
+        $pkg = Get-Content $agentkitPkg -Raw | ConvertFrom-Json
+        if ($pkg.name -eq 'agentkit-forge-runtime') {
+            # This IS the agentkit-forge source repo — agents maintain these files.
+            exit 0
+        }
+    } catch {
+        # Ignore parse errors, proceed with protection
+    }
+}
+
 # -- Protected directory patterns ---------------------------------------------
+# In downstream repos, these are the upstream source-of-truth paths.
 $protectedPatterns = @(
     '\.agentkit[\\/]templates[\\/]'
     '\.agentkit[\\/]spec[\\/]'
@@ -37,7 +55,7 @@ $protectedPatterns = @(
 
 foreach ($pattern in $protectedPatterns) {
     if ($filePath -match $pattern) {
-        $reason = "Blocked: '$filePath' is an AgentKit Forge source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template."
+        $reason = "Blocked: '$filePath' is an AgentKit Forge source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run 'pnpm -C .agentkit agentkit:sync'."
         @{
             hookSpecificOutput = @{
                 hookEventName           = 'PreToolUse'

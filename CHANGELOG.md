@@ -24,18 +24,35 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Support for Claude Code, Cursor, Windsurf, Copilot, and MCP/A2A
 - Hook-based safety guardrails
 - Automated quality gates and validation
+- Area labels (`area:backend`, `area:frontend`, etc.) for issue triage
+- P0-P4 priority labels aligned across agentkit-forge and cognitive-mesh
+- Form-template detection in issue label validation (skip non-form issues)
+- Strategic Ops team (T12) for cross-project coordination and framework governance
+- Cost Ops team (T13) with 5 agent personas: Model Economist, Token Efficiency Engineer, Vendor Arbitrage Analyst, Grant Hunter, Cost Ops Monitor
+- Forge meta-team (T11) for creating and validating new agent team specifications
+- Agent/team relationship matrix analysis engine (`scripts/analyze-agents.mjs`)
+- `WebSearch` and `WebFetch` tools for cost-ops agents (ad-hoc pricing research)
+- Multi-provider infrastructure cost planning docs and web intake expansion ticket
+- Spec-compliance-auditor agent for detecting agent/spec drift
 
 ### Changed
 
-- (none yet)
+- `claude.yml` now uses `self-hosted` runner (matches all other workflows)
+- Branch protection required status checks aligned with `project.yaml`
+- Planning registry consolidated (60+ items across 12 categories)
 
 ### Fixed
 
-- (none yet)
+- Flaky discover test — replaced real repo with controlled temp fixture
+- Issue label validation applying `invalid-fields` to all CLI-created issues
+- Command injection vulnerability in `resolve-merge.sh` (fixed-string grep)
+- Stale orchestrator state reset to current branch/session
 
 ### Removed
 
-- (none yet)
+- Orphaned `pr72-ubuntu-failed.log` (empty file)
+- Empty `scripts/create-quality-issues.sh` stub
+- Duplicate `__tests__/task-types.test.mjs` (canonical copy in `.agentkit/engines/`)
 
 ---
 
