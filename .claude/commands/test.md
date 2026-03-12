@@ -3,7 +3,7 @@ description: "Runs the test suite using the detected tech stack's test command. 
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *), Bash(vitest *), Bash(jest *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -34,15 +34,15 @@ If no arguments are provided, run the full test suite.
 
 Detect the test framework in the following priority order:
 
-| Priority | Signal                                                                | Run Command              |
-| -------- | --------------------------------------------------------------------- | ------------------------ |
-| 1        | `vitest` in devDependencies or vitest config file                     | `npx vitest run`         |
-| 2        | `jest` in devDependencies or jest config file                         | `npx jest`               |
-| 3        | `test` script in `package.json`                                       | `pnpm test` / `npm test` |
-| 4        | `Cargo.toml`                                                          | `cargo test`             |
-| 5        | `*.csproj` with test framework references                             | `dotnet test`            |
-| 6        | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest`                 |
-| 7        | `go.mod`                                                              | `go test ./...`          |
+| Priority | Signal                                                                | Run Command      |
+| -------- | --------------------------------------------------------------------- | ---------------- |
+| 1        | `vitest` in devDependencies or vitest config file                     | `npx vitest run` |
+| 2        | `jest` in devDependencies or jest config file                         | `npx jest`       |
+| 3        | `test` script in `package.json`                                       | `pnpm test`      |
+| 4        | `Cargo.toml`                                                          | `cargo test`     |
+| 5        | `*.csproj` with test framework references                             | `dotnet test`    |
+| 6        | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest`         |
+| 7        | `go.mod`                                                              | `go test ./...`  |
 
 ## Scoped Test Runs
 
@@ -66,8 +66,7 @@ Detect the test framework in the following priority order:
 
 ### Monorepo Scope
 
-- **pnpm workspaces:** `pnpm --filter <scope> test`
-- **npm workspaces:** `npm test --workspace=<scope>`
+- **Workspaces:** `pnpm --filter <scope> test`
 - **Cargo workspaces:** `cargo test -p <package>`
 - **dotnet solutions:** `dotnet test <project>.csproj`
 

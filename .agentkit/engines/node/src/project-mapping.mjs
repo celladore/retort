@@ -14,6 +14,7 @@ export const PROJECT_MAPPING = [
   { src: 'stack.database', dest: 'stackDatabase', type: 'array-join' },
   { src: 'stack.search', dest: 'stackSearch', type: 'string' },
   { src: 'stack.messaging', dest: 'stackMessaging', type: 'array-join' },
+  { src: 'stack.packageManager', dest: 'packageManager', check: 'not-none' },
   { src: 'stack.nodeVersion', dest: 'nodeVersion' },
   { src: 'stack.pythonVersion', dest: 'pythonVersion' },
 

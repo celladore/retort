@@ -13,10 +13,9 @@ on:
     paths:
       - 'package.json'
       - '**/package.json'
+
       - 'pnpm-lock.yaml'
       - '**/pnpm-lock.yaml'
-      - 'yarn.lock'
-      - 'package-lock.json'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -40,33 +39,30 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: lts/*
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile 2>/dev/null || npm ci 2>/dev/null || true
+        run: pnpm install --frozen-lockfile 2>/dev/null || true
 
-      - name: Run npm audit
+      - name: Run dependency audit
         run: |
           echo "## Node.js Dependency Audit" >> $GITHUB_STEP_SUMMARY
 
-          # Write pnpm audit parser
-          cat > /tmp/parse_pnpm_audit.py <<'PY'
-          import json, sys
-          data = json.load(sys.stdin)
-          advisories = data.get('advisories', {})
-          if advisories:
-              print(f'::warning::Found {len(advisories)} vulnerability advisories')
-              for id, adv in list(advisories.items())[:10]:
-                  severity = adv.get('severity', 'unknown')
-                  title = adv.get('title', 'Unknown')
-                  module_name = adv.get('module_name', 'unknown')
-                  print(f'::warning::{severity.upper()}: {module_name} — {title}')
-          PY
-
-          # Write npm audit parser
-          cat > /tmp/parse_npm_audit.py <<'PY'
+          # Write audit output parser
+          cat > /tmp/parse_audit.py <<'PY'
           import json, sys
           try:
               data = json.load(sys.stdin)
+              # pnpm audit format
+              advisories = data.get('advisories', {})
+              if advisories:
+                  print(f'::warning::Found {len(advisories)} vulnerability advisories')
+                  for id, adv in list(advisories.items())[:10]:
+                      severity = adv.get('severity', 'unknown')
+                      title = adv.get('title', 'Unknown')
+                      module_name = adv.get('module_name', 'unknown')
+                      print(f'::warning::{severity.upper()}: {module_name} — {title}')
+              # npm audit format
               vulns = data.get('vulnerabilities', {})
               if vulns:
                   print(f'::warning::Found {len(vulns)} vulnerabilities')
@@ -77,15 +73,10 @@ jobs:
               pass
           PY
 
-          # Try pnpm audit first, fall back to npm audit
-          if command -v pnpm &>/dev/null && [ -f pnpm-lock.yaml ]; then
-            if pnpm audit --json 2>/dev/null | tee /tmp/audit.json | python3 /tmp/parse_pnpm_audit.py 2>/dev/null; then
-              echo "Audit complete — see annotations above" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "No known vulnerabilities found" >> $GITHUB_STEP_SUMMARY
-            fi
-          elif [ -f package-lock.json ]; then
-            npm audit --json 2>/dev/null | python3 /tmp/parse_npm_audit.py 2>/dev/null || echo "Audit parsing skipped" >> $GITHUB_STEP_SUMMARY
+          if pnpm audit --json 2>/dev/null | tee /tmp/audit.json | python3 /tmp/parse_audit.py 2>/dev/null; then
+            echo "Audit complete — see annotations above" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No known vulnerabilities found" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Check for new dependencies in diff
