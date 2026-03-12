@@ -112,4 +112,24 @@ describe('App', () => {
     const { lastFrame } = render(React.createElement(App, { ctx: makeCtx() }));
     expect(lastFrame()).toContain('AK');
   });
+
+  it('should show result screen with selected command before exit', async () => {
+    const { lastFrame, stdin } = render(React.createElement(App, { ctx: makeCtx() }));
+
+    // Navigate: root → Build something new
+    stdin.write('\r');
+    await waitFor(() => expect(lastFrame()).toContain('What kind of thing?'));
+
+    // Yield so ink-select-input can initialise before processing ENTER
+    await new Promise((r) => setImmediate(r));
+    await new Promise((r) => setImmediate(r));
+
+    // Select first leaf: API / backend service → triggers result screen + exit
+    stdin.write('\r');
+    await waitFor(() => {
+      const frame = lastFrame();
+      expect(frame).toContain('Run this in your Claude session');
+      expect(frame).toContain('/team-backend');
+    });
+  });
 });
