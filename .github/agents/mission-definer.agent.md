@@ -3,7 +3,7 @@ name: 'Mission Definer'
 description: 'Locks the team mission, scope, accepted task types, and handoff chain. Produces a complete team definition entry for teams.yaml with all required fields validated against the schema.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

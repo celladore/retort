@@ -3,7 +3,7 @@ name: 'check'
 description: 'Runs all quality checks for the repository: type checking, linting, formatting validation, and test suites. Returns a unified pass/fail status with detailed breakdowns per check category.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

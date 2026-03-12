@@ -68,11 +68,10 @@ function AppInner({ ctx }) {
     setResult(command);
   }
 
-  // Exit after the result screen has had time to render
+  // Exit after the result screen has rendered
   useEffect(() => {
     if (result) {
-      const timer = setTimeout(() => exit(), 200);
-      return () => clearTimeout(timer);
+      exit();
     }
   }, [result, exit]);
 
