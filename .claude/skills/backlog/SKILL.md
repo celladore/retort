@@ -3,7 +3,7 @@ name: 'backlog'
 description: 'Displays a consolidated backlog view from all sources (external tracker, discovery, healthcheck, code TODOs, review findings, manual entries). Supports filtering and multiple output formats for CLI and future UI consumption.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-10'
+last_updated: '2026-03-11'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
