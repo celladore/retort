@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-11 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-12 -->
 <!-- Format: Plain Markdown. Language/domain-specific AI assistant instructions. -->
 
 # Instructions — template-protection

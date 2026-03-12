@@ -3,7 +3,7 @@ name: 'format'
 description: 'Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

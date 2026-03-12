@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Cost centre management for cloud infrastructure. Manages budget allocations, resource group mappings, tag compliance, and spend tracking. Requires a FinOps-enabled overlay (finops rule domain). For AI session cost tracking, use /cost instead.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
