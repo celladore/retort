@@ -66,6 +66,9 @@ describe('ConversationFlow', () => {
     stdin.write(ENTER);
     await waitFor(() => expect(lastFrame()).toContain('What kind of thing?'));
 
+    // Yield so ink-select-input can initialise before processing ENTER
+    await new Promise((r) => setImmediate(r));
+    await new Promise((r) => setImmediate(r));
     stdin.write(ENTER);
     await waitFor(() => expect(lastFrame()).toContain('Got it'));
 
@@ -79,8 +82,12 @@ describe('ConversationFlow', () => {
     stdin.write(ENTER);
     await waitFor(() => expect(lastFrame()).toContain('What kind of thing?'));
 
+    // Yield so ink-select-input can initialise before processing ENTER
+    await new Promise((r) => setImmediate(r));
+    await new Promise((r) => setImmediate(r));
     stdin.write(ENTER);
-    await waitFor(() => expect(lastFrame()).toContain('Backend team handles API'));
+    await waitFor(() => expect(lastFrame()).toContain('Got it'));
+    expect(lastFrame()).toContain('Backend team handles API');
   });
 
   it('should show breadcrumbs after navigating deeper', async () => {

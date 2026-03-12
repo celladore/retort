@@ -75,10 +75,13 @@ if (!process.stdin.isTTY) {
 // Detect context (Phase 1 — silent)
 const ctx = detect();
 
-// Clean exit on signals
-const cleanup = () => process.exit(0);
+// Render interactive TUI (Phase 2 + 3)
+const inkInstance = render(React.createElement(App, { ctx }));
+
+// Clean exit on signals — unmount Ink before exiting
+const cleanup = () => {
+  inkInstance.unmount();
+  process.exit(0);
+};
 process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);
-
-// Render interactive TUI (Phase 2 + 3)
-render(React.createElement(App, { ctx }));

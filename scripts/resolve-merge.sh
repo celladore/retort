@@ -95,6 +95,8 @@ LOCKFILE_PATTERNS=(
   '.agentkit/pnpm-lock.yaml'
   'package-lock.json'
   '.agentkit/package-lock.json'
+  'yarn.lock'
+  '.agentkit/yarn.lock'
 )
 
 for lockfile in "${LOCKFILE_PATTERNS[@]}"; do

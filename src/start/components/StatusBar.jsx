@@ -18,6 +18,7 @@ const MAX_BRANCH_LENGTH = 24;
  * @param {{ ctx: import('../lib/detect.js').RepoContext }} props
  */
 export default function StatusBar({ ctx }) {
+  if (!ctx) return null;
   const forgeOk = ctx.forgeInitialised && ctx.syncRun;
 
   return (
