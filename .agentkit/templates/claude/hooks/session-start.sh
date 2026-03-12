@@ -134,7 +134,7 @@ fi
 conventions_reminder="REMINDERS:
 - Commits & PR titles MUST use Conventional Commits: type(scope): description
   Types: feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert
-- After editing .agentkit/spec/, run: pnpm -C .agentkit agentkit:sync
+- After editing .agentkit/spec/, run: {{packageManager}} -C .agentkit agentkit:sync
 - Run /check before creating a PR"
 
 # ── Compose the environment summary ─────────────────────────────────────

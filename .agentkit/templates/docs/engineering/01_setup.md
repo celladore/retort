@@ -13,7 +13,7 @@ Instructions for setting up a local development environment for {{repoName}}.
 | Tool          | Version             | Installation                         |
 | ------------- | ------------------- | ------------------------------------ |
 | Node.js       | <!-- e.g. >= 22 --> | [nodejs.org](https://nodejs.org)     |
-| pnpm          | <!-- e.g. >= 9 -->  | `npm install -g pnpm`                |
+| {{packageManager}} | <!-- e.g. >= 9 -->  | See [{{packageManager}}](https://{{packageManager}}.io) |
 | Docker        | <!-- e.g. >= 24 --> | [docker.com](https://www.docker.com) |
 | <!-- Tool --> | <!-- Version -->    | <!-- Link -->                        |
 
@@ -25,7 +25,7 @@ git clone <!-- REPO_URL -->
 cd {{repoName}}
 
 # Install dependencies
-pnpm install
+{{pmInstall}}
 
 # Set up environment variables
 cp .env.example .env
@@ -52,10 +52,10 @@ pnpm dev
 
 ```bash
 # Run the test suite
-pnpm test
+{{pmRun}} test
 
 # Check the application starts correctly
-pnpm dev
+{{pmRun}} dev
 # Visit http://localhost:3000/health
 ```
 

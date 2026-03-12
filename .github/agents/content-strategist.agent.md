@@ -3,7 +3,7 @@ name: 'Content Strategist'
 description: 'Content strategy specialist responsible for messaging, copy, documentation voice, and content architecture. Ensures clear, consistent, and audience-appropriate communication.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

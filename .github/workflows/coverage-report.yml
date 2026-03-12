@@ -48,42 +48,22 @@ jobs:
             echo "project_dir=." >> $GITHUB_OUTPUT
           fi
 
-      - name: Detect package manager
-        id: pm
-        run: |
-          if [ -f pnpm-lock.yaml ]; then
-            echo "cmd=pnpm" >> $GITHUB_OUTPUT
-          elif [ -f yarn.lock ]; then
-            echo "cmd=yarn" >> $GITHUB_OUTPUT
-          else
-            echo "cmd=npm" >> $GITHUB_OUTPUT
-          fi
-        working-directory: ${{ steps.detect.outputs.project_dir }}
-
       - name: Install dependencies
-        run: |
-          PM="${{ steps.pm.outputs.cmd }}"
-          case "$PM" in
-            pnpm) pnpm install --frozen-lockfile 2>/dev/null || true ;;
-            yarn) yarn install --frozen-lockfile 2>/dev/null || true ;;
-            *)    npm ci 2>/dev/null || npm install --no-audit --prefer-offline 2>/dev/null || true ;;
-          esac
+        run: pnpm install --frozen-lockfile 2>/dev/null || true
         working-directory: ${{ steps.detect.outputs.project_dir }}
 
       - name: Run tests with coverage
         run: |
-          PM="${{ steps.pm.outputs.cmd }}"
-
           # Try coverage script first, fall back to test with coverage flag
-          if $PM run coverage 2>/dev/null; then
+          if pnpm coverage 2>/dev/null; then
             echo "Ran dedicated coverage script"
-          elif $PM run vitest -- run --coverage 2>/dev/null; then
+          elif pnpm vitest -- run --coverage 2>/dev/null; then
             echo "Ran vitest with coverage"
-          elif $PM run jest -- --coverage 2>/dev/null; then
+          elif pnpm jest -- --coverage 2>/dev/null; then
             echo "Ran jest with coverage"
           else
             echo "::notice::No coverage runner detected — running tests without coverage"
-            $PM test || true
+            pnpm test || true
           fi
         working-directory: ${{ steps.detect.outputs.project_dir }}
 

@@ -3,7 +3,7 @@ name: 'sync-backlog'
 description: 'Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-11'
+last_updated: '2026-03-12'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

@@ -14,13 +14,14 @@
 
 # Project identity
 name: agentkit-forge # e.g. "chaufher", "phoenix", "my-api"
-githubSlug: JustAGhosT/agentkit-forge # e.g. "my-org/my-repo" — used in GitHub URLs (security advisories, etc.)
+githubSlug: phoenixvc/agentkit-forge # e.g. "my-org/my-repo" — used in GitHub URLs (security advisories, etc.)
 description: AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
 phase: active # greenfield | active | maintenance | legacy
 
 # Tech stack (auto-detected + confirmed at init)
 stack:
   languages: [javascript, yaml, markdown] # e.g. [typescript, csharp, python]
+  packageManager: pnpm # pnpm | npm | yarn — controls install/run commands and lockfile references across all generated output
   nodeVersion: lts/* # e.g. 22, 20, lts/* — used in CI setup-node
   pythonVersion: '3.12' # e.g. 3.12, 3.11 — used in CI setup-python (only when python in languages)
   frameworks:
