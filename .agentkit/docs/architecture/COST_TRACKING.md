@@ -69,7 +69,7 @@ costTracking:
 
 Each log entry is a JSON line (JSONL format) written to a date-stamped file:
 
-```
+```text
 .agentkit/logs/usage-2025-01-15.jsonl
 ```
 
@@ -168,7 +168,7 @@ Each session records:
 
 Session summaries are written to:
 
-```
+```text
 .agentkit/logs/sessions/session-<sessionId>.json
 ```
 

@@ -52,7 +52,7 @@ workflows, natural language commands, and integrated code review.
 
 ### Directory Structure Example
 
-```
+```text
 project/
   AGENTS.md                # Project-wide rules (preferred)
   WARP.md                  # Legacy format (still recognized)

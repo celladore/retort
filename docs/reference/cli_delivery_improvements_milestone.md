@@ -15,8 +15,8 @@ repositories that have integrated AgentKit Forge.
 
 ## Issues in this Milestone
 
-| #                                                               | Title                                                                                           | Status | PRD / Spec                                          |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------- |
+| #                                                              | Title                                                                                           | Status | PRD / Spec                                          |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------- |
 | [#196](https://github.com/phoenixvc/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain availability (gh, az, etc.)              | Open   | N/A                                                 |
 | [#194](https://github.com/phoenixvc/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR (blocking) and post-commit (non-blocking) for adopters | Open   | N/A                                                 |
 | [#258](https://github.com/phoenixvc/agentkit-forge/issues/258) | feat(cli): implement autoupdate functionality for repositories adopting AgentKit Forge          | Open   | [PRD-007](../product/PRD-007-adopter-autoupdate.md) |

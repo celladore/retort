@@ -144,7 +144,7 @@ The `sync` command generated several directories and files in your repository ro
 
 The `docs/` directory follows a standardized 8-category layout:
 
-```
+```text
 docs/
   product/           Product requirements, user stories, roadmap, personas
   architecture/      Specs, system overview, architecture decision records (ADRs)
@@ -166,7 +166,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ### 1. Discover Your Codebase
 
-```
+```text
 /discover
 ```
 
@@ -174,9 +174,9 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 **What you get:** An `AGENT_TEAMS.md` file in your repository root with a repository profile, team assignments tailored to your actual codebase, a folder map, and a list of detected issues.
 
-**Example output:**
+#### Example output:
 
-```
+```text
 ## Repository Profile
 - Primary stack: TypeScript + React + Node.js
 - Build system: pnpm + Turborepo
@@ -196,7 +196,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ### 2. Run a Health Check
 
-```
+```text
 /healthcheck
 ```
 
@@ -204,9 +204,9 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 **What you get:** A structured report showing pass/fail status for each check, with an overall health verdict of HEALTHY, DEGRADED, or BROKEN.
 
-**Example output:**
+#### Example output:
 
-```
+```text
 ## Healthcheck Report
 
 | Check        | Status | Duration | Details              |
@@ -223,7 +223,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ### 3. Plan Your Work
 
-```
+```text
 /plan Add user authentication with JWT tokens
 ```
 
@@ -233,7 +233,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ### 4. See Recommended Actions
 
-```
+```text
 /orchestrate --assess-only
 ```
 
@@ -243,7 +243,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 ### 5. Start Working
 
-```
+```text
 /orchestrate Add user authentication
 ```
 

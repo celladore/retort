@@ -105,20 +105,20 @@ the "cheapest" option depends on team size, usage intensity, and required featur
 
 ### Justification — AI-Native IDEs
 
-**Cursor (68/100)**
+#### Cursor (68/100)
 
 - Free Tier: 6 — 2,000 completions/mo is usable but runs out fast for active developers [C1]
 - Individual: 7 — $20/mo is standard for the category; strong feature set [C1]
 - Team: 6 — $40/mo/seat is the highest in category; justified by features [C1]
 - Predictability: 8 — Fixed subscription, no usage surprises [C1]
 
-**Windsurf (73/100)**
+#### Windsurf (73/100)
 
 - Free Tier: 7 — More generous trial than Cursor [C2]
 - Individual: 8 — $15/mo undercuts Cursor while matching core features [C2]
 - Team: 7 — $30/mo/seat is competitive for the tier [C2]
 
-**Warp (69/100)**
+#### Warp (69/100)
 
 - Free Tier: 7 — Decent free tier for terminal + AI usage [C3]
 - Individual: 7 — $15/mo with AI features included [C3]
@@ -141,36 +141,36 @@ the "cheapest" option depends on team size, usage intensity, and required featur
 
 ### Justification — IDE Extensions
 
-**GitHub Copilot (72/100)**
+#### GitHub Copilot (72/100)
 
 - Free Tier: 4 — No meaningful free tier (education/OSS exceptions) [C4]
 - Individual: 8 — $10/mo is the lowest fixed-price option in IDE extensions [C4]
 - Predictability: 9 — Fixed subscription, no API key management [C4]
 - Enterprise: 8 — Strong admin controls, audit logs, policy management [C4]
 
-**Cline (80/100)**
+#### Cline (80/100)
 
 - Free Tier: 10 — Fully free and open-source; unlimited use [C5]
 - Individual: 9 — $0 tool cost; only API costs (~$5–30/mo typical) [C5]
 - Predictability: 5 — BYOK means variable API costs; power users can spike [C5]
 
-**Roo Code (80/100)**
+#### Roo Code (80/100)
 
 - Same economics as Cline (open-source fork, BYOK model) [C6]
 
-**Continue (76/100)**
+#### Continue (76/100)
 
 - Free Tier: 10 — Open-source, unlimited local use [C7]
 - Team: 7 — Hub/Mission Control adds cost for managed rules [C7]
 - Predictability: 5 — BYOK variability for API costs [C7]
 
-**Sourcegraph Cody (80/100)**
+#### Sourcegraph Cody (80/100)
 
 - Free Tier: 7 — Generous free tier with limited completions [C8]
 - Individual: 9 — Free for individual use; $9/mo Pro adds features [C8]
 - Enterprise: 7 — Requires Sourcegraph instance for full code graph [C8]
 
-**Amazon Q Developer (79/100)**
+#### Amazon Q Developer (79/100)
 
 - Free Tier: 7 — Free tier included with AWS account [C9]
 - Individual: 9 — Free tier is very usable; $19/mo Pro for power use [C9]
@@ -193,37 +193,37 @@ the "cheapest" option depends on team size, usage intensity, and required featur
 
 ### Justification — CLI Agents
 
-**Claude Code (64/100)**
+#### Claude Code (64/100)
 
 - Free Tier: 5 — Limited free usage; quickly requires Pro subscription [C10]
 - Individual: 7 — $20/mo (Pro) provides good value for the best-in-class agent [C10]
 - Team: 6 — $30/mo/seat is premium; justified by capability but costly at scale [C10]
 - Predictability: 7 — Subscription-based but usage caps can force tier upgrades [C10]
 
-**OpenAI Codex (59/100)**
+#### OpenAI Codex (59/100)
 
 - Free Tier: 4 — No meaningful free Codex access [C11]
 - Individual: 6 — $20/mo (Plus) with limited Codex; $200/mo (Pro) for full [C11]
 - Predictability: 6 — Tiered usage limits; Pro is expensive [C11]
 
-**Gemini CLI (83/100)**
+#### Gemini CLI (83/100)
 
 - Free Tier: 9 — Very generous free tier with high rate limits [C12]
 - Individual: 9 — Excellent value; free tier covers most individual needs [C12]
 - Predictability: 8 — Google's free tier is stable and well-documented [C12]
 
-**Aider (80/100)**
+#### Aider (80/100)
 
 - Free Tier: 10 — Fully open-source, unlimited use [C13]
 - Individual: 9 — $0 tool cost; only API costs [C13]
 - Predictability: 5 — BYOK cost variability [C13]
 
-**Amp (79/100)**
+#### Amp (79/100)
 
 - Free Tier: 8 — Generous free tier [C14]
 - Individual: 9 — Free for most use cases [C14]
 
-**OpenCode (79/100)**
+#### OpenCode (79/100)
 
 - Free Tier: 10 — Fully open-source [C15]
 - Individual: 10 — $0 tool cost [C15]
@@ -246,24 +246,24 @@ the "cheapest" option depends on team size, usage intensity, and required featur
 
 ### Justification — Cloud / Autonomous Agents
 
-**Google Jules (62/100)**
+#### Google Jules (62/100)
 
 - Free Tier: 6 — Included with Gemini; limited task quota [C16]
 - Individual: 7 — Reasonable if already on a Gemini plan [C16]
 - Predictability: 7 — Task-based; usage is somewhat predictable [C16]
 
-**Factory (38/100)**
+#### Factory (38/100)
 
 - Free Tier: 2 — No free tier; enterprise sales-driven [C17]
 - Individual: 3 — Not available for individuals [C17]
 - Predictability: 4 — Custom pricing; difficult to budget upfront [C17]
 
-**Codex Cloud (51/100)**
+#### Codex Cloud (51/100)
 
 - Same subscription as Codex CLI but cloud tasks consume more [C11]
 - Pro tier ($200/mo) needed for meaningful autonomous usage [C11]
 
-**Copilot Coding Agent (67/100)**
+#### Copilot Coding Agent (67/100)
 
 - Free Tier: 4 — Requires Copilot subscription [C4]
 - Individual: 7 — Included in $10/mo Copilot Individual for limited use [C4]

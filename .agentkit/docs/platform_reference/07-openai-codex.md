@@ -50,7 +50,7 @@ discovery and a TOML-based configuration system.
 
 ### Skill Structure
 
-```
+```text
 .codex/skills/my-custom-skill/
 ├── SKILL.md         # Metadata + instructions (required)
 ├── scripts/         # Optional: agent-invokable scripts

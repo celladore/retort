@@ -142,12 +142,12 @@ The following gaps were filled as part of this audit:
 
 The following items from the initial audit's "remaining recommendations" have also been addressed:
 
-7. **Updated `STATE_AND_SESSIONS.md`** — Added concrete `orchestrator.json` example (full JSON with all fields) and expanded `events.log` with 14 example entries covering all event action types, plus an event action types reference table
-8. **Updated `MCP_A2A_GUIDE.md`** — Added full JSON payload examples for all 4 A2A message types (`delegate`, `report`, `query`, `broadcast`)
-9. **Updated `ONBOARDING.md`** — Added GitLab CI and Azure Pipelines configuration examples alongside the existing GitHub Actions example
-10. **Updated `QUICK_START.md`** — Reconciled command count from "24" to "29" (added task management and diagnostic commands), updated team command table to match `teams.yaml` (replaced outdated team names)
-11. **Updated `COST_TRACKING.md`** — Added implementation status callouts to Token Usage Logging and Budget Alerts sections, split log format examples into implemented vs roadmap fields
-12. **Updated `WORKFLOWS.md`** — Added 3 new workflow scenarios: Code Refactoring (Scenario 5), Security Hardening (Scenario 6), and Dependency Upgrade (Scenario 7)
+1. **Updated `STATE_AND_SESSIONS.md`** — Added concrete `orchestrator.json` example (full JSON with all fields) and expanded `events.log` with 14 example entries covering all event action types, plus an event action types reference table
+2. **Updated `MCP_A2A_GUIDE.md`** — Added full JSON payload examples for all 4 A2A message types (`delegate`, `report`, `query`, `broadcast`)
+3. **Updated `ONBOARDING.md`** — Added GitLab CI and Azure Pipelines configuration examples alongside the existing GitHub Actions example
+4. **Updated `QUICK_START.md`** — Reconciled command count from "24" to "29" (added task management and diagnostic commands), updated team command table to match `teams.yaml` (replaced outdated team names)
+5. **Updated `COST_TRACKING.md`** — Added implementation status callouts to Token Usage Logging and Budget Alerts sections, split log format examples into implemented vs roadmap fields
+6. **Updated `WORKFLOWS.md`** — Added 3 new workflow scenarios: Code Refactoring (Scenario 5), Security Hardening (Scenario 6), and Dependency Upgrade (Scenario 7)
 
 ---
 
@@ -155,11 +155,11 @@ The following items from the initial audit's "remaining recommendations" have al
 
 A comprehensive analysis of 7 active branches identified 6 new commands, 2 new agents, and 3 new systems that will need documentation when merged. Rather than waiting for merge, the following preemptive documentation has been added:
 
-13. **Updated `COMMAND_REFERENCE.md`** — Added "Incoming Commands" section documenting `/infra-eval`, `/brand`, `/feature-configure`, `/feature-flow`, `/feature-review`, and `/review --focus=retrospective` with full flags, descriptions, and integration notes. Also documented the merge conflict resolution system and CI/CD audit.
-14. **Updated `AGENTS_REFERENCE.md`** — Added "Incoming Agents" section documenting `retrospective-analyst` (operations) and `feature-ops` (new feature-management category) with roles, scopes, and responsibilities.
-15. **Updated `AGENTS_VS_TEAMS.md`** — Added "Incoming Agents" section with merge instructions for updating agent counts and category tables.
-16. **Updated `QUICK_START.md`** — Added "Coming Soon" table listing all 6 incoming commands with their source branches.
-17. **Updated `WORKFLOWS.md`** — Added 4 new workflow scenarios: Infrastructure Fitness Evaluation (Scenario 8), Feature Management Setup (Scenario 9), Session Retrospective (Scenario 10), Brand & Editor Theme Setup (Scenario 11).
+1. **Updated `COMMAND_REFERENCE.md`** — Added "Incoming Commands" section documenting `/infra-eval`, `/brand`, `/feature-configure`, `/feature-flow`, `/feature-review`, and `/review --focus=retrospective` with full flags, descriptions, and integration notes. Also documented the merge conflict resolution system and CI/CD audit.
+2. **Updated `AGENTS_REFERENCE.md`** — Added "Incoming Agents" section documenting `retrospective-analyst` (operations) and `feature-ops` (new feature-management category) with roles, scopes, and responsibilities.
+3. **Updated `AGENTS_VS_TEAMS.md`** — Added "Incoming Agents" section with merge instructions for updating agent counts and category tables.
+4. **Updated `QUICK_START.md`** — Added "Coming Soon" table listing all 6 incoming commands with their source branches.
+5. **Updated `WORKFLOWS.md`** — Added 4 new workflow scenarios: Infrastructure Fitness Evaluation (Scenario 8), Feature Management Setup (Scenario 9), Session Retrospective (Scenario 10), Brand & Editor Theme Setup (Scenario 11).
 
 ### Branch-by-Branch Impact Summary
 

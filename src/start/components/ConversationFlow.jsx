@@ -73,8 +73,12 @@ export default function ConversationFlow({ ctx, onSelect }) {
 
           <Box flexDirection="column">
             <Text>
-              <Text color="white" bold>Suggested command: </Text>
-              <Text color="cyan" bold>{selected.command}</Text>
+              <Text color="white" bold>
+                Suggested command:{' '}
+              </Text>
+              <Text color="cyan" bold>
+                {selected.command}
+              </Text>
             </Text>
             {selected.hint && (
               <Text color="gray" dimColor>

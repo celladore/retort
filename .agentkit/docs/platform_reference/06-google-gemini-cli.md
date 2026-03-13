@@ -51,7 +51,7 @@ global, and environment-level settings.
 
 ### Configuration Hierarchy
 
-```
+```text
 Priority (highest to lowest):
 1. Command-line arguments
 2. Environment variables ($GEMINI_API_KEY, etc.)

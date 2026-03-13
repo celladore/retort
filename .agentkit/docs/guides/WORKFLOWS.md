@@ -42,20 +42,20 @@ Use this flow for medium-to-large features that touch multiple parts of the code
 
 #### Step 1: Discover the Codebase
 
-```
+```text
 /discover
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Scans the entire repository for languages, frameworks, build tools, and folder structure
 - Detects Node.js and Express (or whatever framework is present)
 - Identifies existing test frameworks (Vitest, Jest, etc.)
 - Creates or updates `AGENT_TEAMS.md` with team assignments based on your actual code
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Repository Profile
 - Primary stack: TypeScript + Express + Node.js
 - Build system: pnpm
@@ -83,19 +83,19 @@ Use this flow for medium-to-large features that touch multiple parts of the code
 
 #### Step 2: Plan the Implementation
 
-```
+```text
 /plan Add JWT-based user authentication with login and registration endpoints, password hashing with bcrypt, and a React login form
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reads the codebase to understand existing patterns (routing style, middleware conventions, database layer)
 - Produces a structured plan with: goal, assumptions, ordered implementation steps, file touch list, validation commands, rollback plan, and risks
 - Does NOT write any code -- planning only
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## 1. Goal
 Add JWT-based authentication with login (POST /api/auth/login) and registration
 (POST /api/auth/register) endpoints, bcrypt password hashing, and a React login form.
@@ -151,11 +151,11 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 
 #### Step 3: Implement the Backend
 
-```
+```text
 /team-backend Implement auth service, login and registration endpoints, and JWT middleware per the plan above
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reads the plan and the relevant source files
 - Creates the auth service with password hashing and token generation
@@ -165,9 +165,9 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 - Runs the quality gate (format, lint, typecheck, test) on changed files
 - Stays within the backend scope -- does not touch frontend files
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Backend Report
 
 **Items Completed:** 3
@@ -198,11 +198,11 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 
 #### Step 4: Implement the Frontend
 
-```
+```text
 /team-frontend Implement login and registration forms that connect to the auth API endpoints
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reads the API endpoints created by the backend team
 - Creates React components for Login and Registration pages
@@ -211,9 +211,9 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 - Adds tests for the new components
 - Runs the quality gate on frontend files
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Frontend Report
 
 **Items Completed:** 2
@@ -241,19 +241,19 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 
 #### Step 5: Run Quality Gates
 
-```
+```text
 /check
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Runs the full quality gate across the entire project (not just the files changed by one team)
 - Executes in order: format check, lint, typecheck, unit tests, build
 - Reports any issues, including cross-team integration problems that individual team checks might miss
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Quality Gate Results
 
 | Step      | Status | Duration | Details              |
@@ -273,20 +273,20 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 
 #### Step 6: Code Review
 
-```
+```text
 /review
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Diffs all changes since the orchestration began
 - Reviews every changed file against six criteria: correctness, security, performance, tests and coverage, documentation and readability, compatibility and standards
 - Classifies findings by severity: CRITICAL, HIGH, MEDIUM, LOW
 - Produces a verdict: APPROVE, REQUEST_CHANGES, or NEEDS_DISCUSSION
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Code Review
 
 **Reviewed:** 12 files changed
@@ -316,20 +316,20 @@ correct, passwords are properly hashed with bcrypt, and test coverage is thoroug
 
 #### Step 7: Document and Hand Off
 
-```
+```text
 /handoff
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Collects the current state: git branch, last commit, orchestrator state, events log
 - Writes a structured handoff document with: what was done, current blockers, next 3 actions, validation commands, and open risks
 - Saves the handoff to `docs/ai_handoffs/` (if the directory exists)
 - Logs the handoff event to `.claude/state/events.log`
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 # Session Handoff
 
 **Date:** 2026-02-23T14:30:00Z
@@ -362,7 +362,7 @@ correct, passwords are properly hashed with bcrypt, and test coverage is thoroug
 
 ### Summary of Commands Used
 
-```
+```text
 /discover            Understand the codebase
 /plan                Design the implementation
 /team-backend        Implement server-side auth
@@ -390,11 +390,11 @@ Use this flow for focused bug fixes where you already know the symptom. The emph
 
 #### Step 1: Discover the Stack (If Needed)
 
-```
+```text
 /discover
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Scans the repository for database-related files, connection configuration, and ORM setup
 - Identifies the database stack (PostgreSQL + Prisma, MySQL + Knex, etc.)
@@ -410,14 +410,14 @@ Use this flow for focused bug fixes where you already know the symptom. The emph
 
 Tell the AI what you know about the bug:
 
-```
+```text
 The application throws "Error: Connection terminated unexpectedly" under load.
 This happens intermittently on the POST /api/orders endpoint. The database is
 PostgreSQL and we use Prisma. Please investigate the connection handling,
 pool configuration, and any timeout settings.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reads the database configuration files (Prisma schema, environment variables, connection string format)
 - Examines the connection pool settings
@@ -425,9 +425,9 @@ pool configuration, and any timeout settings.
 - Reviews error handling in the affected endpoint
 - Reports findings with specific file and line references
 
-**Expected findings:**
+#### Expected findings:
 
-```
+```text
 Investigation Results:
 
 1. Connection pool is using default Prisma settings (connection_limit not set).
@@ -450,7 +450,7 @@ Investigation Results:
 
 Based on the investigation, implement the fix directly. You can use a team command or just describe what to do:
 
-```
+```text
 Fix the database connection timeout issue:
 1. Add connection_limit=10 and pool_timeout=10 to the Prisma datasource URL
 2. Wrap the transaction in POST /api/orders with proper try/catch/finally
@@ -458,7 +458,7 @@ Fix the database connection timeout issue:
 3. Add a connect_timeout=5 parameter to the DATABASE_URL
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Makes minimal, targeted changes to fix the specific issue
 - Updates the Prisma configuration with pool settings
@@ -469,19 +469,19 @@ Fix the database connection timeout issue:
 
 #### Step 4: Quick Validation
 
-```
+```text
 /check --fast
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Runs format, lint, and typecheck only (skips the full build to save time)
 - The `--fast` flag is designed for quick iterations during bug fixes
 - Confirms the fix compiles and passes static analysis
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Quality Gate Results
 
 | Step      | Status  | Duration | Details             |
@@ -497,7 +497,7 @@ Fix the database connection timeout issue:
 
 Then run the full check to make sure nothing else broke:
 
-```
+```text
 /check
 ```
 
@@ -505,20 +505,20 @@ Then run the full check to make sure nothing else broke:
 
 #### Step 5: Review for Regressions
 
-```
+```text
 /review
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Diffs the changes you just made
 - Checks specifically for regressions: did the fix break any existing behavior?
 - Verifies the fix actually addresses the root cause (not just the symptom)
 - Checks for security implications of the changes
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Code Review
 
 **Reviewed:** 3 files changed
@@ -541,7 +541,7 @@ backwards-compatible. Transaction error handling now properly releases connectio
 
 ### Summary of Commands Used
 
-```
+```text
 /discover            Understand the database stack (optional if recent)
 (investigate)        Manual investigation with AI assistance
 (fix)                Implement the targeted fix
@@ -552,7 +552,7 @@ backwards-compatible. Transaction error handling now properly releases connectio
 
 Total time: 5-10 minutes for a focused bug fix.
 
-**Tips for fast bug fixes:**
+#### Tips for fast bug fixes:
 
 - Skip `/discover` if you already have a recent `AGENT_TEAMS.md`
 - Use `/check --fast` for quick iterations while developing the fix
@@ -575,28 +575,29 @@ Use this flow when you need a thorough understanding of a project's health, qual
 
 #### Step 1: Run the Project Review
 
-```
+```text
 /project-review
 ```
 
-**What the AI does:**
+#### What the AI does
+
 The `/project-review` command runs a comprehensive multi-phase analysis of the entire project. It combines several checks into a single, structured assessment:
 
-**Phase A -- Discovery and Inventory:**
+#### Phase A -- Discovery and Inventory:
 
 - Full codebase scan (same as `/discover`)
 - Technology stack identification
 - Dependency inventory with version currency
 - Folder structure mapping
 
-**Phase B -- Health Validation:**
+#### Phase B -- Health Validation:
 
 - Build status (same as `/healthcheck`)
 - Test suite status and coverage
 - Lint and typecheck status
 - Dependency vulnerability scan
 
-**Phase C -- Code Quality Assessment:**
+#### Phase C -- Code Quality Assessment:
 
 - Architecture pattern analysis
 - Code duplication detection
@@ -604,16 +605,16 @@ The `/project-review` command runs a comprehensive multi-phase analysis of the e
 - Test quality evaluation
 - Documentation coverage
 
-**Phase D -- Security Review:**
+#### Phase D -- Security Review:
 
 - OWASP top 10 check (same as `/security`)
 - Hardcoded secrets scan
 - Dependency vulnerability audit
 - Authentication flow review
 
-**Expected output -- Findings Table:**
+#### Expected output -- Findings Table:
 
-```
+```text
 ## Project Review: my-project
 
 ### Executive Summary
@@ -658,12 +659,12 @@ but there are 3 high-severity security findings and significant lint debt.
 
 Review the findings table and decide which items to address first. The project review already suggests a priority order, but you may want to adjust based on business context:
 
-```
+```text
 Let's focus on the top 3 items: the SQL injection, the hardcoded JWT secret,
 and the missing payment tests. Deprioritize the lint debt for now.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Acknowledges the priority adjustment
 - Focuses subsequent planning on the selected items
@@ -673,20 +674,20 @@ and the missing payment tests. Deprioritize the lint debt for now.
 
 #### Step 3: Plan the Fixes
 
-```
+```text
 /plan Fix the top 3 findings from the project review: SQL injection in user search, hardcoded JWT secret, and missing payment processing tests
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Creates a structured implementation plan for each finding
 - Orders the steps by dependency (security fixes first, then tests)
 - Identifies the specific files and lines to change
 - Provides validation commands for each fix
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## 1. Goal
 Fix 3 high-priority findings from the project review: SQL injection, hardcoded
 secret, and missing test coverage for payment processing.
@@ -716,11 +717,11 @@ secret, and missing test coverage for payment processing.
 
 From here, you can either delegate to teams or fix manually:
 
-```
+```text
 /orchestrate Fix the SQL injection, hardcoded JWT secret, and add payment tests per the plan
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Enters the 5-phase lifecycle starting from Implementation (since discovery and planning are done)
 - Delegates the security fixes to the relevant team
@@ -734,7 +735,7 @@ From here, you can either delegate to teams or fix manually:
 
 ### Summary of Commands Used
 
-```
+```text
 /project-review      Comprehensive multi-phase audit
 (prioritize)         Review findings and set priorities
 /plan                Create implementation plan for top items
@@ -744,7 +745,7 @@ From here, you can either delegate to teams or fix manually:
 
 Total time: 20-40 minutes for the full assessment, plus implementation time for fixes.
 
-**Tips for project assessments:**
+#### Tips for project assessments:
 
 - Run `/project-review` with a fresh eye -- do not assume you know what it will find
 - Share the findings table with your team. It is a useful conversation starter about technical debt
@@ -775,20 +776,20 @@ Use this flow whenever you are starting a new Claude Code session and there is p
 
 When you start a new session, the first thing to do is find and read the most recent handoff document:
 
-```
+```text
 Read the most recent handoff document from docs/ai_handoffs/ and
 summarize where we left off.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Lists files in the `docs/ai_handoffs/` directory
 - Reads the most recent handoff (sorted by date)
 - Summarizes the key information: what was done, what is blocked, and what the next actions are
 
-**Expected handoff content:**
+#### Expected handoff content:
 
-```
+```text
 # Session Handoff
 
 **Date:** 2026-02-22T17:45:00Z
@@ -827,20 +828,20 @@ summarize where we left off.
 
 #### Step 2: Check Orchestrator State
 
-```
+```text
 /orchestrate --status
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reads `.claude/state/orchestrator.json`
 - Reads the recent entries from `.claude/state/events.log`
 - Reports the current phase, active teams, completed work, and pending items
 - Does NOT make any changes -- this is read-only
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Orchestrator Status
 
 **Current Phase:** 3 (Implementation)
@@ -889,11 +890,11 @@ You can now pick up exactly where the previous session left off.
 
 #### Step 4: Continue the Work
 
-```
+```text
 /team-frontend Build the NotificationBell and NotificationList components, and the WebSocket client hook for real-time notification updates. The backend API is already complete -- see src/api/notifications.ts for the endpoints.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reads the handoff and orchestrator state for full context
 - Reads the backend API endpoints to understand the contract
@@ -902,9 +903,9 @@ You can now pick up exactly where the previous session left off.
 - Writes tests for all new components
 - Runs the quality gate on changed files
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Frontend Report
 
 **Items Completed:** 3
@@ -939,31 +940,31 @@ You can now pick up exactly where the previous session left off.
 
 Now that implementation is complete, move through validation and ship:
 
-```
+```text
 /check
 ```
 
 Run the full quality gate across the entire project.
 
-```
+```text
 /review
 ```
 
 Review all changes made across both sessions (backend + frontend).
 
-```
+```text
 /handoff --save
 ```
 
-**What the AI does with `--save`:**
+#### What the AI does with `--save`:
 
 - Writes the handoff document to console AND to `docs/ai_handoffs/`
 - Updates the orchestrator state to Phase 5 (Ship)
 - Logs the session completion to events.log
 
-**Expected handoff:**
+#### Expected handoff:
 
-```
+```text
 # Session Handoff
 
 **Date:** 2026-02-23T10:30:00Z
@@ -994,7 +995,7 @@ Review all changes made across both sessions (backend + frontend).
 
 AgentKit Forge uses three mechanisms to maintain continuity between sessions:
 
-**1. Orchestrator State (`.claude/state/orchestrator.json`)**
+#### 1. Orchestrator State (`.claude/state/orchestrator.json`)
 
 This JSON file tracks:
 
@@ -1005,11 +1006,11 @@ This JSON file tracks:
 
 The orchestrator reads this file at the start of every session and updates it after every significant action.
 
-**2. Events Log (`.claude/state/events.log`)**
+#### 2. Events Log (`.claude/state/events.log`)
 
 A chronological log of every significant action:
 
-```
+```json
 [2026-02-22T14:00:00Z] [DISCOVERY] [ORCHESTRATOR] Discovery complete. Stacks: TypeScript, React. Build: pnpm. Tests: Vitest. Issues: 0.
 [2026-02-22T14:15:00Z] [PLAN] [PLANNER] Plan created for: "Add notification system". Steps: 8. Files: 12.
 [2026-02-22T17:45:00Z] [TEAM] [T1] Completed 3 items. Changes: 5 files. Tests: 12 added. Gate: PASS.
@@ -1018,7 +1019,7 @@ A chronological log of every significant action:
 [2026-02-23T10:30:00Z] [HANDOFF] [ORCHESTRATOR] Session complete. Done: 3 items. Blockers: 0. Next: "Create PR".
 ```
 
-**3. Handoff Documents (`docs/ai_handoffs/`)**
+#### 3. Handoff Documents (`docs/ai_handoffs/`)
 
 Human-readable markdown files with structured summaries. These serve as the "cold start" document: anyone (human or AI) should be able to read a handoff and start working within 2 minutes.
 
@@ -1026,7 +1027,7 @@ Human-readable markdown files with structured summaries. These serve as the "col
 
 ### Summary of Commands Used
 
-```
+```text
 (read handoff)           Read the previous session's handoff document
 /orchestrate --status    Check where the orchestrator left off
 /team-frontend           Continue implementation from where it stopped
@@ -1037,7 +1038,7 @@ Human-readable markdown files with structured summaries. These serve as the "col
 
 Total time: 10-15 minutes for the continuation session.
 
-**Tips for multi-session work:**
+#### Tips for multi-session work:
 
 - Always run `/handoff` at the end of every session. Even if you plan to continue immediately, the handoff is your safety net
 - Read the handoff BEFORE checking orchestrator state. The handoff is written for humans and gives you context faster
@@ -1062,13 +1063,13 @@ Use this flow for refactoring tasks that improve code quality without changing b
 
 #### Step 1: Assess the Current State
 
-```
+```text
 /discover
 ```
 
 Run discovery to understand the project structure and identify dependencies on the file being refactored.
 
-```
+```text
 /check
 ```
 
@@ -1078,20 +1079,20 @@ Run a full quality gate to establish a passing baseline. Refactoring should star
 
 #### Step 2: Plan the Refactoring
 
-```
+```text
 /plan Refactor src/services/orderService.ts into smaller modules: extract payment processing, inventory management, and notification logic into separate service files. Maintain all existing behavior and test coverage.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Analyzes the existing file to identify logical boundaries
 - Maps all imports and dependents that reference `orderService`
 - Produces a plan with extraction steps, new file locations, and updated imports
 - Includes a validation strategy to confirm no behavior changes
 
-**Expected plan highlights:**
+#### Expected plan highlights:
 
-```
+```text
 ## Steps
 1. Extract payment logic into src/services/paymentService.ts
 2. Extract inventory logic into src/services/inventoryService.ts
@@ -1109,11 +1110,11 @@ Run a full quality gate to establish a passing baseline. Refactoring should star
 
 #### Step 3: Execute the Refactoring
 
-```
+```text
 /team-backend Refactor orderService.ts per the plan: extract paymentService, inventoryService, and notificationService. Update all imports. Do NOT change any test files -- all existing tests must pass as-is.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Extracts each module one at a time, running tests after each extraction
 - Updates import paths in all dependent files
@@ -1124,13 +1125,13 @@ Run a full quality gate to establish a passing baseline. Refactoring should star
 
 #### Step 4: Verify Behavior Preservation
 
-```
+```text
 /check
 ```
 
 Run the full quality gate. The key check: **all existing tests pass without modification**. If any test needed changes, the refactoring may have altered behavior.
 
-```
+```text
 /review --focus correctness
 ```
 
@@ -1140,13 +1141,13 @@ Review the changes specifically for correctness — are the extracted modules fu
 
 #### Step 5: Hand Off
 
-```
+```text
 /handoff --save --tag refactoring
 ```
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## What Was Done
 - Extracted paymentService.ts (120 lines) from orderService.ts
 - Extracted inventoryService.ts (95 lines) from orderService.ts
@@ -1164,7 +1165,7 @@ Review the changes specifically for correctness — are the extracted modules fu
 
 ### Summary of Commands Used
 
-```
+```text
 /discover            Understand the codebase structure
 /check               Establish a passing baseline
 /plan                Design the refactoring strategy
@@ -1190,11 +1191,11 @@ Use this flow when responding to security audit findings, penetration test repor
 
 #### Step 1: Run the Security Audit
 
-```
+```text
 /security
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Scans for OWASP Top 10 vulnerabilities
 - Checks dependency vulnerabilities via `npm audit` or equivalent
@@ -1202,9 +1203,9 @@ Use this flow when responding to security audit findings, penetration test repor
 - Reviews authentication and authorization flows
 - Reports findings by severity
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## Security Audit
 
 ### Findings
@@ -1222,7 +1223,7 @@ Use this flow when responding to security audit findings, penetration test repor
 
 #### Step 2: Plan the Fixes
 
-```
+```text
 /plan Fix all CRITICAL and HIGH security findings from the audit: parameterize the SQL query in search, restrict CORS to allowed origins, and add rate limiting to auth endpoints
 ```
 
@@ -1230,11 +1231,11 @@ Use this flow when responding to security audit findings, penetration test repor
 
 #### Step 3: Fix Security Issues
 
-```
+```text
 /team-security Fix the SQL injection vulnerability in src/api/search.ts, restrict CORS configuration to allowed origins, and add rate limiting to /api/auth/* endpoints
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Replaces raw SQL with parameterized queries
 - Configures CORS with an explicit allowlist read from environment variables
@@ -1246,11 +1247,11 @@ Use this flow when responding to security audit findings, penetration test repor
 
 #### Step 4: Fix Dependency Vulnerabilities
 
-```
+```text
 /security --scan-type deps --fix
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Identifies packages with known vulnerabilities
 - Upgrades to patched versions where available
@@ -1260,7 +1261,7 @@ Use this flow when responding to security audit findings, penetration test repor
 
 #### Step 5: Validate and Review
 
-```
+```text
 /check
 /review --focus security
 ```
@@ -1271,13 +1272,13 @@ Run the full quality gate, then a security-focused code review to verify the fix
 
 #### Step 6: Re-run the Security Audit
 
-```
+```text
 /security
 ```
 
 Run the security audit again to confirm all CRITICAL and HIGH findings are resolved. The output should show the remaining items are MEDIUM or LOW only.
 
-```
+```text
 /handoff --save --tag security
 ```
 
@@ -1285,7 +1286,7 @@ Run the security audit again to confirm all CRITICAL and HIGH findings are resol
 
 ### Summary of Commands Used
 
-```
+```text
 /security            Initial security audit
 /plan                Plan fixes for critical findings
 /team-security       Implement security fixes
@@ -1312,7 +1313,7 @@ Use this flow for major version upgrades of core dependencies. Minor and patch u
 
 #### Step 1: Assess Current State
 
-```
+```text
 /discover
 /healthcheck
 ```
@@ -1323,20 +1324,20 @@ Run discovery and healthcheck to establish a baseline. You need to know what is 
 
 #### Step 2: Plan the Upgrade
 
-```
+```text
 /plan Upgrade React from v18 to v19. Identify all breaking changes, deprecated APIs in use, and files that need migration. Include a rollback strategy.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reviews the changelog and migration guide for the target version
 - Scans the codebase for deprecated patterns and breaking change impacts
 - Produces a file-by-file migration plan
 - Lists specific API changes (e.g., removed hooks, changed signatures)
 
-**Expected plan highlights:**
+#### Expected plan highlights:
 
-```
+```text
 ## Breaking Changes Affecting This Project
 1. `ReactDOM.render` removed -- must use `createRoot` (4 files affected)
 2. `ReactDOM.hydrate` removed -- must use `hydrateRoot` (if SSR is used)
@@ -1366,17 +1367,17 @@ Run discovery and healthcheck to establish a baseline. You need to know what is 
 
 Option A — use the orchestrator for multi-team coordination:
 
-```
+```text
 /orchestrate Upgrade React from v18 to v19 per the plan above
 ```
 
 Option B — use a single team for a more controlled approach:
 
-```
+```text
 /team-frontend Upgrade React from v18 to v19. Start by updating package.json and running pnpm install, then migrate each breaking change one at a time, running tests after each change.
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Updates the dependency version in `package.json`
 - Applies each migration step incrementally
@@ -1388,7 +1389,7 @@ Option B — use a single team for a more controlled approach:
 
 #### Step 4: Validate Thoroughly
 
-```
+```text
 /check
 ```
 
@@ -1398,7 +1399,7 @@ Run the full quality gate. Pay special attention to:
 - **Tests:** Behavioral changes in the dependency may cause test failures
 - **Build:** New peer dependency requirements may cause build failures
 
-```
+```text
 /review --range main..HEAD
 ```
 
@@ -1414,7 +1415,7 @@ Review all changes since the upgrade started. Look for:
 
 If your project has E2E tests or a staging environment:
 
-```
+```text
 /deploy staging --dry-run
 ```
 
@@ -1424,13 +1425,13 @@ Preview what would be deployed to catch any deployment-specific issues from the 
 
 #### Step 6: Document and Hand Off
 
-```
+```text
 /handoff --save --tag dependency-upgrade
 ```
 
-**Expected output:**
+#### Expected output:
 
-```
+```text
 ## What Was Done
 - Upgraded React from 18.2.0 to 19.0.0
 - Migrated ReactDOM.render to createRoot (4 files)
@@ -1453,7 +1454,7 @@ Preview what would be deployed to catch any deployment-specific issues from the 
 
 ### Summary of Commands Used
 
-```
+```text
 /discover            Understand the codebase
 /healthcheck         Establish a passing baseline
 /plan                Plan the migration with rollback strategy
@@ -1463,7 +1464,7 @@ Preview what would be deployed to catch any deployment-specific issues from the 
 /handoff --save      Document the session
 ```
 
-**Tips for major dependency upgrades:**
+#### Tips for major dependency upgrades:
 
 - Always start from a clean, passing baseline. Run `/healthcheck` first.
 - Make changes incrementally and test after each step. Do not update everything at once.
@@ -1513,11 +1514,11 @@ evaluation:
 
 #### Step 2: Run the Evaluation
 
-```
+```text
 /infra-eval
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Scans the repository for evidence across all 8 dimensions
 - Scores each dimension on a 0–5 scale
@@ -1546,21 +1547,21 @@ Score interpretation:
 
 Any hard gate failure results in an overall FAIL regardless of dimension scores. Fix these first:
 
-```
+```text
 /team-infra --task "Address hard gate G1: implement tested backup restore"
 /check
 ```
 
 #### Step 5: Plan Remediation
 
-```
+```text
 /plan "Address top 3 risk drivers from infra-eval report"
 /orchestrate
 ```
 
 ### Command Sequence Summary
 
-```
+```text
 /infra-eval                          Full evaluation with all dimensions
 /infra-eval --gates-only             Quick check — hard gates only
 /infra-eval --focus reliability      Single dimension deep dive
@@ -1585,11 +1586,11 @@ Use this flow when onboarding a new repository, when a solo developer wants to d
 
 #### Step 1: Review Available Features
 
-```
+```text
 /feature-review
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Lists all features by category with current enabled/disabled status
 - Highlights dependency issues or conflicts
@@ -1597,15 +1598,15 @@ Use this flow when onboarding a new repository, when a solo developer wants to d
 
 #### Step 2: Choose a Preset or Customize
 
-**Option A — Apply a preset:**
+#### Option A — Apply a preset:
 
-```
+```text
 /feature-configure
 ```
 
 The AI walks you through an interactive preset selection with diff preview.
 
-**Option B — CLI direct:**
+#### Option B — CLI direct:
 
 ```bash
 agentkit features preset lean              # Solo developer, no team overhead
@@ -1620,11 +1621,11 @@ agentkit sync                              # Regenerate configs with new feature
 
 #### Step 4: Audit the Configuration
 
-```
+```text
 /feature-review --audit
 ```
 
-**What the AI does:**
+#### What the AI does
 
 - Checks that every enabled feature has corresponding generated files
 - Flags stale configurations (enabled features with missing output)
@@ -1632,11 +1633,11 @@ agentkit sync                              # Regenerate configs with new feature
 
 #### Step 5: Trace a Specific Feature (Debugging)
 
-```
+```text
 /feature-flow team-orchestration --show-output
 ```
 
-**What the AI does:**
+#### What the AI does for tracing
 
 - Shows the full resolution chain: spec definition → overlay config → template variables → generated output
 - Useful for debugging why a command or agent is missing from generated configs
@@ -1652,7 +1653,7 @@ agentkit sync                              # Regenerate configs with new feature
 
 ### Command Sequence Summary
 
-```
+```text
 /feature-review                       Audit current feature state
 /feature-configure --preset standard  Apply a preset
 /feature-configure --toggle <name>    Enable/disable individual features
@@ -1683,11 +1684,11 @@ Finish whatever task you were working on. The retrospective works best when ther
 
 #### Step 2: Run the Retrospective
 
-```
+```text
 /review --focus=retrospective
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Reviews the full conversation history for the current session
 - Identifies issues encountered (bugs, blockers, misunderstandings, tooling failures)
@@ -1706,7 +1707,7 @@ Review the generated records and edit as needed. The sequential numbering and de
 
 #### Step 4: Optionally File External Issues
 
-```
+```text
 /review --focus=retrospective --open-issues
 ```
 
@@ -1714,7 +1715,7 @@ This files unresolved issues to your external tracker (GitHub Issues or Linear) 
 
 #### Step 5: Preview Without Writing (Dry Run)
 
-```
+```text
 /review --focus=retrospective --dry-run
 ```
 
@@ -1722,7 +1723,7 @@ Shows what would be captured without writing any files.
 
 ### Command Sequence Summary
 
-```
+```text
 /review --focus=retrospective              Full retrospective capture
 /review --focus=retrospective --dry-run    Preview without writing files
 /review --focus=retrospective --open-issues File unresolved issues to tracker
@@ -1746,11 +1747,11 @@ Use this flow when you want consistent visual identity in your editor workspace,
 
 #### Step 1: Scaffold Brand Files
 
-```
+```text
 /brand --init
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Creates `.agentkit/spec/brand.yaml` with a template brand identity
 - Creates `.agentkit/spec/editor-theme.yaml` with default color mappings
@@ -1767,13 +1768,13 @@ Edit `.agentkit/spec/brand.yaml` with your brand's colors, fonts, and identity a
 
 #### Step 3: Validate and Preview
 
-```
+```text
 /brand --validate
 /brand --palette
 /brand --contrast
 ```
 
-**What the AI does:**
+#### What the AI does:
 
 - Validates required fields and color format
 - Previews the resolved color palette
@@ -1781,7 +1782,7 @@ Edit `.agentkit/spec/brand.yaml` with your brand's colors, fonts, and identity a
 
 #### Step 4: Generate Editor Themes
 
-```
+```text
 /brand --theme
 ```
 
@@ -1810,7 +1811,7 @@ cursor:
 
 ### Command Sequence Summary
 
-```
+```text
 /brand --init                    Scaffold brand.yaml with interactive prompts
 /brand --validate                Validate required fields and color format
 /brand --palette                 Preview resolved color palette

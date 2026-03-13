@@ -6,7 +6,13 @@ import { makeCtx } from '../test-utils.js';
 
 // StatusBar tests use a "discovered" baseline where forge is initialised
 const statusCtx = (overrides = {}) =>
-  makeCtx({ forgeInitialised: true, syncRun: true, discoveryDone: true, flow: 'discovered', ...overrides });
+  makeCtx({
+    forgeInitialised: true,
+    syncRun: true,
+    discoveryDone: true,
+    flow: 'discovered',
+    ...overrides,
+  });
 
 describe('StatusBar', () => {
   it('should show AK ✓ when forge is initialised and synced', () => {

@@ -33,7 +33,8 @@ export const COMMANDS = [
     desc: 'Full lifecycle — assess, plan, delegate, ship',
     category: 'workflow',
     tags: ['lifecycle', 'delegate', 'coordinate', 'master'],
-    rank: (ctx) => (ctx.discoveryDone && !ctx.hasOrchestratorState ? 90 : ctx.hasOrchestratorState ? 85 : 40),
+    rank: (ctx) =>
+      ctx.discoveryDone && !ctx.hasOrchestratorState ? 90 : ctx.hasOrchestratorState ? 85 : 40,
   },
   {
     id: '/plan',

@@ -122,7 +122,9 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
       return;
     }
     if (key.downArrow) {
-      setCursor((prev) => Math.min(commandItems.length - 1, Math.min(prev, commandItems.length - 1) + 1));
+      setCursor((prev) =>
+        Math.min(commandItems.length - 1, Math.min(prev, commandItems.length - 1) + 1)
+      );
       return;
     }
     if (key.return && commandItems[clampedCursor]) {
@@ -148,12 +150,10 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
   return (
     <Box flexDirection="column">
       {/* Search input */}
-      <Box
-        borderStyle="single"
-        borderColor="cyan"
-        paddingX={1}
-      >
-        <Text color="cyan" bold>{'> '}</Text>
+      <Box borderStyle="single" borderColor="cyan" paddingX={1}>
+        <Text color="cyan" bold>
+          {'> '}
+        </Text>
         <TextInput
           value={query}
           onChange={(val) => {
@@ -173,7 +173,9 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
         paddingX={1}
       >
         {flatList.length === 0 && (
-          <Text color="gray" dimColor>No matching commands</Text>
+          <Text color="gray" dimColor>
+            No matching commands
+          </Text>
         )}
 
         {flatList.map((item, idx) => {
@@ -194,9 +196,7 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
               <Text color={isActive ? 'cyan' : 'white'} bold={isActive}>
                 {isActive ? '❯' : ' '}
               </Text>
-              <Text color={isRecommended ? 'yellow' : 'gray'}>
-                {isRecommended ? '★' : ' '}
-              </Text>
+              <Text color={isRecommended ? 'yellow' : 'gray'}>{isRecommended ? '★' : ' '}</Text>
               <Text color={isActive ? 'cyan' : 'white'} bold={isActive}>
                 {item.id.padEnd(18)}
               </Text>
@@ -209,7 +209,7 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
 
         <Box marginTop={1}>
           <Text color="gray" dimColor>
-            ↑↓ navigate  ⏎ select  esc back  ★ = recommended
+            ↑↓ navigate ⏎ select esc back ★ = recommended
           </Text>
         </Box>
       </Box>

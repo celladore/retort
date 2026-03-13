@@ -46,7 +46,7 @@ target formats (Cursor, Claude, Copilot, Codex, Cody).
 
 ### Directory Structure Example
 
-```
+```text
 .continue/
   rules/
     typescript-standards.md

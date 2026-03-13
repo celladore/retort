@@ -79,30 +79,15 @@ function makeMinimalAgentkitRootWithPrefix({
   );
 
   // Claude command template
-  writeTestFile(
-    resolve(root, 'templates', 'root', 'AGENTS.md'),
-    '# Agents\n'
-  );
-  writeTestFile(
-    resolve(root, 'templates', 'claude', 'CLAUDE.md'),
-    '# Claude\n'
-  );
-  writeTestFile(
-    resolve(root, 'templates', 'claude', 'commands', 'build.md'),
-    '# Build Command\n'
-  );
-  writeTestFile(
-    resolve(root, 'templates', 'claude', 'commands', 'check.md'),
-    '# Check Command\n'
-  );
+  writeTestFile(resolve(root, 'templates', 'root', 'AGENTS.md'), '# Agents\n');
+  writeTestFile(resolve(root, 'templates', 'claude', 'CLAUDE.md'), '# Claude\n');
+  writeTestFile(resolve(root, 'templates', 'claude', 'commands', 'build.md'), '# Build Command\n');
+  writeTestFile(resolve(root, 'templates', 'claude', 'commands', 'check.md'), '# Check Command\n');
   writeTestFile(
     resolve(root, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
     '# Skill {{commandName}}\n'
   );
-  writeTestFile(
-    resolve(root, 'templates', 'copilot', 'copilot-instructions.md'),
-    '# Copilot\n'
-  );
+  writeTestFile(resolve(root, 'templates', 'copilot', 'copilot-instructions.md'), '# Copilot\n');
   writeTestFile(
     resolve(root, 'templates', 'copilot', 'prompts', 'TEMPLATE.prompt.md'),
     "---\nmode: 'agent'\n---\n# {{commandName}}\n"
@@ -203,51 +188,59 @@ describe('commandPrefixedName template variable', () => {
     }
   });
 
-  it('should render commandPrefixedName in skill templates when prefix is set', { timeout: 15000 }, async () => {
-    // Arrange — use a template that renders {{commandPrefixedName}}
-    agentkitRoot = makeMinimalAgentkitRootWithPrefix({
-      overlayName: 'test-repo',
-      commandPrefix: 'kits',
-    });
-    // Override the skill template to include commandPrefixedName
-    writeTestFile(
-      resolve(agentkitRoot, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
-      '# {{commandPrefixedName}}\nOriginal: {{commandName}}\n'
-    );
-    projectRoot = makeNamedTmpProject('test-repo');
+  it(
+    'should render commandPrefixedName in skill templates when prefix is set',
+    { timeout: 15000 },
+    async () => {
+      // Arrange — use a template that renders {{commandPrefixedName}}
+      agentkitRoot = makeMinimalAgentkitRootWithPrefix({
+        overlayName: 'test-repo',
+        commandPrefix: 'kits',
+      });
+      // Override the skill template to include commandPrefixedName
+      writeTestFile(
+        resolve(agentkitRoot, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
+        '# {{commandPrefixedName}}\nOriginal: {{commandName}}\n'
+      );
+      projectRoot = makeNamedTmpProject('test-repo');
 
-    // Act
-    await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
+      // Act
+      await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
 
-    // Assert
-    const content = readFileSync(
-      resolve(projectRoot, '.claude', 'skills', 'kits-build', 'SKILL.md'),
-      'utf-8'
-    );
-    expect(content).toContain('# kits-build');
-    expect(content).toContain('Original: build');
-  });
+      // Assert
+      const content = readFileSync(
+        resolve(projectRoot, '.claude', 'skills', 'kits-build', 'SKILL.md'),
+        'utf-8'
+      );
+      expect(content).toContain('# kits-build');
+      expect(content).toContain('Original: build');
+    }
+  );
 
-  it('should render commandPrefixedName as commandName when no prefix', { timeout: 15000 }, async () => {
-    agentkitRoot = makeMinimalAgentkitRootWithPrefix({
-      overlayName: 'test-repo',
-      commandPrefix: null,
-    });
-    writeTestFile(
-      resolve(agentkitRoot, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
-      '# {{commandPrefixedName}}\nOriginal: {{commandName}}\n'
-    );
-    projectRoot = makeNamedTmpProject('test-repo');
+  it(
+    'should render commandPrefixedName as commandName when no prefix',
+    { timeout: 15000 },
+    async () => {
+      agentkitRoot = makeMinimalAgentkitRootWithPrefix({
+        overlayName: 'test-repo',
+        commandPrefix: null,
+      });
+      writeTestFile(
+        resolve(agentkitRoot, 'templates', 'claude', 'skills', 'TEMPLATE', 'SKILL.md'),
+        '# {{commandPrefixedName}}\nOriginal: {{commandName}}\n'
+      );
+      projectRoot = makeNamedTmpProject('test-repo');
 
-    await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
+      await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
 
-    const content = readFileSync(
-      resolve(projectRoot, '.claude', 'skills', 'build', 'SKILL.md'),
-      'utf-8'
-    );
-    expect(content).toContain('# build');
-    expect(content).toContain('Original: build');
-  });
+      const content = readFileSync(
+        resolve(projectRoot, '.claude', 'skills', 'build', 'SKILL.md'),
+        'utf-8'
+      );
+      expect(content).toContain('# build');
+      expect(content).toContain('Original: build');
+    }
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -269,23 +262,27 @@ describe('sync with commandPrefix enabled', () => {
     }
   });
 
-  it('should place Claude commands in subdirectory when prefix is set', { timeout: 15000 }, async () => {
-    agentkitRoot = makeMinimalAgentkitRootWithPrefix({
-      overlayName: 'test-repo',
-      commandPrefix: 'kits',
-    });
-    projectRoot = makeNamedTmpProject('test-repo');
+  it(
+    'should place Claude commands in subdirectory when prefix is set',
+    { timeout: 15000 },
+    async () => {
+      agentkitRoot = makeMinimalAgentkitRootWithPrefix({
+        overlayName: 'test-repo',
+        commandPrefix: 'kits',
+      });
+      projectRoot = makeNamedTmpProject('test-repo');
 
-    await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
+      await runSync({ agentkitRoot, projectRoot, flags: { only: 'claude' } });
 
-    const files = collectFiles(projectRoot);
-    // Commands should be in kits/ subdirectory
-    expect(files).toContain('.claude/commands/kits/build.md');
-    expect(files).toContain('.claude/commands/kits/check.md');
-    // Should NOT have unprefixed commands at root
-    expect(files).not.toContain('.claude/commands/build.md');
-    expect(files).not.toContain('.claude/commands/check.md');
-  });
+      const files = collectFiles(projectRoot);
+      // Commands should be in kits/ subdirectory
+      expect(files).toContain('.claude/commands/kits/build.md');
+      expect(files).toContain('.claude/commands/kits/check.md');
+      // Should NOT have unprefixed commands at root
+      expect(files).not.toContain('.claude/commands/build.md');
+      expect(files).not.toContain('.claude/commands/check.md');
+    }
+  );
 
   it('should prefix Claude skills with filename strategy', { timeout: 15000 }, async () => {
     agentkitRoot = makeMinimalAgentkitRootWithPrefix({

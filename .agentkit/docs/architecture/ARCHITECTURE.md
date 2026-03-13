@@ -24,7 +24,7 @@ generic `.ai` configs) from a single set of YAML specifications. It provides:
 
 ## 2. Directory Structure
 
-```
+```text
 .agentkit/
   spec/                          Canonical YAML definitions (source of truth)
     teams.yaml                     Team definitions + tech stack configs
@@ -329,7 +329,7 @@ gracefully. Results are logged as orchestrator events. Flags: `--fix`, `--fast`,
 
 ## 10. Data Flow Diagram
 
-```
+```text
 +---------------------------+     +---------------------------+
 |   .agentkit/spec/*.yaml    |     | .agentkit/overlays/<repo>/ |
 |                           |     |   settings.yaml           |

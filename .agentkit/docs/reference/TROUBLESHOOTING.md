@@ -36,7 +36,7 @@ npm install -g pnpm
 
 If agentkit is included as a git submodule and files are missing or empty:
 
-**Fix:**
+#### Fix
 
 ```bash
 git submodule update --init --recursive
@@ -62,7 +62,7 @@ This copies the `__TEMPLATE__` overlay to `.agentkit/overlays/<your-repo-name>/`
 
 Template rendering failed during sync, typically due to malformed YAML in your overlay.
 
-**Fix:**
+#### Fix
 
 1. Check the YAML syntax in your overlay files. Common issues include incorrect indentation, missing colons, and unquoted special characters.
 2. Run the spec validator to identify the problem:
@@ -79,7 +79,7 @@ Template rendering failed during sync, typically due to malformed YAML in your o
 
 The orchestrator refuses to start because a lock file exists from a previous session.
 
-**Fix:**
+#### Fix
 
 ```bash
 node .agentkit/engines/node/src/cli.mjs orchestrate --force-unlock
@@ -91,7 +91,7 @@ Locks are normally auto-cleared after 30 minutes of inactivity. If you see this 
 
 The orchestrator fails to start or behaves unexpectedly because the state file contains invalid data.
 
-**Fix:**
+#### Fix
 
 1. Delete the corrupted state file:
 
@@ -159,7 +159,7 @@ Agents are running commands they should not, or are blocked from commands they n
 
 **Fix:** Check the `settings.yaml` in your overlay for the allow and deny lists:
 
-```
+```text
 .agentkit/overlays/<repoName>/settings.yaml
 ```
 

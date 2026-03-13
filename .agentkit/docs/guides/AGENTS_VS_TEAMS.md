@@ -136,7 +136,7 @@ The orchestrator does not call agents directly. It delegates to teams, and the t
 
 Invoke a team directly using its slash command:
 
-```
+```text
 /team-backend       Build or fix API endpoints and services
 /team-frontend      Build or fix UI components and client state
 /team-data          Create or modify schemas, migrations, queries
@@ -184,7 +184,7 @@ Session knowledge capture agent activated via `/review --focus=retrospective`. E
 
 Kit feature management agent that helps teams choose, configure, and audit feature presets. Activated via `/feature-configure`, `/feature-flow`, and `/feature-review`.
 
-**When these branches merge, update:**
+#### When these branches merge, update:
 
 1. The agent count heading from "19" to "21"
 2. Add a "Feature Management" category (1 agent) to the category tables

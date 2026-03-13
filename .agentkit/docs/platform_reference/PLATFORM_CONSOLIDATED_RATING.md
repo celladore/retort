@@ -74,7 +74,7 @@ Dimension scores sourced from each evaluation document, combined with weights.
 
 ### Calculation Method
 
-```
+```text
 Weighted Total = (Perf × 0.30) + (DX × 0.20) + (Cost × 0.20)
                + (Custom × 0.10) + (Privacy × 0.10) + (Enterprise × 0.10)
 ```

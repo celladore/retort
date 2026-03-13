@@ -28,10 +28,16 @@ class ErrorBoundary extends Component {
   }
   render() {
     if (this.state.error) {
-      return React.createElement(Box, { flexDirection: 'column', padding: 1 },
+      return React.createElement(
+        Box,
+        { flexDirection: 'column', padding: 1 },
         React.createElement(Text, { color: 'red', bold: true }, 'ak-start encountered an error:'),
-        React.createElement(Text, { color: 'red' }, String(this.state.error.message || this.state.error)),
-        React.createElement(Text, { color: 'gray', dimColor: true }, 'Try: ak-start --json'),
+        React.createElement(
+          Text,
+          { color: 'red' },
+          String(this.state.error.message || this.state.error)
+        ),
+        React.createElement(Text, { color: 'gray', dimColor: true }, 'Try: ak-start --json')
       );
     }
     return this.props.children;
@@ -82,9 +88,11 @@ function AppInner({ ctx }) {
         <Header mode={mode} />
 
         <Box paddingX={2} flexDirection="column" gap={1}>
-          <Text color="green" bold>→ Run this in your Claude session:</Text>
+          <Text color="green" bold>
+            → Run this in your Claude session:
+          </Text>
           <Box>
-            <Text>  </Text>
+            <Text> </Text>
             <Text color="cyan" bold backgroundColor="gray">{` ${result} `}</Text>
           </Box>
           <Text color="gray" dimColor>
@@ -105,8 +113,8 @@ function AppInner({ ctx }) {
       {ctx.flow === 'uncommitted' && (
         <Box paddingX={2}>
           <Text color="yellow">
-            ⚠ {ctx.uncommittedCount} uncommitted change{ctx.uncommittedCount === 1 ? '' : 's'} detected.
-            Consider committing or stashing before starting new work.
+            ⚠ {ctx.uncommittedCount} uncommitted change{ctx.uncommittedCount === 1 ? '' : 's'}{' '}
+            detected. Consider committing or stashing before starting new work.
           </Text>
         </Box>
       )}
@@ -116,7 +124,8 @@ function AppInner({ ctx }) {
         <Box paddingX={2}>
           <Text color="cyan">
             ↻ Active session — Phase {ctx.orchestratorPhase}: {ctx.phaseName}
-            {ctx.activeTaskCount > 0 && ` (${ctx.activeTaskCount} active task${ctx.activeTaskCount === 1 ? '' : 's'})`}
+            {ctx.activeTaskCount > 0 &&
+              ` (${ctx.activeTaskCount} active task${ctx.activeTaskCount === 1 ? '' : 's'})`}
           </Text>
         </Box>
       )}
@@ -125,7 +134,11 @@ function AppInner({ ctx }) {
       {mode === 'conversation' ? (
         <ConversationFlow ctx={ctx} onSelect={handleCommandSelected} />
       ) : (
-        <CommandPalette ctx={ctx} onSelect={handleCommandSelected} onBack={() => setMode('conversation')} />
+        <CommandPalette
+          ctx={ctx}
+          onSelect={handleCommandSelected}
+          onBack={() => setMode('conversation')}
+        />
       )}
 
       <StatusBar ctx={ctx} />
@@ -137,7 +150,9 @@ function Header({ mode }) {
   return (
     <Box flexDirection="column" paddingX={1}>
       <Box gap={1}>
-        <Text color="blue" bold>AgentKit Forge</Text>
+        <Text color="blue" bold>
+          AgentKit Forge
+        </Text>
         <Text color="gray">—</Text>
         <Text color="white">Start</Text>
       </Box>

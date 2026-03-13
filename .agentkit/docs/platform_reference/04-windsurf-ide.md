@@ -46,7 +46,7 @@ multi-step automation sequences. It supports over 70 languages out of the box.
 
 ### Directory Structure Example
 
-```
+```text
 .windsurf/
   rules/
     project.md

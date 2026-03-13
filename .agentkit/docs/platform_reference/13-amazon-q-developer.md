@@ -46,7 +46,7 @@ configuration and reads `AGENTS.md` for universal context.
 
 ### Directory Structure Example
 
-```
+```text
 .amazonq/
   config.yaml
   prompts/

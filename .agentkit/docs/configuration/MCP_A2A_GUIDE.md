@@ -36,7 +36,7 @@ during a session. Each entry maps a server name to a command and its arguments.
 }
 ```
 
-**Server descriptions:**
+#### Server descriptions:
 
 - **git** -- Provides git operations as MCP tools. Invokes the `git` binary
   directly with no additional arguments.
@@ -118,7 +118,7 @@ capabilities:
 }
 ```
 
-**Roles:**
+#### Roles:
 
 - **coordinator** -- The orchestrator agent. Delegates tasks to executor agents,
   aggregates their results, and monitors overall progress. There is exactly one
@@ -126,7 +126,7 @@ capabilities:
 - **executor** -- A team agent that performs work within its domain. Receives
   tasks from the coordinator and reports results back.
 
-**Registered agents:**
+#### Registered agents:
 
 | Agent ID        | Role        | Domain             | Capabilities                 |
 | --------------- | ----------- | ------------------ | ---------------------------- |
@@ -275,7 +275,7 @@ passing.
 
 After running `agentkit sync`, the rendered files appear at:
 
-```
+```text
 <project-root>/
   mcp/
     servers.json        # MCP server configuration
@@ -284,7 +284,7 @@ After running `agentkit sync`, the rendered files appear at:
 
 The source templates live at:
 
-```
+```text
 .agentkit/
   templates/
     mcp/

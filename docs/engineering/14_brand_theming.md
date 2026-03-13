@@ -7,15 +7,15 @@ from the brand specification.
 
 The brand spec lives at `.agentkit/spec/brand.yaml` and defines:
 
-| Section | Purpose |
-|---------|---------|
-| `identity` | Name, mission, product promise, brand attributes |
-| `colors` | Primary, secondary, semantic, neutral, dark mode colors |
-| `typography` | Font families, weights, type scale |
-| `spacing` | Base unit and scale (xs through xl) |
-| `layout` | Max width, grid, border radius, component dimensions |
-| `motion` | Animation durations and easing curves |
-| `accessibility` | WCAG standard, contrast ratios, touch targets |
+| Section         | Purpose                                                 |
+| --------------- | ------------------------------------------------------- |
+| `identity`      | Name, mission, product promise, brand attributes        |
+| `colors`        | Primary, secondary, semantic, neutral, dark mode colors |
+| `typography`    | Font families, weights, type scale                      |
+| `spacing`       | Base unit and scale (xs through xl)                     |
+| `layout`        | Max width, grid, border radius, component dimensions    |
+| `motion`        | Animation durations and easing curves                   |
+| `accessibility` | WCAG standard, contrast ratios, touch targets           |
 
 ### Color Formats
 
@@ -57,9 +57,9 @@ The mapping lives at `.agentkit/spec/editor-theme.yaml`:
 
 ```yaml
 enabled: true
-mode: both        # dark | light | both
-scheme: dark      # which mode wins on conflict
-tier: full        # full | medium | minimal
+mode: both # dark | light | both
+scheme: dark # which mode wins on conflict
+tier: full # full | medium | minimal
 outputs:
   vscode: .vscode/settings.json
   cursor: .cursor/settings.json
@@ -75,11 +75,11 @@ light:
 
 ### Brand Density Tiers
 
-| Tier | Surfaces | Slots |
-|------|----------|-------|
-| `minimal` | Title bar only | ~3 |
-| `medium` | Title bar, activity bar, status bar, sidebar | ~15 |
-| `full` | All of the above plus editor, tabs, badges, lists, buttons | ~77 |
+| Tier      | Surfaces                                                   | Slots |
+| --------- | ---------------------------------------------------------- | ----- |
+| `minimal` | Title bar only                                             | ~3    |
+| `medium`  | Title bar, activity bar, status bar, sidebar               | ~15   |
+| `full`    | All of the above plus editor, tabs, badges, lists, buttons | ~77   |
 
 ### Scaffold Mode
 
@@ -100,15 +100,17 @@ design token files from `brand.yaml`.
 ### Enabling Design Tokens
 
 1. Enable the feature in your overlay `settings.yaml`:
+
    ```yaml
    enabledFeatures:
      - design-tokens
    ```
 
 2. Optionally configure the output directory in `project.yaml`:
+
    ```yaml
    designTokens:
-     outputDir: tokens  # default
+     outputDir: tokens # default
    ```
 
 3. Run sync:
@@ -120,11 +122,11 @@ design token files from `brand.yaml`.
 
 Three files are generated in the configured output directory:
 
-| File | Format | Usage |
-|------|--------|-------|
-| `tokens.css` | CSS custom properties (`:root { --color-primary-brand: #1976D2; }`) | Web applications |
-| `tokens.json` | Flat JSON object | Build tools, Style Dictionary |
-| `tokens.scss` | SCSS variables (`$color-primary-brand: #1976D2;`) | SCSS preprocessor |
+| File          | Format                                                              | Usage                         |
+| ------------- | ------------------------------------------------------------------- | ----------------------------- |
+| `tokens.css`  | CSS custom properties (`:root { --color-primary-brand: #1976D2; }`) | Web applications              |
+| `tokens.json` | Flat JSON object                                                    | Build tools, Style Dictionary |
+| `tokens.scss` | SCSS variables (`$color-primary-brand: #1976D2;`)                   | SCSS preprocessor             |
 
 ### Token Naming Convention
 
@@ -145,26 +147,28 @@ radius-m                 → 8px
 
 ### Token Sources
 
-| Brand Section | Token Prefix | Example |
-|--------------|-------------|---------|
-| `colors.*` | `color-*` | `color-primary-brand`, `color-neutral-900` |
-| `typography.primary` | `font-primary` | `Inter` |
-| `typography.weights.*` | `font-weight-*` | `font-weight-semiBold` |
-| `typography.scale.*` | `font-size-*`, `line-height-*` | `font-size-h1` |
-| `spacing.scale.*` | `spacing-*` | `spacing-xl` |
-| `layout.radius.*` | `radius-*` | `radius-m` |
-| `layout.maxWidth` | `layout-max-width` | `1200px` |
+| Brand Section          | Token Prefix                   | Example                                    |
+| ---------------------- | ------------------------------ | ------------------------------------------ |
+| `colors.*`             | `color-*`                      | `color-primary-brand`, `color-neutral-900` |
+| `typography.primary`   | `font-primary`                 | `Inter`                                    |
+| `typography.weights.*` | `font-weight-*`                | `font-weight-semiBold`                     |
+| `typography.scale.*`   | `font-size-*`, `line-height-*` | `font-size-h1`                             |
+| `spacing.scale.*`      | `spacing-*`                    | `spacing-xl`                               |
+| `layout.radius.*`      | `radius-*`                     | `radius-m`                                 |
+| `layout.maxWidth`      | `layout-max-width`             | `1200px`                                   |
 
 ## Brand Validation
 
 The `validateBrandSpec()` function checks:
 
 **Errors (block generation):**
+
 - Missing `identity.name`
 - Missing `colors.primary.brand`
 - Invalid hex color values
 
 **Warnings (logged only):**
+
 - Missing semantic colors (success, warning, error, info)
 - Missing `colors.darkMode` section
 

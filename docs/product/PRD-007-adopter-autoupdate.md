@@ -311,12 +311,12 @@ agentkit-forge update --check
 
 ## Dependencies and Related Issues
 
-| Issue                                                           | Title                                                  | Relationship                                                          |
-| --------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
+| Issue                                                          | Title                                                  | Relationship                                                          |
+| -------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
 | [#196](https://github.com/phoenixvc/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
 | [#194](https://github.com/phoenixvc/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
-| [PRD-005](./PRD-005-mesh-native-distribution.md)                | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
-| [ADR-07](../architecture/decisions/07-delivery-strategy.md)     | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
+| [PRD-005](./PRD-005-mesh-native-distribution.md)               | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
+| [ADR-07](../architecture/decisions/07-delivery-strategy.md)    | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
 | [#241](https://github.com/phoenixvc/agentkit-forge/issues/241) | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
 
 ## Milestone

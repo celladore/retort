@@ -68,10 +68,7 @@ describe('checkDirtyProtectedFiles', () => {
 
   it('detects modified files in .agentkit/engines/', () => {
     writeFileSync(join(tempDir, '.agentkit', 'engines', 'sync.mjs'), 'export default { v: 2 };\n');
-    const result = checkDirtyProtectedFiles(tempDir, [
-      '.agentkit/engines',
-      '.agentkit/spec',
-    ]);
+    const result = checkDirtyProtectedFiles(tempDir, ['.agentkit/engines', '.agentkit/spec']);
     expect(result.dirty).toBe(true);
     expect(result.files).toContain('.agentkit/engines/sync.mjs');
   });
@@ -89,10 +86,7 @@ describe('checkDirtyProtectedFiles', () => {
 
   it('detects untracked files in protected directories', () => {
     writeFileSync(join(tempDir, '.agentkit', 'engines', 'new-file.mjs'), 'new content\n');
-    const result = checkDirtyProtectedFiles(tempDir, [
-      '.agentkit/engines',
-      '.agentkit/spec',
-    ]);
+    const result = checkDirtyProtectedFiles(tempDir, ['.agentkit/engines', '.agentkit/spec']);
     expect(result.dirty).toBe(true);
     expect(result.files).toContain('.agentkit/engines/new-file.mjs');
   });

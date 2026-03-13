@@ -110,10 +110,7 @@ describe('detect', () => {
 
     it('should handle malformed JSON gracefully', () => {
       mkdirSync(join(root, '.claude', 'state'), { recursive: true });
-      writeFileSync(
-        join(root, '.claude', 'state', 'orchestrator.json'),
-        '{broken json'
-      );
+      writeFileSync(join(root, '.claude', 'state', 'orchestrator.json'), '{broken json');
       const ctx = detect(root);
       expect(ctx.hasOrchestratorState).toBe(true);
       expect(ctx.orchestratorPhase).toBeNull();
@@ -202,10 +199,7 @@ describe('detect', () => {
     it('should return 0 for backlog with only headers', () => {
       writeFileSync(
         join(root, 'AGENT_BACKLOG.md'),
-        [
-          '| ID | Title | Status |',
-          '| --- | --- | --- |',
-        ].join('\n')
+        ['| ID | Title | Status |', '| --- | --- | --- |'].join('\n')
       );
       const ctx = detect(root);
       expect(ctx.backlogCount).toBe(0);
@@ -404,11 +398,21 @@ describe('detect', () => {
     it('should return all expected fields', () => {
       const ctx = detect(root);
       const keys = [
-        'forgeInitialised', 'syncRun', 'discoveryDone',
-        'hasOrchestratorState', 'orchestratorPhase', 'phaseName',
-        'hasBacklog', 'backlogCount', 'activeTaskCount',
-        'branch', 'isClean', 'uncommittedCount',
-        'lockHeld', 'flow', 'teams',
+        'forgeInitialised',
+        'syncRun',
+        'discoveryDone',
+        'hasOrchestratorState',
+        'orchestratorPhase',
+        'phaseName',
+        'hasBacklog',
+        'backlogCount',
+        'activeTaskCount',
+        'branch',
+        'isClean',
+        'uncommittedCount',
+        'lockHeld',
+        'flow',
+        'teams',
       ];
       for (const key of keys) {
         expect(ctx).toHaveProperty(key);

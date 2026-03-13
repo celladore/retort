@@ -18,9 +18,7 @@ afterEach(() => {
 
 function renderFlow(ctx = makeCtx()) {
   const onSelect = vi.fn();
-  const result = render(
-    React.createElement(ConversationFlow, { ctx, onSelect })
-  );
+  const result = render(React.createElement(ConversationFlow, { ctx, onSelect }));
   cleanup = result.unmount;
   return { ...result, onSelect };
 }

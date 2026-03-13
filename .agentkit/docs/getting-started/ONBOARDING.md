@@ -56,19 +56,19 @@ git submodule update --init --recursive
 
 The `init` command bootstraps AgentKit Forge for your repository. It copies the overlay template and generates initial configuration files.
 
-**On Linux/macOS:**
+#### On Linux/macOS:
 
 ```bash
 node agentkit-forge/.agentkit/engines/node/src/cli.mjs init
 ```
 
-**On Windows (PowerShell):**
+#### On Windows (PowerShell):
 
 ```powershell
 .\agentkit-forge\.agentkit\bin\init.ps1
 ```
 
-**On Windows (Command Prompt):**
+#### On Windows (Command Prompt):
 
 ```cmd
 agentkit-forge\.agentkit\bin\init.cmd
@@ -84,7 +84,7 @@ This command will:
 
 After initialization, review the files created in your overlay directory:
 
-```
+```text
 agentkit-forge/.agentkit/overlays/<your-repo>/
   settings.yaml    # Core settings (repo name, branch, stack, render targets)
   commands.yaml    # Command overrides
@@ -361,19 +361,19 @@ git commit -m "chore: update AgentKit Forge and re-sync configuration"
 
 ### Common Issues
 
-**"Command not found" when running bin scripts**
+#### "Command not found" when running bin scripts
 
 Ensure Node.js is installed and available on your PATH. Verify with `node --version`.
 
-**YAML parse errors during validation**
+#### YAML parse errors during validation
 
 Validate your YAML files with an online YAML validator or run `node -e "require('yaml').parse(require('fs').readFileSync('file.yaml','utf8'))"`.
 
-**Sync produces no output**
+#### Sync produces no output
 
 Ensure `renderTargets` in `settings.yaml` contains at least one valid target. Valid targets are: `claude`, `cursor`, `windsurf`, `copilot`, `ai`.
 
-**Submodule not initialized**
+#### Submodule not initialized
 
 Run `git submodule update --init --recursive` to ensure the submodule is properly cloned.
 

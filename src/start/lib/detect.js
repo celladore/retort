@@ -48,7 +48,11 @@ const PHASE_NAMES = {
  */
 function runGit(args, cwd, fallback = '') {
   try {
-    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return execFileSync('git', args, {
+      cwd,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
   } catch {
     return fallback;
   }
@@ -63,13 +67,15 @@ function countBacklogItems(root) {
   const content = readFileSync(backlogPath, 'utf8');
   // Count table rows (lines starting with |) that aren't header separators or completed items
   const completedPattern = /\b(done|completed|closed)\b/i;
-  const rows = content.split('\n').filter(
-    (line) =>
-      line.startsWith('|') &&
-      !line.match(/^\|\s*-/) &&
-      !line.match(/^\|\s*#/) &&
-      !completedPattern.test(line)
-  );
+  const rows = content
+    .split('\n')
+    .filter(
+      (line) =>
+        line.startsWith('|') &&
+        !line.match(/^\|\s*-/) &&
+        !line.match(/^\|\s*#/) &&
+        !completedPattern.test(line)
+    );
   // Subtract header row
   return Math.max(0, rows.length - 1);
 }
@@ -85,13 +91,16 @@ function parseTeams(root) {
     const content = readFileSync(teamsPath, 'utf8');
     // Table format: | Name | id | focus | scope | accepts | handoff | Status | Lead |
     // Skip header rows and separator rows
-    const tableRows = content.split('\n').filter(
-      (l) => l.startsWith('|') && !l.match(/^\|\s*[-:]+\s*\|/)
-    );
+    const tableRows = content
+      .split('\n')
+      .filter((l) => l.startsWith('|') && !l.match(/^\|\s*[-:]+\s*\|/));
     // Drop the first row (header) if any rows exist
     const lines = tableRows.slice(1);
     for (const line of lines) {
-      const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
+      const cells = line
+        .split('|')
+        .map((c) => c.trim())
+        .filter(Boolean);
       if (cells.length >= 3) {
         const id = cells[1] || cells[0].toLowerCase().replace(/\s+/g, '-');
         teams.push({
@@ -148,7 +157,7 @@ export function detect(root = process.cwd()) {
       // Malformed JSON — treat as no state
     }
   }
-  const phaseName = orchestratorPhase ? PHASE_NAMES[orchestratorPhase] ?? null : null;
+  const phaseName = orchestratorPhase ? (PHASE_NAMES[orchestratorPhase] ?? null) : null;
 
   // Backlog
   const backlogCount = countBacklogItems(root);

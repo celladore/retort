@@ -26,12 +26,14 @@ project root                ← Final output (.claude/, .github/, docs/, etc.)
 Templates use a Handlebars-inspired syntax:
 
 ### Variables
+
 ```
 {{projectName}}                    → Simple substitution
 {{githubSlug}}                     → Dot-path from project.yaml
 ```
 
 ### Conditionals
+
 ```
 {{#if hasTeamOrchestration}}
 Team orchestration is enabled.
@@ -43,6 +45,7 @@ No authentication configured.
 ```
 
 ### Iteration
+
 ```
 {{#each integrations}}
 - {{this.name}}: {{this.purpose}}
@@ -50,6 +53,7 @@ No authentication configured.
 ```
 
 ### Whitespace Control
+
 ```
 {{~#if hasAuth}}                   → Strips whitespace before tag
 Content{{~/if}}                    → Strips whitespace after tag
@@ -59,11 +63,11 @@ Content{{~/if}}                    → Strips whitespace after tag
 
 Every template declares how it should be handled on subsequent syncs:
 
-| Mode | Frontmatter | First Sync | Later Syncs | User Edits |
-|------|-------------|------------|-------------|------------|
-| `always` | `scaffold: always` | Write | **Overwrite** | Lost |
-| `managed` | `scaffold: managed` | Write | **Hash check → 3-way merge** | Preserved |
-| `once` | `scaffold: once` | Write | **Skip** | Fully preserved |
+| Mode      | Frontmatter         | First Sync | Later Syncs                  | User Edits      |
+| --------- | ------------------- | ---------- | ---------------------------- | --------------- |
+| `always`  | `scaffold: always`  | Write      | **Overwrite**                | Lost            |
+| `managed` | `scaffold: managed` | Write      | **Hash check → 3-way merge** | Preserved       |
+| `once`    | `scaffold: once`    | Write      | **Skip**                     | Fully preserved |
 
 ### Declaring Scaffold Mode
 
@@ -83,15 +87,15 @@ The frontmatter is stripped during rendering — it never appears in output.
 
 When no frontmatter is present, defaults apply based on path:
 
-| Path Pattern | Default Mode |
-|-------------|-------------|
-| `docs/` | `once` |
-| `.vscode/` | `once` |
-| `.github/ISSUE_TEMPLATE/` | `once` |
-| `AGENT_BACKLOG.md` | `once` |
-| `CHANGELOG.md` | `once` |
-| `CONTRIBUTING.md` | `once` |
-| Everything else | `always` |
+| Path Pattern              | Default Mode |
+| ------------------------- | ------------ |
+| `docs/`                   | `once`       |
+| `.vscode/`                | `once`       |
+| `.github/ISSUE_TEMPLATE/` | `once`       |
+| `AGENT_BACKLOG.md`        | `once`       |
+| `CHANGELOG.md`            | `once`       |
+| `CONTRIBUTING.md`         | `once`       |
+| Everything else           | `always`     |
 
 ### Override via project.yaml
 
@@ -101,8 +105,8 @@ The `automation.languageProfile.scaffoldOverrides` section can override defaults
 automation:
   languageProfile:
     scaffoldOverrides:
-      alwaysRegenerate: ['docs/api/README.md']  # Force always mode
-      scaffoldOnce: ['scripts/deploy.sh']        # Force once mode
+      alwaysRegenerate: ['docs/api/README.md'] # Force always mode
+      scaffoldOnce: ['scripts/deploy.sh'] # Force once mode
 ```
 
 ## Three-Way Merge (Managed Files)
