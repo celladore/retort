@@ -49,7 +49,7 @@ conventions file for coding standards. Aider works with multiple LLM providers
 
 ### Configuration Files
 
-```
+```text
 project/
 ├── AGENTS.md                    # Project instructions
 ├── .aider.conventions.md        # Coding standards

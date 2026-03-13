@@ -19,11 +19,11 @@ import { execFileSync } from 'child_process';
  */
 export function checkDirtyProtectedFiles(projectRoot, protectedDirs) {
   try {
-    const stdout = execFileSync(
-      'git',
-      ['status', '--porcelain', '--', ...protectedDirs],
-      { cwd: projectRoot, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
-    );
+    const stdout = execFileSync('git', ['status', '--porcelain', '--', ...protectedDirs], {
+      cwd: projectRoot,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
     const files = stdout
       .split('\n')
       .filter((line) => line.length > 3)
@@ -78,11 +78,11 @@ export async function promptDirtyFileAction(dirtyFiles) {
 
   if (action === 'stash') {
     try {
-      execFileSync(
-        'git',
-        ['stash', 'push', '-m', 'agentkit-sync-guard', '--', ...dirtyFiles],
-        { cwd: process.cwd(), encoding: 'utf-8', stdio: 'pipe' }
-      );
+      execFileSync('git', ['stash', 'push', '-m', 'agentkit-sync-guard', '--', ...dirtyFiles], {
+        cwd: process.cwd(),
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
       clack.log.success('Changes stashed. Run `git stash pop` after sync to restore.');
     } catch (err) {
       clack.log.error(`Stash failed: ${err?.message ?? err}`);

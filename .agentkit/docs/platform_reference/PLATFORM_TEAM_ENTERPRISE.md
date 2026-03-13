@@ -50,18 +50,18 @@ team adoption and organization-wide deployment.
 
 ### Justification
 
-**Cursor (63/100)**
+#### Cursor (63/100)
 
 - Team: 7 — Team rules in `.cursor/rules/`, shared commands [T1]
 - SSO: 7 — Business tier includes SSO [T1]
 - Audit: 5 — Basic usage tracking; growing admin features [T1]
 
-**Warp (54/100)**
+#### Warp (54/100)
 
 - Team: 8 — Warp Drive enables shared commands, environments, agent prompts [T3]
 - Admin: 5 — Team plan exists but governance is limited [T3]
 
-**Windsurf (51/100)**
+#### Windsurf (51/100)
 
 - Team: 6 — Team rules and commands; emerging enterprise features [T2]
 
@@ -82,7 +82,7 @@ team adoption and organization-wide deployment.
 
 ### Justification
 
-**GitHub Copilot (88/100)**
+#### GitHub Copilot (88/100)
 
 - Admin: 9 — Full seat management, usage policies, content exclusions [T4]
 - SSO: 9 — GitHub org SSO, SAML, directory sync [T4]
@@ -90,25 +90,25 @@ team adoption and organization-wide deployment.
 - Audit: 8 — Copilot usage metrics, audit log API [T4]
 - Scale: 9 — Enterprise tier with dedicated support, SLAs [T4]
 
-**Amazon Q Developer (86/100)**
+#### Amazon Q Developer (86/100)
 
 - Admin: 9 — IAM policies, service control policies, AWS Organizations [T8]
 - SSO: 9 — AWS SSO, IAM Identity Center, SAML [T8]
 - Audit: 9 — CloudTrail logging, CloudWatch metrics [T8]
 - Scale: 9 — AWS enterprise support; SLAs backed by AWS [T8]
 
-**Sourcegraph Cody (72/100)**
+#### Sourcegraph Cody (72/100)
 
 - Admin: 7 — Sourcegraph admin dashboard, repo permissions [T7]
 - SSO: 8 — Enterprise SSO via Sourcegraph [T7]
 - Org Policies: 7 — Code graph-based access controls [T7]
 
-**Continue (50/100)**
+#### Continue (50/100)
 
 - Team: 6 — Mission Control Hub for org rules [T9]
 - Admin: 5 — Hub provides some management capabilities [T9]
 
-**Cline (32/100) / Roo Code (34/100)**
+#### Cline (32/100) / Roo Code (34/100)
 
 - Open-source with no built-in team/enterprise features [T5, T6]
 - Team sharing is file-based (.clinerules/, .roo/rules/) via git [T5, T6]
@@ -130,17 +130,17 @@ team adoption and organization-wide deployment.
 
 ### Justification
 
-**Claude Code (68/100)**
+#### Claude Code (68/100)
 
 - Team: 7 — Team commands, shared rules, settings.json for permissions [T10]
 - Admin: 7 — Enterprise tier with admin controls [T10]
 - Org Policies: 7 — Anthropic enterprise org policies [T10]
 
-**Codex / Gemini CLI (50/100)**
+#### Codex / Gemini CLI (50/100)
 
 - Both have growing enterprise features tied to their parent platforms [T11, T12]
 
-**Aider (30/100)**
+#### Aider (30/100)
 
 - Open-source, individual-focused; team use is via git-shared config files [T13]
 
@@ -161,16 +161,16 @@ team adoption and organization-wide deployment.
 
 ### Justification
 
-**Copilot Coding Agent (88/100)**
+#### Copilot Coding Agent (88/100)
 
 - Same enterprise infrastructure as GitHub Copilot [T4]
 
-**Factory (71/100)**
+#### Factory (71/100)
 
 - Enterprise-first: dashboard management, org policies, dedicated support [T14]
 - SSO: 7 — Enterprise SSO available [T14]
 
-**Jules (43/100)**
+#### Jules (43/100)
 
 - Emerging enterprise features; primarily individual-use today [T15]
 

@@ -50,7 +50,7 @@ multiple AI providers, mode-specific rules, and Cursor rule imports.
 
 ### Directory Structure Example
 
-```
+```text
 .roo/
   rules/
     typescript.md

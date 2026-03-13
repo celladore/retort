@@ -42,7 +42,7 @@ tier usage.
 
 ### 🏆 Best Overall: Copilot + Free Tools ($10/mo)
 
-```
+```yaml
 Paid:  GitHub Copilot Individual ($10/mo)
        └── Unlimited completions, chat, agent mode
 Free:  Trae IDE (unlimited GPT-4o + Claude)
@@ -54,13 +54,13 @@ Free:  Codeium (backup completions)
 completions, chat, code review, and coding agent mode. Supplement with Trae's
 free unlimited AI for a secondary editor and Gemini CLI for terminal work.
 
-**Total: $10/month**
+#### Total: $10/month
 
 ---
 
 ### 🧑‍💻 Terminal-First Developer: Claude Code + Free CLI ($20/mo)
 
-```
+```yaml
 Paid:  Claude Code Max 5x ($20/mo)
        └── Best coding performance, hooks, skills, subagents
 Free:  Gemini CLI (routine CLI tasks — save Claude for complex work)
@@ -71,13 +71,13 @@ Free:  Copilot Free (2K completions/mo bonus)
 **Why:** Claude Code has the highest coding performance scores. Use Gemini CLI
 for routine tasks to preserve Claude usage for complex multi-file work.
 
-**Total: $20/month**
+#### Total: $20/month
 
 ---
 
 ### 🎨 Visual IDE Developer: Cursor Pro + Free Tools ($20/mo)
 
-```
+```yaml
 Paid:  Cursor Pro ($20/mo)
        └── AI-native IDE, Composer, .mdc rules, Agent mode
 Free:  Gemini CLI (agentic CLI tasks)
@@ -88,13 +88,13 @@ Free:  Same.new (rapid prototyping — 500K tokens free)
 **Why:** Cursor offers the best AI-native IDE experience with deep rule
 customization. The $20 subscription covers daily IDE needs.
 
-**Total: $20/month**
+#### Total: $20/month
 
 ---
 
 ### 🚀 Startup / Prototype-Heavy: Windsurf + Vibe Tools ($25/mo)
 
-```
+```yaml
 Paid:  Windsurf Pro ($15/mo)
        └── Cascade agent, Flows, Memories system
 Paid:  Same.new Basic ($10/mo)
@@ -107,13 +107,13 @@ Free:  Copilot Free (2K completions bonus)
 **Why:** Windsurf for daily coding + Same.new for rapid prototyping gives
 startups a complete ideation-to-production pipeline.
 
-**Total: $25/month**
+#### Total: $25/month
 
 ---
 
 ### 🔒 Privacy-Focused: Zed Pro + BYOK ($15/mo)
 
-```
+```yaml
 Paid:  Zed Pro ($10/mo)
        └── Unlimited predictions, $5 AI credit, open-source
 BYOK:  Aider + DeepSeek (~$3-5/mo)
@@ -125,13 +125,13 @@ Free:  Cline + Ollama (local VS Code agent)
 **Why:** Zed is open-source with strong privacy. Aider + DeepSeek keeps costs
 minimal while providing excellent CLI agent capability.
 
-**Total: ~$15/month**
+#### Total: ~$15/month
 
 ---
 
 ### 🏢 JetBrains User: Junie + Copilot ($27/mo)
 
-```
+```yaml
 Paid:  JetBrains AI Pro ($16.67/mo) — includes Junie
        └── Agentic coding inside IntelliJ/PyCharm/WebStorm
 Paid:  GitHub Copilot Individual ($10/mo)

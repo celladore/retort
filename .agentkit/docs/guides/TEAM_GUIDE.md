@@ -34,7 +34,7 @@ When to use which team, how teams interact, and when to let `/orchestrate` handl
 
 Use this lookup to find the right team for your task.
 
-```
+```text
 I want to...                              --> Use this team
 ------------------------------------------    ----------------
 Build an API endpoint                     --> /team-backend
@@ -91,7 +91,7 @@ These are the three most common multi-team workflows. Each pattern shows the tea
 
 This is the most common cross-team workflow for feature development.
 
-```
+```text
 /team-backend                     /team-frontend
      |                                  |
      |  1. Implement API endpoint       |
@@ -116,7 +116,7 @@ This is the most common cross-team workflow for feature development.
 
 This is the standard feature lifecycle from requirements to verification.
 
-```
+```text
 /team-product                /team-backend + /team-frontend         /team-testing
      |                                  |                                |
      |  1. Write PRD with user          |                                |
@@ -135,7 +135,7 @@ This is the standard feature lifecycle from requirements to verification.
                                                                          |  8. Report coverage gaps
 ```
 
-**What gets handed off:**
+#### What gets handed off:
 
 - Product to Backend/Frontend: PRD document with user stories, acceptance criteria, and priority.
 - Backend/Frontend to Testing: Feature branch with implementation and unit tests. Testing uses the acceptance criteria from the PRD to write verification tests.
@@ -148,7 +148,7 @@ This is the standard feature lifecycle from requirements to verification.
 
 This pattern is used for security hardening and vulnerability remediation.
 
-```
+```text
 /team-security               /team-backend                    /team-quality
      |                              |                               |
      |  1. Run security audit       |                               |
@@ -170,7 +170,7 @@ This pattern is used for security hardening and vulnerability remediation.
                                                                     | 10. Approve for merge
 ```
 
-**What gets handed off:**
+#### What gets handed off:
 
 - Security to Backend: Audit report with severity-classified findings, exact file/line references, and remediation guidance.
 - Backend to Quality: Branch with fixes, tests, and documentation updates. Quality verifies the fixes are correct and complete.
@@ -221,7 +221,7 @@ This gives you the intelligence-gathering benefits of orchestration with the pre
 
 ### Decision Flowchart
 
-```
+```text
 Is the task well-defined and limited to one team?
 |
 +-- YES --> Do you know which team?

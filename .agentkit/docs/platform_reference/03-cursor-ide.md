@@ -63,7 +63,7 @@ alwaysApply: false
 
 ### Directory Structure Example
 
-```
+```text
 .cursor/
   rules/
     typescript-standards.mdc

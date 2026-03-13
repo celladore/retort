@@ -52,7 +52,7 @@ JetBrains, and GitHub.com.
 
 ### Directory Structure Example
 
-```
+```text
 .github/
   copilot-instructions.md
   instructions/

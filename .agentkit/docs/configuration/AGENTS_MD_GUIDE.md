@@ -79,7 +79,7 @@ OpenAI Codex supports `AGENTS.override.md` at every directory level in a
 monorepo. This allows per-package or per-service overrides. AgentKit Forge does
 not yet generate these automatically, but you can create them manually:
 
-```
+```text
 packages/
   api/
     AGENTS.override.md    # API-specific overrides

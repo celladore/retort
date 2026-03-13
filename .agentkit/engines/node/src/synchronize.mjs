@@ -1729,8 +1729,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   if (!flags?.force && !dryRun && !diff && !isTestEnv) {
     let checkDirtyProtectedFiles, promptDirtyFileAction;
     try {
-      ({ checkDirtyProtectedFiles, promptDirtyFileAction } =
-        await import('./sync-guard.mjs'));
+      ({ checkDirtyProtectedFiles, promptDirtyFileAction } = await import('./sync-guard.mjs'));
     } catch (err) {
       log(`[agentkit:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
     }
@@ -1751,9 +1750,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         }
         // 'stash' handled inside promptDirtyFileAction; 'continue' falls through
       } else {
-        console.warn(
-          '[agentkit:sync] Warning: uncommitted changes in protected directories:'
-        );
+        console.warn('[agentkit:sync] Warning: uncommitted changes in protected directories:');
         for (const f of files) console.warn(`  ${f}`);
       }
     }

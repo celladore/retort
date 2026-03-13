@@ -66,7 +66,7 @@ If using BYOK tools, your actual cost is the API provider fee:
 
 Use different tools for different tasks to maximize free coverage:
 
-```
+```text
 Morning (coding sessions):
 ├── Trae IDE — primary editor with free Claude 3.7 + GPT-4o
 ├── Codeium — fast completions if Trae completions lag
@@ -97,25 +97,25 @@ When one platform's free tier is exhausted, rotate to the next:
 
 ### Phase 2: Rate-Limited Free Tiers (When Phase 1 needs change)
 
-4. **Gemini CLI** — 60 req/min free (good for bursts of agentic work)
-5. **GitHub Copilot Free** — 2K completions + 50 chat messages/month
-6. **Zed Editor** — 2K predictions + 50 prompts/month
+1. **Gemini CLI** — 60 req/min free (good for bursts of agentic work)
+2. **GitHub Copilot Free** — 2K completions + 50 chat messages/month
+3. **Zed Editor** — 2K predictions + 50 prompts/month
 
 ### Phase 3: Token-Limited Free Tiers (For specific tasks)
 
-7. **Same.new** — 500K tokens/month (for app prototyping only)
-8. **Amazon Q Free** — for AWS-specific coding
-9. **Amp Free** — for CLI agentic tasks
+1. **Same.new** — 500K tokens/month (for app prototyping only)
+2. **Amazon Q Free** — for AWS-specific coding
+3. **Amp Free** — for CLI agentic tasks
 
 ### Phase 4: BYOK with Cheap APIs (When everything else runs out)
 
-10. **Aider + DeepSeek** — ~$2-5/month for moderate usage
-11. **Cline + DeepSeek** — same economics, IDE-based
-12. **OpenCode + DeepSeek** — minimal terminal option
+1. **Aider + DeepSeek** — ~$2-5/month for moderate usage
+2. **Cline + DeepSeek** — same economics, IDE-based
+3. **OpenCode + DeepSeek** — minimal terminal option
 
 ### Monthly Reset Strategy
 
-```
+```text
 Day 1-7:   Use Copilot + Zed free tiers (fresh monthly allowance)
 Day 1-30:  Trae IDE as primary (unlimited)
 Day 1-30:  Codeium for completions (unlimited)
@@ -159,7 +159,7 @@ The optimal $0/month stack covers all coding scenarios:
 
 ### Minimal Setup (3 tools)
 
-```
+```text
 1. Trae IDE        — primary AI IDE (free, unlimited)
 2. Codeium ext.    — completions in any editor (free, unlimited)
 3. Gemini CLI      — agentic CLI tasks (free, rate-limited)
@@ -169,7 +169,7 @@ The optimal $0/month stack covers all coding scenarios:
 
 ### Full Coverage (6 tools)
 
-```
+```text
 1. Trae IDE        — primary AI IDE
 2. Codeium         — fast completions everywhere
 3. Gemini CLI      — agentic CLI tasks
@@ -182,7 +182,7 @@ The optimal $0/month stack covers all coding scenarios:
 
 ### Privacy-First Setup (4 tools)
 
-```
+```text
 1. Void Editor     — open-source, no telemetry
 2. Aider + Ollama  — fully local CLI agent
 3. Cline + Ollama  — fully local VS Code agent

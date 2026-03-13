@@ -46,7 +46,7 @@ Cody is available as a VS Code extension, JetBrains plugin, and web interface.
 
 ### Directory Structure Example
 
-```
+```text
 .cody/
   config.json
   ignore

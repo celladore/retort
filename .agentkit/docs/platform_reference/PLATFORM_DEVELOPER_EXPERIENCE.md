@@ -60,20 +60,20 @@ day-to-day — from first install to productive daily workflow.
 
 ### Justification — AI-Native IDEs
 
-**Cursor (84/100)**
+#### Cursor (84/100)
 
 - Onboarding: 9 — Download, open project, start coding. Imports VS Code settings [D1]
 - Workflow: 8 — Full VS Code compatibility; git, terminals, extensions all work [D1]
 - UI: 9 — Tab completion, inline chat, Composer mode — polished and intuitive [D1]
 - Learning Curve: 8 — Familiar VS Code base; Cursor-specific features are discoverable [D1]
 
-**Windsurf (77/100)**
+#### Windsurf (77/100)
 
 - Onboarding: 9 — Similar to Cursor; download and go [D2]
 - UI: 8 — Cascade flow is clean; Memories system adds contextual intelligence [D2]
 - Workflow: 7 — Good but fewer extensions than Cursor ecosystem [D2]
 
-**Warp (77/100)**
+#### Warp (77/100)
 
 - Onboarding: 8 — Terminal replacement; requires adapting terminal habits [D3]
 - UI: 9 — Block-based output, rich rendering, AI-native from ground up [D3]
@@ -96,34 +96,34 @@ day-to-day — from first install to productive daily workflow.
 
 ### Justification — IDE Extensions
 
-**GitHub Copilot (86/100)**
+#### GitHub Copilot (86/100)
 
 - Onboarding: 9 — One-click install in VS Code; GitHub auth is seamless [D4]
 - Workflow: 9 — Deepest editor integration: inline, chat, review, PRs [D4]
 - Learning Curve: 9 — "It just works" — minimal config needed to be productive [D4]
 - Stability: 8 — Mature product with consistent behavior [D4]
 
-**Cline (72/100)**
+#### Cline (72/100)
 
 - Onboarding: 7 — Install extension + configure API key (BYOK friction) [D5]
 - Workflow: 8 — Strong agentic workflow; file creation, command execution [D5]
 - Learning Curve: 6 — Rule system and modes require time to master [D5]
 
-**Roo Code (72/100)**
+#### Roo Code (72/100)
 
 - Similar to Cline; custom modes add both power and learning curve [D6]
 
-**Sourcegraph Cody (74/100)**
+#### Sourcegraph Cody (74/100)
 
 - Onboarding: 8 — Extension install + Sourcegraph account [D7]
 - Workflow: 8 — Code graph intelligence is uniquely valuable for large codebases [D7]
 
-**Amazon Q Developer (73/100)**
+#### Amazon Q Developer (73/100)
 
 - Onboarding: 7 — AWS account requirement adds friction [D8]
 - Workflow: 8 — Excellent AWS integration; `/dev` and `/transform` commands [D8]
 
-**Continue (68/100)**
+#### Continue (68/100)
 
 - Onboarding: 7 — Install + configure providers (BYOK friction) [D9]
 - UI: 7 — Clean but less polished than Copilot [D9]
@@ -146,34 +146,34 @@ day-to-day — from first install to productive daily workflow.
 
 ### Justification — CLI Agents
 
-**Claude Code (80/100)**
+#### Claude Code (80/100)
 
 - Onboarding: 8 — `npm install -g` + API key; quick start [D10]
 - Workflow: 9 — Best-in-class git integration, hooks, permissions, subagents [D10]
 - UI: 8 — Rich terminal UI; excellent diff presentation [D10]
 - Stability: 8 — Consistent, deterministic hooks ensure reliability [D10]
 
-**Aider (74/100)**
+#### Aider (74/100)
 
 - Workflow: 9 — Auto-commits, auto-lint, auto-test integration is superb [D11]
 - Learning Curve: 6 — Many config files and modes to learn [D11]
 - Stability: 8 — Mature, well-tested with 60+ model backends [D11]
 
-**Gemini CLI (73/100)**
+#### Gemini CLI (73/100)
 
 - Onboarding: 8 — Simple npm install; generous free tier reduces friction [D12]
 - Feedback Speed: 8 — Fast inference from Google infrastructure [D12]
 
-**Codex (69/100)**
+#### Codex (69/100)
 
 - Onboarding: 7 — Requires OpenAI account and subscription [D13]
 - Workflow: 7 — Skills system is powerful but requires setup [D13]
 
-**Amp (70/100)**
+#### Amp (70/100)
 
 - Onboarding: 7 — Terminal + IDE dual mode [D14]
 
-**OpenCode (61/100)**
+#### OpenCode (61/100)
 
 - Onboarding: 6 — Go-based install; less accessible than npm/pip [D15]
 - UI: 6 — Functional terminal UI but less polished than Claude Code [D15]
@@ -195,23 +195,23 @@ day-to-day — from first install to productive daily workflow.
 
 ### Justification — Cloud / Autonomous Agents
 
-**Copilot Coding Agent (79/100)**
+#### Copilot Coding Agent (79/100)
 
 - Onboarding: 8 — Already in GitHub; assign from issues [D4]
 - Workflow: 9 — Native GitHub: issues → branches → PRs → CI [D4]
 - Learning Curve: 8 — Familiar GitHub workflow [D4]
 
-**Jules (68/100)**
+#### Jules (68/100)
 
 - Onboarding: 7 — Google account + GitHub access [D16]
 - Learning Curve: 8 — Simple: describe task, review PR [D16]
 - Feedback Speed: 5 — Asynchronous execution means waiting [D16]
 
-**Codex Cloud (64/100)**
+#### Codex Cloud (64/100)
 
 - Feedback Speed: 5 — Cloud execution; minutes per task [D13]
 
-**Factory (57/100)**
+#### Factory (57/100)
 
 - Onboarding: 5 — Enterprise sales process; dashboard configuration [D17]
 - Learning Curve: 5 — Enterprise platform with significant setup [D17]

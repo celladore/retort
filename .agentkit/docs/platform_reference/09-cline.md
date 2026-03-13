@@ -48,7 +48,7 @@ and `AGENTS.md`.
 
 ### Directory Structure Example
 
-```
+```text
 your-project/
 ├── .clinerules/
 │   ├── 01-coding-standards.md
@@ -62,7 +62,7 @@ your-project/
 
 Advanced structure:
 
-```
+```text
 .clinerules/
 ├── rules          # Phased workflow rules
 ├── memory         # Project/sprint context snapshots

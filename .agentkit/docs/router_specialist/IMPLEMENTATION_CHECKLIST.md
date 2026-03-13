@@ -18,17 +18,17 @@
 - Upstream PR(s): `none-yet (tracked via milestone "Router Integration Governance Rollout"; implementation planning issues: #160 #161 #162 #163 #164 #165 #166)`
 - Canonical roadmap/checklist location: `https://github.com/JustAGhosT/agentkit-forge/blob/main/.agentkit/docs/router_specialist/IMPLEMENTATION_CHECKLIST.md`
 
-## Active tracking
+## Active tracking — Governance Rollout
 
 - Milestone: `Router Integration Governance Rollout` (`#1`) in `JustAGhosT/agentkit-forge`.
 - Issue map: see `docs/reference/router_integration_governance_rollout.md`.
 
-## Active tracking
+## Active tracking — Downstream Runtime
 
 - Milestone: `TBD`.
 - Issue map: see `TBD`.
 
-## Active tracking
+## Active tracking — Analytics
 
 - Milestone: `TBD`.
 - Issue map: see `TBD`.

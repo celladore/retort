@@ -123,7 +123,7 @@ Platforms that provide a full editor or IDE with AI built in.
 
 ### Scoring Justification — AI-Native IDEs
 
-**Cursor (77/100)**
+#### Cursor (77/100)
 
 - Code Correctness: 8 — Uses Claude 3.5 Sonnet and GPT-4o; strong SWE-bench
   Verified results via underlying models [R1, R2]
@@ -133,7 +133,7 @@ Platforms that provide a full editor or IDE with AI built in.
 - Instruction Adherence: 8 — `.mdc` rules with YAML frontmatter + AGENTS.md
   recognized [R3]
 
-**Windsurf (69/100)**
+#### Windsurf (69/100)
 
 - Code Correctness: 7 — Cascade AI with strong models; slightly behind Cursor
   in independent comparisons [R4, R5]
@@ -141,7 +141,7 @@ Platforms that provide a full editor or IDE with AI built in.
   than Cursor [R5]
 - Multi-file: 7 — Cascade handles multi-file but occasionally loses context [R5]
 
-**Warp Terminal (63/100)**
+#### Warp Terminal (63/100)
 
 - Code Correctness: 6 — Solid for command-line tasks; less tested on complex
   multi-file coding [R6]
@@ -172,7 +172,7 @@ AI extensions that augment existing IDEs (VS Code, JetBrains, etc.).
 
 ### Scoring Justification — IDE Extensions
 
-**GitHub Copilot (78/100)**
+#### GitHub Copilot (78/100)
 
 - Code Correctness: 8 — GPT-4o and Claude 3.5 Sonnet backends; Copilot Workspace
   and Coding Agent show strong SWE-bench results [R7, R8]
@@ -182,31 +182,31 @@ AI extensions that augment existing IDEs (VS Code, JetBrains, etc.).
   extensions [R7]
 - Ecosystem: 9 — Deepest GitHub integration: PRs, issues, code review [R8]
 
-**Cline (73/100)**
+#### Cline (73/100)
 
 - Multi-file: 8 — Strong agentic multi-file editing with plan-then-execute [R9]
 - Autonomy: 8 — Full agentic mode with file creation, command execution [R9]
 - Context: 7 — `.clinerules/` + AGENTS.md + cross-tool rule detection [R9]
 
-**Roo Code (73/100)**
+#### Roo Code (73/100)
 
 - Similar to Cline (fork) with additional mode-specific rules [R10]
 - Autonomy: 8 — Boomerang tasks and custom modes add orchestration [R10]
 
-**Sourcegraph Cody (68/100)**
+#### Sourcegraph Cody (68/100)
 
 - Context Understanding: 8 — Code graph intelligence is industry-leading for
   large codebases [R11]
 - Multi-file: 6 — Better at understanding than editing across files [R11]
 - Autonomy: 5 — Primarily a copilot, not an autonomous agent [R11]
 
-**Amazon Q Developer (70/100)**
+#### Amazon Q Developer (70/100)
 
 - Code Correctness: 7 — Strong on AWS-specific code; competitive generally [R12]
 - Ecosystem: 8 — Deep AWS integration, security scanning, `/transform` [R12]
 - Autonomy: 7 — `/dev` mode handles multi-file autonomous tasks [R12]
 
-**Continue (61/100)**
+#### Continue (61/100)
 
 - Code Correctness: 6 — Quality depends heavily on chosen model [R13]
 - Autonomy: 5 — Primarily a copilot with limited agentic capabilities [R13]
@@ -234,7 +234,7 @@ Terminal-based AI coding agents.
 
 ### Scoring Justification — CLI Agents
 
-**Claude Code (89/100)**
+#### Claude Code (89/100)
 
 - Code Correctness: 9 — Claude 4 Sonnet achieves 72.7% on SWE-bench Verified,
   industry-leading [R14, R15]
@@ -246,14 +246,14 @@ Terminal-based AI coding agents.
 - Testing: 9 — Integrated test running, auto-fix loop, hooks for verification [R14]
 - Ecosystem: 9 — Git integration, MCP, hooks, settings, full file system access [R14]
 
-**OpenAI Codex (79/100)**
+#### OpenAI Codex (79/100)
 
 - Code Correctness: 8 — Codex-1 model; 67% on SWE-bench Verified [R16, R17]
 - Context Understanding: 8 — Hierarchical AGENTS.md with override support [R16]
 - Multi-file: 8 — Skills system enables structured multi-file workflows [R16]
 - Autonomy: 8 — Cloud-based autonomous execution in sandboxed environment [R16]
 
-**Aider (76/100)**
+#### Aider (76/100)
 
 - Code Correctness: 8 — Polyglot benchmark leader when using top models;
   Aider leaderboard tracks 60+ models [R18, R19]
@@ -261,18 +261,18 @@ Terminal-based AI coding agents.
 - Language Breadth: 9 — Polyglot benchmark covers many languages [R19]
 - Testing: 8 — Auto-lint, auto-test, auto-fix loop [R18]
 
-**Google Gemini CLI (73/100)**
+#### Google Gemini CLI (73/100)
 
 - Code Correctness: 8 — Gemini 2.5 Pro scores well on coding benchmarks [R20]
 - Speed: 8 — Fast inference with Google's infrastructure [R20]
 - Context: 7 — GEMINI.md + styleguide but fewer activation controls [R20]
 
-**Amp (72/100)**
+#### Amp (72/100)
 
 - Code Correctness: 7 — Good but less benchmarked than top agents [R21]
 - Autonomy: 8 — Strong autonomous multi-step execution [R21]
 
-**OpenCode (56/100)**
+#### OpenCode (56/100)
 
 - Scores are estimated (~) as benchmarks are limited for this newer tool [R22]
 - Open-source with growing community but fewer features than mature tools
@@ -299,7 +299,7 @@ Fully autonomous, cloud-hosted coding agents.
 
 ### Scoring Justification — Cloud / Autonomous Agents
 
-**Google Jules (71/100)**
+#### Google Jules (71/100)
 
 - Code Correctness: 7 — Gemini-powered; good but less benchmarked as
   autonomous agent [R23]
@@ -307,19 +307,19 @@ Fully autonomous, cloud-hosted coding agents.
 - Instruction Adherence: 6 — Reads AGENTS.md but limited customization
   controls [R23]
 
-**Factory (72/100)**
+#### Factory (72/100)
 
 - Multi-file: 8 — End-to-end feature implementation across files [R24]
 - Autonomy: 9 — Full SDLC automation: code, review, test, deploy [R24]
 - Instruction Adherence: 6 — AGENTS.md support but primarily dashboard
   configured [R24]
 
-**OpenAI Codex Cloud (79/100)**
+#### OpenAI Codex Cloud (79/100)
 
 - Same model as CLI but in autonomous cloud mode [R16, R17]
 - Autonomy: 9 — Sandboxed cloud execution with full repo access [R16]
 
-**Copilot Coding Agent (79/100)**
+#### Copilot Coding Agent (79/100)
 
 - Code Correctness: 8 — Strong models with GitHub context [R8, R25]
 - Ecosystem: 9 — Native GitHub integration: issues, PRs, CI checks [R8, R25]

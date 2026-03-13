@@ -25,7 +25,7 @@ When the spec and overlay are merged during `agentkit sync`:
 
 ### Directory Structure
 
-```
+```text
 .agentkit/
   spec/               # Canonical defaults (YAML spec files)
     commands.yaml

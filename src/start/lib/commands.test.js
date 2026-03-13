@@ -46,7 +46,12 @@ describe('getAllCommands', () => {
     const ctx = makeCtx({
       teams: [
         { id: 'forge', name: 'Forge', focus: 'Meta', command: '/team-forge' },
-        { id: 'strategic-ops', name: 'StratOps', focus: 'Coordination', command: '/team-strategic-ops' },
+        {
+          id: 'strategic-ops',
+          name: 'StratOps',
+          focus: 'Coordination',
+          command: '/team-strategic-ops',
+        },
         { id: 'backend', name: 'Backend', focus: 'API', command: '/team-backend' },
       ],
     });
@@ -58,9 +63,7 @@ describe('getAllCommands', () => {
 
   it('should assign category "team" to team commands', () => {
     const ctx = makeCtx({
-      teams: [
-        { id: 'backend', name: 'Backend', focus: 'API', command: '/team-backend' },
-      ],
+      teams: [{ id: 'backend', name: 'Backend', focus: 'API', command: '/team-backend' }],
     });
     const cmds = getAllCommands(ctx);
     const teamCmd = cmds.find((c) => c.id === '/team-backend');

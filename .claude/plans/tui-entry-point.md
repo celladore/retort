@@ -103,23 +103,23 @@ Make the `ak-start` TUI a production-ready, fully tested, documented feature tha
 
 ## File Touch List
 
-| # | File | Action | Description |
-|---|------|--------|-------------|
-| 1 | `vitest.config.mjs` | CREATE | Root vitest config for `src/` tests |
-| 2 | `package.json` | MODIFY | Add vitest, ink-testing-library devDeps; add `test:start` script |
-| 3 | `src/start/lib/detect.test.js` | CREATE | Unit tests for context detection |
-| 4 | `src/start/lib/commands.test.js` | CREATE | Unit tests for command registry and ranking |
-| 5 | `src/start/components/ConversationFlow.test.js` | CREATE | Component tests for conversation flow |
-| 6 | `src/start/components/CommandPalette.test.js` | CREATE | Component tests for command palette |
-| 7 | `src/start/components/StatusBar.test.js` | CREATE | Component tests for status bar |
-| 8 | `src/start/components/App.test.js` | CREATE | Component tests for root app |
-| 9 | `src/start/index.js` | MODIFY | Add TTY detection, --help flag, process cleanup |
-| 10 | `src/start/components/App.jsx` | MODIFY | Add error boundary |
-| 11 | `src/start/lib/detect.js` | MODIFY | Improve error handling, validate schemas |
-| 12 | `src/start/lib/conversation-tree.js` | CREATE | Extracted conversation tree config |
-| 13 | `src/start/components/ConversationFlow.jsx` | MODIFY | Import tree from separate file |
-| 14 | `src/start/components/CommandPalette.jsx` | MODIFY | Terminal width awareness |
-| 15 | `.claude/commands/start.md` | MODIFY | Add TUI cross-reference note |
+| #   | File                                            | Action | Description                                                      |
+| --- | ----------------------------------------------- | ------ | ---------------------------------------------------------------- |
+| 1   | `vitest.config.mjs`                             | CREATE | Root vitest config for `src/` tests                              |
+| 2   | `package.json`                                  | MODIFY | Add vitest, ink-testing-library devDeps; add `test:start` script |
+| 3   | `src/start/lib/detect.test.js`                  | CREATE | Unit tests for context detection                                 |
+| 4   | `src/start/lib/commands.test.js`                | CREATE | Unit tests for command registry and ranking                      |
+| 5   | `src/start/components/ConversationFlow.test.js` | CREATE | Component tests for conversation flow                            |
+| 6   | `src/start/components/CommandPalette.test.js`   | CREATE | Component tests for command palette                              |
+| 7   | `src/start/components/StatusBar.test.js`        | CREATE | Component tests for status bar                                   |
+| 8   | `src/start/components/App.test.js`              | CREATE | Component tests for root app                                     |
+| 9   | `src/start/index.js`                            | MODIFY | Add TTY detection, --help flag, process cleanup                  |
+| 10  | `src/start/components/App.jsx`                  | MODIFY | Add error boundary                                               |
+| 11  | `src/start/lib/detect.js`                       | MODIFY | Improve error handling, validate schemas                         |
+| 12  | `src/start/lib/conversation-tree.js`            | CREATE | Extracted conversation tree config                               |
+| 13  | `src/start/components/ConversationFlow.jsx`     | MODIFY | Import tree from separate file                                   |
+| 14  | `src/start/components/CommandPalette.jsx`       | MODIFY | Terminal width awareness                                         |
+| 15  | `.claude/commands/start.md`                     | MODIFY | Add TUI cross-reference note                                     |
 
 ## Validation Plan
 
@@ -155,18 +155,20 @@ pnpm test
 ## Rollback Plan
 
 All changes are in `src/start/` (new files) and `package.json` (additive). Rollback:
+
 ```bash
 git revert <commit-sha>   # Revert the implementation commits
 pnpm install              # Restore original dependencies
 ```
+
 No database migrations, no infrastructure changes, no breaking API changes.
 
 ## Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| `ink-testing-library` may not support Ink v6 | Tests won't work | Check compatibility before installing; fall back to snapshot testing with `render().lastFrame()` |
-| React 19 breaking changes with ink-testing-library | Component tests fail | Pin ink-testing-library version; use `@testing-library/react` patterns adapted for ink |
-| Terminal width differences across environments | Layout breaks on narrow terminals | Use `useStdout()` hook and set sensible minimums (80 cols) |
-| ConversationFlow tree grows complex | Hard to maintain and test | Extraction to config file (Step 15) makes it data-driven and testable |
-| esbuild JSX transform changes | Build breaks | Pin esbuild version (already done in package.json) |
+| Risk                                               | Impact                            | Mitigation                                                                                       |
+| -------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ink-testing-library` may not support Ink v6       | Tests won't work                  | Check compatibility before installing; fall back to snapshot testing with `render().lastFrame()` |
+| React 19 breaking changes with ink-testing-library | Component tests fail              | Pin ink-testing-library version; use `@testing-library/react` patterns adapted for ink           |
+| Terminal width differences across environments     | Layout breaks on narrow terminals | Use `useStdout()` hook and set sensible minimums (80 cols)                                       |
+| ConversationFlow tree grows complex                | Hard to maintain and test         | Extraction to config file (Step 15) makes it data-driven and testable                            |
+| esbuild JSX transform changes                      | Build breaks                      | Pin esbuild version (already done in package.json)                                               |

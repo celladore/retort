@@ -83,18 +83,18 @@ and control over where code is processed.
 
 ### Justification — AI-Native IDEs
 
-**Cursor (63/100)**
+#### Cursor (63/100)
 
 - Retention: 8 — Privacy Mode available; disables cloud code storage [S1]
 - Compliance: 7 — SOC 2 Type II certified [S1]
 - Local: 3 — Cloud-based models only; no local model support [S1]
 
-**Windsurf (55/100)**
+#### Windsurf (55/100)
 
 - Retention: 7 — No-training policy stated [S2]
 - Compliance: 6 — Growing compliance program [S2]
 
-**Warp (51/100)**
+#### Warp (51/100)
 
 - Residency: 5 — Cloud-processed; limited control [S3]
 - Compliance: 5 — Younger product; fewer certifications [S3]
@@ -116,31 +116,31 @@ and control over where code is processed.
 
 ### Justification — IDE Extensions
 
-**Amazon Q Developer (79/100)**
+#### Amazon Q Developer (79/100)
 
 - Residency: 9 — AWS region control; data stays in your AWS account [S8]
 - Auth: 9 — IAM, SSO, MFA, fine-grained policies [S8]
 - Compliance: 9 — SOC 2, ISO 27001, HIPAA, FedRAMP [S8]
 
-**GitHub Copilot (74/100)**
+#### GitHub Copilot (74/100)
 
 - Retention: 8 — Business/Enterprise tiers guarantee no training on code [S4]
 - Auth: 9 — GitHub SSO, org policies, seat management [S4]
 - Compliance: 9 — SOC 2, ISO 27001, GDPR [S4]
 - Local: 3 — No local model option [S4]
 
-**Sourcegraph Cody (66/100)**
+#### Sourcegraph Cody (66/100)
 
 - Local: 5 — Self-hosted Sourcegraph enables on-premises code graph [S7]
 - Compliance: 7 — SOC 2 certified [S7]
 
-**Continue (64/100)**
+#### Continue (64/100)
 
 - Local: 9 — Full local model support (Ollama, llama.cpp) [S9]
 - Residency: 8 — BYOK with choice of provider and region [S9]
 - Compliance: 4 — Open-source; no vendor compliance certifications [S9]
 
-**Cline / Roo Code (62/100)**
+#### Cline / Roo Code (62/100)
 
 - Local: 8 — Local models via Ollama or LM Studio [S5, S6]
 - BYOK privacy depends entirely on chosen provider [S5, S6]
@@ -162,19 +162,19 @@ and control over where code is processed.
 
 ### Justification — CLI Agents
 
-**Claude Code (66/100)**
+#### Claude Code (66/100)
 
 - Retention: 8 — No training by default; enterprise zero-retention [S10]
 - Compliance: 8 — SOC 2 Type II, GDPR compliant [S10]
 - Local: 3 — Claude models only; no local option [S10]
 
-**Aider (62/100)**
+#### Aider (62/100)
 
 - Local: 9 — Full local model support; can be completely air-gapped [S12]
 - Residency: 8 — BYOK; choose any provider/region [S12]
 - Compliance: 3 — Open-source; no vendor certifications [S12]
 
-**OpenCode (61/100)**
+#### OpenCode (61/100)
 
 - Local: 9 — Supports local models [S15]
 - Compliance: 3 — Early-stage open-source [S15]

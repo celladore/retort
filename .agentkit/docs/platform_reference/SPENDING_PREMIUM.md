@@ -43,7 +43,7 @@ productivity, autonomy, and the best AI coding experience money can buy.
 
 ### 💰 $50/month — Strong Professional
 
-```
+```yaml
 Paid:  Cursor Business ($40/mo)
        └── Full IDE with admin, SSO, privacy mode
 Paid:  Copilot Individual ($10/mo)
@@ -60,7 +60,7 @@ Free:  Codeium (completions in secondary editors)
 
 ### 💰💰 $100/month — Maximum Individual Power
 
-```
+```yaml
 Paid:  Claude Code Max 20x ($100/mo)
        └── Best coding performance, generous usage
 Paid:  Cursor Pro ($20/mo) — or use Claude Code in terminal
@@ -74,13 +74,13 @@ Free:  Copilot Free (bonus 2K completions)
 unmatched quality. Cursor handles the visual 80% of daily IDE work.
 Gemini CLI and Copilot Free fill gaps at $0 extra.
 
-**Total: ~$120/month**
+#### Total: ~$120/month
 
 ---
 
 ### 💰💰💰 $200/month — The Full Arsenal
 
-```
+```yaml
 Paid:  Claude Code Max Unlimited ($200/mo)
        └── Unlimited Claude usage — no caps ever
 Paid:  Cursor Business ($40/mo)
@@ -97,13 +97,13 @@ Free:  Codeium (completions in JetBrains/other editors)
 **What you get:** Every coding scenario covered with premium models.
 No usage caps, no waiting, no compromises. Best-in-class for each task.
 
-**Total: ~$284/month**
+#### Total: ~$284/month
 
 ---
 
 ### 💰💰💰💰 $500/month — Team / Enterprise Starter
 
-```
+```yaml
 Paid:  Copilot Enterprise (5 seats × $39 = $195/mo)
        └── Full governance, IP protection, custom models
 Paid:  Claude Code Max Unlimited ($200/mo)
@@ -118,7 +118,7 @@ Free:  Gemini CLI for all team members
 **What you get:** Enterprise-grade GitHub integration + top coding agent
 for lead + AI-native IDE for the team. AGENTS.md ensures consistency.
 
-**Total: ~$515/month for 5 developers**
+#### Total: ~$515/month for 5 developers
 
 ---
 

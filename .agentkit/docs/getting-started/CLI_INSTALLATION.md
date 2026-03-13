@@ -232,7 +232,7 @@ suitable for CI gates. Use `--bail` to stop on the first failing check.
 
 ### "Unknown command" error
 
-```
+```text
 Unknown command: "foo"
 Valid commands: init, sync, validate, discover, spec-validate, orchestrate, plan, check, review, handoff, healthcheck, cost, add, remove, list, tasks, delegate, doctor
 ```
@@ -266,7 +266,7 @@ node .agentkit/engines/node/src/cli.mjs init --repoName my-project
 
 ### Unrecognised flag warnings
 
-```
+```json
 [agentkit:check] Warning: unrecognised flag --unknown (ignored)
 ```
 

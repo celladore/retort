@@ -60,20 +60,20 @@ and organizational policies.
 
 ### Justification — AI-Native IDEs
 
-**Cursor (79/100)**
+#### Cursor (79/100)
 
 - Instruction Depth: 8 — `.mdc` rules with YAML frontmatter + commands [E1]
 - Activation: 9 — Globs, alwaysApply, AI-decided, manual `@rule-name` [E1]
 - MCP: 8 — Strong MCP support for external tools [E1]
 - Model: 8 — Multiple providers; user can switch models per-task [E1]
 
-**Windsurf (62/100)**
+#### Windsurf (62/100)
 
 - Instruction Depth: 7 — Rules + commands + workflows [E2]
 - AGENTS.md: 4 — Not documented as supporting AGENTS.md natively [E2]
 - Activation: 6 — Modes (always, manual, glob, model) but less granular [E2]
 
-**Warp (62/100)**
+#### Warp (62/100)
 
 - AGENTS.md: 9 — AGENTS.md is the primary instruction file [E3]
 - Instruction Depth: 4 — AGENTS.md only; no rules directory or skills [E3]
@@ -96,7 +96,7 @@ and organizational policies.
 
 ### Justification — IDE Extensions
 
-**GitHub Copilot (76/100)**
+#### GitHub Copilot (76/100)
 
 - Instruction Depth: 9 — Instructions, prompts, agents, chat modes — richest IDE extension [E4]
 - AGENTS.md: 8 — Auto-detected and applied to all chat requests [E4]
@@ -104,30 +104,30 @@ and organizational policies.
 - Model: 6 — Limited to GitHub-provided models [E4]
 - MCP: 5 — No MCP support yet [E4]
 
-**Roo Code (75/100)**
+#### Roo Code (75/100)
 
 - Instruction Depth: 7 — Rules + mode-specific rules + custom modes [E6]
 - Activation: 7 — Mode-specific activation is powerful [E6]
 - Model: 9 — BYOK; supports 20+ providers including local models [E6]
 
-**Continue (72/100)**
+#### Continue (72/100)
 
 - Model: 10 — Best model flexibility; any provider, local or remote [E9]
 - MCP: 8 — Strong tool integration ecosystem [E9]
 - AGENTS.md: 4 — Uses own rules system, indirect AGENTS.md support [E9]
 
-**Cline (68/100)**
+#### Cline (68/100)
 
 - MCP: 8 — Strong MCP integration [E5]
 - Model: 9 — BYOK; any provider [E5]
 - Activation: 5 — Rules are always-on; less granular than Cursor/Copilot [E5]
 
-**Sourcegraph Cody (58/100)**
+#### Sourcegraph Cody (58/100)
 
 - Instruction Depth: 5 — AGENTS.md + config.json; no rules directory [E7]
 - Team: 7 — Enterprise org-wide policies via Sourcegraph [E7]
 
-**Amazon Q Developer (56/100)**
+#### Amazon Q Developer (56/100)
 
 - Instruction Depth: 5 — AGENTS.md + `.amazonq/` config [E8]
 - Model: 5 — Locked to Amazon's model offerings [E8]
@@ -150,25 +150,25 @@ and organizational policies.
 
 ### Justification — CLI Agents
 
-**Claude Code (84/100)**
+#### Claude Code (84/100)
 
 - Instruction Depth: 10 — CLAUDE.md + rules + commands + skills + agents + hooks + settings — richest system of any platform [E10]
 - Activation: 9 — Glob-targeted rules, lifecycle hooks, skill triggers [E10]
 - MCP: 9 — Full MCP support with tool permissions [E10]
 - Model: 5 — Locked to Claude models [E10]
 
-**Codex (67/100)**
+#### Codex (67/100)
 
 - AGENTS.md: 10 — AGENTS.md is the primary file; hierarchical discovery, override support [E11]
 - Instruction Depth: 8 — AGENTS.md + Skills system with scripts/templates [E11]
 
-**Aider (62/100)**
+#### Aider (62/100)
 
 - Model: 10 — Supports 60+ models from any provider [E12]
 - AGENTS.md: 8 — Reads AGENTS.md + conventions file [E12]
 - Instruction Depth: 6 — AGENTS.md + conventions; less structured than Claude/Codex [E12]
 
-**Gemini CLI (59/100)**
+#### Gemini CLI (59/100)
 
 - Instruction Depth: 7 — GEMINI.md + styleguide + settings + config [E13]
 - MCP: 8 — Good MCP tool integration [E13]

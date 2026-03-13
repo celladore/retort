@@ -49,34 +49,34 @@ Set `stack.packageManager` in `.agentkit/spec/project.yaml`:
 
 ```yaml
 stack:
-  packageManager: pnpm  # pnpm | npm | yarn
+  packageManager: pnpm # pnpm | npm | yarn
 ```
 
 This generates derived template variables used in workflows and scripts:
 
-| Variable | pnpm | npm | yarn |
-|----------|------|-----|------|
-| `installCmd` | `pnpm install --frozen-lockfile` | `npm ci` | `yarn install --frozen-lockfile` |
-| `installCmdDev` | `pnpm install` | `npm install` | `yarn install` |
-| `runCmd` | `pnpm` | `npm run` | `yarn` |
-| `execCmd` | `pnpm exec` | `npx` | `yarn` |
-| `lockfilePath` | `pnpm-lock.yaml` | `package-lock.json` | `yarn.lock` |
-| `pmSetupAction` | `pnpm/action-setup@v4` | _(null)_ | _(null)_ |
-| `ciCacheKey` | `pnpm-store` | `npm-cache` | `yarn-cache` |
+| Variable        | pnpm                             | npm                 | yarn                             |
+| --------------- | -------------------------------- | ------------------- | -------------------------------- |
+| `installCmd`    | `pnpm install --frozen-lockfile` | `npm ci`            | `yarn install --frozen-lockfile` |
+| `installCmdDev` | `pnpm install`                   | `npm install`       | `yarn install`                   |
+| `runCmd`        | `pnpm`                           | `npm run`           | `yarn`                           |
+| `execCmd`       | `pnpm exec`                      | `npx`               | `yarn`                           |
+| `lockfilePath`  | `pnpm-lock.yaml`                 | `package-lock.json` | `yarn.lock`                      |
+| `pmSetupAction` | `pnpm/action-setup@v4`           | _(null)_            | _(null)_                         |
+| `ciCacheKey`    | `pnpm-store`                     | `npm-cache`         | `yarn-cache`                     |
 
 ## Feature-Gated CLI Scripts
 
 Not all `agentkit:*` scripts are relevant to every project. The `SCRIPT_FEATURE_MAP`
 in `synchronize.mjs` maps scripts to their required feature:
 
-| Script | Required Feature |
-|--------|-----------------|
-| `agentkit:cost` | `cost-tracking` |
+| Script                   | Required Feature     |
+| ------------------------ | -------------------- |
+| `agentkit:cost`          | `cost-tracking`      |
 | `agentkit:import-issues` | `team-orchestration` |
-| `agentkit:backlog` | `team-orchestration` |
-| `agentkit:sync-backlog` | `team-orchestration` |
-| `agentkit:healthcheck` | `healthcheck` |
-| `agentkit:check` | `quality-gates` |
+| `agentkit:backlog`       | `team-orchestration` |
+| `agentkit:sync-backlog`  | `team-orchestration` |
+| `agentkit:healthcheck`   | `healthcheck`        |
+| `agentkit:check`         | `quality-gates`      |
 
 Scripts not in this map (sync, init, validate, discover, spec-validate, add, remove, list)
 are always included — they are core to the sync engine.
@@ -100,7 +100,7 @@ Workflows can use the template variables for PM-agnostic commands:
 ```yaml
 # In a workflow template:
 - name: Install dependencies
-  run: {{installCmd}}
+  run: { { installCmd } }
 ```
 
 For pnpm specifically, the `pmSetupAction` variable provides the GitHub Action

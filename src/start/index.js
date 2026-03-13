@@ -65,9 +65,7 @@ if (args.includes('--json')) {
 
 // TTY check — Ink requires an interactive terminal
 if (!process.stdin.isTTY) {
-  process.stderr.write(
-    'ak-start: not a terminal. Use --json for non-interactive output.\n'
-  );
+  process.stderr.write('ak-start: not a terminal. Use --json for non-interactive output.\n');
   dumpContextJson();
   process.exit(1);
 }

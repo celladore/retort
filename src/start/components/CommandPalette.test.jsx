@@ -101,13 +101,9 @@ describe('CommandPalette', () => {
     const onSelect = vi.fn();
     const onBack = vi.fn();
     const ctx = makeCtx({
-      teams: [
-        { id: 'backend', name: 'Backend', focus: 'API, services', command: '/team-backend' },
-      ],
+      teams: [{ id: 'backend', name: 'Backend', focus: 'API, services', command: '/team-backend' }],
     });
-    const { lastFrame } = render(
-      React.createElement(CommandPalette, { ctx, onSelect, onBack })
-    );
+    const { lastFrame } = render(React.createElement(CommandPalette, { ctx, onSelect, onBack }));
     expect(lastFrame()).toContain('/team-backend');
     expect(lastFrame()).toContain('teams');
   });

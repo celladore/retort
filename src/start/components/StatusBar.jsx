@@ -22,18 +22,9 @@ export default function StatusBar({ ctx }) {
   const forgeOk = ctx.forgeInitialised && ctx.syncRun;
 
   return (
-    <Box
-      borderStyle="single"
-      borderColor="gray"
-      paddingX={1}
-      flexDirection="row"
-      gap={0}
-    >
+    <Box borderStyle="single" borderColor="gray" paddingX={1} flexDirection="row" gap={0}>
       {/* Forge status */}
-      <Segment
-        color={forgeOk ? 'green' : 'yellow'}
-        bold
-      >
+      <Segment color={forgeOk ? 'green' : 'yellow'} bold>
         {forgeOk ? 'AK ✓' : 'AK ✗'}
       </Segment>
 
@@ -63,9 +54,7 @@ export default function StatusBar({ ctx }) {
       <Divider />
 
       {/* Branch */}
-      <Segment color="blue">
-        {truncate(ctx.branch, MAX_BRANCH_LENGTH)}
-      </Segment>
+      <Segment color="blue">{truncate(ctx.branch, MAX_BRANCH_LENGTH)}</Segment>
 
       <Divider />
 
