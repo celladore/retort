@@ -3,7 +3,7 @@ name: 'feature-review'
 description: 'Reviews the current feature configuration for the repo. Analyzes which features are enabled/disabled, checks for misconfigured dependencies, identifies unused features (enabled but no matching code patterns), and recommends features to enable based on codebase analysis.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-12'
+last_updated: '2026-03-13'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

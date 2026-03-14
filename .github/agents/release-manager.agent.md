@@ -3,7 +3,7 @@ name: 'Release Manager'
 description: 'Release management specialist responsible for coordinating releases, managing versioning, generating changelogs, and ensuring smooth deployment workflows from staging to production. During code review, validates that breaking changes are documented, version bumps are correct, changelogs are updated, and deprecations are marked properly.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-12'
+last_updated: '2026-03-13'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

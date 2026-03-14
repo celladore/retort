@@ -3,7 +3,7 @@ description: 'QUALITY (quality) — Code review, refactoring, bugs, reliability,
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(pytest *), Bash(go *)
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-12'
+last_updated: '2026-03-13'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

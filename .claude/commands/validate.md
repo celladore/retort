@@ -3,7 +3,7 @@ description: 'Validates generated outputs for correctness. Checks that all requi
 allowed-tools: Read, Glob
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-12'
+last_updated: '2026-03-13'
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

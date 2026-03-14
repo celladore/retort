@@ -3,7 +3,7 @@ name: 'Grant & Programs Hunter'
 description: 'Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator credits, academic partnerships, bug bounty programs, community contribution rewards, and referral bonuses. Maintains an active pipeline of applications.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-12'
+last_updated: '2026-03-13'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
