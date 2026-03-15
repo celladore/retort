@@ -564,11 +564,11 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 }
 
 // Export internal helpers so they can be directly unit-tested.
+// auditUnresolvedPlaceholders is exported at declaration above.
 export {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
-  auditUnresolvedPlaceholders,
   isAllowedFormatter,
   isAllowedLinter,
   resolveFormatter,
