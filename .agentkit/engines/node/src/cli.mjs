@@ -492,25 +492,21 @@ async function main() {
     process.exit(1);
   }
 
-  const flags = parseFlags(command, commandArgs);
-
-  // Show command-specific help
-  if (flags.help) {
-    showHelp();
-    process.exit(0);
-  }
-
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);
   }
 
-  // Load js-yaml now that dependencies are guaranteed to be installed
   yaml = (await import('js-yaml')).default;
-
-  // Now that yaml is available, load command flags from spec
   const loaded = loadCommandFlags(AGENTKIT_ROOT);
   VALID_FLAGS = loaded.validFlags;
   FLAG_TYPES = loaded.flagTypes;
+
+  const flags = parseFlags(command, commandArgs);
+
+  if (flags.help) {
+    showHelp();
+    process.exit(0);
+  }
 
   // Record command invocation for cost tracking (best-effort)
   try {

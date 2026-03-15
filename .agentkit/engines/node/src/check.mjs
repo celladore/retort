@@ -16,13 +16,38 @@ import { commandExists, execCommand, formatDuration, isValidCommand } from './ru
 // ---------------------------------------------------------------------------
 
 /**
+ * Resolve typecheck command for node stack: use package script when defined.
+ * Prefers running the script body directly when it is a simple node no-op so the
+ * step does not depend on pnpm in the spawned process PATH.
+ * @param {object} stack - Stack config
+ * @param {string} projectRoot - Project root path
+ * @returns {string} Command to run
+ */
+function resolveTypecheckCommand(stack, projectRoot) {
+  if (stack.name !== 'node' || !stack.typecheck || !projectRoot) return stack.typecheck;
+  try {
+    const pkgPath = resolve(projectRoot, 'package.json');
+    if (!existsSync(pkgPath)) return stack.typecheck;
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const script = pkg.scripts?.typecheck;
+    if (typeof script !== 'string' || !script.trim()) return stack.typecheck;
+    if (/^node\s+-e\s+/.test(script.trim())) return script.trim();
+    return 'pnpm typecheck';
+  } catch {
+    /* ignore */
+  }
+  return stack.typecheck;
+}
+
+/**
  * Build the check steps for a detected stack.
  * @param {object} stack - Stack config from teams.yaml techStacks
  * @param {object} flags - CLI flags
  * @param {string} agentkitRoot - Path to .agentkit root
+ * @param {string} [projectRoot] - Project root (for node typecheck script resolution)
  * @returns {Array<{ name: string, command: string, fixCommand?: string }>}
  */
-function buildSteps(stack, flags, agentkitRoot) {
+function buildSteps(stack, flags, agentkitRoot, projectRoot) {
   const steps = [];
 
   if (stack.formatter) {
@@ -62,12 +87,13 @@ function buildSteps(stack, flags, agentkitRoot) {
   }
 
   if (stack.typecheck) {
-    if (!isValidCommand(stack.typecheck)) {
+    const typecheckCmd = resolveTypecheckCommand(stack, projectRoot);
+    if (!isValidCommand(typecheckCmd)) {
       console.warn(`[agentkit:check] Skipping invalid typecheck command: ${stack.typecheck}`);
     } else {
       steps.push({
         name: 'typecheck',
-        command: stack.typecheck,
+        command: typecheckCmd,
       });
     }
   }
@@ -374,7 +400,7 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 
   for (const stack of detectedStacks) {
     console.log(`--- Stack: ${stack.name} ---`);
-    const steps = buildSteps(stack, flags, agentkitRoot);
+    const steps = buildSteps(stack, flags, agentkitRoot, projectRoot);
     const stackResults = [];
 
     for (const step of steps) {
@@ -422,7 +448,7 @@ export async function runCheck({ agentkitRoot, projectRoot, flags = {} }) {
 
     // Coverage check: run after test step if --coverage flag or threshold is configured
     if (flags.coverage || coverageThreshold != null) {
-      const covCmd = resolveCoverageCommand(stack);
+      const covCmd = resolveCoverageCommand(stack, projectRoot);
       if (covCmd.command && isValidCommand(covCmd.command)) {
         process.stdout.write(`  ${'coverage'.padEnd(12)} `);
         const covResult = execCommand(covCmd.command, { cwd: projectRoot });

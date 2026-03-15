@@ -29,7 +29,7 @@
 
 This project follows a 5-phase lifecycle model:
 
-1. **Discovery** — Understand the problem, review existing docs
+1. **Discovery** — Understand the problem, review existing docs ([documentation hub](docs/README.md))
 2. **Planning** — Design the solution, write ADRs for significant decisions
 3. **Implementation** — Write code, add tests, run `/check` locally
 4. **Validation** — Create PR, pass CI, get code review
