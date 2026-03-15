@@ -3,7 +3,7 @@ name: 'Security Auditor'
 description: 'Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verification across the entire codebase and infrastructure.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-13'
+last_updated: '2026-03-15'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
