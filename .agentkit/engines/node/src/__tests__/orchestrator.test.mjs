@@ -22,28 +22,24 @@ import {
   updateTeamStatus,
 } from '../orchestrator.mjs';
 
-// Use a temporary directory for tests
+// Use a temporary directory for tests; unique per run to avoid Windows EPERM on rmSync
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_ROOT = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'orchestrator');
-const STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
+const TEST_BASE = resolve(__dirname, '..', '..', '..', '..', '..', '.test-tmp', 'orchestrator');
+let TEST_ROOT;
+let STATE_DIR;
+let TASKS_DIR;
+let AGENTKIT_ROOT;
 
 describe('orchestrator', () => {
   beforeEach(() => {
-    // Clean up test directory
-    if (existsSync(TEST_ROOT)) {
-      rmSync(TEST_ROOT, { recursive: true });
-    }
+    const id = `run-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    TEST_ROOT = resolve(TEST_BASE, id);
+    STATE_DIR = resolve(TEST_ROOT, '.agentkit', 'state');
+    TASKS_DIR = resolve(TEST_ROOT, '.agentkit', 'state', 'tasks');
+    AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
     mkdirSync(STATE_DIR, { recursive: true });
-    // Create a mock .agentkit-repo marker
     writeFileSync(resolve(TEST_ROOT, '.agentkit-repo'), 'test-project', 'utf-8');
-    // Create a mock .git so git commands don't fail badly
     mkdirSync(resolve(TEST_ROOT, '.git'), { recursive: true });
-  });
-
-  afterEach(() => {
-    if (existsSync(TEST_ROOT)) {
-      rmSync(TEST_ROOT, { recursive: true });
-    }
   });
 
   describe('loadState()', () => {
@@ -257,8 +253,6 @@ describe('orchestrator', () => {
   });
 
   describe('getTasksSummary()', () => {
-    const TASKS_DIR = resolve(TEST_ROOT, '.agentkit', 'state', 'tasks');
-
     it('returns empty-queue message when tasks directory does not exist', async () => {
       const result = await getTasksSummary(TEST_ROOT);
       expect(result).toBe('No tasks in the task queue.');
@@ -415,8 +409,6 @@ describe('orchestrator', () => {
   });
 
   describe('resolveTeamByArea()', () => {
-    const AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
-
     beforeEach(() => {
       clearTeamsSpecCache();
     });
@@ -457,8 +449,6 @@ describe('orchestrator', () => {
   });
 
   describe('computeEscalation()', () => {
-    const AGENTKIT_ROOT = resolve(TEST_ROOT, '.agentkit');
-
     beforeEach(() => {
       clearTeamsSpecCache();
     });
