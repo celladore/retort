@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-15 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-13 -->
 <!-- Format: Plain Markdown agent persona definition. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory -->
 

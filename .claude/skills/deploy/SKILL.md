@@ -3,7 +3,7 @@ name: 'deploy'
 description: 'Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-13'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
