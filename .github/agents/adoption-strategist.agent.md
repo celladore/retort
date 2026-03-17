@@ -3,7 +3,7 @@ name: 'Adoption Strategist'
 description: 'Plans and executes adoption campaigns — onboarding new repos, migration paths for existing projects, and rollout strategies for new framework features across the portfolio.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

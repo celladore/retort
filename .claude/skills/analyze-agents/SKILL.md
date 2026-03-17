@@ -3,7 +3,7 @@ name: 'analyze-agents'
 description: 'Generates a comprehensive agent/team relationship matrix. Analyzes dependencies, notifications, handoffs, coverage gaps, bottlenecks, and consolidation opportunities across all teams and agents.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
