@@ -3,7 +3,7 @@ name: 'brand'
 description: 'Manage the project brand spec (brand.yaml) and editor theme. Supports validation, palette preview, theme mapping, contrast auditing, scaffolding, and regeneration of editor theme files.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

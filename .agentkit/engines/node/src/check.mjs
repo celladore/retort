@@ -31,8 +31,35 @@ function resolveTypecheckCommand(stack, projectRoot) {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
     const script = pkg.scripts?.typecheck;
     if (typeof script !== 'string' || !script.trim()) return stack.typecheck;
-    if (/^node\s+-e\s+/.test(script.trim())) return script.trim();
-    return 'pnpm typecheck';
+    const trimmed = script.trim();
+    // If the script is a simple node one-liner, run it directly to avoid
+    // depending on a package manager binary being present.
+    if (/^node\s+-e\s+/.test(trimmed)) return trimmed;
+
+    // Otherwise, prefer running the script via the project's package manager.
+    // Detect package manager by lockfile + available executable, then fall
+    // back to any available PM, and finally to the configured stack.typecheck.
+    let pm = null;
+    if (existsSync(resolve(projectRoot, 'pnpm-lock.yaml')) && commandExists('pnpm')) {
+      pm = 'pnpm';
+    } else if (existsSync(resolve(projectRoot, 'package-lock.json')) && commandExists('npm')) {
+      pm = 'npm';
+    } else if (existsSync(resolve(projectRoot, 'yarn.lock')) && commandExists('yarn')) {
+      pm = 'yarn';
+    } else if (commandExists('pnpm')) {
+      pm = 'pnpm';
+    } else if (commandExists('npm')) {
+      pm = 'npm';
+    } else if (commandExists('yarn')) {
+      pm = 'yarn';
+    }
+
+    if (pm === 'yarn') return 'yarn typecheck';
+    if (pm) return `${pm} run typecheck`;
+
+    // If we can't determine a usable package manager, fall back to the
+    // stack-configured command, which might be a direct executable.
+    return stack.typecheck;
   } catch {
     /* ignore */
   }
@@ -89,7 +116,9 @@ function buildSteps(stack, flags, agentkitRoot, projectRoot) {
   if (stack.typecheck) {
     const typecheckCmd = resolveTypecheckCommand(stack, projectRoot);
     if (!isValidCommand(typecheckCmd)) {
-      console.warn(`[agentkit:check] Skipping invalid typecheck command: ${stack.typecheck}`);
+      console.warn(
+        `[agentkit:check] Skipping invalid typecheck command: ${typecheckCmd} (resolved from: ${stack.typecheck})`
+      );
     } else {
       steps.push({
         name: 'typecheck',
