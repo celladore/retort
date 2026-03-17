@@ -7,22 +7,23 @@
 
 ## Overview
 
-Set up the Linear PhoenixVC workspace with 5 sub-teams, label-based routing, issue templates, workflow automations, and auto-triage via Tembo. This creates a structured workflow where new issues are automatically enriched with context (codebase, Notion, Sentry), labeled, prioritized, and routed to the appropriate team for action.
+Set up the Linear PhoenixVC workspace with 7 sub-teams, label-based routing, issue templates, workflow automations, auto-triage via Tembo, and a Notion intake agent. This creates a structured workflow where new issues are automatically enriched with context (codebase, Notion, Sentry), labeled, prioritized, and routed to the appropriate team for action.
 
 ## Implementation Summary
 
 ### Projects/Components Affected
 
-- ✅ **Linear PhoenixVC Workspace** — 5 sub-teams created with distinct purposes
-- ✅ **Label System** — 2 label groups (Routing + Type) with 11 labels total
-- ✅ **Issue Templates** — 6 templates at workspace level with default properties
+- ✅ **Linear PhoenixVC Workspace** — 7 sub-teams created with distinct purposes
+- ✅ **Label System** — 2 label groups (Routing + Type) with 13 labels total
+- ✅ **Issue Templates** — 8 templates at workspace level with default properties
 - ✅ **Workflow Automations** — PR-to-status mapping, auto-close stale issues
 - ✅ **Tembo Auto-Triage** — "Enrich Linear Issue" automation with routing logic
+- ✅ **Notion Intake Agent** — Automated Notion → Linear filing with research, dedup, and routing
 - ✅ **Issue Statuses** — 6 custom statuses added (Investigating, Findings Ready, Testing, Waiting, Passed, Failed)
 
 ### Key Changes Made
 
-1. **Team Structure** — Created Coding (COD), Research (RES), QA (QA), Ops (OPS), Design (DES) as sub-teams under PhoenixVC (PHO)
+1. **Team Structure** — Created Coding (COD), Research (RES), QA (QA), Ops (OPS), Design (DES), Docs (DOC), Support (SUP) as sub-teams under PhoenixVC (PHO)
 2. **Label-Based Routing** — Each ticket gets 1 Routing label (determines team) + 1 Type label (Bug/Feature/Improvement/chore)
 3. **Auto-Triage via Tembo** — Claude Code Opus 4.6 agent enriches every new issue and applies routing labels + moves to correct team
 4. **Templates with Defaults** — Each template auto-sets Team and Labels via default properties
@@ -53,9 +54,9 @@ Extended existing Tembo "Enrich Linear Issue" automation to also apply routing l
 
 ### Configuration
 
-- **Teams**: 5 sub-teams + 1 parent = 6 total
-- **Labels**: 11 workspace-level labels in 2 groups
-- **Templates**: 6 issue templates with default properties
+- **Teams**: 7 sub-teams + 1 parent = 8 total
+- **Labels**: 13 workspace-level labels in 2 groups
+- **Templates**: 8 issue templates with default properties
 - **Statuses**: 14 total (8 default + 6 custom)
 - **Automations**: PR→status mapping, auto-close stale, Tembo enrichment + routing
 
@@ -68,6 +69,8 @@ Extended existing Tembo "Enrich Linear Issue" automation to also apply routing l
 | QA | Ranger (recommended), Tusk (recommended) — not yet enabled |
 | Ops | GitHub integration (broken auth) |
 | Design | Stilla (meeting context + drafts) |
+| Docs | Claude Code, Notion AI |
+| Support | Intercom (MCP), ChatGPT |
 
 ## Lessons Learned
 
@@ -88,7 +91,7 @@ Extended existing Tembo "Enrich Linear Issue" automation to also apply routing l
 
 - Create labels at workspace level with descriptive group names
 - Use templates' default properties to auto-route, not workflow automations
-- Keep team count small (5) — more teams = more routing complexity
+- Keep team count small (7) — more teams = more routing complexity
 - Single triage owner (human) as safety net until automation is proven
 
 ## Future Considerations
@@ -114,6 +117,7 @@ Extended existing Tembo "Enrich Linear Issue" automation to also apply routing l
 
 - **Session Memory**: `~/.claude/projects/.../memory/MEMORY.md` — Linear section added
 - **MCP Knowledge Graph**: 12 entities + 11 relations saved covering full workspace config
+- **Notion Intake Agent**: `docs/integrations/04_notion-linear-intake-agent.md` — Full agent instructions
 
 ---
 
