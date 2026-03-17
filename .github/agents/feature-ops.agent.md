@@ -3,7 +3,7 @@ name: 'Feature Operations Specialist'
 description: 'Kit feature management specialist responsible for analyzing, configuring, and auditing the agentkit-forge feature set for this repository. Understands the full feature dependency graph, overlay precedence rules, and how features map to template output. Helps teams adopt the right features for their workflow and troubleshoot feature configuration issues.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-17'
+last_updated: '2026-03-15'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

@@ -13,7 +13,7 @@ Instructions for setting up a local development environment for agentkit-forge.
 | Tool          | Version             | Installation                         |
 | ------------- | ------------------- | ------------------------------------ |
 | Node.js       | <!-- e.g. >= 22 --> | [nodejs.org](https://nodejs.org)     |
-| pnpm          | <!-- e.g. >= 9 -->  | `npm install -g pnpm`                |
+| pnpm          | <!-- e.g. >= 9 -->  | See [pnpm](https://pnpm.io)          |
 | Docker        | <!-- e.g. >= 24 --> | [docker.com](https://www.docker.com) |
 | <!-- Tool --> | <!-- Version -->    | <!-- Link -->                        |
 
@@ -25,7 +25,7 @@ git clone <!-- REPO_URL -->
 cd agentkit-forge
 
 # Install dependencies
-pnpm install
+pnpm install --frozen-lockfile
 
 # Set up environment variables
 cp .env.example .env

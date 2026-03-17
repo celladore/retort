@@ -13,6 +13,7 @@
     "start": "node dist/start/index.js",
     "start:build": "esbuild src/start/index.js --bundle --platform=node --format=esm --outfile=dist/start/index.js --jsx=automatic --external:ink --external:react --external:ink-text-input --external:ink-select-input --external:fuse.js",
     "start:dev": "pnpm run start:build && node dist/start/index.js",
+    "typecheck": "node -e \"\"",
     "test": "pnpm -C .agentkit test",
     "test:start": "vitest run --config vitest.config.mjs",
     "test:start:coverage": "vitest run --config vitest.config.mjs --coverage",
