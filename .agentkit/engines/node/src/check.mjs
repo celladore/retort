@@ -116,7 +116,9 @@ function buildSteps(stack, flags, agentkitRoot, projectRoot) {
   if (stack.typecheck) {
     const typecheckCmd = resolveTypecheckCommand(stack, projectRoot);
     if (!isValidCommand(typecheckCmd)) {
-      console.warn(`[agentkit:check] Skipping invalid typecheck command: ${stack.typecheck}`);
+      console.warn(
+        `[agentkit:check] Skipping invalid typecheck command: ${typecheckCmd} (resolved from: ${stack.typecheck})`
+      );
     } else {
       steps.push({
         name: 'typecheck',
