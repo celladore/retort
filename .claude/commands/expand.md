@@ -3,7 +3,7 @@ description: 'Runs the expansion analyzer to identify gaps, missing capabilities
 allowed-tools: Read, Write, Glob, Grep
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-13'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

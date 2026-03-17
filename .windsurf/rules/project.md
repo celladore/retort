@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-13 -->
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-17 -->
 <!-- Format: Plain Markdown rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
