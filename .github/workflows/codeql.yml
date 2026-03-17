@@ -1,10 +1,8 @@
 name: CodeQL
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  # Reduced to weekly + manual to cut GitHub Actions costs
+  # Was running on every push/PR including Renovate bot
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:
@@ -17,7 +15,6 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
-
 jobs:
   analyze:
     name: analyze-javascript
