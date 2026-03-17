@@ -3,7 +3,7 @@ name: 'Portfolio Analyst'
 description: 'Scans the adoption landscape — inventories downstream repos using AgentKit Forge, compares spec versions, detects drift, and maps the portfolio health across all managed projects.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

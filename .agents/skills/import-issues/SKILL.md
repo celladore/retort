@@ -3,7 +3,7 @@ name: 'import-issues'
 description: 'Imports issues from the configured external tracker (GitHub or Linear), normalizes fields to the canonical backlog schema, deduplicates against existing items, assigns teams via intake routing rules, and merges into AGENT_BACKLOG.md and .claude/state/backlog.json. Gated behind the process.intake.autoImport flag (can be overridden with --force).'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

@@ -3,7 +3,7 @@ description: 'Regenerates all AI tool configurations from the AgentKit Forge spe
 allowed-tools: Bash(node *), Bash(pnpm *), Bash(git *), Read, Glob
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-15'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
