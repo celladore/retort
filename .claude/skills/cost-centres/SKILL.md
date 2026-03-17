@@ -3,7 +3,7 @@ name: 'cost-centres'
 description: 'Cost centre management for cloud infrastructure. Manages budget allocations, resource group mappings, tag compliance, and spend tracking. Requires a FinOps-enabled overlay (finops rule domain). For AI session cost tracking, use /cost instead.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-13'
+last_updated: '2026-03-15'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
