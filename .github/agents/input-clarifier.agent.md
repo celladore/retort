@@ -3,7 +3,7 @@ name: 'Input Clarifier'
 description: 'Assesses raw team creation requests, extracts constraints, validates against existing teams to prevent scope overlap, and enriches the request with missing context before passing to the mission definer.'
 generated_by: 'agentkit-forge'
 last_model: 'sync-engine'
-last_updated: '2026-03-13'
+last_updated: '2026-03-17'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
