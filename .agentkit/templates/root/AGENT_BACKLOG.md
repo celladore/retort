@@ -24,8 +24,8 @@
 
 | Priority | Team              | Task                                          | Phase          | Status      | Notes                    |
 | -------- | ----------------- | --------------------------------------------- | -------------- | ----------- | ------------------------ |
-| P0       | T4-Infrastructure | Configure CI pipeline for main branch         | Implementation | In Progress | GitHub Actions workflow  |
-| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul        |
+| P0       | T4-Infrastructure | Configure CI pipeline for main branch         | Implementation | In Progress | GitHub Actions workflow; scope: branch-protection, drift check, quality gates on main |
+| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul; scope: .agentkit test suite, 80% coverage target, run in CI         |
 | P1       | T1-Backend        | Define core API route structure               | Planning       | In Progress | REST endpoints for v1    |
 | P1       | T3-Data           | Design initial database schema                | Planning       | Todo        | Depends on T1 API design |
 | P1       | T8-DevEx          | Configure linting and formatting rules        | Implementation | Done        | ESLint + Prettier        |
@@ -99,6 +99,10 @@ Items finished in previous sprints.
 2. Use the format: `Blocked by: T{n} - {description}`.
 3. The orchestrator will attempt to resolve blockers during sync cycles.
 4. If blocked for more than one phase cycle, escalate per UNIFIED_AGENT_TEAMS.md.
+
+### Task files (optional)
+
+When delegating work via `/orchestrate`, create per-task JSON files in `.claude/state/tasks/` (lifecycle: submitted → accepted → working → completed/failed/rejected). The project-status dashboard uses these to report throughput, WIP count, and lead time; if the directory is empty, those metrics show as N/A.
 
 ---
 

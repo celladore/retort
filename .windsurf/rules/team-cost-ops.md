@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-15 -->
-=======
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-13 -->
->>>>>>> origin/main
+<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-17 -->
 <!-- Format: Plain Markdown team rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
