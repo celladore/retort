@@ -40,7 +40,11 @@ run_check() {
     if output=$(cd "$CWD" && "$@" 2>&1); then
         return 0
     else
-        FAILURE_REASON="${label} failed:\n${output}"
+        # Truncate to last 3000 chars to avoid "Argument list too long" when
+        # output is large (e.g. a failing test run with hundreds of results).
+        local truncated
+        truncated=$(printf '%s' "$output" | tail -c 3000)
+        FAILURE_REASON="${label} failed:\n${truncated}"
         return 1
     fi
 }
