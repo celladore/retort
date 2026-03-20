@@ -312,8 +312,10 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
   if (existsSync(gitattrsPath)) {
     const gitattrs = readFileSync(gitattrsPath, 'utf-8');
     const hasMarkers =
-      gitattrs.includes('# >>> AgentKit Forge merge drivers') &&
-      gitattrs.includes('# <<< AgentKit Forge merge drivers');
+      (gitattrs.includes('# >>> Retort merge drivers') ||
+        gitattrs.includes('# >>> AgentKit Forge merge drivers')) &&
+      (gitattrs.includes('# <<< Retort merge drivers') ||
+        gitattrs.includes('# <<< AgentKit Forge merge drivers'));
     const hasMergeRules = gitattrs.includes('merge=agentkit-generated');
 
     if (!hasMergeRules) {
