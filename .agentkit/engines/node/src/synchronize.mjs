@@ -1282,6 +1282,124 @@ async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, co
 }
 
 // ---------------------------------------------------------------------------
+// Org-meta skill distribution + uptake detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolves the path to the org-meta skills directory.
+ * Priority: ORG_META_PATH env var → ~/repos/org-meta (default)
+ *
+ * @returns {string}
+ */
+function resolveOrgMetaSkillsDir() {
+  const base = process.env.ORG_META_PATH
+    ? resolve(process.env.ORG_META_PATH)
+    : resolve(process.env.HOME || process.env.USERPROFILE || '~', 'repos', 'org-meta');
+  return join(base, 'skills');
+}
+
+/**
+ * Copies org-meta skills (source: org-meta) into tmpDir/.agents/skills/<name>/SKILL.md.
+ * Non-destructive: if the skill already exists in projectRoot with different content,
+ * the file is NOT written to tmpDir — the local version is preserved.
+ *
+ * @param {string} tmpDir - Temp directory for sync output
+ * @param {string} projectRoot - Actual project root (for diffing existing files)
+ * @param {object} skillsSpec - Parsed skills.yaml
+ * @param {function} log - Logger
+ */
+async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log) {
+  const orgMetaSkillsDir = resolveOrgMetaSkillsDir();
+  if (!existsSync(orgMetaSkillsDir)) {
+    log(`[agentkit:sync] org-meta skills: directory not found at ${orgMetaSkillsDir} — skipping`);
+    return;
+  }
+
+  const orgMetaSkills = (skillsSpec.skills || []).filter((s) => s.source === 'org-meta');
+
+  for (const skill of orgMetaSkills) {
+    const srcPath = join(orgMetaSkillsDir, skill.name, 'SKILL.md');
+    if (!existsSync(srcPath)) {
+      log(`[agentkit:sync] org-meta skill '${skill.name}' not found at ${srcPath} — skipping`);
+      continue;
+    }
+
+    const destRelPath = join('.agents', 'skills', skill.name, 'SKILL.md');
+    const destProjectPath = join(projectRoot, destRelPath);
+
+    // If local version exists and differs, preserve it (non-destructive)
+    if (existsSync(destProjectPath)) {
+      const localContent = readFileSync(destProjectPath, 'utf-8');
+      const srcContent = readFileSync(srcPath, 'utf-8');
+      if (localContent !== srcContent) {
+        log(
+          `[agentkit:sync] org-meta skill '${skill.name}' differs from local — preserving local copy`
+        );
+        continue;
+      }
+    }
+
+    const content = readFileSync(srcPath, 'utf-8');
+    await writeOutput(join(tmpDir, destRelPath), content);
+  }
+}
+
+/**
+ * Scans projectRoot/.agents/skills/ for skill directories not listed in skills.yaml.
+ * Appends unknown skill names to .agents/skills/_unknown/report.md in tmpDir.
+ * This is the non-destructive uptake mechanism — unknown skills are never overwritten,
+ * only reported. Use `pnpm ak:propose-skill <name>` to promote them to org-meta.
+ *
+ * @param {string} tmpDir - Temp directory for sync output
+ * @param {string} projectRoot - Actual project root (for reading existing skills)
+ * @param {object} skillsSpec - Parsed skills.yaml
+ * @param {string} syncDate - ISO date string (YYYY-MM-DD)
+ * @param {function} log - Logger
+ */
+async function syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, syncDate, log) {
+  const localSkillsDir = join(projectRoot, '.agents', 'skills');
+  if (!existsSync(localSkillsDir)) return;
+
+  const knownNames = new Set((skillsSpec.skills || []).map((s) => s.name));
+  let entries;
+  try {
+    entries = await readdir(localSkillsDir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+
+  const unknownSkills = entries
+    .filter((e) => e.isDirectory() && e.name !== '_unknown' && !knownNames.has(e.name))
+    .map((e) => e.name);
+
+  if (unknownSkills.length === 0) return;
+
+  log(
+    `[agentkit:sync] Found ${unknownSkills.length} local skill(s) not in skills.yaml: ${unknownSkills.join(', ')}`
+  );
+
+  const reportPath = join(tmpDir, '.agents', 'skills', '_unknown', 'report.md');
+
+  // Read existing report from projectRoot (if any) to append rather than replace
+  const existingReportPath = join(projectRoot, '.agents', 'skills', '_unknown', 'report.md');
+  let existingContent = '';
+  if (existsSync(existingReportPath)) {
+    existingContent = readFileSync(existingReportPath, 'utf-8');
+  }
+
+  // Build new entries (only skills not already listed in the report)
+  const newEntries = unknownSkills.filter((name) => !existingContent.includes(`| \`${name}\``));
+  if (newEntries.length === 0) return;
+
+  const header = existingContent
+    ? ''
+    : `# Unknown Skills — Uptake Candidates\n\nSkills found in \`.agents/skills/\` that are not in \`skills.yaml\`.\n\nTo promote a skill: \`pnpm ak:propose-skill <name>\`\n\n| Skill | First Seen | Action |\n|-------|------------|--------|\n`;
+
+  const rows = newEntries.map((name) => `| \`${name}\` | ${syncDate} | pending |\n`).join('');
+  await writeOutput(reportPath, existingContent + header + rows);
+}
+
+// ---------------------------------------------------------------------------
 // Warp sync helper
 // ---------------------------------------------------------------------------
 
@@ -1778,6 +1896,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const rulesSpec = readYaml(resolve(agentkitRoot, 'spec', 'rules.yaml')) || {};
   const settingsSpec = readYaml(resolve(agentkitRoot, 'spec', 'settings.yaml')) || {};
   const agentsSpec = readYaml(resolve(agentkitRoot, 'spec', 'agents.yaml')) || {};
+  const skillsSpec = readYaml(resolve(agentkitRoot, 'spec', 'skills.yaml')) || {};
   const docsSpec = readYaml(resolve(agentkitRoot, 'spec', 'docs.yaml')) || {};
   const sectionsSpec = readYaml(resolve(agentkitRoot, 'spec', 'sections.yaml')) || {};
   const projectSpec = readYaml(resolve(agentkitRoot, 'spec', 'project.yaml'));
@@ -2246,7 +2365,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     if (targets.has('codex')) {
       gatedTasks.push(
-        syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec)
+        syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
+        syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log),
+        syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log)
       );
     }
 

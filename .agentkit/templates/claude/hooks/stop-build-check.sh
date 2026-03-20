@@ -95,7 +95,9 @@ ran_check=false
 # hook essentially free (<0.1s) when only docs or config were touched.
 _changed_files=""
 if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
-    _changed_files=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null || true)
+    _tracked=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null || true)
+    _untracked=$(git -C "$CWD" ls-files --others --exclude-standard 2>/dev/null || true)
+    _changed_files=$(printf '%s\n%s\n' "$_tracked" "$_untracked" | sed '/^$/d' | sort -u)
 fi
 _has_changed() { printf '%s\n' "$_changed_files" | grep -qE "$1"; }
 

@@ -31,8 +31,15 @@ function resolveTypecheckCommand(stack, projectRoot) {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
     const script = pkg.scripts?.typecheck;
     if (typeof script !== 'string' || !script.trim()) return stack.typecheck;
+    // If the script is a no-op node invocation, run it directly without a package manager
     if (/^node\s+-e\s+/.test(script.trim())) return script.trim();
-    return 'pnpm typecheck';
+    // Detect the package manager from lockfiles so we don't hardcode pnpm
+    const pm = existsSync(resolve(projectRoot, 'pnpm-lock.yaml'))
+      ? 'pnpm'
+      : existsSync(resolve(projectRoot, 'yarn.lock'))
+        ? 'yarn'
+        : 'npm run';
+    return `${pm} typecheck`;
   } catch {
     /* ignore */
   }

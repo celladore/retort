@@ -9,6 +9,7 @@ import { extname, join, resolve } from 'path';
 import { validateSpec, PROJECT_ENUMS } from './spec-validator.mjs';
 import { emitEvent } from './event-emitter.mjs';
 import { createTask } from './task-protocol.mjs';
+import { VALID_COMMANDS, FRAMEWORK_COMMANDS as CLI_FRAMEWORK_COMMANDS } from './commands-registry.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const userContext =
@@ -311,12 +312,8 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   // ─── Phase 10: CLI-spec command parity ─────────────────────────────────
   console.log('\n  --- CLI-Spec Command Parity ---');
   {
-    // Commands that exist in the CLI but are intentionally excluded from the
-    // user-facing spec (framework internals, not slash commands).
-    const FRAMEWORK_COMMANDS = new Set([
-      'validate', 'spec-validate', 'add', 'remove', 'list',
-      'tasks', 'delegate', 'features', 'init',
-    ]);
+    // Imported from commands-registry.mjs — single source of truth
+    const FRAMEWORK_COMMANDS = CLI_FRAMEWORK_COMMANDS;
 
     // Load spec command names from commands.yaml
     const commandsYamlPath = join(agentkitRoot, 'spec', 'commands.yaml');
@@ -336,15 +333,8 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
       warnings++;
     }
 
-    // The canonical CLI command list (mirrors VALID_COMMANDS in cli.mjs).
-    // Update this list when cli.mjs VALID_COMMANDS changes.
-    const CLI_COMMANDS = new Set([
-      'init', 'sync', 'validate', 'discover', 'spec-validate', 'orchestrate',
-      'plan', 'check', 'review', 'handoff', 'healthcheck', 'cost',
-      'project-review', 'import-issues', 'backlog', 'sync-backlog',
-      'add', 'remove', 'list', 'features', 'tasks', 'delegate',
-      'doctor', 'scaffold', 'preflight', 'analyze-agents', 'cicd-optimize',
-    ]);
+    // Single source of truth: imported from cli.mjs
+    const CLI_COMMANDS = new Set(VALID_COMMANDS);
 
     // CLI commands not in spec and not framework internals — these are gaps
     const missingFromSpec = [...CLI_COMMANDS].filter(
