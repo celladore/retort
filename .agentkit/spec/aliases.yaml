@@ -1,6 +1,6 @@
 # =============================================================================
 # aliases.yaml — Command compatibility aliases
-# Canonical source of truth for agentkit-forge
+# Canonical source of truth for retort
 # Version: 0.1.0
 # =============================================================================
 # Aliases provide shorthand and alternate syntax for invoking commands.

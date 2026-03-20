@@ -1,6 +1,6 @@
 # =============================================================================
 # project.yaml — Project-level metadata for rich, context-aware AI configs
-# Canonical source of truth for agentkit-forge
+# Canonical source of truth for retort
 # Version: 0.1.0
 # =============================================================================
 # This file feeds into every generated config (AGENTS.md, CLAUDE.md, WARP.md,
@@ -13,9 +13,9 @@
 # =============================================================================
 
 # Project identity
-name: agentkit-forge # e.g. "chaufher", "phoenix", "my-api"
-githubSlug: phoenixvc/agentkit-forge # e.g. "my-org/my-repo" — used in GitHub URLs (security advisories, etc.)
-description: AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
+name: retort # e.g. "chaufher", "phoenix", "my-api"
+githubSlug: phoenixvc/retort # e.g. "my-org/my-repo" — used in GitHub URLs (security advisories, etc.)
+description: Retort framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
 phase: active # greenfield | active | maintenance | legacy
 
 # Tech stack (auto-detected + confirmed at init)
@@ -259,7 +259,7 @@ automation:
     semgrep: true
     dependencyAudit: true
   languageProfile:
-    mode: hybrid # configured | hybrid | heuristic
+    mode: configured # configured | hybrid | heuristic
     diagnostics: verbose # off | minimal | verbose
     inferFrom:
       frameworks: true
@@ -267,6 +267,14 @@ automation:
     scaffoldOverrides:
       alwaysRegenerate: [] # relative paths that must always be regenerated even if scaffold-once by default
       scaffoldOnce: [] # relative paths that should be treated as scaffold-once
+
+# Domain selection — controls which rule domains are generated
+# When omitted, domains are auto-selected from stack.languages (mode: configured/hybrid)
+# or all domains are included (mode: heuristic).
+# Uncomment and specify to override auto-detection:
+# domains:
+#   rules: [typescript, security, testing, git-workflow, documentation,
+#           ci-cd, dependency-management, agent-conduct, template-protection]
 
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:

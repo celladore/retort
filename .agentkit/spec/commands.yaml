@@ -1,6 +1,6 @@
 # =============================================================================
-# commands.yaml — Command definitions for agentkit-forge
-# Canonical source of truth for agentkit-forge
+# commands.yaml — Command definitions for retort
+# Canonical source of truth for retort
 # Version: 0.1.0
 # =============================================================================
 # Each command defines: name, description, type, flags, and allowed-tools.

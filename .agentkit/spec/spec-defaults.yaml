@@ -1,4 +1,4 @@
-# AgentKit Forge — Spec Defaults
+# Retort — Spec Defaults
 # Single source of truth for template-variable default values.
 #
 # Merge precedence (highest → lowest):
@@ -10,6 +10,11 @@
 # Static defaults — applied when a variable is not set anywhere else
 # ---------------------------------------------------------------------------
 issueTracker: github
+# domains key is intentionally absent — it defaults to null (auto-detect from stack).
+# Set in project.yaml to explicitly control which rule domains are generated:
+#   domains:
+#     rules: [typescript, security, testing, git-workflow, documentation,
+#             ci-cd, dependency-management, agent-conduct]
 testingCoverage: 80
 maxTaskTurns: 25
 maxStagnationTurns: 20

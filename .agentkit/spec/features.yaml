@@ -7,7 +7,7 @@
 # PURPOSE
 # -------
 # Each feature represents a discrete, independently toggleable capability that
-# agentkit-forge provides to adopting repositories. This file is the single
+# retort provides to adopting repositories. This file is the single
 # source of truth — the feature-manager engine reads it at `sync` and `init`
 # time, generates template variables, and enforces dependency constraints.
 #

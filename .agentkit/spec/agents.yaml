@@ -1,6 +1,6 @@
 # =============================================================================
 # agents.yaml — Agent definitions organized by category
-# Canonical source of truth for agentkit-forge
+# Canonical source of truth for retort
 # Version: 0.1.0
 # =============================================================================
 # Agents are specialized AI personas with defined roles, focus areas,
@@ -1114,7 +1114,7 @@ agents:
       name: Feature Operations Specialist
       role: >
         Kit feature management specialist responsible for analyzing,
-        configuring, and auditing the agentkit-forge feature set for
+        configuring, and auditing the retort feature set for
         this repository. Understands the full feature dependency graph,
         overlay precedence rules, and how features map to template
         output. Helps teams adopt the right features for their workflow
