@@ -467,6 +467,13 @@ async function main() {
     process.exit(1);
   }
 
+  // Short-circuit help for subcommands before dependency checks and dynamic imports.
+  if (Array.isArray(commandArgs) && commandArgs.some((arg) => arg === '--help' || arg === '-h')) {
+    showHelp();
+    process.exit(0);
+  }
+
+
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);
   }
