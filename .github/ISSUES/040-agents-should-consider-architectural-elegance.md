@@ -49,7 +49,8 @@ elegance-guidelines:
   - `devops`: composite actions, workflow clarity, fail-fast
   - `infra`: thin root modules, consistent naming locals, Terragrunt DRY, minimal parameters
 - [x] Update spec-validator to accept the new field (no change needed — validator allows unknown fields)
-- [ ] Regenerate issue templates and agent files to confirm compatibility (run sync)
+- [x] Regenerate issue templates and agent files to confirm compatibility (run sync)
+  - Sync run as part of `feat/kit-domain-selection-onboarding`; no compatibility issues found
 - [x] Document the new field in the agents.yaml header comment
 
 ## Alternatives considered

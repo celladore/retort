@@ -308,6 +308,70 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
     warnings++;
   }
 
+  // ─── Phase 10: CLI-spec command parity ─────────────────────────────────
+  console.log('\n  --- CLI-Spec Command Parity ---');
+  {
+    // Commands that exist in the CLI but are intentionally excluded from the
+    // user-facing spec (framework internals, not slash commands).
+    const FRAMEWORK_COMMANDS = new Set([
+      'validate', 'spec-validate', 'add', 'remove', 'list',
+      'tasks', 'delegate', 'features', 'init',
+    ]);
+
+    // Load spec command names from commands.yaml
+    const commandsYamlPath = join(agentkitRoot, 'spec', 'commands.yaml');
+    let specCommandNames = new Set();
+    if (existsSync(commandsYamlPath)) {
+      try {
+        const commandsYaml = yaml.load(readFileSync(commandsYamlPath, 'utf-8'));
+        for (const cmd of commandsYaml?.commands ?? []) {
+          if (cmd.name) specCommandNames.add(cmd.name);
+        }
+      } catch (err) {
+        console.warn(`  WARN: Could not parse commands.yaml for parity check: ${err.message}`);
+        warnings++;
+      }
+    } else {
+      console.warn('  WARN: commands.yaml not found — skipping CLI-spec parity check');
+      warnings++;
+    }
+
+    // The canonical CLI command list (mirrors VALID_COMMANDS in cli.mjs).
+    // Update this list when cli.mjs VALID_COMMANDS changes.
+    const CLI_COMMANDS = new Set([
+      'init', 'sync', 'validate', 'discover', 'spec-validate', 'orchestrate',
+      'plan', 'check', 'review', 'handoff', 'healthcheck', 'cost',
+      'project-review', 'import-issues', 'backlog', 'sync-backlog',
+      'add', 'remove', 'list', 'features', 'tasks', 'delegate',
+      'doctor', 'scaffold', 'preflight', 'analyze-agents', 'cicd-optimize',
+    ]);
+
+    // CLI commands not in spec and not framework internals — these are gaps
+    const missingFromSpec = [...CLI_COMMANDS].filter(
+      (cmd) => !FRAMEWORK_COMMANDS.has(cmd) && !specCommandNames.has(cmd)
+    );
+    // Spec commands (non-team) not in CLI — could be slash-only or missing from CLI
+    const missingFromCli = [...specCommandNames].filter(
+      (cmd) => !cmd.startsWith('team-') && !CLI_COMMANDS.has(cmd) && !FRAMEWORK_COMMANDS.has(cmd)
+    );
+
+    if (missingFromSpec.length > 0) {
+      for (const cmd of missingFromSpec) {
+        console.warn(`  WARN: CLI command '${cmd}' has no entry in commands.yaml spec`);
+        warnings++;
+      }
+    }
+    if (missingFromCli.length > 0) {
+      for (const cmd of missingFromCli) {
+        console.warn(`  WARN: spec command '${cmd}' has no CLI equivalent in VALID_COMMANDS`);
+        warnings++;
+      }
+    }
+    if (missingFromSpec.length === 0 && missingFromCli.length === 0) {
+      console.log('  OK: CLI commands and spec commands are in sync');
+    }
+  }
+
   // ─── Event + Summary ────────────────────────────────────────────────────
   emitEvent(
     projectRoot,

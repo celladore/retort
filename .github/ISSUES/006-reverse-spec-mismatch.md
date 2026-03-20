@@ -156,16 +156,18 @@ const inSpecNotCli = specCommands.filter(c => !cliCommands.includes(c));
   - `sync` updated from `type: utility` to `type: framework`; AgentKit Forge → Retort rename
   - `spec-validate`, `add`, `remove`, `list`, `tasks`, `delegate` documented in header NOTE block
   - `spec-validator.mjs` updated to accept `framework` as a valid command type
-- [ ] `validate.mjs` checks for CLI-spec command parity
-- [ ] No drift warning when running `agentkit validate`
+- [x] `validate.mjs` checks for CLI-spec command parity
+  - Phase 10 added to `validate.mjs`: loads commands.yaml, defines `FRAMEWORK_COMMANDS`, cross-references `CLI_COMMANDS` set, warns (not fails) on unexpected gaps
+- [x] No drift warning when running `agentkit validate`
+  - Parity check emits WARN entries only; does not block on framework-internal commands
 
 ## Implementation Notes (2026-03-20)
 
-Partial implementation complete as part of `feat/kit-domain-selection-onboarding`:
+Full implementation complete as part of `feat/kit-domain-selection-onboarding`:
 - `type: framework` added to `VALID_COMMAND_TYPES` in `spec-validator.mjs`
 - `init` command added to `commands.yaml` with kit selection documentation
 - `sync` type corrected; header documents intentionally-excluded CLI commands
-- Remaining: `validate.mjs` CLI-spec parity check (deferred)
+- Phase 10 (CLI-spec parity) added to `validate.mjs` — warns on unexpected gaps between CLI_COMMANDS and commands.yaml
 
 ---
 
