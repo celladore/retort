@@ -48,18 +48,13 @@ run_check() {
 
 FAILURE_REASON=""
 
-# -- Check for generated file drift ----------------------------------------
-if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.mjs" ]] && command -v node &>/dev/null; then
-    # Run sync to see if anything is out of date
-    (cd "${CWD}/.agentkit" && node engines/node/src/cli.mjs sync 2>/dev/null) || true
-
-    if ! git -C "$CWD" diff --quiet 2>/dev/null; then
-        drift_files=$(git -C "$CWD" diff --name-only 2>/dev/null | head -10)
-        FAILURE_REASON="Generated files are out of sync with spec. Run '{{packageManager}} -C .agentkit agentkit:sync' and commit the changes.\nDrifted files:\n${drift_files}"
-        # Restore working tree
-        git -C "$CWD" checkout -- $drift_files 2>/dev/null || true
-        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-        exit 0
+# -- Check for spec-modified-without-sync (lightweight git check only) ------
+# Never re-runs agentkit sync here — that can take 30s+ and is too slow for a
+# stop hook. Instead, warn non-blockingly if spec files look dirty.
+if [[ -d "${CWD}/.agentkit/spec" ]] && command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    spec_dirty=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null | { grep -c '^\.agentkit/spec/' || true; })
+    if [[ "$spec_dirty" -gt 0 ]]; then
+        echo "⚠️  .agentkit/spec/ has uncommitted changes — remember to run '{{packageManager}} -C .agentkit agentkit:sync' before pushing." >&2
     fi
 fi
 
@@ -107,36 +102,12 @@ if [[ -f "${CWD}/package.json" ]]; then
         pm="yarn"
     fi
 
-    # Try lint, then test, then build -- stop at first failure.
-    # Each package manager uses a different flag to set the working directory.
-    pm_run() {
-        local script="$1"
-        if [[ "$pm" == "pnpm" ]]; then
-            "$pm" -C "$CWD" run "$script"
-        elif [[ "$pm" == "yarn" ]]; then
-            "$pm" --cwd "$CWD" run "$script"
-        else
-            "$pm" run "$script" --prefix "$CWD"
-        fi
-    }
+    # Stop hook runs lint only — tests and builds are too slow for an interactive
+    # hook and belong in /check or pre-commit. Lint is typically fast (<10s).
     has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
 
     if has_script "lint"; then
         if ! run_check "${pm} lint" "$pm" run lint; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
-    fi
-
-    if has_script "test"; then
-        if ! run_check "${pm} test" "$pm" run test; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
-    fi
-
-    if has_script "build"; then
-        if ! run_check "${pm} build" "$pm" run build; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi
@@ -149,11 +120,8 @@ fi
 SLN_FILE=$(find "$CWD" -maxdepth 2 -name '*.sln' -o -name '*.csproj' 2>/dev/null | head -n1 || true)
 if [[ -n "$SLN_FILE" ]] && command -v dotnet &>/dev/null; then
     ran_check=true
+    # Build only — tests belong in /check or CI, not the stop hook.
     if ! run_check "dotnet build" dotnet build "$SLN_FILE" --nologo --verbosity quiet; then
-        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-        exit 0
-    fi
-    if ! run_check "dotnet test" dotnet test "$SLN_FILE" --nologo --verbosity quiet --no-build; then
         jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
         exit 0
     fi
@@ -164,11 +132,8 @@ fi
 # Rust / Cargo
 if [[ -f "${CWD}/Cargo.toml" ]] && command -v cargo &>/dev/null; then
     ran_check=true
+    # cargo check only — cargo test can be very slow; use /check for full validation.
     if ! run_check "cargo check" cargo check --manifest-path "${CWD}/Cargo.toml" --quiet; then
-        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-        exit 0
-    fi
-    if ! run_check "cargo test" cargo test --manifest-path "${CWD}/Cargo.toml" --quiet; then
         jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
         exit 0
     fi
@@ -180,18 +145,9 @@ fi
 if [[ -f "${CWD}/pyproject.toml" ]]; then
     ran_check=true
 
-    # Try pytest first, fall back to unittest.
-    if command -v pytest &>/dev/null; then
-        if ! run_check "pytest" pytest --rootdir "$CWD" -q; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
-    elif command -v python3 &>/dev/null; then
-        if ! run_check "python -m pytest" python3 -m pytest --rootdir "$CWD" -q 2>/dev/null; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
-    fi
+    # Tests removed from stop hook — too slow for interactive use.
+    # Run /check or pytest manually for full test validation.
+    ran_check=true  # mark as handled so the "no tools found" path is skipped
 fi
 {{/if}}
 
