@@ -92,11 +92,20 @@ fi
 # -- Auto-detect stack and run checks --------------------------------------
 ran_check=false
 
-# Node.js / JavaScript / TypeScript
-if [[ -f "${CWD}/package.json" ]]; then
+# -- Compute changed files once (used for all per-language gates below) ------
+# Only inspect files changed since HEAD (staged + unstaged). If nothing
+# relevant changed for a language, skip its check entirely — this makes the
+# hook essentially free (<0.1s) when only docs or config were touched.
+_changed_files=""
+if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    _changed_files=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null || true)
+fi
+_has_changed() { printf '%s\n' "$_changed_files" | grep -qE "$1"; }
+
+# Node.js / JavaScript / TypeScript — lint only, and only when JS/TS files changed
+if [[ -f "${CWD}/package.json" ]] && _has_changed '\.(ts|tsx|js|jsx|mjs|cjs)$'; then
     ran_check=true
 
-    # Determine the package manager.
     pm="npm"
     if [[ -f "${CWD}/pnpm-lock.yaml" ]] && command -v pnpm &>/dev/null; then
         pm="pnpm"
@@ -104,8 +113,6 @@ if [[ -f "${CWD}/package.json" ]]; then
         pm="yarn"
     fi
 
-    # Stop hook runs lint only — tests and builds are too slow for an interactive
-    # hook and belong in /check or pre-commit. Lint is typically fast (<10s).
     has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
 
     if has_script "lint"; then
