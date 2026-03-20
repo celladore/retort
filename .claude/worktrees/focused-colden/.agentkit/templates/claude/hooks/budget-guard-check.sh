@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# Hook: PreToolUse (matcher: Bash|Write|Edit)
+# Purpose: Check session and daily budgets before allowing tool execution.
+#          Returns a warning or deny response when thresholds are exceeded.
+# Stdin:   JSON with session_id, cwd, hook_event_name, tool_name, tool_input
+# Stdout:  JSON hook response (allow/deny/warning)
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+# -- Read JSON payload from stdin ------------------------------------------
+INPUT=$(cat)
+
+# -- Locate agentkit root --------------------------------------------------
+CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+if [[ -z "$CWD" ]]; then
+    # No cwd means we can't find agentkit root — allow by default.
+    exit 0
+fi
+
+# Walk up from CWD to find .agentkit directory
+AGENTKIT_ROOT=""
+DIR="$CWD"
+while [[ "$DIR" != "/" ]]; do
+    if [[ -d "$DIR/.agentkit" ]]; then
+        AGENTKIT_ROOT="$DIR/.agentkit"
+        break
+    fi
+    DIR=$(dirname "$DIR")
+done
+
+if [[ -z "$AGENTKIT_ROOT" ]]; then
+    # No .agentkit directory found — allow by default.
+    exit 0
+fi
+
+# -- Check if Node.js is available ----------------------------------------
+if ! command -v node &>/dev/null; then
+    exit 0
+fi
+
+# -- Run budget check via Node.js -----------------------------------------
+RESULT=$(node --input-type=module -e "
+import { evaluateForHook } from '${AGENTKIT_ROOT}/engines/node/src/budget-guard.mjs';
+try {
+  const result = evaluateForHook('${AGENTKIT_ROOT}');
+  console.log(JSON.stringify(result));
+} catch {
+  console.log('{\"decision\":\"allow\"}');
+}
+" 2>/dev/null) || RESULT='{"decision":"allow"}'
+
+# -- Parse and output response --------------------------------------------
+DECISION=$(echo "$RESULT" | jq -r '.decision // "allow"')
+
+if [[ "$DECISION" == "deny" ]]; then
+    REASON=$(echo "$RESULT" | jq -r '.reason // "Budget exceeded"')
+    echo "{\"decision\":\"block\",\"reason\":\"$REASON\"}"
+elif [[ "$DECISION" == "allow" ]]; then
+    WARNING=$(echo "$RESULT" | jq -r '.warning // empty')
+    if [[ -n "$WARNING" ]]; then
+        # Emit a system notification as additionalContext so the agent sees the warning
+        echo "{\"additionalContext\":\"[BUDGET WARNING] $WARNING\"}"
+    fi
+    # allow — no output needed (empty stdout = allow)
+fi

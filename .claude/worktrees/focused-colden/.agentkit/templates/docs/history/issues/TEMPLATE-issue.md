@@ -1,0 +1,69 @@
+# [Issue Title] - Issue Record
+
+**Recorded**: [YYYY-MM-DD]
+**Session**: [Session identifier or PR number]
+**Severity**: [Critical/High/Medium/Low]
+**Status**: [Open/Resolved/Workaround Applied/Won't Fix]
+
+## Summary
+
+[Brief description of the issue encountered]
+
+## Context
+
+[What was being worked on when the issue was discovered]
+
+### Environment
+
+- **Branch**: [Branch name]
+- **Stack**: [Relevant tech stack or component]
+- **Trigger**: [What action triggered the issue]
+
+## Symptoms
+
+[Observable symptoms — error messages, unexpected behaviour, failures]
+
+```text
+[Relevant error output or logs, if any]
+```
+
+## Root Cause
+
+[Identified root cause, or "Under Investigation" if unknown]
+
+## Impact
+
+- **Blocked work**: [What work was blocked or delayed]
+- **Workaround available**: [Yes/No — describe if yes]
+- **Affected components**: [List of affected files or modules]
+
+## Resolution
+
+[How the issue was resolved, or planned resolution steps]
+
+### Steps Taken
+
+1. **[Step 1]** — [Description]
+2. **[Step 2]** — [Description]
+
+### Preventive Measures
+
+- [What can be done to prevent recurrence]
+
+## Related
+
+- **Issue tracker**: [GitHub Issue #, Linear ID, or Jira ticket]
+- **Related issues**: [Links to related issue records]
+- **Lessons learned**: [Link to associated lesson-learned record, if any]
+
+## Sync Status
+
+<!-- Used by scripts/sync-issues.sh to track GitHub Issue creation -->
+- **gh_synced**: false
+- **gh_issue_number**: —
+- **gh_synced_at**: —
+
+---
+
+**Reported by**: [Agent/Human]
+**Resolved by**: [Agent/Human]

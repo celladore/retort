@@ -1,0 +1,18 @@
+%% Feature-Gated Template Rendering
+%% Shows how presets control which sections appear in generated output
+
+flowchart LR
+    FP[Feature Preset\nminimal/lean/standard/full] --> FR[Feature Resolver]
+    FR -->|"hasTeamOrchestration=true"| V1["shared_sharedState = content"]
+    FR -->|"hasTaskDelegation=true"| V2["shared_taskProtocol = content"]
+    FR -->|"hasTaskDelegation=false"| V3["shared_taskProtocol = empty"]
+
+    SY[sections.yaml] -->|"gate: hasTaskDelegation"| FR
+
+    V1 --> TE[Template Engine]
+    V2 --> TE
+    V3 --> TE
+    TE --> OUT["Generated .claude/agents/*.md\n(only relevant sections included)"]
+
+    style V3 fill:#fee,stroke:#c00
+    style OUT fill:#e3f2fd

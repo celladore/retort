@@ -1,0 +1,41 @@
+# [Plan-ID]: [Plan Title]
+
+**Created**: [YYYY-MM-DD]
+**Priority**: [P0|P1|P2|P3]
+**Status**: not-started
+**Category**: [category]
+**History**: —
+
+## Goal
+
+[What this plan aims to achieve]
+
+## Assumptions & Constraints
+
+[Key assumptions and constraints]
+
+## Proposed Approach
+
+[Step-by-step implementation approach]
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+
+## Acceptance Criteria
+
+- [ ] [Criterion 1]
+
+## Risks
+
+[Anything that could go wrong or needs human attention]
+
+## References
+
+- [Related ADRs, PRDs, issues]
+
+---
+
+**Author**: [Agent/Human]
+**Reviewed**: [Yes/No]

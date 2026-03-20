@@ -1,0 +1,241 @@
+<# agentkit: scaffold: managed #>
+# =============================================================================
+# consolidate-branches.ps1 — Merge all unmerged feature branches into one
+# =============================================================================
+# Usage: .\scripts\consolidate-branches.ps1 [-Base {{defaultBranch}}] [-DryRun] [-Skip branch1,branch2]
+#
+# Discovers all local and remote branches not yet merged into <base-branch>,
+# filters out protected branches, and merges them one by one into the current
+# branch. Auto-resolves generated files per the AgentKit merge resolution matrix.
+# =============================================================================
+param(
+    [string]$Base = "{{defaultBranch}}",
+    [switch]$DryRun,
+    [string]$Skip = ""
+)
+
+$ErrorActionPreference = "Stop"
+
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$RepoRoot  = Split-Path -Parent $ScriptDir
+
+Push-Location $RepoRoot
+
+function Write-Info  { param([string]$msg) Write-Host "[info]  $msg" -ForegroundColor Cyan }
+function Write-Ok    { param([string]$msg) Write-Host "[ok]    $msg" -ForegroundColor Green }
+function Write-Warn  { param([string]$msg) Write-Host "[warn]  $msg" -ForegroundColor Yellow }
+function Write-Err   { param([string]$msg) Write-Host "[error] $msg" -ForegroundColor Red }
+
+$ProtectedBranches = @('main', 'master', 'develop', 'release')
+
+$SkipList = @()
+if ($Skip) { $SkipList = $Skip -split ',' | ForEach-Object { $_.Trim() } }
+
+try {
+    $currentBranch = git branch --show-current
+    if (-not $currentBranch) {
+        Write-Err "Not on a branch (detached HEAD). Checkout a branch first."
+        exit 1
+    }
+
+    # -----------------------------------------------------------------------
+    # 1. Fetch all remotes
+    # -----------------------------------------------------------------------
+    Write-Info "Fetching all remotes..."
+    git fetch --all --prune 2>$null
+
+    # -----------------------------------------------------------------------
+    # 2. Discover unmerged branches
+    # -----------------------------------------------------------------------
+    Write-Info "Finding branches not merged into ${Base}..."
+
+    $remoteBranches = git branch -r --no-merged "origin/${Base}" 2>$null |
+        ForEach-Object { $_.Trim() -replace '^\* ', '' } |
+        Where-Object { $_ -and $_ -notmatch 'HEAD' } |
+        ForEach-Object { $_ -replace '^origin/', '' } |
+        Sort-Object -Unique
+
+    $localBranches = git branch --no-merged $Base 2>$null |
+        ForEach-Object { $_.Trim() -replace '^\* ', '' } |
+        Where-Object { $_ } |
+        Sort-Object -Unique
+
+    $allBranches = @($remoteBranches) + @($localBranches) | Sort-Object -Unique
+
+    $unmerged = @()
+    foreach ($branch in $allBranches) {
+        if (-not $branch) { continue }
+        if ($branch -eq $currentBranch) { continue }
+        if ($branch -eq $Base) { continue }
+        if ($ProtectedBranches -contains $branch) { continue }
+        if ($SkipList -contains $branch) { continue }
+        $unmerged += $branch
+    }
+
+    if ($unmerged.Count -eq 0) {
+        Write-Ok "No unmerged branches found. Everything is up to date with ${Base}."
+        exit 0
+    }
+
+    # -----------------------------------------------------------------------
+    # 3. Display plan
+    # -----------------------------------------------------------------------
+    Write-Host ""
+    Write-Host "Branch Consolidation Plan" -ForegroundColor White
+    Write-Host "========================" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Current branch:    $currentBranch" -ForegroundColor Green
+    Write-Host "  Base branch:       $Base" -ForegroundColor Cyan
+    Write-Host "  Branches to merge: $($unmerged.Count)"
+    Write-Host ""
+
+    for ($i = 0; $i -lt $unmerged.Count; $i++) {
+        $branch = $unmerged[$i]
+        $ahead = git rev-list --count "origin/${Base}..origin/${branch}" 2>$null
+        if (-not $ahead) { $ahead = "?" }
+        Write-Host "  $($i + 1). $branch  ($ahead commits ahead)" -ForegroundColor Yellow
+    }
+
+    Write-Host ""
+
+    if ($DryRun) {
+        Write-Info "Dry run — no changes made."
+        exit 0
+    }
+
+    # -----------------------------------------------------------------------
+    # 4. Merge each branch
+    # -----------------------------------------------------------------------
+    $merged  = @()
+    $failed  = @()
+
+    # Patterns for generated files (auto-resolve with --theirs)
+    $generatedPatterns = @(
+        '^\.claude/',
+        '^\.cursor/',
+        '^\.windsurf/',
+        '^\.roo/',
+        '^\.clinerules/',
+        '^\.github/instructions/',
+        '^\.github/copilot-instructions\.md$',
+        '^\.github/PULL_REQUEST_TEMPLATE\.md$',
+        '^\.github/agents/',
+        '^\.github/chatmodes/',
+        '^\.github/prompts/',
+        '^\.agents/',
+        '^\.gemini/',
+        '^docs/.*/README\.md$',
+        '^scripts/.*\.(sh|ps1)$',
+        '^AGENTS\.md$',
+        '^UNIFIED_AGENT_TEAMS\.md$',
+        '^COMMAND_GUIDE\.md$',
+        '^QUALITY_GATES\.md$',
+        '^RUNBOOK_AI\.md$',
+        '^CONTRIBUTING\.md$',
+        'pnpm-lock\.yaml$',
+        'package-lock\.json$',
+        'yarn\.lock$'
+    )
+
+    foreach ($branch in $unmerged) {
+        Write-Host ""
+        Write-Host "-------------------------------------------" -ForegroundColor DarkGray
+        $idx = $merged.Count + $failed.Count + 1
+        Write-Info "Merging ${branch} (${idx}/$($unmerged.Count))..."
+
+        # Try remote first, fall back to local
+        $mergeRef = "origin/${branch}"
+        $refExists = git rev-parse --verify $mergeRef 2>$null
+        if ($LASTEXITCODE -ne 0) { $mergeRef = $branch }
+
+        git merge $mergeRef --no-edit 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Ok "Merged ${branch} cleanly."
+            $merged += $branch
+            continue
+        }
+
+        # Check for conflicts
+        $conflicted = git diff --name-only --diff-filter=U 2>$null
+        if (-not $conflicted) {
+            Write-Err "Merge of ${branch} failed (not a conflict issue)."
+            git merge --abort 2>$null
+            $failed += $branch
+            continue
+        }
+
+        Write-Warn "Conflicts merging ${branch}. Attempting auto-resolution..."
+        $autoResolved = 0
+
+        foreach ($file in $conflicted) {
+            if (-not $file) { continue }
+            $isGenerated = $false
+            foreach ($pattern in $generatedPatterns) {
+                if ($file -match $pattern) {
+                    $isGenerated = $true
+                    break
+                }
+            }
+            if ($isGenerated) {
+                git checkout --theirs -- $file 2>$null
+                git add $file 2>$null
+                Write-Ok "  Auto-resolved: $file"
+                $autoResolved++
+            }
+        }
+
+        $remaining = git diff --name-only --diff-filter=U 2>$null
+        if (-not $remaining -or $remaining.Count -eq 0) {
+            git commit --no-edit 2>$null
+            Write-Ok "Merged ${branch} (${autoResolved} auto-resolved)."
+            $merged += $branch
+        }
+        else {
+            Write-Err "Unresolved conflicts merging ${branch}:"
+            foreach ($f in $remaining) {
+                Write-Host "  x $f" -ForegroundColor Red
+            }
+            Write-Warn "Aborting merge of ${branch}."
+            git merge --abort 2>$null
+            $failed += $branch
+        }
+    }
+
+    # -----------------------------------------------------------------------
+    # 5. Summary
+    # -----------------------------------------------------------------------
+    Write-Host ""
+    Write-Host "===========================================" -ForegroundColor White
+    Write-Host "Consolidation Summary" -ForegroundColor White
+    Write-Host "===========================================" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Merged: $($merged.Count)/$($unmerged.Count)" -ForegroundColor Green
+
+    foreach ($b in $merged) {
+        Write-Host "    + $b" -ForegroundColor Green
+    }
+
+    if ($failed.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  Failed: $($failed.Count)/$($unmerged.Count)" -ForegroundColor Red
+        foreach ($b in $failed) {
+            Write-Host "    x $b" -ForegroundColor Red
+        }
+        Write-Host ""
+        $skipStr = ($merged -join ',')
+        Write-Warn "Re-run with: .\scripts\consolidate-branches.ps1 -Base ${Base} -Skip '${skipStr}'"
+    }
+
+    Write-Host ""
+    if ($merged.Count -gt 0) {
+        Write-Info "Next steps:"
+        Write-Host "  1. Run: pnpm -C .agentkit agentkit:sync"
+        Write-Host "  2. Run: pnpm test"
+        Write-Host "  3. Review with: git log --oneline -20"
+    }
+
+    exit $failed.Count
+}
+finally {
+    Pop-Location
+}

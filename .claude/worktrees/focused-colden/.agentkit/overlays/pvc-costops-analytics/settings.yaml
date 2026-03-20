@@ -1,0 +1,11 @@
+repoName: pvc-costops-analytics
+defaultBranch: main
+primaryStack: python
+windowsFirst: true
+aiSynthesisLayer: false
+renderTargets:
+  - claude
+  - cursor
+  - copilot
+  - windsurf
+  - ai

@@ -1,0 +1,4 @@
+# Repo-specific rule overrides
+# Add custom rules or override existing ones here.
+# These take precedence over .agentkit/spec/rules.yaml
+overrides: {}

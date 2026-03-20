@@ -1,0 +1,77 @@
+{
+  "a2a": {
+    "enabled": true,
+    "protocol_version": "1.0.0",
+    "task_format": "json",
+    "context_transfer": "memory",
+    "result_aggregation": "orchestrator",
+    "agents": [
+      {
+        "id": "orchestrator",
+        "role": "coordinator",
+        "capabilities": ["delegate", "aggregate", "monitor"]
+      },
+      {
+        "id": "backend",
+        "role": "executor",
+        "domain": "api,services",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "frontend",
+        "role": "executor",
+        "domain": "ui,components",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "data",
+        "role": "executor",
+        "domain": "database,models",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "infra",
+        "role": "executor",
+        "domain": "iac,cloud",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "devops",
+        "role": "executor",
+        "domain": "ci,cd,automation",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "testing",
+        "role": "executor",
+        "domain": "tests,quality",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "security",
+        "role": "executor",
+        "domain": "auth,compliance",
+        "capabilities": ["implement", "test", "review"]
+      },
+      {
+        "id": "docs",
+        "role": "executor",
+        "domain": "documentation",
+        "capabilities": ["implement", "review"]
+      },
+      {
+        "id": "product",
+        "role": "executor",
+        "domain": "features,prd",
+        "capabilities": ["implement", "review"]
+      },
+      {
+        "id": "quality",
+        "role": "executor",
+        "domain": "review,refactor",
+        "capabilities": ["implement", "test", "review"]
+      }
+    ],
+    "messageTypes": ["delegate", "report", "query", "broadcast"]
+  }
+}

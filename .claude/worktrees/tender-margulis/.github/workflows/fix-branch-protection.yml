@@ -1,0 +1,100 @@
+name: Fix Branch Protection Check Names
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-issue-and-fix:
+    runs-on: self-hosted
+    permissions:
+      issues: write
+      checks: write
+    steps:
+      - name: Create tracking issue (if not already open)
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            const title = 'fix(ci): branch protection checks stuck — status check name mismatch';
+
+            // Check for existing open issue with same title
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            if (existing.some(i => i.title === title)) {
+              core.info('Issue already exists, skipping creation.');
+              return;
+            }
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: [
+                '## Problem',
+                '',
+                'Required status checks in branch protection are stuck at **"Expected — Waiting for status to be reported"** because the configured check names don\'t match the actual names produced by CI.',
+                '',
+                '| Branch Protection Expects | CI Actually Produces |',
+                '|---|---|',
+                '| `markdown-lint` | `Markdown Lint` |',
+                '| `test (24, ubuntu-latest)` | `Test (ubuntu-latest)` |',
+                '| `validate` | `Validate` |',
+                '| `yaml-lint` | `YAML Lint` |',
+                '',
+                '## Root Cause',
+                '',
+                'The CI workflow (`.github/workflows/ci.yml`) jobs have `name:` fields that differ from the job keys. GitHub uses the `name` field for status check names, but branch protection was configured using the job keys (or an older version of the workflow).',
+                '',
+                'Additionally, `test (24, ubuntu-latest)` references Node 24, but `.node-version` is currently `22` and the matrix only varies by OS — so the check is just `Test (ubuntu-latest)`.',
+                '',
+                '## Fix',
+                '',
+                'Update the required status checks in branch protection for `dev` and `main` to:',
+                '- `Markdown Lint`',
+                '- `Test (ubuntu-latest)`',
+                '- `Validate`',
+                '- `YAML Lint`',
+                '',
+                'This workflow will attempt to apply the fix automatically in the next step.',
+              ].join('\n'),
+              labels: ['bug', 'ci'],
+            });
+            core.info(`Created issue #${issue.number}: ${issue.html_url}`);
+            core.setOutput('issue_number', issue.number);
+
+      - name: Fix branch protection check names
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        continue-on-error: true
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const correctChecks = [
+              'Markdown Lint',
+              'Test (ubuntu-latest)',
+              'Validate',
+              'YAML Lint',
+              'branch-rules',
+            ];
+
+            for (const branch of ['dev', 'main']) {
+              try {
+                const { data: protection } = await github.rest.repos.getBranchProtection({
+                  owner, repo, branch,
+                });
+
+                // Only update the status checks — leave all other protection settings untouched
+                await github.rest.repos.updateStatusCheckProtection({
+                  owner, repo, branch,
+                  strict: protection.required_status_checks?.strict ?? true,
+                  contexts: correctChecks,
+                });
+
+                core.info(`Updated required status checks for ${branch}`);
+              } catch (err) {
+                core.warning(`Could not update ${branch}: ${err.message}. Manual update may be needed (requires admin permission).`);
+              }
+            }

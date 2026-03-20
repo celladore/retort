@@ -1,0 +1,30 @@
+%% PM Capability Overhaul — Implementation Dependency Graph
+
+flowchart TD
+    subgraph "Wave 1: Foundations (Engine Changes)"
+        P2[P2: Template Dedup\n+ Feature Gating] --> P7[P7: Concurrency\nSimplification]
+        P2 --> P0[P0: Agent Loader]
+    end
+
+    subgraph "Wave 2: Capabilities (Spec Only)"
+        P3[P3: Tighten\nFocus Areas]
+        P5[P5: Risk Register]
+        P3 --> P1[P1: /project-status\nCommand]
+        P5 --> P1
+        P0 --> P1
+    end
+
+    subgraph "Wave 3: Metrics (Spec Only)"
+        P1 --> P4[P4: Delivery Metrics]
+    end
+
+    subgraph "Wave 4: Documentation"
+        P0 --> P8[P8: Docs + Diagrams\n+ Guides]
+        P1 --> P8
+    end
+
+    style P2 fill:#bbdefb
+    style P0 fill:#bbdefb
+    style P7 fill:#bbdefb
+    style P1 fill:#c8e6c9
+    style P8 fill:#fff9c4

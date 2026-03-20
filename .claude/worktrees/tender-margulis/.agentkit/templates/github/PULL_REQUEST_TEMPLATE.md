@@ -1,0 +1,53 @@
+## Summary
+
+Brief description of what this PR does and why.
+
+Closes #<!-- issue number -->
+
+## Changes
+
+- [ ] Change 1
+- [ ] Change 2
+- [ ] Change 3
+
+## Test Plan
+
+Describe how you tested these changes:
+
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing performed
+
+### Validation Commands
+
+```bash
+# Commands to verify this change works correctly
+```
+
+## Checklist
+
+- [ ] Tests pass locally (`npm test` / `cargo test` / equivalent)
+- [ ] Linter passes with no new warnings
+- [ ] Build succeeds
+- [ ] Documentation updated (if behavior changed)
+- [ ] No secrets, tokens, or credentials in the diff
+- [ ] Breaking changes documented (if applicable)
+- [ ] Reviewed my own diff before requesting review
+
+## Documentation
+
+### Change Impact
+
+- [ ] **High** — Architecture, major refactor, new feature, security, or breaking change
+- [ ] **Medium** — Complex bug fix, major library upgrade, tooling change
+- [ ] **Low** — Minor fix, config change, style update
+
+### Documentation Checklist (required for High impact)
+
+- [ ] Not applicable (Low/Medium impact without historical record needed)
+- [ ] History document created using `./scripts/create-doc.sh <type> "<title>" <pr>`
+- [ ] All `[bracketed]` placeholder sections filled in
+- [ ] Filed in correct `docs/history/` subdirectory
+- [ ] Sequential number assigned via `.index.json`
+- [ ] Related ADRs cross-referenced
+- [ ] `CHANGELOG.md` updated (auto-updated by `create-doc.sh`, or run `./scripts/update-changelog.sh`)

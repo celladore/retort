@@ -1,0 +1,101 @@
+<!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
+<!-- Format: Plain Markdown. Copilot domain-specific instructions. -->
+<!-- Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot -->
+
+# Copilot Instructions — Testing & Quality Assurance
+
+Apply these rules when editing test files (`*.test.*`, `*.spec.*`) or test
+configuration (`vitest.config.*`, `jest.config.*`, `playwright.config.*`).
+
+## Test File Organisation
+
+- Mirror the source directory structure: `src/users/user.service.ts` →
+  `src/users/user.service.test.ts`.
+- Keep test helpers and fixtures in a `__fixtures__` or `__helpers__` sibling
+  directory, not scattered across test files.
+- Export only what the test suite needs; do not expose test internals.
+
+## Naming Conventions
+
+- **Describe blocks**: name of the unit under test — class, function, or module.
+- **It/test blocks**: `should <verb> <outcome>` in plain English.
+- **Helper factories**: prefix with `make` or `build` (e.g. `makeUser()`).
+
+```typescript
+describe('UserService', () => {
+  it('should return a user when the ID exists', async () => {
+    /* ... */
+  });
+  it('should throw NotFoundError when the ID is missing', async () => {
+    /* ... */
+  });
+});
+```
+
+## Arrange-Act-Assert
+
+Every test body must follow the AAA pattern with blank lines separating each
+section:
+
+```typescript
+it('should deduct balance on successful payment', async () => {
+  // Arrange
+  const account = makeAccount({ balance: 200 });
+
+  // Act
+  await paymentService.charge(account, 50);
+
+  // Assert
+  expect(account.balance).toBe(150);
+});
+```
+
+## Mocking
+
+- Mock at **system boundaries** (HTTP, database, filesystem, queues).
+- Never mock the unit under test itself.
+- Prefer dependency injection; avoid `jest.mock` / `vi.mock` for internal modules.
+- Use `vi.spyOn` sparingly — prefer passing test doubles via constructor or
+  function arguments.
+- Clean up all mocks in `afterEach` / `afterAll` to prevent test pollution.
+
+## Coverage
+
+{{#if testingCoverage}}- Target: **{{testingCoverage}}% line, branch, and function coverage**.{{/if}}
+
+- New code must include tests that exercise the new behaviour.
+- Do not remove or weaken existing assertions to make tests pass.
+- Focus on branches and edge cases, not line counts.
+
+## Async Tests
+
+- Always `await` async calls; never leave floating Promises.
+- Use `waitFor` / `findBy*` helpers rather than `setTimeout` for async
+  assertions in UI tests.
+- Set explicit timeouts on long-running integration tests.
+
+## Forbidden Patterns
+
+| Pattern                               | Replacement                       |
+| ------------------------------------- | --------------------------------- |
+| `setTimeout(fn, n)` in tests          | `waitFor(fn)` or polling helpers  |
+| `it.skip` / `xit` left permanently    | Fix or delete the test            |
+| `expect(true).toBe(true)` (tautology) | Assert meaningful values          |
+| Shared mutable state between tests    | Reset in `beforeEach`             |
+| `console.log` in test output          | Remove or use a structured logger |
+
+## Quality Gates
+
+Before pushing:
+
+```bash
+{{#if testingUnit}}# Run unit tests with coverage
+npx {{testingUnit}} run --coverage
+{{/if}}
+{{#if testingIntegration}}# Run integration tests
+npx {{testingIntegration}} run --config vitest.integration.config.ts
+{{/if}}
+{{#if testingE2e}}# Run end-to-end tests
+npx {{testingE2e}}
+{{/if}}
+```

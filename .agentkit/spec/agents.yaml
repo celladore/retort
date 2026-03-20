@@ -6,6 +6,17 @@
 # Agents are specialized AI personas with defined roles, focus areas,
 # responsibilities, and preferred tools. They are grouped by category
 # for organizational clarity and delegation routing.
+#
+# Optional field: elegance-guidelines
+#   A list of architectural and design principles the agent should apply
+#   when evaluating solutions. Encourages choosing the simplest, most
+#   maintainable approach rather than technically-correct-but-over-engineered
+#   implementations. Mirrors the conventions and anti-patterns fields in intent
+#   but focuses on elegance, simplicity, and design quality.
+#   Example:
+#     elegance-guidelines:
+#       - Prefer single-responsibility modules over utility bags
+#       - Choose the simplest data structure that satisfies the use case
 # =============================================================================
 
 agents:
@@ -55,6 +66,11 @@ agents:
       anti-patterns:
         - Service locator usage inside handlers/controllers
         - Returning raw ORM entities directly from API responses
+      elegance-guidelines:
+        - Prefer single-responsibility services over catch-all utility classes
+        - Choose the thinnest abstraction that satisfies the use case — avoid wrapping for wrapping's sake
+        - Extract a shared helper only when duplication appears in three or more places
+        - Favour explicit contracts (interfaces, typed inputs/outputs) over implicit runtime coupling
       examples:
         - title: Service registration pattern
           code: |
@@ -112,6 +128,11 @@ agents:
       anti-patterns:
         - Using arbitrary inline styles where design tokens already exist
         - Duplicating component variants instead of using props/composition
+      elegance-guidelines:
+        - Prefer composition over inheritance for component variants
+        - Use design tokens and Tailwind utilities rather than one-off style values
+        - Keep components small and single-purpose; split when props exceed ~8
+        - Reach for the simplest state management primitive that solves the problem
       examples:
         - title: Accessible interactive component
           code: |
@@ -227,6 +248,11 @@ agents:
         - 'Follow ci-cd domain rules [ci-quality-gates, ci-no-skip-hooks, ci-pin-actions] — workflows must be non-blocking where appropriate, use continue-on-error for advisory checks'
         - 'Follow security domain rules [sec-no-secrets, ci-no-secrets-in-workflows] — never expose secrets in logs or workflow outputs'
         - 'Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state'
+      elegance-guidelines:
+        - Prefer reusable composite actions over copy-pasted step blocks
+        - Keep pipeline logic in the workflow file, not in opaque shell scripts
+        - Avoid deep conditional nesting in workflow YAML; split into separate jobs
+        - Fail fast and clearly — a clear error beats a hidden one
       preferred-tools:
         - Read
         - Write
@@ -299,6 +325,11 @@ agents:
       anti-patterns:
         - Inline hardcoded secrets in Terraform variables or locals
         - Shared mutable state backends without locking configuration
+      elegance-guidelines:
+        - Prefer thin root modules delegating to versioned shared modules over monolithic configurations
+        - Name every resource consistently via a local variable rather than repeated string interpolation
+        - Use Terragrunt DRY principles — no copy-paste of backend config or providers
+        - Avoid over-parameterising modules; expose only the variables callers actually need to vary
       examples:
         - title: Resource naming local
           code: |

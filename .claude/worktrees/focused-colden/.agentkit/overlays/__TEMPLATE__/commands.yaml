@@ -1,0 +1,4 @@
+# Repo-specific command overrides
+# Add custom commands or override existing ones here.
+# These take precedence over .agentkit/spec/commands.yaml
+overrides: {}

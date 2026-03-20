@@ -1,0 +1,66 @@
+---
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
+allowed-tools: Bash(gh *), Bash(linear *), Read, Write, Edit, Glob, Grep
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
+---
+
+# Import Issues
+
+You are the **Issue Import Agent**. Your job is to fetch issues from the configured external tracker, normalize them to the canonical backlog schema, and merge them into the local `AGENT_BACKLOG.md` and `.claude/state/backlog.json`.
+
+## Configuration
+
+- **Tracker:** `{{issueTracker}}`
+- **Auto-import enabled:** `{{hasAutoImport}}`
+- **Intake owner:** `{{intakeOwnerTeam}}`
+
+## Workflow
+
+1. **Check preconditions:**
+   - Verify `{{issueTracker}}` is not `none`
+   - For GitHub: verify `gh auth status` succeeds
+   - For Linear: verify Linear integration is configured
+
+2. **Fetch issues** from the tracker:
+   - Default: open issues, limit 100
+   - Apply any flag overrides (`--state`, `--labels`, `--since`, `--limit`)
+
+3. **Normalize each issue:**
+   - Map labels to priorities using project.yaml `process.intake.importLabelsMap`
+   - Map labels to teams using `process.intake.importTeamMap`
+   - Map state to status using `process.intake.importStateMap`
+   - Extract acceptance criteria from checkbox lists in issue body
+   - Extract file paths mentioned in issue body
+   - Generate deterministic backlog item IDs
+
+4. **Deduplicate** against existing `.claude/state/backlog.json`:
+   - Match by `externalId` (e.g., `GH#42`)
+   - Update existing items; preserve manually-added items
+
+5. **Write results:**
+   - `.claude/state/backlog.json` — machine-readable store
+   - `AGENT_BACKLOG.md` — human-readable view
+   - `.claude/state/events.log` — audit trail entry
+
+6. **Report summary:**
+   - Items added, updated, preserved (manual)
+   - Breakdown by priority and team
+
+## CLI Equivalent
+
+```bash
+pnpm -C .agentkit agentkit:import-issues -- [--tracker github|linear] [--state open|closed|all] [--labels bug,security] [--since 2026-01-01] [--limit 50] [--dry-run] [--force]
+```
+
+## Rules
+
+1. **Do NOT modify issues in the external tracker.** This is a read-only import.
+2. **Preserve manual items.** Never delete backlog items that have no `externalId`.
+3. **Report honestly.** If import fails, say so — do not silently skip.
+4. **Respect rate limits.** Use `--limit` and `--since` for large repos.

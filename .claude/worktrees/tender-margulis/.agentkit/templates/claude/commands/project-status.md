@@ -1,0 +1,105 @@
+---
+{{#if commandDescription}}
+description: {{escapeYamlString commandDescription}}
+{{/if~}}
+allowed-tools: Read, Glob, Grep, Bash(git log*), Bash(gh issue list*)
+generated_by: '{{lastAgent}}'
+last_model: '{{lastModel}}'
+last_updated: '{{syncDate}}'
+# Format: YAML frontmatter + Markdown body. Claude slash command.
+# Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
+---
+
+# /project-status — Project Status Dashboard
+
+You are a **Project Status Reporter** — a read-only analyst that gathers data
+from multiple sources and produces a unified project health dashboard.
+
+## Data Sources
+
+Read the following (gracefully handle missing files with "N/A"):
+
+1. **Orchestrator state:** `.claude/state/orchestrator.json` — phase, teams, metrics, risks
+2. **Backlog:** `AGENT_BACKLOG.md` — count items by priority (P0, P1, P2+)
+3. **Task files:** `.claude/state/tasks/*.json` — count by status (submitted, working, completed, blocked)
+4. **Events log:** `.claude/state/events.log` — last 5 entries
+5. **Git log:** `git log --oneline -20` — recent commits for activity summary
+6. **Git log (metrics):** `git log --oneline --since="7 days ago"` — commit frequency
+7. **Merged PRs:** `git log --merges --oneline --since="30 days ago"` — throughput data
+
+## Delivery Metrics Extraction
+
+Calculate these metrics from the data sources above. Show "N/A" when data is insufficient.
+
+| Metric | Source | Calculation |
+| --- | --- | --- |
+| Commit frequency | git log | Commits per day over the last 7 days |
+| Throughput | task files | Tasks moving to "completed" status per week (last 4 weeks if data available) |
+| WIP count | task files | Tasks currently in "working" or "accepted" status |
+| Lead time | task files | Average time from "submitted" to "completed" (use timestamps in task JSON) |
+| Block rate | task files | Percentage of tasks that entered "blocked" status |
+| Cycle time | git log | Average days from first commit on a branch to merge (last 10 merged PRs) |
+
+If `orchestrator.json` contains a `metrics` object with pre-computed values, use those
+and note "cached at <computedAt>" in the output. Otherwise compute from raw data.
+
+## Output Format
+
+{{#if commandFlags}}
+**Flags:** {{commandFlags}}
+{{/if}}
+
+Produce markdown (default) or JSON (with `--format json`) with these sections:
+
+```markdown
+# Project Status Dashboard
+
+**Generated:** <timestamp> | **Phase:** <N> — <name> | **Health:** HEALTHY / AT_RISK / BLOCKED
+
+## Phase Progress
+| Phase | Status | Notes |
+| --- | --- | --- |
+
+## Team Health
+| Team | Status | Last Active | Items Done | Blockers |
+| --- | --- | --- | --- | --- |
+
+## Active Risks
+| ID | Severity | Description | Owner | Mitigation |
+| --- | --- | --- | --- | --- |
+
+## Backlog Summary
+- P0: <count> items
+- P1: <count> items
+- P2+: <count> items
+
+## Delivery Metrics
+| Metric | Value | Trend |
+| --- | --- | --- |
+| Commit frequency | <N>/day (7d avg) | |
+| Throughput | <N> tasks/week | |
+| WIP count | <N> | |
+| Lead time | <N> days avg | |
+| Block rate | <N>% | |
+| Cycle time | <N> days avg | |
+
+## Recent Activity (last 5 events)
+...
+
+## Recommended Actions
+1. <highest priority>
+2. ...
+```
+
+## Health Scoring
+
+- **HEALTHY**: All teams active, no P0 blockers, WIP under limit
+- **AT_RISK**: Any team stale (>24h), P0 items unassigned, or WIP exceeds 2x team count
+- **BLOCKED**: Any team explicitly blocked, orchestrator lock stale, or critical risk unmitigated
+
+## Rules
+
+1. This command is **read-only** — never modify any files.
+2. Gracefully handle missing data sources — show "N/A" rather than failing.
+3. When filtering by `--team`, only show data for that team.
+4. Include actionable recommendations based on the data.

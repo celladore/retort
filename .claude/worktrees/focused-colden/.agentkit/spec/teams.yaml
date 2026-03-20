@@ -1,0 +1,204 @@
+# =============================================================================
+# teams.yaml — Team definitions and tech stack configurations
+# Canonical source of truth for agentkit-forge
+# Version: 0.1.0
+# =============================================================================
+
+teams:
+  - id: backend
+    name: BACKEND
+    focus: 'API, services, core logic'
+    scope: ['apps/api/**', 'services/**', 'src/server/**', 'controllers/**']
+    accepts: [implement, review, plan]
+    handoff-chain: [testing, docs]
+
+  - id: frontend
+    name: FRONTEND
+    focus: 'UI, components, PWA'
+    scope: ['apps/web/**', 'apps/marketing/**', 'src/client/**', 'components/**']
+    accepts: [implement, review, plan]
+    handoff-chain: [testing, docs]
+
+  - id: data
+    name: DATA
+    focus: 'Database, models, migrations'
+    scope: ['db/**', 'migrations/**', 'models/**', 'prisma/**']
+    accepts: [implement, review, plan]
+    handoff-chain: [backend, testing]
+
+  - id: infra
+    name: INFRA
+    focus: 'IaC, cloud, Terraform/Bicep'
+    scope: ['infra/**', 'terraform/**', 'bicep/**', 'pulumi/**']
+    accepts: [implement, review, plan, investigate]
+    handoff-chain: [devops, security]
+
+  - id: devops
+    name: DEVOPS
+    focus: 'CI/CD, pipelines, automation'
+    scope: ['.github/workflows/**', 'scripts/**', 'docker/**', '**/Dockerfile*']
+    accepts: [implement, review, plan]
+    handoff-chain: [testing, security]
+
+  - id: testing
+    name: TESTING
+    focus: 'Unit, E2E, integration tests'
+    scope: ['**/*.test.*', '**/*.spec.*', 'tests/**', 'e2e/**', 'playwright/**']
+    accepts: [implement, review, test]
+    handoff-chain: [quality]
+
+  - id: security
+    name: SECURITY
+    focus: 'Auth, compliance, audit'
+    scope: ['auth/**', 'security/**', 'middleware/auth*']
+    accepts: [review, investigate]
+    handoff-chain: []
+
+  - id: docs
+    name: DOCUMENTATION
+    focus: 'Docs, ADRs, guides'
+    scope:
+      [
+        'docs/**',
+        'docs/architecture/decisions/**',
+        '.github/**',
+        'README.md',
+        'CHANGELOG.md',
+        'CONTRIBUTING.md',
+      ]
+    accepts: [implement, review, document]
+    handoff-chain: []
+
+  - id: product
+    name: PRODUCT
+    focus: 'Features, PRDs, roadmap'
+    scope: ['docs/product/**', 'docs/prd/**']
+    accepts: [plan, review]
+    handoff-chain: [backend, frontend]
+
+  - id: quality
+    name: QUALITY
+    focus: 'Code review, refactoring, bugs, reliability, session retrospectives'
+    scope: ['**/*']
+    accepts: [review, investigate]
+    handoff-chain: []
+
+  - id: forge
+    name: TEAMFORGE
+    focus: 'Meta-team — creates, validates, and deploys new agent team specifications'
+    scope: ['.agentkit/spec/**', 'docs/planning/agents-teams/**', 'docs/architecture/**']
+    accepts: [plan, review, investigate, document]
+    handoff-chain: [quality, docs]
+    agents:
+      [
+        input-clarifier,
+        mission-definer,
+        role-architect,
+        prompt-engineer,
+        flow-designer,
+        team-validator,
+      ]
+
+  - id: strategic-ops
+    name: STRATEGIC OPS
+    focus: 'Cross-project coordination, framework governance, portfolio-level planning'
+    scope:
+      [
+        'docs/planning/**',
+        'docs/architecture/**',
+        '.agentkit/spec/**',
+        'AGENT_BACKLOG.md',
+        'UNIFIED_AGENT_TEAMS.md',
+        'AGENT_TEAMS.md',
+      ]
+    accepts: [plan, review, investigate, document]
+    handoff-chain: [product, quality]
+    agents:
+      [
+        portfolio-analyst,
+        governance-advisor,
+        adoption-strategist,
+        impact-assessor,
+        release-coordinator,
+      ]
+
+  - id: cost-ops
+    name: COST OPS
+    focus: 'AI infrastructure cost reduction, vendor optimization, token efficiency'
+    scope: ['docs/cost-ops/**', 'docs/planning/cost/**', 'config/models/**', 'config/pricing/**']
+    accepts: [investigate, review, plan, document, implement]
+    handoff-chain: [infra, product, strategic-ops]
+    agents:
+      [
+        model-economist,
+        token-efficiency-engineer,
+        vendor-arbitrage-analyst,
+        grant-hunter,
+        cost-ops-monitor,
+      ]
+
+intake:
+  ownerTeam: product
+  operationsTeam: quality
+  routing:
+    backend: backend
+    frontend: frontend
+    data: data
+    infra: infra
+    devops: devops
+    testing: testing
+    security: security
+    docs: docs
+    product: product
+    quality: quality
+    forge: forge # Team creation requests route to forge team
+    strategic-ops: strategic-ops # Cross-project coordination routes to strategic ops
+    cost-ops: cost-ops # AI cost optimization routes to cost ops team
+    agent-performance: quality # Agent performance evaluation routes to quality team
+    cli: backend # CLI issues route to backend team
+    sync-engine: devops # Sync engine issues route to devops team
+  escalation:
+    securityCritical: [security, devops]
+    blockedCrossTeam: [product]
+
+# =============================================================================
+# Tech Stack Definitions
+# Each stack declares build/test/lint/format commands and file detection patterns
+# =============================================================================
+
+techStacks:
+  - name: node
+    buildCommand: 'pnpm build'
+    testCommand: 'pnpm test'
+    linter: 'eslint'
+    formatter: 'prettier'
+    typecheck: 'tsc --noEmit'
+    detect: ['package.json']
+    scope: ['package.json', 'apps/**', 'packages/**', 'src/**/*.ts', 'src/**/*.tsx']
+
+  - name: dotnet
+    buildCommand: 'dotnet build'
+    testCommand: 'dotnet test'
+    linter: 'dotnet format'
+    formatter: 'dotnet format'
+    typecheck: 'dotnet build'
+    detect: ['*.sln', '*.csproj', 'Directory.Build.props']
+    scope: ['*.csproj', 'src/**/*.cs', '**/*.cs']
+
+  - name: rust
+    buildCommand: 'cargo build'
+    testCommand: 'cargo test'
+    linter: 'cargo clippy'
+    formatter: 'cargo fmt'
+    typecheck: 'cargo check'
+    detect: ['Cargo.toml']
+    scope: ['Cargo.toml', 'crates/**', 'src/**/*.rs']
+
+  - name: python
+    buildCommand: 'python -m build'
+    testCommand: 'python -m pytest'
+    linter: 'ruff check'
+    formatter: 'black'
+    typecheck: 'mypy'
+    detect: ['pyproject.toml', 'requirements.txt', 'setup.py']
+    scope: ['pyproject.toml', '**/*.py']

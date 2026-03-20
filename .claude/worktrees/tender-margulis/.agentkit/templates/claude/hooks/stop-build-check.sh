@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# Hook: Stop
+# Purpose: Best-effort build / lint / test validation before Claude stops.
+#          If the build fails the hook returns a "block" decision so Claude
+#          can attempt to fix the problem before finishing.
+# Stdin:   JSON with session_id, cwd, hook_event_name, stop_hook_active, ...
+# Stdout:  JSON with decision "block" + reason on failure, empty on success
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+# -- Require jq for JSON parsing ------------------------------------------
+if ! command -v jq &>/dev/null; then
+    # jq is required to parse stdin JSON; allow stop without checks
+    cat > /dev/null  # drain stdin
+    exit 0
+fi
+
+# -- Read JSON payload from stdin ------------------------------------------
+INPUT=$(cat)
+
+CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+CWD="${CWD:-$PWD}"
+
+# Guard against infinite loops: if stop_hook_active is already true the hook
+# was re-invoked after a previous block -- let it through this time.
+STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // "false"')
+if [[ "$STOP_HOOK_ACTIVE" == "true" ]]; then
+    exit 0
+fi
+
+# -- Helper: run a command and capture failure -----------------------------
+run_check() {
+    local label="$1"
+    shift
+    local output
+    if output=$(cd "$CWD" && "$@" 2>&1); then
+        return 0
+    else
+        FAILURE_REASON="${label} failed:\n${output}"
+        return 1
+    fi
+}
+
+FAILURE_REASON=""
+
+# -- Check for generated file drift ----------------------------------------
+if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.mjs" ]] && command -v node &>/dev/null; then
+    # Run sync to see if anything is out of date
+    (cd "${CWD}/.agentkit" && node engines/node/src/cli.mjs sync 2>/dev/null) || true
+
+    if ! git -C "$CWD" diff --quiet 2>/dev/null; then
+        drift_files=$(git -C "$CWD" diff --name-only 2>/dev/null | head -10)
+        FAILURE_REASON="Generated files are out of sync with spec. Run '{{packageManager}} -C .agentkit agentkit:sync' and commit the changes.\nDrifted files:\n${drift_files}"
+        # Restore working tree
+        git -C "$CWD" checkout -- $drift_files 2>/dev/null || true
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+fi
+
+# -- Resolve branch names (shared by commit-check and history-doc-check) ----
+BRANCH=""
+DEFAULT_BRANCH=""
+if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
+    DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+fi
+
+# -- Check for non-conventional commit messages on current branch ----------
+if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
+    CC_PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?!?:.+'
+    BAD_COMMITS=""
+    if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        while IFS= read -r line; do
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
+                BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
+            fi
+        done < <(git -C "$CWD" log --oneline "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null || true)
+    fi
+
+    if [[ -n "$BAD_COMMITS" ]]; then
+        FAILURE_REASON="Commits with non-conventional messages detected. PR titles must follow 'type(scope): description'.\nBad commits:\n${BAD_COMMITS}\nFix with: git rebase -i and reword, or ensure the PR title follows the format."
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+fi
+
+# -- Auto-detect stack and run checks --------------------------------------
+ran_check=false
+
+{{#if hasLanguageJsLikeEffective}}
+# Node.js / JavaScript / TypeScript
+if [[ -f "${CWD}/package.json" ]]; then
+    ran_check=true
+
+    # Determine the package manager.
+    pm="npm"
+    if [[ -f "${CWD}/pnpm-lock.yaml" ]] && command -v pnpm &>/dev/null; then
+        pm="pnpm"
+    elif [[ -f "${CWD}/yarn.lock" ]] && command -v yarn &>/dev/null; then
+        pm="yarn"
+    fi
+
+    # Try lint, then test, then build -- stop at first failure.
+    # Each package manager uses a different flag to set the working directory.
+    pm_run() {
+        local script="$1"
+        if [[ "$pm" == "pnpm" ]]; then
+            "$pm" -C "$CWD" run "$script"
+        elif [[ "$pm" == "yarn" ]]; then
+            "$pm" --cwd "$CWD" run "$script"
+        else
+            "$pm" run "$script" --prefix "$CWD"
+        fi
+    }
+    has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
+
+    if has_script "lint"; then
+        if ! run_check "${pm} lint" "$pm" run lint; then
+            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            exit 0
+        fi
+    fi
+
+    if has_script "test"; then
+        if ! run_check "${pm} test" "$pm" run test; then
+            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            exit 0
+        fi
+    fi
+
+    if has_script "build"; then
+        if ! run_check "${pm} build" "$pm" run build; then
+            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            exit 0
+        fi
+    fi
+fi
+{{/if}}
+
+{{#if hasLanguageDotnetEffective}}
+# .NET
+SLN_FILE=$(find "$CWD" -maxdepth 2 -name '*.sln' -o -name '*.csproj' 2>/dev/null | head -n1 || true)
+if [[ -n "$SLN_FILE" ]] && command -v dotnet &>/dev/null; then
+    ran_check=true
+    if ! run_check "dotnet build" dotnet build "$SLN_FILE" --nologo --verbosity quiet; then
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+    if ! run_check "dotnet test" dotnet test "$SLN_FILE" --nologo --verbosity quiet --no-build; then
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+fi
+{{/if}}
+
+{{#if hasLanguageRustEffective}}
+# Rust / Cargo
+if [[ -f "${CWD}/Cargo.toml" ]] && command -v cargo &>/dev/null; then
+    ran_check=true
+    if ! run_check "cargo check" cargo check --manifest-path "${CWD}/Cargo.toml" --quiet; then
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+    if ! run_check "cargo test" cargo test --manifest-path "${CWD}/Cargo.toml" --quiet; then
+        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        exit 0
+    fi
+fi
+{{/if}}
+
+{{#if hasLanguagePythonEffective}}
+# Python
+if [[ -f "${CWD}/pyproject.toml" ]]; then
+    ran_check=true
+
+    # Try pytest first, fall back to unittest.
+    if command -v pytest &>/dev/null; then
+        if ! run_check "pytest" pytest --rootdir "$CWD" -q; then
+            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            exit 0
+        fi
+    elif command -v python3 &>/dev/null; then
+        if ! run_check "python -m pytest" python3 -m pytest --rootdir "$CWD" -q 2>/dev/null; then
+            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            exit 0
+        fi
+    fi
+fi
+{{/if}}
+
+# -- Check for missing history documentation --------------------------------
+if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
+    # Count non-trivial changed files (source files, not config/docs)
+    changed_src_files=0
+    if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        changed_src_files=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
+            | { grep -cE '\.(ts|tsx|js|jsx|py|rs|go|cs|java|rb|swift|kt)$' || true; })
+    fi
+
+    # Check if any history doc was created in this branch
+    history_docs_created=0
+    if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        history_docs_created=$(git -C "$CWD" diff --name-only "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null \
+            | { grep -c '^docs/history/' || true; })
+    fi
+
+    # If significant source changes but no history doc, warn (non-blocking)
+    if [[ "$changed_src_files" -ge 3 ]] && [[ "$history_docs_created" -eq 0 ]]; then
+        echo "⚠️  This session changed ${changed_src_files} source files but no history document was created." >&2
+        echo "   Consider running: /document-history  (or ./scripts/create-doc.sh <type> \"<title>\")" >&2
+        echo "   History docs capture institutional memory for future sessions." >&2
+    fi
+fi
+
+# -- Session cost tracking: log session end --------------------------------
+AGENTKIT_ROOT=""
+if [[ -d "${CWD}/.agentkit" ]]; then
+    AGENTKIT_ROOT="${CWD}/.agentkit"
+elif [[ -d "${CWD}/../.agentkit" ]]; then
+    AGENTKIT_ROOT="${CWD}/../.agentkit"
+fi
+
+if [[ -n "$AGENTKIT_ROOT" ]] && command -v jq &>/dev/null; then
+    LOG_DIR="${AGENTKIT_ROOT}/logs"
+    mkdir -p "$LOG_DIR" 2>/dev/null || true
+    DATE_STR=$(date -u +"%Y-%m-%d")
+    LOG_FILE="${LOG_DIR}/usage-${DATE_STR}.jsonl"
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+
+    SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
+    files_changed=0
+    if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+        tracked=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+        untracked=$(git -C "$CWD" ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+        files_changed=$(( tracked + untracked ))
+    fi
+
+    jq -n --arg ts "$TIMESTAMP" --arg sid "$SESSION_ID" --arg files "$files_changed" \
+        '{timestamp: $ts, event: "session_end", sessionId: $sid, filesModified: ($files | tonumber)}' \
+        >> "$LOG_FILE" 2>/dev/null || true
+fi
+
+# If no build tools were found, or all checks passed -- allow stop.
+exit 0

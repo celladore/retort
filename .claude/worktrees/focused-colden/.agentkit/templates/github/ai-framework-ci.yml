@@ -1,0 +1,147 @@
+name: AI Framework Validation
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.cursor/**'
+      - '.windsurf/**'
+      - '.ai/**'
+      - '.github/copilot-instructions.md'
+      - '.github/copilot-instructions/**'
+      - 'CLAUDE.md'
+      - 'UNIFIED_AGENT_TEAMS.md'
+      - 'AGENT_TEAMS.md'
+      - '.agentkit/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.cursor/**'
+      - '.windsurf/**'
+      - '.ai/**'
+      - '.github/copilot-instructions.md'
+      - '.github/copilot-instructions/**'
+      - 'CLAUDE.md'
+      - 'UNIFIED_AGENT_TEAMS.md'
+      - 'AGENT_TEAMS.md'
+      - '.agentkit/**'
+
+jobs:
+  validate-framework:
+    name: Validate Agent Framework
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          echo "=== Validating JSON files ==="
+          errors=0
+          for f in $(find . -name '*.json' -not -path './node_modules/*' -not -path './.git/*'); do
+            if ! python3 -c 'import json,sys; json.loads(open(sys.argv[1]).read())' "$f" 2>/dev/null; then
+              echo "FAIL: $f is not valid JSON"
+              errors=$((errors + 1))
+            else
+              echo "OK:   $f"
+            fi
+          done
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors JSON file(s) failed validation"
+            exit 1
+          fi
+          echo "All JSON files are valid."
+
+      - name: Check required command files
+        run: |
+          echo "=== Checking required command files ==="
+          required_commands=(
+            ".agentkit/commands/discover"
+            ".agentkit/commands/healthcheck"
+            ".agentkit/commands/plan"
+            ".agentkit/commands/check"
+            ".agentkit/commands/review"
+          )
+          missing=0
+          for cmd in "${required_commands[@]}"; do
+            if [ -f "$cmd" ] || [ -f "${cmd}.sh" ] || [ -f "${cmd}.ts" ] || [ -f "${cmd}.js" ]; then
+              echo "OK:   $cmd"
+            else
+              echo "MISS: $cmd (not found)"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "::warning::$missing required command(s) not found. Run 'agentkit init' to generate them."
+          fi
+
+      - name: Check hooks exist
+        run: |
+          echo "=== Checking hooks ==="
+          hooks_dir=".agentkit/hooks"
+          if [ -d "$hooks_dir" ]; then
+            hook_count=$(find "$hooks_dir" -type f | wc -l)
+            echo "Found $hook_count hook file(s) in $hooks_dir"
+            find "$hooks_dir" -type f -exec echo "  {}" \;
+          else
+            echo "::warning::No hooks directory found at $hooks_dir"
+          fi
+
+      - name: Scan for forbidden patterns
+        run: |
+          echo "=== Scanning for forbidden patterns ==="
+          errors=0
+
+          # Check for hardcoded secrets patterns
+          patterns=(
+            'AKIA[0-9A-Z]{16}'
+            'sk-[a-zA-Z0-9]{20,}'
+            'ghp_[a-zA-Z0-9]{36}'
+            'password\s*=\s*["'"'"'][^"'"'"']{8,}'
+          )
+
+          for pattern in "${patterns[@]}"; do
+            matches=$(grep -rn --include='*.ts' --include='*.js' --include='*.py' --include='*.rs' --include='*.go' \
+              -E "$pattern" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=target 2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              echo "::error::Potential secret found matching pattern: $pattern"
+              echo "$matches"
+              errors=$((errors + 1))
+            fi
+          done
+
+          # Check for .env files in repo (tracked or untracked)
+          if { git ls-files --name-only 2>/dev/null; git ls-files --others --exclude-standard --name-only 2>/dev/null; } | grep -qE '\.env($|\.)'; then
+            echo "::error::.env file detected in repository files"
+            errors=$((errors + 1))
+          fi
+
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors forbidden pattern(s) detected"
+            exit 1
+          fi
+          echo "No forbidden patterns found."
+
+      - name: Validate framework structure
+        run: |
+          echo "=== Validating framework structure ==="
+          # Check for key documentation files
+          for doc in CLAUDE.md UNIFIED_AGENT_TEAMS.md; do
+            if [ -f "$doc" ]; then
+              echo "OK:   $doc exists"
+            else
+              echo "::warning::$doc not found. Run 'agentkit init' to generate it."
+            fi
+          done
+
+          # Check for agent configuration directories
+          for dir in .cursor .windsurf .ai .agentkit; do
+            if [ -d "$dir" ]; then
+              echo "OK:   $dir/ directory exists"
+            else
+              echo "INFO: $dir/ directory not present"
+            fi
+          done
+
+          echo "Framework structure validation complete."

@@ -34,7 +34,7 @@ framework:
   - name: init
     type: framework
     description: >
-      Initialize the current repository as an AgentKit Forge project.
+      Initialize the current repository as an Retort project.
       Creates .agentkit-repo marker and initial overlay configuration.
     flags:
       - name: overlay
@@ -131,7 +131,7 @@ Add a comment block at the top of `commands.yaml`:
 # NOTE: The following CLI commands are framework-internal and intentionally
 # not listed in this spec file. They are always available via the CLI:
 #   init, sync, spec-validate, add, remove, list, tasks, delegate
-# These commands manage the AgentKit Forge framework itself, not project workflows.
+# These commands manage the Retort framework itself, not project workflows.
 ```
 
 ### Step: Add validate.mjs check for spec-CLI parity (~30 min)
@@ -151,9 +151,21 @@ const inSpecNotCli = specCommands.filter(c => !cliCommands.includes(c));
 
 ## Acceptance Criteria
 
-- [ ] All 8 commands either added to `commands.yaml` or documented as intentionally excluded
+- [x] All 8 commands either added to `commands.yaml` or documented as intentionally excluded
+  - `init` added as `type: framework` with full prompt/flags documentation
+  - `sync` updated from `type: utility` to `type: framework`; AgentKit Forge → Retort rename
+  - `spec-validate`, `add`, `remove`, `list`, `tasks`, `delegate` documented in header NOTE block
+  - `spec-validator.mjs` updated to accept `framework` as a valid command type
 - [ ] `validate.mjs` checks for CLI-spec command parity
 - [ ] No drift warning when running `agentkit validate`
+
+## Implementation Notes (2026-03-20)
+
+Partial implementation complete as part of `feat/kit-domain-selection-onboarding`:
+- `type: framework` added to `VALID_COMMAND_TYPES` in `spec-validator.mjs`
+- `init` command added to `commands.yaml` with kit selection documentation
+- `sync` type corrected; header documents intentionally-excluded CLI commands
+- Remaining: `validate.mjs` CLI-spec parity check (deferred)
 
 ---
 

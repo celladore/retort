@@ -1,0 +1,337 @@
+# =============================================================================
+# project.yaml — Project-level metadata for rich, context-aware AI configs
+# Canonical source of truth for agentkit-forge
+# Version: 0.1.0
+# =============================================================================
+# This file feeds into every generated config (AGENTS.md, CLAUDE.md, WARP.md,
+# GEMINI.md, copilot-instructions.md, etc.) to produce project-specific output
+# instead of generic framework boilerplate.
+#
+# All fields are optional — if missing, sync still works with generic output.
+# Run `agentkit discover` to auto-detect values, or `agentkit init` to fill
+# this interactively.
+# =============================================================================
+
+# Project identity
+name: agentkit-forge # e.g. "chaufher", "phoenix", "my-api"
+githubSlug: phoenixvc/agentkit-forge # e.g. "my-org/my-repo" — used in GitHub URLs (security advisories, etc.)
+description: AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
+phase: active # greenfield | active | maintenance | legacy
+
+# Tech stack (auto-detected + confirmed at init)
+stack:
+  languages: [javascript, yaml, markdown] # e.g. [typescript, csharp, python]
+  packageManager: pnpm # pnpm | npm | yarn — controls install/run commands and lockfile references across all generated output
+  nodeVersion: lts/* # e.g. 22, 20, lts/* — used in CI setup-node
+  pythonVersion: '3.12' # e.g. 3.12, 3.11 — used in CI setup-python (only when python in languages)
+  frameworks:
+    frontend: [] # e.g. [next.js, react]
+    backend: [node.js] # e.g. [asp.net-core, express]
+    css: [] # e.g. [tailwind, sass]
+  orm: none # e.g. ef-core, prisma, drizzle, sqlalchemy
+  database: [none] # e.g. [postgresql, redis]
+  search: none # e.g. elasticsearch, meilisearch
+  messaging: [none] # e.g. [signalr, rabbitmq]
+
+# Architecture
+architecture:
+  pattern: monolith # clean | hexagonal | mvc | microservices | monolith | serverless
+  apiStyle: mixed # rest | graphql | grpc | mixed
+  monorepo: false
+  monorepoTool: pnpm-workspaces # turborepo | nx | lerna | pnpm-workspaces
+
+# Explicit implementation patterns (helps agents avoid reinventing architecture)
+patterns:
+  repository: false
+  cqrs: false
+  eventSourcing: false
+  mediator: false
+  unitOfWork: false # domain/app UoW pattern, distinct from DB transaction strategy
+
+# Existing documentation & specs
+documentation:
+  hasPrd: true
+  prdPath: docs/prd/ # e.g. docs/prd/
+  hasAdr: true
+  adrPath: docs/architecture/decisions/ # e.g. docs/architecture/decisions/
+  hasApiSpec: true
+  apiSpecPath: docs/api/ # e.g. docs/api/openapi/
+  hasTechnicalSpec: true
+  technicalSpecPath: docs/architecture/specs/
+  hasDesignSystem: false
+  designSystemPath: null # e.g. packages/ui/
+  storybook: false
+  designTokensPath: null # e.g. styles/tokens/
+  historyPath: docs/history # path to retrospective/issue/lesson history docs
+  hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
+  brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
+
+# Editor theme — generates workbench.colorCustomizations in .vscode/settings.json
+editorTheme:
+  enabled: true # master toggle for VS Code theme generation
+  source: brand # brand | custom | none
+
+# External knowledge/doc sources used to seed template metadata + overlays
+# (no raw bulk copy by default).
+externalKnowledge:
+  enabled: false
+  mode: metadata-overlays # metadata-overlays | direct-copy | hybrid
+  sources:
+    windsurfDomainGuidesPath: null # e.g. C:/Users/<user>/.windsurf/plans/domain-guides
+    mystiraDocsPath: null # e.g. C:/Users/<user>/repos/Mystira.workspace/docs
+    markdownFiles: [] # e.g. [docs/strategy.md, docs/vision.md]
+    gitRepoUrls: [] # e.g. [https://github.com/org/repo]
+  targetPlatforms: [copilot, windsurf]
+
+# Deployment & infrastructure
+deployment:
+  cloudProvider: none # aws | azure | gcp | vercel | netlify | self-hosted | none
+  containerized: false
+  containerRuntime: null # docker | podman | containerd | nerdctl | none
+  environments: [local, ci] # e.g. [dev, staging, prod]
+  iacTool: none # terraform | bicep | pulumi | cdk | terragrunt | none
+
+# Infrastructure — IaC conventions, naming, and resource management
+infrastructure:
+  namingConvention: '{org}-{env}-{project}-{resourcetype}-{region}' # e.g. "{org}-{env}-{project}-{resourcetype}-{region}"
+  defaultRegion: global # e.g. southafricanorth, eastus, westeurope
+  org: akf # e.g. nl, contoso — the org prefix used in resource names
+  iacToolchain: [terraform, terragrunt] # e.g. [terraform, terragrunt]
+  stateBackend: none # azurerm | s3 | gcs | consul | local | none
+  modulesRepo: null # e.g. git::https://github.com/org/tf-modules.git
+  lockProvider: null # blob-lease | dynamodb | consul | none
+  tagging:
+    mandatory: [environment, project, owner, cost_center] # required on every taggable resource
+    optional: [team, created_by, managed_by] # recommended for cost analysis and lifecycle tracking
+
+# Observability — monitoring, alerting, and tracing defaults
+observability:
+  monitoring:
+    provider: none # azure-monitor | datadog | prometheus | grafana-cloud | cloudwatch | none
+    dashboards: false
+  alerting:
+    provider: none # azure-monitor | pagerduty | opsgenie | grafana | none
+    channels: [none] # e.g. [email, slack, teams]
+  tracing:
+    provider: none # application-insights | jaeger | zipkin | otel-collector | none
+    samplingRate: null # 0.0–1.0, e.g. 0.1 for 10%
+  logging:
+    centralised: false # whether logs are shipped to a central store
+    retentionDays: null # e.g. 30, 90, 365
+
+# Compliance — governance, DR, and audit policies
+compliance:
+  framework: null # soc2 | iso27001 | pci-dss | hipaa | gdpr | internal | none
+  disasterRecovery:
+    rpoHours: null # Recovery Point Objective in hours
+    rtoHours: null # Recovery Time Objective in hours
+    backupSchedule: null # daily | weekly | continuous | none
+    testSchedule: null # monthly | quarterly | annually | none
+    geoRedundancy: false
+  audit:
+    enabled: false
+    appendOnly: false # append-only event log for critical tables
+    eventBus: null # service-bus | event-hub | sns | none
+
+# Process & conventions
+process:
+  branchStrategy: github-flow # trunk-based | github-flow | gitflow
+  protectedBranches: [main, dev] # branches used in CI triggers (pull_request.branches)
+  commitConvention: conventional # conventional | semantic | none
+  codeReview: required-pr # required-pr | optional | none
+  teamSize: solo # solo | small | medium | large
+  # Issue tracker used by review/project-review/sync-backlog workflows.
+  # github   → gh issue create (requires gh CLI authenticated)
+  # linear   → Linear MCP or linear CLI
+  # none     → log finding to events.log only, do not open external issue
+  issueTracker: github # github | linear | none
+  intake:
+    ownerTeam: product # primary triage owner
+    operationsTeam: quality # routing/hygiene executor
+    cadence: daily # daily | on-demand | weekly
+    # Auto-import external issues into AGENT_BACKLOG.md during adoption (agentkit init)
+    # and when running /sync-backlog. When false, import-issues requires explicit invocation.
+    autoImport: false
+    # Map tracker labels to backlog priorities (P0–P3)
+    importLabelsMap:
+      bug: P1
+      critical: P0
+      enhancement: P2
+      documentation: P3
+      security: P0
+      feature: P2
+      chore: P3
+    # Map tracker issue states to backlog statuses
+    importStateMap:
+      open: open
+      closed: completed
+    # Map tracker labels/keywords to team assignments
+    importTeamMap:
+      backend: backend
+      frontend: frontend
+      api: backend
+      ui: frontend
+      database: data
+      infra: infra
+      ci: devops
+      test: testing
+      security: security
+      docs: docs
+    escalation:
+      securityCritical: [security, devops]
+      blockedCrossTeam: [product]
+
+# Branch protection — GitHub branch protection & repository settings
+# These values feed into the generated setup-branch-protection script.
+# The script uses the GitHub API to apply these rules programmatically.
+branchProtection:
+  # Pull request review requirements
+  requiredReviewCount: 1 # 0-6 approvals required
+  dismissStaleReviews: true # re-review required after new pushes
+  requireCodeOwnerReviews: true # CODEOWNERS review required
+  requireLastPushApproval: false # last pusher cannot self-approve
+
+  # Status checks
+  strictStatusChecks: true # branch must be up-to-date before merge
+  requiredStatusChecks: # CI job names that must pass
+    - 'Test'
+    - 'Validate'
+    - 'Branch Protection / branch-rules'
+
+  # Branch rules
+  enforceAdmins: false # apply rules to repo admins too
+  requiredLinearHistory: true # squash/rebase only (no merge commits in history)
+  requireSignedCommits: false # require GPG/SSH signed commits
+  allowForcePushes: false # block force pushes
+  allowDeletions: false # block branch deletion
+  blockCreations: false # block branch creation via push
+  requiredConversationResolution: true # all PR conversations must be resolved
+
+  # Code scanning (applied via GitHub Rulesets API)
+  # Requires GitHub Advanced Security or public repos
+  codeScanning:
+    enabled: true
+    tools:
+      - name: CodeQL
+        # none | critical | high_or_higher | medium_or_higher | all
+        securityAlertThreshold: high_or_higher
+        # none | errors | warnings_and_errors | all
+        alertThreshold: errors
+
+  # GitHub Copilot automated code review
+  copilotReview:
+    enabled: true # auto-request Copilot review on PRs
+    reviewNewPushes: true # re-review when new commits are pushed
+    reviewDraftPRs: true # also review draft pull requests
+
+  # Merge strategies (repository-level settings)
+  mergeStrategies:
+    allowMergeCommits: false # disable merge commits
+    allowSquashMerge: true # enable squash merging
+    allowRebaseMerge: false # disable rebase merging
+    deleteBranchOnMerge: true # auto-delete head branch after merge
+    allowAutoMerge: false # allow PRs to merge automatically when checks pass
+
+  # Merge queue (GitHub merge queue)
+  mergeQueue:
+    enabled: false # enable merge queue for the protected branch
+    mergeMethod: squash # merge | squash | rebase
+    minGroupSize: 1 # minimum PRs to batch
+    maxGroupSize: 5 # maximum PRs to batch
+
+# Testing strategy
+testing:
+  unit: [vitest] # e.g. [vitest, xunit, pytest]
+  integration: [vitest] # e.g. [vitest, supertest, testcontainers]
+  e2e: [] # e.g. [playwright, cypress]
+  coverage: 80 # Target coverage percentage (0-100)
+  mutation: null # e.g. stryker, pitest — mutation testing tool (null to disable)
+  staticAnalysis: [semgrep] # e.g. [semgrep, eslint, sonarqube] — static analysis tools
+  contractTesting: null # e.g. pact — consumer-driven contract testing tool (null to disable)
+  performanceTesting: null # e.g. k6, artillery, criterion — performance/load testing tool (null to disable)
+
+# CI/workflow defaults
+automation:
+  baselineProfile: node-ts-react # generic | node-ts-react | node-api | library
+  ciProfile: medium # minimal | medium | strict
+  checks:
+    codeql: true
+    semgrep: true
+    dependencyAudit: true
+  languageProfile:
+    mode: hybrid # configured | hybrid | heuristic
+    diagnostics: verbose # off | minimal | verbose
+    inferFrom:
+      frameworks: true
+      tests: true
+    scaffoldOverrides:
+      alwaysRegenerate: [] # relative paths that must always be regenerated even if scaffold-once by default
+      scaffoldOnce: [] # relative paths that should be treated as scaffold-once
+
+# External integrations (helps agents understand system boundaries)
+# Uncomment and add entries to describe external system boundaries:
+# integrations:
+#   - name: Azure AD B2C
+#     purpose: authentication
+#   - name: PayFast
+#     purpose: payments
+integrations: []
+
+# Evaluation — opt-in infrastructure & codebase fitness evaluation
+# Enable this to add the /infra-eval command for adopting repos.
+# Weights must sum to 100. Custom gates extend the default hard gate set.
+evaluation:
+  infraEval: false # set to true to enable /infra-eval command
+  weights:
+    reliability: 18
+    cost: 16
+    security: 14
+    infra: 12
+    scalability: 12
+    architecture: 10
+    code: 10
+    ops: 8
+  customGates: null # free-text markdown block for project-specific hard gates
+
+# Cross-cutting concerns (project-specific decisions agents must follow)
+crosscutting:
+  logging:
+    framework: null # serilog | winston | pino | bunyan | python-logging | log4net | nlog | none
+    structured: false
+    correlationId: false
+    level: null # trace | debug | information | warning | error | critical
+    sink: [] # e.g. [console, applicationInsights]
+  errorHandling:
+    strategy: null # problem-details | custom-envelope | raw | none
+    globalHandler: false
+    customExceptions: false
+    errorCodes: false
+  authentication:
+    provider: custom-jwt # azure-ad | azure-ad-b2c | auth0 | firebase | cognito | keycloak | custom-jwt | none
+    strategy: jwt-bearer # jwt-bearer | cookie | session | api-key | oauth2-code
+    multiTenant: false
+    rbac: true
+  caching:
+    provider: null # redis | memcached | in-memory | none
+    patterns: [] # e.g. [cache-aside, write-through]
+    distributedCache: false
+  api:
+    versioning: url-segment # url-segment | header | query-string | media-type | none
+    pagination: cursor # cursor | offset | keyset | none
+    responseFormat: envelope # envelope | raw | json-api | hal
+    rateLimiting: true
+  database:
+    migrations: null # code-first | sql-scripts | auto | none
+    seeding: false
+    transactionStrategy: null # unit-of-work | per-request | manual | none
+    connectionPooling: false
+  performance:
+    bundleBudget: null # KB limit for frontend bundles
+    lazyLoading: false
+    imageOptimization: false
+  featureFlags:
+    provider: null # launchdarkly | azure-app-config | unleash | flagsmith | custom | none
+  environments:
+    naming: [] # e.g. [dev, staging, prod]
+    configStrategy: null # env-vars | config-files | vault | app-config | none
+    envFilePattern: null # e.g. .env.example

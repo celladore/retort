@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "repo_id": "{{repoName}}",
+  "branch": "main",
+  "session_id": "",
+  "current_phase": 1,
+  "phase_name": "Discovery",
+  "last_phase_completed": 0,
+  "next_action": "Run /orchestrate to begin project assessment",
+  "team_progress": {
+    "team-backend": { "status": "idle", "notes": "" },
+    "team-frontend": { "status": "idle", "notes": "" },
+    "team-data": { "status": "idle", "notes": "" },
+    "team-infra": { "status": "idle", "notes": "" },
+    "team-devops": { "status": "idle", "notes": "" },
+    "team-testing": { "status": "idle", "notes": "" },
+    "team-security": { "status": "idle", "notes": "" },
+    "team-docs": { "status": "idle", "notes": "" },
+    "team-product": { "status": "idle", "notes": "" },
+    "team-quality": { "status": "idle", "notes": "" }
+  },
+  "todo_items": [],
+  "recent_results": [],
+  "completed": false
+}

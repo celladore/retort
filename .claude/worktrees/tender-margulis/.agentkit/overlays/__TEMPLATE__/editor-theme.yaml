@@ -1,0 +1,28 @@
+# Repo-specific editor theme override
+# This file is copied by `agentkit init` and customized per repo.
+# Uncomment and fill in to override the shared editor-theme.yaml spec.
+# Only include fields you want to override — everything else inherits.
+
+# enabled: true
+# mode: dark  # light | dark | both
+
+# Brand density tier — how much of the editor chrome gets themed:
+#   full    — Everything (title bar, activity bar, status bar, sidebar, editor, tabs, badges, etc.)
+#   medium  — Key chrome (title bar, activity bar, status bar, sidebar)
+#   minimal — Title bar only (one glanceable surface to identify which project you're in)
+# tier: full
+
+# Color scheme preference:
+#   dark  — Deep muted hues with a brand accent on the title bar
+#   light — Light surfaces with the brand color on chrome elements
+# scheme: dark
+
+# Per-tool overrides — use brand token references (dot-notation paths into brand.yaml).
+# These merge on top of the base light/dark mapping for that tool only.
+# cursor:
+#   sideBar.background: colors.neutral.900
+#   activityBar.background: colors.primary.dark
+#   statusBar.background: colors.secondary.lilac
+
+# windsurf:
+#   sideBar.background: colors.darkMode.surface

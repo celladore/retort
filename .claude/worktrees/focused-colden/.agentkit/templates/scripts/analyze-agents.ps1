@@ -1,0 +1,23 @@
+<# agentkit: scaffold: managed #>
+# scripts/analyze-agents.ps1
+# Generates agent/team relationship matrices from spec files.
+#
+# Usage:
+#   .\scripts\analyze-agents.ps1 [-Output <path>] [-Matrix <n>] [-Format <fmt>]
+
+param(
+    [string]$Output,
+    [string]$Matrix,
+    [string]$Format
+)
+
+$ErrorActionPreference = 'Stop'
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectRoot = Split-Path -Parent $ScriptDir
+
+$cliArgs = @('analyze-agents')
+if ($Output) { $cliArgs += '--output', $Output }
+if ($Matrix) { $cliArgs += '--matrix', $Matrix }
+if ($Format) { $cliArgs += '--format', $Format }
+
+node "$ProjectRoot/.agentkit/engines/node/src/cli.mjs" @cliArgs
