@@ -63,7 +63,19 @@ BRANCH=""
 DEFAULT_BRANCH=""
 if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
     BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null || echo "")
-    DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+    # Prefer the live remote HEAD; fall back to common names if the local ref is stale.
+    # Run 'git remote set-head origin --auto' to fix a stale ref.
+    DEFAULT_BRANCH=$(git -C "$CWD" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+    if [[ -z "$DEFAULT_BRANCH" ]]; then
+        # Stale or missing ref — probe common default branch names
+        for _candidate in main master dev trunk; do
+            if git -C "$CWD" rev-parse --verify "origin/${_candidate}" &>/dev/null; then
+                DEFAULT_BRANCH="$_candidate"
+                break
+            fi
+        done
+        DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
+    fi
 fi
 
 # -- Check for non-conventional commit messages on current branch ----------
