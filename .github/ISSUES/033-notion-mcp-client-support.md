@@ -19,10 +19,10 @@ References:
 
 ## Scope
 
-Evaluate what AgentKit Forge should support for Notion MCP integration, including:
+Evaluate what Retort should support for Notion MCP integration, including:
 
 - recommended MCP client usage patterns
-- workspace/page/database operations most relevant to AgentKit workflows
+- workspace/page/database operations most relevant to Retort workflows
 - authentication and secret handling
 - generated docs or setup guidance
 - overlap with existing Notion integration expectations
@@ -35,7 +35,7 @@ Evaluate what AgentKit Forge should support for Notion MCP integration, includin
 
 Document the client-side flow and required capabilities from the Notion MCP guide.
 
-### Step 2: Map high-value AgentKit use cases
+### Step 2: Map high-value Retort use cases
 
 Candidate use cases:
 
@@ -60,7 +60,7 @@ Decide whether support should be:
 
 - [ ] Notion MCP has a dedicated support recommendation
 - [ ] The official Notion MCP client guide is referenced
-- [ ] High-value AgentKit use cases are documented
+- [ ] High-value Retort use cases are documented
 - [ ] Auth/security handling is documented at a planning level
 
 ---

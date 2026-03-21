@@ -9,7 +9,7 @@ It is the "team that builds teams."
 ## Origin
 
 - **Source**: `phoenixvc/cognitive-mesh` issue #130 — TeamForge pipeline architecture
-- **Adapted for**: agentkit-forge spec-driven architecture (YAML specs → sync → generated configs)
+- **Adapted for**: retort spec-driven architecture (YAML specs → sync → generated configs)
 
 ## Pipeline Architecture
 

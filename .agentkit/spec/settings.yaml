@@ -1,6 +1,6 @@
 # =============================================================================
 # settings.yaml — Permissions, hooks, and runtime configuration
-# Canonical source of truth for agentkit-forge
+# Canonical source of truth for retort
 # Version: 0.1.0
 # =============================================================================
 # Permissions follow an allow/deny model. Deny rules take precedence.

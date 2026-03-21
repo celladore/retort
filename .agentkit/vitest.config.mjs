@@ -14,8 +14,4 @@ export default defineConfig({
       reporter: ['text', 'text-summary'],
     },
   },
-  coverage: {
-    provider: 'v8',
-    reporter: ['text', 'text-summary'],
-  },
 });

@@ -1,23 +1,23 @@
-# AgentKit Adopter Branch Governance Checklist
+# Retort Adopter Branch Governance Checklist
 
 ## Purpose
 
-Apply the branch-governance profile to repositories that implement AgentKit Forge until template/spec automation is merged.
+Apply the branch-governance profile to repositories that implement Retort until template/spec automation is merged.
 
 ## Governance source
 
-- Rollout tracker: [Issue #167](https://github.com/phoenixvc/agentkit-forge/issues/167)
-- Policy issue: [Issue #168](https://github.com/phoenixvc/agentkit-forge/issues/168)
-- Infrastructure issue: [Issue #169](https://github.com/phoenixvc/agentkit-forge/issues/169)
+- Rollout tracker: [Issue #167](https://github.com/phoenixvc/retort/issues/167)
+- Policy issue: [Issue #168](https://github.com/phoenixvc/retort/issues/168)
+- Infrastructure issue: [Issue #169](https://github.com/phoenixvc/retort/issues/169)
 
 ## Implementation checklist (per adopting repo)
 
-- [ ] Confirm repository is enrolled in AgentKit implementer policy profile.
+- [ ] Confirm repository is enrolled in Retort implementer policy profile.
 - [ ] Set default branch to `dev` (with owner approval and migration notice).
 - [ ] Enable branch protection for `dev` with required status checks and reviews.
 - [ ] Enable branch protection for `main` with required status checks and reviews.
 - [ ] Add/enable a required check that blocks direct changes to `.agentkit/**` in PRs targeting `dev` or `main`.
-- [ ] Require upstream issue linkage for `.agentkit/**` change requests (must reference `phoenixvc/agentkit-forge` issue URL).
+- [ ] Require upstream issue linkage for `.agentkit/**` change requests (must reference `phoenixvc/retort` issue URL).
 - [ ] Document exception path for maintainers (emergency only, audited): [Maintainer Exception Policy](maintainer_exception_policy.md).
 - [ ] Update contributor docs in the adopting repo to reflect `dev` default and upstream-first `.agentkit` policy.
 
@@ -32,7 +32,7 @@ Apply the branch-governance profile to repositories that implement AgentKit Forg
 
 If a PR targets `dev` or `main` and includes `.agentkit/**` changes:
 
-1. It must link a tracking issue in `phoenixvc/agentkit-forge`.
+1. It must link a tracking issue in `phoenixvc/retort`.
 2. If no upstream issue exists, PR must fail with actionable guidance to open one.
 3. Local/direct template-source edits are rejected unless explicitly approved under [Maintainer Exception Policy](maintainer_exception_policy.md).
 

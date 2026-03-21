@@ -1,6 +1,6 @@
 # Framework API Conventions (Adopter Guide)
 
-This repository (**agentkit-forge**) is the AgentKit Forge framework. It does **not** ship an application API or run an HTTP server. Adopters of the framework implement their own APIs in their repositories.
+This repository (**retort**) is the Retort framework. It does **not** ship an application API or run an HTTP server. Adopters of the framework implement their own APIs in their repositories.
 
 ## Recommended API Route Structure
 

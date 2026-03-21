@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'fs';
 import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { VALID_COMMANDS } from './commands-registry.mjs';
 
 // Lazy-loaded after ensureDependencies() — js-yaml may not be installed yet
 let yaml;
@@ -26,34 +27,8 @@ try {
   /* fallback to 0.0.0 */
 }
 
-const VALID_COMMANDS = [
-  'init',
-  'sync',
-  'validate',
-  'discover',
-  'spec-validate',
-  'orchestrate',
-  'plan',
-  'check',
-  'review',
-  'handoff',
-  'healthcheck',
-  'cost',
-  'project-review',
-  'import-issues',
-  'backlog',
-  'sync-backlog',
-  'add',
-  'remove',
-  'list',
-  'features',
-  'tasks',
-  'delegate',
-  'doctor',
-  'scaffold',
-  'preflight',
-  'analyze-agents',
-];
+// Re-export for callers that import from cli.mjs directly
+export { VALID_COMMANDS } from './commands-registry.mjs';
 
 // Workflow commands with runtime handlers
 const WORKFLOW_COMMANDS = ['orchestrate', 'plan', 'check', 'review', 'handoff', 'healthcheck'];
@@ -497,6 +472,7 @@ async function main() {
     showHelp();
     process.exit(0);
   }
+
 
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);

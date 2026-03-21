@@ -1,7 +1,7 @@
 # Concurrency Protocol Reference
 
 This document describes the full file-locking and concurrency protocol used by
-AgentKit Forge agents when accessing shared state files. Agents receive a brief
+Retort agents when accessing shared state files. Agents receive a brief
 summary in their persona files; this is the complete reference.
 
 ## Overview

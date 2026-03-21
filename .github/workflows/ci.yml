@@ -1,4 +1,4 @@
-name: AgentKit Forge CI
+name: Retort CI
 
 on:
   push:

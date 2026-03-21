@@ -83,7 +83,7 @@ a meaningful uplift, but Claude still trails GPT-5 on this benchmark.
 **Agentic scaffolding inflates scores.** The Refact.ai 93.3 % result
 highlights that the _workflow_ (plan, code, test, iterate) is often more
 important than the underlying model. This is consistent with the
-AgentKit Forge design principle of optimising the agent harness alongside
+Retort design principle of optimising the agent harness alongside
 model selection.
 
 ---
@@ -100,7 +100,7 @@ Key data points available in the dossiers:
 
 ---
 
-## Implications for AgentKit Forge model guides
+## Implications for Retort model guides
 
 - GPT-5.2 / 5.3 Codex High justifies its Tier 1 placement in Backend
   and Security guides despite a weaker long-context story — it wins on
@@ -110,6 +110,6 @@ Key data points available in the dossiers:
 - Claude Opus 4.x should remain primary where multi-file reasoning and
   large context are needed, but should not be assumed best for all coding
   scenarios — GPT-5 family and Gemini are stronger on narrow code-edit tasks.
-- The agentic scaffold (how AgentKit Forge chains tool calls) may have
+- The agentic scaffold (how Retort chains tool calls) may have
   more impact on end-to-end results than the ±5 % differences between
   top-tier models.

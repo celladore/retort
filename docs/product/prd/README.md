@@ -1,6 +1,6 @@
 # PRD Library
 
-Product Requirement Documents for AgentKit Forge and projects using it.
+Product Requirement Documents for Retort and projects using it.
 
 ---
 
@@ -35,8 +35,8 @@ From the [Agent Backlog](../../AGENT_BACKLOG.md) (synced from GitHub), the follo
 
 | Issue                                                             | Title                                                                   | Notes                                                                                                                                                                             |
 | ----------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [GH#371](https://github.com/JustAGhosT/agentkit-forge/issues/371) | fix(state): state cleanup, validation, session-start directory creation | Agent state management: ensure directories exist, clean stale tasks, validate state. **Plan:** [PLAN-gh371](../../planning/PLAN-gh371-state-cleanup-validation-session-start.md). |
-| [GH#328](https://github.com/JustAGhosT/agentkit-forge/issues/328) | fix(budget-guard): verify and address budget-guard workflow logic       | Budget-guard workflow step logic issues from test execution                                                                                                                       |
+| [GH#371](https://github.com/JustAGhosT/retort/issues/371) | fix(state): state cleanup, validation, session-start directory creation | Agent state management: ensure directories exist, clean stale tasks, validate state. **Plan:** [PLAN-gh371](../../planning/PLAN-gh371-state-cleanup-validation-session-start.md). |
+| [GH#328](https://github.com/JustAGhosT/retort/issues/328) | fix(budget-guard): verify and address budget-guard workflow logic       | Budget-guard workflow step logic issues from test execution                                                                                                                       |
 
 Consider drafting PRDs for these when scope is stable. An implementation plan exists for GH#371; GH#328 can have a plan added when scope is agreed.
 

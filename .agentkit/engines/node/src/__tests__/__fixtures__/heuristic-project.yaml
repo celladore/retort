@@ -1,0 +1,23 @@
+name: heuristic-test
+githubSlug: test-org/heuristic-test
+description: Heuristic mode fixture — all domains should be included (backward compat).
+phase: active
+stack:
+  languages: [javascript]
+  packageManager: pnpm
+  nodeVersion: lts/*
+  frameworks:
+    frontend: []
+    backend: [node.js]
+    css: []
+  orm: none
+  database: [none]
+  search: none
+  messaging: [none]
+automation:
+  languageProfile:
+    mode: heuristic
+    diagnostics: off
+    inferFrom:
+      frameworks: true
+      tests: true

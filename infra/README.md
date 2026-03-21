@@ -1,6 +1,6 @@
-# Infrastructure — agentkit-forge
+# Infrastructure — retort
 
-This directory holds infrastructure and staging guidance for the AgentKit Forge framework repository.
+This directory holds infrastructure and staging guidance for the Retort framework repository.
 
 ## Staging and local validation
 
@@ -8,7 +8,7 @@ This repo is **framework-only**: it does not deploy a runnable application. Ther
 
 - **Local:** Run `pnpm install` and `pnpm -C .agentkit agentkit:sync` (and optionally `pnpm -C .agentkit agentkit:validate`) from the repo root.
 - **Staging-like:** Use the root `docker-compose.yml` to run sync in a container: `docker compose --profile sync run --rm agentkit-sync`.
-- **Adopters:** Projects that use AgentKit Forge should define their own staging (e.g. in their `infra/`, Terraform, or Docker Compose) and deploy their application there.
+- **Adopters:** Projects that use Retort should define their own staging (e.g. in their `infra/`, Terraform, or Docker Compose) and deploy their application there.
 
 ## Naming and IaC
 

@@ -1,6 +1,6 @@
 # =============================================================================
 # rules.yaml — Domain-specific coding rules and standards
-# Canonical source of truth for agentkit-forge
+# Canonical source of truth for retort
 # Version: 0.2.0
 # =============================================================================
 # Rules are organized by domain. Each rule set defines conventions, tooling
@@ -768,9 +768,9 @@ rules:
   # ===========================================================================
   - domain: template-protection
     description: >
-      Rules preventing AI agents from directly modifying AgentKit Forge
+      Rules preventing AI agents from directly modifying Retort
       source-of-truth files. Changes to templates, specs, engines, and
-      overlays must go through a PR to the agentkit-forge repository.
+      overlays must go through a PR to the retort repository.
     applies-to:
       - '.agentkit/templates/**'
       - '.agentkit/spec/**'
@@ -806,7 +806,7 @@ rules:
         rule: >
           When a change to templates, specs, or engines is needed, the agent
           must describe the desired change and recommend the user submit a
-          PR to the agentkit-forge repository. The PR will be auto-labelled
+          PR to the retort repository. The PR will be auto-labelled
           and require maintainer review via CODEOWNERS.
         severity: error
         type: advisory

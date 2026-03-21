@@ -1,0 +1,19 @@
+version: "1.0"
+scope: todo
+repo: phoenixvc/retort
+updated_at: 2026-03-18
+
+tasks:
+  - id: rename-decision
+    title: "Decide rename: agent-forge vs phoenix-forge (or keep retort)"
+    description: "173 stars. Collides with Google ADK and Coinbase Retort. agent-forge = independent product, phoenix-forge = Phoenix-branded. Decide before 500+ stars."
+    priority: high
+    status: todo
+    tags: [naming, brand, strategy]
+
+  - id: agents-hub-portability
+    title: "Extract Mystira .agents/ skeleton as Retort overlay template"
+    description: "Target: .agentkit/overlays/agents-hub/. Makes session-startup, end-session, skill-discovery portable via agentkit:sync."
+    priority: medium
+    status: todo
+    tags: [agent, portability, template]

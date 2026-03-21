@@ -1,6 +1,6 @@
-# Migrations — agentkit-forge
+# Migrations — retort
 
-This repository (**agentkit-forge**) is the framework and has **no database or migrations**. This directory is a placeholder for adopters.
+This repository (**retort**) is the framework and has **no database or migrations**. This directory is a placeholder for adopters.
 
 ## For adopters
 

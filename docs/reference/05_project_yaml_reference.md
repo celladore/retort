@@ -1,7 +1,7 @@
 # project.yaml Reference
 
 > Canonical configuration for project-level metadata consumed by
-> AgentKit Forge's sync engine. All fields are **optional** — if
+> Retort's sync engine. All fields are **optional** — if
 > missing, sync produces generic output.
 
 ## Sections

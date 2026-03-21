@@ -1,4 +1,4 @@
-# feat(mcp): Evaluate hosting our own MCP server for AgentKit Forge
+# feat(mcp): Evaluate hosting our own MCP server for Retort
 
 **Priority:** P1 — High
 **Labels:** `enhancement`, `mcp`, `architecture`, `platform`
@@ -8,7 +8,7 @@
 
 ## Problem
 
-AgentKit Forge currently consumes or plans around third-party MCP servers, but there is no dedicated issue evaluating whether the project should host its own MCP server.
+Retort currently consumes or plans around third-party MCP servers, but there is no dedicated issue evaluating whether the project should host its own MCP server.
 
 This needs a deliberate architectural decision before ad hoc implementation begins.
 
@@ -18,12 +18,12 @@ This needs a deliberate architectural decision before ad hoc implementation begi
 
 Candidate responsibilities worth evaluating:
 
-- expose AgentKit project/spec metadata to MCP-capable clients
+- expose Retort project/spec metadata to MCP-capable clients
 - expose backlog/tasks/orchestrator state in a stable tool interface
 - expose docs/ADR/PRD retrieval with project-aware filtering
 - expose workflow execution surfaces safely
 - expose project health/status summaries
-- provide a stable adapter over AgentKit-native concepts instead of leaking file layout details
+- provide a stable adapter over Retort-native concepts instead of leaking file layout details
 
 Possible non-goals:
 
@@ -41,7 +41,7 @@ Answer whether a first-party MCP server would improve:
 
 - interoperability
 - platform portability
-- discoverability of AgentKit capabilities
+- discoverability of Retort capabilities
 - safer integrations for external tools
 
 ### Step 2: Define candidate tool surface

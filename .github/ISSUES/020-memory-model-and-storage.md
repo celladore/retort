@@ -8,7 +8,7 @@
 
 ## Problem
 
-Before implementing memory-related features, AgentKit Forge needs a clear architecture for:
+Before implementing memory-related features, Retort needs a clear architecture for:
 
 - session memory vs durable memory
 - workspace-scoped vs user-scoped memory

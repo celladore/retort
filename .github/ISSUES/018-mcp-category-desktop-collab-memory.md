@@ -8,7 +8,7 @@
 
 ## Problem
 
-The TRAE marketplace includes desktop/filesystem/shell, collaboration, and memory-oriented MCP servers that can materially change agent workflows. AgentKit Forge needs a clear position on which of these should be integrated, documented, or deferred.
+The TRAE marketplace includes desktop/filesystem/shell, collaboration, and memory-oriented MCP servers that can materially change agent workflows. Retort needs a clear position on which of these should be integrated, documented, or deferred.
 
 Examples visible in screenshots include:
 

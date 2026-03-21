@@ -25,7 +25,7 @@ It's **not called from**:
 
 ### Step 1: Integrate doctor into healthcheck.mjs (~30 min)
 
-In `healthcheck.mjs`, after the AgentKit Setup section (line 84):
+In `healthcheck.mjs`, after the Retort Setup section (line 84):
 
 ```javascript
 // --- Step 2b: Framework Diagnostics ---

@@ -1,7 +1,7 @@
 # Cost Management Infrastructure — Comprehensive Plan
 
 > **Context**: Recent incident where agent usage spiraled out of control.
-> **Scope**: Three repos — `agentkit-forge` (spec/templates), `ai-gateway` (runtime), `pvc-costops-analytics` (FinOps analytics).
+> **Scope**: Three repos — `retort` (spec/templates), `ai-gateway` (runtime), `pvc-costops-analytics` (FinOps analytics).
 > **Goal**: Unified cost governance spanning AI agent usage, Azure infrastructure, and resource group budgeting.
 
 ---
@@ -12,16 +12,16 @@
 
 | Capability                                               | Repo                  | Status                       | Gap                                                         |
 | -------------------------------------------------------- | --------------------- | ---------------------------- | ----------------------------------------------------------- |
-| Session cost tracking (duration, commands, files)        | agentkit-forge        | Implemented                  | Observation-only — no enforcement                           |
-| Budget-guard module (circuit breaker)                    | agentkit-forge        | **Just added** (this branch) | Not wired to hooks, no tests, no CLI integration            |
-| `/cost` CLI command                                      | agentkit-forge        | Implemented                  | Reports only — no limits                                    |
-| `/infra-eval` with cost dimension (16% weight)           | agentkit-forge        | Implemented                  | Evaluation-only — no remediation                            |
-| `infra` agent with cost-optimization responsibility      | agentkit-forge        | Defined                      | Generic — not specialized for cost governance               |
-| FinOps integration spec (FINOPS_AGENTKIT_INTEGRATION.md) | agentkit-forge        | Documented                   | Phase 1 spec exists but not implemented in templates        |
+| Session cost tracking (duration, commands, files)        | retort        | Implemented                  | Observation-only — no enforcement                           |
+| Budget-guard module (circuit breaker)                    | retort        | **Just added** (this branch) | Not wired to hooks, no tests, no CLI integration            |
+| `/cost` CLI command                                      | retort        | Implemented                  | Reports only — no limits                                    |
+| `/infra-eval` with cost dimension (16% weight)           | retort        | Implemented                  | Evaluation-only — no remediation                            |
+| `infra` agent with cost-optimization responsibility      | retort        | Defined                      | Generic — not specialized for cost governance               |
+| FinOps integration spec (FINOPS_AGENTKIT_INTEGRATION.md) | retort        | Documented                   | Phase 1 spec exists but not implemented in templates        |
 | AI Gateway with rate limiting                            | ai-gateway            | Deployed                     | No budget caps, no usage telemetry export, no chargeback    |
 | Azure Container Apps (scale-to-zero)                     | ai-gateway            | Deployed                     | No Azure Budget resources in Terraform                      |
 | ADX cost analytics (KQL, Grafana)                        | pvc-costops-analytics | Partial                      | Private repo; Phase 1 spec defined but checklist incomplete |
-| pvc-costops-analytics overlay                            | agentkit-forge        | Scaffolded                   | Empty — no rules, commands, or cost config                  |
+| pvc-costops-analytics overlay                            | retort        | Scaffolded                   | Empty — no rules, commands, or cost config                  |
 
 ### 1.2 What Caused the Spiral
 
@@ -39,9 +39,9 @@ Building on the existing model from `FINOPS_AGENTKIT_INTEGRATION.md`:
 
 | Concern                                        | Primary Repo            | What It Owns                                                      |
 | ---------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
-| **Budget policy schema & enforcement engine**  | `agentkit-forge`        | `budget-guard.mjs`, policy config in `settings.yaml`, hook wiring |
-| **Agent session cost tracking**                | `agentkit-forge`        | `cost-tracker.mjs`, `/cost` command, session JSONL logs           |
-| **FinOps methodology & templates**             | `agentkit-forge`        | Rules, Phase 1 spec template, overlay config for FinOps repos     |
+| **Budget policy schema & enforcement engine**  | `retort`        | `budget-guard.mjs`, policy config in `settings.yaml`, hook wiring |
+| **Agent session cost tracking**                | `retort`        | `cost-tracker.mjs`, `/cost` command, session JSONL logs           |
+| **FinOps methodology & templates**             | `retort`        | Rules, Phase 1 spec template, overlay config for FinOps repos     |
 | **Cost centre / resource group management UX** | `pvc-costops-analytics` | ADX tables, KQL functions, Grafana dashboards, cost centre CRUD   |
 | **Azure Budget resources (IaC)**               | `ai-gateway`            | Terraform `azurerm_consumption_budget_*` in infra/modules         |
 | **Gateway usage metering & telemetry**         | `ai-gateway`            | Request logging, token counting, usage export to ADX              |
@@ -105,7 +105,7 @@ This is handled by the existing template rendering pipeline — no new agent nee
 
 ---
 
-## Part 4: Implementation Plan — agentkit-forge
+## Part 4: Implementation Plan — retort
 
 ### 4.1 Complete Budget-Guard Module (budget-guard.mjs)
 
@@ -445,7 +445,7 @@ unbudgeted_resources(_since)   — Resources not in any cost centre
 
 ## Part 7: Template & Integration Changes Summary
 
-### 7.1 agentkit-forge Changes (This PR)
+### 7.1 retort Changes (This PR)
 
 | File                                                         | Change                                        | Priority |
 | ------------------------------------------------------------ | --------------------------------------------- | -------- |

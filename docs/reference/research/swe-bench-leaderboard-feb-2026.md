@@ -77,11 +77,11 @@ more general Pro variants.
 **Benchmark harness matters.** Results can vary materially depending on
 agent scaffold (SWE-agent, Moatless, OpenHands, etc.). The leaderboard
 numbers above are for the published scaffold reported by each team;
-internal AgentKit evaluations using a custom scaffold may differ.
+internal Retort evaluations using a custom scaffold may differ.
 
 ---
 
-## Implications for AgentKit Forge model guides
+## Implications for Retort model guides
 
 - The Tier 1 choices in the team guides (Claude Opus 4.6, GPT-5.3 Codex
   High) are consistent with this leaderboard.

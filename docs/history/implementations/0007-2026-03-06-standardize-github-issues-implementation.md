@@ -8,7 +8,7 @@
 
 ## Problem Statement
 
-When adopting AgentKit Forge into an existing repository, GitHub issues (and
+When adopting Retort into an existing repository, GitHub issues (and
 potentially Linear issues) already exist in various formats, labels, and states.
 There is no automated mechanism to:
 

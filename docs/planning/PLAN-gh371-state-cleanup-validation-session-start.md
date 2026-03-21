@@ -2,7 +2,7 @@
 
 **Goal:** Agent state is reliable: required state directories exist before any command runs, orchestrator state is validated on load, and stale task files can be cleaned so agents never fail or misbehave due to missing or corrupt state.
 
-**Scope:** P1 product backlog item [GH#371](https://github.com/JustAGhosT/agentkit-forge/issues/371).
+**Scope:** P1 product backlog item [GH#371](https://github.com/JustAGhosT/retort/issues/371).
 
 ---
 

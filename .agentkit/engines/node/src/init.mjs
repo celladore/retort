@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Init Command (§12)
+ * Retort — Init Command (§12)
  * Interactive multi-phase wizard for project setup.
  * Uses @clack/prompts for Windows-safe interactive prompts.
  *
@@ -9,6 +9,7 @@
  *   --non-interactive       Skip prompts, use auto-detected defaults
  *   --ci                    Alias for --non-interactive
  *   --preset <preset>       minimal | full | team | infra
+ *   --dry-run               Show what would be generated without writing files
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
@@ -192,6 +193,7 @@ function applyExternalKnowledgeFlags(project, flags = {}) {
 
 export async function runInit({ agentkitRoot, projectRoot, flags }) {
   const force = flags.force || false;
+  const dryRun = flags['dry-run'] || false;
   const nonInteractive = flags['non-interactive'] || flags.ci || false;
   const preset = flags.preset || null;
   const rawRepoName = flags.repoName ?? basename(projectRoot);
@@ -246,6 +248,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   if (nonInteractive || process.env.CI) {
     console.log('[agentkit:init] Non-interactive mode — using auto-detected defaults.');
     applyPresetDefaults(project, preset);
+    applyDetectedKitDefaults(project, report);
     const presetDef = preset ? PRESETS[preset] : PRESETS.full;
     return await finalizeInit({
       agentkitRoot,
@@ -255,6 +258,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
       renderTargets: presetDef.renderTargets,
       featurePreset: presetDef.featurePreset || 'standard',
       force,
+      dryRun,
     });
   }
 
@@ -262,6 +266,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   if (preset) {
     console.log(`[agentkit:init] Using preset: ${PRESETS[preset].label}`);
     applyPresetDefaults(project, preset);
+    applyDetectedKitDefaults(project, report);
     return await finalizeInit({
       agentkitRoot,
       projectRoot,
@@ -270,6 +275,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
       renderTargets: PRESETS[preset].renderTargets,
       featurePreset: PRESETS[preset].featurePreset || 'standard',
       force,
+      dryRun,
     });
   }
 
@@ -281,6 +287,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
     console.warn(
       '[agentkit:init] @clack/prompts not available — falling back to non-interactive mode.'
     );
+    applyDetectedKitDefaults(project, report);
     return await finalizeInit({
       agentkitRoot,
       projectRoot,
@@ -289,10 +296,78 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
       renderTargets: PRESETS.full.renderTargets,
       featurePreset: 'standard',
       force,
+      dryRun,
     });
   }
 
-  clack.intro('AgentKit Forge — Project Setup');
+  clack.intro('Retort — Project Setup');
+
+  // --- Kit detection display ---
+  const STACK_TO_DOMAIN = {
+    javascript: 'typescript',
+    typescript: 'typescript',
+    node: 'typescript',
+    csharp: 'dotnet',
+    dotnet: 'dotnet',
+    rust: 'rust',
+    python: 'python',
+    solidity: 'blockchain',
+    blockchain: 'blockchain',
+  };
+  const UNIVERSAL_KIT_NAMES = [
+    'security',
+    'testing',
+    'git-workflow',
+    'documentation',
+    'ci-cd',
+    'dependency-management',
+    'agent-conduct',
+  ];
+
+  const detectedLangDomains = new Set();
+  for (const stack of report.techStacks) {
+    const domain = STACK_TO_DOMAIN[(stack.name || '').toLowerCase()];
+    if (domain) detectedLangDomains.add(domain);
+  }
+  const iacDetectedFromReport = !!detectIacTool(report);
+
+  const kitSummaryLines = [];
+  if (detectedLangDomains.size > 0) {
+    kitSummaryLines.push('Language kits (auto-detected from stack):');
+    for (const d of detectedLangDomains) kitSummaryLines.push(`  ✓ ${d}`);
+  } else {
+    kitSummaryLines.push('Language kits: none detected');
+  }
+  kitSummaryLines.push('');
+  kitSummaryLines.push('Universal kits (always included):');
+  kitSummaryLines.push(`  ✓ ${UNIVERSAL_KIT_NAMES.join(', ')}`);
+  if (iacDetectedFromReport) kitSummaryLines.push('  ✓ iac (detected from infra/)');
+  clack.note(kitSummaryLines.join('\n'), 'Kit detection — nothing forced');
+
+  // --- Optional kit selection ---
+  const optionalKitChoices = await clack.multiselect({
+    message: 'Additional kits to activate (space to toggle)',
+    options: [
+      {
+        value: 'iac',
+        label: 'iac — Terraform / Bicep / Pulumi',
+        hint: iacDetectedFromReport ? 'auto-detected' : 'no infra/ directory found',
+      },
+      { value: 'finops', label: 'finops — Azure cost tracking' },
+      { value: 'ai-cost-ops', label: 'ai-cost-ops — LLM token budgets' },
+    ],
+    initialValues: iacDetectedFromReport ? ['iac'] : [],
+    required: false,
+  });
+
+  if (clack.isCancel(optionalKitChoices)) {
+    clack.cancel('Init cancelled.');
+    process.exit(0);
+  }
+
+  const selectedOptionalKits = Array.isArray(optionalKitChoices) ? optionalKitChoices : [];
+  // Persist kit selections to project for sync engine consumption
+  applyKitSelections(project, report, selectedOptionalKits);
 
   // --- Phase 1: Project Identity ---
   const identity = await clack.group({
@@ -670,6 +745,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
     featurePreset,
     enabledFeatures,
     force,
+    dryRun,
   });
 }
 
@@ -686,7 +762,38 @@ async function finalizeInit({
   featurePreset,
   enabledFeatures,
   force,
+  dryRun = false,
 }) {
+  // --- Dry-run: show plan without writing ---
+  if (dryRun) {
+    const langs = project.stack?.languages || [];
+    const mode = project.automation?.languageProfile?.mode || 'configured';
+    const features = [];
+    if (project.features?.aiCostOps) features.push('ai-cost-ops');
+    if (project.features?.finops) features.push('finops');
+    const featureInfo = enabledFeatures
+      ? `${enabledFeatures.length} features (custom)`
+      : featurePreset
+        ? `preset: ${featurePreset}`
+        : 'default features';
+
+    console.log('\n[agentkit:init] DRY-RUN — no files will be written\n');
+    console.log(`  Repo name:       ${repoName}`);
+    console.log(`  Languages:       ${langs.join(', ') || 'none'}`);
+    console.log(`  Language mode:   ${mode}`);
+    console.log(
+      `  Features:        ${featureInfo}${features.length ? ' + ' + features.join(', ') : ''}`
+    );
+    console.log(`  Render targets:  ${renderTargets.join(', ')}`);
+    console.log('');
+    console.log('  Would write:');
+    console.log(`    .agentkit/overlays/${repoName}/settings.yaml`);
+    console.log('    .agentkit/spec/project.yaml');
+    console.log('    .agentkit-repo');
+    console.log('    (+ all sync outputs for configured render targets)');
+    console.log('\n  Run without --dry-run to generate.\n');
+    return;
+  }
   // 1. Copy __TEMPLATE__ overlay
   const templateDir = resolve(agentkitRoot, 'overlays', '__TEMPLATE__');
   const overlayDir = resolve(agentkitRoot, 'overlays', repoName);
@@ -984,6 +1091,48 @@ function writeProjectYaml(filePath, project) {
 // ---------------------------------------------------------------------------
 // Detection helpers
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Kit helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Applies kit defaults to project based on auto-detected stack.
+ * Used by non-interactive / preset / fallback paths so they get the same
+ * language-profile configuration as the interactive wizard.
+ */
+function applyDetectedKitDefaults(project, report) {
+  project.automation = project.automation || {};
+  project.automation.languageProfile = project.automation.languageProfile || {};
+  // Non-interactive defaults to 'hybrid' so heuristic detection still works
+  if (!project.automation.languageProfile.mode) {
+    project.automation.languageProfile.mode = 'hybrid';
+  }
+}
+
+/**
+ * Persists interactive kit selections to the project object for project.yaml.
+ * Called after the optional-kit multiselect prompt.
+ */
+function applyKitSelections(project, report, selectedOptionalKits) {
+  project.automation = project.automation || {};
+  project.automation.languageProfile = project.automation.languageProfile || {};
+  project.automation.languageProfile.mode = 'configured';
+
+  if (selectedOptionalKits.includes('ai-cost-ops')) {
+    project.features = project.features || {};
+    project.features.aiCostOps = true;
+  }
+  if (selectedOptionalKits.includes('finops')) {
+    project.features = project.features || {};
+    project.features.finops = true;
+  }
+  if (selectedOptionalKits.includes('iac') && !detectIacTool(report)) {
+    // User explicitly opted into iac but no IaC tool was detected — default to terraform
+    project.deployment = project.deployment || {};
+    if (!project.deployment.iacTool) project.deployment.iacTool = 'terraform';
+  }
+}
 
 function detectCloudProvider(report) {
   if (report.infrastructure.includes('bicep')) return 'azure';

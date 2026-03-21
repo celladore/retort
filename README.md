@@ -1,6 +1,6 @@
-# AgentKit Forge
+# Retort
 
-[![CI](https://github.com/phoenixvc/agentkit-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/phoenixvc/agentkit-forge/actions/workflows/ci.yml)
+[![CI](https://github.com/phoenixvc/retort/actions/workflows/ci.yml/badge.svg)](https://github.com/phoenixvc/retort/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/Node.js-%3E%3D22-green.svg)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9-orange.svg)](https://pnpm.io/)
@@ -15,7 +15,7 @@ Every AI coding tool has its own config format — `CLAUDE.md`, `.cursor/rules/`
 
 ## What
 
-AgentKit Forge is a **single source of truth** for all your AI tool configurations. You define your project once in YAML (`project.yaml` + spec files), and `sync` generates consistent, project-aware configs for every tool your team uses. It also provides an orchestration layer — slash commands, team routing, quality gates, and session state — that works identically across Claude Code, Cursor, Copilot, and the rest.
+Retort is a **single source of truth** for all your AI tool configurations. You define your project once in YAML (`project.yaml` + spec files), and `sync` generates consistent, project-aware configs for every tool your team uses. It also provides an orchestration layer — slash commands, team routing, quality gates, and session state — that works identically across Claude Code, Cursor, Copilot, and the rest.
 
 ## How
 
@@ -88,7 +88,7 @@ Use this path when starting a project from scratch.
 Click **"Use this template"** on GitHub (or clone directly):
 
 ```bash
-gh repo create my-org/my-project --template my-org/agentkit-forge --private --clone
+gh repo create my-org/my-project --template my-org/retort --private --clone
 cd my-project
 ```
 
@@ -161,36 +161,36 @@ Commit `.agentkit/` (source of truth). AI tool configs (`.claude/`, `.cursor/`, 
 
 ```bash
 git add .agentkit/ .gitignore .gitattributes README.md LICENSE
-git commit -m "feat: initialize agentkit-forge scaffold"
+git commit -m "feat: initialize retort scaffold"
 ```
 
 ---
 
 ## Adoption Guide: Existing Repos
 
-Use this path to add AgentKit Forge to a project that already has code.
+Use this path to add Retort to a project that already has code.
 
 ### Step 1 — Add the .agentkit directory
 
 Copy or merge the `.agentkit/` directory into your repo root. If using git:
 
 ```bash
-# Add agentkit-forge as a remote
-git remote add agentkit-forge https://github.com/my-org/agentkit-forge.git
-git fetch agentkit-forge
+# Add retort as a remote
+git remote add retort https://github.com/my-org/retort.git
+git fetch retort
 
 # Bring in just the .agentkit/ directory (and root config files)
-git checkout agentkit-forge/main -- .agentkit/ .gitattributes
+git checkout retort/main -- .agentkit/ .gitattributes
 ```
 
 Or simply copy the folder manually.
 
 ### Step 2 — Merge the .gitignore
 
-Append the AgentKit Forge ignore rules to your existing `.gitignore`. The key entries:
+Append the Retort ignore rules to your existing `.gitignore`. The key entries:
 
 ```gitignore
-# AgentKit Forge — always-regenerate outputs (regenerate with: pnpm -C .agentkit agentkit:sync)
+# Retort — always-regenerate outputs (regenerate with: pnpm -C .agentkit agentkit:sync)
 /.claude/
 /.cursor/
 /.windsurf/
@@ -253,14 +253,14 @@ renderTargets:
 pnpm -C .agentkit agentkit:sync
 pnpm -C .agentkit agentkit:validate
 git add .agentkit/ .gitignore .gitattributes
-git commit -m "feat: adopt agentkit-forge for AI orchestration"
+git commit -m "feat: adopt retort for AI orchestration"
 ```
 
 ---
 
 ## Documentation
 
-Comprehensive guides for using AgentKit Forge:
+Comprehensive guides for using Retort:
 
 | Guide                                                                                | Description                                                         |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
@@ -275,7 +275,7 @@ Comprehensive guides for using AgentKit Forge:
 | **[Cost Tracking](.agentkit/docs/architecture/COST_TRACKING.md)**                    | Session tracking, usage reports, optimization tips                  |
 | **[AGENTS.md Guide](.agentkit/docs/configuration/AGENTS_MD_GUIDE.md)**               | What AGENTS.md is, which tools read it, best practices              |
 | **[project.yaml Reference](.agentkit/docs/configuration/PROJECT_YAML_REFERENCE.md)** | Full schema with examples for every field                           |
-| **[Migration Guide](.agentkit/docs/reference/MIGRATION_GUIDE.md)**                   | Upgrading from older versions of AgentKit Forge                     |
+| **[Migration Guide](.agentkit/docs/reference/MIGRATION_GUIDE.md)**                   | Upgrading from older versions of Retort                     |
 | **[Architecture](.agentkit/docs/architecture/ARCHITECTURE.md)**                      | Sync engine, template rendering, CLI, orchestrator internals        |
 | **[Tools](.agentkit/docs/configuration/TOOLS.md)**                                   | All 11 render targets + AGENTS.md-only tools                        |
 | **[Security Model](.agentkit/docs/architecture/SECURITY_MODEL.md)**                  | Permission model, secret scanning, path traversal protection        |
@@ -398,14 +398,14 @@ See **[Architecture](.agentkit/docs/architecture/ARCHITECTURE.md)** and **[Custo
 ## Upgrading
 
 ```bash
-git remote add agentkit-forge https://github.com/my-org/agentkit-forge.git  # one-time
-git fetch agentkit-forge
-git merge agentkit-forge/main --allow-unrelated-histories
+git remote add retort https://github.com/my-org/retort.git  # one-time
+git fetch retort
+git merge retort/main --allow-unrelated-histories
 pnpm -C .agentkit install
 pnpm -C .agentkit agentkit:sync
 pnpm -C .agentkit agentkit:validate
 git add .agentkit/ .gitignore .gitattributes
-git commit -m "chore: upgrade agentkit-forge to latest"
+git commit -m "chore: upgrade retort to latest"
 ```
 
 > **Note:** If the upgrade adds new files with `once` scaffold mode (docs, editor configs), they appear as untracked after your first `sync`. This is expected — review them and `git add` the ones you want to keep. Files with `managed` mode are regenerated if pristine or merged with your edits. Files with `always` mode are always overwritten. Use `--overwrite` to force-regenerate everything. See [Scaffold Management Guide](docs/engineering/08_scaffold_management.md) for details.

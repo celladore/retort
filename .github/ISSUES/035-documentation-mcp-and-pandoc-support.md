@@ -8,7 +8,7 @@
 
 ## Problem
 
-There is no dedicated ticket for documentation-focused MCP workflows, despite strong relevance to AgentKit Forge.
+There is no dedicated ticket for documentation-focused MCP workflows, despite strong relevance to Retort.
 
 Pandoc also appeared in the marketplace screenshots, and documentation-oriented MCP support could be valuable for:
 
@@ -50,7 +50,7 @@ Assess whether Pandoc MCP support should help with:
 - markdown-to-pdf-oriented workflows
 - frontmatter-preserving transformations
 
-### Step 3: Identify AgentKit-specific value
+### Step 3: Identify Retort-specific value
 
 Potential value areas:
 
@@ -65,7 +65,7 @@ Potential value areas:
 
 - [ ] Documentation MCP category is described with examples
 - [ ] Pandoc MCP is evaluated as a concrete candidate
-- [ ] Documentation-oriented use cases for AgentKit are listed
+- [ ] Documentation-oriented use cases for Retort are listed
 - [ ] Follow-up implementation work is identified if warranted
 
 ---

@@ -8,7 +8,7 @@
 
 ## Problem
 
-TRAE exposes skills as a first-class concept. AgentKit Forge should revisit whether its generated skills are scoped, named, and documented optimally for TRAE-style usage.
+TRAE exposes skills as a first-class concept. Retort should revisit whether its generated skills are scoped, named, and documented optimally for TRAE-style usage.
 
 Reference:
 
@@ -30,6 +30,13 @@ Areas to revisit:
 - [ ] Redundant or low-value skill generation is identified
 - [ ] Naming/discoverability improvements are proposed
 - [ ] Follow-up implementation tasks are identified if needed
+
+## Implementation Notes (2026-03-20)
+
+Kit-based domain filtering (`feat/kit-domain-selection-onboarding`) reduces generated skill
+volume by only activating domains relevant to the project's declared stack. The same principle
+could be applied to skill generation in a follow-up: generate language-specific skills only
+for active language kits. Skill format audit against TRAE expectations remains outstanding.
 
 ---
 
