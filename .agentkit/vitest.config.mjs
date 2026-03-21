@@ -9,9 +9,9 @@ export default defineConfig({
       GIT_CONFIG_KEY_0: 'commit.gpgsign',
       GIT_CONFIG_VALUE_0: 'false',
     },
-  },
-  coverage: {
-    provider: 'v8',
-    reporter: ['text', 'text-summary'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary'],
+    },
   },
 });

@@ -23,6 +23,27 @@ import { commandExists, execCommand, formatDuration, isValidCommand } from './ru
  * @param {string} projectRoot - Project root path
  * @returns {string} Command to run
  */
+/**
+ * Detect the package manager in use for a project.
+ * Checks package.json#packageManager first, then falls back to lockfile detection.
+ * @param {string} projectRoot
+ * @param {object} [pkg] - Already-parsed package.json (optional, avoids re-read)
+ * @returns {'pnpm'|'yarn'|'npm'}
+ */
+function detectPackageManager(projectRoot, pkg) {
+  // 1. Explicit declaration in package.json
+  const pmField = pkg?.packageManager;
+  if (typeof pmField === 'string') {
+    if (pmField.startsWith('pnpm')) return 'pnpm';
+    if (pmField.startsWith('yarn')) return 'yarn';
+    if (pmField.startsWith('npm')) return 'npm';
+  }
+  // 2. Lockfile heuristic
+  if (existsSync(resolve(projectRoot, 'pnpm-lock.yaml'))) return 'pnpm';
+  if (existsSync(resolve(projectRoot, 'yarn.lock'))) return 'yarn';
+  return 'npm';
+}
+
 function resolveTypecheckCommand(stack, projectRoot) {
   if (stack.name !== 'node' || !stack.typecheck || !projectRoot) return stack.typecheck;
   try {
@@ -32,7 +53,9 @@ function resolveTypecheckCommand(stack, projectRoot) {
     const script = pkg.scripts?.typecheck;
     if (typeof script !== 'string' || !script.trim()) return stack.typecheck;
     if (/^node\s+-e\s+/.test(script.trim())) return script.trim();
-    return 'pnpm typecheck';
+    const pm = detectPackageManager(projectRoot, pkg);
+    // pnpm and yarn can run scripts without the `run` sub-command
+    return pm === 'npm' ? 'npm run typecheck' : `${pm} typecheck`;
   } catch {
     /* ignore */
   }
@@ -89,7 +112,7 @@ function buildSteps(stack, flags, agentkitRoot, projectRoot) {
   if (stack.typecheck) {
     const typecheckCmd = resolveTypecheckCommand(stack, projectRoot);
     if (!isValidCommand(typecheckCmd)) {
-      console.warn(`[agentkit:check] Skipping invalid typecheck command: ${stack.typecheck}`);
+      console.warn(`[agentkit:check] Skipping invalid typecheck command: ${typecheckCmd}`);
     } else {
       steps.push({
         name: 'typecheck',

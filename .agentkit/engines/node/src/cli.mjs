@@ -492,6 +492,12 @@ async function main() {
     process.exit(1);
   }
 
+  // Early --help check before dependency installation to avoid side effects.
+  if (commandArgs.includes('--help') || commandArgs.includes('-h')) {
+    showHelp();
+    process.exit(0);
+  }
+
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);
   }
