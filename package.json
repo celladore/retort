@@ -1,5 +1,5 @@
 {
-  "name": "agentkit-forge-root",
+  "name": "retort-root",
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "engines": {
@@ -17,17 +17,21 @@
     "test": "pnpm -C .agentkit test",
     "test:start": "vitest run --config vitest.config.mjs",
     "test:start:coverage": "vitest run --config vitest.config.mjs --coverage",
-    "build": "pnpm -C .agentkit agentkit:validate",
+    "build": "pnpm -C .agentkit retort:validate",
     "lint:md": "pnpm -C .agentkit lint:md",
     "lint:md:fix": "pnpm -C .agentkit lint:md:fix",
     "sync:split-pr": "pwsh -NoLogo -NoProfile -NonInteractive -File scripts/sync-split-pr.ps1",
     "sync:split-pr:dry": "pwsh -NoLogo -NoProfile -NonInteractive -File scripts/sync-split-pr.ps1 -DryRun",
     "sync:split-pr:sh": "bash scripts/sync-split-pr.sh",
     "sync:split-pr:sh:dry": "bash scripts/sync-split-pr.sh --dry-run",
+    "retort:install": "pnpm -C .agentkit install",
+    "retort:sync": "pnpm -C .agentkit retort:sync",
+    "retort:validate": "pnpm -C .agentkit retort:validate",
+    "retort:setup": "pnpm -C .agentkit install && pnpm -C .agentkit retort:sync && pnpm -C .agentkit retort:validate",
     "ak:install": "pnpm -C .agentkit install",
-    "ak:sync": "pnpm -C .agentkit agentkit:sync",
-    "ak:validate": "pnpm -C .agentkit agentkit:validate",
-    "ak:setup": "pnpm -C .agentkit install && pnpm -C .agentkit agentkit:sync && pnpm -C .agentkit agentkit:validate"
+    "ak:sync": "pnpm -C .agentkit retort:sync",
+    "ak:validate": "pnpm -C .agentkit retort:validate",
+    "ak:setup": "pnpm -C .agentkit install && pnpm -C .agentkit retort:sync && pnpm -C .agentkit retort:validate"
   },
   "dependencies": {
     "fuse.js": "7.1.0",

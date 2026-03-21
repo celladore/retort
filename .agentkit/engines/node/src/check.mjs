@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Check Command (Quality Gate Runner)
+ * Retort — Check Command (Quality Gate Runner)
  * Auto-detects tech stacks and runs format, lint, typecheck, test, build in sequence.
  * Outputs a structured results table and logs to events.
  */

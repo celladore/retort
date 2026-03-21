@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Init Command (§12)
+ * Retort — Init Command (§12)
  * Interactive multi-phase wizard for project setup.
  * Uses @clack/prompts for Windows-safe interactive prompts.
  *
@@ -292,7 +292,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
     });
   }
 
-  clack.intro('AgentKit Forge — Project Setup');
+  clack.intro('Retort — Project Setup');
 
   // --- Phase 1: Project Identity ---
   const identity = await clack.group({

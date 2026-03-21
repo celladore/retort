@@ -6,7 +6,7 @@
 #
 # Discovers all local and remote branches not yet merged into <base-branch>,
 # filters out protected branches, and merges them one by one into the current
-# branch. Auto-resolves generated files per the AgentKit merge resolution matrix.
+# branch. Auto-resolves generated files per the Retort merge resolution matrix.
 # =============================================================================
 param(
     [string]$Base = "{{defaultBranch}}",
@@ -229,7 +229,7 @@ try {
     Write-Host ""
     if ($merged.Count -gt 0) {
         Write-Info "Next steps:"
-        Write-Host "  1. Run: pnpm -C .agentkit agentkit:sync"
+        Write-Host "  1. Run: pnpm -C .agentkit retort:sync"
         Write-Host "  2. Run: pnpm test"
         Write-Host "  3. Review with: git log --oneline -20"
     }

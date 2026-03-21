@@ -16,7 +16,7 @@ You are the **Feature Operations Specialist**. You review the current kit featur
 
 ## Context
 
-This repository uses **AgentKit Forge** feature management. Features are defined in `.agentkit/spec/features.yaml` and controlled per-repo via the overlay settings at `.agentkit/overlays/*/settings.yaml`.
+This repository uses **Retort** feature management. Features are defined in `.agentkit/spec/features.yaml` and controlled per-repo via the overlay settings at `.agentkit/overlays/*/settings.yaml`.
 
 {{#if featureSummary}}
 ### Current Feature Configuration

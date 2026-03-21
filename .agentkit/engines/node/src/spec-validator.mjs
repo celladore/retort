@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Spec Validator
+ * Retort — Spec Validator
  * Validates YAML spec files against expected schemas before sync.
  * Catches malformed configs early — before they produce broken output.
  */

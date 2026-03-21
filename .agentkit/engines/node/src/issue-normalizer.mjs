@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Issue Normalizer
+ * Retort — Issue Normalizer
  * Transforms raw tracker issues into canonical BacklogItem schema.
  */
 import { createHash } from 'crypto';

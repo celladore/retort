@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Feature Manager
+ * Retort — Feature Manager
  * Handles feature resolution, validation, enable/disable, and template variable generation.
  *
  * Features are defined in spec/features.yaml and controlled per-repo via overlay settings.yaml.

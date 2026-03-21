@@ -1,5 +1,5 @@
 ﻿/**
- * AgentKit Forge — Runtime Orchestration Engine
+ * Retort — Runtime Orchestration Engine
  * State machine for the 5-phase lifecycle: Discovery → Planning → Implementation → Validation → Ship.
  * Manages orchestrator state, event logging, and session locking.
  */
@@ -643,7 +643,7 @@ export async function getStatus(projectRoot, agentkitRoot) {
   const teamProgress = state.team_progress || {};
 
   const lines = [
-    `=== AgentKit Forge — Orchestrator Status ===`,
+    `=== Retort — Orchestrator Status ===`,
     ``,
     `Repo:      ${state.repo_id}`,
     `Branch:    ${state.branch}`,

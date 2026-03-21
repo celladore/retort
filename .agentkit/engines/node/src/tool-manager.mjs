@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Tool Manager
+ * Retort — Tool Manager
  * Handles add/remove/list subcommands for incremental AI tool management.
  */
 import { existsSync, readFileSync, realpathSync, unlinkSync, writeFileSync } from 'fs';

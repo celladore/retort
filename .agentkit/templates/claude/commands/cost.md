@@ -47,6 +47,6 @@ You are the **Cost Tracker Agent**. You help users understand their AI session u
 ## Notes
 
 - Session tracking is automatic via lifecycle hooks (session-start, session-end).
-- AgentKit tracks operational metrics (duration, commands, files) — not token counts.
+- Retort tracks operational metrics (duration, commands, files) — not token counts.
 - Logs are stored in `.agentkit/logs/` as daily JSONL files.
 - Session records are in `.agentkit/logs/sessions/`.

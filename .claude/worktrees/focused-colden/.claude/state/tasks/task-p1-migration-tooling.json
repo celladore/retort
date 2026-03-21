@@ -1,0 +1,24 @@
+{
+  "id": "task-p1-migration-tooling",
+  "type": "implement",
+  "status": "completed",
+  "priority": "P1",
+  "delegator": "orchestrator",
+  "assignees": ["team-data"],
+  "title": "Create migration tooling setup",
+  "description": "Prisma or Drizzle (or document choice). Set up migration tooling for the project.",
+  "acceptanceCriteria": [
+    "Migration tooling chosen and documented or implemented",
+    "Basic migration workflow documented"
+  ],
+  "scope": ["db/**", "migrations/**", "prisma/**", "package.json"],
+  "backlogItemId": "P1-T3-migration-tooling",
+  "messages": [
+    { "role": "delegator", "from": "orchestrator", "timestamp": "2026-03-15T12:00:00Z", "content": "P1: Create migration tooling setup. See Backlog." },
+    { "role": "executor", "from": "data", "timestamp": "2026-03-15T12:35:00Z", "content": "Completed. Repo has no DB. Added migrations/README.md documenting that adopters choose Prisma or Drizzle and documenting basic migration workflow (define schema, generate migration, run migrations)." }
+  ],
+  "artifacts": [
+    { "type": "files-changed", "paths": ["migrations/README.md"] },
+    { "type": "test-results", "passed": 0, "failed": 0, "testsAdded": 0, "testsModified": 0 }
+  ]
+}

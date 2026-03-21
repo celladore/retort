@@ -4,7 +4,7 @@
 
 # GitHub Copilot Instructions
 
-You are assisting with a project managed by the AgentKit Forge framework.
+You are assisting with a project managed by the Retort framework.
 Follow these instructions for all code generation, suggestions, and chat responses.
 
 ## Project Context
@@ -68,7 +68,7 @@ understand team assignments, ownership boundaries, and escalation paths.
   (TypeScript strict mode, Rust's type system, Python type hints with mypy).
   {{#if commitConvention}}- **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" or "Update files" — CI will reject them.{{/if}}
   {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
-- **Generated file sync**: After editing any file in `.agentkit/spec/`, run `pnpm -C .agentkit agentkit:sync` and commit the regenerated output. CI drift checks will fail otherwise.
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, run `pnpm -C .agentkit retort:sync` and commit the regenerated output. CI drift checks will fail otherwise.
 
 {{#if hasLogging}}
 

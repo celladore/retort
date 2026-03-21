@@ -5,7 +5,7 @@
 # Usage: .\scripts\resolve-merge.ps1 [-Target {{defaultBranch}}]
 #
 # Merges origin/<target-branch> into the current branch and auto-resolves
-# generated/framework-managed files per the AgentKit merge resolution matrix.
+# generated/framework-managed files per the Retort merge resolution matrix.
 # Remaining conflicts (engine source, spec files) are listed for manual review.
 # =============================================================================
 param(

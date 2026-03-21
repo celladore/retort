@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Event Emitter
+ * Retort — Event Emitter
  * Shared event logging helper. All agents and handlers should use this module
  * to write structured JSONL events to .agentkit/state/events.log.
  */

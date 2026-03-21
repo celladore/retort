@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Suggestion Store
+ * Retort — Suggestion Store
  * File-backed suggestion management with YAML serialization.
  * Stores suggestions in .agentkit/state/suggestions/ as individual YAML files.
  *

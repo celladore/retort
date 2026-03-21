@@ -1,6 +1,6 @@
 # Migration Guide — {{repoName}}
 
-> How to upgrade between AgentKit Forge versions and handle breaking changes.
+> How to upgrade between Retort versions and handle breaking changes.
 
 ---
 
@@ -16,10 +16,10 @@
 
 ### Standard Upgrade
 
-1. Pull the latest AgentKit Forge changes
+1. Pull the latest Retort changes
 2. Review the changelog for breaking changes
-3. Run `agentkit sync` to regenerate all configs
-4. Run `agentkit validate` to verify integrity
+3. Run `retort sync` to regenerate all configs
+4. Run `retort validate` to verify integrity
 5. Review `git diff` for unexpected changes
 6. Commit the updated generated files
 
@@ -29,7 +29,7 @@ When upgrading introduces new spec fields:
 
 1. Compare your overlay files against `.agentkit/overlays/__TEMPLATE__/`
 2. Add any new required fields to your overlay
-3. Run `agentkit sync` and verify output
+3. Run `retort sync` and verify output
 
 ---
 
@@ -37,7 +37,7 @@ When upgrading introduces new spec fields:
 
 ### v0.1.0 (Initial)
 
-- Initial release of AgentKit Forge
+- Initial release of Retort
 - Spec-driven config generation for 6 AI tools
 - 10-team framework with 5-phase lifecycle
 - Hook-based security guardrails
@@ -53,4 +53,4 @@ No breaking changes — this is the initial release.
 
 ---
 
-_This guide is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate._
+_This guide is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate._

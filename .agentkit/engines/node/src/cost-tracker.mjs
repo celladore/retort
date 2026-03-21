@@ -1,9 +1,9 @@
 /**
- * AgentKit Forge — Cost Tracker
+ * Retort — Cost Tracker
  * Session-level tracking via hooks: tracks session start/end, commands invoked,
  * files changed, and durations. Logs to JSONL files for reporting.
  *
- * Note: AgentKit cannot intercept AI API calls directly, so actual token counts
+ * Note: Retort cannot intercept AI API calls directly, so actual token counts
  * are not available. This tracks operational metrics (session duration, commands
  * run, files modified) which are useful for understanding usage patterns.
  */

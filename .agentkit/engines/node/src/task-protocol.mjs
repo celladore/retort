@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Task Protocol
+ * Retort — Task Protocol
  * File-based A2A-lite task delegation protocol.
  * Tasks are JSON files in .agentkit/state/tasks/ with lifecycle states,
  * messages, artifacts, dependency tracking, and chained handoffs.
@@ -227,7 +227,7 @@ async function withHandoffLock(projectRoot, taskId, fn) {
 function generateRandomSuffix() {
   if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') {
     throw new Error(
-      'AgentKit Forge Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).'
+      'Retort Node engine requires Node.js >= 22 with Web Crypto API available (globalThis.crypto.getRandomValues).'
     );
   }
   const bytes = new Uint8Array(3);
