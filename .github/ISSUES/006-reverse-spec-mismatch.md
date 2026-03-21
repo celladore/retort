@@ -151,9 +151,30 @@ const inSpecNotCli = specCommands.filter(c => !cliCommands.includes(c));
 
 ## Acceptance Criteria
 
-- [ ] All 8 commands either added to `commands.yaml` or documented as intentionally excluded
-- [ ] `validate.mjs` checks for CLI-spec command parity
-- [ ] No drift warning when running `agentkit validate`
+- [x] All 8 commands either added to `commands.yaml` or documented as intentionally excluded
+  - `init` added as `type: framework` with full prompt/flags documentation
+  - `sync` updated from `type: utility` to `type: framework`; AgentKit Forge → Retort rename
+  - `spec-validate`, `add`, `remove`, `list`, `tasks`, `delegate` documented in header NOTE block
+  - `spec-validator.mjs` updated to accept `framework` as a valid command type
+- [x] `validate.mjs` checks for CLI-spec command parity
+  - Phase 10 added to `validate.mjs`: loads commands.yaml, defines `FRAMEWORK_COMMANDS`, cross-references `CLI_COMMANDS` set, warns (not fails) on unexpected gaps
+- [x] No drift warning when running `agentkit validate`
+  - Parity check emits WARN entries only; does not block on framework-internal commands
+
+---
+
+## Resolution
+
+**Status: Resolved** (2026-03-21)
+
+Addressed in `feat(validate): add CLI-spec command parity check` (PR #432, `feat/kit-domain-selection-onboarding`):
+
+- `type: framework` added to `VALID_COMMAND_TYPES` in `spec-validator.mjs`
+- `init` command added to `commands.yaml` with full kit-selection documentation
+- `sync` command type corrected from `utility` to `framework`; header comment documents intentionally-excluded CLI commands
+- Phase 10 (CLI-spec parity check) added to `validate.mjs` — warns on unexpected gaps between `CLI_COMMANDS` and `commands.yaml`
+
+All 8 framework-internal commands are now either formally documented in `commands.yaml` (as `type: framework`) or explicitly acknowledged in the header block. No drift warning when running `agentkit validate`.
 
 ---
 
