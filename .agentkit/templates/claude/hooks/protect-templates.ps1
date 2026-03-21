@@ -52,7 +52,7 @@ $protectedPatterns = @(
 
 foreach ($pattern in $protectedPatterns) {
     if ($filePath -match $pattern) {
-        $reason = "Blocked: '$filePath' is an Retort source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run 'pnpm -C .agentkit retort:sync'."
+        $reason = "Blocked: '$filePath' is a Retort source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run 'pnpm -C .agentkit retort:sync'."
         @{
             hookSpecificOutput = @{
                 hookEventName           = 'PreToolUse'
