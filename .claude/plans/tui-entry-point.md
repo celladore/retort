@@ -2,7 +2,7 @@
 
 ## Goal
 
-Make the `ak-start` TUI a production-ready, fully tested, documented feature that integrates cleanly with the existing `/start` Claude command and the AgentKit Forge workflow.
+Make the `ak-start` TUI a production-ready, fully tested, documented feature that integrates cleanly with the existing `/start` Claude command and the Retort workflow.
 
 ## Assumptions
 

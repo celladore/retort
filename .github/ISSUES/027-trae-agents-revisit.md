@@ -8,7 +8,7 @@
 
 ## Problem
 
-TRAE provides both agent overview guidance and custom agents ready for one-click import. AgentKit Forge should revisit whether its agent model and generated outputs map well to those capabilities.
+TRAE provides both agent overview guidance and custom agents ready for one-click import. Retort should revisit whether its agent model and generated outputs map well to those capabilities.
 
 References:
 
@@ -37,7 +37,7 @@ Identify over-specialization, duplication, and missing platform-oriented persona
 
 ### 3. Evaluate export/import affordances
 
-Determine whether AgentKit Forge should emit TRAE-ready agent artifacts directly or via an adapter/export step.
+Determine whether Retort should emit TRAE-ready agent artifacts directly or via an adapter/export step.
 
 ---
 
@@ -47,6 +47,13 @@ Determine whether AgentKit Forge should emit TRAE-ready agent artifacts directly
 - [ ] One-click import implications are documented
 - [ ] Agent overlap/gaps are identified
 - [ ] Follow-up implementation tasks are identified if needed
+
+## Implementation Notes (2026-03-20)
+
+Issue 040 (elegance-guidelines) from `feat/kit-domain-selection-onboarding` adds per-agent
+design guidance that improves agent quality independent of platform. The kit-based filtering
+work means agent-related generation is more stack-aware. TRAE-specific agent packaging/import
+format audit remains outstanding — this should be prioritised in the next sprint.
 
 ---
 

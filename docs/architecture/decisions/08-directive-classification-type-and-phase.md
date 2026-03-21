@@ -10,7 +10,7 @@
 
 ## Context
 
-AgentKit Forge's `rules.yaml` defines ~90 conventions across 14 domains. All
+Retort's `rules.yaml` defines ~90 conventions across 14 domains. All
 conventions carry a `severity` field (critical / error / warning / info), but
 severity alone conflates two concerns:
 
@@ -154,4 +154,4 @@ conventions:
 - [rules.yaml](../../../.agentkit/spec/rules.yaml) — canonical rule definitions
 - [spec-validator.mjs](../../../.agentkit/engines/node/src/spec-validator.mjs) — schema validation
 - [synchronize.mjs](../../../.agentkit/engines/node/src/synchronize.mjs) — template rendering
-- [ADR-01: Adopt AgentKit Forge](./01-adopt-agentkit-forge.md)
+- [ADR-01: Adopt Retort](./01-adopt-retort.md)

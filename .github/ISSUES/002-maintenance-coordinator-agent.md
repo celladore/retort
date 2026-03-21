@@ -33,7 +33,7 @@ Append to the operations category in `.agentkit/spec/agents.yaml`:
   role: >
     System maintenance specialist responsible for framework health, rule
     governance, technical debt tracking, script ownership, and coordination
-    of maintenance-phase operations. Stewards AgentKit Forge internals and
+    of maintenance-phase operations. Stewards Retort internals and
     ensures CLI, hooks, CI, and generated outputs remain consistent with
     specifications.
   accepts:

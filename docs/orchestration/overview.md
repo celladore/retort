@@ -1,6 +1,6 @@
 # How Orchestration Works
 
-This guide explains the AgentKit Forge orchestration pipeline — how work flows from
+This guide explains the Retort orchestration pipeline — how work flows from
 a user request through phases, team delegation, agent personas, and quality gates.
 
 ## The Pipeline

@@ -227,7 +227,7 @@ jobs:
                 'Please edit this issue and select valid options from the dropdowns.',
                 '',
                 '---',
-                '*This check is automated by AgentKit Forge issue field validation.*'
+                '*This check is automated by Retort issue field validation.*'
               ].join('\n');
 
               await github.rest.issues.createComment({

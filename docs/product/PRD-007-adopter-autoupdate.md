@@ -1,4 +1,4 @@
-# PRD-007: AgentKit Forge Adopter Autoupdate
+# PRD-007: Retort Adopter Autoupdate
 
 ## Status
 
@@ -6,15 +6,15 @@ Draft
 
 ## Module / Feature Name
 
-AgentKit Forge Autoupdate for Adopter Repositories
+Retort Autoupdate for Adopter Repositories
 
 ## Marketing Name
 
-AgentKit Forge Autoupdate
+Retort Autoupdate
 
 ## Platform / Mesh Layers
 
-- CLI toolchain (npm/npx-delivered `agentkit-forge` binary)
+- CLI toolchain (npm/npx-delivered `retort` binary)
 - GitHub Actions CI/CD automation layer
 - Adopter repository bootstrap and governance pipeline
 
@@ -22,14 +22,14 @@ AgentKit Forge Autoupdate
 
 - Developers (CLI-first) who manage adopter repositories
 - DevOps / Platform Engineers automating config drift detection and remediation
-- Repository maintainers responsible for keeping AgentKit Forge versions current
+- Repository maintainers responsible for keeping Retort versions current
 
 ## Core Value Proposition
 
 Eliminates manual version tracking in adopter repositories by providing a
 first-class autoupdate mechanism — delivered via CLI command, scheduled GitHub
 Action, and/or Renovate/Dependabot integration — so adopting teams always run
-on a supported AgentKit Forge version without manual intervention.
+on a supported Retort version without manual intervention.
 
 ## Priority
 
@@ -50,13 +50,13 @@ Planned — design phase pending delivery channel GA (see PRD-005 Phase 1–3).
 ## TL;DR
 
 Provide a safe, opt-in autoupdate capability so that repositories adopting
-AgentKit Forge can receive new forge versions without error-prone multi-step
+Retort can receive new forge versions without error-prone multi-step
 manual upgrade ceremonies. Delivers update notifications, one-command upgrades,
 and CI-enforced version freshness.
 
 ## Problem Statement
 
-Repositories that adopt AgentKit Forge via git submodule or npm devDependency
+Repositories that adopt Retort via git submodule or npm devDependency
 today face a painful multi-step upgrade process:
 
 1. Enter the submodule directory (or check npm for new versions manually)
@@ -82,10 +82,10 @@ Specific pain points in the current state:
   forge version is more than N versions behind the current release.
 - **CLI toolchain dependency gap** — related issue: adopter repos may not
   have the required CLI tools installed to even perform an upgrade
-  (see issue [#196](https://github.com/phoenixvc/agentkit-forge/issues/196)).
+  (see issue [#196](https://github.com/phoenixvc/retort/issues/196)).
 - **Sync enforcement gap** — autoupdate is tightly coupled with the enforced
   sync contract described in issue
-  [#194](https://github.com/phoenixvc/agentkit-forge/issues/194); upgrading
+  [#194](https://github.com/phoenixvc/retort/issues/194); upgrading
   the forge version must trigger a re-sync before the PR passes validation.
 
 ## Core Challenge
@@ -99,7 +99,7 @@ governance already planned for adopter repos.
 - PRD-005 (Mesh-Native Distribution) targets GA for the npm package delivery
   channel; autoupdate is a natural complement once the package is published.
 - ADR-07 explicitly calls out "autoupdate support" as part of the `npm install
--g agentkit-forge` CLI consumer experience.
+-g retort` CLI consumer experience.
 - Governance enforcement (#194) and CLI toolchain requirements (#196) create the
   prerequisite infrastructure for autoupdate to function safely.
 - Growing adopter base amplifies the support cost of manual upgrades.
@@ -159,9 +159,9 @@ check for and apply a forge update, with a dry-run preview of what changes.
 
 Acceptance criteria:
 
-- `agentkit-forge update` checks for new versions and prints a changelog summary.
-- `agentkit-forge update --apply` upgrades and re-runs sync in one step.
-- `agentkit-forge update --rollback` restores the previous version and outputs.
+- `retort update` checks for new versions and prints a changelog summary.
+- `retort update --apply` upgrades and re-runs sync in one step.
+- `retort update --rollback` restores the previous version and outputs.
 - The command fails fast with clear guidance if prerequisite CLI tools are
   missing (see issue #196).
 
@@ -198,13 +198,13 @@ Acceptance criteria:
 
 ### Primary Use Cases
 
-- **CLI upgrade:** Developer runs `agentkit-forge update --apply` → version
+- **CLI upgrade:** Developer runs `retort update --apply` → version
   bumped, sync re-run, outputs validated, PR opened.
 - **Automated PR:** Scheduled GitHub Action opens a forge-version bump PR
   automatically when a new release is available.
-- **Version check only:** `agentkit-forge update --check` prints current vs
+- **Version check only:** `retort update --check` prints current vs
   latest version without modifying anything.
-- **Rollback:** `agentkit-forge update --rollback` restores the previous version
+- **Rollback:** `retort update --rollback` restores the previous version
   if the new one broke overlay outputs.
 
 ### Core Flows
@@ -212,12 +212,12 @@ Acceptance criteria:
 #### Flow 1: CLI One-Step Upgrade (Developer)
 
 ```text
-agentkit-forge update --apply
+retort update --apply
   → checks latest published version
   → compares with pinned version in adopter repo
   → prints changelog summary
   → bumps version (npm or submodule)
-  → re-runs agentkit-forge sync
+  → re-runs retort sync
   → validates generated output parity
   → opens draft PR on dev branch with diff
 ```
@@ -231,7 +231,7 @@ on:
     - cron: '0 9 * * 1' # weekly Monday 9am
 jobs:
   autoupdate:
-    uses: org/agentkit-forge-action@v3
+    uses: org/retort-action@v3
     with:
       mode: update
       overlay: my-project
@@ -241,10 +241,10 @@ jobs:
 #### Flow 3: Version Check Only
 
 ```text
-agentkit-forge update --check
+retort update --check
   → Current: 3.2.1 (pinned in package.json)
   → Latest: 3.4.0
-  → 2 minor versions behind. Run `agentkit-forge update --apply` to upgrade.
+  → 2 minor versions behind. Run `retort update --apply` to upgrade.
   → Changelog: [link to release notes]
 ```
 
@@ -252,11 +252,11 @@ agentkit-forge update --check
 
 | Step              | CLI Path                           | Automated CI Path              | Outcome                          |
 | ----------------- | ---------------------------------- | ------------------------------ | -------------------------------- |
-| Detect update     | `agentkit-forge update --check`    | Scheduled Action detects delta | New version identified           |
+| Detect update     | `retort update --check`    | Scheduled Action detects delta | New version identified           |
 | Preview changelog | Printed in CLI output              | PR body contains changelog     | Team informed of changes         |
-| Apply update      | `agentkit-forge update --apply`    | Action bumps version, re-syncs | Overlay outputs regenerated      |
+| Apply update      | `retort update --apply`    | Action bumps version, re-syncs | Overlay outputs regenerated      |
 | Validate          | Sync output diff printed; CI check | PR checks validate drift       | Regression surfaced before merge |
-| Rollback          | `agentkit-forge update --rollback` | Close PR / revert commit       | Previous state restored          |
+| Rollback          | `retort update --rollback` | Close PR / revert commit       | Previous state restored          |
 
 ## Functional Requirements
 
@@ -264,11 +264,11 @@ agentkit-forge update --check
 
 | Command                             | Description                                            |
 | ----------------------------------- | ------------------------------------------------------ |
-| `agentkit-forge update`             | Check for updates and print summary (no-op, dry-run)   |
-| `agentkit-forge update --apply`     | Upgrade to latest version and re-run sync              |
-| `agentkit-forge update --check`     | Alias for default: check-only, machine-readable output |
-| `agentkit-forge update --version X` | Upgrade to a specific version X (pinned upgrade)       |
-| `agentkit-forge update --rollback`  | Restore previously pinned version and sync outputs     |
+| `retort update`             | Check for updates and print summary (no-op, dry-run)   |
+| `retort update --apply`     | Upgrade to latest version and re-run sync              |
+| `retort update --check`     | Alias for default: check-only, machine-readable output |
+| `retort update --version X` | Upgrade to a specific version X (pinned upgrade)       |
+| `retort update --rollback`  | Restore previously pinned version and sync outputs     |
 
 ### GitHub Action
 
@@ -290,7 +290,7 @@ agentkit-forge update --check
 
 ### Prerequisite Checks
 
-- `update --apply` runs a preflight check equivalent to `agentkit-forge doctor`
+- `update --apply` runs a preflight check equivalent to `retort doctor`
   to validate CLI toolchain availability (addresses #196 requirements).
 - If required tools are missing, upgrade is blocked with an actionable error
   message including installation instructions.
@@ -313,11 +313,11 @@ agentkit-forge update --check
 
 | Issue                                                          | Title                                                  | Relationship                                                          |
 | -------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
-| [#196](https://github.com/phoenixvc/agentkit-forge/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
-| [#194](https://github.com/phoenixvc/agentkit-forge/issues/194) | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
+| [#196](https://github.com/phoenixvc/retort/issues/196) | adoption/startup-hooks: enforce required CLI toolchain | Prerequisite: autoupdate preflight reuses CLI toolchain validation    |
+| [#194](https://github.com/phoenixvc/retort/issues/194) | governance: enforce agentkit sync pre-PR for adopters  | Prerequisite: `update --apply` must trigger sync to satisfy this gate |
 | [PRD-005](./PRD-005-mesh-native-distribution.md)               | Mesh-Native Distribution                               | Parent delivery strategy; autoupdate is a Phase 4+ CLI capability     |
 | [ADR-07](../architecture/decisions/07-delivery-strategy.md)    | Delivery Strategy                                      | Architectural decisions that autoupdate must respect (npm, GH Action) |
-| [#241](https://github.com/phoenixvc/agentkit-forge/issues/241) | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
+| [#241](https://github.com/phoenixvc/retort/issues/241) | feat(analytics): cross-repo usage telemetry            | Future: telemetry can track autoupdate adoption and version currency  |
 
 ## Milestone
 
@@ -326,14 +326,14 @@ which groups delivery-method improvements for adopter repositories. Related
 issues to include in this milestone:
 
 - This autoupdate feature issue
-- [#196](https://github.com/phoenixvc/agentkit-forge/issues/196) — CLI toolchain enforcement
-- [#194](https://github.com/phoenixvc/agentkit-forge/issues/194) — agentkit sync enforcement
+- [#196](https://github.com/phoenixvc/retort/issues/196) — CLI toolchain enforcement
+- [#194](https://github.com/phoenixvc/retort/issues/194) — agentkit sync enforcement
 
 ## Acceptance Criteria
 
-- [ ] `agentkit-forge update` (check-only) prints current vs. latest version with changelog link.
-- [ ] `agentkit-forge update --apply` upgrades, re-syncs, and validates output parity in one command.
-- [ ] `agentkit-forge update --rollback` restores previous version and outputs.
+- [ ] `retort update` (check-only) prints current vs. latest version with changelog link.
+- [ ] `retort update --apply` upgrades, re-syncs, and validates output parity in one command.
+- [ ] `retort update --rollback` restores previous version and outputs.
 - [ ] GitHub Action template generated by agentkit:sync supports weekly auto-update PRs.
 - [ ] Preflight check validates CLI toolchain availability before attempting upgrade (covers #196).
 - [ ] Upgrade flow always triggers sync, satisfying the pre-PR sync contract (covers #194).
@@ -347,5 +347,5 @@ issues to include in this milestone:
 - [ADR-07: Delivery Strategy](../architecture/decisions/07-delivery-strategy.md)
 - [PRD-005: Mesh-Native Distribution](./PRD-005-mesh-native-distribution.md)
 - [PRD-006: PWA/Desktop Visual Configuration](./PRD-006-pwa-desktop-visual-configuration.md)
-- [Issue #196: CLI Toolchain Enforcement](https://github.com/phoenixvc/agentkit-forge/issues/196)
-- [Issue #194: agentkit sync Enforcement for Adopters](https://github.com/phoenixvc/agentkit-forge/issues/194)
+- [Issue #196: CLI Toolchain Enforcement](https://github.com/phoenixvc/retort/issues/196)
+- [Issue #194: agentkit sync Enforcement for Adopters](https://github.com/phoenixvc/retort/issues/194)

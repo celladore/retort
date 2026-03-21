@@ -8,7 +8,7 @@
 
 ## Problem
 
-MCP support currently exists as scattered capability rather than a governed framework concern. AgentKit Forge needs a clear model for deciding:
+MCP support currently exists as scattered capability rather than a governed framework concern. Retort needs a clear model for deciding:
 
 - Which MCP servers are officially supported
 - Which MCP servers are merely documented or recommended

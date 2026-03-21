@@ -10,11 +10,11 @@ In Review
 
 ## Module / Feature Name
 
-AgentKit Forge: Agent-to-LLM Weighted Selection and Configuration Layer
+Retort: Agent-to-LLM Weighted Selection and Configuration Layer
 
 ## Marketing Name
 
-AgentKit Forge - Polyglot LLM Decision Matrix Configurator
+Retort - Polyglot LLM Decision Matrix Configurator
 
 ## Platform / Mesh Layers
 
@@ -62,7 +62,7 @@ Enterprise
 
 ## Integration Points
 
-- AgentKit orchestration layer
+- Retort orchestration layer
 - Team and agent assignment modules
 - Model APIs (OpenAI, Anthropic, Google, Kimi, etc.)
 - Audit and logging services
@@ -70,7 +70,7 @@ Enterprise
 
 ## TL;DR
 
-AgentKit Forge enables declarative, team-aware agent-to-LLM mapping through
+Retort enables declarative, team-aware agent-to-LLM mapping through
 YAML and JSON overlays so organizations can optimize quality and spend as model
 capabilities, pricing, and constraints evolve.
 

@@ -40,9 +40,9 @@ jobs:
         with:
           script: |
             const body = [
-              '## AgentKit Forge Source Change Detected',
+              '## Retort Source Change Detected',
               '',
-              'This PR modifies files in the AgentKit Forge source directories:',
+              'This PR modifies files in the Retort source directories:',
               '- `.agentkit/templates/` — output templates',
               '- `.agentkit/spec/` — YAML specifications',
               '- `.agentkit/engines/` — sync engine code',
@@ -69,7 +69,7 @@ jobs:
             });
 
             const existing = comments.data.find(c =>
-              c.body.includes('AgentKit Forge Source Change Detected')
+              c.body.includes('Retort Source Change Detected')
             );
 
             if (!existing) {

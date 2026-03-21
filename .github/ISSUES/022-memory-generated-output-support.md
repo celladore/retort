@@ -8,7 +8,7 @@
 
 ## Problem
 
-If AgentKit Forge adds memory support, generated outputs need to reflect that consistently across supported platforms.
+If Retort adds memory support, generated outputs need to reflect that consistently across supported platforms.
 
 This includes:
 

@@ -1,13 +1,13 @@
 ---
 name: 'feat: add /doc-audit slash command'
-about: 'Add a repeatable documentation audit command to agentkit-forge'
+about: 'Add a repeatable documentation audit command to retort'
 title: 'feat: add /doc-audit slash command for repeatable documentation audits'
 labels: enhancement, documentation
 ---
 
 ## Summary
 
-Add a dedicated `/doc-audit` command to agentkit-forge that provides repeatable, systematic documentation audits. Currently, documentation auditing is either a manual one-off exercise or a narrow subset of `/project-review --focus docs`.
+Add a dedicated `/doc-audit` command to retort that provides repeatable, systematic documentation audits. Currently, documentation auditing is either a manual one-off exercise or a narrow subset of `/project-review --focus docs`.
 
 ## Context
 

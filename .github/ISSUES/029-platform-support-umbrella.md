@@ -31,13 +31,13 @@ Requested platforms:
 This umbrella exists to answer two questions consistently:
 
 1. Is the platform an IDE, an agent shell, an aggregator, or another execution surface?
-2. What level of AgentKit Forge support should exist for that platform?
+2. What level of Retort support should exist for that platform?
 
 ---
 
 ## Problem
 
-AgentKit Forge already targets several AI coding environments, but support expansion is currently driven by ad hoc additions. That makes it hard to reason about:
+Retort already targets several AI coding environments, but support expansion is currently driven by ad hoc additions. That makes it hard to reason about:
 
 - which platforms are officially supported
 - how support levels differ by platform type
@@ -70,7 +70,7 @@ Review each requested platform for:
 
 ### Phase 3: Support implementation strategy
 
-Decide for each platform whether AgentKit Forge should add:
+Decide for each platform whether Retort should add:
 
 - first-class generated outputs
 - adapter/export support

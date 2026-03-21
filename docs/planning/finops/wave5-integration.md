@@ -1,6 +1,6 @@
 # Wave 5: End-to-End Integration & Hardening
 
-> **Target repos**: `agentkit-forge` (orchestration), `phoenixvc/ai-gateway` (runtime), `phoenixvc/pvc-costops-analytics` (analytics)
+> **Target repos**: `retort` (orchestration), `phoenixvc/ai-gateway` (runtime), `phoenixvc/pvc-costops-analytics` (analytics)
 > **Labels**: `finops`, `integration`, `cost-management`
 > **Priority**: P2
 
@@ -21,7 +21,7 @@ Wire together the three enforcement layers (session budget guard → gateway spe
 **Data flow**:
 
 ```
-Agent session (agentkit-forge)
+Agent session (retort)
   → cost-tracker.mjs logs to JSONL
   → session metrics: duration, commands, files
 
@@ -67,7 +67,7 @@ GitHub Actions cron job (monthly, 1st of month):
 
 ### 5.4 Budget Approval Workflow (GitHub Issues)
 
-**Repo**: `pvc-costops-analytics` (or `agentkit-forge` for template)
+**Repo**: `pvc-costops-analytics` (or `retort` for template)
 
 Flesh out the budget approval process:
 

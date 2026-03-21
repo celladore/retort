@@ -1,11 +1,11 @@
 # Package Management Architecture
 
-This guide explains how AgentKit Forge manages package dependencies, scripts, and
+This guide explains how Retort manages package dependencies, scripts, and
 package managers across its two-layer architecture.
 
 ## Two-Layer Design
 
-AgentKit Forge uses a two-layer package architecture:
+Retort uses a two-layer package architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────┐

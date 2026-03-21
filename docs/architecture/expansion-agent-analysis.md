@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This document analyzes the feasibility, design considerations, and integration strategy for adding a **Feature Expansion/Addition Agent** to agentkit-forge. The agent would analyze a repository's current state and suggest new features, missing capabilities, documentation gaps, and architectural improvements — then optionally generate specification artifacts (ADR, PRD, functional specs, technical specs) for approved suggestions.
+This document analyzes the feasibility, design considerations, and integration strategy for adding a **Feature Expansion/Addition Agent** to retort. The agent would analyze a repository's current state and suggest new features, missing capabilities, documentation gaps, and architectural improvements — then optionally generate specification artifacts (ADR, PRD, functional specs, technical specs) for approved suggestions.
 
 **Verdict**: The idea is **sound but must be carefully scoped**. The repository already has strong primitives that support this (team routing, task protocol, review gates, documentation structure, discovery engine). However, the agent carries unique risks around scope creep, hallucinated requirements, and autonomy overreach that demand explicit human-in-the-loop controls beyond what existing agents require.
 

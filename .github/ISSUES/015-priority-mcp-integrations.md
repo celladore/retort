@@ -34,12 +34,12 @@ For each server, document:
 - expected user value
 - credential / environment requirements
 - local vs hosted execution model
-- overlap with existing AgentKit capabilities
+- overlap with existing Retort capabilities
 - target support level
 
 ### Step 2: Define framework integration surface
 
-For each server, decide whether AgentKit Forge should add:
+For each server, decide whether Retort should add:
 
 - documentation only
 - recommended install/onboarding workflow
@@ -77,7 +77,7 @@ Beyond the first four priority MCPs, keep the following adjacent follow-ups visi
 
 - Notion MCP client support details: `033-notion-mcp-client-support.md`
 - Documentation MCP and Pandoc workflows: `035-documentation-mcp-and-pandoc-support.md`
-- Self-hosted AgentKit MCP server strategy: `036-self-hosted-mcp-server-strategy.md`
+- Self-hosted Retort MCP server strategy: `036-self-hosted-mcp-server-strategy.md`
 - Todoist-through-MCP task integration: `037-todoist-mcp-task-integration.md`
 - InsForge MCP evaluation: `034-insforge-mcp-support.md`
 

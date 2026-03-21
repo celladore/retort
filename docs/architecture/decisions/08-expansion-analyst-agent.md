@@ -10,7 +10,7 @@
 
 ## Context
 
-AgentKit Forge has excellent execution infrastructure — orchestrator, task protocol,
+Retort has excellent execution infrastructure — orchestrator, task protocol,
 team routing, review gates, handoff chains — but lacks a strategic analysis layer
 that identifies **what is missing** from a repository. The discovery engine reports
 what exists; nothing systematically identifies gaps in documentation, testing,

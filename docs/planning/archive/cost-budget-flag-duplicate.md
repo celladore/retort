@@ -1,6 +1,6 @@
 # chore(cost): Add `--budget` flag documentation to `/cost` command template
 
-> **Target repo**: `agentkit-forge`
+> **Target repo**: `retort`
 > **Labels**: `chore`, `finops`, `cost-management`
 > **Priority**: P2
 

@@ -1,7 +1,7 @@
 # Quirks Scoring Implementation Guide
 
 **Last Updated:** 2026-02-26
-**Purpose:** Implement numerical scoring for model quirks in the AgentKit decision engine
+**Purpose:** Implement numerical scoring for model quirks in the Retort decision engine
 **Scope:** Integration with PRD-001 weighted decision matrix
 
 ## Overview

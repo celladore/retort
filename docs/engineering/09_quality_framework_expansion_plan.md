@@ -1,6 +1,6 @@
 # Strategic Plan: Code Quality Framework Expansion
 
-> Expanding the agentkit-forge code quality assessment to cover TypeScript, HTML,
+> Expanding the retort code quality assessment to cover TypeScript, HTML,
 > CSS, Bash, PowerShell, and their associated linting/testing ecosystems alongside
 > the already-documented JavaScript, Python, Rust, and C# stacks.
 
@@ -162,7 +162,7 @@ type-aware analysis.
 
 | Framework      | Role                     | Recommendation                                                                                                                                                                |
 | -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vitest**     | Primary unit/integration | **Recommended primary.** Native ESM, TypeScript support via esbuild, API-compatible with Jest, fastest option for Vite-based projects. Already used by agentkit-forge itself. |
+| **Vitest**     | Primary unit/integration | **Recommended primary.** Native ESM, TypeScript support via esbuild, API-compatible with Jest, fastest option for Vite-based projects. Already used by retort itself. |
 | **Jest**       | Legacy primary           | **Secondary.** Still the most widely used; recommend for brownfield projects already using Jest. CJS-focused; ESM support requires configuration.                             |
 | **Playwright** | E2E testing              | **Recommended for E2E.** Cross-browser, auto-wait, TypeScript-first. Already detected by discover.mjs.                                                                        |
 | **Cypress**    | Alternative E2E          | **Secondary.** Excellent developer experience but limited to Chromium-based browsers for component testing. Already detected by discover.mjs.                                 |
@@ -310,7 +310,7 @@ variables, missing error handling) that cause the most shell script failures.
   Bash/shell scripts
 - **teams.yaml consideration:** Shell scripts are owned by the `devops` team. Not a
   separate techStack, but quality rules should apply to `.sh` files in scope.
-- **CI integration:** Add ShellCheck to the CI pipeline for the agentkit-forge
+- **CI integration:** Add ShellCheck to the CI pipeline for the retort
   repository itself (26 scripts currently unchecked).
 
 #### Recommended rules.yaml Conventions
@@ -691,7 +691,7 @@ when the upstream specs and templates change:
 
 ### Phase 1: High-Impact, Low-Effort (Week 1-2)
 
-These changes address real quality gaps in the agentkit-forge repository itself.
+These changes address real quality gaps in the retort repository itself.
 
 | #   | Action                                                                     | Impact     | Effort | Dependencies                           |
 | --- | -------------------------------------------------------------------------- | ---------- | ------ | -------------------------------------- |

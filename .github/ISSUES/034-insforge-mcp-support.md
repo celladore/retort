@@ -8,7 +8,7 @@
 
 ## Problem
 
-InsForge MCP appeared in the marketplace screenshots, but AgentKit Forge does not yet have a dedicated issue evaluating whether it should support or document this integration.
+InsForge MCP appeared in the marketplace screenshots, but Retort does not yet have a dedicated issue evaluating whether it should support or document this integration.
 
 ---
 
@@ -16,7 +16,7 @@ InsForge MCP appeared in the marketplace screenshots, but AgentKit Forge does no
 
 Assess InsForge MCP for:
 
-- fit with AgentKit workflows
+- fit with Retort workflows
 - backend/app-scaffolding relevance
 - security and credential requirements
 - whether it is docs-only, experimental, or a stronger candidate
@@ -26,7 +26,7 @@ Assess InsForge MCP for:
 ## Acceptance Criteria
 
 - [ ] InsForge MCP is evaluated with a support recommendation
-- [ ] Likely use cases inside AgentKit are documented
+- [ ] Likely use cases inside Retort are documented
 - [ ] Security/prerequisite considerations are captured
 
 ---

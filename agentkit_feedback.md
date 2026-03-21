@@ -1,6 +1,6 @@
-# AgentKit Forge Sync Feedback (pvc-costops-analytics)
+# Retort Sync Feedback (pvc-costops-analytics)
 
-This document captures practical feedback from using AgentKit Forge v3.1.0 in this repository, with a focus on sync behavior, Windows developer experience, and documentation workflows.
+This document captures practical feedback from using Retort v3.1.0 in this repository, with a focus on sync behavior, Windows developer experience, and documentation workflows.
 
 ## Summary
 
@@ -82,7 +82,7 @@ Suggestion:
 - Multi-editor instructions and rules are consistently generated for Claude/Cursor/Windsurf/Copilot.
 - Documentation structure under `docs/` is scaffolded and kept consistent across runs (when not overridden).
 
-## Recommended next steps (AgentKit)
+## Recommended next steps (Retort)
 
 - Add official support for repo-local overrides of specific generated docs (e.g., incident response).
 - Improve unresolved placeholder diagnostics.

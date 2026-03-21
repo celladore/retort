@@ -22,7 +22,7 @@ Use the same logic as current runtime workflow in `.github/workflows/branch-prot
 - `pull_request` branches: `[main, dev]`
 - dynamic secret-scan diff base: `origin/${{ github.event.pull_request.base.ref }}...HEAD`
 - guardrail step: fail PR when `.agentkit/**` changed and PR body lacks upstream issue URL matching:
-  - `https://github.com/phoenixvc/agentkit-forge/issues/<number>`
+  - `https://github.com/phoenixvc/retort/issues/<number>`
 
 Recommended source for exact content:
 

@@ -1,6 +1,6 @@
 # Template System Guide
 
-This guide explains how AgentKit Forge's template engine works, including scaffold
+This guide explains how Retort's template engine works, including scaffold
 modes, frontmatter, three-way merge, and the rendering pipeline.
 
 ## Template Rendering Pipeline

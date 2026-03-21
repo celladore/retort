@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * ak-start — interactive entry point for AgentKit Forge.
+ * ak-start — interactive entry point for Retort.
  *
  * Replaces the static markdown output of `/start` with a terminal UI
  * that combines two modes:
@@ -27,7 +27,7 @@ const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) {
   process.stdout.write(
     [
-      'ak-start — interactive entry point for AgentKit Forge',
+      'ak-start — interactive entry point for Retort',
       '',
       'Usage:',
       '  ak-start          Interactive TUI (requires a terminal)',

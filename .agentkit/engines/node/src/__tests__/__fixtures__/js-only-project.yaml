@@ -1,0 +1,23 @@
+name: js-only-test
+githubSlug: test-org/js-only-test
+description: JS-only fixture for domain filtering tests.
+phase: active
+stack:
+  languages: [javascript]
+  packageManager: pnpm
+  nodeVersion: lts/*
+  frameworks:
+    frontend: []
+    backend: [node.js]
+    css: []
+  orm: none
+  database: [none]
+  search: none
+  messaging: [none]
+automation:
+  languageProfile:
+    mode: configured
+    diagnostics: off
+    inferFrom:
+      frameworks: true
+      tests: true

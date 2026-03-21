@@ -1,4 +1,4 @@
-# feat(mcp): Integrate AgentKit tasks with Todoist through MCP
+# feat(mcp): Integrate Retort tasks with Todoist through MCP
 
 **Priority:** P2 — Medium
 **Labels:** `enhancement`, `mcp`, `tasks`, `todoist`, `integration`
@@ -8,7 +8,7 @@
 
 ## Problem
 
-AgentKit Forge has task and backlog concepts, but there is no dedicated issue to evaluate syncing or integrating them with Todoist through MCP.
+Retort has task and backlog concepts, but there is no dedicated issue to evaluate syncing or integrating them with Todoist through MCP.
 
 ---
 
@@ -16,8 +16,8 @@ AgentKit Forge has task and backlog concepts, but there is no dedicated issue to
 
 Evaluate whether Todoist-through-MCP should support:
 
-- pushing AgentKit tasks to Todoist
-- importing Todoist tasks into AgentKit backlog/task views
+- pushing Retort tasks to Todoist
+- importing Todoist tasks into Retort backlog/task views
 - one-way vs two-way sync
 - tagging/project mapping
 - priority/status translation
@@ -37,7 +37,7 @@ Decide whether the initial target should be:
 
 ### Step 2: Define mapping model
 
-Map AgentKit concepts to Todoist concepts:
+Map Retort concepts to Todoist concepts:
 
 - task type
 - priority
@@ -55,7 +55,7 @@ Clarify conflict and ownership rules so Todoist does not become an unsafe parall
 ## Acceptance Criteria
 
 - [ ] Todoist-through-MCP integration has a support recommendation
-- [ ] Mapping between AgentKit tasks and Todoist concepts is documented
+- [ ] Mapping between Retort tasks and Todoist concepts is documented
 - [ ] Sync direction and conflict model are documented
 - [ ] Follow-up implementation work is identified if warranted
 

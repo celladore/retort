@@ -8,7 +8,7 @@
 | **Prompt 2** | Structured markdown with meta-instructions   | CLAUDE.md-style developer persona                 | ~2,200                  |
 | **Prompt 3** | YAML frontmatter + concise markdown          | `.github/agents/backend.agent.md` (Copilot agent) | ~750                    |
 
-All three prompts define the same "Senior Backend Engineer" role within the AgentKit Forge multi-agent system. They share identical focus areas, responsibilities, domain rules, and tooling. The differences lie in structure, depth, and operational guidance.
+All three prompts define the same "Senior Backend Engineer" role within the Retort multi-agent system. They share identical focus areas, responsibilities, domain rules, and tooling. The differences lie in structure, depth, and operational guidance.
 
 ---
 
@@ -140,7 +140,7 @@ All three prompts define the same "Senior Backend Engineer" role within the Agen
 
 ### 3rd Place: Prompt 3 (Copilot Agent YAML + Markdown)
 
-**Why it's third:** Extremely token-efficient and well-structured for a configuration-driven system. However, it critically lacks concurrency controls, error handling guidance, and an autonomous decision framework. In a single-agent or human-supervised context, this prompt would be adequate. In a multi-agent autonomous environment like AgentKit Forge, the missing operational guidance makes it insufficient without heavy reliance on external documentation.
+**Why it's third:** Extremely token-efficient and well-structured for a configuration-driven system. However, it critically lacks concurrency controls, error handling guidance, and an autonomous decision framework. In a single-agent or human-supervised context, this prompt would be adequate. In a multi-agent autonomous environment like Retort, the missing operational guidance makes it insufficient without heavy reliance on external documentation.
 
 ---
 

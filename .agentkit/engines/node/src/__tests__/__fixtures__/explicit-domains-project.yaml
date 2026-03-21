@@ -1,0 +1,25 @@
+name: explicit-domains-test
+githubSlug: test-org/explicit-domains-test
+description: Explicit domain override fixture for domain filtering tests.
+phase: active
+stack:
+  languages: [typescript, csharp, rust]
+  packageManager: pnpm
+  nodeVersion: lts/*
+  frameworks:
+    frontend: []
+    backend: [node.js]
+    css: []
+  orm: none
+  database: [none]
+  search: none
+  messaging: [none]
+domains:
+  rules: [typescript, security]
+automation:
+  languageProfile:
+    mode: configured
+    diagnostics: off
+    inferFrom:
+      frameworks: true
+      tests: true

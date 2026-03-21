@@ -1,4 +1,4 @@
-name: Block AgentKit Changes
+name: Block Retort Changes
 
 on:
   pull_request:
@@ -20,8 +20,8 @@ jobs:
       - name: Detect .agentkit changes
         shell: bash
         run: |
-          if [[ "${{ github.repository }}" == "JustAGhosT/agentkit-forge" ]]; then
-            echo "Info: Skipping .agentkit/ change block for exception repository JustAGhosT/agentkit-forge."
+          if [[ "${{ github.repository }}" == "JustAGhosT/retort" ]]; then
+            echo "Info: Skipping .agentkit/ change block for exception repository JustAGhosT/retort."
             exit 0
           fi
 

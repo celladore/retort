@@ -6,26 +6,26 @@ Issue-first governance rollout for router-specialist integration with no direct 
 
 ## Milestone
 
-- Repository: `phoenixvc/agentkit-forge`
+- Repository: `phoenixvc/retort`
 - Milestone: `Router Integration Governance Rollout` (`#1`)
 
 ## Epic and child issues
 
-- Epic: #159 — [Issue #159](https://github.com/phoenixvc/agentkit-forge/issues/159)
-- A: #160 — [Issue #160](https://github.com/phoenixvc/agentkit-forge/issues/160)
-- B: #161 — [Issue #161](https://github.com/phoenixvc/agentkit-forge/issues/161)
-- C: #162 — [Issue #162](https://github.com/phoenixvc/agentkit-forge/issues/162)
-- D: #163 — [Issue #163](https://github.com/phoenixvc/agentkit-forge/issues/163)
-- E: #164 — [Issue #164](https://github.com/phoenixvc/agentkit-forge/issues/164)
-- F: #165 — [Issue #165](https://github.com/phoenixvc/agentkit-forge/issues/165)
-- G: #166 — [Issue #166](https://github.com/phoenixvc/agentkit-forge/issues/166)
+- Epic: #159 — [Issue #159](https://github.com/phoenixvc/retort/issues/159)
+- A: #160 — [Issue #160](https://github.com/phoenixvc/retort/issues/160)
+- B: #161 — [Issue #161](https://github.com/phoenixvc/retort/issues/161)
+- C: #162 — [Issue #162](https://github.com/phoenixvc/retort/issues/162)
+- D: #163 — [Issue #163](https://github.com/phoenixvc/retort/issues/163)
+- E: #164 — [Issue #164](https://github.com/phoenixvc/retort/issues/164)
+- F: #165 — [Issue #165](https://github.com/phoenixvc/retort/issues/165)
+- G: #166 — [Issue #166](https://github.com/phoenixvc/retort/issues/166)
 
 ## Branch governance rollout (new)
 
-- Tracker: #167 — [Issue #167](https://github.com/phoenixvc/agentkit-forge/issues/167)
-- Policy: #168 — [Issue #168](https://github.com/phoenixvc/agentkit-forge/issues/168)
-- Infrastructure: #169 — [Issue #169](https://github.com/phoenixvc/agentkit-forge/issues/169)
-- Immediate guardrail: #170 — [Issue #170](https://github.com/phoenixvc/agentkit-forge/issues/170)
+- Tracker: #167 — [Issue #167](https://github.com/phoenixvc/retort/issues/167)
+- Policy: #168 — [Issue #168](https://github.com/phoenixvc/retort/issues/168)
+- Infrastructure: #169 — [Issue #169](https://github.com/phoenixvc/retort/issues/169)
+- Immediate guardrail: #170 — [Issue #170](https://github.com/phoenixvc/retort/issues/170)
 
 ## Dependency map
 
@@ -53,7 +53,7 @@ Each child issue must include and satisfy this closure gate before status moves 
 
 ## Plan decisions (locked)
 
-- Issue-first governance only in `agentkit-forge` for this phase.
+- Issue-first governance only in `retort` for this phase.
 - One dedicated milestone for coordinated execution.
 - Full render-target matrix is in scope.
 - FinOps scope includes rule domain + Phase 1 spec doc + skill note.

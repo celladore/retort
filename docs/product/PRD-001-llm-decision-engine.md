@@ -1,4 +1,4 @@
-# PRD-001: AgentKit Forge LLM Decision Engine
+# PRD-001: Retort LLM Decision Engine
 
 ## Status
 
@@ -6,11 +6,11 @@ Draft
 
 ## Module / Feature Name
 
-Multi-LLM Agent Model Optimization and Routing in AgentKit Forge
+Multi-LLM Agent Model Optimization and Routing in Retort
 
 ## Marketing Name
 
-AgentKit Forge LLM Decision Engine
+Retort LLM Decision Engine
 
 ## Platform / Mesh Layers
 
@@ -95,7 +95,7 @@ competitive advantage for team productivity, governance, and cost control.
 ### Business Goals
 
 - Streamline model routing and mapping for teams.
-- Increase AgentKit Forge adoption.
+- Increase Retort adoption.
 - Improve output quality and delivery speed.
 - Establish Forge as a mesh-native source of truth for model selection.
 
@@ -410,7 +410,7 @@ Project start date: **2026-03-03**
 
 | Product                  | Centralized Mapping | Coding Scorecards | Drift Detection | Gotcha Docs |
 | ------------------------ | ------------------- | ----------------- | --------------- | ----------- |
-| AgentKit Forge           | Yes                 | Yes               | Planned         | Yes         |
+| Retort           | Yes                 | Yes               | Planned         | Yes         |
 | LangChain                | No                  | Partial           | No              | No          |
 | OSS Agent Bundles        | No                  | No                | No              | No          |
 | Enterprise RAG Platforms | Yes                 | Partial           | Yes             | Partial     |

@@ -34,7 +34,7 @@ The system has 19 agents covering engineering, design, marketing, operations, pr
   role: >
     System maintenance specialist responsible for framework health, rule
     governance, technical debt tracking, script ownership, and coordination
-    of maintenance-phase operations. Acts as the steward of AgentKit Forge
+    of maintenance-phase operations. Acts as the steward of Retort
     internals and ensures CLI, hooks, CI, and generated outputs remain
     consistent with specifications.
   accepts:
