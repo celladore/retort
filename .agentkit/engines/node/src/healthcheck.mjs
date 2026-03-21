@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Healthcheck Command
+ * Retort — Healthcheck Command
  * Pre-flight validation: checks tooling availability, dependency installation,
  * and runs build/test/lint to report overall repo health.
  */
@@ -75,8 +75,8 @@ export async function runHealthcheck({ agentkitRoot, projectRoot, flags = {} }) 
   }
   console.log('');
 
-  // --- Step 2: Check AgentKit setup ---
-  console.log('--- AgentKit Setup ---');
+  // --- Step 2: Check Retort setup ---
+  console.log('--- Retort Setup ---');
   const hasMarker = existsSync(resolve(projectRoot, '.agentkit-repo'));
   const hasState = existsSync(resolve(projectRoot, '.agentkit', 'state', 'orchestrator.json'));
   const hasCommands = existsSync(resolve(projectRoot, '.claude', 'commands'));

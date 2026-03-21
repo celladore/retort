@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Backlog Viewer
+ * Retort — Backlog Viewer
  * Displays a consolidated backlog view with filtering and output format options.
  */
 import yaml from 'js-yaml';

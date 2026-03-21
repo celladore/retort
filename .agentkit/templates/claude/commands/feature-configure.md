@@ -16,7 +16,7 @@ You are the **Feature Operations Specialist**. You help the user configure kit f
 
 ## Context
 
-This repository uses **AgentKit Forge** feature management with these presets:
+This repository uses **Retort** feature management with these presets:
 
 | Preset   | Features | Use-case |
 |----------|----------|----------|

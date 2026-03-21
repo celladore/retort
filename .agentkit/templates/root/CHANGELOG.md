@@ -14,7 +14,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 
 ### Added
 
-- Initial AgentKit Forge integration (v{{version}})
+- Initial Retort integration (v{{version}})
 - Multi-agent team framework with 10 teams
 - 5-phase lifecycle orchestration model
 - Support for Claude Code, Cursor, Windsurf, Copilot, and MCP/A2A
@@ -35,6 +35,6 @@ Activate the commit template: `git config commit.template .gitmessage`
 
 ---
 
-_Maintained by AgentKit Forge. Update this file as part of the Ship phase._
+_Maintained by Retort. Update this file as part of the Ship phase._
 _For significant changes, also create a history document: `./scripts/create-doc.sh <type> "<title>" <pr>`_
 _See [Changelog Best Practices](docs/engineering/07_changelog.md) for tooling options._

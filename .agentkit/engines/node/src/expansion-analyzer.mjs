@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Expansion Analyzer (Phase 1)
+ * Retort — Expansion Analyzer (Phase 1)
  * Read-only gap analysis engine that scans the repository and produces
  * scored, ranked suggestions for missing documentation, tests, security
  * measures, and architectural improvements.

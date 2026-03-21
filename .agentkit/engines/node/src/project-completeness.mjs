@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Project Completeness Scoring
+ * Retort — Project Completeness Scoring
  * Centralized scoring profiles for project.yaml completeness checks.
  */
 

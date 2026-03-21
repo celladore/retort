@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — GitHub Adapter
+ * Retort — GitHub Adapter
  * Fetches issues from GitHub using the `gh` CLI.
  */
 import { execFileSync } from 'child_process';

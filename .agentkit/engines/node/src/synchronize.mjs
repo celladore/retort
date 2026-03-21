@@ -449,7 +449,7 @@ const GITATTR_START = '# >>> Retort merge drivers — DO NOT EDIT below this lin
 const GITATTR_END = '# <<< Retort merge drivers — DO NOT EDIT above this line';
 
 /**
- * Appends (or updates) the AgentKit merge-driver section in .gitattributes.
+ * Appends (or updates) the Retort merge-driver section in .gitattributes.
  * Preserves all user-authored content outside the markers. Writes the result
  * to tmpDir so the standard manifest/diff/swap pipeline handles it.
  */
@@ -561,33 +561,33 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
 
   const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
   if (!brandSpec) {
-    log('[agentkit:sync] Editor theme enabled but no brand.yaml found — skipping');
+    log('[retort:sync] Editor theme enabled but no brand.yaml found — skipping');
     return;
   }
 
   // Validate brand spec
   const validation = validateBrandSpec(brandSpec);
   for (const err of validation.errors) {
-    log(`[agentkit:sync] Brand error: ${err}`);
+    log(`[retort:sync] Brand error: ${err}`);
   }
   for (const warn of validation.warnings) {
-    if (process.env.DEBUG) log(`[agentkit:sync] Brand warning: ${warn}`);
+    if (process.env.DEBUG) log(`[retort:sync] Brand warning: ${warn}`);
   }
   if (validation.errors.length > 0) {
-    log('[agentkit:sync] Brand validation failed — skipping editor theme');
+    log('[retort:sync] Brand validation failed — skipping editor theme');
     return;
   }
 
   const themeSpec = readYaml(resolve(agentkitRoot, 'spec', 'editor-theme.yaml'));
   if (!themeSpec || !themeSpec.enabled) {
-    log('[agentkit:sync] Editor theme spec not found or disabled — skipping');
+    log('[retort:sync] Editor theme spec not found or disabled — skipping');
     return;
   }
 
   // Validate tier/scheme values
   const themeValidation = validateThemeSpec(themeSpec);
   for (const warn of themeValidation.warnings) {
-    log(`[agentkit:sync] Theme config warning: ${warn}`);
+    log(`[retort:sync] Theme config warning: ${warn}`);
   }
 
   // Determine which mode mapping(s) to resolve
@@ -602,7 +602,7 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
     const { resolved, warnings } = resolveThemeMapping(lightMapping, brandSpec);
     lightColors = resolved;
     for (const warn of warnings) {
-      log(`[agentkit:sync] Theme warning (light): ${warn}`);
+      log(`[retort:sync] Theme warning (light): ${warn}`);
     }
   }
   if (mode === 'both' || mode === 'dark') {
@@ -610,7 +610,7 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
     const { resolved, warnings } = resolveThemeMapping(darkMapping, brandSpec);
     darkColors = resolved;
     for (const warn of warnings) {
-      log(`[agentkit:sync] Theme warning (dark): ${warn}`);
+      log(`[retort:sync] Theme warning (dark): ${warn}`);
     }
   }
 
@@ -633,12 +633,12 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
   colorCustomizations = filterByTier(colorCustomizations, tier);
   if (tier !== 'full') {
     log(
-      `[agentkit:sync] Brand tier "${tier}" — filtered to ${Object.keys(colorCustomizations).length} color slots`
+      `[retort:sync] Brand tier "${tier}" — filtered to ${Object.keys(colorCustomizations).length} color slots`
     );
   }
 
   if (Object.keys(colorCustomizations).length === 0) {
-    log('[agentkit:sync] No colors resolved from editor theme — skipping');
+    log('[retort:sync] No colors resolved from editor theme — skipping');
     return;
   }
 
@@ -692,7 +692,7 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
 
     // Scaffold-once: skip targets that already exist in projectRoot (unless --overwrite/--force)
     if (skipOutputs && skipOutputs.has(outputPath)) {
-      log(`[agentkit:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
+      log(`[retort:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
       continue;
     }
 
@@ -700,7 +700,7 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
     const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
     const settingsPath = resolve(tmpDir, normalizedPath);
     if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
-      log(`[agentkit:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
+      log(`[retort:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
       continue;
     }
 
@@ -745,7 +745,7 @@ async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutpu
         await writeFile(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n', 'utf-8');
 
         log(
-          `[agentkit:sync] Editor theme → ${outputPath}: ${Object.keys(toolColors).length} color(s) from "${meta.brand}" (${mode} mode)`
+          `[retort:sync] Editor theme → ${outputPath}: ${Object.keys(toolColors).length} color(s) from "${meta.brand}" (${mode} mode)`
         );
       })()
     );
@@ -1201,7 +1201,7 @@ function resolveLanguageTemplate(overlayDir, sharedDir, name, fallback) {
  * @param {string} templatesDir - Root templates directory
  * @param {string} tmpDir - Output root directory
  * @param {object} vars - Flattened project template variables
- * @param {string} version - AgentKit version string
+ * @param {string} version - Retort version string
  * @param {string} repoName - Repository name for header injection
  * @param {object} rulesSpec - Parsed rules.yaml spec
  * @param {string} outputSubDir - Output path relative to tmpDir (e.g. '.github/instructions/languages')
@@ -1228,7 +1228,7 @@ async function syncLanguageInstructions(
   for (const rule of rules) {
     const domain = rule.domain;
     if (typeof domain !== 'string' || !SAFE_DOMAIN_PATTERN.test(domain)) {
-      console.warn(`[agentkit:sync] Skipping rule with invalid domain: ${JSON.stringify(domain)}`);
+      console.warn(`[retort:sync] Skipping rule with invalid domain: ${JSON.stringify(domain)}`);
       continue;
     }
 
@@ -1876,7 +1876,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     try {
       ({ checkDirtyProtectedFiles, promptDirtyFileAction } = await import('./sync-guard.mjs'));
     } catch (err) {
-      log(`[agentkit:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
+      log(`[retort:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
     }
     const { dirty, files } = checkDirtyProtectedFiles
       ? checkDirtyProtectedFiles(projectRoot, [
@@ -1890,24 +1890,24 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       if (isTTY) {
         const action = await promptDirtyFileAction(files);
         if (action === 'abort') {
-          log('[agentkit:sync] Aborted — commit or stash your changes first.');
+          log('[retort:sync] Aborted — commit or stash your changes first.');
           return;
         }
         // 'stash' handled inside promptDirtyFileAction; 'continue' falls through
       } else {
-        console.warn('[agentkit:sync] Warning: uncommitted changes in protected directories:');
+        console.warn('[retort:sync] Warning: uncommitted changes in protected directories:');
         for (const f of files) console.warn(`  ${f}`);
       }
     }
   }
 
   if (dryRun) {
-    log('[agentkit:sync] Dry-run mode — no files will be written.');
+    log('[retort:sync] Dry-run mode — no files will be written.');
   }
   if (diff) {
-    log('[agentkit:sync] Diff mode — showing what would change.');
+    log('[retort:sync] Diff mode — showing what would change.');
   }
-  log('[agentkit:sync] Starting sync...');
+  log('[retort:sync] Starting sync...');
 
   // 1. Load spec — version from package.json (primary) with VERSION file as fallback
   let version = '0.0.0';
@@ -1930,7 +1930,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // 2. Detect overlay
   const overlaySelection = resolveOverlaySelection(agentkitRoot, projectRoot, flags);
   const repoName = overlaySelection.repoName;
-  log(`[agentkit:sync] Using overlay: ${repoName} (${overlaySelection.reason})`);
+  log(`[retort:sync] Using overlay: ${repoName} (${overlaySelection.reason})`);
 
   // 3. Load overlay
   const overlayDir = resolve(agentkitRoot, 'overlays', repoName);
@@ -1953,10 +1953,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     const enabledFeatures = resolveFeatures(features, overlaySettings, presets, { log });
     featureVars = buildFeatureVars(features, enabledFeatures);
     hookFeatureMap = buildHookFeatureMap(features);
-    log(`[agentkit:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
+    log(`[retort:sync] Features: ${enabledFeatures.size} / ${features.length} enabled`);
   } catch {
     // features.yaml may not exist yet in older repos — degrade gracefully
-    log('[agentkit:sync] Features: spec not found, all features assumed enabled');
+    log('[retort:sync] Features: spec not found, all features assumed enabled');
   }
 
   const teamsIntake = teamsSpec?.intake || {};
@@ -2093,9 +2093,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // Resolve render targets — determines which tool outputs to generate
   let targets = resolveRenderTargets(overlaySettings.renderTargets, flags);
 
-  log(`[agentkit:sync] Repo: ${vars.repoName}, Version: ${version}`);
+  log(`[retort:sync] Repo: ${vars.repoName}, Version: ${version}`);
   if (flags?.only) {
-    log(`[agentkit:sync] Syncing only: ${[...targets].join(', ')}`);
+    log(`[retort:sync] Syncing only: ${[...targets].join(', ')}`);
   }
 
   // 4. Render templates to temp directory
@@ -2174,7 +2174,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs);
       } else {
         log(
-          '[agentkit:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.'
+          '[retort:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.'
         );
       }
     }
@@ -2486,7 +2486,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     // --- Dry-run: print summary and exit without writing ---
     if (dryRun) {
       const total = Object.keys(newManifestFiles).length;
-      log(`[agentkit:sync] Dry-run: would generate ${total} file(s):`);
+      log(`[retort:sync] Dry-run: would generate ${total} file(s):`);
       printSyncSummary(fileSummary, targets, { quiet });
       return;
     }
@@ -2546,7 +2546,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         }
       }
       log(
-        `[agentkit:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
+        `[retort:sync] Diff: ${createCount} create, ${updateCount} update, ${skipCount} unchanged/skip`
       );
       return;
     }
@@ -2603,7 +2603,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         const mode = await promptApplyMode({ creates, updates });
 
         if (mode === 'none') {
-          log('[agentkit:sync] Skipped — no files written.');
+          log('[retort:sync] Skipped — no files written.');
           return;
         }
 
@@ -2623,7 +2623,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           }
           if (skipSet.size > 0) {
             flags._skipPaths = skipSet;
-            log(`[agentkit:sync] Skipping ${skipSet.size} file(s) by user choice.`);
+            log(`[retort:sync] Skipping ${skipSet.size} file(s) by user choice.`);
           }
         }
         // mode === 'all' falls through to normal swap
@@ -2642,7 +2642,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
 
     // 7. Atomic swap: move temp outputs to project root & build new manifest
-    log('[agentkit:sync] Writing outputs...');
+    log('[retort:sync] Writing outputs...');
     const resolvedRoot = resolve(projectRoot) + sep;
     const scaffoldCacheDir = resolve(agentkitRoot, '.scaffold-cache');
 
@@ -2679,7 +2679,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         !resolve(destFile).startsWith(resolvedRoot) &&
         resolve(destFile) !== resolve(projectRoot)
       ) {
-        console.error(`[agentkit:sync] BLOCKED: path traversal detected — ${normalizedRel}`);
+        console.error(`[retort:sync] BLOCKED: path traversal detected — ${normalizedRel}`);
         failedFiles.push({ file: normalizedRel, error: 'path traversal blocked' });
         return;
       }
@@ -2723,7 +2723,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
                 if (result.hasConflicts) {
                   scaffoldResults.managedConflicts.push(normalizedRel);
                   console.warn(
-                    `[agentkit:sync] CONFLICT in ${normalizedRel} — resolve <<<< markers manually`
+                    `[retort:sync] CONFLICT in ${normalizedRel} — resolve <<<< markers manually`
                   );
                 } else {
                   scaffoldResults.managedMerged.push(normalizedRel);
@@ -2802,12 +2802,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         logVerbose(`  wrote ${normalizedRel}`);
       } catch (err) {
         failedFiles.push({ file: normalizedRel, error: err.message });
-        console.error(`[agentkit:sync] Failed to write: ${normalizedRel} — ${err.message}`);
+        console.error(`[retort:sync] Failed to write: ${normalizedRel} — ${err.message}`);
       }
     });
 
     if (failedFiles.length > 0) {
-      console.error(`[agentkit:sync] Error: ${failedFiles.length} file(s) failed to write:`);
+      console.error(`[retort:sync] Error: ${failedFiles.length} file(s) failed to write:`);
       for (const f of failedFiles) {
         console.error(`  - ${f.file}: ${f.error}`);
       }
@@ -2823,7 +2823,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       scaffoldResults.managedPreserved.length > 0;
 
     if (hasManagedActivity) {
-      log('[agentkit:sync] Scaffold summary:');
+      log('[retort:sync] Scaffold summary:');
       if (scaffoldResults.alwaysRegenerated.length > 0) {
         log(`  ${scaffoldResults.alwaysRegenerated.length} file(s) always-regenerated`);
       }
@@ -2888,17 +2888,17 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         const orphanPath = resolve(projectRoot, prevFile);
         // Path traversal protection: ensure orphan path stays within project root
         if (!orphanPath.startsWith(resolvedRoot)) {
-          console.warn(`[agentkit:sync] BLOCKED: path traversal in manifest — ${prevFile}`);
+          console.warn(`[retort:sync] BLOCKED: path traversal in manifest — ${prevFile}`);
           return;
         }
         if (existsSync(orphanPath)) {
           try {
             await unlink(orphanPath);
             cleanedCount++;
-            logVerbose(`[agentkit:sync] Cleaned stale file: ${prevFile}`);
+            logVerbose(`[retort:sync] Cleaned stale file: ${prevFile}`);
           } catch (err) {
             console.warn(
-              `[agentkit:sync] Warning: could not clean stale file ${prevFile} — ${err.message}`
+              `[retort:sync] Warning: could not clean stale file ${prevFile} — ${err.message}`
             );
           }
         }
@@ -2915,7 +2915,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     try {
       await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
     } catch (err) {
-      console.warn(`[agentkit:sync] Warning: could not write manifest — ${err.message}`);
+      console.warn(`[retort:sync] Warning: could not write manifest — ${err.message}`);
     }
 
     // 10. Post-sync prettier formatting — ensure generated files are formatted
@@ -2937,14 +2937,14 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
             formattedCount += batch.length;
           } catch (err) {
             if (err?.killed) {
-              logVerbose(`[agentkit:sync] Prettier batch timed out, continuing...`);
+              logVerbose(`[retort:sync] Prettier batch timed out, continuing...`);
             }
             // prettier may fail on some files (e.g. non-parseable) — continue
           }
         }
         if (formattedCount > 0) {
           logVerbose(
-            `[agentkit:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
+            `[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
           );
         }
       } catch {
@@ -2953,10 +2953,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
 
     if (skippedScaffold > 0) {
-      log(`[agentkit:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
+      log(`[retort:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
     }
     if (cleanedCount > 0) {
-      log(`[agentkit:sync] Cleaned ${cleanedCount} stale file(s) from previous sync.`);
+      log(`[retort:sync] Cleaned ${cleanedCount} stale file(s) from previous sync.`);
     }
 
     // 11. Post-sync summary
@@ -2964,13 +2964,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     const completeness = computeProjectCompleteness(projectSpec);
     if (completeness.total > 0) {
       log(
-        `[agentkit:sync] project.yaml completeness: ${completeness.percent}% (${completeness.present}/${completeness.total} fields populated)`
+        `[retort:sync] project.yaml completeness: ${completeness.percent}% (${completeness.present}/${completeness.total} fields populated)`
       );
       if (completeness.missing.length > 0) {
-        log(`[agentkit:sync] Top missing fields: ${completeness.missing.slice(0, 5).join(', ')}`);
+        log(`[retort:sync] Top missing fields: ${completeness.missing.slice(0, 5).join(', ')}`);
       }
     }
-    log(`[agentkit:sync] Done! Generated ${count} files.`);
+    log(`[retort:sync] Done! Generated ${count} files.`);
 
     // 12. First-sync hint (when not called from init)
     if (!flags?.overlay) {

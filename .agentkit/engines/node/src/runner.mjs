@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Process Execution Helper
+ * Retort — Process Execution Helper
  * Shared utility for running shell commands with timeout, output capture, and timing.
  */
 import { spawnSync } from 'child_process';

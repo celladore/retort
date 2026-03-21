@@ -44,7 +44,7 @@ These conventions are enforced by the `security` rule domain
 
 ### Hook-based Protection
 
-AgentKit Forge installs hook scripts that guard against common risks:
+Retort installs hook scripts that guard against common risks:
 
 | Hook                            | Trigger               | Protection                                       |
 | ------------------------------- | --------------------- | ------------------------------------------------ |
@@ -115,4 +115,4 @@ The `validate` command scans for common secret patterns:
 
 ---
 
-_This policy is maintained by AgentKit Forge. Run `pnpm -C .agentkit agentkit:sync` to regenerate._
+_This policy is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate._

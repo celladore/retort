@@ -62,7 +62,7 @@ if [[ -z "$REPO" ]]; then
   exit 1
 fi
 
-echo "=== AgentKit Branch Governance Setup ==="
+echo "=== Retort Branch Governance Setup ==="
 echo "Repository: $REPO"
 echo "DryRun:     $DRY_RUN"
 echo

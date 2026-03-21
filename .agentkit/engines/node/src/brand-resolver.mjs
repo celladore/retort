@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Brand Resolver
+ * Retort — Brand Resolver
  * Resolves brand.yaml color references and validates brand specs.
  * Pure functions — no file I/O.
  */

@@ -349,7 +349,7 @@ describe('mergeThemeIntoSettings', () => {
       'statusBar.background': '#1976D2',
     };
     const meta = {
-      brand: 'AgentKit Forge',
+      brand: 'Retort',
       mode: 'dark',
       scheme: 'dark',
       tier: 'full',

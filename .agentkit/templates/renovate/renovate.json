@@ -33,7 +33,7 @@
       "labels": ["dependencies", "breaking-change"]
     },
     {
-      "description": "AgentKit engine dependencies — require maintainer review",
+      "description": "Retort engine dependencies — require maintainer review",
       "matchFileNames": [".agentkit/package.json"],
       "labels": ["dependencies", "forge-source-change"],
       "automerge": false

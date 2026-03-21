@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "AgentKit Forge Orchestrator State",
+  "title": "Retort Orchestrator State",
   "description": "Schema for the orchestrator state file managed by /orchestrate",
   "type": "object",
   "required": ["schema_version", "repo_id", "current_phase", "phase_name", "team_progress"],

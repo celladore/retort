@@ -31,7 +31,7 @@ describe('CLI', () => {
   it('shows help with --help', () => {
     const result = run('--help');
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('AgentKit Forge');
+    expect(result.stdout).toContain('Retort');
     expect(result.stdout).toContain('Commands:');
     expect(result.stdout).toContain('init');
     expect(result.stdout).toContain('sync');
@@ -41,18 +41,18 @@ describe('CLI', () => {
   it('shows help with -h', () => {
     const result = run('-h');
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('AgentKit Forge');
+    expect(result.stdout).toContain('Retort');
   });
 
   it('shows help with no arguments', () => {
     const result = run();
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('AgentKit Forge');
+    expect(result.stdout).toContain('Retort');
   });
 
   it('shows version from package.json', () => {
     const result = run('--help');
-    expect(result.stdout).toContain(`AgentKit Forge v${PKG_VERSION}`);
+    expect(result.stdout).toContain(`Retort v${PKG_VERSION}`);
   });
 
   it('rejects unknown commands with exit code 1', () => {
@@ -170,14 +170,14 @@ describe('CLI', () => {
       // --status is boolean for orchestrate; --help exits before running the command
       const result = run('orchestrate', '--status', '--help');
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('AgentKit Forge');
+      expect(result.stdout).toContain('Retort');
     });
 
     it('tasks --status accepts a string value', () => {
       // --status is string for tasks; --help exits before running the command
       const result = run('tasks', '--status', 'submitted', '--help');
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('AgentKit Forge');
+      expect(result.stdout).toContain('Retort');
     });
 
     it('tasks --status without a value exits non-zero', () => {
@@ -197,14 +197,14 @@ describe('CLI', () => {
       // -q is a short alias for --quiet; --help exits before running sync
       const result = run('sync', '-q', '--help');
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('AgentKit Forge');
+      expect(result.stdout).toContain('Retort');
     });
 
     it('sync -v (short for --verbose) does not error', () => {
       // -v is a short alias for --verbose; --help exits before running sync
       const result = run('sync', '-v', '--help');
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('AgentKit Forge');
+      expect(result.stdout).toContain('Retort');
     });
   });
 });

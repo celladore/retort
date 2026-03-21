@@ -34,7 +34,7 @@ framework:
   - name: init
     type: framework
     description: >
-      Initialize the current repository as an Retort project.
+      Initialize the current repository as an AgentKit Forge project.
       Creates .agentkit-repo marker and initial overlay configuration.
     flags:
       - name: overlay
@@ -131,7 +131,7 @@ Add a comment block at the top of `commands.yaml`:
 # NOTE: The following CLI commands are framework-internal and intentionally
 # not listed in this spec file. They are always available via the CLI:
 #   init, sync, spec-validate, add, remove, list, tasks, delegate
-# These commands manage the Retort framework itself, not project workflows.
+# These commands manage the AgentKit Forge framework itself, not project workflows.
 ```
 
 ### Step: Add validate.mjs check for spec-CLI parity (~30 min)
@@ -161,13 +161,20 @@ const inSpecNotCli = specCommands.filter(c => !cliCommands.includes(c));
 - [x] No drift warning when running `agentkit validate`
   - Parity check emits WARN entries only; does not block on framework-internal commands
 
-## Implementation Notes (2026-03-20)
+---
 
-Full implementation complete as part of `feat/kit-domain-selection-onboarding`:
+## Resolution
+
+**Status: Resolved** (2026-03-21)
+
+Addressed in `feat(validate): add CLI-spec command parity check` (PR #432, `feat/kit-domain-selection-onboarding`):
+
 - `type: framework` added to `VALID_COMMAND_TYPES` in `spec-validator.mjs`
-- `init` command added to `commands.yaml` with kit selection documentation
-- `sync` type corrected; header documents intentionally-excluded CLI commands
-- Phase 10 (CLI-spec parity) added to `validate.mjs` — warns on unexpected gaps between CLI_COMMANDS and commands.yaml
+- `init` command added to `commands.yaml` with full kit-selection documentation
+- `sync` command type corrected from `utility` to `framework`; header comment documents intentionally-excluded CLI commands
+- Phase 10 (CLI-spec parity check) added to `validate.mjs` — warns on unexpected gaps between `CLI_COMMANDS` and `commands.yaml`
+
+All 8 framework-internal commands are now either formally documented in `commands.yaml` (as `type: framework`) or explicitly acknowledged in the header block. No drift warning when running `agentkit validate`.
 
 ---
 

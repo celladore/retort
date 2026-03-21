@@ -1,9 +1,9 @@
 {
-  "name": "agentkit-forge-runtime",
+  "name": "retort-runtime",
   "version": "3.1.0",
   "private": true,
   "type": "module",
-  "description": "AgentKit Forge — unified AI agent team framework sync engine",
+  "description": "Retort — unified AI agent team orchestration framework",
   "packageManager": "pnpm@10.30.3",
   "engines": {
     "node": ">=22.0.0"
@@ -13,6 +13,20 @@
     "js-yaml": "^4.1.0"
   },
   "scripts": {
+    "retort:sync": "node engines/node/src/cli.mjs sync",
+    "retort:init": "node engines/node/src/cli.mjs init",
+    "retort:validate": "node engines/node/src/cli.mjs validate",
+    "retort:discover": "node engines/node/src/cli.mjs discover",
+    "retort:spec-validate": "node engines/node/src/cli.mjs spec-validate",
+    "retort:add": "node engines/node/src/cli.mjs add",
+    "retort:remove": "node engines/node/src/cli.mjs remove",
+    "retort:list": "node engines/node/src/cli.mjs list",
+    "retort:healthcheck": "node engines/node/src/cli.mjs healthcheck",
+    "retort:check": "node engines/node/src/cli.mjs check",
+    "retort:cost": "node engines/node/src/cli.mjs cost",
+    "retort:import-issues": "node engines/node/src/cli.mjs import-issues",
+    "retort:backlog": "node engines/node/src/cli.mjs backlog",
+    "retort:sync-backlog": "node engines/node/src/cli.mjs sync-backlog",
     "agentkit:sync": "node engines/node/src/cli.mjs sync",
     "agentkit:init": "node engines/node/src/cli.mjs init",
     "agentkit:validate": "node engines/node/src/cli.mjs validate",

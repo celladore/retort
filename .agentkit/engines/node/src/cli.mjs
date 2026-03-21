@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * AgentKit Forge CLI Router
+ * Retort CLI Router
  * Routes subcommands to their handlers.
  */
 import { spawnSync } from 'child_process';
@@ -184,7 +184,7 @@ function loadCommandFlags(agentkitRoot) {
     for (const flag of flags) {
       if (!flagTypes[flag] && !specialCased.has(flag)) {
         console.warn(
-          `[agentkit] Warning: flag "--${flag}" is listed for command "${cmd}" ` +
+          `[retort] Warning: flag "--${flag}" is listed for command "${cmd}" ` +
             `but has no type definition. Add it to CLI_INTERNAL_FLAG_TYPES or commands.yaml.`
         );
       }
@@ -268,7 +268,7 @@ function parseFlags(command, args) {
     const knownFlags = new Set(Object.keys(options));
     for (const token of tokens) {
       if (token.kind === 'option' && !knownFlags.has(token.name)) {
-        console.warn(`[agentkit:${command}] Warning: unrecognized flag --${token.name} (ignored)`);
+        console.warn(`[retort:${command}] Warning: unrecognized flag --${token.name} (ignored)`);
       }
     }
 
@@ -281,7 +281,7 @@ function parseFlags(command, args) {
 
 function showHelp() {
   console.log(`
-AgentKit Forge v${VERSION}
+Retort v${VERSION}
 
 Usage: node cli.mjs <command> [options]
 
@@ -346,7 +346,7 @@ Task Delegation:
                   --handoff-to <t>  Auto-handoff to team on completion
 
 Diagnostics:
-  doctor          Run AgentKit diagnostics and setup checks
+  doctor          Run Retort diagnostics and setup checks
                   --verbose         Include detailed diagnostics
 
 Backlog & Issue Tracking:
@@ -438,7 +438,7 @@ function ensureDependencies(agentkitRoot) {
   const installCmd = hasPnpm ? 'pnpm' : 'npm';
   const installArgs = hasPnpm ? ['install'] : ['install'];
   console.warn(
-    `[agentkit] Dependencies not installed. Running ${installCmd} install in .agentkit...`
+    `[retort] Dependencies not installed. Running ${installCmd} install in .agentkit...`
   );
   const r = spawnSync(installCmd, installArgs, {
     cwd: agentkitRoot,
@@ -447,7 +447,7 @@ function ensureDependencies(agentkitRoot) {
   });
   if (r.status !== 0) {
     console.error(
-      `[agentkit] Failed to install dependencies. Run manually: ${installCmd} -C .agentkit install`
+      `[retort] Failed to install dependencies. Run manually: ${installCmd} -C .agentkit install`
     );
     return false;
   }
@@ -678,7 +678,7 @@ async function main() {
         const { mkdirSync, writeFileSync } = await import('fs');
         mkdirSync(dirname(outputPath), { recursive: true });
         writeFileSync(outputPath, content, 'utf-8');
-        console.log(`[agentkit:analyze-agents] Matrix written to ${outputPath}`);
+        console.log(`[retort:analyze-agents] Matrix written to ${outputPath}`);
         console.log(
           `  ${graph.agents.length} agents, ${graph.teams.length} teams, ${graph.categories.length} categories`
         );
@@ -687,7 +687,7 @@ async function main() {
       default: {
         if (SLASH_ONLY_COMMANDS.includes(command)) {
           const cmdFile = resolve(PROJECT_ROOT, '.claude', 'commands', `${command}.md`);
-          console.log(`[agentkit:${command}] Slash command: /${command}`);
+          console.log(`[retort:${command}] Slash command: /${command}`);
           console.log();
           console.log(`This is an AI agent slash command. Use it within your AI tool:`);
           console.log(`  Claude Code:  /${command}`);
@@ -696,14 +696,14 @@ async function main() {
           if (existsSync(cmdFile)) {
             console.log(`Command definition: .claude/commands/${command}.md`);
           } else {
-            console.log('Run "agentkit sync" first to generate command files.');
+            console.log('Run "retort sync" first to generate command files.');
           }
           break;
         }
       }
     }
   } catch (err) {
-    console.error(`[agentkit:${command}] Error: ${err.message}`);
+    console.error(`[retort:${command}] Error: ${err.message}`);
     if (process.env.DEBUG) {
       console.error(err.stack);
     } else {

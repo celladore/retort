@@ -51,6 +51,16 @@ remains outstanding.
 
 ---
 
+## Resolution
+
+**Status: Partially resolved** (2026-03-21)
+
+Kit-based domain filtering (`filterDomainsByStack()` in `template-utils.mjs`, PR #432) directly addresses the core noise problem: only domains relevant to the project's declared stack are generated. A TypeScript-only project now receives typescript + universal domains — not dotnet, rust, python, or blockchain rule files. This eliminates the primary source of redundancy and platform noise flagged in this issue.
+
+Outstanding: the TRAE-specific rule format audit (rule granularity, platform-specific projection, prompt length) remains a follow-up task and has not been addressed.
+
+---
+
 ## Related
 
 - TRAE docs: https://docs.trae.ai/ide/rules?_lang=en
