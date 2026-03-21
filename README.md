@@ -77,9 +77,10 @@
 >
 > | Repo | Role |
 > |---|---|
-> | [`cockpit`](https://github.com/phoenixvc/cockpit) | Desktop ops tool — uses retort scaffold internally; cockpit can invoke retort via CLI to bootstrap new agent projects |
-> | [`ai-cadence`](https://github.com/phoenixvc/ai-cadence) | Project tracker — retort-based projects can read their tasks from ai-cadence via MCP |
-> | [`ai-flume`](https://github.com/phoenixvc/ai-flume) | AI data plane — projects scaffolded with retort inherit ai-flume as their model gateway |
+> | [`deck`](https://github.com/phoenixvc/deck) | Desktop ops tool — uses retort scaffold internally; deck can invoke retort via CLI to bootstrap new agent projects |
+> | [`phoenix-flow`](https://github.com/phoenixvc/phoenix-flow) | Project tracker — retort-based projects can read their tasks from phoenix-flow via MCP |
+> | [`sluice`](https://github.com/phoenixvc/sluice) | AI data plane — projects scaffolded with retort inherit sluice as their model gateway |
+> | [`docket`](https://github.com/phoenixvc/docket) | AI cost ops — tracks token spend and model costs across retort-scaffolded projects |
 > | [`cognitive-mesh`](https://github.com/phoenixvc/cognitive-mesh) | Agent orchestration — retort-based agents are routed through cognitive-mesh for complex multi-agent tasks |
 > | [`org-meta`](https://github.com/phoenixvc/org-meta) | Org registry — org-meta's CLAUDE.md and project specs are generated using retort |
 >
@@ -94,7 +95,7 @@
 >
 > ## Name
 >
-> **retort** — a retort is a sharp, witty response, but also a sealed laboratory vessel used for distillation and chemical reactions. Both meanings apply: retort gives you a precise, controlled response to the chaos of AI tool fragmentation (the sharp comeback), and it's a vessel in which agent configurations are synthesised from raw ingredients (the chemistry). The name sits comfortably alongside `cockpit` and `ai-flume` — slightly more playful, but intentional.
+> **retort** — a retort is a sharp, witty response, but also a sealed laboratory vessel used for distillation and chemical reactions. Both meanings apply: retort gives you a precise, controlled response to the chaos of AI tool fragmentation (the sharp comeback), and it's a vessel in which agent configurations are synthesised from raw ingredients (the chemistry). The name sits comfortably alongside `deck` and `sluice` — slightly more playful, but intentional.
 >
 > The repo was previously called `agentkit-forge` internally. The public-facing name `retort` better reflects its standalone, template-first character.
 > 
