@@ -57,7 +57,7 @@ These variables are used **directly** (no conditional guard) and will render as 
 | `version`          | 88                                                          | ✅ from package.json             | Low                                            |
 | `syncDate`         | 74                                                          | ✅ `new Date().toISOString()`    | Low                                            |
 | `lastModel`        | 74                                                          | ✅ env var or `'sync-engine'`    | Low                                            |
-| `lastAgent`        | 74                                                          | ✅ env var or `'agentkit-forge'` | Low                                            |
+| `lastAgent`        | 74                                                          | ✅ env var or `'retort'` | Low                                            |
 | `defaultBranch`    | 26                                                          | ✅ `'main'`                      | Low                                            |
 | `testingCoverage`  | 19                                                          | ❌ No default, used bare         | **Medium** — will render `{{testingCoverage}}` |
 | `commitConvention` | 7                                                           | ❌ comes from project.yaml only  | **Medium**                                     |

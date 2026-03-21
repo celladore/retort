@@ -1,4 +1,4 @@
-# PRD-005: AgentKit Forge Mesh-Native Distribution
+# PRD-005: Retort Mesh-Native Distribution
 
 ## Status
 
@@ -6,11 +6,11 @@ Draft
 
 ## Module / Feature Name
 
-AgentKit Forge Distribution & Orchestration Layer
+Retort Distribution & Orchestration Layer
 
 ## Marketing Name
 
-AgentKit Forge (Unified Delivery)
+Retort (Unified Delivery)
 
 ## Platform / Mesh Layers
 
@@ -49,7 +49,7 @@ timeline below.
 
 ## TL;DR
 
-Unified, frictionless delivery of AgentKit Forge via npm, GitHub Action, and a
+Unified, frictionless delivery of Retort via npm, GitHub Action, and a
 GA PWA UI — accelerating onboarding and enabling configuration by any team
 member with minimal operational burden. This PRD codifies the delivery strategy
 approved in [ADR-07](../architecture/decisions/07-delivery-strategy.md).
@@ -100,7 +100,7 @@ forge's core differentiator.
 
 ### Business Goals
 
-- Maximize AgentKit Forge adoption across all user segments.
+- Maximize Retort adoption across all user segments.
 - Eliminate configuration drift in all enabled project repositories.
 - Minimize operational support needs (L2/L3 ticket reduction).
 - Establish veritasvault.ai as the standard for mesh-native AI configuration.
@@ -157,14 +157,14 @@ environment parity.
 
 **Pain:** Submodules, multiple manual steps, repo drift.
 
-As a developer, I can install and sync AgentKit Forge in one minute using
+As a developer, I can install and sync Retort in one minute using
 npm/CLI.
 
 Acceptance criteria:
 
-- Clean install with a single command (`npm install -D agentkit-forge`).
+- Clean install with a single command (`npm install -D retort`).
 - Overlays auto-pulled from package; no submodule checkout required.
-- `npx agentkit-forge sync` produces identical outputs to the submodule flow.
+- `npx retort sync` produces identical outputs to the submodule flow.
 
 ### DevOps / Platform Owner
 
@@ -229,9 +229,9 @@ Acceptance criteria:
 #### Flow 1: CLI Onboarding (Developer)
 
 ```
-npm install -D agentkit-forge
-  → npx agentkit-forge init --repoName my-project
-  → npx agentkit-forge sync
+npm install -D retort
+  → npx retort init --repoName my-project
+  → npx retort sync
   → git add . && git commit
 ```
 
@@ -239,7 +239,7 @@ npm install -D agentkit-forge
 
 ```yaml
 # .github/workflows/agentkit-sync.yml
-- uses: org/agentkit-forge-action@v3
+- uses: org/retort-action@v3
   with:
     overlay: my-project
     version: '3.4.0'
@@ -249,7 +249,7 @@ npm install -D agentkit-forge
 #### Flow 3: UI Onboarding (Non-CLI User)
 
 ```
-npx agentkit-forge ui
+npx retort ui
   → Browser opens PWA at localhost:4827
   → Visual wizard: detect stack → select render targets → create overlay
   → Click "Sync" → review diff → apply
@@ -259,8 +259,8 @@ npx agentkit-forge ui
 
 | Step         | CLI / Automation          | UI Path                | Outcome                |
 | ------------ | ------------------------- | ---------------------- | ---------------------- |
-| Install      | `npm i -D agentkit-forge` | PWA onboarding wizard  | AgentKit Forge ready   |
-| Sync / init  | `npx agentkit-forge sync` | "Sync Now" in UI       | Overlays in place      |
+| Install      | `npm i -D retort` | PWA onboarding wizard  | Retort ready   |
+| Sync / init  | `npx retort sync` | "Sync Now" in UI       | Overlays in place      |
 | Overlay mgmt | CLI commands              | Dashboard editor       | Changes committed      |
 | Drift check  | GitHub Action step        | CI status in UI        | Drift flagged/cleared  |
 | Update       | `npm update` + sync       | "Apply/Rollback" in UI | State current/restored |
@@ -276,19 +276,19 @@ npx agentkit-forge ui
 - **Failed sync in CI:** CI job fails with actionable error message and diff
   summary; rollback queued if auto-commit mode is enabled.
 - **Partial update rollbacks:** Allow restoring last known good state via
-  `npm install agentkit-forge@previous-version` + sync, or one-click rollback in
+  `npm install retort@previous-version` + sync, or one-click rollback in
   UI with version history.
 
 ## Functional Requirements
 
 ### Distribution Channels
 
-- **npm package** — CLI and SDK bundled as `agentkit-forge`. Published to npm
+- **npm package** — CLI and SDK bundled as `retort`. Published to npm
   (and optionally private registries). Supports `--registry` flag for
   GitHub Packages / Artifactory.
-- **GitHub Action** — `org/agentkit-forge-action@v3`. Drift detection, overlay
+- **GitHub Action** — `org/retort-action@v3`. Drift detection, overlay
   validation, and optional auto-commit. Published to GitHub Actions marketplace.
-- **PWA UI** — launched via `npx agentkit-forge ui` on `localhost:4827`.
+- **PWA UI** — launched via `npx retort ui` on `localhost:4827`.
   Schema-driven overlay editor, sync dashboard, version manager, health report.
 
 ### Core Capabilities
@@ -306,11 +306,11 @@ npx agentkit-forge ui
 
 | Command                       | Description                                        |
 | ----------------------------- | -------------------------------------------------- |
-| `agentkit-forge init`         | Initialize overlays for a new consumer repo        |
-| `agentkit-forge sync`         | Regenerate outputs from current overlays and specs |
-| `agentkit-forge ui`           | Launch PWA UI on localhost:4827                    |
-| `agentkit-forge doctor`       | Health check — validate environment and config     |
-| `agentkit-forge overlay edit` | Open overlay in editor with schema validation      |
+| `retort init`         | Initialize overlays for a new consumer repo        |
+| `retort sync`         | Regenerate outputs from current overlays and specs |
+| `retort ui`           | Launch PWA UI on localhost:4827                    |
+| `retort doctor`       | Health check — validate environment and config     |
+| `retort overlay edit` | Open overlay in editor with schema validation      |
 
 ### UI Screens
 
@@ -353,7 +353,7 @@ npx agentkit-forge ui
 
 ### Required APIs
 
-- **CLI commands** — `agentkit-forge init`, `sync`, `ui`, `doctor`,
+- **CLI commands** — `retort init`, `sync`, `ui`, `doctor`,
   `overlay edit`.
 - **UI ↔ Engine API** — JSON-RPC bridge over local HTTP. The UI is a
   presentation layer only; all logic lives in the engine. Same API can be
@@ -385,22 +385,22 @@ npx agentkit-forge ui
 **CLI path:**
 
 ```bash
-npm install -D agentkit-forge        # or npm install -g agentkit-forge
-npx agentkit-forge init --repoName my-project
-npx agentkit-forge sync
+npm install -D retort        # or npm install -g retort
+npx retort init --repoName my-project
+npx retort sync
 ```
 
 **UI path:**
 
 ```bash
-npx agentkit-forge ui
+npx retort ui
 # Browser opens → visual wizard → detect stack → select tools → create overlay → sync
 ```
 
 **CI path:**
 
 ```yaml
-- uses: org/agentkit-forge-action@v3
+- uses: org/retort-action@v3
   with:
     overlay: my-project
     version: '3.4.0'
@@ -564,7 +564,7 @@ Minimal manual steps, rapid path to first agent deployed or registered:
 
 ### Competitive Analysis
 
-| Capability                | GitHub Copilot | Claude | Cursor | AgentKit Forge        |
+| Capability                | GitHub Copilot | Claude | Cursor | Retort        |
 | ------------------------- | -------------- | ------ | ------ | --------------------- |
 | Multi-tool overlay system | No             | No     | No     | **Yes**               |
 | PWA / UI-based editing    | No             | No     | No     | **Yes**               |
@@ -577,12 +577,12 @@ drift detection across AI tooling. This is a first-mover opportunity.
 ### Related Documents
 
 - [ADR-07: Delivery Strategy (Refined)](../architecture/decisions/07-delivery-strategy.md)
-- [ADR-01: Adopt AgentKit Forge](../architecture/decisions/01-adopt-agentkit-forge.md)
+- [ADR-01: Adopt Retort](../architecture/decisions/01-adopt-retort.md)
 - [ADR-03: Tooling Strategy](../architecture/decisions/03-tooling-strategy.md)
 - [Architecture Overview](../architecture/01_overview.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)
 - [PRD-007: Adopter Autoupdate](PRD-007-adopter-autoupdate.md) — follow-on CLI capability
   for keeping adopter repositories current with the latest forge version;
   builds on the npm/CLI delivery channel established by this PRD.
-  See also: [#196](https://github.com/phoenixvc/agentkit-forge/issues/196),
-  [#194](https://github.com/phoenixvc/agentkit-forge/issues/194).
+  See also: [#196](https://github.com/phoenixvc/retort/issues/196),
+  [#194](https://github.com/phoenixvc/retort/issues/194).

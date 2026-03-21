@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-AgentKit Forge has a well-structured CI/CD foundation with 8 GitHub Actions workflows, comprehensive branch governance, and a powerful spec-driven generation pipeline. However, there are **meaningful gaps between the CI/CD infrastructure and the agentic workforce it supports**. The workflows validate the _forge itself_ but don't yet generate CI/CD that exercises the full agent team model, and several hardening opportunities exist in the existing pipelines.
+Retort has a well-structured CI/CD foundation with 8 GitHub Actions workflows, comprehensive branch governance, and a powerful spec-driven generation pipeline. However, there are **meaningful gaps between the CI/CD infrastructure and the agentic workforce it supports**. The workflows validate the _forge itself_ but don't yet generate CI/CD that exercises the full agent team model, and several hardening opportunities exist in the existing pipelines.
 
 This review identifies **28 findings** organized into 4 categories:
 

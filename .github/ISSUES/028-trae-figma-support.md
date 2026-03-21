@@ -8,7 +8,7 @@
 
 ## Problem
 
-The screenshots show Figma-oriented MCP capability (`Figma AI Bridge`). AgentKit Forge does not yet define how design-tool integration should work across prompts, agents, workflows, and generated platform guidance.
+The screenshots show Figma-oriented MCP capability (`Figma AI Bridge`). Retort does not yet define how design-tool integration should work across prompts, agents, workflows, and generated platform guidance.
 
 This gap affects:
 

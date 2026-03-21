@@ -146,7 +146,7 @@ operational constraints on API-based models.
 
 ---
 
-## Implications for AgentKit Forge model guides
+## Implications for Retort model guides
 
 - The hybrid recommendation is already reflected in the 10 team guides:
   each guide has a primary and 1–2 cost-aware or context-specific

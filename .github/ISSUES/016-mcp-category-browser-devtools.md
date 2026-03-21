@@ -8,7 +8,7 @@
 
 ## Problem
 
-TRAE marketplace screenshots show browser-oriented MCP workflows such as Puppeteer and Chrome DevTools MCP. AgentKit Forge should decide how these fit into platform guidance, testing workflows, and security boundaries.
+TRAE marketplace screenshots show browser-oriented MCP workflows such as Puppeteer and Chrome DevTools MCP. Retort should decide how these fit into platform guidance, testing workflows, and security boundaries.
 
 ---
 
@@ -26,7 +26,7 @@ Evaluate support patterns for browser/devtools MCP servers, including:
 
 - [ ] Browser/devtools MCP category has a support recommendation
 - [ ] Security constraints are documented
-- [ ] Testing / debugging workflows are mapped to AgentKit commands or skills
+- [ ] Testing / debugging workflows are mapped to Retort commands or skills
 - [ ] First-class vs documented-only support is decided per candidate
 
 ---

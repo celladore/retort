@@ -1,6 +1,6 @@
-# Product Manager Guide to AgentKit Forge
+# Product Manager Guide to Retort
 
-A practical guide for using AgentKit Forge's orchestration system to manage
+A practical guide for using Retort's orchestration system to manage
 features from idea through to shipped code.
 
 ## Quick Start
@@ -27,7 +27,7 @@ features from idea through to shipped code.
 
 ## The Three PM Agents
 
-AgentKit Forge includes three PM-oriented agent personas that are loaded into
+Retort includes three PM-oriented agent personas that are loaded into
 relevant team commands:
 
 ### Product Manager

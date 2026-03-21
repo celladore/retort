@@ -67,7 +67,7 @@ These were review-stage findings caught before merge. No user impact. The drift 
 ## Lessons Learned
 
 1. **Sync-then-verify discipline**: Spec changes and sync output must be committed together. A CI drift check exists but wasn't catching this because it ran on the generated output dir, not the agent files.
-2. **Template protection hook awareness**: The `protect-templates.sh` PreToolUse hook blocks Edit/Write tools on `.agentkit/` paths. When working in the agentkit-forge repo itself (not an adopting repo), Bash `sed` is the workaround, but this is fragile and should be documented.
+2. **Template protection hook awareness**: The `protect-templates.sh` PreToolUse hook blocks Edit/Write tools on `.agentkit/` paths. When working in the retort repo itself (not an adopting repo), Bash `sed` is the workaround, but this is fragile and should be documented.
 3. **Step numbering cascades**: Handlebars conditional numbering creates a maintenance burden — every step after a conditional insert must also be conditional. Consider using ordered lists (`1.` repeated) in Markdown instead, which auto-number.
 
 ---

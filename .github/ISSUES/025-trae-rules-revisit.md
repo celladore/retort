@@ -8,7 +8,7 @@
 
 ## Problem
 
-TRAE exposes explicit rules behavior, and AgentKit Forge should revisit whether its current rule generation strategy best fits that environment.
+TRAE exposes explicit rules behavior, and Retort should revisit whether its current rule generation strategy best fits that environment.
 
 Reference:
 
@@ -39,6 +39,15 @@ Areas to revisit:
 - [ ] Simplification opportunities are documented
 - [ ] Platform-specific projection strategy is reviewed
 - [ ] Follow-up implementation tasks are identified if needed
+
+## Implementation Notes (2026-03-20)
+
+The `feat/kit-domain-selection-onboarding` branch introduces stack-based domain filtering
+(`filterDomainsByStack` in `template-utils.mjs`) which directly reduces rule noise: only
+domains relevant to the declared stack are generated. A TypeScript-only project now gets
+typescript + universal domains — not dotnet/rust/python/blockchain. This partially addresses
+the redundancy and platform noise concerns raised here. The TRAE-specific rule format audit
+remains outstanding.
 
 ---
 

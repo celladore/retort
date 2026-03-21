@@ -67,7 +67,7 @@ The `/infra-eval` command is now available to any project that sets `evaluation.
 
 1. **Handlebars conditional numbering is brittle**: When inserting a conditionally-numbered step in a Markdown ordered list, every subsequent step must also be conditionalized. This creates a maintenance cascade. A better pattern would be to use Markdown auto-numbering (all steps as `1.`) or to restructure the template to isolate conditional sections.
 
-2. **Template protection hook blocks the forge repo too**: The `protect-templates.sh` hook doesn't distinguish between "adopting repo" and "the agentkit-forge repo itself." When developing templates in the forge repo, the hook blocks Edit/Write tools, forcing the use of Bash `sed` as a workaround. This is by design (protects against accidental edits) but should be documented in the contributing guide.
+2. **Template protection hook blocks the forge repo too**: The `protect-templates.sh` hook doesn't distinguish between "adopting repo" and "the retort repo itself." When developing templates in the forge repo, the hook blocks Edit/Write tools, forcing the use of Bash `sed` as a workaround. This is by design (protects against accidental edits) but should be documented in the contributing guide.
 
 3. **Event schema must be centrally registered**: Defining a new event type in a command template without adding it to the orchestrator's enum creates a silent inconsistency. The orchestrator won't recognize the event. Consider adding a spec-level validation that cross-references event types across command templates.
 

@@ -1,4 +1,4 @@
-name: 'agentkit-forge CodeQL Config'
+name: 'retort CodeQL Config'
 
 paths:
   - .agentkit/engines/node/src

@@ -1,4 +1,4 @@
-# PRD-006: AgentKit Forge PWA/Desktop Visual Configuration
+# PRD-006: Retort PWA/Desktop Visual Configuration
 
 ## Status
 
@@ -6,11 +6,11 @@ Draft
 
 ## Module / Feature Name
 
-AgentKit Forge Visual Configuration PWA/Desktop Module
+Retort Visual Configuration PWA/Desktop Module
 
 ## Marketing Name
 
-AgentKit Forge Visual Editor (PWA/Desktop)
+Retort Visual Editor (PWA/Desktop)
 
 ## Platform / Mesh Layers
 
@@ -55,7 +55,7 @@ CLI/GitHub Action strategy per
 A schema-driven visual overlay/config editor and sync dashboard, deployable as a
 PWA or desktop app, that democratizes orchestration and delivers CLI parity and
 safety for the whole team. The UI is a presentation layer only — all logic lives
-in the agentkit-forge engine, communicated via a JSON-RPC bridge.
+in the retort engine, communicated via a JSON-RPC bridge.
 
 ## Problem Statement
 
@@ -111,7 +111,7 @@ can update or validate configuration.
 
 ### Business Goals
 
-- Expand agentkit-forge adoption in large organizations beyond the engineering
+- Expand retort adoption in large organizations beyond the engineering
   team.
 - Drive engagement from PMs, designers, and team leads (not just developers).
 - Reduce dev team support and onboarding burden by at least 70%.
@@ -219,7 +219,7 @@ identical sync outputs to CLI-created overlays.
 
 Acceptance criteria:
 
-- UI sync output is byte-identical to `npx agentkit-forge sync` output.
+- UI sync output is byte-identical to `npx retort sync` output.
 - "Show YAML" view displays the exact YAML that will be written.
 - All CLI capabilities for overlay management are accessible in the UI.
 
@@ -240,7 +240,7 @@ Acceptance criteria:
 
 ```
 1. Launch PWA/Desktop App
-   └─ PWA: `npx agentkit-forge ui` → browser opens localhost:4827
+   └─ PWA: `npx retort ui` → browser opens localhost:4827
    └─ Desktop: open Tauri app → select repo folder
 
 2. Select or connect to a repository
@@ -266,7 +266,7 @@ Acceptance criteria:
 
 | Step           | PWA Path                | Desktop Path            | Outcome         |
 | -------------- | ----------------------- | ----------------------- | --------------- |
-| Launch         | `npx agentkit-forge ui` | Open app                | UI ready        |
+| Launch         | `npx retort ui` | Open app                | UI ready        |
 | Connect repo   | Auto-detect from CWD    | "Open Repo" file picker | Repo linked     |
 | Create overlay | Wizard form             | Wizard form             | Overlay created |
 | Edit overlay   | Schema-driven editor    | Schema-driven editor    | Changes staged  |
@@ -294,12 +294,12 @@ Acceptance criteria:
 ### Application Shell
 
 - **PWA (primary):** Single-page application served by
-  `npx agentkit-forge ui` on `localhost:4827`. Lightweight framework (Preact,
+  `npx retort ui` on `localhost:4827`. Lightweight framework (Preact,
   Svelte, or plain web components). Service worker for offline caching. Runs in
   any modern browser.
 - **Tauri desktop (follow-up):** Wraps the same web UI. ~5 MB binary (vs.
   ~150 MB for Electron). Built-in auto-updater. Distributed via GitHub Releases,
-  Homebrew (`brew install agentkit-forge`), or winget.
+  Homebrew (`brew install retort`), or winget.
 
 ### Overlay CRUD
 
@@ -324,7 +324,7 @@ Acceptance criteria:
 
 ### Engine Communication
 
-- JSON-RPC bridge over local HTTP to the agentkit-forge engine.
+- JSON-RPC bridge over local HTTP to the retort engine.
 - No direct file system access from the browser — all mutations go through the
   engine API.
 - Same API contract consumed by CLI internally, ensuring parity.
@@ -383,10 +383,10 @@ Acceptance criteria:
 | --------------------- | --------------------------------------------------------- |
 | Presentation / UI     | Orchestration interface for `.agentkit/spec` overlays     |
 | JSON-RPC bridge       | Communication layer between UI and engine                 |
-| agentkit-forge engine | All sync, validation, and output logic (shared with CLI)  |
+| retort engine | All sync, validation, and output logic (shared with CLI)  |
 | Overlay directory     | `.agentkit/overlays/` — source of truth persisted in repo |
 
-State manipulations are routed through the agentkit-forge sync engine. The UI
+State manipulations are routed through the retort sync engine. The UI
 never bypasses the engine to write files directly — no runtime-layer or team
 bypass is possible.
 
@@ -421,7 +421,7 @@ bypass is possible.
 **PWA:**
 
 ```bash
-npx agentkit-forge ui
+npx retort ui
 # Browser opens → guided repo selection → scan overlays → wizard
 ```
 
@@ -530,7 +530,7 @@ npx agentkit-forge ui
 
 ### Technical Constraints
 
-- Node.js / agentkit-forge CLI required for validation and sync (engine is not
+- Node.js / retort CLI required for validation and sync (engine is not
   duplicated in the UI).
 - Tauri desktop app has full file system access; browser PWA is limited by
   browser security model (all FS operations via engine API).
@@ -549,7 +549,7 @@ npx agentkit-forge ui
 
 | Dependency                               | Owner            | Risk Level     |
 | ---------------------------------------- | ---------------- | -------------- |
-| agentkit-forge CLI/engine (JSON-RPC API) | Engineering Lead | Low (in-house) |
+| retort CLI/engine (JSON-RPC API) | Engineering Lead | Low (in-house) |
 | UX/design collaboration                  | UX/UI Designer   | Medium         |
 | QA test coverage (GUI flows, parity)     | QA Lead          | Medium         |
 | Pilot users for early feedback           | Product Owner    | Medium         |
@@ -610,7 +610,7 @@ npx agentkit-forge ui
 
 ### Competitive Analysis
 
-| Capability                     | GitHub Copilot | Claude | Cursor | AgentKit Forge |
+| Capability                     | GitHub Copilot | Claude | Cursor | Retort |
 | ------------------------------ | -------------- | ------ | ------ | -------------- |
 | Multi-tool overlay system      | No             | No     | No     | **Yes**        |
 | Visual GUI overlay editing     | No             | No     | No     | **Yes**        |
@@ -628,5 +628,5 @@ first-mover opportunity for non-developer personas.
   parent PRD covering the full hybrid delivery strategy
 - [ADR-07: Delivery Strategy (Refined)](../architecture/decisions/07-delivery-strategy.md) —
   architectural decision record
-- [ADR-01: Adopt AgentKit Forge](../architecture/decisions/01-adopt-agentkit-forge.md)
+- [ADR-01: Adopt Retort](../architecture/decisions/01-adopt-retort.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)

@@ -8,7 +8,7 @@
 
 ## Problem
 
-AgentKit Forge currently focuses mostly on editor and agent-runtime targets, but there is a separate class of tools that act as AI aggregators or orchestration hubs.
+Retort currently focuses mostly on editor and agent-runtime targets, but there is a separate class of tools that act as AI aggregators or orchestration hubs.
 
 Example requested category:
 

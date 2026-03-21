@@ -8,7 +8,7 @@
 
 ## Problem
 
-TRAE documents automated context compaction, but AgentKit Forge does not yet define how its generated prompts, workflows, and orchestration model should behave when context is compacted automatically.
+TRAE documents automated context compaction, but Retort does not yet define how its generated prompts, workflows, and orchestration model should behave when context is compacted automatically.
 
 Reference:
 

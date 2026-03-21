@@ -1,15 +1,26 @@
 # =============================================================================
-# commands.yaml — Command definitions for agentkit-forge
-# Canonical source of truth for agentkit-forge
+# commands.yaml — Command definitions for retort
+# Canonical source of truth for retort
 # Version: 0.1.0
 # =============================================================================
 # Each command defines: name, description, type, flags, and allowed-tools.
-# Types: workflow (multi-step orchestration), team (team-scoped), utility (single action)
+# Types:
+#   workflow  — multi-step orchestration commands (e.g. /orchestrate, /plan)
+#   team      — team-scoped delegation commands (e.g. /team-backend)
+#   utility   — single-action tools (e.g. /build, /test)
+#   framework — Retort framework management commands (e.g. /sync, /init)
+#               Framework commands are always available via the CLI regardless
+#               of feature flags.
 #
 # Optional field: requiredFeature
 #   If set, this command is only generated when the specified feature is enabled.
 #   If null or omitted, the command is always generated.
 #   Example: requiredFeature: quality-gates  → only generated if quality-gates is enabled.
+#
+# NOTE: The following CLI commands are framework-internal and managed separately.
+#   They are listed here for spec completeness but are not generated as slash
+#   command files (they are CLI subcommands of agentkit / pnpm ak:*):
+#   add, remove, list, tasks, delegate, spec-validate
 # =============================================================================
 
 commands:
@@ -1481,17 +1492,101 @@ commands:
       - Read
       - Glob
 
-  - name: sync
-    type: utility
+  # ===========================================================================
+  # Framework Commands — Retort framework management
+  # ===========================================================================
+
+  - name: init
+    type: framework
     description: >
-      Regenerates all AI tool configurations from the AgentKit Forge spec.
+      Initialise the current repository as a Retort project. Runs the
+      interactive setup wizard to detect the tech stack, select language kits,
+      choose AI tools, and generate the initial project.yaml and overlay
+      configuration. Supports --dry-run to preview without writing.
+    prompt: |
+      ## Role
+
+      You are the **Init Agent**. Guide users through initialising a new Retort project in the current repository.
+
+      ## How to Initialise
+
+      Run the init command from the repository root:
+
+      ```bash
+      node .agentkit/engines/node/src/cli.mjs init
+      ```
+
+      Or if pnpm is available:
+
+      ```bash
+      pnpm -C .agentkit agentkit:init
+      ```
+
+      ## Flags
+
+      | Flag | Effect |
+      |------|--------|
+      | `--dry-run` | Show what would be generated without writing any files |
+      | `--non-interactive` | Skip prompts, use auto-detected defaults |
+      | `--preset <name>` | Use a preset: minimal, full, team, infra |
+      | `--force` | Overwrite existing overlay configuration |
+      | `--repoName <name>` | Override the detected repository name |
+
+      ## Kit Selection
+
+      During interactive init, Retort detects your tech stack and shows which
+      language kits will be activated (typescript, dotnet, rust, python, blockchain).
+      Universal kits (security, testing, git-workflow, documentation, ci-cd,
+      dependency-management, agent-conduct) are always included.
+
+      Optional kits (iac, finops, ai-cost-ops) are presented for explicit opt-in.
+
+      ## Post-Init
+
+      1. Review the generated `spec/project.yaml` — fill in any `null` fields
+      2. Run `/sync` to regenerate all AI tool configurations
+      3. Run `/validate` to verify generated outputs are well-formed
+      4. Commit both the spec and generated outputs together
+    flags:
+      - name: --dry-run
+        description: 'Preview what would be generated without writing any files'
+        type: boolean
+        default: false
+      - name: --non-interactive
+        description: 'Skip prompts, use auto-detected defaults'
+        type: boolean
+        default: false
+      - name: --preset
+        description: 'Apply a named preset: minimal | full | team | infra'
+        type: string
+        default: null
+        required: false
+        enum: [minimal, full, team, infra]
+      - name: --force
+        description: 'Overwrite existing overlay configuration'
+        type: boolean
+        default: false
+      - name: --repoName
+        description: 'Override the auto-detected repository name'
+        type: string
+        default: null
+        required: false
+    allowed-tools:
+      - Read
+      - Write
+      - Bash
+
+  - name: sync
+    type: framework
+    description: >
+      Regenerates all AI tool configurations from the Retort spec.
       Renders templates for every active render target (Claude, Cursor, Copilot,
       Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files
       in the repository.
     prompt: |
       ## Role
 
-      You are the **Sync Agent**. Regenerate all AI tool configurations from the AgentKit Forge spec files.
+      You are the **Sync Agent**. Regenerate all AI tool configurations from the Retort spec files.
 
       ## How to Sync
 
@@ -1526,7 +1621,7 @@ commands:
 
       - After modifying any file in `.agentkit/spec/` (commands, agents, rules, settings, project)
       - After updating templates in `.agentkit/templates/`
-      - After upgrading AgentKit Forge to a new version
+      - After upgrading Retort to a new version
       - When CI reports "generated outputs are out of sync with sources"
 
       ## Platform Note
@@ -1896,6 +1991,106 @@ commands:
       - Glob
       - Grep
       - Bash
+
+  - name: cicd-optimize
+    type: workflow
+    description: >
+      CI/CD pipeline and local hook optimizer. Audits GitHub Actions workflows,
+      pre-commit/stop hooks, and test configurations for speed bottlenecks.
+      Identifies caching gaps, sequential jobs that could parallelize, missing
+      path filters, redundant installs, and slow hook steps. Produces a
+      prioritized list of improvements with estimated time savings per fix.
+    prompt: |
+      ## Role
+
+      You are the **CI/CD Optimization Agent**. Analyse this project's CI/CD pipelines and local hooks for speed bottlenecks. Produce a prioritized report with concrete, copy-paste-ready fixes.
+
+      ## Step 1 — Inventory
+
+      Collect all CI/CD surface area:
+      - `.github/workflows/*.yml` — list each workflow, its triggers, jobs, and steps
+      - `.claude/hooks/` — list each hook file and its purpose
+      - `package.json` scripts: `lint`, `test`, `build`, `typecheck`
+      - Test framework config: `vitest.config.*`, `jest.config.*`, `pytest.ini`, `Cargo.toml [profile.test]`
+      - Lock files: `pnpm-lock.yaml`, `Cargo.lock`, `poetry.lock`
+
+      ## Step 2 — Bottleneck Detection
+
+      For each workflow, check:
+
+      ### Caching
+      - [ ] Node modules cached? (`actions/cache` with `node_modules` or `pnpm store`)
+      - [ ] Cargo registry cached? (`~/.cargo/registry` and `target/`)
+      - [ ] pip/poetry cached? (`~/.cache/pip`)
+      - [ ] Docker layer cache used? (`cache-from: type=gha`)
+
+      ### Parallelization
+      - [ ] Jobs that depend on each other but don't need to — should they be parallel?
+      - [ ] Test suites that could use matrix strategy or `--pool` (vitest), `pytest-xdist`, `cargo nextest`
+      - [ ] Lint and typecheck run sequentially when they're independent
+
+      ### Trigger efficiency
+      - [ ] Workflows triggered on `push` to all branches — should use `paths:` filters
+      - [ ] PR workflows trigger on `push` AND `pull_request` — often redundant
+      - [ ] Scheduled workflows running more frequently than needed
+
+      ### Install efficiency
+      - [ ] `npm install` / `pnpm install` without `--frozen-lockfile` (slower)
+      - [ ] Install steps duplicated across jobs (should use artifacts or caching)
+      - [ ] `node_modules` copied between jobs instead of restored from cache
+
+      ### Hook efficiency
+      - [ ] Stop hook runs tests or full builds (should be lint-only with file-change gating)
+      - [ ] Pre-commit hook runs expensive operations without caching
+      - [ ] Hooks run regardless of which files changed
+
+      ## Step 3 — Test Suite Speed
+
+      Check for parallelization opportunities:
+      - vitest: `--pool=threads` or `--pool=forks`, `--reporter=verbose` adding noise
+      - pytest: `pytest-xdist` (`-n auto`), test isolation issues
+      - cargo: `cargo nextest` (2-3x faster than `cargo test`)
+      - jest: `--maxWorkers` configuration
+
+      ## Step 4 — Report
+
+      Produce a table sorted by estimated time savings (highest first):
+
+      | # | Area | Issue | Fix | Est. saving |
+      |---|------|-------|-----|-------------|
+      | 1 | ... | ... | ... | ~Xs per run |
+
+      Then provide **Ready-to-apply fixes** — code blocks for each high-impact change, in order. For workflow changes, show the exact YAML diff. For hook changes, show the exact shell change. For config changes, show the file and the new content.
+
+      ## Rules
+
+      1. Only suggest changes with clear, measurable benefit. Skip micro-optimisations.
+      2. Preserve correctness — never suggest removing a cache that would break reproducibility.
+      3. Flag any changes that require secrets or environment variables.
+      4. If a fix requires a new dependency (e.g. cargo-nextest), note the install command.
+    flags:
+      - name: --focus
+        description: 'Scope: all, workflows, hooks, tests, or deps'
+        type: string
+        default: 'all'
+        required: false
+        enum: [all, workflows, hooks, tests, deps]
+      - name: --apply
+        description: 'Apply safe, low-risk fixes automatically (caching, frozen lockfile flags)'
+        type: boolean
+        default: false
+      - name: --output
+        description: 'Output format: markdown or json'
+        type: string
+        default: 'markdown'
+        required: false
+    allowed-tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+      - Edit
+      - Write
 
   - name: analyze-agents
     type: utility

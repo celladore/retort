@@ -127,4 +127,4 @@ can pass `--label` for additional labels.
 - [docs/history/issues/README.md](../../history/issues/README.md)
 - [docs/history/README.md](../../history/README.md)
 - [scripts/sync-issues.sh](../../../scripts/sync-issues.sh)
-- [ADR-01: Adopt AgentKit Forge](./01-adopt-agentkit-forge.md)
+- [ADR-01: Adopt Retort](./01-adopt-retort.md)

@@ -3,7 +3,7 @@
 **Completed**: 2026-03-01
 **Duration**: Multi-session merge and validation pass
 **Status**: ✅ **Near completion — verification pending**
-**PR**: [#72](https://github.com/phoenixvc/agentkit-forge/pull/72) ⚡ optimize sync command with async I/O and concurrency
+**PR**: [#72](https://github.com/phoenixvc/retort/pull/72) ⚡ optimize sync command with async I/O and concurrency
 
 ## Overview
 
@@ -88,7 +88,7 @@ Merge was completed without unresolved conflicts, and critical paths were valida
 ## Related Documentation
 
 - **Merge Matrix**: `MERGE_RESOLUTION_MATRIX.md`
-- **PR**: <https://github.com/phoenixvc/agentkit-forge/pull/72>
+- **PR**: <https://github.com/phoenixvc/retort/pull/72>
 
 ---
 

@@ -23,7 +23,7 @@ These are close enough to core coding-agent/editor workflows that they deserve e
 For each platform, evaluate:
 
 - platform type and target model
-- current overlap with existing AgentKit outputs
+- current overlap with existing Retort outputs
 - rules/skills/agent/workflow fit
 - adapter/export opportunities
 - first-class vs docs-only support recommendation

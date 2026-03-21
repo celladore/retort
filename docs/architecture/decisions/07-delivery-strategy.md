@@ -1,4 +1,4 @@
-# ADR-07: Delivery Strategy (Refined) — AgentKit Forge Distribution
+# ADR-07: Delivery Strategy (Refined) — Retort Distribution
 
 ## Status
 
@@ -10,7 +10,7 @@
 
 ## Context
 
-AgentKit Forge, a core platform for deploying mesh-native agents at scale, faces rising friction in delivering updates, onboarding new customers, and supporting diverse consumption models. Historically, Forge delivery methods lagged industry and developer best practices, relying on manual binary distribution and ad hoc integrations. This produced pain for both CLI-first engineers and UI-oriented operators, delayed onboarding, and created avoidable support overhead amid growing cloud-native adoption.
+Retort, a core platform for deploying mesh-native agents at scale, faces rising friction in delivering updates, onboarding new customers, and supporting diverse consumption models. Historically, Forge delivery methods lagged industry and developer best practices, relying on manual binary distribution and ad hoc integrations. This produced pain for both CLI-first engineers and UI-oriented operators, delayed onboarding, and created avoidable support overhead amid growing cloud-native adoption.
 
 **Executive Summary:**
 Market analysis, customer interviews, and operational metrics all highlight these delivery inefficiencies as blockers for broader adoption and hamper ecosystem integration efforts. To support customer GTM targets for Q3–Q4 2024—especially for mid-market and enterprise cohorts—Forge must move to a modern, multi-modal distribution model. This ADR formalizes the shift to three distribution mechanisms: npm (modern package distribution), GitHub Actions (automation-centric CI/CD), and PWA (progressive web onboarding), providing consistency, reliability, and seamless migration for varied user segments.
@@ -22,7 +22,7 @@ The forge repository is added as a git submodule at `.agentkit/`. All specs, tem
 **How it works today:**
 
 ```bash
-git submodule add https://github.com/org/agentkit-forge.git .agentkit
+git submodule add https://github.com/org/retort.git .agentkit
 pnpm -C .agentkit install
 node .agentkit/engines/node/src/cli.mjs init --repoName my-project
 node .agentkit/engines/node/src/cli.mjs sync
@@ -30,14 +30,14 @@ node .agentkit/engines/node/src/cli.mjs sync
 
 ### Option B: npm Package with CLI
 
-Publish agentkit-forge as an npm package (`agentkit-forge`). The consumer installs it as a devDependency. The CLI is exposed via `npx agentkit-forge <command>`. Specs and templates ship inside the package. Overlays remain in the consumer repo.
+Publish retort as an npm package (`retort`). The consumer installs it as a devDependency. The CLI is exposed via `npx retort <command>`. Specs and templates ship inside the package. Overlays remain in the consumer repo.
 
 **Consumer workflow:**
 
 ```bash
-npm install -D agentkit-forge
-npx agentkit-forge init --repoName my-project
-npx agentkit-forge sync
+npm install -D retort
+npx retort init --repoName my-project
+npx retort sync
 ```
 
 **Overlay location:** `.agentkit/overlays/<repoName>/` (same as today, but the engine and templates come from `node_modules/`).
@@ -49,8 +49,8 @@ Publish a lightweight CLI tool that fetches templates and specs on demand from a
 **Consumer workflow:**
 
 ```bash
-npx agentkit-forge@latest init --repoName my-project
-npx agentkit-forge@latest sync
+npx retort@latest init --repoName my-project
+npx retort@latest sync
 ```
 
 **Key difference from Option B:** no `devDependency` entry, no `node_modules/` footprint. The tool is ephemeral — invoked when needed, not installed permanently.
@@ -63,7 +63,7 @@ Deliver the forge as a GitHub Action. Sync runs in CI on push/PR, and generated 
 
 ```yaml
 # .github/workflows/agentkit-sync.yml
-- uses: org/agentkit-forge-action@v3
+- uses: org/retort-action@v3
   with:
     overlay: my-project
     version: '3.4.0'
@@ -71,23 +71,23 @@ Deliver the forge as a GitHub Action. Sync runs in CI on push/PR, and generated 
 
 ### Option E: Template Repository + Upstream Sync
 
-Publish agentkit-forge as a GitHub template repository. Consumers create repos from the template. Updates are pulled via `git merge` from the upstream template remote.
+Publish retort as a GitHub template repository. Consumers create repos from the template. Updates are pulled via `git merge` from the upstream template remote.
 
 **Consumer workflow:**
 
 ```bash
 # Initial
-gh repo create my-project --template org/agentkit-forge-template
+gh repo create my-project --template org/retort-template
 
 # Update
-git remote add forge-upstream https://github.com/org/agentkit-forge-template.git
+git remote add forge-upstream https://github.com/org/retort-template.git
 git fetch forge-upstream
 git merge forge-upstream/main --allow-unrelated-histories
 ```
 
 ### Option F: Hybrid — npm Package + GitHub Action
 
-Combine Options B and D. The npm package handles local development (`npx agentkit-forge sync`). The GitHub Action handles CI enforcement (drift detection, auto-sync on version bumps). Both share the same engine and templates from the npm package.
+Combine Options B and D. The npm package handles local development (`npx retort sync`). The GitHub Action handles CI enforcement (drift detection, auto-sync on version bumps). Both share the same engine and templates from the npm package.
 
 ### Option G: PWA / Lightweight Desktop UI
 
@@ -107,7 +107,7 @@ Wrap the forge engine in a small UI shell — either a Progressive Web App (serv
 │  │ Manager   │  │ (add/remove)   │  │
 │  └───────────┘  └────────────────┘  │
 ├─────────────────────────────────────┤
-│  agentkit-forge engine (npm pkg)    │
+│  retort engine (npm pkg)    │
 │  specs ─► templates ─► outputs      │
 └─────────────────────────────────────┘
 ```
@@ -115,7 +115,7 @@ Wrap the forge engine in a small UI shell — either a Progressive Web App (serv
 **Consumer workflow (PWA):**
 
 ```bash
-npx agentkit-forge ui              # launches localhost:4827
+npx retort ui              # launches localhost:4827
 # Browser opens → visual wizard for init, overlay editing, sync
 ```
 
@@ -123,8 +123,8 @@ npx agentkit-forge ui              # launches localhost:4827
 
 ```bash
 # Download from releases page or:
-brew install agentkit-forge         # macOS
-winget install agentkit-forge       # Windows
+brew install retort         # macOS
+winget install retort       # Windows
 # Open app → point at repo → visual init + sync
 ```
 
@@ -241,7 +241,7 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 
 ### CLI-First Personas
 
-**Install AgentKit Forge via npm:**
+**Install Retort via npm:**
 | Layer | Audience | Problem it solves |
 | -------------------- | ---------- | ------------------------------------------------------ |
 | **npm package** | Developers | Local sync, version pinning, offline support |
@@ -256,10 +256,10 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
    - `src/` — CLI entry point and engine (currently `engines/node/src/`)
    - `templates/` — all Mustache templates
    - `spec/` — canonical YAML specs
-   - `bin/agentkit-forge` — CLI binary entry point
+   - `bin/retort` — CLI binary entry point
 2. **Add `package.json`** with:
-   - `"name": "agentkit-forge"`
-   - `"bin": { "agentkit-forge": "./bin/agentkit-forge" }`
+   - `"name": "retort"`
+   - `"bin": { "retort": "./bin/retort" }`
    - `"files": ["src/", "templates/", "spec/", "bin/"]`
 3. **Update the sync engine** to resolve templates/specs from the package installation path (`import.meta.resolve` or `require.resolve`) instead of relative `../../` paths.
 4. **Preserve overlay location** at `.agentkit/overlays/<repoName>/` in the consumer repo — this directory is the only forge artifact that lives in the consumer repo.
@@ -269,7 +269,7 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 
 1. **Create `action.yml`** that:
    - Installs the npm package at the specified version.
-   - Runs `agentkit-forge sync` with the consumer's overlay.
+   - Runs `retort sync` with the consumer's overlay.
    - Compares generated outputs against committed files (drift detection).
    - Fails the check if drift is detected (with a diff summary).
 2. **Add an optional auto-commit mode** for repos that want CI to keep outputs in sync automatically.
@@ -277,7 +277,7 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 
 #### Phase 3 — Migration (weeks 5–7)
 
-1. **Write a migration script** (`agentkit-forge migrate-from-submodule`) that:
+1. **Write a migration script** (`retort migrate-from-submodule`) that:
    - Reads the current overlay from `.agentkit/overlays/`.
    - Removes the git submodule.
    - Installs the npm package.
@@ -288,7 +288,7 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 #### Phase 4 — PWA / Desktop UI (weeks 7–12)
 
 1. **Choose the shell framework:**
-   - **PWA (recommended first)** — lower build/distribution overhead. Ship as `npx agentkit-forge ui` which starts a local server on `localhost:4827`. Uses a lightweight framework (Preact, Svelte, or plain web components). Runs in any browser. No app store, no code signing, no platform-specific builds.
+   - **PWA (recommended first)** — lower build/distribution overhead. Ship as `npx retort ui` which starts a local server on `localhost:4827`. Uses a lightweight framework (Preact, Svelte, or plain web components). Runs in any browser. No app store, no code signing, no platform-specific builds.
    - **Tauri (follow-up)** — for teams that want a native app experience. Wraps the same web UI. Smaller binary than Electron (~5 MB vs ~150 MB). Auto-updater built in. Distribute via GitHub Releases, Homebrew, or winget.
 2. **Core UI screens:**
    - **Init wizard** — repo name, tech stack detection (from `discover`), render target selection via checkboxes, overlay creation.
@@ -298,8 +298,8 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
    - **Health report** — visual rendering of `doctor` and `healthcheck` output. Red/amber/green status per check.
 3. **API boundary** — the UI communicates with the forge engine via a thin JSON-RPC or REST layer over the local server. No direct file system access from the browser. The same API can be consumed by IDE extensions later.
 4. **Distribution:**
-   - PWA: `npx agentkit-forge ui` (zero install, opens browser).
-   - Tauri: GitHub Releases with `brew install agentkit-forge` / `winget install agentkit-forge`.
+   - PWA: `npx retort ui` (zero install, opens browser).
+   - Tauri: GitHub Releases with `brew install retort` / `winget install retort`.
    - Both auto-update when the underlying npm package updates.
 
 ### Consumer Experience After Migration
@@ -307,7 +307,7 @@ All legacy/manual mechanisms to be deprecated by end of Q3 2024.
 **Developer (CLI-first):**
 
 ```bash
-npm install -g agentkit-forge
+npm install -g retort
 ```
 
 - Immediate CLI and SDK access with autoupdate support
@@ -329,14 +329,14 @@ Day-zero onboarding: minimal manual steps, rapid path to first agent deployed or
 **Non-developer / visual preference (UI):**
 
 ```bash
-npx agentkit-forge ui
+npx retort ui
 # Browser opens → visual wizard → click through init → toggle tools → sync
 ```
 
 **Or with the desktop app:**
 
 ```
-1. Open AgentKit Forge app
+1. Open Retort app
 2. Click "Open Repo" → select project folder
 3. Visual wizard detects stack, suggests render targets
 4. Click "Sync" → see diff of generated files
@@ -384,7 +384,7 @@ Adopting the Hybrid model unlocks growth and developer satisfaction, at the cost
 
 ## References
 
-- AgentKit Forge Architectural Overview (Doc A1-Overview.pdf)
+- Retort Architectural Overview (Doc A1-Overview.pdf)
 - CI/CD Integration Guide
 - Ecosystem Compatibility Matrix
 - Internal Security and Audit Policy
@@ -393,7 +393,7 @@ Adopting the Hybrid model unlocks growth and developer satisfaction, at the cost
 - [PRD-007: Adopter Autoupdate](../../product/PRD-007-adopter-autoupdate.md) — follow-up capability
   building on the npm CLI distribution channel defined in this ADR; specifically the "Immediate CLI
   and SDK access with autoupdate support" requirement from the Consumer Experience section.
-- [#196: adoption/startup-hooks: enforce required CLI toolchain availability](https://github.com/phoenixvc/agentkit-forge/issues/196)
+- [#196: adoption/startup-hooks: enforce required CLI toolchain availability](https://github.com/phoenixvc/retort/issues/196)
   — prerequisite for the autoupdate preflight checks.
-- [#194: governance: enforce agentkit sync pre-PR for adopters](https://github.com/phoenixvc/agentkit-forge/issues/194)
+- [#194: governance: enforce agentkit sync pre-PR for adopters](https://github.com/phoenixvc/retort/issues/194)
   — sync enforcement gate that autoupdate must satisfy.

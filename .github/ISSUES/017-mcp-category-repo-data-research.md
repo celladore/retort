@@ -8,7 +8,7 @@
 
 ## Problem
 
-The TRAE marketplace screenshots show strong coverage across repository, database, and research-oriented MCP servers. AgentKit Forge needs a deliberate support position for these categories rather than ad hoc adoption.
+The TRAE marketplace screenshots show strong coverage across repository, database, and research-oriented MCP servers. Retort needs a deliberate support position for these categories rather than ad hoc adoption.
 
 Candidate examples visible across screenshots and request context include:
 
@@ -35,7 +35,7 @@ This issue should identify which category members deserve separate first-class f
 ## Acceptance Criteria
 
 - [ ] Repo/data/research MCP categories have support recommendations
-- [ ] Existing AgentKit capabilities are compared against marketplace MCP overlap
+- [ ] Existing Retort capabilities are compared against marketplace MCP overlap
 - [ ] High-value servers are identified for first-class support
 - [ ] Documentation-only vs generated-config support is decided where practical
 

@@ -29,7 +29,7 @@ Adopt the `[Category] Description` pattern for all workflow `name:` fields. This
 | -------------------------------- | -------------------------- | ------------------------------------- | ---------- |
 | `ci.yml`                         | `CI`                       | `[CI] Test & Validate`                | CI         |
 | `branch-protection.yml`          | `Branch Protection`        | `[Governance] Branch Rules`           | Governance |
-| `block-agentkit-changes.yml`     | `block-agentkit-changes`   | `[Governance] Block AgentKit Changes` | Governance |
+| `block-agentkit-changes.yml`     | `block-agentkit-changes`   | `[Governance] Block Retort Changes` | Governance |
 | `template-protection.yml`        | `Template Protection`      | `[Framework] Template Protection`     | Framework  |
 | `codeql.yml`                     | `CodeQL`                   | `[Security] CodeQL Analysis`          | Security   |
 | `semgrep.yml`                    | `Semgrep (Advisory)`       | `[Security] Semgrep Scan`             | Security   |
@@ -45,7 +45,7 @@ Renaming workflows changes the status check names used by branch protection. All
    - `"CI / test (ubuntu-latest, 24)"` → `"[CI] Test & Validate / test (ubuntu-latest, 24)"`
    - `"CI / validate"` → `"[CI] Test & Validate / validate"`
    - `"Branch Protection / branch-rules"` → `"[Governance] Branch Rules / branch-rules"`
-   - `"block-agentkit-changes / check_agentkit_changes"` → `"[Governance] Block AgentKit Changes / check-agentkit-changes"`
+   - `"block-agentkit-changes / check_agentkit_changes"` → `"[Governance] Block Retort Changes / check-agentkit-changes"`
 
 2. **`.agentkit/templates/github/scripts/setup-branch-protection.sh`** — update the generated template's `contexts` array similarly
 
@@ -175,7 +175,7 @@ Update the sync engine to generate `a2a-config.json` agent capabilities from `te
 Extract the repeated pnpm + Node + install pattern into a reusable composite action:
 
 ```yaml
-name: Setup AgentKit
+name: Setup Retort
 description: Install pnpm, Node.js, and agentkit dependencies
 inputs:
   node-version:

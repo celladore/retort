@@ -1,6 +1,6 @@
 # Code Quality Assessment: Refactoring, SOLID, DRY, Complexity & Class Size
 
-> Comprehensive analysis of code quality practices in the agentkit-forge repository,
+> Comprehensive analysis of code quality practices in the retort repository,
 > with language-specific baselines and actionable integration recommendations.
 
 ---
@@ -18,7 +18,7 @@
 
 ## 1. Executive Summary
 
-AgentKit Forge is a Node.js (ESM) build-time framework that generates AI-tool
+Retort is a Node.js (ESM) build-time framework that generates AI-tool
 configurations from YAML specs. The codebase is **well-structured** with strong
 foundations: comprehensive test coverage (23 test files for 24 source modules),
 CI/CD with drift checks, conventional commits, and an established rules system.
@@ -160,11 +160,11 @@ The 30-second test timeout is a symptom of this coupling.
 
 ## 3. Language & Stack-Specific Baselines
 
-AgentKit Forge's `teams.yaml` defines four tech stacks: **Node.js (JavaScript/TypeScript)**, **.NET (C#)**, **Rust**, and **Python**. The engine itself is pure JavaScript (ESM). Below are research-backed baselines for each.
+Retort's `teams.yaml` defines four tech stacks: **Node.js (JavaScript/TypeScript)**, **.NET (C#)**, **Rust**, and **Python**. The engine itself is pure JavaScript (ESM). Below are research-backed baselines for each.
 
 ### 3.1 JavaScript / TypeScript (Node.js)
 
-This is the **primary language** of the agentkit-forge engine.
+This is the **primary language** of the retort engine.
 
 #### File & Class Size Targets
 
@@ -662,7 +662,7 @@ provides unified dashboards with:
 Configuration via `sonar-project.properties`:
 
 ```properties
-sonar.projectKey=agentkit-forge
+sonar.projectKey=retort
 sonar.sources=.agentkit/engines/node/src
 sonar.tests=.agentkit/engines/node/src/__tests__
 sonar.javascript.lcov.reportPaths=.agentkit/coverage/lcov.info

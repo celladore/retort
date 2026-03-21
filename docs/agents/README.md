@@ -1,6 +1,6 @@
 # Agents Documentation
 
-This category catalogs all agent personas, roles, and team mappings for AgentKit Forge. See:
+This category catalogs all agent personas, roles, and team mappings for Retort. See:
 
 - [catalog.md](catalog.md)
 

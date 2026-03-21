@@ -1,7 +1,7 @@
 # Model Quirks Analysis
 
 **Last Updated:** 2026-02-26  
-**Scope:** Systematic exploration of model-specific quirks for the AgentKit decision engine  
+**Scope:** Systematic exploration of model-specific quirks for the Retort decision engine  
 **Purpose:** Enhance the "quirks" scoring dimension with specific, actionable model behaviors
 
 ## Overview

@@ -1,6 +1,6 @@
 # Brand & Theming Guide
 
-This guide explains how AgentKit Forge generates editor themes and design tokens
+This guide explains how Retort generates editor themes and design tokens
 from the brand specification.
 
 ## Brand Spec Structure

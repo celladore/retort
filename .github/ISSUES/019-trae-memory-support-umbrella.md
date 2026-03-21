@@ -10,7 +10,7 @@
 
 ## Summary
 
-Add explicit memory support strategy and implementation planning to AgentKit Forge, aligned with TRAE memory workflows.
+Add explicit memory support strategy and implementation planning to Retort, aligned with TRAE memory workflows.
 
 Primary reference:
 
@@ -27,7 +27,7 @@ This umbrella covers:
 
 ## Problem
 
-AgentKit Forge supports rich prompts, generated rules, workflows, and orchestration, but does not yet define a framework-level position on:
+Retort supports rich prompts, generated rules, workflows, and orchestration, but does not yet define a framework-level position on:
 
 - what memory means in product terms
 - which memories are per-session vs durable
@@ -41,7 +41,7 @@ Without that, memory support risks becoming inconsistent, overly implicit, or un
 
 ## Acceptance Criteria
 
-- [ ] A memory support model exists for AgentKit Forge
+- [ ] A memory support model exists for Retort
 - [ ] Persistence, scope, retention, and privacy boundaries are defined
 - [ ] Follow-on sub-issues cover architecture, UX/governance, and generated-output integration
 - [ ] TRAE memory documentation is referenced in the implementation notes

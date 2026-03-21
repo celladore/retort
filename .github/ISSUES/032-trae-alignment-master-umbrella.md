@@ -48,7 +48,7 @@ Tracking these as isolated issues is useful for execution, but there also needs 
 
 ## Coordination Goals
 
-- Define what “TRAE support” means for AgentKit Forge
+- Define what “TRAE support” means for Retort
 - Separate first-class support from documentation-only support
 - Ensure platform changes do not fragment the core spec/sync architecture
 - Reuse common abstractions across MCP, memory, rules, skills, and agents where possible

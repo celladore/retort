@@ -4,11 +4,11 @@
 
 Strategic Ops is the cross-project coordination team responsible for framework
 governance, portfolio-level planning, adoption strategy, impact assessment, and
-release coordination across all repos using AgentKit Forge.
+release coordination across all repos using Retort.
 
 ## Motivation
 
-As AgentKit Forge scales to manage multiple downstream repos, the need for
+As Retort scales to manage multiple downstream repos, the need for
 portfolio-level visibility and governance becomes critical. Individual teams
 (backend, frontend, etc.) operate within a single repo — Strategic Ops operates
 _across_ repos, ensuring consistency, managing breaking changes, and coordinating

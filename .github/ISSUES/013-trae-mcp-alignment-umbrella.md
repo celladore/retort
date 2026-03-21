@@ -10,7 +10,7 @@
 
 ## Summary
 
-Add first-class support for high-value MCP integrations and MCP-oriented framework behavior so AgentKit Forge can better interoperate with TRAE-style MCP workflows.
+Add first-class support for high-value MCP integrations and MCP-oriented framework behavior so Retort can better interoperate with TRAE-style MCP workflows.
 
 This umbrella tracks:
 
@@ -46,7 +46,7 @@ Additional screenshot-visible MCP categories worth grouping:
 
 ## Problem
 
-AgentKit Forge already generates MCP-related assets (for example `.mcp/a2a-config.json`) and contains early A2A/task delegation concepts, but the framework does **not yet present a coherent strategy** for:
+Retort already generates MCP-related assets (for example `.mcp/a2a-config.json`) and contains early A2A/task delegation concepts, but the framework does **not yet present a coherent strategy** for:
 
 1. Selecting and prioritizing high-value MCP servers
 2. Modeling MCP server categories in spec/config
@@ -57,13 +57,13 @@ AgentKit Forge already generates MCP-related assets (for example `.mcp/a2a-confi
 This creates a gap between:
 
 - What MCP-capable IDEs now expose in marketplace workflows
-- What AgentKit Forge can scaffold, document, validate, and maintain
+- What Retort can scaffold, document, validate, and maintain
 
 ---
 
 ## Goals
 
-- Define a canonical MCP support strategy for AgentKit Forge
+- Define a canonical MCP support strategy for Retort
 - Prioritize practical MCP servers with clear user value
 - Add documentation, config, and generated output support where justified
 - Avoid server-by-server sprawl without governance

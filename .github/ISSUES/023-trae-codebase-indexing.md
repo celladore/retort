@@ -8,7 +8,7 @@
 
 ## Problem
 
-TRAE documents explicit codebase indexing behavior, but AgentKit Forge does not yet define a corresponding framework posture for indexing-aware workflows.
+TRAE documents explicit codebase indexing behavior, but Retort does not yet define a corresponding framework posture for indexing-aware workflows.
 
 Reference:
 
@@ -16,7 +16,7 @@ Reference:
 
 Questions to resolve:
 
-- What should AgentKit Forge assume about indexing availability?
+- What should Retort assume about indexing availability?
 - Which generated instructions should be indexing-aware?
 - How should indexing limitations or stale index behavior be handled?
 - What repo guidance improves indexing quality in large or multi-root workspaces?

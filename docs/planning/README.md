@@ -1,6 +1,6 @@
 # Planning Index
 
-Central planning registry for agentkit-forge. Each entry tracks a discrete work item with status, priority, remaining actions, and dependencies. Organized by domain.
+Central planning registry for retort. Each entry tracks a discrete work item with status, priority, remaining actions, and dependencies. Organized by domain.
 
 > **Last updated**: 2026-03-10
 > **Source**: Consolidated from `plan.md`, `docs/reference/issues/`, `.agentkit/docs/`, and GitHub Issues
@@ -105,7 +105,7 @@ Phase 3 (after P2):  CM-006 (RepoGuardian P3) + CM-003 (CommsCrew)
 
 ## FinOps & Cost Management
 
-Multi-repo cost governance spanning agentkit-forge, ai-gateway, and pvc-costops-analytics.
+Multi-repo cost governance spanning retort, ai-gateway, and pvc-costops-analytics.
 
 | ID     | Title                                      | Priority | Status      | Plan File                                                                      | Blockers                             | GH Issue |
 | ------ | ------------------------------------------ | -------- | ----------- | ------------------------------------------------------------------------------ | ------------------------------------ | -------- |
@@ -116,7 +116,7 @@ Multi-repo cost governance spanning agentkit-forge, ai-gateway, and pvc-costops-
 
 ## Cost Governance (Local)
 
-Items scoped to agentkit-forge cost tooling.
+Items scoped to retort cost tooling.
 
 | ID     | Title                                          | Priority | Status      | Plan File                                                                                  | Blockers                                    | GH Issue |
 | ------ | ---------------------------------------------- | -------- | ----------- | ------------------------------------------------------------------------------------------ | ------------------------------------------- | -------- |
@@ -126,7 +126,7 @@ Items scoped to agentkit-forge cost tooling.
 
 ## Framework & Templates
 
-Items related to AgentKit Forge framework structure, template organization, and tooling.
+Items related to Retort framework structure, template organization, and tooling.
 
 | ID     | Title                                                        | Priority | Status      | Plan File                                                                                  | Blockers                             | GH Issue |
 | ------ | ------------------------------------------------------------ | -------- | ----------- | ------------------------------------------------------------------------------------------ | ------------------------------------ | -------- |

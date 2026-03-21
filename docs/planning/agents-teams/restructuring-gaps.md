@@ -1,6 +1,6 @@
 # refactor(agents): Address team/agent mapping gaps and missing dedicated agents
 
-> **Target repo**: `agentkit-forge`
+> **Target repo**: `retort`
 > **Labels**: `enhancement`, `agents`, `teams`, `tech-debt`
 > **Priority**: P3
 

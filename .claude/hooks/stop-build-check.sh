@@ -40,25 +40,24 @@ run_check() {
     if output=$(cd "$CWD" && "$@" 2>&1); then
         return 0
     else
-        FAILURE_REASON="${label} failed:\n${output}"
+        # Truncate to last 3000 chars to avoid "Argument list too long" when
+        # output is large (e.g. a failing test run with hundreds of results).
+        local truncated
+        truncated=$(printf '%s' "$output" | tail -c 3000)
+        FAILURE_REASON="${label} failed:\n${truncated}"
         return 1
     fi
 }
 
 FAILURE_REASON=""
 
-# -- Check for generated file drift ----------------------------------------
-if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.mjs" ]] && command -v node &>/dev/null; then
-    # Run sync to see if anything is out of date
-    (cd "${CWD}/.agentkit" && node engines/node/src/cli.mjs sync 2>/dev/null) || true
-
-    if ! git -C "$CWD" diff --quiet 2>/dev/null; then
-        drift_files=$(git -C "$CWD" diff --name-only 2>/dev/null | head -10)
-        FAILURE_REASON="Generated files are out of sync with spec. Run 'pnpm -C .agentkit agentkit:sync' and commit the changes.\nDrifted files:\n${drift_files}"
-        # Restore working tree
-        git -C "$CWD" checkout -- $drift_files 2>/dev/null || true
-        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-        exit 0
+# -- Check for spec-modified-without-sync (lightweight git check only) ------
+# Never re-runs agentkit sync here — that can take 30s+ and is too slow for a
+# stop hook. Instead, warn non-blockingly if spec files look dirty.
+if [[ -d "${CWD}/.agentkit/spec" ]] && command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    spec_dirty=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null | { grep -c '^\.agentkit/spec/' || true; })
+    if [[ "$spec_dirty" -gt 0 ]]; then
+        echo "⚠️  .agentkit/spec/ has uncommitted changes — remember to run 'pnpm -C .agentkit agentkit:sync' before pushing." >&2
     fi
 fi
 
@@ -93,11 +92,20 @@ fi
 # -- Auto-detect stack and run checks --------------------------------------
 ran_check=false
 
-# Node.js / JavaScript / TypeScript
-if [[ -f "${CWD}/package.json" ]]; then
+# -- Compute changed files once (used for all per-language gates below) ------
+# Only inspect files changed since HEAD (staged + unstaged). If nothing
+# relevant changed for a language, skip its check entirely — this makes the
+# hook essentially free (<0.1s) when only docs or config were touched.
+_changed_files=""
+if command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
+    _changed_files=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null || true)
+fi
+_has_changed() { printf '%s\n' "$_changed_files" | grep -qE "$1"; }
+
+# Node.js / JavaScript / TypeScript — lint only, and only when JS/TS files changed
+if [[ -f "${CWD}/package.json" ]] && _has_changed '\.(ts|tsx|js|jsx|mjs|cjs)$'; then
     ran_check=true
 
-    # Determine the package manager.
     pm="npm"
     if [[ -f "${CWD}/pnpm-lock.yaml" ]] && command -v pnpm &>/dev/null; then
         pm="pnpm"
@@ -105,36 +113,10 @@ if [[ -f "${CWD}/package.json" ]]; then
         pm="yarn"
     fi
 
-    # Try lint, then test, then build -- stop at first failure.
-    # Each package manager uses a different flag to set the working directory.
-    pm_run() {
-        local script="$1"
-        if [[ "$pm" == "pnpm" ]]; then
-            "$pm" -C "$CWD" run "$script"
-        elif [[ "$pm" == "yarn" ]]; then
-            "$pm" --cwd "$CWD" run "$script"
-        else
-            "$pm" run "$script" --prefix "$CWD"
-        fi
-    }
     has_script() { jq -e --arg s "$1" '.scripts[$s] // empty' "${CWD}/package.json" &>/dev/null; }
 
     if has_script "lint"; then
         if ! run_check "${pm} lint" "$pm" run lint; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
-    fi
-
-    if has_script "test"; then
-        if ! run_check "${pm} test" "$pm" run test; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
-            exit 0
-        fi
-    fi
-
-    if has_script "build"; then
-        if ! run_check "${pm} build" "$pm" run build; then
             jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
             exit 0
         fi

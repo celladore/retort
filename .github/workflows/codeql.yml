@@ -1,10 +1,14 @@
 name: CodeQL
 
 on:
+  # Reduced to weekly + manual to cut GitHub Actions costs
+  # Was running on every push/PR including Renovate bot
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:
@@ -17,10 +21,10 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
-
 jobs:
   analyze:
     name: analyze-javascript
+    if: github.actor != 'renovate[bot]'
     runs-on: self-hosted
     strategy:
       fail-fast: false

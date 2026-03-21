@@ -35,7 +35,7 @@ Epic-level impacted files/components:
 
 Ownership:
 
-- Primary: `phoenixvc/agentkit-forge` maintainers
+- Primary: `phoenixvc/retort` maintainers
 - Linked downstream: `phoenixvc/ai-gateway`, `phoenixvc/pvc-costops-analytics`
 
 ---

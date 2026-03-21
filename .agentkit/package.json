@@ -41,6 +41,7 @@
     "agentkit:import-issues": "node engines/node/src/cli.mjs import-issues",
     "agentkit:backlog": "node engines/node/src/cli.mjs backlog",
     "agentkit:sync-backlog": "node engines/node/src/cli.mjs sync-backlog",
+    "agentkit:propose-skill": "node engines/node/src/propose-skill.mjs",
     "lint:md": "markdownlint-cli2 --config ../.markdownlint.json \"../docs/prd/**/*.md\" \"../docs/README.md\" \"../CONTRIBUTING.md\" \"docs/**/*.md\"",
     "lint:md:fix": "markdownlint-cli2 --fix --config ../.markdownlint.json \"../docs/prd/**/*.md\" \"../docs/README.md\" \"../CONTRIBUTING.md\" \"docs/**/*.md\"",
     "test": "vitest run",

@@ -94,7 +94,7 @@ $envSummary = @"
 Session: $sessionId
 Working directory: $cwd
 
-Language profile source: mixed (confidence: high)
+Language profile source: configured (confidence: high)
 
 Toolchains:
 $toolsSummary

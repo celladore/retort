@@ -1,6 +1,6 @@
 # feat(agents): Consider splitting a FinOps Specialist agent from Data Engineer
 
-> **Target repo**: `agentkit-forge`
+> **Target repo**: `retort`
 > **Labels**: `enhancement`, `finops`, `agents`, `cost-management`
 > **Priority**: P3 (future consideration)
 

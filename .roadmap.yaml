@@ -1,0 +1,37 @@
+version: "1.0"
+scope: roadmap
+repo: phoenixvc/retort
+updated_at: 2026-03-18
+
+tasks:
+  - id: repo-rename
+    title: "Rename retort (avoid Google ADK / Coinbase Retort collision)"
+    description: "173 stars. agent-forge = independent open-source identity. phoenix-forge = Phoenix-branded. Decision must happen before 500+ stars to minimise redirect confusion."
+    priority: high
+    status: todo
+    quarter: "2026-Q2"
+    tags: [naming, brand, strategy]
+
+  - id: agents-hub-overlay
+    title: "agents-hub overlay — port Mystira .agents/ pattern as syncable template"
+    description: "Extract session-startup skill, end-session lifecycle, users/ system, hookify guards into an overlay that agentkit:sync can deploy to any repo. Phase 5 of agent-consolidation roadmap."
+    priority: medium
+    status: todo
+    quarter: "2026-Q2"
+    tags: [agent, portability, template]
+    depends_on: [phoenixvc/mystira-workspace#agent-infra-enhancement]
+
+  - id: mcp-integration
+    title: "Add /mcp/ endpoint (Tier 1 project MCP)"
+    priority: medium
+    status: todo
+    quarter: "2026-Q3"
+    tags: [mcp, agent]
+    depends_on: [phoenixvc/org-meta#mcp-ecosystem-build]
+
+  - id: ai-gateway-connect
+    title: "Route retort agent calls through ai-gateway for cost tracking"
+    priority: low
+    status: todo
+    quarter: "2026-Q3"
+    tags: [ai-gateway, cost-ops]

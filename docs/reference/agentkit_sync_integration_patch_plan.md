@@ -1,8 +1,8 @@
-# AgentKit Sync Integration Patch Plan
+# Retort Sync Integration Patch Plan
 
 ## Why this exists
 
-This plan provides a maintainer-ready implementation blueprint to move branch-governance guardrails from runtime repo files into AgentKit sync source-of-truth.
+This plan provides a maintainer-ready implementation blueprint to move branch-governance guardrails from runtime repo files into Retort sync source-of-truth.
 
 ## Target outcome
 
@@ -41,7 +41,7 @@ In generated branch-protection workflow:
 
 - Trigger applies to PRs targeting `dev` and `main`.
 - If PR touches `.agentkit/**`, PR body must contain upstream issue URL pattern:
-  - [https://github.com/phoenixvc/agentkit-forge/issues/<number>](https://github.com/phoenixvc/agentkit-forge/issues/<number>)
+  - [https://github.com/phoenixvc/retort/issues/<number>](https://github.com/phoenixvc/retort/issues/<number>)
 - On missing link, required check fails with clear remediation message.
 
 ### 2) Branch protection script behavior

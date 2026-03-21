@@ -1,4 +1,4 @@
-# PRD-002: AgentKit Forge LLM Selection and Scorecard Guide
+# PRD-002: Retort LLM Selection and Scorecard Guide
 
 ## Status
 
@@ -8,15 +8,15 @@ This document is a living draft. The appendix contains TBD markers and data that
 
 ## Module / Feature Name
 
-AgentKit Forge LLM Model Selection and Scorecard System
+Retort LLM Model Selection and Scorecard System
 
 ## Marketing Name
 
-AgentKit Forge Model Scorecard and Recommender
+Retort Model Scorecard and Recommender
 
 ## Platform / Mesh Layers
 
-- AgentKit Forge orchestration layer
+- Retort orchestration layer
 - Agent execution layer
 - Model selection engine
 - Reporting and telemetry layer
@@ -51,7 +51,7 @@ Pro and Enterprise
 
 ## Integration Points
 
-- AgentKit Forge model mapping config (YAML and JSON)
+- Retort model mapping config (YAML and JSON)
 - Agent execution APIs
 - Reporting and analytics dashboards
 - Third-party LLM endpoints

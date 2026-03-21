@@ -11,8 +11,8 @@ concurrency:
 
 # Enforce that all PRs to main pass required checks before merge.
 # Configure GitHub branch protection rules to require these status checks:
-#   - AgentKit Forge CI / Test (ubuntu-latest)
-#   - AgentKit Forge CI / Validate
+#   - Retort CI / Test (ubuntu-latest)
+#   - Retort CI / Validate
 #   - Branch Protection / branch-rules
 
 jobs:
@@ -101,20 +101,20 @@ jobs:
 
             const isAgentkitForgeRepo =
               context.repo.owner.toLowerCase() === 'justaghost' &&
-              context.repo.repo.toLowerCase() === 'agentkit-forge';
+              context.repo.repo.toLowerCase() === 'retort';
 
             if (isAgentkitForgeRepo) {
-              core.info('Running in agentkit-forge source repo; upstream issue link check skipped.');
+              core.info('Running in retort source repo; upstream issue link check skipped.');
               return;
             }
 
             const body = pr.body || '';
-            const hasUpstreamIssueLink = /https:\/\/github\.com\/JustAGhosT\/agentkit-forge\/issues\/\d+/i.test(body);
+            const hasUpstreamIssueLink = /https:\/\/github\.com\/JustAGhosT\/retort\/issues\/\d+/i.test(body);
 
             if (!hasUpstreamIssueLink) {
               core.setFailed(
                 'This PR modifies .agentkit/** and must include an upstream issue link in the PR body.\n' +
-                'Required format example: https://github.com/JustAGhosT/agentkit-forge/issues/170'
+                'Required format example: https://github.com/JustAGhosT/retort/issues/170'
               );
               return;
             }
