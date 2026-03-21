@@ -1,6 +1,6 @@
 # feat(governance): Assign ownership and review process for rules.yaml
 
-**Priority:** P2 — Medium
+**Priority:** P3 — Low (reduced from P2)
 **Labels:** `enhancement`, `governance`, `spec`
 **Blocked by:** #002 (maintenance-coordinator agent)
 
@@ -129,7 +129,18 @@ Add to `CONTRIBUTING.md` or create `docs/RULES_GOVERNANCE.md`:
 
 ---
 
+## Note
+
+**Status: Reduced priority — P3** (2026-03-21, downgraded from P2)
+
+Kit-based domain filtering (PR #432) significantly reduces the governance burden for `rules.yaml`. Because irrelevant domains are no longer generated for projects (a JS-only project no longer gets dotnet/rust/python rule files), rules.yaml only needs active stewardship for domains that are actually in use. This removes the urgency of the full governance workflow described above.
+
+The ownership and review process is still valuable long-term, but the immediate risk of rule drift affecting end users is lower. Full implementation (protect-templates hook change, CODEOWNERS, staleness check, governance docs) can proceed at reduced priority when bandwidth allows.
+
+---
+
 ## Related
 
 - Umbrella: `.github/ISSUES/agent-maintainer-proposal.md`
 - Depends-on: #002
+- Related: `.github/ISSUES/025-trae-rules-revisit.md` (domain filtering reduces noise)

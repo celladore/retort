@@ -50,7 +50,18 @@ Determine whether AgentKit Forge should emit TRAE-ready agent artifacts directly
 
 ---
 
+## Note
+
+**Status: Deferred** (2026-03-21)
+
+Issue #040 (`elegance-guidelines`) from PR #432 improves agent quality through per-agent design guidance, independent of platform. The kit-based domain filtering work makes agent-related generation more stack-aware. However, TRAE-specific agent packaging (one-click import format, metadata requirements, export model) has not been addressed and remains a follow-up.
+
+Agent catalog filtering by active kit is a natural next enhancement — defer to after the TRAE format audit is completed. Reference the domain filtering approach (`filterDomainsByStack()`) as the model to follow.
+
+---
+
 ## Related
 
 - TRAE docs: https://docs.trae.ai/ide/agent-overview?_lang=en
 - TRAE docs: https://docs.trae.ai/ide/custom-agents-ready-for-one-click-import
+- Related: `.github/ISSUES/040-agents-should-consider-architectural-elegance.md` (elegance field merged)

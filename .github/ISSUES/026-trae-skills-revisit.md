@@ -33,6 +33,17 @@ Areas to revisit:
 
 ---
 
+## Note
+
+**Status: In progress / follow-up needed** (2026-03-21)
+
+Kit-based domain filtering (PR #432) reduces generated output volume by only activating domains relevant to the project's declared stack. The same principle applies to skill generation — language-specific skills should only be emitted for active language kits. This is a natural follow-up to the domain filtering work.
+
+The TRAE-specific skill format audit (naming, discoverability, platform differences) remains outstanding and should be scheduled in the next sprint.
+
+---
+
 ## Related
 
 - TRAE docs: https://docs.trae.ai/ide/skills?_lang=en
+- Related: `.github/ISSUES/025-trae-rules-revisit.md` (same filtering principle)
