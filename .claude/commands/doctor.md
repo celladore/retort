@@ -1,5 +1,5 @@
 ---
-description: 'Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.'
+description: 'Runs Retort diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.'
 allowed-tools: Bash(node *), Bash(find *), Bash(ls *)
 generated_by: 'retort'
 last_model: 'sync-engine'

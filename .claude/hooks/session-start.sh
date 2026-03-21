@@ -124,7 +124,7 @@ conventions_reminder="REMINDERS:
 - Run /check before creating a PR"
 
 # ── Compose the environment summary ─────────────────────────────────────
-env_summary=$(printf 'Session: %s\nWorking directory: %s\nLanguage profile source: configured (confidence: high)\n\nToolchains:\n%s\n\nGit:\n%s\n\n%s' \
+env_summary=$(printf 'Session: %s\nWorking directory: %s\nLanguage profile source: mixed (confidence: high)\n\nToolchains:\n%s\n\nGit:\n%s\n\n%s' \
     "$SESSION_ID" "$CWD" "$tools_summary" "$git_summary" "$conventions_reminder")
 
 # ── Return structured output ────────────────────────────────────────────
