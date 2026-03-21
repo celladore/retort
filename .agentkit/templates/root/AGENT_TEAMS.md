@@ -12,7 +12,7 @@ agentkit:
 
 ## Overview
 
-This document maps the canonical AgentKit team definitions (see
+This document maps the canonical Retort team definitions (see
 [UNIFIED_AGENT_TEAMS.md](./UNIFIED_AGENT_TEAMS.md)) to the concrete structure
 of this repository. Not all teams may be active — mark inactive teams so the
 orchestrator skips them during dispatch.

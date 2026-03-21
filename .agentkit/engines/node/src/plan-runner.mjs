@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Plan Runner
+ * Retort — Plan Runner
  * Shows current orchestrator state, backlog items, and suggests next actions
  * based on the current phase. This is the CLI companion to the /plan slash command.
  */

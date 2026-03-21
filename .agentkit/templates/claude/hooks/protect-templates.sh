@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
 # Hook: PreToolUse (matcher: Write|Edit)
-# Purpose: Block AI writes to AgentKit Forge source files (templates, spec,
+# Purpose: Block AI writes to Retort source files (templates, spec,
 #          engines, overlays) in DOWNSTREAM repos. In the agentkit-forge source
 #          repo itself, agents ARE the maintainers and need full access.
 # Stdin:   JSON with session_id, cwd, hook_event_name, tool_name, tool_input
@@ -47,7 +47,7 @@ PROTECTED_PATTERNS=(
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
     if echo "$FILE_PATH" | grep -qE "$pattern"; then
         jq -n \
-            --arg reason "Blocked: '${FILE_PATH}' is an AgentKit Forge source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run '{{packageManager}} -C .agentkit agentkit:sync'." \
+            --arg reason "Blocked: '${FILE_PATH}' is an Retort source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run '{{packageManager}} -C .agentkit retort:sync'." \
             '{
                 hookSpecificOutput: {
                     hookEventName: "PreToolUse",

@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Agent Integration Engine
+ * Retort — Agent Integration Engine
  * Cross-agent notification processing, auto-delegation, coverage tracking,
  * and acceptance criteria enforcement.
  *

@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Linear Adapter (Stub)
+ * Retort — Linear Adapter (Stub)
  * Placeholder for Linear issue tracker integration.
  * Implements the same interface as GitHubAdapter.
  */

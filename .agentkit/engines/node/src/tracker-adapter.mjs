@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Tracker Adapter Factory
+ * Retort — Tracker Adapter Factory
  * Creates the appropriate adapter for the configured issue tracker.
  */
 

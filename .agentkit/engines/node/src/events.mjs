@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Event Logging Compatibility Adapter
+ * Retort — Event Logging Compatibility Adapter
  * Wraps event-emitter.mjs to preserve legacy appendEvent/readEvents signatures.
  * New code should import from event-emitter.mjs directly.
  */

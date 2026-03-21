@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Sync Guard
+ * Retort — Sync Guard
  * Pre-sync safety checks and interactive apply prompts.
  * Uses @clack/prompts for Windows-safe terminal UI.
  */

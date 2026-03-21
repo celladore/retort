@@ -29,7 +29,7 @@ if (-not $Repo) {
     exit 1
 }
 
-Write-Host "=== AgentKit Branch Governance Setup ==="
+Write-Host "=== Retort Branch Governance Setup ==="
 Write-Host "Repository: $Repo"
 Write-Host "DryRun:     $DryRun"
 Write-Host ""

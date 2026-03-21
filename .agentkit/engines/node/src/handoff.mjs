@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Handoff Generator
+ * Retort — Handoff Generator
  * Creates a structured session handoff document with git state,
  * orchestrator state, and recent activity.
  */

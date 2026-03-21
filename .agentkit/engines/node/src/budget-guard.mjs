@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Budget Guard
+ * Retort — Budget Guard
  * Enforcement layer for cost management. Checks session-level budgets
  * (duration, command count, file modifications) and triggers warnings
  * or hard stops when thresholds are exceeded.

@@ -1,0 +1,24 @@
+{
+  "id": "task-p1-health-check",
+  "type": "implement",
+  "status": "completed",
+  "priority": "P1",
+  "delegator": "orchestrator",
+  "assignees": ["team-backend"],
+  "title": "Implement health check endpoint",
+  "description": "Implement /api/health (or equivalent) for the application.",
+  "acceptanceCriteria": [
+    "Health check endpoint implemented and documented",
+    "Returns appropriate status for load balancers or readiness probes"
+  ],
+  "scope": ["apps/api/**", "services/**", "docs/api/**"],
+  "backlogItemId": "P1-T1-health-check",
+  "messages": [
+    { "role": "delegator", "from": "orchestrator", "timestamp": "2026-03-15T12:00:00Z", "content": "P1: Implement health check endpoint. See Backlog." },
+    { "role": "executor", "from": "backend", "timestamp": "2026-03-15T12:15:00Z", "content": "Completed. No application server in this repo (framework-only). Documented health check convention in docs/api/07_framework-api-conventions.md: GET /api/health or GET /health, 200 + { status: ok } for adopters." }
+  ],
+  "artifacts": [
+    { "type": "files-changed", "paths": ["docs/api/07_framework-api-conventions.md"] },
+    { "type": "test-results", "passed": 0, "failed": 0, "testsAdded": 0, "testsModified": 0 }
+  ]
+}

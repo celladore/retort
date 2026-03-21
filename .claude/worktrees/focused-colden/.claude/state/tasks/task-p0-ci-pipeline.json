@@ -1,0 +1,22 @@
+{
+  "id": "task-p0-ci-pipeline",
+  "type": "implement",
+  "status": "rejected",
+  "priority": "P0",
+  "delegator": "orchestrator",
+  "assignees": ["team-infra"],
+  "title": "Configure CI pipeline for main branch",
+  "description": "GitHub Actions workflow; scope: branch-protection, drift check, quality gates on main. Ensure required status checks align with ci.yml, branch-protection.yml, and drift/sync validation.",
+  "acceptanceCriteria": [
+    "Workflow runs on push/PR to main (and dev per existing)",
+    "Drift check (sync then git diff) runs and is required for main",
+    "Quality gates (test, validate) are required; branch protection documented or enforced"
+  ],
+  "scope": [".github/workflows/**", "docs/operations/**"],
+  "backlogItemId": "P0-T4-CI-pipeline",
+  "messages": [
+    { "role": "delegator", "from": "orchestrator", "timestamp": "2026-03-15T12:00:00Z", "content": "P0: Configure CI pipeline for main. See AGENT_BACKLOG.md Active Sprint." },
+    { "role": "executor", "from": "infra", "timestamp": "2026-03-15T12:25:00Z", "content": "Rejected: task scope is .github/workflows/** and docs/operations/**, which is DevOps (CI/CD, pipelines), not Infra (IaC, terraform, bicep, pulumi). Suggested team: team-devops." }
+  ],
+  "artifacts": []
+}

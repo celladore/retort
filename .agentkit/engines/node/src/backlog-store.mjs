@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Backlog Store
+ * Retort — Backlog Store
  * Reads and writes backlog data in both JSON and Markdown formats.
  */
 import { existsSync, readFileSync } from 'fs';
@@ -235,7 +235,7 @@ ${renderTable(completed)}
 
 ---
 
-_This backlog is maintained by AgentKit Forge. Use \`/sync-backlog\` to refresh_
+_This backlog is maintained by Retort. Use \`/sync-backlog\` to refresh_
 _or \`agentkit import-issues\` to import from external trackers._
 `;
 

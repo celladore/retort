@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Import Issues
+ * Retort — Import Issues
  * Fetches issues from an external tracker, normalizes, deduplicates, and
  * merges into the local backlog.
  */

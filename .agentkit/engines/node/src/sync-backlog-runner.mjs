@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Sync-Backlog Runner
+ * Retort — Sync-Backlog Runner
  * Orchestrated backlog sync combining external tracker + local sources.
  * Runtime handler for the /sync-backlog command and `agentkit sync-backlog` CLI.
  */

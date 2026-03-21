@@ -18,7 +18,7 @@ last_updated: '{{syncDate}}'
 
 ## Instructions
 
-When invoked, follow the AgentKit Forge orchestration lifecycle:
+When invoked, follow the Retort orchestration lifecycle:
 
 1. **Understand** the request and any arguments provided
 2. **Scan** relevant files to build context

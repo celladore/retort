@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Weighted Priority Scorer
+ * Retort — Weighted Priority Scorer
  * Deterministic scoring system for backlog items. Category scores (0-10) are
  * supplied by agents; weights and phase adjustments are configurable in
  * project.yaml. The final score (0-100) maps to P0-P3 via thresholds.

@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Discover Command
+ * Retort — Discover Command
  * Scans the repository to detect tech stacks, project structure, team boundaries,
  * and build a structured discovery report.
  */

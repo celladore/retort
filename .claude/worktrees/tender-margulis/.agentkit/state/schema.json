@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentKit Forge Orchestrator State",
+  "description": "Schema for the orchestrator state file managed by /orchestrate",
+  "type": "object",
+  "required": ["schema_version", "repo_id", "current_phase", "phase_name", "team_progress"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version for forward compatibility"
+    },
+    "repo_id": {
+      "type": "string",
+      "description": "Repository identifier (from .agentkit-repo)"
+    },
+    "branch": {
+      "type": "string",
+      "description": "Current git branch"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Current session identifier"
+    },
+    "current_phase": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Current lifecycle phase (1-5)"
+    },
+    "phase_name": {
+      "type": "string",
+      "enum": ["Discovery", "Planning", "Implementation", "Validation", "Ship"],
+      "description": "Human-readable phase name"
+    },
+    "last_phase_completed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Last fully completed phase (0 = none)"
+    },
+    "next_action": {
+      "type": "string",
+      "description": "Recommended next action"
+    },
+    "team_progress": {
+      "type": "object",
+      "description": "Per-team status tracking",
+      "patternProperties": {
+        "^team-": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["idle", "in_progress", "blocked", "done"]
+            },
+            "notes": {
+              "type": "string"
+            },
+            "last_updated": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "assigned_to": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "todo_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "done", "blocked"]
+          },
+          "team": { "type": "string" },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"]
+          }
+        }
+      }
+    },
+    "recent_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "action": { "type": "string" },
+          "result": { "type": "string" },
+          "team": { "type": "string" }
+        }
+      }
+    },
+    "completed": {
+      "type": "boolean",
+      "description": "Whether all phases are complete"
+    },
+    "last_healthcheck": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last healthcheck run"
+    },
+    "health_status": {
+      "type": "string",
+      "enum": ["HEALTHY", "UNHEALTHY"],
+      "description": "Overall health status from last healthcheck"
+    },
+    "session_metrics": {
+      "type": "object",
+      "description": "Cost tracking session metrics",
+      "properties": {
+        "current_session_id": {
+          "type": "string",
+          "description": "Active session ID for cost tracking"
+        },
+        "total_sessions": {
+          "type": "integer",
+          "description": "Total sessions recorded"
+        },
+        "last_session_end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the last session ended"
+        }
+      }
+    }
+  }
+}

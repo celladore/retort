@@ -16,7 +16,7 @@ last_updated: '{{syncDate}}'
 
 ## Purpose
 
-Diagnose AgentKit Forge setup and spec quality issues quickly.
+Diagnose Retort setup and spec quality issues quickly.
 
 ## Workflow
 

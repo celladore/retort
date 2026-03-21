@@ -1,5 +1,5 @@
 /**
- * AgentKit Forge — Review Runner
+ * Retort — Review Runner
  * Automated pre-review checks: secret scanning, large file detection,
  * TODO/FIXME scanning, and lint on changed files.
  * This is NOT the AI review — that's the /review slash command.
