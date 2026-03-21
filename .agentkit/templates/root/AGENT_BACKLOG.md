@@ -25,7 +25,7 @@
 | Priority | Team              | Task                                          | Phase          | Status      | Notes                    |
 | -------- | ----------------- | --------------------------------------------- | -------------- | ----------- | ------------------------ |
 | P0       | T4-Infrastructure | Configure CI pipeline for main branch         | Implementation | In Progress | GitHub Actions workflow; scope: branch-protection, drift check, quality gates on main |
-| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest (coverage via v8); scope: .agentkit test suite, 80% coverage target, run in CI |
+| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul; scope: .agentkit test suite, 80% coverage target, run in CI         |
 | P1       | T1-Backend        | Define core API route structure               | Planning       | In Progress | REST endpoints for v1    |
 | P1       | T3-Data           | Design initial database schema                | Planning       | Todo        | Depends on T1 API design |
 | P1       | T8-DevEx          | Configure linting and formatting rules        | Implementation | Done        | ESLint + Prettier        |
