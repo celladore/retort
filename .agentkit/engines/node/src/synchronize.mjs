@@ -1860,6 +1860,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       overlaySettings.repoName ||
       repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
+    integrationBranch:
+      overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     commandPrefix: overlaySettings.commandPrefix || null,
     syncDate: new Date().toISOString().slice(0, 10),

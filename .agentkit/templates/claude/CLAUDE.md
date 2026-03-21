@@ -12,6 +12,7 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 
 - **Repository**: {{repoName}}
 - **Default Branch**: {{defaultBranch}}
+- **Integration Branch** (PR target): {{integrationBranch}}
 - **Framework Version**: {{version}}
   {{#if projectPhase}}
 
@@ -355,6 +356,16 @@ Then commit the regenerated output. The CI drift check **will fail** if generate
 ### Branch Naming
 
 Feature branches: `type/short-description` (e.g., `feat/add-user-auth`, `fix/token-refresh`)
+
+### PR Target Branch
+
+All PRs **must** target `{{integrationBranch}}` — not `{{defaultBranch}}` or any other branch unless explicitly instructed:
+
+```bash
+gh pr create --base {{integrationBranch}} --title "type(scope): description"
+```
+
+The integration branch (`{{integrationBranch}}`) is the configured PR target for this repo. Creating PRs against `{{defaultBranch}}` directly causes reverse-merge noise and bypasses the integration pipeline. A hookify rule in `.claude/rules/pr-base-branch.md` enforces this at runtime.
 
 ## Safety Rules
 

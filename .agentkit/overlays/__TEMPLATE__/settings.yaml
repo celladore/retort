@@ -1,7 +1,8 @@
 # Repo-specific overlay settings
 # This file is copied by `agentkit init` and customized per repo.
 repoName: __TEMPLATE__
-defaultBranch: main
+defaultBranch: main          # Repository default branch (usually main or master)
+integrationBranch: main      # Branch PRs should target (often dev or main; defaults to defaultBranch)
 primaryStack: auto
 windowsFirst: true
 
