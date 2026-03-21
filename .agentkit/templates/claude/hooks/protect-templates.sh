@@ -47,7 +47,7 @@ PROTECTED_PATTERNS=(
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
     if echo "$FILE_PATH" | grep -qE "$pattern"; then
         jq -n \
-            --arg reason "Blocked: '${FILE_PATH}' is an Retort source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run '{{packageManager}} -C .agentkit retort:sync'." \
+            --arg reason "Blocked: '${FILE_PATH}' is a Retort source file. These files are the upstream source-of-truth and must not be modified directly by AI agents. To propose changes, create a PR to the agentkit-forge repository targeting the relevant spec or template. If you need to change project configuration, edit the YAML specs in .agentkit/spec/ and run '{{packageManager}} -C .agentkit retort:sync'." \
             '{
                 hookSpecificOutput: {
                     hookEventName: "PreToolUse",
