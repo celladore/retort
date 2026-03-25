@@ -51,6 +51,10 @@ run_check() {
 
 FAILURE_REASON=""
 
+# Helper: emit a block decision — passes reason via stdin to avoid E2BIG on
+# Windows Git Bash when $FAILURE_REASON contains large command output (issue #453).
+emit_block() { printf '%s' "$1" | jq -Rs '{"decision": "block", "reason": .}'; }
+
 # -- Check for spec-modified-without-sync (lightweight git check only) ------
 # Never re-runs agentkit sync here — that can take 30s+ and is too slow for a
 # stop hook. Instead, warn non-blockingly if spec files look dirty.
@@ -84,7 +88,7 @@ if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
 
     if [[ -n "$BAD_COMMITS" ]]; then
         FAILURE_REASON="Commits with non-conventional messages detected. PR titles must follow 'type(scope): description'.\nBad commits:\n${BAD_COMMITS}\nFix with: git rebase -i and reword, or ensure the PR title follows the format."
-        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        emit_block "$FAILURE_REASON"
         exit 0
     fi
 fi
@@ -117,7 +121,7 @@ if [[ -f "${CWD}/package.json" ]] && _has_changed '\.(ts|tsx|js|jsx|mjs|cjs)$'; 
 
     if has_script "lint"; then
         if ! run_check "${pm} lint" "$pm" run lint; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            emit_block "$FAILURE_REASON"
             exit 0
         fi
     fi
