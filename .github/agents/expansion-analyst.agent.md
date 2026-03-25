@@ -1,9 +1,9 @@
 ---
 name: 'Expansion Analyst'
-description: 'Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces ranked suggestions with rationale and can generate draft specification documents for approved suggestions. Never acts autonomously — all suggestions require explicit human approval before any downstream action occurs.'
-generated_by: 'agentkit-forge'
+description: "Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces ranked suggestions with rationale and can generate draft specification documents for approved suggestions. Never acts autonomously — all suggestions require explicit human approval before any downstream action occurs."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,7 +32,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- \*_/_
+- **/*
 
 ## Responsibilities
 

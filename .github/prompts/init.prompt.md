@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Supports --dry-run to preview without writing.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-20'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -36,13 +36,13 @@ pnpm -C .agentkit agentkit:init
 
 ## Flags
 
-| Flag                | Effect                                                 |
-| ------------------- | ------------------------------------------------------ |
-| `--dry-run`         | Show what would be generated without writing any files |
-| `--non-interactive` | Skip prompts, use auto-detected defaults               |
-| `--preset <name>`   | Use a preset: minimal, full, team, infra               |
-| `--force`           | Overwrite existing overlay configuration               |
-| `--repoName <name>` | Override the detected repository name                  |
+| Flag | Effect |
+|------|--------|
+| `--dry-run` | Show what would be generated without writing any files |
+| `--non-interactive` | Skip prompts, use auto-detected defaults |
+| `--preset <name>` | Use a preset: minimal, full, team, infra |
+| `--force` | Overwrite existing overlay configuration |
+| `--repoName <name>` | Override the detected repository name |
 
 ## Kit Selection
 
@@ -82,3 +82,4 @@ Optional kits (iac, finops, ai-cost-ops) are presented for explicit opt-in.
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

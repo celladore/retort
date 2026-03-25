@@ -3,7 +3,7 @@ name: 'init'
 description: 'Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Supports --dry-run to preview without writing.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-20'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

@@ -1,9 +1,9 @@
 ---
 name: 'Role Architect'
-description: 'Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team. Produces complete agent entries for agents.yaml following the established schema.'
-generated_by: 'agentkit-forge'
+description: "Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team. Produces complete agent entries for agents.yaml following the established schema."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-21 -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
 <!-- Format: Plain Markdown rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
@@ -8,7 +8,7 @@ This repository uses the Retort unified agent team framework.
 
 ## Language Profile Diagnostics
 
-- Source: mixed (confidence: high)
+- Source: configured (confidence: high)
 - Configured languages present: yes
 - JS-like: configured=true, inferred=true, effective=true
 - Python: configured=false, inferred=false, effective=false
@@ -39,10 +39,12 @@ This repository uses the Retort unified agent team framework.
 ## No Monitoring
 
 - No monitoring configured
+  
 
 ## No Compliance and DR
 
 - No compliance/DR configuration
+  
 
 ## Non-negotiables
 

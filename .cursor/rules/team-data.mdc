@@ -2,9 +2,9 @@
 description: "Team DATA — Database, models, migrations"
 globs: []
 alwaysApply: false
-generated_by: "agentkit-forge"
+generated_by: "retort"
 last_model: "sync-engine"
-last_updated: "2026-03-21"
+last_updated: ""
 # Format: MDC (Markdown with YAML frontmatter). Cursor team rule.
 # Docs: https://docs.cursor.com/context/rules
 ---

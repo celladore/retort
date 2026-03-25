@@ -1,9 +1,9 @@
 ---
 name: 'Infrastructure Engineer'
-description: 'Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliability. Ensures reproducible environments and cost-effective resource provisioning. Enforces the project naming convention {org}-{env}-{project}-{resourcetype}-{region} using project-configured defaults. Preferred IaC toolchain: Terraform + Terragrunt.'
-generated_by: 'agentkit-forge'
+description: "Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliability. Ensures reproducible environments and cost-effective resource provisioning. Enforces the project naming convention {org}-{env}-{project}-{resourcetype}-{region} using project-configured defaults. Preferred IaC toolchain: Terraform + Terragrunt."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,14 +32,14 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- infra/\*\*
-- terraform/\*\*
-- terragrunt/\*\*
-- bicep/\*\*
-- pulumi/\*\*
-- k8s/\*\*
-- helm/\*\*
-- modules/\*\*
+- infra/**
+- terraform/**
+- terragrunt/**
+- bicep/**
+- pulumi/**
+- k8s/**
+- helm/**
+- modules/**
 
 ## Responsibilities
 
@@ -85,7 +85,6 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Resource naming local
-
 ```
 locals {
   resource_name = "${var.org}-${var.environment}-${var.project}-${var.resource_type}-${var.region}"

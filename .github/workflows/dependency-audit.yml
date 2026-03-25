@@ -24,7 +24,7 @@ concurrency:
 jobs:
   audit-node:
     name: Node.js dependency audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: true
     if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
@@ -93,7 +93,7 @@ jobs:
 
   summary:
     name: Audit summary
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [audit-node]
     if: always()
     steps:
