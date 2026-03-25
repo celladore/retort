@@ -25,7 +25,7 @@ jobs:
   analyze:
     name: analyze-javascript
     if: github.actor != 'renovate[bot]'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
