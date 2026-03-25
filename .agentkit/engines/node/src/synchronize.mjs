@@ -2010,7 +2010,16 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     commandPrefix: overlaySettings.commandPrefix || null,
-    syncDate: new Date().toISOString().slice(0, 10),
+    // syncDateMode controls {{syncDate}} in generated headers (issue #417).
+    // 'run' (default) — today's date; causes churn on every sync
+    // 'version'       — the spec VERSION; stable until the spec changes
+    // 'none'          — empty string; removes the date field entirely
+    syncDate: (() => {
+      const mode = overlaySettings.syncDateMode ?? settingsSpec.sync?.dateMode ?? 'run';
+      if (mode === 'none') return '';
+      if (mode === 'version') return version || '';
+      return new Date().toISOString().slice(0, 10);
+    })(),
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'retort',
     // Branch protection defaults — ensure generated scripts produce valid

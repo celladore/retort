@@ -111,7 +111,7 @@ export function collapseBlankLines(text) {
  * - Allows raw values for keys in RAW_TEMPLATE_VARS when allowRawVars is true
  * - Warns on unresolved placeholders
  */
-export function replacePlaceholders(template, vars, sanitizeStrings = false) {
+export function replacePlaceholders(template, vars, sanitizeStrings = false, opts = {}) {
   let result = template;
   const sortedKeys = Object.keys(vars).sort((a, b) => b.length - a.length);
   for (const key of sortedKeys) {
@@ -150,7 +150,8 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false) {
   const unresolved = result.match(/\{\{(?!#|\/|else\}\})([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g);
   if (unresolved) {
     const unique = [...new Set(unresolved)];
-    console.warn(`[agentkit:sync] Warning: unresolved placeholders: ${unique.join(', ')}`);
+    const loc = opts?.filePath ? ` in ${opts.filePath}` : '';
+    console.warn(`[agentkit:sync] Warning: unresolved placeholders${loc}: ${unique.join(', ')}`);
   }
   return result;
 }
