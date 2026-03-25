@@ -15,8 +15,8 @@
 >   - - **MCP/A2A integration** — Orchestration layer with slash commands, team routing, quality gates, and session state that works identically across all supported tools.
 >     - - **Cross-platform** — Windows, macOS, Linux. Polyglot support (any language, any framework).
 >       - - **Public template** — Designed to be cloned or used as a GitHub template. phoenixvc projects use it as their agent engineering baseline.
->        
->         - ---
+>
+>         ***
 >
 > ## How it works
 >
@@ -33,11 +33,8 @@
 >
 > 1. **`agentkit init`** — scans your repo, asks a few questions, writes `project.yaml`.
 > 2. 2. **`agentkit sync`** — renders templates, generates all tool configs.
->   
->    3. ---
->   
+>    3. ***
 >    4. ## Quick start
->   
 >    5. ```bash
 >       # Use as a GitHub template, or clone directly
 >       npx agentkit init
@@ -75,14 +72,14 @@
 >
 > retort is the agent engineering baseline for the phoenixvc platform. It connects to:
 >
-> | Repo | Role |
-> |---|---|
-> | [`deck`](https://github.com/phoenixvc/deck) | Desktop ops tool — uses retort scaffold internally; deck can invoke retort via CLI to bootstrap new agent projects |
-> | [`phoenix-flow`](https://github.com/phoenixvc/phoenix-flow) | Project tracker — retort-based projects can read their tasks from phoenix-flow via MCP |
-> | [`sluice`](https://github.com/phoenixvc/sluice) | AI data plane — projects scaffolded with retort inherit sluice as their model gateway |
-> | [`docket`](https://github.com/phoenixvc/docket) | AI cost ops — tracks token spend and model costs across retort-scaffolded projects |
-> | [`cognitive-mesh`](https://github.com/phoenixvc/cognitive-mesh) | Agent orchestration — retort-based agents are routed through cognitive-mesh for complex multi-agent tasks |
-> | [`org-meta`](https://github.com/phoenixvc/org-meta) | Org registry — org-meta's CLAUDE.md and project specs are generated using retort |
+> | Repo                                                            | Role                                                                                                               |
+> | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+> | [`deck`](https://github.com/phoenixvc/deck)                     | Desktop ops tool — uses retort scaffold internally; deck can invoke retort via CLI to bootstrap new agent projects |
+> | [`phoenix-flow`](https://github.com/phoenixvc/phoenix-flow)     | Project tracker — retort-based projects can read their tasks from phoenix-flow via MCP                             |
+> | [`sluice`](https://github.com/phoenixvc/sluice)                 | AI data plane — projects scaffolded with retort inherit sluice as their model gateway                              |
+> | [`docket`](https://github.com/phoenixvc/docket)                 | AI cost ops — tracks token spend and model costs across retort-scaffolded projects                                 |
+> | [`cognitive-mesh`](https://github.com/phoenixvc/cognitive-mesh) | Agent orchestration — retort-based agents are routed through cognitive-mesh for complex multi-agent tasks          |
+> | [`org-meta`](https://github.com/phoenixvc/org-meta)             | Org registry — org-meta's CLAUDE.md and project specs are generated using retort                                   |
 >
 > ---
 >
@@ -90,12 +87,11 @@
 >
 > - [**AgentKit**](https://github.com/inngest/agent-kit) — agent orchestration patterns and YAML-driven config generation
 > - - [**dotfiles**](https://dotfiles.github.io) — the original single-source-of-truth config management pattern, adapted for AI tooling
->  
->   - ---
+>
+>   ***
 >
 > ## Name
 >
 > **retort** — a retort is a sharp, witty response, but also a sealed laboratory vessel used for distillation and chemical reactions. Both meanings apply: retort gives you a precise, controlled response to the chaos of AI tool fragmentation (the sharp comeback), and it's a vessel in which agent configurations are synthesised from raw ingredients (the chemistry). The name sits comfortably alongside `deck` and `sluice` — slightly more playful, but intentional.
 >
 > The repo was previously called `agentkit-forge` internally. The public-facing name `retort` better reflects its standalone, template-first character.
-> 

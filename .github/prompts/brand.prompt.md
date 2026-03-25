@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'Manage the project brand spec (brand.yaml) and editor theme. Supports validation, palette preview, theme mapping, contrast auditing, scaffolding, and regeneration of editor theme files.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -48,3 +48,4 @@ When invoked, follow the Retort orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

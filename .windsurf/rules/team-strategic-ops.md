@@ -1,11 +1,11 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-21 -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
 <!-- Format: Plain Markdown team rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
 # Team: STRATEGIC OPS
 
 **Focus**: Cross-project coordination, framework governance, portfolio-level planning
-**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/\*\*, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
+**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/**, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 
 ## Persona
 

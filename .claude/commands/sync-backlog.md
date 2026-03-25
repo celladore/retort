@@ -1,9 +1,10 @@
 ---
+
 description: 'Synchronizes the local backlog with the configured issue tracker (GitHub or Linear), maps findings to ownership teams, updates local tracking documents, and identifies stale or unassigned work items.'
 allowed-tools: Bash(git *), Bash(grep *), Bash(find *)
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -122,12 +123,12 @@ The area determines which team the item is routed to via `teams.yaml` intake rou
 
 When a backlog item originates from a bug report or incident, include a severity tag:
 
-| Severity     | Meaning                                                |
-| ------------ | ------------------------------------------------------ |
+| Severity     | Meaning                                              |
+| ------------ | ---------------------------------------------------- |
 | **critical** | Complete failure, data loss, or security vulnerability |
-| **high**     | Major functionality broken                             |
-| **medium**   | Partial functionality impaired                         |
-| **low**      | Minor issue, cosmetic or edge-case                     |
+| **high**     | Major functionality broken                            |
+| **medium**   | Partial functionality impaired                        |
+| **low**      | Minor issue, cosmetic or edge-case                    |
 
 ### Escalation Rules
 

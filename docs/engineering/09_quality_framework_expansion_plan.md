@@ -160,12 +160,12 @@ type-aware analysis.
 
 #### Testing Frameworks
 
-| Framework      | Role                     | Recommendation                                                                                                                                                                |
-| -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework      | Role                     | Recommendation                                                                                                                                                        |
+| -------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Vitest**     | Primary unit/integration | **Recommended primary.** Native ESM, TypeScript support via esbuild, API-compatible with Jest, fastest option for Vite-based projects. Already used by retort itself. |
-| **Jest**       | Legacy primary           | **Secondary.** Still the most widely used; recommend for brownfield projects already using Jest. CJS-focused; ESM support requires configuration.                             |
-| **Playwright** | E2E testing              | **Recommended for E2E.** Cross-browser, auto-wait, TypeScript-first. Already detected by discover.mjs.                                                                        |
-| **Cypress**    | Alternative E2E          | **Secondary.** Excellent developer experience but limited to Chromium-based browsers for component testing. Already detected by discover.mjs.                                 |
+| **Jest**       | Legacy primary           | **Secondary.** Still the most widely used; recommend for brownfield projects already using Jest. CJS-focused; ESM support requires configuration.                     |
+| **Playwright** | E2E testing              | **Recommended for E2E.** Cross-browser, auto-wait, TypeScript-first. Already detected by discover.mjs.                                                                |
+| **Cypress**    | Alternative E2E          | **Secondary.** Excellent developer experience but limited to Chromium-based browsers for component testing. Already detected by discover.mjs.                         |
 
 #### Template Requirements
 

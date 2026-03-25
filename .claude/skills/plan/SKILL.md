@@ -1,9 +1,9 @@
 ---
 name: 'plan'
 description: 'Creates a detailed implementation plan for a feature, bug fix, or refactoring task. Analyzes the codebase, identifies affected files and teams, estimates complexity, and produces a step-by-step plan with acceptance criteria.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

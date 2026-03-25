@@ -1,9 +1,9 @@
 ---
 name: 'Retrospective Analyst'
-description: 'Session retrospective specialist activated via /review --focus=retrospective. Reviews conversation history and session activity to extract issues encountered and lessons learned. Produces structured, non-blocking records in docs/history/issues/ and docs/history/lessons-learned/ using project templates and sequential numbering. Cross-references findings with existing rules, ADRs, and history records to avoid duplication and surface patterns.'
-generated_by: 'agentkit-forge'
+description: "Session retrospective specialist activated via /review --focus=retrospective. Reviews conversation history and session activity to extract issues encountered and lessons learned. Produces structured, non-blocking records in docs/history/issues/ and docs/history/lessons-learned/ using project templates and sequential numbering. Cross-references findings with existing rules, ADRs, and history records to avoid duplication and surface patterns."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,10 +32,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/history/issues/\*\*
-- docs/history/lessons-learned/\*\*
+- docs/history/issues/**
+- docs/history/lessons-learned/**
 - docs/history/.index.json
-- docs/ai_handoffs/\*\*
+- docs/ai_handoffs/**
 
 ## Responsibilities
 

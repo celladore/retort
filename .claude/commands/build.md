@@ -1,9 +1,10 @@
 ---
-description: "Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace."
+
+description: 'Builds the project using the detected tech stack''s build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(python *), Bash(go *), Bash(make *)
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

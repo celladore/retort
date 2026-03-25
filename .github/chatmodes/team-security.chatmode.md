@@ -1,9 +1,9 @@
 ---
 name: 'SECURITY'
 description: 'Team SECURITY — Auth, compliance, audit'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -15,7 +15,7 @@ last_updated: '2026-03-21'
 # Team: SECURITY
 
 **Focus**: Auth, compliance, audit
-**Scope**: auth/**, security/**, middleware/auth\*
+**Scope**: auth/**, security/**, middleware/auth*
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: auth/**, security/**, middleware/auth\*
+- Own all code within scope: auth/**, security/**, middleware/auth*
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

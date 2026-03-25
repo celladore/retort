@@ -1,9 +1,10 @@
 ---
+
 description: 'Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.'
 allowed-tools: Bash(node *), Bash(find *), Bash(ls *)
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

@@ -2006,8 +2006,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       overlaySettings.repoName ||
       repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
-    integrationBranch:
-      overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
+    integrationBranch: overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     commandPrefix: overlaySettings.commandPrefix || null,
     // syncDateMode controls {{syncDate}} in generated headers (issue #417).
@@ -2954,9 +2953,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           }
         }
         if (formattedCount > 0) {
-          logVerbose(
-            `[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
-          );
+          logVerbose(`[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`);
         }
       } catch {
         // If prettier is not available or fails entirely, just continue
@@ -2993,6 +2990,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       }
     }
   } finally {
-    await rm(tmpDir, { recursive: true, force: true });
+    // Wrap cleanup so it cannot mask the primary sync error.
+    // maxRetries handles transient ENOTEMPTY on tmpfs/overlayfs (Node.js
+    // fs.rm defaults to maxRetries:0, so the first failed rmdir throws).
+    try {
+      await rm(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch (cleanupErr) {
+      if (process.env.DEBUG) {
+        console.error(`[retort:sync] Warning: tmpDir cleanup failed — ${cleanupErr.message}`);
+      }
+    }
   }
 }

@@ -47,13 +47,13 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 
 ### 1.3 Protocol Standardisation Wave
 
-| Protocol | Owner | Scope | Status |
-|----------|-------|-------|--------|
-| MCP (Model Context Protocol) | Anthropic | Tool discovery & execution | Widely adopted |
-| ACP (Agent Client Protocol) | JetBrains + Zed | Agent-to-IDE communication | Early adoption |
-| Agent Protocol | LangChain | Agent runtime API | Moderate adoption |
-| AGENTS.md | OpenAI / AAIF | Agent instruction files | Rapid adoption |
-| W3C Agent Protocol | W3C CG | Web-standard agent comms | Spec drafting (2026–27) |
+| Protocol                     | Owner           | Scope                      | Status                  |
+| ---------------------------- | --------------- | -------------------------- | ----------------------- |
+| MCP (Model Context Protocol) | Anthropic       | Tool discovery & execution | Widely adopted          |
+| ACP (Agent Client Protocol)  | JetBrains + Zed | Agent-to-IDE communication | Early adoption          |
+| Agent Protocol               | LangChain       | Agent runtime API          | Moderate adoption       |
+| AGENTS.md                    | OpenAI / AAIF   | Agent instruction files    | Rapid adoption          |
+| W3C Agent Protocol           | W3C CG          | Web-standard agent comms   | Spec drafting (2026–27) |
 
 **Missing from all protocols:** Agent configuration management, governance rules, cross-session continuity, team orchestration. This is AgentKit Forge's category.
 
@@ -70,32 +70,36 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 
 ### 2.1 Configuration Management
 
-| Practice | Leaders | Adoption |
-|----------|---------|----------|
-| Single source of truth (YAML/MD → tool-specific output) | AgentKit Forge, Agent OS, Ruler | Growing |
-| Hierarchical instructions (root + subdirectory overrides) | AGENTS.md, CLAUDE.md | Standard |
-| CI drift validation (spec vs generated output) | AgentKit Forge | Unique |
-| Reflective guards (portable governance) | Mystira.workspace | Novel |
-| `.readme.yaml` (machine-readable metadata) | Mystira.workspace | Novel |
+| Practice                                                  | Leaders                         | Adoption |
+| --------------------------------------------------------- | ------------------------------- | -------- |
+| Single source of truth (YAML/MD → tool-specific output)   | AgentKit Forge, Agent OS, Ruler | Growing  |
+| Hierarchical instructions (root + subdirectory overrides) | AGENTS.md, CLAUDE.md            | Standard |
+| CI drift validation (spec vs generated output)            | AgentKit Forge                  | Unique   |
+| Reflective guards (portable governance)                   | Mystira.workspace               | Novel    |
+| `.readme.yaml` (machine-readable metadata)                | Mystira.workspace               | Novel    |
 
 ### 2.2 What Industry Leaders Are Implementing
 
 **Block (formerly Square):**
+
 - Open-sourced `ai-rules` for managing rules, commands, and skills across agents
 - Built Goose, an open-source autonomous agent with extensible plugin architecture
 - Uses AGENTS.md + repeatable "agent skills" as packaged workflows
 
 **Anthropic:**
+
 - Claude Code hooks system for automated enforcement
 - Sub-agent architecture for parallel task execution
 - MCP for tool discovery standardisation
 
 **GitHub/Microsoft:**
+
 - Copilot agents with `.github/agents/` directory
 - Copilot chatmodes for team-based interaction patterns
 - CODEOWNERS integration for agent access control
 
 **JetBrains:**
+
 - ACP protocol for agent-IDE interop
 - Moving toward agent-neutral IDE support
 
@@ -116,6 +120,7 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 #### Primary Competitors (Direct)
 
 **1. Ruler** (intellectronica/ruler)
+
 - **What:** CLI tool that syncs a single rules file to 11+ AI coding tool directories
 - **Stars:** ~2,500 GitHub stars
 - **Mechanism:** Reads `ruler.md` (or config), writes to `.cursor/rules/`, `.claude/CLAUDE.md`, `.github/copilot-instructions.md`, etc.
@@ -124,6 +129,7 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 - **Pricing:** Free, open source (MIT)
 
 **2. Agent OS** (buildermethods/agent-os)
+
 - **What:** System for injecting coding standards into AI-powered development
 - **Stars:** Moderate
 - **Mechanism:** Discover patterns → document standards → inject into context → shape specifications
@@ -132,6 +138,7 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 - **Pricing:** Free and open source; paid training via Builder Methods Pro
 
 **3. ai-rules-sync** (lbb00/ai-rules-sync)
+
 - **What:** Sync rules, skills, commands, and subagents across 8+ tools via symlinks
 - **Stars:** Growing
 - **Mechanism:** Git-based rule storage, symlink sync, web dashboard UI
@@ -140,6 +147,7 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 - **Pricing:** Free, open source
 
 **4. agent-rules** (jeejeeguan/agent-rules)
+
 - **What:** Centralise rules in `AGENT_RULES.md`, auto-sync to each agent's directory via CI
 - **Stars:** Small
 - **Mechanism:** CI pipeline copies single file to `.claude/CLAUDE.md`, `.codex/AGENTS.md`, `.gemini/GEMINI.md`, etc.
@@ -148,6 +156,7 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 - **Pricing:** Free, open source
 
 **5. Block ai-rules** (block/ai-rules)
+
 - **What:** Manage AI rules, commands, and skills across multiple agents from one place
 - **Stars:** Notable (Block/Square backing)
 - **Mechanism:** Centralised configuration with distribution
@@ -158,36 +167,39 @@ OpenAI pushed AGENTS.md as an open standard in late 2025. It provides a single m
 #### Secondary Competitors (Adjacent)
 
 **6. AGENTS.md (standard)**
+
 - Not a tool but a standard. Competes by making per-tool configuration seem unnecessary — "just write one AGENTS.md." In practice, tools interpret it differently, and it doesn't cover governance, orchestration, or cross-session continuity.
 
 **7. LIDR-academy/ai-specs**
+
 - Comprehensive development rules and AI agent configurations designed to work with multiple copilots. Portable, importable into any project. More of a "rules library" than a sync tool.
 
 **8. snowdreamtech/template**
+
 - Enterprise-grade template claiming 50+ AI IDE support. Single source of truth for rules, workflows, and configurations. Template-based (copy/fork) rather than sync-engine-based.
 
 #### Runtime Orchestration (Different Category)
 
-**CrewAI, LangGraph, AG2 (AutoGen), Semantic Kernel** — These orchestrate agent *execution* at runtime (API calls, conversations, tool use). They don't manage agent *configuration* in repositories. Complementary to AgentKit Forge, not competing.
+**CrewAI, LangGraph, AG2 (AutoGen), Semantic Kernel** — These orchestrate agent _execution_ at runtime (API calls, conversations, tool use). They don't manage agent _configuration_ in repositories. Complementary to AgentKit Forge, not competing.
 
 ### 3.2 Competitive Evaluation Matrix
 
-| Dimension | AgentKit Forge | Ruler | Agent OS | ai-rules-sync | agent-rules | Block ai-rules | AGENTS.md |
-|-----------|---------------|-------|----------|---------------|-------------|----------------|-----------|
-| **Multi-tool output** | 15+ targets | 11 targets | 1 (Claude) | 8+ targets | 5 targets | Multi | 1 file |
-| **Spec-driven (YAML → output)** | Yes | No (MD only) | Partial | No | No | Partial | N/A |
-| **Agent personas** | 39 agents | None | None | None | None | None | None |
-| **Team orchestration** | 13 teams + task protocol | None | None | None | None | None | None |
-| **Skills/commands** | 30+ skills, 42 commands | None | Standards | Skills, commands | None | Commands, skills | None |
-| **CI drift validation** | Yes | None | None | None | CI copy | None | None |
-| **Governance (hooks)** | 14 shell hooks | None | None | None | None | None | None |
-| **Governance (guards)** | Roadmap (Phase 2) | None | None | None | None | None | None |
-| **Quality gates** | 5-phase lifecycle | None | None | None | None | None | None |
-| **Cross-session traces** | Roadmap (Phase 4) | None | None | None | None | None | None |
-| **`.readme.yaml`** | Roadmap (Phase 3) | None | None | None | None | None | None |
-| **Maturity** | Production | Stable | Active | Active | Early | Active | Standard |
-| **Effort to adopt** | Medium | Low | Low | Low | Low | Low | Trivial |
-| **Lock-in risk** | Medium (Node.js engine) | Low | Low | Low | Low | Low | None |
+| Dimension                       | AgentKit Forge           | Ruler        | Agent OS   | ai-rules-sync    | agent-rules | Block ai-rules   | AGENTS.md |
+| ------------------------------- | ------------------------ | ------------ | ---------- | ---------------- | ----------- | ---------------- | --------- |
+| **Multi-tool output**           | 15+ targets              | 11 targets   | 1 (Claude) | 8+ targets       | 5 targets   | Multi            | 1 file    |
+| **Spec-driven (YAML → output)** | Yes                      | No (MD only) | Partial    | No               | No          | Partial          | N/A       |
+| **Agent personas**              | 39 agents                | None         | None       | None             | None        | None             | None      |
+| **Team orchestration**          | 13 teams + task protocol | None         | None       | None             | None        | None             | None      |
+| **Skills/commands**             | 30+ skills, 42 commands  | None         | Standards  | Skills, commands | None        | Commands, skills | None      |
+| **CI drift validation**         | Yes                      | None         | None       | None             | CI copy     | None             | None      |
+| **Governance (hooks)**          | 14 shell hooks           | None         | None       | None             | None        | None             | None      |
+| **Governance (guards)**         | Roadmap (Phase 2)        | None         | None       | None             | None        | None             | None      |
+| **Quality gates**               | 5-phase lifecycle        | None         | None       | None             | None        | None             | None      |
+| **Cross-session traces**        | Roadmap (Phase 4)        | None         | None       | None             | None        | None             | None      |
+| **`.readme.yaml`**              | Roadmap (Phase 3)        | None         | None       | None             | None        | None             | None      |
+| **Maturity**                    | Production               | Stable       | Active     | Active           | Early       | Active           | Standard  |
+| **Effort to adopt**             | Medium                   | Low          | Low        | Low              | Low         | Low              | Trivial   |
+| **Lock-in risk**                | Medium (Node.js engine)  | Low          | Low        | Low              | Low         | Low              | None      |
 
 ### 3.3 Competitive Positioning Map
 
@@ -218,47 +230,47 @@ AgentKit Forge occupies the **upper-right quadrant** — many tools + complex ca
 
 ### Strengths
 
-| Strength | Evidence | Strategic Value |
-|----------|----------|-----------------|
-| **Only spec-driven multi-tool engine with CI validation** | 15+ output targets, drift check in CI | Hard to replicate — requires deep knowledge of each tool's format |
-| **Team orchestration is unique** | 13 teams, task delegation protocol, fan-out/chain handoff | No competitor offers development-time team coordination |
-| **39 agent personas** | Categorised agents with defined roles, responsibilities, context | Competitors offer rules; Forge offers full agent definitions |
-| **Quality gate framework** | 5-phase lifecycle with enforcement at each transition | Connects agent config to delivery discipline |
-| **Proven at scale** | Deployed across 6+ repos (chaufher, PuffWise, etc.) in production | Not theoretical — validated in real projects |
-| **Deep tool format knowledge** | Supports `.mdc` (Cursor), `.chatmode.md` (Copilot), `.agent.md` (GitHub), skill YAML, etc. | Barrier to entry — each format has undocumented quirks |
+| Strength                                                  | Evidence                                                                                   | Strategic Value                                                   |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| **Only spec-driven multi-tool engine with CI validation** | 15+ output targets, drift check in CI                                                      | Hard to replicate — requires deep knowledge of each tool's format |
+| **Team orchestration is unique**                          | 13 teams, task delegation protocol, fan-out/chain handoff                                  | No competitor offers development-time team coordination           |
+| **39 agent personas**                                     | Categorised agents with defined roles, responsibilities, context                           | Competitors offer rules; Forge offers full agent definitions      |
+| **Quality gate framework**                                | 5-phase lifecycle with enforcement at each transition                                      | Connects agent config to delivery discipline                      |
+| **Proven at scale**                                       | Deployed across 6+ repos (chaufher, PuffWise, etc.) in production                          | Not theoretical — validated in real projects                      |
+| **Deep tool format knowledge**                            | Supports `.mdc` (Cursor), `.chatmode.md` (Copilot), `.agent.md` (GitHub), skill YAML, etc. | Barrier to entry — each format has undocumented quirks            |
 
 ### Weaknesses
 
-| Weakness | Impact | Mitigation Path |
-|----------|--------|-----------------|
-| **High adoption effort** | New users face `.agentkit/` directory, spec YAML, sync engine, hooks — steep learning curve vs "just add a `ruler.md`" | Guided `/start` command, progressive disclosure, "lite mode" |
-| **Node.js dependency** | Sync engine requires Node.js/pnpm — excludes Python-only or Rust-only teams | Consider standalone binary (Go/Rust) or WASM-based engine |
-| **No portable governance** | Shell hooks only work for Claude Code; other tools bypass governance | Reflective guards (Phase 2 roadmap) |
-| **Generated file noise** | 300+ generated files across tool targets; PRs are overwhelming (see: PR #428 with 444 files) | Smarter sync (hash-based skip), `.gitattributes` to collapse diffs |
-| **No schema versioning** | Format changes would break existing consumers with no migration path | Add `version` field to all generated frontmatter |
-| **Timestamp churn** | Every sync bumps `last_updated` on all files even when content unchanged | Content-hash-based timestamps (only update if content actually changed) |
+| Weakness                   | Impact                                                                                                                 | Mitigation Path                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **High adoption effort**   | New users face `.agentkit/` directory, spec YAML, sync engine, hooks — steep learning curve vs "just add a `ruler.md`" | Guided `/start` command, progressive disclosure, "lite mode"            |
+| **Node.js dependency**     | Sync engine requires Node.js/pnpm — excludes Python-only or Rust-only teams                                            | Consider standalone binary (Go/Rust) or WASM-based engine               |
+| **No portable governance** | Shell hooks only work for Claude Code; other tools bypass governance                                                   | Reflective guards (Phase 2 roadmap)                                     |
+| **Generated file noise**   | 300+ generated files across tool targets; PRs are overwhelming (see: PR #428 with 444 files)                           | Smarter sync (hash-based skip), `.gitattributes` to collapse diffs      |
+| **No schema versioning**   | Format changes would break existing consumers with no migration path                                                   | Add `version` field to all generated frontmatter                        |
+| **Timestamp churn**        | Every sync bumps `last_updated` on all files even when content unchanged                                               | Content-hash-based timestamps (only update if content actually changed) |
 
 ### Opportunities
 
-| Opportunity | Market Signal | Action |
-|-------------|--------------|--------|
-| **Portable governance (guards)** | No competitor offers this; Mystira.workspace validated the pattern | ADR-10 Phase 2 — adopt reflective guards |
-| **`.readme.yaml` standard** | Token cost is a growing concern (62% of devs use AI tools daily) | ADR-10 Phase 3 — generate machine-readable metadata |
-| **ETH Zurich finding re: AGENTS.md** | Auto-generated context files may hinder agents | Position Forge's spec-validated, tool-specific output as superior to "dump everything in AGENTS.md" |
-| **Enterprise demand for governance** | 90% of Fortune 100 use AI coding tools; compliance is lagging | Governance-as-code offering for enterprise teams |
-| **Cross-session memory** | No tool solves agent continuity well; `/handoff` is a start | ADR-10 Phase 4 — traces + roadmaps |
-| **Plugin marketplace** | Claude Code plugins, Cursor extensions, Copilot agents are all growing | Package team definitions as distributable plugins |
-| **Standard body participation** | W3C Agent Protocol CG, AAIF — no configuration standard exists yet | Propose `.agents/` convention to AAIF or W3C |
+| Opportunity                          | Market Signal                                                          | Action                                                                                              |
+| ------------------------------------ | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Portable governance (guards)**     | No competitor offers this; Mystira.workspace validated the pattern     | ADR-10 Phase 2 — adopt reflective guards                                                            |
+| **`.readme.yaml` standard**          | Token cost is a growing concern (62% of devs use AI tools daily)       | ADR-10 Phase 3 — generate machine-readable metadata                                                 |
+| **ETH Zurich finding re: AGENTS.md** | Auto-generated context files may hinder agents                         | Position Forge's spec-validated, tool-specific output as superior to "dump everything in AGENTS.md" |
+| **Enterprise demand for governance** | 90% of Fortune 100 use AI coding tools; compliance is lagging          | Governance-as-code offering for enterprise teams                                                    |
+| **Cross-session memory**             | No tool solves agent continuity well; `/handoff` is a start            | ADR-10 Phase 4 — traces + roadmaps                                                                  |
+| **Plugin marketplace**               | Claude Code plugins, Cursor extensions, Copilot agents are all growing | Package team definitions as distributable plugins                                                   |
+| **Standard body participation**      | W3C Agent Protocol CG, AAIF — no configuration standard exists yet     | Propose `.agents/` convention to AAIF or W3C                                                        |
 
 ### Threats
 
-| Threat | Likelihood | Impact | Mitigation |
-|--------|-----------|--------|------------|
-| **IDE-native configuration** | High | Medium | IDEs add built-in agent config → sync tools become less needed. Counter: Forge syncs *across* IDEs, which IDE-native can't do |
-| **AGENTS.md becomes sufficient** | Medium | High | If tools converge on one format, multi-tool sync loses value. Counter: Forge offers orchestration, governance, and team coordination beyond rules sync |
-| **Ruler reaches feature parity** | Low | Medium | Ruler adds agents, skills, CI validation. Counter: Deep format knowledge and spec-driven architecture are hard to replicate |
-| **Enterprise vendor enters** | Medium | High | GitHub/JetBrains build native multi-tool config. Counter: Move fast on governance and orchestration — features enterprises want but vendors are slow to ship |
-| **Adoption friction kills growth** | Medium | High | Teams choose "good enough" simple tools over Forge's power. Counter: Lite mode, progressive adoption, one-command onboarding |
+| Threat                             | Likelihood | Impact | Mitigation                                                                                                                                                   |
+| ---------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **IDE-native configuration**       | High       | Medium | IDEs add built-in agent config → sync tools become less needed. Counter: Forge syncs _across_ IDEs, which IDE-native can't do                                |
+| **AGENTS.md becomes sufficient**   | Medium     | High   | If tools converge on one format, multi-tool sync loses value. Counter: Forge offers orchestration, governance, and team coordination beyond rules sync       |
+| **Ruler reaches feature parity**   | Low        | Medium | Ruler adds agents, skills, CI validation. Counter: Deep format knowledge and spec-driven architecture are hard to replicate                                  |
+| **Enterprise vendor enters**       | Medium     | High   | GitHub/JetBrains build native multi-tool config. Counter: Move fast on governance and orchestration — features enterprises want but vendors are slow to ship |
+| **Adoption friction kills growth** | Medium     | High   | Teams choose "good enough" simple tools over Forge's power. Counter: Lite mode, progressive adoption, one-command onboarding                                 |
 
 ---
 
@@ -266,44 +278,44 @@ AgentKit Forge occupies the **upper-right quadrant** — many tools + complex ca
 
 ### 5.1 Key Performance Indicators
 
-| # | KPI | Current Baseline | Target (6mo) | Measurement Method |
-|---|-----|-----------------|--------------|-------------------|
-| 1 | **Onboarded repos** | 6 | 15 | Count of repos with `.agentkit/` and passing CI drift check |
-| 2 | **Tool targets supported** | 15 | 18 | Count of render targets in sync engine |
-| 3 | **Agent persona count** | 39 | 45 | Count of agent definitions in spec |
-| 4 | **Team count** | 13 | 13 | Stable — quality over quantity |
-| 5 | **CI drift check pass rate** | ~90% (manual observation) | 99% | Ratio of drift-check-passing PRs to total PRs |
-| 6 | **Governance coverage** | Hooks only (1 platform) | Guards + hooks (all platforms) | Count of platforms with automated or reflective governance |
-| 7 | **Adoption effort (time to first sync)** | ~30 min | <10 min | Time from `git clone` to first successful `agentkit:sync` |
-| 8 | **Generated file churn ratio** | High (all files bump on sync) | <10% (content-changed only) | Ratio of content-changed files to timestamp-only-changed files per sync |
-| 9 | **Cross-session trace coverage** | 0% | 50% | Percentage of sessions that produce a structured trace |
-| 10 | **PR review noise ratio** | 444 files for 3 docs (PR #428) | <50 files for docs-only changes | Count of files in PR vs count of meaningful changes |
-| 11 | **External contributor onboarding** | 0 external contributors | 3 | Count of non-org contributors with merged PRs |
-| 12 | **Competitive feature gap** | 6+ unique features | 8+ unique features | Count of features in evaluation matrix where Forge = "Yes" and all competitors = "None" |
+| #   | KPI                                      | Current Baseline               | Target (6mo)                    | Measurement Method                                                                      |
+| --- | ---------------------------------------- | ------------------------------ | ------------------------------- | --------------------------------------------------------------------------------------- |
+| 1   | **Onboarded repos**                      | 6                              | 15                              | Count of repos with `.agentkit/` and passing CI drift check                             |
+| 2   | **Tool targets supported**               | 15                             | 18                              | Count of render targets in sync engine                                                  |
+| 3   | **Agent persona count**                  | 39                             | 45                              | Count of agent definitions in spec                                                      |
+| 4   | **Team count**                           | 13                             | 13                              | Stable — quality over quantity                                                          |
+| 5   | **CI drift check pass rate**             | ~90% (manual observation)      | 99%                             | Ratio of drift-check-passing PRs to total PRs                                           |
+| 6   | **Governance coverage**                  | Hooks only (1 platform)        | Guards + hooks (all platforms)  | Count of platforms with automated or reflective governance                              |
+| 7   | **Adoption effort (time to first sync)** | ~30 min                        | <10 min                         | Time from `git clone` to first successful `agentkit:sync`                               |
+| 8   | **Generated file churn ratio**           | High (all files bump on sync)  | <10% (content-changed only)     | Ratio of content-changed files to timestamp-only-changed files per sync                 |
+| 9   | **Cross-session trace coverage**         | 0%                             | 50%                             | Percentage of sessions that produce a structured trace                                  |
+| 10  | **PR review noise ratio**                | 444 files for 3 docs (PR #428) | <50 files for docs-only changes | Count of files in PR vs count of meaningful changes                                     |
+| 11  | **External contributor onboarding**      | 0 external contributors        | 3                               | Count of non-org contributors with merged PRs                                           |
+| 12  | **Competitive feature gap**              | 6+ unique features             | 8+ unique features              | Count of features in evaluation matrix where Forge = "Yes" and all competitors = "None" |
 
 ### 5.2 Benchmarks Against Competitors
 
-| KPI | AgentKit Forge | Ruler | Agent OS | ai-rules-sync |
-|-----|---------------|-------|----------|---------------|
-| Tool targets | **15** | 11 | 1 | 8 |
-| Adoption effort | 30 min | **2 min** | 5 min | 5 min |
-| Governance platforms | 1 | 0 | 0 | 0 |
-| CI validation | **Yes** | No | No | No |
-| Agent definitions | **39** | 0 | 0 | 0 |
-| Team orchestration | **13 teams** | 0 | 0 | 0 |
-| GitHub stars | ~50 | ~2,500 | ~200 | ~300 |
-| Generated file noise | High | **None** | None | None |
+| KPI                  | AgentKit Forge | Ruler     | Agent OS | ai-rules-sync |
+| -------------------- | -------------- | --------- | -------- | ------------- |
+| Tool targets         | **15**         | 11        | 1        | 8             |
+| Adoption effort      | 30 min         | **2 min** | 5 min    | 5 min         |
+| Governance platforms | 1              | 0         | 0        | 0             |
+| CI validation        | **Yes**        | No        | No       | No            |
+| Agent definitions    | **39**         | 0         | 0        | 0             |
+| Team orchestration   | **13 teams**   | 0         | 0        | 0             |
+| GitHub stars         | ~50            | ~2,500    | ~200     | ~300          |
+| Generated file noise | High           | **None**  | None     | None          |
 
 ### 5.3 Scoring Methodology
 
 Each KPI maps to a SWOT quadrant:
 
-| SWOT Category | KPIs | Weight |
-|---------------|------|--------|
-| **Strengths (protect)** | #2, #3, #4, #5, #12 | 30% |
-| **Weaknesses (fix)** | #7, #8, #10 | 30% |
-| **Opportunities (pursue)** | #6, #9, #11 | 25% |
-| **Threats (monitor)** | #1, #12 | 15% |
+| SWOT Category              | KPIs                | Weight |
+| -------------------------- | ------------------- | ------ |
+| **Strengths (protect)**    | #2, #3, #4, #5, #12 | 30%    |
+| **Weaknesses (fix)**       | #7, #8, #10         | 30%    |
+| **Opportunities (pursue)** | #6, #9, #11         | 25%    |
+| **Threats (monitor)**      | #1, #12             | 15%    |
 
 **Scoring per KPI:** 0 = below baseline, 1 = at baseline, 2 = at target, 3 = exceeds target.
 
@@ -342,15 +354,15 @@ Each KPI maps to a SWOT quadrant:
 
 Based on the metrics, the prioritised action list for product/strategy teams:
 
-| Priority | Action | KPIs Improved | Effort | Impact |
-|----------|--------|---------------|--------|--------|
-| **P0** | Content-hash-based sync (skip unchanged files) | #8, #10 | Medium | High — eliminates the #1 user complaint (noisy PRs) |
-| **P0** | One-command onboarding (`npx agentkit-forge init`) | #7, #11 | Medium | High — reduces adoption barrier from 30min to <5min |
-| **P1** | Reflective guards (ADR-10 Phase 2) | #6, #12 | Medium | High — unique feature, governance for all platforms |
-| **P1** | `.readme.yaml` generation (ADR-10 Phase 3) | #12 | Low | Medium — token cost reduction, machine-readable metadata |
-| **P2** | Cross-session traces (ADR-10 Phase 4) | #9 | Low-Med | Medium — agent continuity improvement |
-| **P2** | Publish as distributable package (npm/brew) | #7, #11 | Medium | High — prerequisite for external adoption |
-| **P3** | Schema formalisation (ADR-10 Phase 5) | #11, #12 | Medium | Medium — enables ecosystem adoption |
+| Priority | Action                                             | KPIs Improved | Effort  | Impact                                                   |
+| -------- | -------------------------------------------------- | ------------- | ------- | -------------------------------------------------------- |
+| **P0**   | Content-hash-based sync (skip unchanged files)     | #8, #10       | Medium  | High — eliminates the #1 user complaint (noisy PRs)      |
+| **P0**   | One-command onboarding (`npx agentkit-forge init`) | #7, #11       | Medium  | High — reduces adoption barrier from 30min to <5min      |
+| **P1**   | Reflective guards (ADR-10 Phase 2)                 | #6, #12       | Medium  | High — unique feature, governance for all platforms      |
+| **P1**   | `.readme.yaml` generation (ADR-10 Phase 3)         | #12           | Low     | Medium — token cost reduction, machine-readable metadata |
+| **P2**   | Cross-session traces (ADR-10 Phase 4)              | #9            | Low-Med | Medium — agent continuity improvement                    |
+| **P2**   | Publish as distributable package (npm/brew)        | #7, #11       | Medium  | High — prerequisite for external adoption                |
+| **P3**   | Schema formalisation (ADR-10 Phase 5)              | #11, #12      | Medium  | Medium — enables ecosystem adoption                      |
 
 ---
 

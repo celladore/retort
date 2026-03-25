@@ -1,9 +1,9 @@
 ---
 name: 'TEAMFORGE'
 description: 'Team TEAMFORGE — Meta-team — creates, validates, and deploys new agent team specifications'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -15,7 +15,7 @@ last_updated: '2026-03-21'
 # Team: TEAMFORGE
 
 **Focus**: Meta-team — creates, validates, and deploys new agent team specifications
-**Scope**: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/\*\*
+**Scope**: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/**
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/\*\*
+- Own all code within scope: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/**
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

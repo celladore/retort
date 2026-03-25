@@ -101,7 +101,7 @@ describe('fresh install (no node_modules)', () => {
         cwd: projectRoot,
         timeout: 120_000,
       });
-      expect(result).toContain('[agentkit:sync]');
+      expect(result).toContain('[retort:sync]');
       expect(result).toContain('Dry-run');
       expect(
         existsSync(join(projectRoot, '.agentkit', 'node_modules', 'js-yaml', 'package.json'))

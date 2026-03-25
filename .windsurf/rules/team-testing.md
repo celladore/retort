@@ -1,11 +1,11 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-21 -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
 <!-- Format: Plain Markdown team rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
 # Team: TESTING
 
 **Focus**: Unit, E2E, integration tests
-**Scope**: **/_.test._, **/_.spec._, tests/**, e2e/**, playwright/\*\*
+**Scope**: **/*.test.*, **/*.spec.*, tests/**, e2e/**, playwright/**
 
 ## Persona
 

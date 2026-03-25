@@ -1,9 +1,9 @@
 ---
 name: 'validate'
 description: 'Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

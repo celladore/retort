@@ -1,9 +1,9 @@
 ---
 name: 'scaffold'
 description: 'Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

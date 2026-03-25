@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'New user entry point. Detects repository state, shows contextual status, and guides users to the right command or team for their goal. Read-only — suggests commands but does not execute them.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -45,16 +45,16 @@ Gather these signals silently:
 
 Print a concise status table:
 
-| Item           | Status                              |
-| -------------- | ----------------------------------- |
-| AgentKit Forge | Initialised / Not initialised       |
-| Sync           | Up to date / Needs sync / Never run |
-| Discovery      | Complete / Not run                  |
-| Orchestrator   | Phase N (name) / No prior session   |
-| Backlog        | N items / Empty                     |
-| Active tasks   | N tasks / None                      |
-| Branch         | branch-name                         |
-| Working tree   | Clean / N uncommitted changes       |
+| Item | Status |
+| --- | --- |
+| AgentKit Forge | Initialised / Not initialised |
+| Sync | Up to date / Needs sync / Never run |
+| Discovery | Complete / Not run |
+| Orchestrator | Phase N (name) / No prior session |
+| Backlog | N items / Empty |
+| Active tasks | N tasks / None |
+| Branch | branch-name |
+| Working tree | Clean / N uncommitted changes |
 
 ## Phase 3: Guided Choices
 
@@ -82,12 +82,11 @@ If the user describes a task or asks which team to use, **build the routing tabl
 
 From the discovered teams, build a routing table with three columns:
 
-| I want to...                           | Team        | Command      |
-| -------------------------------------- | ----------- | ------------ |
+| I want to... | Team | Command |
+| --- | --- | --- |
 | (inferred from team description/scope) | (team name) | `/team-<id>` |
 
 Map the team's `description` and `scope` patterns to plain-language "I want to..." rows. For example:
-
 - A team with scope `apps/api/**, services/**` and description "API, services, core logic" → "Build or fix backend/API logic"
 - A team with scope `src/components/**, src/pages/**` and description "UI, components, PWA" → "Build or fix UI components"
 
@@ -130,3 +129,4 @@ This command is **read-only**. It reads state files for context detection but do
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

@@ -1,9 +1,10 @@
 ---
+
 description: 'Risk-aware infrastructure and codebase evaluation against reliability, cost, and scale fitness. Scores eight weighted dimensions (0–5 each), enforces hard gates for critical safety properties, and produces a scored summary with narrative risk analysis. Designed for quarterly reassessment, pre-funding due diligence, and architectural decision support. Gated behind the evaluation.infraEval project.yaml flag.'
 allowed-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -17,3 +18,4 @@ last_updated: '2026-03-21'
 > **This command is not enabled.** To enable infrastructure evaluation, set `evaluation.infraEval: true` in your project's `.agentkit/spec/project.yaml`, then run `pnpm -C .agentkit agentkit:sync` to regenerate.
 
 Stop here. Do not proceed with the evaluation.
+

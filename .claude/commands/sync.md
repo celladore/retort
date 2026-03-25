@@ -1,9 +1,10 @@
 ---
-description: 'Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
+
+description: 'Regenerates all AI tool configurations from the Retort spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
 allowed-tools: Bash(node *), Bash(pnpm *), Bash(git *), Read, Glob
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -14,7 +15,7 @@ last_updated: '2026-03-21'
 
 # /sync — Regenerate AI Tool Configurations
 
-Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.
+Regenerates all AI tool configurations from the Retort spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.
 
 ## Usage
 
@@ -38,12 +39,12 @@ node .agentkit/engines/node/src/cli.mjs sync
 
 ## Flags
 
-| Flag              | Effect                                                                                               |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Flag | Effect |
+|------|--------|
 | `--only <target>` | Sync only one platform (claude, cursor, copilot, windsurf, codex, gemini, cline, roo, warp, ai, mcp) |
-| `--overwrite`     | Overwrite project-owned (scaffold-once) files                                                        |
-| `--diff`          | Preview changes without writing                                                                      |
-| `--no-clean`      | Keep orphaned files that would normally be removed                                                   |
+| `--overwrite` | Overwrite project-owned (scaffold-once) files |
+| `--diff` | Preview changes without writing |
+| `--no-clean` | Keep orphaned files that would normally be removed |
 
 ## Post-Sync Checklist
 

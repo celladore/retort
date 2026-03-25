@@ -1,9 +1,9 @@
 ---
 name: 'Frontend Engineer'
-description: 'Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experience. Champions accessibility, performance, and responsive design.'
-generated_by: 'agentkit-forge'
+description: "Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experience. Champions accessibility, performance, and responsive design."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,12 +32,12 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- apps/web/\*\*
-- apps/marketing/\*\*
-- src/client/\*\*
-- components/\*\*
-- styles/\*\*
-- public/\*\*
+- apps/web/**
+- apps/marketing/**
+- src/client/**
+- components/**
+- styles/**
+- public/**
 
 ## Responsibilities
 
@@ -74,7 +74,6 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 ## Examples
 
 ### Accessible interactive component
-
 ```
 <button
   type="button"

@@ -1,9 +1,9 @@
 ---
 name: 'cost'
 description: 'Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

@@ -8,7 +8,7 @@
 
 | Term                 | Definition                                                                                                              |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Retort**   | An opinionated project scaffolding and documentation generation tool.                                                   |
+| **Retort**           | An opinionated project scaffolding and documentation generation tool.                                                   |
 | **Spec**             | The source-of-truth configuration that defines project structure and templates.                                         |
 | **Overlay**          | A per-project customisation layer applied on top of the base spec.                                                      |
 | **Sync**             | The process of regenerating files from the spec and overlays (`agentkit:sync`).                                         |

@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'Displays a consolidated backlog view from all sources (external tracker, discovery, healthcheck, code TODOs, review findings, manual entries). Supports filtering and multiple output formats for CLI and future UI consumption.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -48,3 +48,4 @@ When invoked, follow the Retort orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

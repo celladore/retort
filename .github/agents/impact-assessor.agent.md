@@ -1,9 +1,9 @@
 ---
 name: 'Impact Assessor'
-description: 'Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template changes, spec modifications, or engine updates before they ship.'
-generated_by: 'agentkit-forge'
+description: "Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template changes, spec modifications, or engine updates before they ship."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,8 +32,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- .agentkit/spec/\*\*
-- .agentkit/templates/\*\*
+- .agentkit/spec/**
+- .agentkit/templates/**
 
 ## Responsibilities
 

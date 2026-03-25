@@ -25,17 +25,17 @@ Adopt the `[Category] Description` pattern for all workflow `name:` fields. This
 
 ### Naming Map
 
-| File                             | Current `name:`            | New `name:`                           | Category   |
-| -------------------------------- | -------------------------- | ------------------------------------- | ---------- |
-| `ci.yml`                         | `CI`                       | `[CI] Test & Validate`                | CI         |
-| `branch-protection.yml`          | `Branch Protection`        | `[Governance] Branch Rules`           | Governance |
+| File                             | Current `name:`            | New `name:`                         | Category   |
+| -------------------------------- | -------------------------- | ----------------------------------- | ---------- |
+| `ci.yml`                         | `CI`                       | `[CI] Test & Validate`              | CI         |
+| `branch-protection.yml`          | `Branch Protection`        | `[Governance] Branch Rules`         | Governance |
 | `block-agentkit-changes.yml`     | `block-agentkit-changes`   | `[Governance] Block Retort Changes` | Governance |
-| `template-protection.yml`        | `Template Protection`      | `[Framework] Template Protection`     | Framework  |
-| `codeql.yml`                     | `CodeQL`                   | `[Security] CodeQL Analysis`          | Security   |
-| `semgrep.yml`                    | `Semgrep (Advisory)`       | `[Security] Semgrep Scan`             | Security   |
-| `documentation-quality.yml`      | `Documentation Quality`    | `[Docs] Quality Check`                | Docs       |
-| `documentation-validation.yml`   | `Documentation Validation` | `[Docs] PR Validation`                | Docs       |
-| `ai-framework-ci.yml` (template) | `AI Framework Validation`  | `[Framework] AI Config Validation`    | Framework  |
+| `template-protection.yml`        | `Template Protection`      | `[Framework] Template Protection`   | Framework  |
+| `codeql.yml`                     | `CodeQL`                   | `[Security] CodeQL Analysis`        | Security   |
+| `semgrep.yml`                    | `Semgrep (Advisory)`       | `[Security] Semgrep Scan`           | Security   |
+| `documentation-quality.yml`      | `Documentation Quality`    | `[Docs] Quality Check`              | Docs       |
+| `documentation-validation.yml`   | `Documentation Validation` | `[Docs] PR Validation`              | Docs       |
+| `ai-framework-ci.yml` (template) | `AI Framework Validation`  | `[Framework] AI Config Validation`  | Framework  |
 
 ### Cascading Updates Required
 
