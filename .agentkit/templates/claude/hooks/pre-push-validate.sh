@@ -89,8 +89,8 @@ fi
 
 # -- Emit block decision if errors found ----------------------------------
 if [[ -n "$ERRORS" ]]; then
-    jq -n --arg reason "$(echo -e "$ERRORS")" \
-        '{ decision: "block", reason: $reason }'
+    # Pass reason via stdin to avoid E2BIG on Windows Git Bash (issue #453)
+    printf '%b' "$ERRORS" | jq -Rs '{"decision": "block", "reason": .}'
     exit 0
 fi
 
