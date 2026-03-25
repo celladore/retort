@@ -1,6 +1,7 @@
 # CI/CD Workflow Patterns
 
 Copy-paste templates for common CI/CD scenarios. All patterns follow these conventions:
+
 - Concurrency group cancels in-progress runs on new push
 - `fetch-depth: 1` unless full history is needed
 - Dependency cache keyed on lockfile hash
@@ -215,7 +216,7 @@ jobs:
   deploy-staging:
     needs: deploy-dev
     runs-on: ubuntu-latest
-    environment: staging   # requires reviewer approval in GitHub settings
+    environment: staging # requires reviewer approval in GitHub settings
     steps:
       - uses: actions/checkout@v4
       # deploy steps
@@ -223,7 +224,7 @@ jobs:
   deploy-prod:
     needs: deploy-staging
     runs-on: ubuntu-latest
-    environment: production  # requires reviewer approval + wait timer
+    environment: production # requires reviewer approval + wait timer
     steps:
       - uses: actions/checkout@v4
       # deploy steps

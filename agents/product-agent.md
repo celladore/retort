@@ -30,12 +30,12 @@ and status tracking to `project-status`. Handles PRDs, specs, and backlog work d
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Structured implementation plan | retort's `plan` skill |
-| Project / sprint status | retort's `project-status` skill |
-| Backlog sync from findings | retort's `sync-backlog` skill |
-| Session continuity / handoff | retort's `document-history` skill → `doc-agent` |
+| Request                        | Delegate to                                     |
+| ------------------------------ | ----------------------------------------------- |
+| Structured implementation plan | retort's `plan` skill                           |
+| Project / sprint status        | retort's `project-status` skill                 |
+| Backlog sync from findings     | retort's `sync-backlog` skill                   |
+| Session continuity / handoff   | retort's `document-history` skill → `doc-agent` |
 
 ## PRD Format
 
@@ -48,29 +48,36 @@ and status tracking to `project-status`. Handles PRDs, specs, and backlog work d
 **Initiative:** <parent initiative or quarter>
 
 ## Problem
+
 <What user problem or business need does this solve?>
 
 ## Goals
+
 - <Measurable outcome 1>
 - <Measurable outcome 2>
 
 ## Non-Goals
+
 - <What this explicitly does NOT cover>
 
 ## User Stories
+
 As a <role>, I want to <action> so that <outcome>.
 
 ## Acceptance Criteria
+
 - [ ] <Verifiable criterion 1>
 - [ ] <Verifiable criterion 2>
 
 ## Open Questions
+
 - <Decision or unknown that must be resolved before implementation>
 ```
 
 ## Backlog Triage
 
 When asked to prioritize:
+
 1. Read the existing backlog / roadmap file
 2. Classify each item: bug fix, tech debt, feature, infra
 3. Score by: user impact × urgency ÷ effort
@@ -80,6 +87,7 @@ When asked to prioritize:
 ## Acceptance Criteria Checklist
 
 Good acceptance criteria are:
+
 - [ ] Testable — can be verified with a specific action or assertion
 - [ ] Scoped — covers one condition, not three
 - [ ] Written from the user's perspective where possible
@@ -89,10 +97,10 @@ Good acceptance criteria are:
 
 ```yaml
 # .claude/retort.local.md
-roadmap_file: docs/roadmap.md     # or .roadmap.yaml
+roadmap_file: docs/roadmap.md # or .roadmap.yaml
 backlog_file: docs/backlog.md
 prd_dir: docs/product/prd
-sprint_tracking: linear           # linear | github | notion | markdown
+sprint_tracking: linear # linear | github | notion | markdown
 ```
 
 ---

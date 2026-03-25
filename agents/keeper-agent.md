@@ -55,6 +55,7 @@ grep -r "ChangedPathOrSymbol" .claude/agents/ 2>/dev/null || \
 ### 3. Verify References
 
 For each affected agent:
+
 - [ ] Referenced file paths still exist
 - [ ] Named classes/methods/components still exist in source
 - [ ] Described conventions still match current code style
@@ -70,8 +71,10 @@ For each affected agent:
 ### 5. Record Lessons Learned
 
 New patterns established during implementation belong in agent files. Format:
+
 ```markdown
 <!-- Added by keeper after [brief work description] on YYYY-MM-DD -->
+
 - [Pattern/rule/convention established]
 ```
 

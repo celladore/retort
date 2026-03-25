@@ -31,6 +31,7 @@ skill. Handles all other documentation tasks directly.
 ## Dual-File Convention
 
 Every documented component should have two files:
+
 - `README.md` — human-readable, markdown prose
 - `.readme.yaml` — agent-readable structured metadata
 
@@ -39,18 +40,19 @@ When creating or updating docs for any module, maintain both. Read
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| "document what we built this session" | retort's `document-history` skill |
-| "update CLAUDE.md" | retort's `document-history` skill + direct edit |
-| "write/update README" | Direct — follow dual-file convention |
-| "write an ADR" | retort's `plan` skill for context, then direct |
-| "API docs / inline docs" | Direct — read source, generate docstrings/OpenAPI |
-| "doc gap analysis" | retort's `project-review` skill + direct scan |
+| Request                               | Delegate to                                       |
+| ------------------------------------- | ------------------------------------------------- |
+| "document what we built this session" | retort's `document-history` skill                 |
+| "update CLAUDE.md"                    | retort's `document-history` skill + direct edit   |
+| "write/update README"                 | Direct — follow dual-file convention              |
+| "write an ADR"                        | retort's `plan` skill for context, then direct    |
+| "API docs / inline docs"              | Direct — read source, generate docstrings/OpenAPI |
+| "doc gap analysis"                    | retort's `project-review` skill + direct scan     |
 
 ## Doc Gap Analysis
 
 When asked what's missing:
+
 1. Scan for source files without corresponding README or inline docs
 2. Check for undocumented public APIs (C#: missing XML doc comments; TS: missing JSDoc; Rust: missing `///`)
 3. Check ADR coverage — significant architectural decisions should have a record in `docs/architecture/decisions/`
@@ -66,12 +68,15 @@ When asked what's missing:
 **Deciders:** <names or teams>
 
 ## Context
+
 <Why this decision was needed>
 
 ## Decision
+
 <What was decided>
 
 ## Consequences
+
 <Trade-offs, follow-up work>
 ```
 
@@ -79,7 +84,7 @@ When asked what's missing:
 
 ```yaml
 # .claude/retort.local.md
-docs_style: verbose   # verbose | concise
+docs_style: verbose # verbose | concise
 adr_dir: docs/architecture/decisions
 history_dir: docs/history
 ```

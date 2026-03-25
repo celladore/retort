@@ -51,6 +51,7 @@ Infrastructure adapter (.NET / Python / Node)
 ## Contract Development Patterns
 
 **Access control (OpenZeppelin):**
+
 ```solidity
 import "@openzeppelin/contracts/access/AccessControl.sol";
 // All state-changing functions must be gated
@@ -58,6 +59,7 @@ function mint(address to, uint256 id) external onlyRole(MINTER_ROLE) { ... }
 ```
 
 **Checks-Effects-Interactions (reentrancy prevention):**
+
 ```solidity
 // ALWAYS: check → update state → interact externally
 balances[msg.sender] -= amount;  // state first
@@ -65,6 +67,7 @@ balances[msg.sender] -= amount;  // state first
 ```
 
 **Events for all state changes** (auditability + off-chain indexing):
+
 ```solidity
 emit Transfer(from, to, amount);
 ```
@@ -72,6 +75,7 @@ emit Transfer(from, to, amount);
 ## Contract Review Checklist
 
 Before any contract change:
+
 - [ ] No reentrancy: state before external calls
 - [ ] All state-changing functions have access control
 - [ ] Solidity 0.8+ (overflow protection) or SafeMath

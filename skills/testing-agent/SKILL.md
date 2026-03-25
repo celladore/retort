@@ -27,11 +27,11 @@ Invoke them explicitly (`use the test-generator agent`) or they activate on matc
 
 Detect the right test command from project signals:
 
-| Signal | Command |
-|---|---|
-| `*.csproj` with xUnit refs | `dotnet test` |
+| Signal                     | Command                          |
+| -------------------------- | -------------------------------- |
+| `*.csproj` with xUnit refs | `dotnet test`                    |
 | `vitest` in `package.json` | `pnpm test` or `pnpm vitest run` |
-| `Cargo.toml` in crate root | `cargo test` |
+| `Cargo.toml` in crate root | `cargo test`                     |
 
 Always run from the appropriate root (solution root for .NET, package root for TS, crate root for Rust).
 
@@ -45,6 +45,7 @@ Context determines scope — a single service change warrants scoped; a shared l
 ### Failure Triage
 
 When tests fail:
+
 1. Read the full error output — do not truncate
 2. Identify whether the failure is: compilation error, assertion failure, or test infrastructure issue
 3. For assertion failures: check if the implementation changed or the test is stale
@@ -55,6 +56,7 @@ When tests fail:
 Run coverage commands from `references/mystira-stacks.md` for stack-specific flags.
 
 Minimum workflow before a PR:
+
 1. Identify files changed in the branch (`git diff main --name-only`)
 2. Run coverage for affected projects
 3. Report files below threshold

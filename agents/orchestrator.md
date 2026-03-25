@@ -26,27 +26,27 @@ Delegates to retort's `orchestrate`, `discover`, `plan`, and `start` skills.
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Assess repo state | retort's `discover` skill |
-| Plan implementation | retort's `plan` skill |
-| Full orchestration | retort's `orchestrate` skill |
-| Session start / orientation | retort's `start` skill |
-| Project status | retort's `project-status` skill |
-| Backlog sync | retort's `sync-backlog` skill |
+| Request                     | Delegate to                     |
+| --------------------------- | ------------------------------- |
+| Assess repo state           | retort's `discover` skill       |
+| Plan implementation         | retort's `plan` skill           |
+| Full orchestration          | retort's `orchestrate` skill    |
+| Session start / orientation | retort's `start` skill          |
+| Project status              | retort's `project-status` skill |
+| Backlog sync                | retort's `sync-backlog` skill   |
 
 ## Agent Delegation Map
 
 Route work to specialist agents based on what's needed:
 
-| Work type | Agent |
-|---|---|
+| Work type               | Agent                              |
+| ----------------------- | ---------------------------------- |
 | Tests missing / failing | `test-generator`, `coverage-guard` |
-| Docs missing / outdated | `doc-agent` |
-| CI pipeline broken | `ci-agent` |
-| Code quality / review | `quality-agent` |
-| Security concerns | `security-agent` |
-| New agent team needed | `team-forge` |
+| Docs missing / outdated | `doc-agent`                        |
+| CI pipeline broken      | `ci-agent`                         |
+| Code quality / review   | `quality-agent`                    |
+| Security concerns       | `security-agent`                   |
+| New agent team needed   | `team-forge`                       |
 
 ## Orchestration Principles
 

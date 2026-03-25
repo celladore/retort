@@ -37,6 +37,7 @@ awareness on top.
    - Rust: public functions without `#[cfg(test)]` blocks
 
 3. **Show a plan before writing anything:**
+
    ```
    Target: <file>  |  Framework: <detected>  |  New file: <test path>
    Proposed tests: <list with priority>

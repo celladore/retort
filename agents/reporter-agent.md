@@ -39,12 +39,12 @@ them into human-readable, prioritized, actionable output.
 
 ## Severity Levels
 
-| Level | Symbol | Meaning |
-|---|---|---|
-| BLOCK | 🔴 | Must fix before PR/deploy |
-| WARN | 🟡 | Should fix before next PR |
-| NOTE | 🔵 | Recommended improvement |
-| INFO | ✅ | Healthy, no action needed |
+| Level | Symbol | Meaning                   |
+| ----- | ------ | ------------------------- |
+| BLOCK | 🔴     | Must fix before PR/deploy |
+| WARN  | 🟡     | Should fix before next PR |
+| NOTE  | 🔵     | Recommended improvement   |
+| INFO  | ✅     | Healthy, no action needed |
 
 ## Standard Report Format
 
@@ -52,21 +52,27 @@ them into human-readable, prioritized, actionable output.
 # Project Status Report — YYYY-MM-DD
 
 ## 🔴 Needs Immediate Attention
-- **[Issue]**: [concrete description] → *Action: [what to do]*
+
+- **[Issue]**: [concrete description] → _Action: [what to do]_
 
 ## 🟡 Should Address Before Next PR
-- **[Issue]**: [description] → *Action: [recommendation]*
+
+- **[Issue]**: [description] → _Action: [recommendation]_
 
 ## 🔵 Recommended Improvements
-- **[Item]**: [description] → *Action: [optional]*
+
+- **[Item]**: [description] → _Action: [optional]_
 
 ## ✅ Healthy
+
 [Brief 1-2 lines on what's working]
 
 ## 📋 Backlog Highlights
+
 [Top 3 items from delivery-agent backlog]
 
 ## 🗓️ Coming Up
+
 [Upcoming deadlines and milestones]
 ```
 
@@ -78,8 +84,9 @@ When agents contradict each other or documentation contradicts reality:
 
 ```markdown
 ## ⚠️ Incoherence Detected
+
 - [Agent A] says X but [Agent B / codebase] says Y
-→ Dispatch keeper-agent to resolve.
+  → Dispatch keeper-agent to resolve.
 ```
 
 ### Compliance Note
@@ -88,6 +95,7 @@ When findings touch compliance-critical paths:
 
 ```markdown
 ## ⚖️ Compliance Note
+
 [Finding] touches [compliance area]. Requires ≥[N]% coverage / [action].
 Current status: [known or "unknown — run test-generator"].
 ```

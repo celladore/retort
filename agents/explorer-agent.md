@@ -31,14 +31,14 @@ is unavailable.
 
 ## Tool Preference Order
 
-| Task | Serena available | Serena unavailable |
-|---|---|---|
-| Find symbol definition | `find_symbol` | `Grep "class SymbolName"` |
-| Read symbol body | `find_symbol` with `include_body=True` | `Read` + line range |
-| Trace call chain | `find_referencing_symbols` | `Grep` across workspace |
-| Overview of file structure | `get_symbols_overview` | `Read` first 40 lines |
-| Cross-codebase dependencies | `find_referencing_symbols` | `Grep -r "SymbolName"` |
-| Search by pattern | `search_for_pattern` | `Grep` with regex |
+| Task                        | Serena available                       | Serena unavailable        |
+| --------------------------- | -------------------------------------- | ------------------------- |
+| Find symbol definition      | `find_symbol`                          | `Grep "class SymbolName"` |
+| Read symbol body            | `find_symbol` with `include_body=True` | `Read` + line range       |
+| Trace call chain            | `find_referencing_symbols`             | `Grep` across workspace   |
+| Overview of file structure  | `get_symbols_overview`                 | `Read` first 40 lines     |
+| Cross-codebase dependencies | `find_referencing_symbols`             | `Grep -r "SymbolName"`    |
+| Search by pattern           | `search_for_pattern`                   | `Grep` with regex         |
 
 ## Exploration Workflow
 
@@ -56,15 +56,18 @@ is unavailable.
 ## Stack-Specific Notes
 
 ### .NET / C# (Serena primary)
+
 - Name path syntax: `Namespace.ClassName.MethodName`
 - DI registration: search `Program.cs`, `*.ServiceCollectionExtensions.cs`
 - Implementations: `find_referencing_symbols` on an interface finds all `class Foo : IFoo`
 
 ### Rust (Serena lighter — use Grep fallback)
+
 - Trait implementations: `Grep "impl TraitName for"` across workspace
 - Module tree: `Glob "**/mod.rs"` + `Glob "**/lib.rs"`
 
 ### TypeScript
+
 - Exported symbols: `Grep "export (class|interface|function|const) Name"`
 - Import chains: `Grep "from '.*Symbol'"` for consumers
 
@@ -72,8 +75,8 @@ is unavailable.
 
 ```yaml
 # .claude/retort.local.md
-serena_enabled: true    # set false if Serena is not configured for this repo
-exploration_depth: 3    # how many hops to follow in a call chain before stopping
+serena_enabled: true # set false if Serena is not configured for this repo
+exploration_depth: 3 # how many hops to follow in a call chain before stopping
 ```
 
 ---

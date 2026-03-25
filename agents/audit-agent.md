@@ -46,12 +46,12 @@ Only **BLOCK** findings must be resolved. Omit empty severity sections.
 
 ## Task Routing
 
-| Audit type | Delegate to |
-|---|---|
-| Full quality gate | retort's `check` skill |
-| Security deep-dive | `security-agent` |
-| Test generation for gaps | `test-generator` |
-| Doc writing for gaps | `doc-agent` |
+| Audit type               | Delegate to            |
+| ------------------------ | ---------------------- |
+| Full quality gate        | retort's `check` skill |
+| Security deep-dive       | `security-agent`       |
+| Test generation for gaps | `test-generator`       |
+| Doc writing for gaps     | `doc-agent`            |
 
 ## Core Gates (Generic)
 
@@ -63,6 +63,7 @@ Check that the project's layering conventions were not violated. Read the projec
 `Architecture` section before auditing — every project has different rules.
 
 Common violations to grep for:
+
 - Business logic in controllers / handlers
 - Infrastructure types referenced from domain layer
 - DTOs / contracts defined in wrong layer
@@ -70,6 +71,7 @@ Common violations to grep for:
 ### Gate 2: Convention Compliance
 
 Check the project's CLAUDE.md `Code Style` section for the relevant language rules. Focus on:
+
 - Formatting (IDE/formatter enforces most of this — skip if formatter is configured)
 - Nullability and error handling patterns
 - Async / sync correctness (no sync-over-async)
@@ -97,6 +99,7 @@ git diff --name-only dev...HEAD | grep -v "test\|spec\|Test\|Spec"
 ### Gate 5: Documentation Completeness
 
 For significant feature or API changes:
+
 - [ ] New public APIs have inline docs (XML comments, JSDoc, Rust `///`)
 - [ ] README / `.readme.yaml` updated if module structure changed
 - [ ] Significant architectural decisions have or warrant an ADR

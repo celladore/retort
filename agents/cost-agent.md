@@ -31,25 +31,26 @@ without blocking feature delivery.
 
 ## Scope
 
-| Domain | What this agent covers |
-|---|---|
-| LLM / AI costs | Model selection, token optimization, prompt efficiency, docket integration |
+| Domain               | What this agent covers                                                       |
+| -------------------- | ---------------------------------------------------------------------------- |
+| LLM / AI costs       | Model selection, token optimization, prompt efficiency, docket integration   |
 | Cloud infrastructure | Compute sizing, storage tiers, GitHub Actions minutes, unnecessary resources |
-| Dependency costs | Paid APIs, third-party SaaS, license overhead |
+| Dependency costs     | Paid APIs, third-party SaaS, license overhead                                |
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| LLM cost tracking / dashboards | docket integration (`phoenixvc/docket`) |
-| AI gateway routing | sluice configuration (`phoenixvc/sluice`) |
-| CI/CD cost review | `ci-agent` → workflow review checklist |
-| Infrastructure cost review | `infra-agent` → resource audit |
+| Request                        | Delegate to                                    |
+| ------------------------------ | ---------------------------------------------- |
+| LLM cost tracking / dashboards | docket integration (`phoenixvc/docket`)        |
+| AI gateway routing             | sluice configuration (`phoenixvc/sluice`)      |
+| CI/CD cost review              | `ci-agent` → workflow review checklist         |
+| Infrastructure cost review     | `infra-agent` → resource audit                 |
 | Implementation of cost changes | Relevant specialist agent (backend, infra, ci) |
 
 ## LLM Cost Optimization Principles
 
 When reviewing AI/LLM usage:
+
 1. **Right-size the model** — use the smallest model that meets the quality bar for each call type
 2. **Cache aggressively** — identical prompts in a session should not re-invoke the API
 3. **Trim context windows** — strip irrelevant history before each call; measure actual token usage
@@ -58,17 +59,18 @@ When reviewing AI/LLM usage:
 
 ## Model Selection Guide
 
-| Use case | Recommended tier | Reason |
-|---|---|---|
-| Long-form story generation | Flagship (Opus / GPT-4o) | Quality-sensitive, user-visible |
+| Use case                        | Recommended tier                | Reason                                |
+| ------------------------------- | ------------------------------- | ------------------------------------- |
+| Long-form story generation      | Flagship (Opus / GPT-4o)        | Quality-sensitive, user-visible       |
 | Structured extraction / parsing | Mid-tier (Sonnet / GPT-4o-mini) | Instruction-following, not creativity |
-| Classification / routing | Fast tier (Haiku / GPT-3.5) | High volume, simple task |
-| Embeddings | Dedicated embedding model | Never use chat model for embeddings |
-| Code generation | Mid-tier or code-specialized | Quality matters, cost is secondary |
+| Classification / routing        | Fast tier (Haiku / GPT-3.5)     | High volume, simple task              |
+| Embeddings                      | Dedicated embedding model       | Never use chat model for embeddings   |
+| Code generation                 | Mid-tier or code-specialized    | Quality matters, cost is secondary    |
 
 ## CI/CD Cost Checklist
 
 When GitHub Actions minutes are high:
+
 - [ ] Are expensive jobs running on push to all branches instead of PR + schedule?
 - [ ] Are Windows/macOS runners used where Linux would work?
 - [ ] Are there missing `paths:` filters causing full-suite runs on doc-only changes?
@@ -79,10 +81,10 @@ When GitHub Actions minutes are high:
 
 ```yaml
 # .claude/retort.local.md
-cost_tracking: docket       # docket | none
-llm_gateway: sluice         # sluice | direct
-monthly_llm_budget: 0       # USD; 0 = no limit set
-alert_threshold: 0.80       # alert at 80% of budget
+cost_tracking: docket # docket | none
+llm_gateway: sluice # sluice | direct
+monthly_llm_budget: 0 # USD; 0 = no limit set
+alert_threshold: 0.80 # alert at 80% of budget
 ```
 
 ---

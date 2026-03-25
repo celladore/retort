@@ -27,17 +27,18 @@ Code quality specialist. Delegates gate execution to retort's `review`, `check`,
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Full quality gate | retort's `check` skill |
-| Code review | retort's `review` skill |
-| Format code | retort's `format` skill |
-| Pre-merge validation | retort's `preflight` skill |
-| Refactoring | Direct — read first, minimal changes |
+| Request              | Delegate to                          |
+| -------------------- | ------------------------------------ |
+| Full quality gate    | retort's `check` skill               |
+| Code review          | retort's `review` skill              |
+| Format code          | retort's `format` skill              |
+| Pre-merge validation | retort's `preflight` skill           |
+| Refactoring          | Direct — read first, minimal changes |
 
 ## Review Focus
 
 When reviewing code directly, prioritise in order:
+
 1. **Correctness** — logic errors, null paths, missing error handling
 2. **Conventions** — matches project CLAUDE.md rules (C#: Allman braces, nullable; TS: double quotes, semicolons; Rust: clippy clean)
 3. **Clarity** — names explain intent, no unnecessary complexity

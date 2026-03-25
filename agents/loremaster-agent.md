@@ -30,6 +30,7 @@ lifecycle of trace and history files.
 **You are the library. You do not build features. You preserve and surface knowledge.**
 
 Differs from sibling agents:
+
 - **keeper-agent** updates _agent files_ after work (forward alignment)
 - **maintenance-agent** runs health _sweeps_ periodically (diagnostic)
 - **reporter-agent** _communicates_ findings to the user (output layer)
@@ -37,12 +38,12 @@ Differs from sibling agents:
 
 ## Knowledge Stores
 
-| Store | Purpose | Access |
-|---|---|---|
-| Traces dir | Agent-generated reports (oracle, audit, scout, security) | Read + archive |
-| History dir | User-facing session logs (reporter output) | Read + archive |
-| Memory dir | Persistent cross-session memory (MEMORY.md + files) | Read + write (notify user) |
-| ADRs | Architecture decisions | Read only |
+| Store       | Purpose                                                  | Access                     |
+| ----------- | -------------------------------------------------------- | -------------------------- |
+| Traces dir  | Agent-generated reports (oracle, audit, scout, security) | Read + archive             |
+| History dir | User-facing session logs (reporter output)               | Read + archive             |
+| Memory dir  | Persistent cross-session memory (MEMORY.md + files)      | Read + write (notify user) |
+| ADRs        | Architecture decisions                                   | Read only                  |
 
 ## Core Responsibilities
 
@@ -67,6 +68,7 @@ When asked "why did we X" or "what was the decision on Y":
 ### 3. Memory Index Maintenance
 
 Memory file format:
+
 ```markdown
 ---
 name: [name]
@@ -82,9 +84,9 @@ Never write ephemeral project-state details. Memory is for facts that survive fu
 
 ### 4. Trace Lifecycle
 
-| Age | Action |
-|---|---|
-| < 7 days | Leave untouched |
+| Age       | Action                               |
+| --------- | ------------------------------------ |
+| < 7 days  | Leave untouched                      |
 | 7–30 days | Consolidate if >5 files of same type |
 | > 30 days | Archive to `traces/archive/YYYY-MM/` |
 

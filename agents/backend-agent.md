@@ -30,21 +30,21 @@ to retort's `check`, `review`, and `test` skills.
 
 Identify the backend stack before working:
 
-| Signal | Stack | Key patterns |
-|---|---|---|
-| `*.csproj` + EF Core | .NET / C# | Allman braces, nullable enabled, PascalCase, DI via constructor |
-| `package.json` + express/fastapi | Node.js / TypeScript | 2-space indent, DI via factory, async/await |
-| `Cargo.toml` + axum/actix | Rust | 4-space indent, Result<T,E>, thiserror/anyhow |
-| `*.py` + FastAPI | Python | snake_case, Pydantic models, dependency injection |
+| Signal                           | Stack                | Key patterns                                                    |
+| -------------------------------- | -------------------- | --------------------------------------------------------------- |
+| `*.csproj` + EF Core             | .NET / C#            | Allman braces, nullable enabled, PascalCase, DI via constructor |
+| `package.json` + express/fastapi | Node.js / TypeScript | 2-space indent, DI via factory, async/await                     |
+| `Cargo.toml` + axum/actix        | Rust                 | 4-space indent, Result<T,E>, thiserror/anyhow                   |
+| `*.py` + FastAPI                 | Python               | snake_case, Pydantic models, dependency injection               |
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Run quality gate | retort's `check` skill |
-| Code review | retort's `review` skill |
-| Run tests | retort's `test` skill |
-| Plan before implementing | retort's `plan` skill |
+| Request                  | Delegate to             |
+| ------------------------ | ----------------------- |
+| Run quality gate         | retort's `check` skill  |
+| Code review              | retort's `review` skill |
+| Run tests                | retort's `test` skill   |
+| Plan before implementing | retort's `plan` skill   |
 
 ## Implementation Principles
 

@@ -29,17 +29,18 @@ Delegates deployment execution to retort's `deploy` skill and quality gates to `
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Run quality gate locally | retort's `check` skill |
-| Deploy / release | retort's `deploy` skill |
-| Pre-release validation | retort's `preflight` skill |
-| Health check | retort's `healthcheck` skill |
-| Pipeline review / fix | Direct — read `.github/workflows/` |
+| Request                  | Delegate to                        |
+| ------------------------ | ---------------------------------- |
+| Run quality gate locally | retort's `check` skill             |
+| Deploy / release         | retort's `deploy` skill            |
+| Pre-release validation   | retort's `preflight` skill         |
+| Health check             | retort's `healthcheck` skill       |
+| Pipeline review / fix    | Direct — read `.github/workflows/` |
 
 ## Pipeline Failure Triage
 
 When CI is failing:
+
 1. Read the workflow file — identify the failing job and step
 2. Check if it's: missing secret, wrong runner, dependency issue, test failure, or config drift
 3. Reproduce locally using retort's `check` skill where possible
@@ -48,6 +49,7 @@ When CI is failing:
 ## Workflow Review Checklist
 
 When reviewing `.github/workflows/`:
+
 - [ ] Triggers are appropriate (avoid push to main for expensive jobs — prefer PR + schedule)
 - [ ] Secrets are referenced via `${{ secrets.NAME }}`, never hardcoded
 - [ ] Jobs use shallow clones where full history isn't needed (`fetch-depth: 1`)
@@ -64,9 +66,9 @@ When setting up CI from scratch, read:
 
 ```yaml
 # .claude/retort.local.md
-ci_platform: github-actions   # github-actions | azure-devops | gitlab-ci
+ci_platform: github-actions # github-actions | azure-devops | gitlab-ci
 default_runner: ubuntu-latest
-cost_aware: true              # flag expensive workflow patterns
+cost_aware: true # flag expensive workflow patterns
 ```
 
 ---

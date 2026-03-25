@@ -1,6 +1,7 @@
 # .readme.yaml Convention
 
 Every documented component carries two files:
+
 - `README.md` — human-readable prose
 - `.readme.yaml` — agent-readable structured metadata
 
@@ -11,12 +12,12 @@ its stack, status, and key contacts.
 ## Required Fields
 
 ```yaml
-name: string           # Same as the directory/package name
-type: string           # app | library | package | service | infrastructure | tool
-description: string    # One sentence. What does this do?
-status: string         # active | deprecated | experimental | archived
-stack: [string]        # e.g. [dotnet, csharp, ef-core] or [typescript, react, vite]
-owner: string          # GitHub handle or team name
+name: string # Same as the directory/package name
+type: string # app | library | package | service | infrastructure | tool
+description: string # One sentence. What does this do?
+status: string # active | deprecated | experimental | archived
+stack: [string] # e.g. [dotnet, csharp, ef-core] or [typescript, react, vite]
+owner: string # GitHub handle or team name
 ```
 
 ## Full Schema
@@ -24,7 +25,7 @@ owner: string          # GitHub handle or team name
 ```yaml
 name: mystira-app-pwa
 type: app
-description: "Blazor WebAssembly PWA — the main player-facing client application."
+description: 'Blazor WebAssembly PWA — the main player-facing client application.'
 status: active
 stack:
   - dotnet
@@ -34,7 +35,7 @@ stack:
 owner: phoenixvc
 
 # Optional but recommended
-version: "1.0.0"
+version: '1.0.0'
 repo: https://github.com/phoenixvc/mystira-workspace
 path: apps/app/src/Mystira.App.PWA
 
@@ -61,9 +62,9 @@ docs:
 
 # Deprecation (if status: deprecated)
 deprecated:
-  reason: "Replaced by apps/publisher"
+  reason: 'Replaced by apps/publisher'
   successor: apps/publisher
-  deadline: "2026-06-01"
+  deadline: '2026-06-01'
 ```
 
 ## Examples by Component Type
@@ -73,11 +74,11 @@ deprecated:
 ```yaml
 name: shared-ts
 type: package
-description: "Shared TypeScript utilities — date formatting, error types, validation helpers."
+description: 'Shared TypeScript utilities — date formatting, error types, validation helpers.'
 status: active
 stack: [typescript]
 owner: phoenixvc
-version: "2.3.1"
+version: '2.3.1'
 ```
 
 ### .NET API Service
@@ -85,7 +86,7 @@ version: "2.3.1"
 ```yaml
 name: Mystira.App.API
 type: service
-description: "Main application REST API — story sessions, user profiles, AI companion."
+description: 'Main application REST API — story sessions, user profiles, AI companion.'
 status: active
 stack: [dotnet, csharp, ef-core, postgresql]
 owner: phoenixvc
@@ -107,7 +108,7 @@ depends_on:
 ```yaml
 name: infra-identity
 type: infrastructure
-description: "Terraform module provisioning Azure resources for the identity service."
+description: 'Terraform module provisioning Azure resources for the identity service.'
 status: active
 stack: [terraform, azure]
 owner: phoenixvc
@@ -137,17 +138,19 @@ When writing an ADR, use this template:
 ## Consequences
 
 **Positive:**
+
 - <Trade-off benefit 1>
 
 **Negative / Trade-offs:**
+
 - <Trade-off cost 1>
 
 ## Alternatives Considered
 
 | Alternative | Reason rejected |
-|---|---|
-| <Option A> | <Why not> |
-| <Option B> | <Why not> |
+| ----------- | --------------- |
+| <Option A>  | <Why not>       |
+| <Option B>  | <Why not>       |
 ```
 
 ## Governance Notes

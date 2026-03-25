@@ -30,13 +30,13 @@ agent or external tracker. Feeds `delivery-agent` with prioritized, structured i
 
 ## Input Sources
 
-| Source | How it arrives | Action |
-|---|---|---|
-| Agent finding (audit, security, etc.) | Passed directly | Classify → deduplicate → route |
-| User report ("something broke") | Direct request | Capture → classify → create ticket |
-| External tracker (GitHub, Linear) | Query on request | Pull open items → triage unclassified |
-| Production alert / incident | User escalation | P0 → immediate capture → route to specialist |
-| Tech debt scan (keeper, maintenance) | Agent dispatch | Batch classify → add to delivery-agent backlog |
+| Source                                | How it arrives   | Action                                         |
+| ------------------------------------- | ---------------- | ---------------------------------------------- |
+| Agent finding (audit, security, etc.) | Passed directly  | Classify → deduplicate → route                 |
+| User report ("something broke")       | Direct request   | Capture → classify → create ticket             |
+| External tracker (GitHub, Linear)     | Query on request | Pull open items → triage unclassified          |
+| Production alert / incident           | User escalation  | P0 → immediate capture → route to specialist   |
+| Tech debt scan (keeper, maintenance)  | Agent dispatch   | Batch classify → add to delivery-agent backlog |
 
 ## Triage Workflow
 
@@ -55,59 +55,65 @@ agent or external tracker. Feeds `delivery-agent` with prioritized, structured i
 
 ### By Type
 
-| Type | Definition | Examples |
-|---|---|---|
-| `bug` | Something that worked and doesn't now | Auth regression, broken build |
-| `compliance` | Regulatory or legal requirement not met | COPPA coverage gap, GDPR data handling |
-| `security` | Vulnerability or exposure | Hardcoded secret, open permission |
-| `feature` | New user-facing capability requested | Story sharing, parent dashboard widget |
-| `tech-debt` | Internal quality issue not user-visible | Missing tests, stale docs, N+1 query |
-| `infra` | Infrastructure, deployment, or CI failure | Workflow broken, container OOM |
-| `investigation` | Unknown root cause, needs diagnosis | "Users report intermittent 500s" |
+| Type            | Definition                                | Examples                               |
+| --------------- | ----------------------------------------- | -------------------------------------- |
+| `bug`           | Something that worked and doesn't now     | Auth regression, broken build          |
+| `compliance`    | Regulatory or legal requirement not met   | COPPA coverage gap, GDPR data handling |
+| `security`      | Vulnerability or exposure                 | Hardcoded secret, open permission      |
+| `feature`       | New user-facing capability requested      | Story sharing, parent dashboard widget |
+| `tech-debt`     | Internal quality issue not user-visible   | Missing tests, stale docs, N+1 query   |
+| `infra`         | Infrastructure, deployment, or CI failure | Workflow broken, container OOM         |
+| `investigation` | Unknown root cause, needs diagnosis       | "Users report intermittent 500s"       |
 
 ### By Severity
 
-| Severity | Description | Response |
-|---|---|---|
-| P0 | Data loss, compliance breach, production outage | Immediate — do not batch |
-| P1 | Significant functional breakage, BLOCK on shipping | Same day |
-| P2 | Degraded experience, important but not blocking | This sprint |
-| P3 | Normal backlog item | Backlog |
-| P4 | Nice-to-have, no deadline | Deferred |
+| Severity | Description                                        | Response                 |
+| -------- | -------------------------------------------------- | ------------------------ |
+| P0       | Data loss, compliance breach, production outage    | Immediate — do not batch |
+| P1       | Significant functional breakage, BLOCK on shipping | Same day                 |
+| P2       | Degraded experience, important but not blocking    | This sprint              |
+| P3       | Normal backlog item                                | Backlog                  |
+| P4       | Nice-to-have, no deadline                          | Deferred                 |
 
 **Compliance findings are always P0 regardless of scope** — route immediately.
 
 ## Routing Table
 
-| Type | Route to |
-|---|---|
+| Type               | Route to                                                |
+| ------------------ | ------------------------------------------------------- |
 | `bug` — production | `security-agent` if auth/data; else relevant specialist |
-| `compliance` | `audit-agent` → `delivery-agent` with P0 flag |
-| `security` | `security-agent` immediately |
-| `feature` | `product-agent` → `delivery-agent` |
-| `tech-debt` | `delivery-agent` backlog |
-| `infra` | `infra-agent` or `ci-agent` |
-| `investigation` | `reporter-agent` → relevant specialist |
+| `compliance`       | `audit-agent` → `delivery-agent` with P0 flag           |
+| `security`         | `security-agent` immediately                            |
+| `feature`          | `product-agent` → `delivery-agent`                      |
+| `tech-debt`        | `delivery-agent` backlog                                |
+| `infra`            | `infra-agent` or `ci-agent`                             |
+| `investigation`    | `reporter-agent` → relevant specialist                  |
 
 ## Issue Template
 
 ```markdown
 ## Context
+
 [What was found, by whom (user/agent), when]
 
 ## Type
+
 bug | compliance | security | feature | tech-debt | infra | investigation
 
 ## Severity
+
 P0 / P1 / P2 / P3 / P4 — [rationale]
 
 ## Impact
+
 [Who/what is affected, how severe]
 
 ## Reproduction / Evidence
+
 [Steps to reproduce, log excerpt, finding source]
 
 ## Recommended Action
+
 [Which agent to dispatch, or what manual work is needed]
 
 🤖 Intake by [intake-agent / project-specific equivalent]
@@ -124,11 +130,11 @@ P0 / P1 / P2 / P3 / P4 — [rationale]
 
 ```yaml
 # .claude/retort.local.md
-issue_tracker: github        # github | linear | jira | notion
+issue_tracker: github # github | linear | jira | notion
 github_labels:
   agent_reported: agent-reported
   priority_prefix: priority-
-linear_team_id: ""           # Linear team ID if used
+linear_team_id: '' # Linear team ID if used
 ```
 
 ---

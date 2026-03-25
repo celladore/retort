@@ -26,6 +26,7 @@ Monitors coverage for files changed in the session. Delegates test execution to 
 ## Session Start
 
 Check `.claude/retort.local.md` for `coverage_threshold`. If absent, ask once:
+
 > "Coverage target for this session? (e.g. 80%, or skip)"
 
 ## Monitoring
@@ -46,6 +47,7 @@ for Mystira-specific targets (70% unit / 20% integration / 10% E2E).
 ## Escalation
 
 Advise for gaps. Escalate (ask user to act) when:
+
 - Multiple critical-path files are at 0% before a PR
 - **COPPA-critical paths** (parental consent, age gating, child data deletion) are below 80% — these always escalate, never advise
 
@@ -61,7 +63,7 @@ Coverage commands per stack:
 ```yaml
 # .claude/retort.local.md
 coverage_threshold: 80
-coverage_check: on_demand   # on_demand | session_end | never
+coverage_check: on_demand # on_demand | session_end | never
 baseline_branch: main
 ```
 

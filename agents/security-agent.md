@@ -26,17 +26,18 @@ targeted reviews directly.
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Full security audit | retort's `security` skill |
-| Dependency CVE scan | retort's `security` skill |
-| Auth / permissions review | Direct |
-| Secret detection | Direct — grep for patterns |
-| OWASP top 10 review | Direct |
+| Request                   | Delegate to                |
+| ------------------------- | -------------------------- |
+| Full security audit       | retort's `security` skill  |
+| Dependency CVE scan       | retort's `security` skill  |
+| Auth / permissions review | Direct                     |
+| Secret detection          | Direct — grep for patterns |
+| OWASP top 10 review       | Direct                     |
 
 ## Quick Secret Scan
 
 Scan for hardcoded credentials before flagging anything else:
+
 ```bash
 grep -rE "(password|secret|apikey|connectionstring|bearer)\s*[=:]\s*[\"'][^\"']{8,}" \
   --include="*.cs" --include="*.ts" --include="*.rs" --include="*.json" \

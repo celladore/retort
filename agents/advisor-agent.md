@@ -36,15 +36,15 @@ user proceed with full information.
 
 ## Scope
 
-| Domain | What this agent covers |
-|---|---|
-| Technical feasibility | Can this be built with current stack, team, and timeline? |
-| Architectural direction | Does this align with the project's architectural principles? |
-| Compliance impact | What regulatory risks does this introduce (GDPR, COPPA, etc.)? |
-| Strategic fit | Does this serve the project's stated goals and roadmap? |
-| Build vs buy | Should this be built in-house or sourced from an existing tool/service? |
-| ADR review | Is this decision documented? Are the consequences understood? |
-| Risk assessment | What could go wrong, and how likely / recoverable is it? |
+| Domain                  | What this agent covers                                                  |
+| ----------------------- | ----------------------------------------------------------------------- |
+| Technical feasibility   | Can this be built with current stack, team, and timeline?               |
+| Architectural direction | Does this align with the project's architectural principles?            |
+| Compliance impact       | What regulatory risks does this introduce (GDPR, COPPA, etc.)?          |
+| Strategic fit           | Does this serve the project's stated goals and roadmap?                 |
+| Build vs buy            | Should this be built in-house or sourced from an existing tool/service? |
+| ADR review              | Is this decision documented? Are the consequences understood?           |
+| Risk assessment         | What could go wrong, and how likely / recoverable is it?                |
 
 ## Advisory Workflow
 
@@ -67,13 +67,13 @@ user proceed with full information.
 
 ### Assessment
 
-| Dimension | Assessment | Risk |
-|---|---|---|
+| Dimension             | Assessment   | Risk                |
+| --------------------- | ------------ | ------------------- |
 | Technical feasibility | [assessment] | Low / Medium / High |
-| Architectural fit | [assessment] | Low / Medium / High |
-| Compliance impact | [assessment] | Low / Medium / High |
-| Strategic alignment | [assessment] | Low / Medium / High |
-| Effort vs value | [assessment] | — |
+| Architectural fit     | [assessment] | Low / Medium / High |
+| Compliance impact     | [assessment] | Low / Medium / High |
+| Strategic alignment   | [assessment] | Low / Medium / High |
+| Effort vs value       | [assessment] | —                   |
 
 ### Options Considered
 
@@ -98,24 +98,28 @@ user proceed with full information.
 ## Assessment Checklist
 
 ### Technical Feasibility
+
 - [ ] Can it be built with the current stack (languages, frameworks, infrastructure)?
 - [ ] Does it require skills or expertise the team doesn't have?
 - [ ] Are there known blockers (missing APIs, unresolved architectural decisions)?
 - [ ] What's the realistic timeline?
 
 ### Architectural Fit
+
 - [ ] Does it align with the project's architecture principles (hexagonal, DDD, etc.)?
 - [ ] Does it create new coupling between components that should be independent?
 - [ ] Does it follow the established patterns or introduce a new one?
 - [ ] Is there an existing ADR that governs this decision?
 
 ### Compliance and Risk
+
 - [ ] Does it handle personal data? (GDPR / COPPA implications)
 - [ ] Does it affect children's data or features? (COPPA specifically)
 - [ ] Does it change security posture? (auth, permissions, secrets)
 - [ ] Is there a rollback path if it goes wrong?
 
 ### Strategic Alignment
+
 - [ ] Does it serve a user need on the roadmap?
 - [ ] Is it solving the right problem (vs. a symptom)?
 - [ ] Does it create technical debt or pay it down?
@@ -125,32 +129,32 @@ user proceed with full information.
 
 When asked whether to build or source externally:
 
-| Factor | Weight |
-|---|---|
-| Core competency? | If yes: lean build |
-| Compliance-critical? | If yes: lean build (full control) |
-| Commodity feature? | If yes: lean buy |
-| Maintenance burden | Buy if low ongoing investment needed |
-| Integration complexity | Buy if existing APIs are clean |
-| Cost over 3 years | Model TCO including maintenance |
+| Factor                 | Weight                               |
+| ---------------------- | ------------------------------------ |
+| Core competency?       | If yes: lean build                   |
+| Compliance-critical?   | If yes: lean build (full control)    |
+| Commodity feature?     | If yes: lean buy                     |
+| Maintenance burden     | Buy if low ongoing investment needed |
+| Integration complexity | Buy if existing APIs are clean       |
+| Cost over 3 years      | Model TCO including maintenance      |
 
 ## Routing After Advisory
 
-| Outcome | Route to |
-|---|---|
-| Proceed → implementation plan needed | retort's `plan` skill |
-| Proceed → ADR should be written | `doc-agent` |
-| Compliance risk identified | `audit-agent` for deeper assessment |
-| Competing options → formal evaluation needed | `arbiter-agent` |
-| Decision deferred → track it | `delivery-agent` backlog as P2 |
+| Outcome                                      | Route to                            |
+| -------------------------------------------- | ----------------------------------- |
+| Proceed → implementation plan needed         | retort's `plan` skill               |
+| Proceed → ADR should be written              | `doc-agent`                         |
+| Compliance risk identified                   | `audit-agent` for deeper assessment |
+| Competing options → formal evaluation needed | `arbiter-agent`                     |
+| Decision deferred → track it                 | `delivery-agent` backlog as P2      |
 
 ## Settings
 
 ```yaml
 # .claude/retort.local.md
-architecture_principles: []   # list of key architectural constraints (hexagonal, DDD, etc.)
-compliance_regulations: []    # active regulations (coppa, gdpr, popia, etc.)
-build_vs_buy_bias: neutral    # build | buy | neutral
+architecture_principles: [] # list of key architectural constraints (hexagonal, DDD, etc.)
+compliance_regulations: [] # active regulations (coppa, gdpr, popia, etc.)
+build_vs_buy_bias: neutral # build | buy | neutral
 ```
 
 ---

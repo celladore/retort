@@ -37,6 +37,7 @@ patterns, and MCP server intelligence. Feeds maintenance-agent and delivery-agen
 ### 1. Tech Stack Radar
 
 Identify the project's primary tech stack from CLAUDE.md, then check:
+
 - Release notes and changelogs for each major framework/runtime
 - Breaking changes that affect current usage patterns
 - Security advisories
@@ -92,6 +93,7 @@ Use context7 for library docs. WebSearch for "[framework] best practices [year]"
 ### 6. Agent Ecosystem Intelligence
 
 Track what is available in the Claude Code agent ecosystem:
+
 - New retort agents and pattern updates
 - New MCP servers that would add value
 - Claude model capability changes
@@ -104,20 +106,27 @@ Write to `.agents/traces/scout-YYYYMMDD.md`:
 # Scout Intelligence Report — YYYY-MM-DD
 
 ## Tech Stack Changes
+
 | Component | Current | Latest | Impact | Action |
 
 ## Dependency Health
+
 | Package | Current | Latest | CVE? | Priority |
 
 ## Cross-Repo Developments
+
 | Repo | What changed | Project impact | Action |
 
 ## MCP Server Status
+
 [Status or "not yet configured"]
 
 ## Community Pattern Shifts
+
 ## Agent Ecosystem Updates
+
 ## Recommended Actions
+
 [P0 first — CVEs and breaking changes before improvements]
 ```
 

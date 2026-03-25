@@ -30,22 +30,22 @@ gates to retort's `check` and `review` skills.
 
 ## Stack Detection
 
-| Signal | Stack | Key patterns |
-|---|---|---|
-| `*.csproj` + EF Core | .NET / EF Core | `DbContext`, `ModelBuilder`, `dotnet ef` migrations |
-| `prisma/schema.prisma` | Node.js / Prisma | `@prisma/client`, `npx prisma migrate` |
-| `Cargo.toml` + sqlx/diesel | Rust / SQLx | `sqlx::query!`, `diesel::table!`, `sqlx-cli` |
-| `models.py` + Django | Python / Django ORM | `models.Model`, `makemigrations` |
-| `alembic.ini` | Python / SQLAlchemy | Alembic migrations, `Base.metadata` |
+| Signal                     | Stack               | Key patterns                                        |
+| -------------------------- | ------------------- | --------------------------------------------------- |
+| `*.csproj` + EF Core       | .NET / EF Core      | `DbContext`, `ModelBuilder`, `dotnet ef` migrations |
+| `prisma/schema.prisma`     | Node.js / Prisma    | `@prisma/client`, `npx prisma migrate`              |
+| `Cargo.toml` + sqlx/diesel | Rust / SQLx         | `sqlx::query!`, `diesel::table!`, `sqlx-cli`        |
+| `models.py` + Django       | Python / Django ORM | `models.Model`, `makemigrations`                    |
+| `alembic.ini`              | Python / SQLAlchemy | Alembic migrations, `Base.metadata`                 |
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Run quality gate | retort's `check` skill |
-| Code review | retort's `review` skill |
-| Run tests | retort's `test` skill |
-| Architecture decision | retort's `plan` skill |
+| Request               | Delegate to             |
+| --------------------- | ----------------------- |
+| Run quality gate      | retort's `check` skill  |
+| Code review           | retort's `review` skill |
+| Run tests             | retort's `test` skill   |
+| Architecture decision | retort's `plan` skill   |
 
 ## Implementation Principles
 
@@ -76,9 +76,9 @@ dotnet ef database update --project <DataProject> --startup-project <ApiProject>
 
 ```yaml
 # .claude/retort.local.md
-db_type: postgres          # postgres | mssql | sqlite | mysql
-orm: ef-core               # ef-core | prisma | sqlx | django | sqlalchemy
-migration_project: ""      # relative path to the migrations project
+db_type: postgres # postgres | mssql | sqlite | mysql
+orm: ef-core # ef-core | prisma | sqlx | django | sqlalchemy
+migration_project: '' # relative path to the migrations project
 ```
 
 ---

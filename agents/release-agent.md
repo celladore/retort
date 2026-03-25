@@ -33,34 +33,34 @@ quality gates to retort's `preflight` skill.
 
 These are distinct artifacts produced from the same commit history:
 
-| Artifact | Audience | Format | Location |
-|---|---|---|---|
-| **CHANGELOG.md** | Developers / contributors | Technical, grouped by type, cumulative | Repo root |
-| **GitHub Release body** | Developers consuming the library/API | Changelog entry reformatted, with PR links | GitHub Releases |
-| **User-facing release notes** | End users / non-engineers | Plain language, "what's new" narrative | Docs site / email |
+| Artifact                      | Audience                             | Format                                     | Location          |
+| ----------------------------- | ------------------------------------ | ------------------------------------------ | ----------------- |
+| **CHANGELOG.md**              | Developers / contributors            | Technical, grouped by type, cumulative     | Repo root         |
+| **GitHub Release body**       | Developers consuming the library/API | Changelog entry reformatted, with PR links | GitHub Releases   |
+| **User-facing release notes** | End users / non-engineers            | Plain language, "what's new" narrative     | Docs site / email |
 
 Always produce CHANGELOG.md. Produce a GitHub Release body by default. Produce user-facing
 release notes only when asked, or when the release contains user-visible changes.
 
 ## Release Types
 
-| Type | Trigger | Version bump | Branch pattern |
-|---|---|---|---|
-| Feature release | End of sprint or milestone | `minor` | `release/vX.Y.0` |
-| Patch / bugfix | Targeted fix on top of stable | `patch` | `hotfix/vX.Y.Z` |
-| Major / breaking | Breaking API or architecture change | `major` | `release/vX.0.0` |
-| Pre-release | Alpha / beta / RC | pre-identifier | `release/vX.Y.Z-rc.N` |
+| Type             | Trigger                             | Version bump   | Branch pattern        |
+| ---------------- | ----------------------------------- | -------------- | --------------------- |
+| Feature release  | End of sprint or milestone          | `minor`        | `release/vX.Y.0`      |
+| Patch / bugfix   | Targeted fix on top of stable       | `patch`        | `hotfix/vX.Y.Z`       |
+| Major / breaking | Breaking API or architecture change | `major`        | `release/vX.0.0`      |
+| Pre-release      | Alpha / beta / RC                   | pre-identifier | `release/vX.Y.Z-rc.N` |
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Deploy the release | retort's `deploy` skill |
-| Pre-release validation | retort's `preflight` skill |
-| CI pipeline review | `ci-agent` |
-| Changelog from commit log | this agent (conventional commits → CHANGELOG.md) |
-| Architecture impact of breaking change | retort's `plan` skill |
-| Post-release audit | `audit-agent` |
+| Request                                | Delegate to                                      |
+| -------------------------------------- | ------------------------------------------------ |
+| Deploy the release                     | retort's `deploy` skill                          |
+| Pre-release validation                 | retort's `preflight` skill                       |
+| CI pipeline review                     | `ci-agent`                                       |
+| Changelog from commit log              | this agent (conventional commits → CHANGELOG.md) |
+| Architecture impact of breaking change | retort's `plan` skill                            |
+| Post-release audit                     | `audit-agent`                                    |
 
 ## Release Workflow
 
@@ -103,9 +103,11 @@ Follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning
 ## [0.1.0] - YYYY-MM-DD
 
 ### Features
+
 - initial public release
 
 ### Notes
+
 > This is the first tagged release. Prior development history is summarised above.
 ```
 
@@ -144,22 +146,27 @@ Follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning
 ## [X.Y.Z] - YYYY-MM-DD
 
 ### Breaking Changes
+
 - **api**: removed deprecated `getStories` endpoint — use `listStories` instead
 
 ### Features
+
 - **story-generator**: support multi-language narrative generation (#123)
 - **frontend**: add parental consent re-prompt on session expiry (#145)
 
 ### Bug Fixes
+
 - **auth**: fix refresh token rotation on concurrent requests (#167)
 
 ### Chores
+
 - **deps**: bump EF Core to 10.0.1
 ```
 
 ## Release Gates
 
 Before tagging, verify all pass:
+
 - [ ] `preflight` skill clean (build + tests + lint)
 - [ ] No open P0/P1 issues targeting this release
 - [ ] Changelog written and reviewed
@@ -196,11 +203,11 @@ chore/docs/style:    → no bump (unless forced)
 
 ```yaml
 # .claude/retort.local.md
-release_branch: main          # stable base branch
-version_files: []             # relative paths to files containing version (auto-detected if empty)
-tag_prefix: "v"               # prefix for git tags (v1.2.3)
-changelog_file: CHANGELOG.md  # where to write the changelog
-prerelease_identifier: rc     # alpha | beta | rc
+release_branch: main # stable base branch
+version_files: [] # relative paths to files containing version (auto-detected if empty)
+tag_prefix: 'v' # prefix for git tags (v1.2.3)
+changelog_file: CHANGELOG.md # where to write the changelog
+prerelease_identifier: rc # alpha | beta | rc
 ```
 
 ---

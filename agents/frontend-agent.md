@@ -29,21 +29,21 @@ to retort's `check`, `review`, and `format` skills.
 
 ## Stack Detection
 
-| Signal | Stack | Key patterns |
-|---|---|---|
-| `*.razor` + `_Imports.razor` | Blazor / .NET | PascalCase components, `@inject`, `@code {}` |
-| `*.tsx` + `vitest` in deps | React / TypeScript | Functional components, hooks, 2-space indent |
-| `*.rs` + `leptos` in Cargo | Leptos / WASM | Rust component macros, signals, views |
-| `*.ts` + Vite config | TypeScript SPA | Generic TS conventions |
+| Signal                       | Stack              | Key patterns                                 |
+| ---------------------------- | ------------------ | -------------------------------------------- |
+| `*.razor` + `_Imports.razor` | Blazor / .NET      | PascalCase components, `@inject`, `@code {}` |
+| `*.tsx` + `vitest` in deps   | React / TypeScript | Functional components, hooks, 2-space indent |
+| `*.rs` + `leptos` in Cargo   | Leptos / WASM      | Rust component macros, signals, views        |
+| `*.ts` + Vite config         | TypeScript SPA     | Generic TS conventions                       |
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Quality gate | retort's `check` skill |
-| Code review | retort's `review` skill |
-| Run tests | retort's `test` skill (Vitest / bunit) |
-| Format | retort's `format` skill |
+| Request      | Delegate to                            |
+| ------------ | -------------------------------------- |
+| Quality gate | retort's `check` skill                 |
+| Code review  | retort's `review` skill                |
+| Run tests    | retort's `test` skill (Vitest / bunit) |
+| Format       | retort's `format` skill                |
 
 ## Implementation Principles
 

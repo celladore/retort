@@ -20,15 +20,15 @@ with the user if uncertain. Do not create documents in random locations.
 
 ## Step 1 — Classify the Document
 
-| Category | Types | Audience |
-|---|---|---|
-| **Strategic** | ADR, proposal, RFP response, architecture brief | Internal / engineering |
-| **Product** | PRD, spec, acceptance criteria, feature brief | Internal / cross-functional |
-| **Client-facing** | Client spec, project brief, status update, invoice scope | External / client |
-| **Technical** | README, API doc, runbook, migration guide, onboarding guide | Developers |
-| **Release** | Changelog, release notes, upgrade guide | Public / consumers |
-| **Session/AI** | Handoff doc, trace, investigation finding, session log | AI agents / continuity |
-| **Project mgmt** | Meeting notes, sprint retrospective, post-mortem, risk log | Internal / team |
+| Category          | Types                                                       | Audience                    |
+| ----------------- | ----------------------------------------------------------- | --------------------------- |
+| **Strategic**     | ADR, proposal, RFP response, architecture brief             | Internal / engineering      |
+| **Product**       | PRD, spec, acceptance criteria, feature brief               | Internal / cross-functional |
+| **Client-facing** | Client spec, project brief, status update, invoice scope    | External / client           |
+| **Technical**     | README, API doc, runbook, migration guide, onboarding guide | Developers                  |
+| **Release**       | Changelog, release notes, upgrade guide                     | Public / consumers          |
+| **Session/AI**    | Handoff doc, trace, investigation finding, session log      | AI agents / continuity      |
+| **Project mgmt**  | Meeting notes, sprint retrospective, post-mortem, risk log  | Internal / team             |
 
 ## Step 2 — Look Up Canonical Location
 
@@ -36,19 +36,19 @@ See `references/document-locations.md` for the full location map.
 
 Quick reference for the most common types:
 
-| Document type | Canonical location | Format |
-|---|---|---|
-| ADR | `docs/architecture/decisions/NNNN-title.md` | Markdown |
-| PRD | `docs/product/prd/YYYY-MM-DD-feature-name.md` | Markdown |
-| README | Project / package root — `README.md` + `.readme.yaml` | Dual-file |
-| Runbook | `docs/runbooks/topic.md` | Markdown |
-| Changelog | Project root `CHANGELOG.md` | Keep-a-Changelog |
-| Release notes | GitHub Releases (not a file in repo) | Markdown |
-| Session handoff | `org-meta/docs/handoffs/YYYY-MM-DD-topic.md` | Markdown |
-| Agent trace | `.agents/traces/YYYY-MM-DD-topic.md` | Markdown |
-| Post-mortem | `docs/incidents/YYYY-MM-DD-incident.md` | Markdown |
-| Client spec | **Notion** — not committed to repo | External |
-| API spec | `docs/api/` or `openapi/` | OpenAPI / Markdown |
+| Document type   | Canonical location                                    | Format             |
+| --------------- | ----------------------------------------------------- | ------------------ |
+| ADR             | `docs/architecture/decisions/NNNN-title.md`           | Markdown           |
+| PRD             | `docs/product/prd/YYYY-MM-DD-feature-name.md`         | Markdown           |
+| README          | Project / package root — `README.md` + `.readme.yaml` | Dual-file          |
+| Runbook         | `docs/runbooks/topic.md`                              | Markdown           |
+| Changelog       | Project root `CHANGELOG.md`                           | Keep-a-Changelog   |
+| Release notes   | GitHub Releases (not a file in repo)                  | Markdown           |
+| Session handoff | `org-meta/docs/handoffs/YYYY-MM-DD-topic.md`          | Markdown           |
+| Agent trace     | `.agents/traces/YYYY-MM-DD-topic.md`                  | Markdown           |
+| Post-mortem     | `docs/incidents/YYYY-MM-DD-incident.md`               | Markdown           |
+| Client spec     | **Notion** — not committed to repo                    | External           |
+| API spec        | `docs/api/` or `openapi/`                             | OpenAPI / Markdown |
 
 ## Step 3 — Naming Conventions
 
@@ -62,6 +62,7 @@ All slugs: lowercase kebab-case. No spaces. No version numbers in filenames (ver
 ## Step 4 — Audience Check
 
 **Before writing:** confirm whether this document is:
+
 - **Internal only** → commit to repo in the canonical location
 - **Client-facing** → goes to Notion or the configured external system; do NOT commit to repo
 - **AI-readable** → pair a `.readme.yaml` or use YAML frontmatter; see dual-file convention
@@ -74,14 +75,16 @@ version in the repo. The sync-agent handles drift between them.
 ## Step 5 — Check Before Creating
 
 Before creating a new file:
+
 1. Check whether the document already exists at the canonical location
-2. Check whether an existing doc should be *updated* rather than a new one created
+2. Check whether an existing doc should be _updated_ rather than a new one created
 3. If the location doesn't exist yet (e.g. no `docs/runbooks/` directory), create it — don't
    put the file somewhere else just because the directory is missing
 
 ## Creating a README (Dual-File Convention)
 
 Every documented component maintains two files:
+
 - `README.md` — human prose
 - `.readme.yaml` — structured agent-readable metadata
 
@@ -99,15 +102,19 @@ ADRs record a significant architectural decision that is not obvious from the co
 **Tags:** backend, data, security, infra, frontend (pick relevant)
 
 ## Context
+
 What situation or constraint makes a decision necessary?
 
 ## Decision
+
 What was decided? State it clearly in one sentence.
 
 ## Consequences
+
 What becomes easier? What becomes harder? What risks are accepted?
 
 ## Considered Alternatives
+
 - **Option A** — why rejected
 - **Option B** — why rejected
 ```
@@ -129,20 +136,24 @@ After creating, notify `product-agent` to register it in the roadmap.
 **Affected:** list services/users
 
 ## Timeline
-| Time | Event |
-|------|-------|
-| HH:MM | ... |
+
+| Time  | Event |
+| ----- | ----- |
+| HH:MM | ...   |
 
 ## Root Cause
+
 One sentence.
 
 ## Contributing Factors
+
 Bulleted list.
 
 ## Action Items
+
 | Item | Owner | Due |
-|------|-------|-----|
-| ... | ... | ... |
+| ---- | ----- | --- |
+| ...  | ...   | ... |
 
 ## What Went Well
 ```

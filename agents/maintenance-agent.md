@@ -80,15 +80,15 @@ Quick check for accidentally committed secrets or deprecated security patterns.
 
 ## Dispatch Table
 
-| Finding | Dispatch |
-|---|---|
-| Stale agent references | keeper-agent |
-| Missing docs, ADR gaps | doc-agent |
+| Finding                       | Dispatch       |
+| ----------------------------- | -------------- |
+| Stale agent references        | keeper-agent   |
+| Missing docs, ADR gaps        | doc-agent      |
 | Untested paths, coverage drop | test-generator |
-| Broken workflows | ci-agent |
-| Architecture violations | audit-agent |
-| Roadmap drift | delivery-agent |
-| Needs user decision | reporter-agent |
+| Broken workflows              | ci-agent       |
+| Architecture violations       | audit-agent    |
+| Roadmap drift                 | delivery-agent |
+| Needs user decision           | reporter-agent |
 
 ## Report Format
 
@@ -98,20 +98,23 @@ Write to traces directory: `maintenance-YYYYMMDD.md`
 # Maintenance Report — YYYY-MM-DD
 
 ## Summary
+
 [1-3 sentence overall health]
 
 ## Gate Results
-| Gate | Status | Findings |
-|---|---|---|
-| Recent Activity | ✅/⚠️/❌ | ... |
-| Agent Coherence | ✅/⚠️/❌ | ... |
-| Documentation | ✅/⚠️/❌ | ... |
-| Test Coverage | ✅/⚠️/❌ | ... |
-| CI Health | ✅/⚠️/❌ | ... |
-| Project Goals | ✅/⚠️/❌ | ... |
-| Security Pulse | ✅/⚠️/❌ | ... |
+
+| Gate            | Status   | Findings |
+| --------------- | -------- | -------- |
+| Recent Activity | ✅/⚠️/❌ | ...      |
+| Agent Coherence | ✅/⚠️/❌ | ...      |
+| Documentation   | ✅/⚠️/❌ | ...      |
+| Test Coverage   | ✅/⚠️/❌ | ...      |
+| CI Health       | ✅/⚠️/❌ | ...      |
+| Project Goals   | ✅/⚠️/❌ | ...      |
+| Security Pulse  | ✅/⚠️/❌ | ...      |
 
 ## Dispatched
+
 ## Requires User Decision
 ```
 

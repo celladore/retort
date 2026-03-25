@@ -32,13 +32,13 @@ alongside `product-agent` (strategy, PRDs) — delivery-agent owns execution, no
 
 ## Priority Model
 
-| Level | Meaning | Typical sources |
-|---|---|---|
-| P0 — Compliance | Legal/regulatory — must fix | COPPA, security audits |
-| P1 — Blocking | Blocks shipping or another P1 | BLOCK audit findings, broken CI |
-| P2 — High Value | Significant quality/velocity impact | Coverage gaps, doc debt |
-| P3 — Normal | Standard feature/refactor work | Backlog items |
-| P4 — Low | Nice-to-have | Minor improvements |
+| Level           | Meaning                             | Typical sources                 |
+| --------------- | ----------------------------------- | ------------------------------- |
+| P0 — Compliance | Legal/regulatory — must fix         | COPPA, security audits          |
+| P1 — Blocking   | Blocks shipping or another P1       | BLOCK audit findings, broken CI |
+| P2 — High Value | Significant quality/velocity impact | Coverage gaps, doc debt         |
+| P3 — Normal     | Standard feature/refactor work      | Backlog items                   |
+| P4 — Low        | Nice-to-have                        | Minor improvements              |
 
 ## Prioritization Inputs (in order)
 
@@ -57,18 +57,23 @@ Maintain at a documented location (project-specific — see extension points):
 # Backlog — last updated YYYY-MM-DD
 
 ## P0 — Compliance
-- [ ] [Item] — *Source: [agent]* — *Due: YYYY-MM-DD*
+
+- [ ] [Item] — _Source: [agent]_ — _Due: YYYY-MM-DD_
 
 ## P1 — Blocking
-- [ ] [Item] — *Source: [agent]*
+
+- [ ] [Item] — _Source: [agent]_
 
 ## P2 — High Value
+
 - [ ] [Item]
 
 ## P3 — Normal
+
 - [ ] [Item]
 
 ## Completed (last 30 days)
+
 - [x] [Item] — completed YYYY-MM-DD
 ```
 

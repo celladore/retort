@@ -19,6 +19,7 @@ produce a complete, validated team definition. Works in retort repos and non-ret
 Before starting, check two things silently:
 
 **Repo type:**
+
 - `.agentkit/spec/` exists → **retort repo** — output targets `agents.yaml`, `teams.yaml`, `commands.yaml`
 - Not found → **standalone repo** — output is a portable markdown spec in `docs/agents/` or similar
 
@@ -60,17 +61,17 @@ Produce:
 
 ```yaml
 # teams.yaml entry
-- id: <team-id>           # kebab-case, unique
+- id: <team-id> # kebab-case, unique
   name: <Display Name>
   mission: >
     <One sentence mission statement. Verb-first. E.g. "Manages X to ensure Y.">
   scope:
     - '<glob pattern>'
-  accepts:                # task types this team accepts from orchestrator
+  accepts: # task types this team accepts from orchestrator
     - implement
     - review
     - plan
-  handoff-chain:          # default downstream teams after completion
+  handoff-chain: # default downstream teams after completion
     - quality
   max-task-turns: 15
   max-handoff-chain-depth: 7
@@ -98,7 +99,7 @@ For each agent (aim for 2–5 per team):
     - '<glob>'
   responsibilities:
     - <Concrete responsibility, verb-first>
-  accepts: [implement, review, plan]   # subset of team's accepted types
+  accepts: [implement, review, plan] # subset of team's accepted types
   depends-on: []
   notifies: []
 ```
@@ -115,15 +116,15 @@ same team.
 For each agent defined in Step 3, add:
 
 ```yaml
-  domain-rules:
-    - 'Follow <rule-set> domain rules [<rule-ids>] — <plain English enforcement>'
-  conventions:
-    - <One concrete coding/behaviour convention>
-  anti-patterns:
-    - <One thing this agent must never do>
-  examples:
-    - title: <Scenario name>
-      description: <What the agent should do in this scenario>
+domain-rules:
+  - 'Follow <rule-set> domain rules [<rule-ids>] — <plain English enforcement>'
+conventions:
+  - <One concrete coding/behaviour convention>
+anti-patterns:
+  - <One thing this agent must never do>
+examples:
+  - title: <Scenario name>
+    description: <What the agent should do in this scenario>
 ```
 
 Quality bar: each domain-rule must reference an existing rule ID from `rules.yaml` (or flag that a
@@ -153,15 +154,16 @@ code review or output review.
 
 Generate files based on the platform answer from Step 0:
 
-| Platform | File location | Format |
-|---|---|---|
-| Claude Code | `.claude/commands/team-<id>.md` | YAML frontmatter + Markdown |
-| Cursor | `.cursor/rules/team-<id>.mdc` | MDC format with frontmatter |
-| Windsurf | `.windsurf/rules/team-<id>.md` | Markdown rules file |
-| GitHub Copilot | `.github/chatmodes/team-<id>.chatmode.md` | Chatmode format |
-| All | All of the above | Run retort sync after spec is written |
+| Platform       | File location                             | Format                                |
+| -------------- | ----------------------------------------- | ------------------------------------- |
+| Claude Code    | `.claude/commands/team-<id>.md`           | YAML frontmatter + Markdown           |
+| Cursor         | `.cursor/rules/team-<id>.mdc`             | MDC format with frontmatter           |
+| Windsurf       | `.windsurf/rules/team-<id>.md`            | Markdown rules file                   |
+| GitHub Copilot | `.github/chatmodes/team-<id>.chatmode.md` | Chatmode format                       |
+| All            | All of the above                          | Run retort sync after spec is written |
 
 **For Claude Code output** — each command file must include:
+
 - `allowed-tools` frontmatter listing only tools the team actually needs
 - Clear scope statement at top
 - The 5 workflow steps (Check Queue → Identify Work → Make Changes → Add Tests → Quality Gate)
@@ -169,6 +171,7 @@ Generate files based on the platform answer from Step 0:
 - No distributed-systems locking machinery — the task protocol handles coordination
 
 **For retort repos:** write the spec to `.agentkit/spec/` and remind the user to run:
+
 ```bash
 pnpm -C .agentkit agentkit:sync
 ```

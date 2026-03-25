@@ -264,15 +264,15 @@ Acceptance criteria:
 
 ### User Flow Matrix
 
-| Step           | PWA Path                | Desktop Path            | Outcome         |
-| -------------- | ----------------------- | ----------------------- | --------------- |
-| Launch         | `npx retort ui` | Open app                | UI ready        |
-| Connect repo   | Auto-detect from CWD    | "Open Repo" file picker | Repo linked     |
-| Create overlay | Wizard form             | Wizard form             | Overlay created |
-| Edit overlay   | Schema-driven editor    | Schema-driven editor    | Changes staged  |
-| Preview        | Side-by-side diff       | Side-by-side diff       | Impact visible  |
-| Sync           | One-click sync          | One-click sync          | Outputs updated |
-| Rollback       | Version history picker  | Version history picker  | State restored  |
+| Step           | PWA Path               | Desktop Path            | Outcome         |
+| -------------- | ---------------------- | ----------------------- | --------------- |
+| Launch         | `npx retort ui`        | Open app                | UI ready        |
+| Connect repo   | Auto-detect from CWD   | "Open Repo" file picker | Repo linked     |
+| Create overlay | Wizard form            | Wizard form             | Overlay created |
+| Edit overlay   | Schema-driven editor   | Schema-driven editor    | Changes staged  |
+| Preview        | Side-by-side diff      | Side-by-side diff       | Impact visible  |
+| Sync           | One-click sync         | One-click sync          | Outputs updated |
+| Rollback       | Version history picker | Version history picker  | State restored  |
 
 ### Edge Cases
 
@@ -379,12 +379,12 @@ Acceptance criteria:
 
 ## Mesh Layer Mapping
 
-| Layer                 | Role                                                      |
-| --------------------- | --------------------------------------------------------- |
-| Presentation / UI     | Orchestration interface for `.agentkit/spec` overlays     |
-| JSON-RPC bridge       | Communication layer between UI and engine                 |
-| retort engine | All sync, validation, and output logic (shared with CLI)  |
-| Overlay directory     | `.agentkit/overlays/` — source of truth persisted in repo |
+| Layer             | Role                                                      |
+| ----------------- | --------------------------------------------------------- |
+| Presentation / UI | Orchestration interface for `.agentkit/spec` overlays     |
+| JSON-RPC bridge   | Communication layer between UI and engine                 |
+| retort engine     | All sync, validation, and output logic (shared with CLI)  |
+| Overlay directory | `.agentkit/overlays/` — source of truth persisted in repo |
 
 State manipulations are routed through the retort sync engine. The UI
 never bypasses the engine to write files directly — no runtime-layer or team
@@ -547,13 +547,13 @@ npx retort ui
 
 ### Dependencies
 
-| Dependency                               | Owner            | Risk Level     |
-| ---------------------------------------- | ---------------- | -------------- |
-| retort CLI/engine (JSON-RPC API) | Engineering Lead | Low (in-house) |
-| UX/design collaboration                  | UX/UI Designer   | Medium         |
-| QA test coverage (GUI flows, parity)     | QA Lead          | Medium         |
-| Pilot users for early feedback           | Product Owner    | Medium         |
-| Tauri build/signing infrastructure       | DevOps           | Low (deferred) |
+| Dependency                           | Owner            | Risk Level     |
+| ------------------------------------ | ---------------- | -------------- |
+| retort CLI/engine (JSON-RPC API)     | Engineering Lead | Low (in-house) |
+| UX/design collaboration              | UX/UI Designer   | Medium         |
+| QA test coverage (GUI flows, parity) | QA Lead          | Medium         |
+| Pilot users for early feedback       | Product Owner    | Medium         |
+| Tauri build/signing infrastructure   | DevOps           | Low (deferred) |
 
 ## Risks and Mitigations
 
@@ -610,13 +610,13 @@ npx retort ui
 
 ### Competitive Analysis
 
-| Capability                     | GitHub Copilot | Claude | Cursor | Retort |
-| ------------------------------ | -------------- | ------ | ------ | -------------- |
-| Multi-tool overlay system      | No             | No     | No     | **Yes**        |
-| Visual GUI overlay editing     | No             | No     | No     | **Yes**        |
-| Schema-driven validation in UI | No             | No     | No     | **Yes**        |
-| Audit trail with rollback      | No             | No     | No     | **Yes**        |
-| Drift detection in CI          | No             | No     | No     | **Yes**        |
+| Capability                     | GitHub Copilot | Claude | Cursor | Retort  |
+| ------------------------------ | -------------- | ------ | ------ | ------- |
+| Multi-tool overlay system      | No             | No     | No     | **Yes** |
+| Visual GUI overlay editing     | No             | No     | No     | **Yes** |
+| Schema-driven validation in UI | No             | No     | No     | **Yes** |
+| Audit trail with rollback      | No             | No     | No     | **Yes** |
+| Drift detection in CI          | No             | No     | No     | **Yes** |
 
 No competitor currently provides a visual, schema-driven overlay editor with
 audit history, rollback, and CI drift detection across AI tooling. This is a

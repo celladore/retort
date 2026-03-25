@@ -16,6 +16,7 @@ Delegates deployment execution to retort's `deploy` skill.
 ## Failure Triage
 
 When CI is failing:
+
 1. Read the workflow YAML — identify the failing job and step name
 2. Diagnose: missing secret? wrong runner? dependency fetch failure? flaky test?
 3. Reproduce locally with retort's `check` skill where possible
@@ -24,6 +25,7 @@ When CI is failing:
 ## Workflow Review Checklist
 
 For every `.github/workflows/` file:
+
 - [ ] Triggers: avoid `push: branches: [main]` for expensive jobs — use `pull_request` + schedule
 - [ ] Secrets: `${{ secrets.NAME }}` only — never inline values
 - [ ] Clone depth: `fetch-depth: 1` unless full history is required
@@ -35,6 +37,7 @@ For every `.github/workflows/` file:
 ## New Repo CI Setup
 
 Read `references/workflow-patterns.md` for copy-paste templates:
+
 - Basic CI (lint + typecheck + test)
 - .NET multi-project CI with coverage
 - TypeScript monorepo with Turborepo
@@ -44,6 +47,7 @@ Read `references/workflow-patterns.md` for copy-paste templates:
 ## Cost-Aware Patterns
 
 High-cost signals to flag during review:
+
 - Windows/macOS runners for tasks that only need bash
 - Missing `paths:` filters — full suite runs on README edits
 - Matrix × N where N > 4 without a clear reason

@@ -33,14 +33,14 @@ and advises.
 
 Score each proposal 1–5 across:
 
-| Dimension | Description | High weight when |
-|---|---|---|
-| Architecture fit | Adheres to project patterns; correct layer placement; no violations | Always |
-| Compliance | Regulatory implications (COPPA, GDPR, HIPAA, etc.) | User-facing or data-handling features |
-| Testability | Unit-testable without excessive mocking; clear integration surface | Always |
-| Maintenance burden | Long-term complexity; blast radius of future changes | Small teams, long-lived code |
-| Performance | Latency, throughput, resource cost | User-facing or high-frequency paths |
-| Cost | Cloud, API, CI/CD minutes | AI features, infra changes |
+| Dimension          | Description                                                         | High weight when                      |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------- |
+| Architecture fit   | Adheres to project patterns; correct layer placement; no violations | Always                                |
+| Compliance         | Regulatory implications (COPPA, GDPR, HIPAA, etc.)                  | User-facing or data-handling features |
+| Testability        | Unit-testable without excessive mocking; clear integration surface  | Always                                |
+| Maintenance burden | Long-term complexity; blast radius of future changes                | Small teams, long-lived code          |
+| Performance        | Latency, throughput, resource cost                                  | User-facing or high-frequency paths   |
+| Cost               | Cloud, API, CI/CD minutes                                           | AI features, infra changes            |
 
 ## Process
 
@@ -56,29 +56,35 @@ Score each proposal 1–5 across:
 # Arbiter Evaluation — [Decision Title]
 
 ## Proposals
+
 - Proposal A: [one-line summary]
 - Proposal B: [one-line summary]
 
 ## Scorecard
-| Dimension | A | B | Notes |
-|---|---|---|---|
-| Architecture fit | /5 | /5 | |
-| Compliance | /5 | /5 | |
-| Testability | /5 | /5 | |
-| Maintenance burden | /5 | /5 | |
-| Performance | /5 | /5 | |
-| Cost | /5 | /5 | |
-| **Total** | **/30** | **/30** | |
+
+| Dimension          | A       | B       | Notes |
+| ------------------ | ------- | ------- | ----- |
+| Architecture fit   | /5      | /5      |       |
+| Compliance         | /5      | /5      |       |
+| Testability        | /5      | /5      |       |
+| Maintenance burden | /5      | /5      |       |
+| Performance        | /5      | /5      |       |
+| Cost               | /5      | /5      |       |
+| **Total**          | **/30** | **/30** |       |
 
 ## Deciding Factor
+
 [The dimension that tips the balance for this decision and why]
 
 ## Recommendation
+
 **[Proposal A / B / Hybrid]**
 [2-3 sentences — project-specific reasoning]
 
 ## Conditions / Risks
+
 ## ADR Input (if applicable)
+
 [Pre-written "Decision" and "Considered Alternatives" sections for doc agent]
 ```
 

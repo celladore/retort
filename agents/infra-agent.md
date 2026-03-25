@@ -30,22 +30,22 @@ deployment execution to retort's `deploy` skill.
 
 ## Stack Detection
 
-| Signal | Stack | Key patterns |
-|---|---|---|
-| `*.tf` + `terraform.tfvars` | Terraform / HCL | `provider "azurerm"`, `resource`, `module` |
-| `*.bicep` + `main.bicep` | Azure Bicep | `resource`, `module`, `param`, `targetScope` |
-| `*.yaml` in `k8s/` or `infra/k8s/` | Kubernetes | `apiVersion`, `kind: Deployment/Service/Ingress` |
-| `docker-compose.yml` | Docker Compose | `services:`, `volumes:`, `networks:` |
-| `terragrunt.hcl` | Terragrunt | `terraform {}`, `inputs = {}`, `include "root"` |
+| Signal                             | Stack           | Key patterns                                     |
+| ---------------------------------- | --------------- | ------------------------------------------------ |
+| `*.tf` + `terraform.tfvars`        | Terraform / HCL | `provider "azurerm"`, `resource`, `module`       |
+| `*.bicep` + `main.bicep`           | Azure Bicep     | `resource`, `module`, `param`, `targetScope`     |
+| `*.yaml` in `k8s/` or `infra/k8s/` | Kubernetes      | `apiVersion`, `kind: Deployment/Service/Ingress` |
+| `docker-compose.yml`               | Docker Compose  | `services:`, `volumes:`, `networks:`             |
+| `terragrunt.hcl`                   | Terragrunt      | `terraform {}`, `inputs = {}`, `include "root"`  |
 
 ## Task Routing
 
-| Request | Delegate to |
-|---|---|
-| Deploy / apply infrastructure | retort's `deploy` skill |
-| Pre-deploy validation | retort's `preflight` skill |
-| CI/CD pipeline review | `ci-agent` |
-| Architecture decision | retort's `plan` skill |
+| Request                       | Delegate to                |
+| ----------------------------- | -------------------------- |
+| Deploy / apply infrastructure | retort's `deploy` skill    |
+| Pre-deploy validation         | retort's `preflight` skill |
+| CI/CD pipeline review         | `ci-agent`                 |
+| Architecture decision         | retort's `plan` skill      |
 
 ## Implementation Principles
 
@@ -59,6 +59,7 @@ deployment execution to retort's `deploy` skill.
 ## Pre-Apply Checklist
 
 Before applying any IaC change:
+
 - [ ] `terraform plan` / `bicep build` shows only expected diff
 - [ ] No resources are being destroyed that shouldn't be (`-/+` or `-` in plan)
 - [ ] Secrets are referenced from Key Vault / SSM, not inline
@@ -69,6 +70,7 @@ Before applying any IaC change:
 ## Destructive Change Protocol
 
 When a plan includes resource destruction:
+
 1. Flag it explicitly: "⚠️ This plan will **destroy** `<resource_type>.<name>`"
 2. Identify the reason: rename? replacement? dependency change?
 3. Assess data risk: does the destroyed resource hold state?
@@ -79,10 +81,10 @@ When a plan includes resource destruction:
 
 ```yaml
 # .claude/retort.local.md
-cloud_provider: azure       # azure | aws | gcp
-iac_tool: terraform         # terraform | bicep | cdk | pulumi
-environment: dev            # dev | staging | prod
-cost_aware: true            # flag expensive resource types
+cloud_provider: azure # azure | aws | gcp
+iac_tool: terraform # terraform | bicep | cdk | pulumi
+environment: dev # dev | staging | prod
+cost_aware: true # flag expensive resource types
 ```
 
 ---

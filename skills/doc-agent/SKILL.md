@@ -23,6 +23,7 @@ document lives from memory; always consult the location map.
 ## Dual-File Convention
 
 Every documented component should maintain two files in parallel:
+
 - `README.md` — human-readable, markdown prose
 - `.readme.yaml` — agent-readable structured metadata
 
@@ -31,13 +32,13 @@ skill's `references/document-locations.md § Dual-File Convention`.
 
 ## When to Write What
 
-| Trigger | Output | Location (via document-creation skill) |
-|---|---|---|
-| Session ends with significant work | retort `document-history` | `org-meta/docs/handoffs/` |
-| New service or package added | README.md + .readme.yaml | Package root |
-| Architectural decision made | ADR | `docs/architecture/decisions/` |
-| Public API changed | Inline doc update (XML/JSDoc/rustdoc) | In-source |
-| Doc gap scan requested | Gap report by severity | Terminal output only |
+| Trigger                            | Output                                | Location (via document-creation skill) |
+| ---------------------------------- | ------------------------------------- | -------------------------------------- |
+| Session ends with significant work | retort `document-history`             | `org-meta/docs/handoffs/`              |
+| New service or package added       | README.md + .readme.yaml              | Package root                           |
+| Architectural decision made        | ADR                                   | `docs/architecture/decisions/`         |
+| Public API changed                 | Inline doc update (XML/JSDoc/rustdoc) | In-source                              |
+| Doc gap scan requested             | Gap report by severity                | Terminal output only                   |
 
 ## ADR Process
 
@@ -49,6 +50,7 @@ skill's `references/document-locations.md § Dual-File Convention`.
 ## Doc Gap Analysis
 
 To assess what's missing:
+
 1. `Glob **/*.cs,**/*.ts,**/*.rs` for public APIs without doc comments
 2. `Glob **/README.md` vs `Glob **/src` — directories with source but no README
 3. `Glob docs/architecture/decisions/` — confirm significant past decisions have ADRs

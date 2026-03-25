@@ -35,13 +35,13 @@ with the user before writing anything.
 
 ## The Two Worlds
 
-| External (client-facing) | Internal (dev-facing) |
-|---|---|
-| Notion spec pages | `.roadmap.yaml`, `org-meta/.todo.yaml` |
-| Client brief / project scope | `docs/product/prd/` |
-| Status updates for stakeholders | Agent traces, Linear issues |
-| "Phase 2: Authentication" | 3 Linear tickets + ADR-0007 |
-| Plain language feature descriptions | Conventional commit scopes |
+| External (client-facing)            | Internal (dev-facing)                  |
+| ----------------------------------- | -------------------------------------- |
+| Notion spec pages                   | `.roadmap.yaml`, `org-meta/.todo.yaml` |
+| Client brief / project scope        | `docs/product/prd/`                    |
+| Status updates for stakeholders     | Agent traces, Linear issues            |
+| "Phase 2: Authentication"           | 3 Linear tickets + ADR-0007            |
+| Plain language feature descriptions | Conventional commit scopes             |
 
 These drift because they're written at different times, for different audiences, by different
 people or agents. The sync agent reconciles them.
@@ -51,12 +51,14 @@ people or agents. The sync agent reconciles them.
 ### 1. Pull External State
 
 Read the external system (via MCP if available, or URL if provided):
+
 - Notion: use `mcp__claude_ai_Notion__*` tools to read pages
 - Fallback: ask user to paste the relevant content
 
 ### 2. Pull Internal State
 
 Read internal artifacts:
+
 ```bash
 cat org-meta/.roadmap.yaml 2>/dev/null
 cat org-meta/.todo.yaml 2>/dev/null
@@ -69,11 +71,13 @@ ls docs/product/prd/ 2>/dev/null
 Identify gaps in both directions:
 
 **External → Internal (features in client spec not tracked internally):**
+
 - Feature mentioned in Notion with no corresponding Linear issue or roadmap entry
 - Client requirement with no acceptance criteria in any PRD
 - "Phase N" in brief with no milestone in delivery-agent backlog
 
 **Internal → External (completed work not reflected in client docs):**
+
 - Shipped features not mentioned in Notion status pages
 - Closed Linear tickets addressing client requirements not updated in spec
 - ADR decisions that change previously stated scope
@@ -84,23 +88,28 @@ Identify gaps in both directions:
 ## Sync Report — YYYY-MM-DD
 
 ### External → Internal gaps (in Notion, not tracked internally)
+
 - [ ] "AI difficulty setting" — Notion § Features, no Linear issue found
 - [ ] "Parent override for story content" — Notion § Phase 2, not in .roadmap.yaml
 
 ### Internal → External gaps (built but not reflected in Notion)
+
 - [ ] Shipped: AI companion name customisation (PR #845) — not in Notion status
 - [ ] ADR-0014 domain consolidation — changes scope of "Data Model" section in spec
 
 ### Possible duplicates / stale entries
+
 - "Story sharing" in Notion § Phase 3 — may conflict with shipped "export story" feature
 
 ### No action needed
+
 - Feature X: matches roadmap entry ✓
 ```
 
 ### 5. Act on Approved Items
 
 Only after user confirms which items to sync:
+
 - **Notion → Internal**: create/update Linear issues, roadmap entries, or PRDs
 - **Internal → Notion**: update Notion page via MCP (`mcp__claude_ai_Notion__notion-update-page`)
 - **Translation**: convert client language to dev tasks, or dev status to plain-language update
@@ -150,11 +159,11 @@ Always confirm with the user before writing to Notion.
 
 ```yaml
 # .claude/retort.local.md
-external_docs: notion          # notion | confluence | sharepoint | none
-notion_workspace: ""           # Workspace name or ID (project-specific)
+external_docs: notion # notion | confluence | sharepoint | none
+notion_workspace: '' # Workspace name or ID (project-specific)
 internal_roadmap: org-meta/.roadmap.yaml
 internal_backlog: org-meta/.todo.yaml
-sync_direction: report-only    # report-only | bidirectional (after confirmation)
+sync_direction: report-only # report-only | bidirectional (after confirmation)
 ```
 
 ---
