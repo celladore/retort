@@ -2993,6 +2993,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       }
     }
   } finally {
-    await rm(tmpDir, { recursive: true, force: true });
+    // Wrap cleanup so it cannot mask the primary sync error.
+    // maxRetries handles transient ENOTEMPTY on tmpfs/overlayfs (Node.js
+    // fs.rm defaults to maxRetries:0, so the first failed rmdir throws).
+    try {
+      await rm(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch (cleanupErr) {
+      if (process.env.DEBUG) {
+        console.error(`[retort:sync] Warning: tmpDir cleanup failed — ${cleanupErr.message}`);
+      }
+    }
   }
 }
