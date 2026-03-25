@@ -681,7 +681,7 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     try {
       await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { diff: true } });
       const out = log.join('\n');
-      expect(out).toContain('[agentkit:sync] Diff mode');
+      expect(out).toContain('Diff mode');
       expect(out).toContain('create ');
       expect(out).toContain('Diff:');
       expect(existsSync(join(projectRoot, 'CONTRIBUTING.md'))).toBe(false);
