@@ -100,7 +100,8 @@ jobs:
             }
 
             const isAgentkitForgeRepo =
-              context.repo.owner.toLowerCase() === 'justaghost' &&
+              (context.repo.owner.toLowerCase() === 'justaghost' ||
+               context.repo.owner.toLowerCase() === 'phoenixvc') &&
               context.repo.repo.toLowerCase() === 'retort';
 
             if (isAgentkitForgeRepo) {

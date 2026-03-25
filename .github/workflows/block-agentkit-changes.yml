@@ -20,8 +20,8 @@ jobs:
       - name: Detect .agentkit changes
         shell: bash
         run: |
-          if [[ "${{ github.repository }}" == "JustAGhosT/retort" ]]; then
-            echo "Info: Skipping .agentkit/ change block for exception repository JustAGhosT/retort."
+          if [[ "${{ github.repository }}" == "JustAGhosT/retort" || "${{ github.repository }}" == "phoenixvc/retort" ]]; then
+            echo "Info: Skipping .agentkit/ change block for source repository ${{ github.repository }}."
             exit 0
           fi
 
