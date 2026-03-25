@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   validate-retrospective:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     # Non-blocking: continue-on-error ensures this never gates delivery
     continue-on-error: true
     permissions:
