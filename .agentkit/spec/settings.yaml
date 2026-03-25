@@ -177,3 +177,16 @@ hooks:
   # Stop hook — runs when the agent session is about to end
   # ---------------------------------------------------------------------------
   stop: stop-build-check
+
+# =============================================================================
+# Sync configuration
+# =============================================================================
+sync:
+  # Controls the value written to {{syncDate}} in generated file headers.
+  # 'run'     — today's ISO date (default); causes churn on every sync (issue #417)
+  # 'version' — the spec VERSION string; stable until spec VERSION changes
+  # 'none'    — empty string; removes the date field from headers entirely
+  #
+  # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
+  #   syncDateMode: none
+  dateMode: run
