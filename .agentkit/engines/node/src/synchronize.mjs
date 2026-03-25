@@ -2006,8 +2006,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       overlaySettings.repoName ||
       repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
-    integrationBranch:
-      overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
+    integrationBranch: overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     commandPrefix: overlaySettings.commandPrefix || null,
     // syncDateMode controls {{syncDate}} in generated headers (issue #417).
@@ -2954,9 +2953,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           }
         }
         if (formattedCount > 0) {
-          logVerbose(
-            `[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
-          );
+          logVerbose(`[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`);
         }
       } catch {
         // If prettier is not available or fails entirely, just continue
