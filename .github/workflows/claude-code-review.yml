@@ -11,6 +11,9 @@ concurrency:
 jobs:
   claude-review:
     runs-on: ubuntu-latest
+    # Skip entirely when the OAuth token secret is not configured — avoids
+    # spurious 401 failures on forks or repos where the secret has not been set.
+    if: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
     permissions:
       contents: read
       pull-requests: read
