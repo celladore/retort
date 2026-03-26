@@ -166,8 +166,8 @@ defaults:
 | `ci-pin-actions`         | ci-cd         | —                                 | Pre-commit or CI linter for workflows      |
 | `ci-reproducible-builds` | ci-cd         | —                                 | CI build config, not agent decision        |
 | `dep-lockfile-committed` | dependency    | —                                 | Pre-commit hook                            |
-| `gw-sync-before-pr`      | git-workflow  | `pnpm -C .agentkit agentkit:sync` | Should auto-run as pre-push hook           |
-| `doc-generated-files`    | documentation | `pnpm -C .agentkit agentkit:sync` | Same as above — auto-run                   |
+| `gw-sync-before-pr`      | git-workflow  | `pnpm --dir .agentkit agentkit:sync` | Should auto-run as pre-push hook           |
+| `doc-generated-files`    | documentation | `pnpm --dir .agentkit agentkit:sync` | Same as above — auto-run                   |
 
 ### The Fix
 

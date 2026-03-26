@@ -50,7 +50,7 @@ git submodule update --init --recursive
 Then install the runtime dependencies:
 
 ```bash
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 ```
 
 > **Note:** If you do not use pnpm, you can also run `npm install` inside the

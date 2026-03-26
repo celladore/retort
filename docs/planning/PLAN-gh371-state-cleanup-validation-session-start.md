@@ -46,7 +46,7 @@ When a user starts a session or runs the orchestrator, the state directory (and 
    In the engine test suite, add tests: (1) session-start hook (or a minimal script that invokes the same mkdir logic) leaves `.claude/state` and `.claude/state/tasks` present when run in a temp project root; (2) `loadState` with a corrupt `orchestrator.json` (e.g. missing `current_phase` or invalid value) results in default state being written and returned; (3) after `saveState`, the `tasks` subdir exists. **Reason:** Regression safety and documentation of expected behavior.
 
 7. **Update docs and run sync**  
-   In `docs/orchestration/` or `docs/architecture/specs/`, add a short subsection (or update SPEC-PROC-005) stating that session-start ensures `.claude/state` and `.claude/state/tasks` exist, and that the engine ensures `.agentkit/state` (and migration) and validates/resets corrupt orchestrator state. If a new flag or command was added for stale-task cleanup, document it in the orchestrate command template and in COMMAND_GUIDE. Run `pnpm -C .agentkit agentkit:sync` and commit generated changes if any. **Reason:** Single source of truth and consistent behavior across adopters.
+   In `docs/orchestration/` or `docs/architecture/specs/`, add a short subsection (or update SPEC-PROC-005) stating that session-start ensures `.claude/state` and `.claude/state/tasks` exist, and that the engine ensures `.agentkit/state` (and migration) and validates/resets corrupt orchestrator state. If a new flag or command was added for stale-task cleanup, document it in the orchestrate command template and in COMMAND_GUIDE. Run `pnpm --dir .agentkit agentkit:sync` and commit generated changes if any. **Reason:** Single source of truth and consistent behavior across adopters.
 
 ---
 
@@ -73,10 +73,10 @@ Commands to run from repo root; copy-paste ready.
 
 ```bash
 # 1. Ensure no regressions in orchestrator
-pnpm -C .agentkit exec node --test engines/node/src/__tests__/orchestrator.test.mjs
+pnpm --dir .agentkit exec node --test engines/node/src/__tests__/orchestrator.test.mjs
 
 # 2. Run full agentkit validate (hooks and structure)
-pnpm -C .agentkit agentkit:validate
+pnpm --dir .agentkit agentkit:validate
 
 # 3. Session-start: in a temp dir with no .claude/state, run session-start and assert dirs exist
 export TMP_PROJECT=$(mktemp -d)
@@ -89,14 +89,14 @@ rm -rf "$TMP_PROJECT"
 
 # 4. Orchestrator: corrupt state file then load — should get default state
 # (Manual or add to orchestrator.test.mjs: write invalid JSON to state path, loadState, assert current_phase === 1 and file overwritten)
-pnpm -C .agentkit exec node --test engines/node/src/__tests__/orchestrator.test.mjs
+pnpm --dir .agentkit exec node --test engines/node/src/__tests__/orchestrator.test.mjs
 ```
 
 ---
 
 ## 6. Rollback plan
 
-- **Session-start changes:** Revert the added `mkdir` / `New-Item` block in both hook templates; run `pnpm -C .agentkit agentkit:sync` to regenerate adopters’ hooks. No data migration.
+- **Session-start changes:** Revert the added `mkdir` / `New-Item` block in both hook templates; run `pnpm --dir .agentkit agentkit:sync` to regenerate adopters’ hooks. No data migration.
 - **Engine changes:** Revert orchestrator.mjs and task-protocol.mjs changes; redeploy. If adopters already had `tasks` created, leaving the dir in place is harmless.
 - **Stale cleanup:** If implemented as a flag-only or separate command, disable or remove the flag/command; no automatic migration to roll back.
 - **Tests:** Revert new test cases if the feature is reverted.

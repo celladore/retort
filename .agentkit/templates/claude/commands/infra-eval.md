@@ -14,7 +14,7 @@ last_updated: '{{syncDate}}'
 
 {{#unless hasInfraEval}}
 
-> **This command is not enabled.** To enable infrastructure evaluation, set `evaluation.infraEval: true` in your project's `.agentkit/spec/project.yaml`, then run `pnpm -C .agentkit agentkit:sync` to regenerate.
+> **This command is not enabled.** To enable infrastructure evaluation, set `evaluation.infraEval: true` in your project's `.agentkit/spec/project.yaml`, then run `pnpm --dir .agentkit agentkit:sync` to regenerate.
 
 Stop here. Do not proceed with the evaluation.
 {{/unless}}

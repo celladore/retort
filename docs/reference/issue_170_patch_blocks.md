@@ -99,7 +99,7 @@ File: `.agentkit/templates/github/scripts/README.md`
 ## Validation commands
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 Then verify generated outputs include expected behavior:

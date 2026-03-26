@@ -113,4 +113,4 @@ If `.claude/state/orchestrator.json` becomes corrupted:
 
 ---
 
-_This runbook is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate._
+_This runbook is maintained by Retort. Run `pnpm --dir .agentkit retort:sync` to regenerate._

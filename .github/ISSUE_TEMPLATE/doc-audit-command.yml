@@ -142,7 +142,7 @@ body:
 
         2. Create template at `.agentkit/templates/claude/commands/doc-audit.md` implementing all 7 phases.
 
-        3. Run `pnpm -C .agentkit agentkit:sync` to generate outputs for all 15+ platform targets.
+        3. Run `pnpm --dir .agentkit agentkit:sync` to generate outputs for all 15+ platform targets.
 
         The full spec YAML entry and complete Handlebars template (with all 7 phases) are in `docs/engineering/doc-audit-command-proposal.md`.
     validations:

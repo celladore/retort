@@ -14,7 +14,7 @@ last_updated: '{{syncDate}}'
 
 {{#unless hasFinOps}}
 
-> **This command requires a FinOps-enabled overlay.** To enable cost centre management, add the `finops` domain to your overlay's `rules.yaml`, then run `pnpm -C .agentkit agentkit:sync`.
+> **This command requires a FinOps-enabled overlay.** To enable cost centre management, add the `finops` domain to your overlay's `rules.yaml`, then run `pnpm --dir .agentkit agentkit:sync`.
 
 Stop here. Do not proceed.
 {{/unless}}

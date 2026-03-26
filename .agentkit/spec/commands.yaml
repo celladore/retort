@@ -1519,7 +1519,7 @@ commands:
       Or if pnpm is available:
 
       ```bash
-      pnpm -C .agentkit agentkit:init
+      pnpm --dir .agentkit agentkit:init
       ```
 
       ## Flags
@@ -1599,7 +1599,7 @@ commands:
       Or if pnpm is available:
 
       ```bash
-      pnpm -C .agentkit agentkit:sync
+      pnpm --dir .agentkit agentkit:sync
       ```
 
       ## Flags

@@ -3,10 +3,10 @@ set -euo pipefail
 # Shortcut script for Retort setup
 
 # Install dependencies
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 
 # Sync tool configs
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 
 # Validate setup
-pnpm -C .agentkit agentkit:validate
+pnpm --dir .agentkit agentkit:validate

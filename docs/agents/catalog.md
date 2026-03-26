@@ -93,4 +93,4 @@ To add agents to a team, either:
 - Add agent IDs to the team's `agents` field in `.agentkit/spec/teams.yaml`
 - Name the agent's category to match the target team ID
 
-After changes, run `pnpm -C .agentkit agentkit:sync` to regenerate team commands.
+After changes, run `pnpm --dir .agentkit agentkit:sync` to regenerate team commands.

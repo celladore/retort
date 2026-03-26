@@ -40,7 +40,7 @@ All files have the correct header `# Instructions — finops` and contain the 7 
 ### 1. Run a clean sync and verify
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 git diff  # Check if any finops.md files change
 ```
 

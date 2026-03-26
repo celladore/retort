@@ -59,7 +59,7 @@ For maintenance requests, quickly check:
 ```bash
 git status
 git log --oneline -5
-pnpm -C .agentkit retort:sync --diff   # preview drift
+pnpm --dir .agentkit retort:sync --diff   # preview drift
 ```
 
 ### Step 3 — Dispatch or act
@@ -72,7 +72,7 @@ pnpm -C .agentkit retort:sync --diff   # preview drift
 **If handling directly:**
 1. Read the relevant spec/template file first
 2. Make the minimum change
-3. Run `pnpm -C .agentkit retort:sync` to regenerate outputs
+3. Run `pnpm --dir .agentkit retort:sync` to regenerate outputs
 4. Verify with `git diff`
 
 ### Step 4 — Report
@@ -107,6 +107,6 @@ pnpm -C .agentkit retort:sync --diff   # preview drift
 
 1. **Never self-answer** instruction/conduct update requests — always divert to `/team-forge` or `/claude-md-management:revise-claude-md`
 2. **Never edit protected directories** (`.agentkit/engines/`, `.agentkit/templates/`, `.agentkit/overlays/`, `.agentkit/bin/`) directly — describe the change and let the user or a forge PR handle it
-3. **Always sync after spec changes** — `pnpm -C .agentkit retort:sync`
-4. **Always run tests after engine changes** — `pnpm -C .agentkit vitest run`
+3. **Always sync after spec changes** — `pnpm --dir .agentkit retort:sync`
+4. **Always run tests after engine changes** — `pnpm --dir .agentkit vitest run`
 5. **Delegate tests to `/team-testing`** — do not write test files inline during dispatch sessions

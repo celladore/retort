@@ -145,7 +145,7 @@ setting has been proposed in `.agentkit/spec/settings.yaml`.
 correlate warnings with the file being written:
 
 ```bash
-pnpm -C .agentkit retort:sync 2>&1 | grep -E "Warning:|Writing|Rendering"
+pnpm --dir .agentkit retort:sync 2>&1 | grep -E "Warning:|Writing|Rendering"
 ```
 
 ---

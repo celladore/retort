@@ -61,7 +61,7 @@ jobs:
             echo ""
             echo "Markdown lint found formatting issues. Run locally to fix:"
             echo '```bash'
-            echo "pnpm -C .agentkit lint:md"
+            echo "pnpm --dir .agentkit lint:md"
             echo '```'
             echo ""
             echo "### Details"

@@ -29,7 +29,7 @@
   {{#if commitConvention}}- **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" — CI will reject them.{{/if}}
   {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
   {{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
-- **Generated file sync**: After editing any file in `.agentkit/spec/`, you MUST run `pnpm -C .agentkit agentkit:sync` and commit the regenerated output before pushing. CI drift checks will fail otherwise.
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, you MUST run `pnpm --dir .agentkit agentkit:sync` and commit the regenerated output before pushing. CI drift checks will fail otherwise.
 
 {{#if hasLogging}}
 

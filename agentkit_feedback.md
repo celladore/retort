@@ -66,7 +66,7 @@ Suggestion:
 
 In some environments, running:
 
-`pnpm -C .agentkit agentkit:sync`
+`pnpm --dir .agentkit agentkit:sync`
 
 may attempt to write to user-level pnpm state/cache locations under `%LOCALAPPDATA%`, which can fail under restricted permissions. Running the sync via node was more reliable:
 

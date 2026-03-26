@@ -53,4 +53,4 @@ No breaking changes — this is the initial release.
 
 ---
 
-_This guide is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate._
+_This guide is maintained by Retort. Run `pnpm --dir .agentkit retort:sync` to regenerate._

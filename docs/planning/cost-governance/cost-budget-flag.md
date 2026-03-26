@@ -63,7 +63,7 @@ Confirm that `node .agentkit/engines/node/src/cli.mjs cost --budget` works corre
 ### 3. Re-sync
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 Verify all platform command outputs include the `--budget` documentation.

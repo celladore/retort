@@ -3,7 +3,7 @@
 
 <<<<<<< YOUR_EDITS
 
-<!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
+<!-- Regenerate: pnpm --dir .agentkit agentkit:sync -->
 
 <<<<<<< YOUR_EDITS
 
@@ -17,9 +17,9 @@
 
 ||||||| LAST_SYNC
 
-# <!-- Regenerate: pnpm -C .agentkit agentkit:sync -->
+# <!-- Regenerate: pnpm --dir .agentkit agentkit:sync -->
 
-<!-- Regenerate: pnpm -C .agentkit retort:sync -->
+<!-- Regenerate: pnpm --dir .agentkit retort:sync -->
 
 > > > > > > > NEW_TEMPLATE
 

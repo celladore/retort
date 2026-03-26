@@ -23,7 +23,7 @@ The forge repository is added as a git submodule at `.agentkit/`. All specs, tem
 
 ```bash
 git submodule add https://github.com/org/retort.git .agentkit
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 node .agentkit/engines/node/src/cli.mjs init --repoName my-project
 node .agentkit/engines/node/src/cli.mjs sync
 ```
