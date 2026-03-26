@@ -89,6 +89,44 @@ cost-operations
 - Setting budgets so tight they block legitimate high-value work
 - Tracking only cost reduction without measuring quality impact
 
+## Collaborators
+
+- **[model-economist]** Model Economist *(cost-operations)* — AI model selection and pricing specialist · accepts: investigate, review, plan
+- **[token-efficiency-engineer]** Token Efficiency Engineer *(cost-operations)* — Prompt engineering and token optimization specialist · accepts: investigate, review, plan, implement
+- **[vendor-arbitrage-analyst]** Vendor Arbitrage Analyst *(cost-operations)* — Multi-vendor cost arbitrage specialist · accepts: investigate, plan, document
+- **[grant-hunter]** Grant & Programs Hunter *(cost-operations)* — Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator cre... · accepts: investigate, plan, document
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+- **[infra]** Infrastructure Engineer *(engineering)* — Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliab... · accepts: implement, review, plan, investigate
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about the team's cost state (spend, savings, anomalies), desires budget health, and forms escalation intentions when thresholds are breached.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/cost-ops/**, .claude/state/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved, phase-transition
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.8
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** domain
+- **Resolution strategy:** escalate
+- **Can negotiate with:** model-economist, token-efficiency-engineer
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

@@ -89,6 +89,40 @@ cost-operations
 - Spending more time on applications than the credits are worth
 - Neglecting to track program renewal dates after initial approval
 
+## Collaborators
+
+- **[vendor-arbitrage-analyst]** Vendor Arbitrage Analyst *(cost-operations)* — Multi-vendor cost arbitrage specialist · accepts: investigate, plan, document
+- **[cost-ops-monitor]** Cost Ops Monitor *(cost-operations)* — Central monitoring and reporting agent for the Cost Ops team · accepts: investigate, review, document
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Investigates external funding sources → analyses eligibility and ROI → recommends and tracks applications; react cycle suits ongoing grant pipeline management.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/cost-ops/grants/**, docs/cost-ops/programs/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** vendor-arbitrage-analyst, cost-ops-monitor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

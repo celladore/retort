@@ -85,6 +85,40 @@ operations
 - Follow security domain rules [sec-no-secrets, sec-encryption, sec-least-privilege] — never commit secrets, rotate credentials, use secret managers
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[infra]** Infrastructure Engineer *(engineering)* — Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliab... · accepts: implement, review, plan, investigate
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes environment configuration drift across stages, reasons about parity requirements, then implements corrections — always validates before committing.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** devops, infra
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

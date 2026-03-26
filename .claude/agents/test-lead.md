@@ -88,6 +88,42 @@ testing
 - Follow testing domain rules [qa-coverage-threshold, qa-no-sleep, qa-no-skipped-tests, qa-aaa-pattern] — maintain coverage thresholds, deterministic tests, test error paths
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+- **[backend]** Backend Engineer *(engineering)* — Senior backend engineer responsible for API design, service architecture, core business logic, and server-side perfor... · accepts: implement, review, plan
+- **[frontend]** Frontend Engineer *(engineering)* — Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi... · accepts: implement, review, plan
+- **[integration-tester]** Integration Tester *(testing)* — Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and use... · accepts: implement, review, test
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes test coverage and quality metrics, reasons about testing strategy gaps, then implements or reviews tests — always validates coverage thresholds before completing.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** backend, frontend, integration-tester
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

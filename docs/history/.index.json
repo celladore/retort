@@ -1,12 +1,21 @@
 {
   "nextNumber": 1,
   "sequences": {
-    "implementation": 1,
+    "implementation": 2,
     "bugfix": 1,
     "feature": 1,
     "migration": 1,
     "issue": 1,
     "lesson": 1
   },
-  "entries": []
+  "entries": [
+    {
+      "number": 1,
+      "type": "implementation",
+      "title": "Agent decision-model metadata and agents.yaml directory split",
+      "date": "2026-03-26",
+      "pr": "",
+      "file": "implementations/0001-2026-03-26-agent-decision-model-metadata-and-agents-yaml-directory-split-implementation.md"
+    }
+  ]
 }

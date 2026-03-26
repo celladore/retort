@@ -83,6 +83,39 @@ testing
 - Follow testing domain rules [qa-coverage-threshold, qa-performance-regression, qa-no-skipped-tests] — maintain coverage thresholds, track regression
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[test-lead]** Test Lead *(testing)* — Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions · accepts: implement, review, test
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes coverage reports, reasons about uncovered paths and risk, then produces recommendations — investigation-first with no direct code output.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** test-lead
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

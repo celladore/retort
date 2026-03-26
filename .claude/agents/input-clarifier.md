@@ -55,7 +55,7 @@ team-creation
 ## Focus Areas
 
 - .agentkit/spec/teams.yaml
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - docs/planning/agents-teams/**
 
 ## Responsibilities
@@ -76,6 +76,39 @@ team-creation
 
 - Always compare against existing teams before proceeding
 - Flag any scope overlap > 30% as a potential conflict
+
+## Collaborators
+
+- **[mission-definer]** Mission Definer *(team-creation)* — Locks the team mission, scope, accepted task types, and handoff chain · accepts: plan
+
+## Decision Model
+
+- **Type:** htn
+- **Rationale:** First node in the hierarchical team-creation pipeline — parses and validates the request before passing a structured brief to mission-definer.
+
+## Retry Policy
+
+- **Max retries:** 0
+- **Failure handling:** transient→retry, logic→fail, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/teams.yaml, .agentkit/spec/agents/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** mission-definer
 
 ## Guidelines
 

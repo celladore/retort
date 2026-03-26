@@ -121,6 +121,39 @@ agentkit features disable team-orchestration agent-personas
 - Enabling all features without considering the team's actual workflow
 - Modifying features.yaml directly instead of using overlay settings
 
+## Collaborators
+
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about the feature dependency graph and overlay configuration, desires correct feature adoption, and forms intentions to audit and advise — reads spec before every recommendation.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/features.yaml, .agentkit/overlays/**, .claude/state/orchestrator.json
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** devops
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

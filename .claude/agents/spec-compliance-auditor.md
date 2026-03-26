@@ -54,7 +54,7 @@ operations
 
 ## Focus Areas
 
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - .agentkit/spec/teams.yaml
 - .claude/state/tasks/**
 - .claude/state/events.log
@@ -97,6 +97,41 @@ operations
 - Penalizing agents for responding to orchestrator delegation outside typical scope
 - Recommending spec changes based on a single session (require sustained pattern)
 - Conflating session-level retrospective findings with agent-level performance
+
+## Collaborators
+
+- **[retrospective-analyst]** Retrospective Analyst *(operations)* — Session retrospective specialist activated via /review --focus=retrospective · accepts: review, investigate
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+- **[team-validator]** Team Validator *(team-creation)* — Quality gate — validates the complete team spec for consistency, conflicts, and completeness · accepts: review, investigate
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about declared vs observed agent behaviour across sessions, desires spec accuracy, and forms intentions to recommend revisions when drift exceeds thresholds.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/agents/**, .claude/state/tasks/**, .claude/state/events.log, docs/history/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.8
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** team-validator
 
 ## Guidelines
 

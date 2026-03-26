@@ -78,6 +78,40 @@ strategic-operations
 - Release notes must include migration steps for breaking changes
 - Sync waves proceed in dependency order (core repos first)
 
+## Collaborators
+
+- **[impact-assessor]** Impact Assessor *(strategic-operations)* — Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template... · accepts: review, investigate
+- **[governance-advisor]** Governance Advisor *(strategic-operations)* — Defines and enforces framework governance policies — versioning strategy, breaking change protocols, deprecation time... · accepts: plan, review, document
+
+## Decision Model
+
+- **Type:** plan-execute
+- **Rationale:** Creates a release DAG (version bumps, changelog, sync wave order) and then dispatches execution — orchestrator pattern matches release coordination work.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** CHANGELOG.md, .agentkit/spec/project.yaml, docs/planning/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved, phase-transition
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** domain
+- **Resolution strategy:** escalate
+- **Can negotiate with:** governance-advisor, impact-assessor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

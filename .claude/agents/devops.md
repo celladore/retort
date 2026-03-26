@@ -87,6 +87,40 @@ engineering
 - Follow security domain rules [sec-no-secrets, ci-no-secrets-in-workflows] — never expose secrets in logs or workflow outputs
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[infra]** Infrastructure Engineer *(engineering)* — Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliab... · accepts: implement, review, plan, investigate
+- **[test-lead]** Test Lead *(testing)* — Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions · accepts: implement, review, test
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes pipeline state and build outputs, reasons about automation gaps, then implements CI/CD changes — greedy with explicit rollback planning.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** infra, test-lead
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

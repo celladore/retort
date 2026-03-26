@@ -112,6 +112,41 @@ ALTER TABLE users ADD COLUMN timezone TEXT NULL;
 - Destructive migrations without rollback/backup strategy
 - Large schema + data transformation in a single migration step
 
+## Collaborators
+
+- **[backend]** Backend Engineer *(engineering)* — Senior backend engineer responsible for API design, service architecture, core business logic, and server-side perfor... · accepts: implement, review, plan
+- **[test-lead]** Test Lead *(testing)* — Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions · accepts: implement, review, test
+- **[cost-ops-monitor]** Cost Ops Monitor *(cost-operations)* — Central monitoring and reporting agent for the Cost Ops team · accepts: investigate, review, document
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes schema state and migration history, reasons about safe evolution, then implements — always validates reversibility before acting.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** backend, test-lead
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

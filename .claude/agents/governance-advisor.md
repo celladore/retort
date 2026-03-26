@@ -77,6 +77,40 @@ strategic-operations
 - Breaking changes require a migration guide before merge
 - Deprecation timeline minimum is 2 minor versions
 
+## Collaborators
+
+- **[portfolio-analyst]** Portfolio Analyst *(strategic-operations)* — Scans the adoption landscape — inventories downstream repos using AgentKit Forge, compares spec versions, detects dri... · accepts: investigate, review
+- **[adoption-strategist]** Adoption Strategist *(strategic-operations)* — Plans and executes adoption campaigns — onboarding new repos, migration paths for existing projects, and rollout stra... · accepts: plan, document
+
+## Decision Model
+
+- **Type:** plan-execute
+- **Rationale:** Defines governance policies and then enforces them — plan-execute separates policy design from compliance verification.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/architecture/**, docs/planning/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** domain
+- **Resolution strategy:** escalate
+- **Can negotiate with:** adoption-strategist
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

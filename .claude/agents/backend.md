@@ -106,6 +106,41 @@ export function registerBillingServices(container) {
 - Service locator usage inside handlers/controllers
 - Returning raw ORM entities directly from API responses
 
+## Collaborators
+
+- **[data]** Data Engineer *(engineering)* — Senior data engineer responsible for database design, migrations, data models, and data pipeline architecture · accepts: implement, review, plan
+- **[test-lead]** Test Lead *(testing)* — Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions · accepts: implement, review, test
+- **[frontend]** Frontend Engineer *(engineering)* — Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi... · accepts: implement, review, plan
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes assigned task context, reasons about implementation approach, then acts by writing code — greedy single-step execution.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** frontend, test-lead, data
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

@@ -86,6 +86,40 @@ operations
 - Follow dependency-management domain rules [dep-audit-before-adopt, dep-regular-audit, dep-pin-versions] — audit supply chain, check for known CVEs
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+- **[infra]** Infrastructure Engineer *(engineering)* — Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliab... · accepts: implement, review, plan, investigate
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about the threat model and known vulnerabilities, desires zero critical findings, and forms intentions to audit at-risk areas — revises beliefs on new CVEs or code changes.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md, .claude/state/events.log
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.9
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** escalate
+- **Can negotiate with:** devops, infra
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

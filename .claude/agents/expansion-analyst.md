@@ -92,6 +92,41 @@ product
 - Re-suggesting previously rejected items
 - Suggesting work that duplicates existing backlog entries
 
+## Collaborators
+
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+- **[retrospective-analyst]** Retrospective Analyst *(operations)* — Session retrospective specialist activated via /review --focus=retrospective · accepts: review, investigate
+- **[content-strategist]** Content Strategist *(marketing)* — Content strategy specialist responsible for messaging, copy, documentation voice, and content architecture · accepts: implement, review
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about codebase gaps via read-only analysis, desires ranked improvement opportunities, and forms intentions to produce suggestions — never acts without explicit approval.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md, docs/history/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.65
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** product-manager, content-strategist
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

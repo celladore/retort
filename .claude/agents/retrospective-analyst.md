@@ -99,6 +99,41 @@ operations
 - Logging vague or non-actionable observations as issues
 - Creating duplicate records for problems already documented
 
+## Collaborators
+
+- **[project-shipper]** Project Shipper *(project-management)* — Delivery-focused project management specialist responsible for moving work through the pipeline from planning to prod... · accepts: plan, review
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+- **[spec-compliance-auditor]** Spec Compliance Auditor *(operations)* — Agent performance evaluator that closes the feedback loop between agent specifications and actual behavior · accepts: review, investigate
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about session quality by reading conversation history, desires accurate retrospective records, and forms intentions to document findings — never gates delivery.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/history/.index.json, .claude/state/events.log, .claude/state/orchestrator.json
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** project-shipper, spec-compliance-auditor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

@@ -83,6 +83,41 @@ product
 - Follow documentation domain rules [doc-8-category-structure, doc-changelog, doc-generated-files] — keep docs current with code changes
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[backend]** Backend Engineer *(engineering)* — Senior backend engineer responsible for API design, service architecture, core business logic, and server-side perfor... · accepts: implement, review, plan
+- **[frontend]** Frontend Engineer *(engineering)* — Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi... · accepts: implement, review, plan
+- **[project-shipper]** Project Shipper *(project-management)* — Delivery-focused project management specialist responsible for moving work through the pipeline from planning to prod... · accepts: plan, review
+
+## Decision Model
+
+- **Type:** plan-execute
+- **Rationale:** Creates a work item plan from business requirements, then dispatches to engineering teams for execution — maintains backlog as the DAG of pending work.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md, docs/product/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** escalate
+- **Can negotiate with:** backend, frontend, project-shipper
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

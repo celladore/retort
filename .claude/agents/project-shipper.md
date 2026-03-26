@@ -88,6 +88,40 @@ project-management
 - Follow documentation domain rules [doc-8-category-structure, doc-changelog, doc-adr-format] — handoff docs must be current and complete
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[release-manager]** Release Manager *(project-management)* — Release management specialist responsible for coordinating releases, managing versioning, generating changelogs, and ... · accepts: implement, plan, review
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+
+## Decision Model
+
+- **Type:** plan-execute
+- **Rationale:** Creates delivery plans by decomposing features into tasks, then dispatches and tracks execution — manages the risk register and handoff documentation.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md, .claude/state/tasks/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** escalate
+- **Can negotiate with:** release-manager, product-manager
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

@@ -84,6 +84,40 @@ design
 - Follow typescript domain rules [ts-wcag-aa, ts-strict-null, ts-no-any] — WCAG AA compliance for all interactive components
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[frontend]** Frontend Engineer *(engineering)* — Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi... · accepts: implement, review, plan
+- **[brand-guardian]** Brand Guardian *(design)* — Brand consistency specialist ensuring all visual and written outputs align with the established brand identity, desig... · accepts: review, plan, investigate
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes design implementation gaps, reasons about interaction patterns, then produces design recommendations — review-only, no direct code output.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** frontend, brand-guardian
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

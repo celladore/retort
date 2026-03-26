@@ -54,7 +54,7 @@ team-creation
 
 ## Focus Areas
 
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - .agentkit/spec/rules.yaml
 
 ## Responsibilities
@@ -75,6 +75,40 @@ team-creation
 - Role descriptions should be 2-3 sentences in imperative voice
 - Reference existing rule domains rather than duplicating rules
 - Examples should demonstrate the most common interaction pattern
+
+## Collaborators
+
+- **[role-architect]** Role Architect *(team-creation)* — Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team · accepts: plan
+- **[flow-designer]** Flow Designer *(team-creation)* — Designs the team command, flags, and integration points with other teams · accepts: plan, implement
+
+## Decision Model
+
+- **Type:** htn
+- **Rationale:** Fourth node in the HTN chain — writes agent descriptions and rules after roles are designed.
+
+## Retry Policy
+
+- **Max retries:** 0
+- **Failure handling:** transient→retry, logic→fail, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/agents/**, .agentkit/spec/rules.yaml
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.8
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** flow-designer
 
 ## Guidelines
 

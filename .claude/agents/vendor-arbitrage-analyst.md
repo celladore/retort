@@ -89,6 +89,41 @@ cost-operations
 - Letting committed-use contracts auto-renew without re-evaluating usage
 - Ignoring free tier reset dates (monthly vs annual)
 
+## Collaborators
+
+- **[model-economist]** Model Economist *(cost-operations)* — AI model selection and pricing specialist · accepts: investigate, review, plan
+- **[cost-ops-monitor]** Cost Ops Monitor *(cost-operations)* — Central monitoring and reporting agent for the Cost Ops team · accepts: investigate, review, document
+- **[grant-hunter]** Grant & Programs Hunter *(cost-operations)* — Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator cre... · accepts: investigate, plan, document
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Investigates vendor pricing and credit programs → analyses arbitrage opportunities → recommends switches; react cycle suits ongoing vendor landscape monitoring.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/cost-ops/vendor-strategy/**, config/pricing/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** model-economist, cost-ops-monitor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

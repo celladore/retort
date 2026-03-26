@@ -78,6 +78,38 @@ team-creation
 - Flag warnings (non-blocking) separately from errors (blocking)
 - Include a diff summary of all spec files changed
 
+## Collaborators
+
+- **[flow-designer]** Flow Designer *(team-creation)* — Designs the team command, flags, and integration points with other teams · accepts: plan, implement
+
+## Decision Model
+
+- **Type:** htn
+- **Rationale:** Final quality-gate node in the HTN chain — validates the complete spec before it is committed. May retry once on validation failures.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.9
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

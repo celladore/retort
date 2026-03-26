@@ -89,6 +89,40 @@ project-management
 - Follow documentation domain rules [doc-changelog, doc-generated-files] — changelogs and release notes must be current
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+
+## Decision Model
+
+- **Type:** plan-execute
+- **Rationale:** Creates release plans by sequencing versioning, changelog, and deployment steps, then executes — validates readiness before committing to any release action.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, CHANGELOG.md, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** escalate
+- **Can negotiate with:** devops, product-manager
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

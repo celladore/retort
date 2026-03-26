@@ -54,7 +54,7 @@ team-creation
 
 ## Focus Areas
 
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - .agentkit/spec/teams.yaml
 
 ## Responsibilities
@@ -75,6 +75,40 @@ team-creation
 - Each team should have 2-6 agents (avoid single-agent teams)
 - Agent IDs must be unique across all categories
 - Every agent must have at least one focus glob
+
+## Collaborators
+
+- **[mission-definer]** Mission Definer *(team-creation)* — Locks the team mission, scope, accepted task types, and handoff chain · accepts: plan
+- **[prompt-engineer]** Prompt Engineer *(team-creation)* — Writes agent descriptions, domain rules, conventions, anti-patterns, and examples for each agent in the new team · accepts: plan, implement
+
+## Decision Model
+
+- **Type:** htn
+- **Rationale:** Third node in the HTN chain — designs agent roles and responsibilities after mission is locked.
+
+## Retry Policy
+
+- **Max retries:** 0
+- **Failure handling:** transient→retry, logic→fail, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/agents/**, .agentkit/spec/teams.yaml
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** prompt-engineer
 
 ## Guidelines
 

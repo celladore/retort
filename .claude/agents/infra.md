@@ -118,6 +118,41 @@ locals {
 - Inline hardcoded secrets in Terraform variables or locals
 - Shared mutable state backends without locking configuration
 
+## Collaborators
+
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+- **[model-economist]** Model Economist *(cost-operations)* — AI model selection and pricing specialist · accepts: investigate, review, plan
+- **[security-auditor]** Security Auditor *(operations)* — Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verificat... · accepts: review, investigate
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes cloud resource state via IaC, reasons about cost and reliability trade-offs, then provisions — always runs plan before apply.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.8
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** escalate
+- **Can negotiate with:** devops, security-auditor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

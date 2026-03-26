@@ -80,6 +80,39 @@ strategic-operations
 - Flag repos more than 2 minor versions behind as at-risk
 - Include feature adoption heatmap across the portfolio
 
+## Collaborators
+
+- **[governance-advisor]** Governance Advisor *(strategic-operations)* — Defines and enforces framework governance policies — versioning strategy, breaking change protocols, deprecation time... · accepts: plan, review, document
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about portfolio adoption state across downstream repos, desires accurate drift detection, and forms intentions to surface at-risk repos.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/planning/**, .agentkit/spec/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** governance-advisor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

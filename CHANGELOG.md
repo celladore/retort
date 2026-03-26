@@ -17,6 +17,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 ## [Unreleased]
 
 ### Added
+- Agent decision-model metadata and agents.yaml directory split ([history](implementations/0001-2026-03-26-agent-decision-model-metadata-and-agents-yaml-directory-split-implementation.md))
 
 - Kit-based domain selection and onboarding redesign ([#432](../../pull/432), [history](implementations/0001-2026-03-20-kit-based-domain-selection-and-onboarding-redesign-implementation.md))
 

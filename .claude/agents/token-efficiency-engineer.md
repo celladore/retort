@@ -57,7 +57,7 @@ cost-operations
 - .claude/commands/**
 - .claude/agents/**
 - .agentkit/spec/commands.yaml
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - docs/cost-ops/token-efficiency/**
 
 ## Responsibilities
@@ -89,6 +89,40 @@ cost-operations
 - Truncating system prompts to the point where agent quality degrades
 - Optimizing for token count without measuring output quality regression
 - Ignoring caching opportunities for prompts that rarely change
+
+## Collaborators
+
+- **[model-economist]** Model Economist *(cost-operations)* — AI model selection and pricing specialist · accepts: investigate, review, plan
+- **[cost-ops-monitor]** Cost Ops Monitor *(cost-operations)* — Central monitoring and reporting agent for the Cost Ops team · accepts: investigate, review, document
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Audits prompt templates for token waste → analyses token ratios → acts to compact or cache; iterative react cycle suits prompt optimization work.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/commands/**, .claude/agents/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** model-economist, cost-ops-monitor
 
 ## Guidelines
 

@@ -76,6 +76,40 @@ team-creation
 - Command descriptions should explain what activating the team context does
 - allowed-tools should match the union of agents' preferred-tools
 
+## Collaborators
+
+- **[prompt-engineer]** Prompt Engineer *(team-creation)* — Writes agent descriptions, domain rules, conventions, anti-patterns, and examples for each agent in the new team · accepts: plan, implement
+- **[team-validator]** Team Validator *(team-creation)* — Quality gate — validates the complete team spec for consistency, conflicts, and completeness · accepts: review, investigate
+
+## Decision Model
+
+- **Type:** htn
+- **Rationale:** Fifth node in the HTN chain — designs the team command and intake routing after prompts are written.
+
+## Retry Policy
+
+- **Max retries:** 0
+- **Failure handling:** transient→retry, logic→fail, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/commands.yaml, .agentkit/spec/teams.yaml
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** team-validator
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

@@ -83,6 +83,40 @@ product
 - Follow documentation domain rules [doc-changelog, doc-8-category-structure] — keep roadmap and changelog accurate
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[product-manager]** Product Manager *(product)* — Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho... · accepts: plan, review
+- **[project-shipper]** Project Shipper *(project-management)* — Delivery-focused project management specialist responsible for moving work through the pipeline from planning to prod... · accepts: plan, review
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about milestone progress and delivery risk, desires accurate roadmap state, and forms intentions to surface blockers proactively.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/roadmap/**, CHANGELOG.md, .claude/state/orchestrator.json
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** product-manager, project-shipper
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

@@ -77,6 +77,40 @@ strategic-operations
 - Breaking changes must list all affected repos by name
 - Include estimated sync time and manual intervention requirements
 
+## Collaborators
+
+- **[adoption-strategist]** Adoption Strategist *(strategic-operations)* — Plans and executes adoption campaigns — onboarding new repos, migration paths for existing projects, and rollout stra... · accepts: plan, document
+- **[release-coordinator]** Release Coordinator *(strategic-operations)* — Orchestrates framework releases — coordinates version bumps, changelog generation, cross-repo sync waves, and release... · accepts: plan, review, document
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about blast radius across the portfolio, desires accurate change classification, and forms intentions to surface breaking changes before they ship.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/**, .agentkit/templates/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved, phase-transition
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** release-coordinator
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

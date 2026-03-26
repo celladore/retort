@@ -85,6 +85,41 @@ testing
 - Follow testing domain rules [qa-no-sleep, qa-aaa-pattern, qa-no-skipped-tests, qa-integration-isolation] — deterministic tests, no flaky timing, test error paths
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[backend]** Backend Engineer *(engineering)* — Senior backend engineer responsible for API design, service architecture, core business logic, and server-side perfor... · accepts: implement, review, plan
+- **[frontend]** Frontend Engineer *(engineering)* — Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi... · accepts: implement, review, plan
+- **[test-lead]** Test Lead *(testing)* — Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions · accepts: implement, review, test
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes cross-service interaction patterns, reasons about contract compliance, then implements or validates E2E tests — depends on stable backend and frontend.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** test-lead, backend, frontend
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

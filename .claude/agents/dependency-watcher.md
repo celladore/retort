@@ -87,6 +87,40 @@ operations
 - Follow security domain rules [sec-dependency-audit, sec-no-secrets] — check for known vulnerabilities before approving updates
 - Follow agent-conduct domain rules [ac-verify-before-change, ac-minimal-changes, ac-run-checks, ac-no-destructive-without-confirm] — coordinate via orchestrator, update shared state
 
+## Collaborators
+
+- **[security-auditor]** Security Auditor *(operations)* — Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verificat... · accepts: review, investigate
+- **[devops]** DevOps Engineer *(engineering)* — Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor... · accepts: implement, review, plan
+
+## Decision Model
+
+- **Type:** react
+- **Rationale:** Observes dependency manifests and vulnerability advisories, reasons about risk, then investigates or implements updates — investigation-first pattern.
+
+## Retry Policy
+
+- **Max retries:** 3
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** .claude/state/orchestrator.json, AGENT_BACKLOG.md
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.75
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** security-auditor, devops
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

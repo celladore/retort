@@ -142,6 +142,40 @@ mappings:
 - Defining new color tokens in component files without adding them to the canonical brand.yaml palette
 - Skipping WCAG contrast validation when introducing new foreground/background color pairs
 
+## Collaborators
+
+- **[frontend]** Frontend Engineer *(engineering)* — Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi... · accepts: implement, review, plan
+- **[ui-designer]** UI Designer *(design)* — UI/UX design specialist responsible for interaction patterns, component design, layout systems, and visual hierarchy · accepts: review, plan
+
+## Decision Model
+
+- **Type:** bdi
+- **Rationale:** Maintains beliefs about brand spec invariants, desires brand consistency, and forms intentions to correct violations — revises beliefs when brand.yaml changes.
+
+## Retry Policy
+
+- **Max retries:** 1
+- **Failure handling:** transient→retry, logic→escalate, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/brand.yaml, .agentkit/spec/editor-theme.yaml, .claude/state/orchestrator.json
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** frontend, ui-designer
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

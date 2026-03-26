@@ -77,6 +77,40 @@ strategic-operations
 - Migration paths must be tested against at least one real downstream repo
 - Rollout plans must include a rollback procedure
 
+## Collaborators
+
+- **[governance-advisor]** Governance Advisor *(strategic-operations)* — Defines and enforces framework governance policies — versioning strategy, breaking change protocols, deprecation time... · accepts: plan, review, document
+- **[impact-assessor]** Impact Assessor *(strategic-operations)* — Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template... · accepts: review, investigate
+
+## Decision Model
+
+- **Type:** plan-execute
+- **Rationale:** Plans adoption campaigns (onboarding workflows, migration paths) and then executes them — two-stage plan-then-act suits phased rollout work.
+
+## Retry Policy
+
+- **Max retries:** 2
+- **Failure handling:** transient→retry, logic→retry, permanent→fail
+
+## Belief System
+
+- **State reads:** docs/planning/**, docs/engineering/**
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.7
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** impact-assessor
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`

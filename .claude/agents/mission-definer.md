@@ -75,6 +75,40 @@ team-creation
 - Focus statements should be concise (< 80 chars)
 - Handoff chains should not create circular dependencies
 
+## Collaborators
+
+- **[input-clarifier]** Input Clarifier *(team-creation)* — Assesses raw team creation requests, extracts constraints, validates against existing teams to prevent scope overlap,... · accepts: plan, investigate
+- **[role-architect]** Role Architect *(team-creation)* — Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team · accepts: plan
+
+## Decision Model
+
+- **Type:** htn
+- **Rationale:** Second node in the HTN chain — locks team mission and scope after receiving a validated brief from input-clarifier.
+
+## Retry Policy
+
+- **Max retries:** 0
+- **Failure handling:** transient→retry, logic→fail, permanent→fail
+
+## Belief System
+
+- **State reads:** .agentkit/spec/teams.yaml
+- **Task reads:** true
+- **Update on:** task-assigned, dependency-resolved
+- **Revision strategy:** latest-wins
+
+## Confidence
+
+- **Output threshold:** 0.85
+- **Requires validation:** false
+- **Low confidence action:** warn
+
+## Negotiation
+
+- **Conflict scope:** file
+- **Resolution strategy:** fiat
+- **Can negotiate with:** role-architect
+
 ## Guidelines
 
 - Follow all project coding standards and domain rules in `AGENTS.md` and `QUALITY_GATES.md`
