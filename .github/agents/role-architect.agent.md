@@ -32,7 +32,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - .agentkit/spec/teams.yaml
 
 ## Responsibilities

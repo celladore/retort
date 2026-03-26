@@ -35,7 +35,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - .claude/commands/**
 - .claude/agents/**
 - .agentkit/spec/commands.yaml
-- .agentkit/spec/agents.yaml
+- .agentkit/spec/agents/**
 - docs/cost-ops/token-efficiency/**
 
 ## Responsibilities
