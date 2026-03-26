@@ -154,7 +154,7 @@ budgetPolicy:
       // deepMerge skips __proto__ key — no prototype pollution
       const overrides = JSON.parse('{"__proto__":{"polluted":true},"maxCommands":5}');
       expect(() => deepMerge({}, overrides)).not.toThrow();
-      expect(({}).polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
     });
   });
 
