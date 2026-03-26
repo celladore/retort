@@ -16,23 +16,23 @@ All of this is **working code** — the task here is architectural review and im
 
 ## Current Module Map
 
-| File | Lines | Role |
-|---|---|---|
-| `synchronize.mjs` | 3,203 | Core sync engine — all platform renderers, spec loaders, template vars, `runSync()` |
-| `spec-validator.mjs` | 1,319 | Validates all spec YAML before sync |
-| `discover.mjs` | 1,242 | Codebase discovery — detects stack, tools, dependencies |
-| `agent-integration.mjs` | 1,211 | Agent task notification, handoff chains, event emission |
-| `init.mjs` | 1,171 | Interactive project initialisation wizard |
-| `orchestrator.mjs` | 1,155 | Orchestrator state machine — task dispatch, dependency resolution |
-| `template-utils.mjs` | 1,144 | Handlebars rendering, `{{placeholder}}` resolution, merge driver |
-| `task-protocol.mjs` | 1,036 | Task file lifecycle (submitted → accepted → working → completed) |
-| `feature-manager.mjs` | 961 | Feature flag management and `affects-templates` validation |
-| `agent-analysis.mjs` | 921 | Agent/team relationship graph — orphan detection, cycle detection, bottlenecks |
-| `expansion-analyzer.mjs` | 825 | Read-only gap analysis — missing docs, tests, security measures |
-| `check.mjs` | 631 | Quality gate runner (lint, typecheck, test) |
-| `cost-tracker.mjs` | 613 | LLM session cost tracking |
-| `review-runner.mjs` | 616 | Code review — secret scan, TODO scan, large file detection, coverage delta |
-| `cli.mjs` | ~400 | CLI entry — routes commands to engine functions |
+| File                     | Lines | Role                                                                                |
+| ------------------------ | ----- | ----------------------------------------------------------------------------------- |
+| `synchronize.mjs`        | 3,203 | Core sync engine — all platform renderers, spec loaders, template vars, `runSync()` |
+| `spec-validator.mjs`     | 1,319 | Validates all spec YAML before sync                                                 |
+| `discover.mjs`           | 1,242 | Codebase discovery — detects stack, tools, dependencies                             |
+| `agent-integration.mjs`  | 1,211 | Agent task notification, handoff chains, event emission                             |
+| `init.mjs`               | 1,171 | Interactive project initialisation wizard                                           |
+| `orchestrator.mjs`       | 1,155 | Orchestrator state machine — task dispatch, dependency resolution                   |
+| `template-utils.mjs`     | 1,144 | Handlebars rendering, `{{placeholder}}` resolution, merge driver                    |
+| `task-protocol.mjs`      | 1,036 | Task file lifecycle (submitted → accepted → working → completed)                    |
+| `feature-manager.mjs`    | 961   | Feature flag management and `affects-templates` validation                          |
+| `agent-analysis.mjs`     | 921   | Agent/team relationship graph — orphan detection, cycle detection, bottlenecks      |
+| `expansion-analyzer.mjs` | 825   | Read-only gap analysis — missing docs, tests, security measures                     |
+| `check.mjs`              | 631   | Quality gate runner (lint, typecheck, test)                                         |
+| `cost-tracker.mjs`       | 613   | LLM session cost tracking                                                           |
+| `review-runner.mjs`      | 616   | Code review — secret scan, TODO scan, large file detection, coverage delta          |
+| `cli.mjs`                | ~400  | CLI entry — routes commands to engine functions                                     |
 
 **Total engine source:** ~21,900 lines across 14 modules
 
@@ -43,6 +43,7 @@ All of this is **working code** — the task here is architectural review and im
 ### 1. `synchronize.mjs` is a god module (3,203 lines)
 
 It contains:
+
 - Spec loaders (`loadAgentsSpec`, `loadSpecDefaults`, `readYaml`)
 - Platform renderers (20+ `sync*` functions — `syncClaudeAgents`, `syncCopilotPrompts`, `syncCursorCommands`, etc.)
 - Template variable builders (`buildAgentVars`, `buildTeamsList`, `buildRuleVars`, etc.)
@@ -53,6 +54,7 @@ It contains:
 All exported from a single file with 19 export points. This makes it hard to test in isolation and impossible to tree-shake.
 
 **What to do:** Identify cohesive groups and propose a module split. Candidates:
+
 - `spec-loaders.mjs` — `loadAgentsSpec`, `loadSpecDefaults`, `readYaml`, `readText`
 - `agent-vars.mjs` — `buildAgentVars`, `buildAgentRegistry`, `buildCollaboratorsSection`, all `buildAgent*Section()` helpers
 - `sync-utils.mjs` — `writeOutput`, `walkDir`, `ensureDir`, `runConcurrent`, `insertHeader`
@@ -77,6 +79,7 @@ Grep for `TODO`/`FIXME`/`HACK` in this file and `task-protocol.mjs` before start
 ### 5. Spec loader inconsistency
 
 Three different styles of reading spec files exist in the codebase:
+
 - `loadAgentsSpec(agentkitRoot)` — new, handles directory or monolithic fallback
 - `loadYamlSpec(agentkitRoot, filename)` — async, used in `expansion-analyzer.mjs`
 - `readYaml(filePath)` — synchronous, used in tests and older code paths
@@ -92,6 +95,7 @@ These should be unified. `loadYamlSpec` is a local private function in `expansio
 `docs/architecture/decisions/XX-engine-module-split.md`
 
 The ADR should answer:
+
 - What modules should `synchronize.mjs` be split into?
 - What is the proposed import graph after splitting?
 - What is the migration order (which extract first, which last)?

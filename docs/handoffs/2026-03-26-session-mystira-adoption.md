@@ -19,7 +19,9 @@ Retort's stack is: JavaScript/Node.js, YAML specs, Markdown templates. It genera
 Read `mystira-workspace/CLAUDE.md` and `mystira-workspace/README.md` first. Then assess each area below:
 
 ### 1. Agent/Orchestration Patterns
+
 Mystira likely has AI orchestration code (it's an AI storytelling platform). Look for:
+
 - How it structures multi-agent workflows
 - Any prompt chaining or agent handoff patterns
 - Session state management approaches
@@ -27,7 +29,9 @@ Mystira likely has AI orchestration code (it's an AI storytelling platform). Loo
 **Adoption question:** Do any of these patterns improve retort's orchestration model (currently in `docs/orchestration/`, `UNIFIED_AGENT_TEAMS.md`)?
 
 ### 2. Blockchain / x402 Integration
+
 Mystira has blockchain integration. Look for:
+
 - x402 payment protocol implementation
 - Solana/EtherLink bridge patterns
 - On-chain agent identity or task verification
@@ -35,14 +39,18 @@ Mystira has blockchain integration. Look for:
 **Adoption question:** Should retort add an `x402` agent or payment-verification layer to its agent spec?
 
 ### 3. .NET Clean Architecture Patterns
+
 Mystira follows clean architecture (Domain → Application → Infrastructure → Presentation). Look for:
+
 - How it separates concerns across layers
 - How it handles cross-cutting concerns (logging, auth, error handling)
 
 **Adoption question:** Should retort's YAML spec model adopt a similar layering concept for agent responsibilities (e.g., explicit `layer` field on each agent)?
 
 ### 4. Testing Patterns
+
 Compare mystira's test structure against retort's vitest suite. Look for:
+
 - Any property-based testing approaches
 - Contract testing between services
 - Snapshot testing for generated output
@@ -50,7 +58,9 @@ Compare mystira's test structure against retort's vitest suite. Look for:
 **Adoption question:** Does mystira have testing patterns that would strengthen retort's sync engine test coverage?
 
 ### 5. Documentation Conventions
+
 Mystira is a large `.sln` — check its docs structure against retort's 8-category docs structure. Look for:
+
 - ADR format differences
 - Onboarding documentation quality
 - Any runbook patterns
@@ -62,11 +72,13 @@ Mystira is a large `.sln` — check its docs structure against retort's 8-catego
 ## How to Structure the Output
 
 Produce a recommendation document at:
+
 ```
 docs/architecture/decisions/XX-mystira-adoption.md
 ```
 
 Format:
+
 - **Status:** proposed
 - **Context:** what was evaluated
 - **Decision:** what to adopt (with rationale) and what to skip (with rationale)

@@ -58,14 +58,14 @@ Two parallel workstreams delivered in one session:
 
 ## Results
 
-| Metric | Before | After |
-|---|---|---|
-| `agents.yaml` size | 3,234 lines / 127 KB | Deleted — 11 files, largest 545 lines |
-| Agent metadata fields | 8 fields | 14 fields |
-| Callers reading deleted file | 4 | 0 |
-| Test count | 1,243 passing | 1,260 passing (+17) |
-| Broken test files | 7 (pre-session) | 2 (pre-existing copilot timeouts, unrelated) |
-| `## Lookahead` noise sections | 39 (every agent) | 0 |
+| Metric                        | Before               | After                                        |
+| ----------------------------- | -------------------- | -------------------------------------------- |
+| `agents.yaml` size            | 3,234 lines / 127 KB | Deleted — 11 files, largest 545 lines        |
+| Agent metadata fields         | 8 fields             | 14 fields                                    |
+| Callers reading deleted file  | 4                    | 0                                            |
+| Test count                    | 1,243 passing        | 1,260 passing (+17)                          |
+| Broken test files             | 7 (pre-session)      | 2 (pre-existing copilot timeouts, unrelated) |
+| `## Lookahead` noise sections | 39 (every agent)     | 0                                            |
 
 ---
 

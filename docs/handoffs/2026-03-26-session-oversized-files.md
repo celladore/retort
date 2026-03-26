@@ -16,10 +16,10 @@
 
 Two spec files remain oversized and have the same problems `agents.yaml` had:
 
-| File | Lines | Size | Problem |
-|---|---|---|---|
+| File            | Lines | Size  | Problem                                                           |
+| --------------- | ----- | ----- | ----------------------------------------------------------------- |
 | `commands.yaml` | 2,408 | 91 KB | Every command (40+) in one file; hard to review, AI context-heavy |
-| `rules.yaml` | 1,445 | 55 KB | Every rule domain (15+) in one file; same issue |
+| `rules.yaml`    | 1,445 | 55 KB | Every rule domain (15+) in one file; same issue                   |
 
 When an AI agent or human reviewer reads these files, they receive context for all commands/rules regardless of what they're working on. Splitting mirrors what was done for agents.
 
@@ -58,6 +58,7 @@ Update each caller to use the new loader functions.
 ### Phase 4 — Tests
 
 Add test files mirroring `synchronize-agents.test.mjs`:
+
 - `synchronize-commands.test.mjs`
 - `synchronize-rules.test.mjs`
 

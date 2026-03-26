@@ -3,6 +3,7 @@
 **Date:** 2026-03-26
 **Prepared for:** Next agent evaluating the VS Code plugin strategy
 **Repos involved:**
+
 - `C:\Users\smitj\repos\retort` — AgentKit Forge framework (this repo)
 - `C:\Users\smitj\repos\codeflow-vscode-extension` — existing VS Code extension
 
@@ -17,6 +18,7 @@ Should retort build its own VS Code extension, or should the `codeflow-vscode-ex
 ## What to Read First
 
 **In `codeflow-vscode-extension`:**
+
 ```bash
 cat README.md
 cat CLAUDE.md 2>/dev/null || echo "(no CLAUDE.md)"
@@ -25,6 +27,7 @@ ls src/                        # source structure
 ```
 
 **In retort:**
+
 ```bash
 cat .agentkit/spec/settings.yaml        # current tool targets (does it list vscode?)
 ls .agentkit/templates/                 # what platforms retort currently generates for
@@ -38,6 +41,7 @@ cat docs/architecture/                  # any existing ADRs on tooling
 ### 1. What does codeflow-vscode-extension currently do?
 
 Map its features:
+
 - Commands it registers (`contributes.commands` in package.json)
 - Activation events — when does it activate?
 - Does it touch `.claude/` directories, agent files, or YAML specs?
@@ -48,6 +52,7 @@ Map its features:
 ### 2. What would a retort VS Code extension need to do?
 
 Retort's natural VS Code integration points:
+
 - **Sidebar panel** — show agent registry (`REGISTRY.json`) as a tree view
 - **Command palette** — run `retort:sync`, `retort:validate`, `retort:check` without leaving VS Code
 - **Status bar** — show sync drift status (generated files out of date?)
@@ -59,29 +64,32 @@ Retort's natural VS Code integration points:
 
 After reading both codebases, fill in this matrix:
 
-| Feature | codeflow-extension has it | retort needs it | Shared? |
-|---|---|---|---|
-| Command palette integration | ? | yes | ? |
-| File system watching | ? | yes (drift detection) | ? |
-| Project metadata reading | ? | yes | ? |
-| Python runtime dependency | ? | no | incompatible |
-| Agent/team awareness | ? | yes | ? |
+| Feature                     | codeflow-extension has it | retort needs it       | Shared?      |
+| --------------------------- | ------------------------- | --------------------- | ------------ |
+| Command palette integration | ?                         | yes                   | ?            |
+| File system watching        | ?                         | yes (drift detection) | ?            |
+| Project metadata reading    | ?                         | yes                   | ?            |
+| Python runtime dependency   | ?                         | no                    | incompatible |
+| Agent/team awareness        | ?                         | yes                   | ?            |
 
 ### 4. Architecture options
 
 Evaluate three options:
 
 **Option A — Extend codeflow-vscode-extension**
+
 - Add retort-specific commands and views to the existing extension
 - Pro: one extension to install, shared activation, shared project-detection logic
 - Con: couples two separate frameworks; codeflow may have conflicting assumptions; adds complexity to both
 
 **Option B — New standalone retort extension**
+
 - `retort-vscode` (new repo or subdirectory of retort)
 - Pro: clean separation, retort-specific UX, no codeflow coupling
 - Con: another extension to maintain and publish
 
 **Option C — Shared extension host (monorepo)**
+
 - Both extensions as separate packages under a shared VS Code extension monorepo
 - Pro: shared utilities (project detection, YAML parsing), separate activation
 - Con: highest initial setup cost
@@ -91,11 +99,13 @@ Evaluate three options:
 ## Recommendation Format
 
 Produce an ADR at:
+
 ```
 docs/architecture/decisions/XX-vscode-plugin-strategy.md
 ```
 
 The ADR should include:
+
 - **Status:** proposed
 - **Context:** what codeflow-extension does, what retort needs, overlap analysis
 - **Decision:** chosen option with rationale

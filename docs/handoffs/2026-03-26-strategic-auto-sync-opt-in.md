@@ -15,6 +15,7 @@ Retort currently enforces sync as a hard gate in two places:
 2. **CI drift check** — a GitHub Actions workflow that fails the build if spec and generated output have diverged.
 
 This is appropriate for the retort repo itself (where drift is always a bug) but is too aggressive when imposed on **adopter repos**. Adopters may want to:
+
 - Run sync manually rather than on every push
 - Batch spec changes across a work session before syncing
 - Disable sync enforcement entirely in early exploration phases
@@ -27,13 +28,16 @@ The mandatory model is also the root cause of friction reported in GH#421 (scaff
 ## Current Auto-Sync Touch Points
 
 **Hook (generated, enforced per-repo):**
+
 - `.claude/hooks/pre-push-validate.sh` — blocks `git push` if drift detected
 - Configured via `settings.yaml` → `hooks.preToolUse` matcher `Bash` → hook `pre-push-validate`
 
 **CI (generated template):**
+
 - `.github/workflows/` — drift check workflow (grep for `agentkit:sync --check` or equivalent in the templates)
 
 **Settings spec:**
+
 - `.agentkit/spec/settings.yaml` — `hooks.preToolUse` is where the pre-push hook is registered
 
 ---
@@ -45,9 +49,9 @@ The mandatory model is also the root cause of friction reported in GH#421 (scaff
 ```yaml
 sync:
   auto-sync:
-    pre-push: enforce    # enforce | warn | off
-    ci-drift-check: enforce  # enforce | warn | off
-    on-spec-change: prompt   # prompt | auto | off  — future
+    pre-push: enforce # enforce | warn | off
+    ci-drift-check: enforce # enforce | warn | off
+    on-spec-change: prompt # prompt | auto | off  — future
 ```
 
 - `enforce` — current behaviour (blocks push / fails CI)
@@ -59,6 +63,7 @@ Default for new adopters via `agentkit init`: `pre-push: warn`, `ci-drift-check:
 ### 2. Template changes
 
 The `pre-push-validate.sh` template needs to read the `autoSync.prePush` setting and change its `decision` output accordingly:
+
 - `enforce` → `{ "decision": "block", "reason": "..." }`
 - `warn` → `{ "decision": "allow" }` + print warning to stderr
 - `off` → exit 0 immediately
@@ -67,19 +72,19 @@ The CI drift check workflow template needs equivalent gating.
 
 ### 3. `agentkit init` wizard update
 
-`init.mjs` should ask: *"Should sync be enforced on every push? (recommended: warn for new projects, enforce when stable)"* and write the chosen value into `settings.yaml`.
+`init.mjs` should ask: _"Should sync be enforced on every push? (recommended: warn for new projects, enforce when stable)"_ and write the chosen value into `settings.yaml`.
 
 ---
 
 ## Files to Change
 
-| File | Change |
-|---|---|
-| `.agentkit/spec/settings.yaml` | Add `sync.auto-sync` block with defaults |
-| `.agentkit/templates/claude/hooks/pre-push-validate.sh` | Read setting, gate block vs warn vs skip |
-| `.agentkit/templates/github/workflows/` drift check template | Read setting, gate fail vs warn vs skip |
-| `.agentkit/engines/node/src/init.mjs` | Add prompt for auto-sync preference |
-| `.agentkit/engines/node/src/synchronize.mjs` | Pass `autoSync` vars into template rendering |
+| File                                                         | Change                                       |
+| ------------------------------------------------------------ | -------------------------------------------- |
+| `.agentkit/spec/settings.yaml`                               | Add `sync.auto-sync` block with defaults     |
+| `.agentkit/templates/claude/hooks/pre-push-validate.sh`      | Read setting, gate block vs warn vs skip     |
+| `.agentkit/templates/github/workflows/` drift check template | Read setting, gate fail vs warn vs skip      |
+| `.agentkit/engines/node/src/init.mjs`                        | Add prompt for auto-sync preference          |
+| `.agentkit/engines/node/src/synchronize.mjs`                 | Pass `autoSync` vars into template rendering |
 
 **Do not touch** `.claude/hooks/pre-push-validate.sh` directly — it is generated. Change only the template.
 

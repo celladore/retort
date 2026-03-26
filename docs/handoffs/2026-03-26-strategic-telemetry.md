@@ -10,6 +10,7 @@
 ## Why This Matters
 
 Retort has no visibility into how it is actually used. We don't know:
+
 - Which adopter repos are running sync
 - Which platforms (claude/cursor/copilot/etc.) are being generated
 - Which commands are used most vs never
@@ -49,6 +50,7 @@ Phase 2 is **out of scope for this session**.
 ## What Already Exists
 
 `cost-tracker.mjs` (613 lines) already does local JSONL logging for session cost/usage. Read it first — the telemetry system should reuse its:
+
 - `appendFileSync` log-append pattern
 - JSONL rotation logic (it caps log file size and rotates)
 - Reader pattern used by the `/cost` command to display summaries
@@ -64,6 +66,7 @@ The new `telemetry-tracker.mjs` should either extend `cost-tracker.mjs` or impor
 ```
 
 Exports:
+
 - `emitSyncEvent(agentkitRoot, payload)` — appends a sync event to the log
 - `emitCommandEvent(agentkitRoot, payload)` — appends a command event
 - `readTelemetryLog(agentkitRoot, days)` — reads recent events for display
@@ -71,11 +74,11 @@ Exports:
 
 ### Integration points
 
-| Where | Change |
-|---|---|
-| `synchronize.mjs` `runSync()` | Call `emitSyncEvent()` at end of successful sync with platform list, agent count, duration |
-| `cli.mjs` command dispatch | Call `emitCommandEvent()` after each command completes (name, duration, exit code) |
-| `cost-tracker.mjs` or new `/telemetry` command | Read and display log summary |
+| Where                                          | Change                                                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `synchronize.mjs` `runSync()`                  | Call `emitSyncEvent()` at end of successful sync with platform list, agent count, duration |
+| `cli.mjs` command dispatch                     | Call `emitCommandEvent()` after each command completes (name, duration, exit code)         |
+| `cost-tracker.mjs` or new `/telemetry` command | Read and display log summary                                                               |
 
 ---
 
@@ -92,9 +95,9 @@ Exports:
 
 ```yaml
 telemetry:
-  enabled: true           # false = no logging at all
-  retentionDays: 30       # how long to keep local log files
-  endpoint: null          # Phase 2 — URL to POST events to (null = local only)
+  enabled: true # false = no logging at all
+  retentionDays: 30 # how long to keep local log files
+  endpoint: null # Phase 2 — URL to POST events to (null = local only)
 ```
 
 ---
@@ -115,6 +118,7 @@ pnpm -C .agentkit test
 ```
 
 Add a test file: `__tests__/telemetry-tracker.test.mjs` covering:
+
 - Event is appended on sync
 - Sensitive fields (repo name) are not present in log output
 - Retention policy removes old files

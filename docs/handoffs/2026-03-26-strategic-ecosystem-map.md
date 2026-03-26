@@ -9,11 +9,11 @@
 
 ## The Three Repos
 
-| Repo | Path | Stack | Purpose |
-|---|---|---|---|
-| **retort** | `~/repos/retort` | Node.js, YAML | AgentKit Forge — spec-driven agent config generation for 15+ AI tools |
-| **codeflow-engine** | `~/repos/codeflow-engine` | Python | AutoPR engine — automated code review, PR generation, CI orchestration |
-| **cognitive-mesh** | `~/repos/cognitive-mesh` | TypeScript (.sln) | Enterprise AI transformation framework |
+| Repo                | Path                      | Stack             | Purpose                                                                |
+| ------------------- | ------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| **retort**          | `~/repos/retort`          | Node.js, YAML     | AgentKit Forge — spec-driven agent config generation for 15+ AI tools  |
+| **codeflow-engine** | `~/repos/codeflow-engine` | Python            | AutoPR engine — automated code review, PR generation, CI orchestration |
+| **cognitive-mesh**  | `~/repos/cognitive-mesh`  | TypeScript (.sln) | Enterprise AI transformation framework                                 |
 
 These three are built by the same owner (JustAGhosT / phoenixvc) and likely have natural integration points — but those points have never been formally mapped.
 
@@ -32,6 +32,7 @@ This map is the prerequisite for all three.
 Start with the README and CLAUDE.md for each repo. Then go deeper on the integration surface:
 
 ### codeflow-engine (`~/repos/codeflow-engine`)
+
 ```bash
 cat README.md
 cat CLAUDE.md 2>/dev/null
@@ -41,12 +42,14 @@ grep -r "agentkit\|retort\|claude\|agent.*spec" codeflow_engine/ --include="*.py
 ```
 
 Key questions:
+
 - Does codeflow-engine generate or consume any files that retort also generates? (`.github/workflows/`, `CLAUDE.md`, agent configs?)
 - Does it have its own concept of "agents" or "teams" that could map to retort's spec model?
 - Does it call Claude/Cursor/Copilot APIs directly, or does it rely on retort-generated personas?
 - What is its CI pipeline model — does it compete with or complement retort's quality gates?
 
 ### cognitive-mesh (`~/repos/cognitive-mesh`)
+
 ```bash
 cat README.md
 cat CLAUDE.md 2>/dev/null
@@ -56,12 +59,14 @@ grep -r "agentkit\|retort\|agent.*spec\|team.*spec" . --include="*.ts" --include
 ```
 
 Key questions:
+
 - What is cognitive-mesh's agent model — how does it define and route agents?
 - Does it have a concept of "tool configuration" that retort could generate for it?
 - Is it a runtime (executes agents) or a framework (defines agent behaviour)?
 - Does it have VS Code integration already?
 
 ### retort side of the equation
+
 ```bash
 # What retort currently generates that might touch the other repos
 ls .agentkit/templates/              # all platform output templates
@@ -79,19 +84,20 @@ Produce `docs/architecture/decisions/XX-ecosystem-integration-map.md` with these
 
 For each potential integration point, classify it:
 
-| Touchpoint | retort | codeflow-engine | cognitive-mesh | Conflict / Complement / Gap |
-|---|---|---|---|---|
-| Claude agent persona files | Generates | Consumes? | Consumes? | |
-| GitHub Actions workflows | Generates | Generates | — | Potential conflict |
-| CLAUDE.md | Generates | — | — | |
-| Agent team definition | YAML spec | Python? | TypeScript? | |
-| CI quality gates | Template | Enforces | — | |
-| VS Code integration | Planned | Planned | Unknown | |
-| ... | | | | |
+| Touchpoint                 | retort    | codeflow-engine | cognitive-mesh | Conflict / Complement / Gap |
+| -------------------------- | --------- | --------------- | -------------- | --------------------------- |
+| Claude agent persona files | Generates | Consumes?       | Consumes?      |                             |
+| GitHub Actions workflows   | Generates | Generates       | —              | Potential conflict          |
+| CLAUDE.md                  | Generates | —               | —              |                             |
+| Agent team definition      | YAML spec | Python?         | TypeScript?    |                             |
+| CI quality gates           | Template  | Enforces        | —              |                             |
+| VS Code integration        | Planned   | Planned         | Unknown        |                             |
+| ...                        |           |                 |                |                             |
 
 ### 2. Integration opportunities
 
 For each complement relationship, describe a concrete integration:
+
 - Could codeflow-engine read retort's `REGISTRY.json` to know which agents are available?
 - Could retort generate codeflow-engine config files (if it has config that follows a known schema)?
 - Could cognitive-mesh register its agents via retort's spec model rather than maintaining its own?
@@ -99,6 +105,7 @@ For each complement relationship, describe a concrete integration:
 ### 3. Conflict risks
 
 For each conflict, describe the resolution options:
+
 - Who owns the file?
 - Should retort detect the other tool and skip that output?
 - Should there be a shared schema owned by a fourth "meta" package?
@@ -106,6 +113,7 @@ For each conflict, describe the resolution options:
 ### 4. Recommended next steps
 
 Order the integration opportunities by:
+
 - **Effort** — how much work to implement?
 - **Value** — how much does it improve the user's workflow?
 - **Dependency** — does one need to happen before another?
