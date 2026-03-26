@@ -67,6 +67,55 @@ Always scan the codebase within your focus area (the repo folders and modules yo
 {{agentAntiPatterns}}
 {{/if}}
 
+{{#if agentCollaborators}}
+
+## Collaborators
+
+{{agentCollaborators}}
+{{/if}}
+
+{{#if agentDecisionModel}}
+
+## Decision Model
+
+{{agentDecisionModel}}
+{{/if}}
+
+{{#if agentRetryPolicy}}
+
+## Retry Policy
+
+{{agentRetryPolicy}}
+{{/if}}
+
+{{#if agentBeliefSystem}}
+
+## Belief System
+
+{{agentBeliefSystem}}
+{{/if}}
+
+{{#if agentConfidence}}
+
+## Confidence
+
+{{agentConfidence}}
+{{/if}}
+
+{{#if agentNegotiation}}
+
+## Negotiation
+
+{{agentNegotiation}}
+{{/if}}
+
+{{#if agentLookahead}}
+
+## Lookahead
+
+{{agentLookahead}}
+{{/if}}
+
 {{shared_guidelines}}
 
 {{shared_prRules}}

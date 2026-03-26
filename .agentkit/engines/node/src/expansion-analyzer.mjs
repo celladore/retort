@@ -9,6 +9,7 @@
 import { existsSync, promises as fsPromises } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'node:path';
+import { loadAgentsSpec } from './synchronize.mjs';
 
 const { readdir, readFile } = fsPromises;
 
@@ -92,7 +93,7 @@ export async function runExpansionAnalysis({
   const docsSpec = await loadYamlSpec(effectiveAgentkitRoot, 'docs.yaml');
 
   // Load agents spec
-  const agentsSpec = await loadYamlSpec(effectiveAgentkitRoot, 'agents.yaml');
+  const agentsSpec = loadAgentsSpec(effectiveAgentkitRoot);
 
   // Load existing backlog items to avoid duplicates
   const backlogItems = await loadBacklogItems(projectRoot);

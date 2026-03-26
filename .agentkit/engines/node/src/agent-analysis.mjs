@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { loadAgentsSpec } from './synchronize.mjs';
 
 // ---------------------------------------------------------------------------
 // Core data loader
@@ -19,7 +20,6 @@ import { resolve } from 'path';
  * @returns {{ agents: object[], teams: object[], categories: string[], teamMap: Map, agentMap: Map, relationships: object }}
  */
 export function loadFullAgentGraph(agentkitRoot) {
-  const agentsPath = resolve(agentkitRoot, 'spec', 'agents.yaml');
   const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
 
   const agents = [];
@@ -27,20 +27,18 @@ export function loadFullAgentGraph(agentkitRoot) {
   const agentMap = new Map(); // agentId → agent
   const categoryMap = new Map(); // category → agentId[]
 
-  if (existsSync(agentsPath)) {
-    const spec = yaml.load(readFileSync(agentsPath, 'utf-8'));
-    if (spec?.agents && typeof spec.agents === 'object') {
-      for (const [category, agentList] of Object.entries(spec.agents)) {
-        if (!Array.isArray(agentList)) continue;
-        categories.push(category);
-        categoryMap.set(category, []);
-        for (const agent of agentList) {
-          if (!agent?.id) continue;
-          const enriched = { ...agent, _category: category };
-          agents.push(enriched);
-          agentMap.set(agent.id, enriched);
-          categoryMap.get(category).push(agent.id);
-        }
+  const spec = loadAgentsSpec(agentkitRoot);
+  if (spec?.agents && typeof spec.agents === 'object') {
+    for (const [category, agentList] of Object.entries(spec.agents)) {
+      if (!Array.isArray(agentList)) continue;
+      categories.push(category);
+      categoryMap.set(category, []);
+      for (const agent of agentList) {
+        if (!agent?.id) continue;
+        const enriched = { ...agent, _category: category };
+        agents.push(enriched);
+        agentMap.set(agent.id, enriched);
+        categoryMap.get(category).push(agent.id);
       }
     }
   }

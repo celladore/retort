@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
+import { loadAgentsSpec } from './synchronize.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
@@ -1051,7 +1052,7 @@ export function validateSpec(agentkitRoot) {
 
   // Load all spec files
   const teams = loadYaml('teams.yaml');
-  const agents = loadYaml('agents.yaml');
+  const agents = loadAgentsSpec(agentkitRoot);
   const commands = loadYaml('commands.yaml');
   const rules = loadYaml('rules.yaml');
   const settings = loadYaml('settings.yaml');

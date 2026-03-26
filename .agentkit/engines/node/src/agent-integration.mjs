@@ -14,6 +14,7 @@
 import { existsSync, readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
+import { loadAgentsSpec } from './synchronize.mjs';
 import { createTask, listTasks, TERMINAL_STATES } from './task-protocol.mjs';
 import { appendEvent } from './events.mjs';
 
@@ -31,13 +32,8 @@ export function loadAgentNotifies(agentkitRoot) {
   const agentNotifies = {};
   const teamToAgents = {};
 
-  const agentsPath = resolve(agentkitRoot, 'spec', 'agents.yaml');
-  if (!existsSync(agentsPath)) {
-    return { agentNotifies, teamToAgents };
-  }
-
   try {
-    const spec = yaml.load(readFileSync(agentsPath, 'utf-8'));
+    const spec = loadAgentsSpec(agentkitRoot);
     if (!spec?.agents || typeof spec.agents !== 'object') {
       return { agentNotifies, teamToAgents };
     }
@@ -61,7 +57,7 @@ export function loadAgentNotifies(agentkitRoot) {
     }
   } catch (err) {
     console.warn(
-      `[agentkit:integration] Could not load agents.yaml: ${err?.message ?? String(err)}`
+      `[agentkit:integration] Could not load agents spec: ${err?.message ?? String(err)}`
     );
   }
 

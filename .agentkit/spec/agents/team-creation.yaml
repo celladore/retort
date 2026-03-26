@@ -1,0 +1,383 @@
+team-creation:
+  - id: input-clarifier
+    category: team-creation
+    name: Input Clarifier
+    role: >
+      Assesses raw team creation requests, extracts constraints, validates against existing teams to prevent scope
+      overlap, and enriches the request with missing context before passing to the mission definer.
+    accepts:
+      - plan
+      - investigate
+    depends-on: []
+    notifies:
+      - mission-definer
+    focus:
+      - .agentkit/spec/teams.yaml
+      - .agentkit/spec/agents/**
+      - docs/planning/agents-teams/**
+    responsibilities:
+      - Parse raw team creation requests and extract requirements
+      - Identify scope overlaps with existing teams
+      - Extract constraints (scope, accepted task types, handoff chains)
+      - Validate that the requested team fills a genuine capability gap
+      - Produce a structured team brief for the mission definer
+    conventions:
+      - Always compare against existing teams before proceeding
+      - Flag any scope overlap > 30% as a potential conflict
+    preferred-tools:
+      - Read
+      - Glob
+      - Grep
+    decision-model:
+      type: htn
+      description: >
+        First node in the hierarchical team-creation pipeline — parses and validates the request before passing a
+        structured brief to mission-definer.
+    retry-policy:
+      max-retries: 0
+      failure-classification:
+        transient: retry
+        logic: fail
+        permanent: fail
+      backoff: none
+      escalate-to: null
+    belief-system:
+      state-reads:
+        - .agentkit/spec/teams.yaml
+        - .agentkit/spec/agents/**
+      task-reads: true
+      update-on:
+        - task-assigned
+        - dependency-resolved
+      revision-strategy: latest-wins
+    confidence:
+      output-threshold: 0.85
+      requires-validation: false
+      validation-agent: null
+      low-confidence-action: warn
+    negotiation:
+      conflict-scope: file
+      resolution-strategy: fiat
+      can-negotiate-with:
+        - mission-definer
+    lookahead:
+      enabled: false
+      depth: 0
+      simulation-budget: 0
+  - id: mission-definer
+    category: team-creation
+    name: Mission Definer
+    role: >
+      Locks the team mission, scope, accepted task types, and handoff chain. Produces a complete team definition entry
+      for teams.yaml with all required fields validated against the schema.
+    accepts:
+      - plan
+    depends-on:
+      - input-clarifier
+    notifies:
+      - role-architect
+    focus:
+      - .agentkit/spec/teams.yaml
+    responsibilities:
+      - Define team ID, name, and focus statement
+      - Lock scope patterns (file globs)
+      - Set accepted task types (implement, review, plan, investigate, document)
+      - Design handoff chain to downstream teams
+      - Validate the definition against the teams.yaml schema
+    conventions:
+      - Team IDs must be kebab-case, unique, and descriptive
+      - Focus statements should be concise (< 80 chars)
+      - Handoff chains should not create circular dependencies
+    preferred-tools:
+      - Read
+      - Edit
+    decision-model:
+      type: htn
+      description: >
+        Second node in the HTN chain — locks team mission and scope after receiving a validated brief from
+        input-clarifier.
+    retry-policy:
+      max-retries: 0
+      failure-classification:
+        transient: retry
+        logic: fail
+        permanent: fail
+      backoff: none
+      escalate-to: null
+    belief-system:
+      state-reads:
+        - .agentkit/spec/teams.yaml
+      task-reads: true
+      update-on:
+        - task-assigned
+        - dependency-resolved
+      revision-strategy: latest-wins
+    confidence:
+      output-threshold: 0.85
+      requires-validation: false
+      validation-agent: null
+      low-confidence-action: warn
+    negotiation:
+      conflict-scope: file
+      resolution-strategy: fiat
+      can-negotiate-with:
+        - role-architect
+    lookahead:
+      enabled: false
+      depth: 0
+      simulation-budget: 0
+  - id: role-architect
+    category: team-creation
+    name: Role Architect
+    role: >
+      Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team. Produces
+      complete agent entries for agents.yaml following the established schema.
+    accepts:
+      - plan
+    depends-on:
+      - mission-definer
+    notifies:
+      - prompt-engineer
+    focus:
+      - .agentkit/spec/agents/**
+      - .agentkit/spec/teams.yaml
+    responsibilities:
+      - Design agent roles that cover the team's full responsibility surface
+      - Define depends-on and notifies relationships
+      - Assign focus areas (file globs) to each agent
+      - List concrete responsibilities for each agent
+      - Ensure no responsibility gaps between agents
+    conventions:
+      - Each team should have 2-6 agents (avoid single-agent teams)
+      - Agent IDs must be unique across all categories
+      - Every agent must have at least one focus glob
+    preferred-tools:
+      - Read
+      - Edit
+    decision-model:
+      type: htn
+      description: |
+        Third node in the HTN chain — designs agent roles and responsibilities after mission is locked.
+    retry-policy:
+      max-retries: 0
+      failure-classification:
+        transient: retry
+        logic: fail
+        permanent: fail
+      backoff: none
+      escalate-to: null
+    belief-system:
+      state-reads:
+        - .agentkit/spec/agents/**
+        - .agentkit/spec/teams.yaml
+      task-reads: true
+      update-on:
+        - task-assigned
+        - dependency-resolved
+      revision-strategy: latest-wins
+    confidence:
+      output-threshold: 0.85
+      requires-validation: false
+      validation-agent: null
+      low-confidence-action: warn
+    negotiation:
+      conflict-scope: file
+      resolution-strategy: fiat
+      can-negotiate-with:
+        - prompt-engineer
+    lookahead:
+      enabled: false
+      depth: 0
+      simulation-budget: 0
+  - id: prompt-engineer
+    category: team-creation
+    name: Prompt Engineer
+    role: >
+      Writes agent descriptions, domain rules, conventions, anti-patterns, and examples for each agent in the new team.
+      Ensures prompt quality and consistency with existing agent definitions.
+    accepts:
+      - plan
+      - implement
+    depends-on:
+      - role-architect
+    notifies:
+      - flow-designer
+    focus:
+      - .agentkit/spec/agents/**
+      - .agentkit/spec/rules.yaml
+    responsibilities:
+      - Write detailed role descriptions for each agent
+      - Define domain-rules references (linking to rules.yaml domains)
+      - Write conventions and anti-patterns specific to each agent
+      - Create illustrative examples with code snippets
+      - Assign preferred-tools lists based on agent responsibilities
+    conventions:
+      - Role descriptions should be 2-3 sentences in imperative voice
+      - Reference existing rule domains rather than duplicating rules
+      - Examples should demonstrate the most common interaction pattern
+    preferred-tools:
+      - Read
+      - Edit
+    decision-model:
+      type: htn
+      description: |
+        Fourth node in the HTN chain — writes agent descriptions and rules after roles are designed.
+    retry-policy:
+      max-retries: 0
+      failure-classification:
+        transient: retry
+        logic: fail
+        permanent: fail
+      backoff: none
+      escalate-to: null
+    belief-system:
+      state-reads:
+        - .agentkit/spec/agents/**
+        - .agentkit/spec/rules.yaml
+      task-reads: true
+      update-on:
+        - task-assigned
+        - dependency-resolved
+      revision-strategy: latest-wins
+    confidence:
+      output-threshold: 0.8
+      requires-validation: false
+      validation-agent: null
+      low-confidence-action: warn
+    negotiation:
+      conflict-scope: file
+      resolution-strategy: fiat
+      can-negotiate-with:
+        - flow-designer
+    lookahead:
+      enabled: false
+      depth: 0
+      simulation-budget: 0
+  - id: flow-designer
+    category: team-creation
+    name: Flow Designer
+    role: >
+      Designs the team command, flags, and integration points with other teams. Creates the command entry in
+      commands.yaml and ensures the team is properly wired into the intake routing system.
+    accepts:
+      - plan
+      - implement
+    depends-on:
+      - prompt-engineer
+    notifies:
+      - team-validator
+    focus:
+      - .agentkit/spec/commands.yaml
+      - .agentkit/spec/teams.yaml
+    responsibilities:
+      - Design the /team-<name> command with appropriate flags
+      - Define command type, description, and allowed-tools
+      - Wire the team into intake routing in teams.yaml
+      - Ensure command flags align with team capabilities
+      - Design integration points with existing team commands
+    conventions:
+      - All team commands must have at least a --task flag
+      - Command descriptions should explain what activating the team context does
+      - allowed-tools should match the union of agents' preferred-tools
+    preferred-tools:
+      - Read
+      - Edit
+    decision-model:
+      type: htn
+      description: |
+        Fifth node in the HTN chain — designs the team command and intake routing after prompts are written.
+    retry-policy:
+      max-retries: 0
+      failure-classification:
+        transient: retry
+        logic: fail
+        permanent: fail
+      backoff: none
+      escalate-to: null
+    belief-system:
+      state-reads:
+        - .agentkit/spec/commands.yaml
+        - .agentkit/spec/teams.yaml
+      task-reads: true
+      update-on:
+        - task-assigned
+        - dependency-resolved
+      revision-strategy: latest-wins
+    confidence:
+      output-threshold: 0.85
+      requires-validation: false
+      validation-agent: null
+      low-confidence-action: warn
+    negotiation:
+      conflict-scope: file
+      resolution-strategy: fiat
+      can-negotiate-with:
+        - team-validator
+    lookahead:
+      enabled: false
+      depth: 0
+      simulation-budget: 0
+  - id: team-validator
+    category: team-creation
+    name: Team Validator
+    role: >
+      Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references
+      agents, teams, and commands to ensure everything is properly wired.
+    accepts:
+      - review
+      - investigate
+    depends-on:
+      - flow-designer
+    notifies: []
+    focus:
+      - .agentkit/spec/**
+    responsibilities:
+      - Cross-reference agents against teams (every agent's category maps to a team)
+      - Validate handoff chains have no circular dependencies
+      - Check that intake routing includes the new team
+      - Verify command flags have type definitions
+      - Run spec-validate to catch schema errors
+      - Produce a validation report with pass/fail status
+    conventions:
+      - Always run spec-validate as the final step
+      - Flag warnings (non-blocking) separately from errors (blocking)
+      - Include a diff summary of all spec files changed
+    preferred-tools:
+      - Read
+      - Glob
+      - Grep
+      - Bash
+    decision-model:
+      type: htn
+      description: >
+        Final quality-gate node in the HTN chain — validates the complete spec before it is committed. May retry once on
+        validation failures.
+    retry-policy:
+      max-retries: 1
+      failure-classification:
+        transient: retry
+        logic: escalate
+        permanent: fail
+      backoff: none
+      escalate-to: null
+    belief-system:
+      state-reads:
+        - .agentkit/spec/**
+      task-reads: true
+      update-on:
+        - task-assigned
+        - dependency-resolved
+      revision-strategy: latest-wins
+    confidence:
+      output-threshold: 0.9
+      requires-validation: false
+      validation-agent: null
+      low-confidence-action: warn
+    negotiation:
+      conflict-scope: file
+      resolution-strategy: fiat
+      can-negotiate-with: []
+    lookahead:
+      enabled: false
+      depth: 0
+      simulation-budget: 0
