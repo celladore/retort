@@ -43,10 +43,13 @@ if ! command -v node &>/dev/null; then
 fi
 
 # -- Run budget check via Node.js -----------------------------------------
-RESULT=$(node --input-type=module -e "
-import { evaluateForHook } from '${AGENTKIT_ROOT}/engines/node/src/budget-guard.mjs';
+# Pass AGENTKIT_ROOT via environment variable to prevent command injection
+# from paths containing shell metacharacters.
+RESULT=$(AGENTKIT_ROOT="$AGENTKIT_ROOT" node --input-type=module -e "
+const root = process.env.AGENTKIT_ROOT;
+const { evaluateForHook } = await import(root + '/engines/node/src/budget-guard.mjs');
 try {
-  const result = evaluateForHook('${AGENTKIT_ROOT}');
+  const result = evaluateForHook(root);
   console.log(JSON.stringify(result));
 } catch {
   console.log('{\"decision\":\"allow\"}');
@@ -57,13 +60,14 @@ try {
 DECISION=$(echo "$RESULT" | jq -r '.decision // "allow"')
 
 if [[ "$DECISION" == "deny" ]]; then
+    # Use jq to build JSON to prevent injection from $REASON content
     REASON=$(echo "$RESULT" | jq -r '.reason // "Budget exceeded"')
-    echo "{\"decision\":\"block\",\"reason\":\"$REASON\"}"
+    jq -n --arg reason "$REASON" '{"decision":"block","reason":$reason}'
 elif [[ "$DECISION" == "allow" ]]; then
     WARNING=$(echo "$RESULT" | jq -r '.warning // empty')
     if [[ -n "$WARNING" ]]; then
         # Emit a system notification as additionalContext so the agent sees the warning
-        echo "{\"additionalContext\":\"[BUDGET WARNING] $WARNING\"}"
+        jq -n --arg ctx "[BUDGET WARNING] $WARNING" '{"additionalContext":$ctx}'
     fi
     # allow — no output needed (empty stdout = allow)
 fi
