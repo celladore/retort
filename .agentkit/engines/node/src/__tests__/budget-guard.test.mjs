@@ -138,6 +138,22 @@ budgetPolicy:
       expect(result.session.warnAtPercent).toBe(70);
       expect(result.daily.warnAtPercent).toBe(90);
     });
+
+    it('should not read enforcement from a sibling top-level section (parser scope regression)', () => {
+      // Regression: getStr previously searched `^  enforcement:` globally in content.
+      // If a sibling section (e.g. costTracking) has enforcement before budgetPolicy,
+      // getStr would return the wrong value. getStr must now scope to the budgetPolicy block.
+      const yaml = `
+costTracking:
+  enforcement: off
+budgetPolicy:
+  enforcement: enforce
+  session:
+    maxCommands: 50
+`;
+      const result = extractBudgetPolicyRegex(yaml);
+      expect(result.enforcement).toBe('enforce');
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -418,9 +434,13 @@ budgetPolicy:
     it('should exclude yesterday sessions from daily totals', () => {
       const today = new Date().toISOString().split('T')[0];
       const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0];
+      // Use YYYYMMDD-prefixed filenames so the getTodaySessions() filename fast-path
+      // is exercised: yesterday's file is filtered out by name alone without reading content.
+      const todayYYYYMMDD = today.replace(/-/g, '');
+      const yesterdayYYYYMMDD = yesterday.replace(/-/g, '');
 
       writeFileSync(
-        resolve(TEST_AGENTKIT, 'logs', 'sessions', 'session-yesterday.json'),
+        resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${yesterdayYYYYMMDD}-main.json`),
         JSON.stringify({
           sessionId: 'yesterday-sess',
           startTime: `${yesterday}T10:00:00.000Z`,
@@ -432,7 +452,7 @@ budgetPolicy:
         'utf-8'
       );
       writeFileSync(
-        resolve(TEST_AGENTKIT, 'logs', 'sessions', 'session-today.json'),
+        resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${todayYYYYMMDD}-main.json`),
         JSON.stringify({
           sessionId: 'today-sess',
           startTime: `${today}T08:00:00.000Z`,

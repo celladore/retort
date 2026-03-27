@@ -98,9 +98,15 @@ function extractBudgetPolicyRegex(content) {
   // Check if budgetPolicy section exists at all
   if (!/^budgetPolicy:/m.test(content)) return null;
 
-  // Extract values scoped to a named YAML section block
+  // Extract the budgetPolicy block first so getSection/getStr search only within
+  // it — prevents sibling top-level sections (e.g. costTracking) from
+  // contributing keys that happen to share names with budgetPolicy children.
+  const policyBlockMatch = content.match(/^budgetPolicy:\s*\n((?:[ \t]+\S.*\n?)*)/m);
+  const policyBlock = policyBlockMatch ? policyBlockMatch[1] : '';
+
+  // Extract values scoped to a named YAML section block within policyBlock
   const getSection = (sectionName) => {
-    const sectionMatch = content.match(
+    const sectionMatch = policyBlock.match(
       new RegExp(`^  ${sectionName}:\\s*\\n((?:[ \\t]+\\S.*\\n?)*)`, 'm')
     );
     if (!sectionMatch) return {};
@@ -121,7 +127,7 @@ function extractBudgetPolicyRegex(content) {
   };
 
   const getStr = (key) => {
-    const m = content.match(new RegExp(`^  ${key}:\\s*([\\w]+)`, 'm'));
+    const m = policyBlock.match(new RegExp(`^  ${key}:\\s*([\\w]+)`, 'm'));
     return m ? m[1] : undefined;
   };
 
