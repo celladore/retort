@@ -32,6 +32,7 @@ import {
   filterDomainsByStack,
   flattenProjectYaml,
   formatCommandFlags,
+  getSyncReportData,
   insertHeader,
   isScaffoldOnce,
   mergePermissions,
@@ -41,6 +42,7 @@ import {
   resolveRenderTargets,
   resolveScaffoldAction,
   simpleDiff,
+  startSyncReport,
 } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -1860,6 +1862,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // Clear module-level state from any previous run (e.g. in tests)
   templateMetaMap.clear();
   templateTextCache.clear();
+  startSyncReport();
 
   const log = (...args) => {
     if (!quiet) console.log(...args);
@@ -2980,7 +2983,50 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
     log(`[retort:sync] Done! Generated ${count} files.`);
 
-    // 12. First-sync hint (when not called from init)
+    // 12. Write sync-report.json
+    if (!dryRun && !diff) {
+      const reportCollector = getSyncReportData();
+      let gitAutocrlf = null;
+      let hasGitattributes = false;
+      try {
+        gitAutocrlf = execFileSync('git', ['-C', projectRoot, 'config', 'core.autocrlf'], {
+          encoding: 'utf-8',
+          stdio: 'pipe',
+        }).trim();
+      } catch {
+        // git not available or not a repo
+      }
+      try {
+        hasGitattributes = existsSync(resolve(projectRoot, '.gitattributes'));
+      } catch {
+        // ignore
+      }
+      const syncReport = {
+        version,
+        generatedAt: new Date().toISOString(),
+        command: 'retort sync',
+        argv: process.argv.slice(2),
+        os: { platform: process.platform, arch: process.arch, nodeVersion: process.version },
+        git: { autocrlf: gitAutocrlf, hasGitattributes },
+        counts: {
+          generated: count,
+          skipped: skippedScaffold,
+          cleaned: cleanedCount,
+          failed: failedFiles.length,
+        },
+        fileSummary,
+        unresolvedPlaceholders: reportCollector?.unresolvedPlaceholders ?? [],
+        errors: failedFiles,
+      };
+      const reportPath = resolve(agentkitRoot, 'sync-report.json');
+      try {
+        await writeFile(reportPath, JSON.stringify(syncReport, null, 2) + '\n', 'utf-8');
+      } catch (err) {
+        console.warn(`[retort:sync] Warning: could not write sync-report.json — ${err.message}`);
+      }
+    }
+
+    // 13. First-sync hint (when not called from init)
     if (!flags?.overlay) {
       const markerPath = resolve(projectRoot, '.agentkit-repo');
       if (!existsSync(markerPath)) {

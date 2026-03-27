@@ -71,6 +71,7 @@ Thumbs.db
 # AgentKit internal generated files
 # =============================================================================
 .agentkit/.manifest.json
+.agentkit/sync-report.json
 .agentkit/package-lock.json
 /package-lock.json
 .agentkit/test_results.txt

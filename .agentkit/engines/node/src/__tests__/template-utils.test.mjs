@@ -3,6 +3,9 @@ import {
   renderTemplate,
   sanitizeTemplateValue,
   getCommentStyle,
+  startSyncReport,
+  getSyncReportData,
+  resetSyncReport,
   getGeneratedHeader,
   mergePermissions,
   insertHeader,
@@ -1678,5 +1681,56 @@ describe('applyWhitespaceControl', () => {
     const vars = { x: false };
     const result = renderTemplate(template, vars);
     expect(result).toBe('---\nallowed: yes');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sync report collector (GH#415)
+// ---------------------------------------------------------------------------
+describe('sync report collector', () => {
+  beforeEach(() => {
+    resetSyncReport();
+  });
+
+  afterEach(() => {
+    resetSyncReport();
+  });
+
+  it('getSyncReportData returns null before startSyncReport is called', () => {
+    expect(getSyncReportData()).toBeNull();
+  });
+
+  it('getSyncReportData returns empty collector after startSyncReport', () => {
+    startSyncReport();
+    const data = getSyncReportData();
+    expect(data).not.toBeNull();
+    expect(data.unresolvedPlaceholders).toEqual([]);
+    expect(data.renderErrors).toEqual([]);
+  });
+
+  it('replacePlaceholders pushes to collector when active', () => {
+    startSyncReport();
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    replacePlaceholders('{{unknown}}', {}, false, { filePath: 'test/file.md' });
+    warnSpy.mockRestore();
+    const data = getSyncReportData();
+    expect(data.unresolvedPlaceholders).toHaveLength(1);
+    expect(data.unresolvedPlaceholders[0].file).toBe('test/file.md');
+    expect(data.unresolvedPlaceholders[0].vars).toContain('{{unknown}}');
+  });
+
+  it('replacePlaceholders does not push when collector is inactive', () => {
+    // collector is null (resetSyncReport called in beforeEach)
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    replacePlaceholders('{{unknown}}', {});
+    warnSpy.mockRestore();
+    expect(getSyncReportData()).toBeNull();
+  });
+
+  it('resetSyncReport clears the collector', () => {
+    startSyncReport();
+    expect(getSyncReportData()).not.toBeNull();
+    resetSyncReport();
+    expect(getSyncReportData()).toBeNull();
   });
 });

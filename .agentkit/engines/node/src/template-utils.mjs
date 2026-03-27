@@ -8,6 +8,30 @@ import { PROJECT_MAPPING, get, transform, check } from './project-mapping.mjs';
 import { computeProjectCompleteness as computeProjectCompletenessBase } from './project-completeness.mjs';
 
 // ---------------------------------------------------------------------------
+// Per-sync report collector
+// Accumulates warnings/errors during a sync run for sync-report.json.
+// Module-level so template helpers can push without threading a context object.
+// ---------------------------------------------------------------------------
+
+/** @type {{ unresolvedPlaceholders: Array<{file:string,vars:string[]}>, renderErrors: Array<{file:string,error:string}> }|null} */
+let _syncReportCollector = null;
+
+/** Call once at the start of each sync run to enable collection. */
+export function startSyncReport() {
+  _syncReportCollector = { unresolvedPlaceholders: [], renderErrors: [] };
+}
+
+/** Returns the collected data. Returns null if startSyncReport was not called. */
+export function getSyncReportData() {
+  return _syncReportCollector;
+}
+
+/** Resets the collector (called at the start of each sync run to clear prior state). */
+export function resetSyncReport() {
+  _syncReportCollector = null;
+}
+
+// ---------------------------------------------------------------------------
 // Template rendering
 // ---------------------------------------------------------------------------
 
@@ -152,6 +176,9 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false, opt
     const unique = [...new Set(unresolved)];
     const loc = opts?.filePath ? ` in ${opts.filePath}` : '';
     console.warn(`[agentkit:sync] Warning: unresolved placeholders${loc}: ${unique.join(', ')}`);
+    if (_syncReportCollector) {
+      _syncReportCollector.unresolvedPlaceholders.push({ file: opts?.filePath || '', vars: unique });
+    }
   }
   return result;
 }
