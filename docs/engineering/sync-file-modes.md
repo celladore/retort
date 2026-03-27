@@ -121,12 +121,28 @@ automation:
 Every `retort:sync` run stamps `last_updated: YYYY-MM-DD` (via `{{syncDate}}`)
 into generated file headers, producing a diff even when nothing changed.
 
-**Status**: Engine fix pending (issue #417). A `sync.syncDateMode` setting has
-been proposed in `.agentkit/spec/settings.yaml` with values `run | version | none`.
-Once the engine honours it, setting `syncDateMode: none` will eliminate date churn.
+**Status**: Fixed. The engine honours `syncDateMode` (three modes: `run | version | none`).
+Set `syncDateMode: none` in your repo overlay to eliminate date churn entirely.
 
-**Current workaround**: After sync, use `git diff --stat` to identify files
-where only the `last_updated` line changed, and reset those files:
+**How to fix for your repo** — add to `.agentkit/overlays/<repoName>/settings.yaml`:
+
+```yaml
+syncDateMode: none
+```
+
+Then re-run `pnpm --dir .agentkit retort:sync`. Generated file headers will no longer
+contain a date stamp, so repeated syncs produce no diff when inputs are unchanged.
+
+**Mode reference:**
+
+| Mode | `{{syncDate}}` value | Stable? |
+|------|---------------------|---------|
+| `run` (default) | Today's ISO date (YYYY-MM-DD) | No — changes every day |
+| `version` | Spec VERSION string | Yes — stable until spec version bumps |
+| `none` | Empty string | Yes — date field removed entirely |
+
+**Temporary workaround** (if you cannot update the overlay yet) — reset files where
+only the date line changed:
 
 ```bash
 git diff --name-only | xargs -I{} sh -c \
