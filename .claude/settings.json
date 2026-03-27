@@ -63,6 +63,14 @@
             "command": "pwsh -NoLogo -NoProfile -NonInteractive -File \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.ps1 || \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoLogo -NoProfile -NonInteractive -File \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/init-state.ps1 || \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/init-state.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [
