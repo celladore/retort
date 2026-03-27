@@ -7,6 +7,7 @@ import {
   mergePermissions,
   insertHeader,
   isScaffoldOnce,
+  isTestSuitePath,
   parseTemplateFrontmatter,
   resolveScaffoldAction,
   resolveConditionals,
@@ -612,6 +613,74 @@ describe('resolveScaffoldAction', () => {
     };
     // Frontmatter says managed, vars say always-regenerate — frontmatter wins
     expect(resolveScaffoldAction('docs/README.md', vars, meta)).toBe('check-hash');
+  });
+
+  describe('test suite guard (GH#422)', () => {
+    it('skips test dirs when testingExamplesEnabled is false', () => {
+      expect(resolveScaffoldAction('tests/foo.test.js', {}, null)).toBe('skip');
+      expect(resolveScaffoldAction('__tests__/auth.test.ts', {}, null)).toBe('skip');
+      expect(resolveScaffoldAction('cypress/e2e/login.cy.ts', {}, null)).toBe('skip');
+      expect(resolveScaffoldAction('playwright/tests/home.spec.ts', {}, null)).toBe('skip');
+    });
+
+    it('skips test config files when testingExamplesEnabled is false', () => {
+      expect(resolveScaffoldAction('vitest.config.ts', {}, null)).toBe('skip');
+      expect(resolveScaffoldAction('jest.config.js', {}, null)).toBe('skip');
+      expect(resolveScaffoldAction('playwright.config.ts', {}, null)).toBe('skip');
+      expect(resolveScaffoldAction('cypress.config.js', {}, null)).toBe('skip');
+    });
+
+    it('allows test files when testingExamplesEnabled is true', () => {
+      const vars = { testingExamplesEnabled: true };
+      // tests/ is not scaffold-once, so should write
+      expect(resolveScaffoldAction('tests/foo.test.js', vars, null)).toBe('write');
+      expect(resolveScaffoldAction('vitest.config.ts', vars, null)).toBe('write');
+    });
+
+    it('frontmatter always overrides test suite guard', () => {
+      const meta = { agentkit: { scaffold: 'always' } };
+      expect(resolveScaffoldAction('tests/foo.test.js', {}, meta)).toBe('write');
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// isTestSuitePath
+// ---------------------------------------------------------------------------
+describe('isTestSuitePath', () => {
+  it('matches top-level test directories', () => {
+    expect(isTestSuitePath('tests/foo.js')).toBe(true);
+    expect(isTestSuitePath('__tests__/bar.ts')).toBe(true);
+    expect(isTestSuitePath('test/baz.js')).toBe(true);
+    expect(isTestSuitePath('cypress/integration/login.cy.ts')).toBe(true);
+    expect(isTestSuitePath('playwright/tests/home.spec.ts')).toBe(true);
+    expect(isTestSuitePath('e2e/smoke.spec.ts')).toBe(true);
+  });
+
+  it('matches nested test directories', () => {
+    expect(isTestSuitePath('src/__tests__/auth.test.ts')).toBe(true);
+    expect(isTestSuitePath('packages/core/tests/index.test.js')).toBe(true);
+  });
+
+  it('matches test file name patterns', () => {
+    expect(isTestSuitePath('src/auth.test.ts')).toBe(true);
+    expect(isTestSuitePath('src/auth.spec.ts')).toBe(true);
+    expect(isTestSuitePath('src/auth_test.ts')).toBe(true);
+    expect(isTestSuitePath('tests_module.test.py')).toBe(true);
+    expect(isTestSuitePath('vitest.config.ts')).toBe(true);
+    expect(isTestSuitePath('jest.config.js')).toBe(true);
+    expect(isTestSuitePath('playwright.config.ts')).toBe(true);
+    expect(isTestSuitePath('cypress.config.js')).toBe(true);
+  });
+
+  it('does not match non-test files', () => {
+    expect(isTestSuitePath('src/auth.ts')).toBe(false);
+    expect(isTestSuitePath('CLAUDE.md')).toBe(false);
+    expect(isTestSuitePath('docs/engineering/03_testing.md')).toBe(false);
+    expect(isTestSuitePath('.claude/rules/testing.md')).toBe(false);
+    expect(isTestSuitePath('scripts/validate-state.sh')).toBe(false);
   });
 });
 

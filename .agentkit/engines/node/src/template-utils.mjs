@@ -499,6 +499,10 @@ export function flattenProjectYaml(project, docsSpec = null) {
     project?.automation?.languageProfile?.scaffoldOverrides?.scaffoldOnce
   );
 
+  // Test suite scaffolding opt-in: disabled by default to prevent retort from
+  // writing test files into adopter repos (GH#422).
+  vars.testingExamplesEnabled = project?.automation?.testingExamples === true;
+
   const hasConfiguredLanguages = langs.length > 0;
   vars.hasConfiguredLanguages = hasConfiguredLanguages;
 
@@ -880,6 +884,47 @@ const SCAFFOLD_ONCE_GITHUB_FILES = new Set([
   '.github/CODEOWNERS',
 ]);
 
+// Test suite paths that are never scaffolded into adopter repos unless
+// `automation.testingExamples: true` is set in project.yaml.
+// Matches directory prefixes and common test config file names.
+const SCAFFOLD_NEVER_TEST_DIRS = [
+  'tests/',
+  '__tests__/',
+  'test/',
+  'cypress/',
+  'playwright/',
+  'e2e/',
+  'spec/',
+];
+
+const SCAFFOLD_NEVER_TEST_FILE_PATTERNS = [
+  /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
+  /_test\.[jt]sx?$/,
+  /\.test\.py$/,
+  /_test\.py$/,
+  /\.test\.rs$/,
+  /vitest\.config\.[jt]sx?$/,
+  /jest\.config\.[jt]sx?$/,
+  /playwright\.config\.[jt]sx?$/,
+  /cypress\.config\.[jt]sx?$/,
+];
+
+/**
+ * Returns true if the relative path looks like a test suite file that should
+ * not be scaffolded into adopter repos by default.
+ */
+export function isTestSuitePath(relPath) {
+  const normalized = relPath.replace(/\\/g, '/');
+  for (const dir of SCAFFOLD_NEVER_TEST_DIRS) {
+    if (normalized.startsWith(dir) || normalized.includes(`/${dir}`)) return true;
+  }
+  for (const pattern of SCAFFOLD_NEVER_TEST_FILE_PATTERNS) {
+    if (pattern.test(normalized)) return true;
+  }
+  return false;
+}
+
 /**
  * Check if a relative path is a scaffold-once file (project-owned content).
  * These are only written on first sync; subsequent syncs skip them if they exist.
@@ -918,6 +963,10 @@ export function resolveScaffoldAction(relPath, vars = {}, templateMeta = null) {
   if (scaffold === 'always') return 'write';
   if (scaffold === 'managed') return 'check-hash';
   if (scaffold === 'once') return 'skip';
+
+  // Test suite guard: skip test files unless the adopter has opted in.
+  // Set `automation.testingExamples: true` in project.yaml to allow scaffolding.
+  if (isTestSuitePath(relPath) && !vars.testingExamplesEnabled) return 'skip';
 
   // Fall through to existing isScaffoldOnce logic
   if (isScaffoldOnce(relPath, vars)) return 'skip';
