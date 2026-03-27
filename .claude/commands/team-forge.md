@@ -88,6 +88,30 @@ files in `.claude/state/tasks/` that carry structured work between agents.
 
 **Default handoff chain:** quality → docs
 
+## Observability
+
+Emit structured `[METRICS]` log lines so usage can be tracked and aggregated.
+
+**At the start of every session**, before any other work, emit:
+
+```
+[METRICS] team=forge event=session_start timestamp=<ISO8601>
+```
+
+**When a task is marked complete** (status → `completed`), emit:
+
+```
+[METRICS] team=forge event=task_complete taskId=<id> timestamp=<ISO8601>
+```
+
+**When work is blocked or rejected** (status → `failed` or `rejected`), emit:
+
+```
+[METRICS] team=forge event=task_failed taskId=<id> reason=<short-reason> timestamp=<ISO8601>
+```
+
+Append all `[METRICS]` lines to `.claude/state/events.log` alongside the existing `[TEAM]` entries. Use the actual current ISO 8601 timestamp (not a placeholder) when emitting.
+
 ## Workflow
 
 Follow these steps in order for every work session:
