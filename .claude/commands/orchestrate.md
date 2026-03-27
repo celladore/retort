@@ -182,10 +182,11 @@ Execute the following loop. Each iteration corresponds to one phase:
 ### Phase 1 — Discovery
 
 1. Read the current state file.
-2. Invoke the `/discover` workflow: scan the repository, identify stacks, build tools, package managers, folder structure, CI configuration, test frameworks, and broken items.
-3. Verify that `AGENT_TEAMS.md` has been created or updated.
-4. Log discovery results to `events.log`.
-5. Update `orchestrator.json` with discovered metadata.
+2. **Read agent health data** — if `.claude/state/agent-health.json` exists, read it and note any agents with a `flag` of `high-failure-rate` or `elevated-failure-rate`. Record these as risks in `orchestrator.json` before dispatching work to those teams. Idle agents (flag `idle`) are noted informally but do not affect dispatch.
+3. Invoke the `/discover` workflow: scan the repository, identify stacks, build tools, package managers, folder structure, CI configuration, test frameworks, and broken items.
+4. Verify that `AGENT_TEAMS.md` has been created or updated.
+5. Log discovery results to `events.log`.
+6. Update `orchestrator.json` with discovered metadata.
 
 ### Phase 2 — Planning
 

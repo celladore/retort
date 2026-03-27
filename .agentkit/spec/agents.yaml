@@ -704,6 +704,8 @@ agents:
         - 'docs/history/lessons-learned/**'
         - 'docs/history/.index.json'
         - 'docs/ai_handoffs/**'
+        - '.claude/state/agent-health.json'
+        - '.claude/state/agent-metrics.json'
       responsibilities:
         - Review conversation history for errors, blockers, and unexpected behaviour
         - Classify issues by severity (critical, high, medium, low) and status
@@ -715,6 +717,8 @@ agents:
         - Cross-reference with existing history records to detect recurring patterns
         - Optionally open external issues (GitHub/Linear/Jira) for unresolved problems
         - Suggest updates to rules.yaml or conventions when lessons warrant them
+        - Read .claude/state/agent-health.json (if present) and surface agents with high-failure-rate or elevated-failure-rate flags as issues; link to relevant lessons
+        - Read .claude/state/agent-metrics.json (if present) to correlate invocation counts and task outcomes with observed patterns in the conversation
       domain-rules:
         - 'Follow git-workflow domain rules [gw-conventional-commits, gw-atomic-commits, gw-branch-naming, gw-no-secrets-in-history] — all commits must use Conventional Commits format type(scope): description, all PRs must have conventional titles'
         - 'Follow documentation domain rules [doc-8-category-structure, doc-changelog] — use consistent structure, keep records current'

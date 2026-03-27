@@ -58,6 +58,8 @@ operations
 - docs/history/lessons-learned/**
 - docs/history/.index.json
 - docs/ai_handoffs/**
+- .claude/state/agent-health.json
+- .claude/state/agent-metrics.json
 
 ## Responsibilities
 
@@ -71,6 +73,8 @@ operations
 - Cross-reference with existing history records to detect recurring patterns
 - Optionally open external issues (GitHub/Linear/Jira) for unresolved problems
 - Suggest updates to rules.yaml or conventions when lessons warrant them
+- Read .claude/state/agent-health.json (if present) and surface agents with high-failure-rate or elevated-failure-rate flags as issues; link to relevant lessons
+- Read .claude/state/agent-metrics.json (if present) to correlate invocation counts and task outcomes with observed patterns in the conversation
 
 ## Preferred Tools
 
