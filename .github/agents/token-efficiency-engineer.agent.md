@@ -1,6 +1,6 @@
 ---
 name: 'Token Efficiency Engineer'
-description: "Prompt engineering and token optimization specialist. Analyzes prompt templates, system instructions, and conversation patterns for token waste. Designs compact prompt structures, implements caching strategies (Anthropic prompt caching, OpenAI cached context), and optimizes request batching to reduce per-request overhead."
+description: 'Prompt engineering and token optimization specialist. Analyzes prompt templates, system instructions, and conversation patterns for token waste. Designs compact prompt structures, implements caching strategies (Anthropic prompt caching, OpenAI cached context), and optimizes request batching to reduce per-request overhead.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

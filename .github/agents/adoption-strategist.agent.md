@@ -1,6 +1,6 @@
 ---
 name: 'Adoption Strategist'
-description: "Plans and executes adoption campaigns — onboarding new repos, migration paths for existing projects, and rollout strategies for new framework features across the portfolio."
+description: 'Plans and executes adoption campaigns — onboarding new repos, migration paths for existing projects, and rollout strategies for new framework features across the portfolio.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

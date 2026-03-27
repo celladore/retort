@@ -85,8 +85,8 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
 - Intake owner team: `product`
 - Operations team: `quality`
 - Cadence: `daily`
-- Security-critical escalation: `security, devops`
-- Blocked cross-team escalation: `product`
+  - Security-critical escalation: `security, devops`
+  - Blocked cross-team escalation: `product`
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
 

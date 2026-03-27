@@ -1,6 +1,6 @@
 ---
 name: 'Test Lead'
-description: "Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions. Ensures comprehensive coverage across unit, integration, and end-to-end testing."
+description: 'Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions. Ensures comprehensive coverage across unit, integration, and end-to-end testing.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

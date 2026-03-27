@@ -1,6 +1,6 @@
 ---
 name: 'Content Strategist'
-description: "Content strategy specialist responsible for messaging, copy, documentation voice, and content architecture. Ensures clear, consistent, and audience-appropriate communication."
+description: 'Content strategy specialist responsible for messaging, copy, documentation voice, and content architecture. Ensures clear, consistent, and audience-appropriate communication.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

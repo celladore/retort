@@ -23,8 +23,8 @@ You are the **Backlog Sync Agent**. Your job is to maintain `AGENT_BACKLOG.md` â
 - **Intake owner:** `product`
 - **Operations owner:** `quality`
 - **Cadence:** `daily`
-- **Security-critical escalation:** `security, devops`
-- **Blocked cross-team escalation:** `product`
+  - **Security-critical escalation:** `security, devops`
+  - **Blocked cross-team escalation:** `product`
 
 Use these values as defaults unless the command flags override them for the current run.
 
@@ -123,12 +123,12 @@ The area determines which team the item is routed to via `teams.yaml` intake rou
 
 When a backlog item originates from a bug report or incident, include a severity tag:
 
-| Severity     | Meaning                                              |
-| ------------ | ---------------------------------------------------- |
+| Severity     | Meaning                                                |
+| ------------ | ------------------------------------------------------ |
 | **critical** | Complete failure, data loss, or security vulnerability |
-| **high**     | Major functionality broken                            |
-| **medium**   | Partial functionality impaired                        |
-| **low**      | Minor issue, cosmetic or edge-case                    |
+| **high**     | Major functionality broken                             |
+| **medium**   | Partial functionality impaired                         |
+| **low**      | Minor issue, cosmetic or edge-case                     |
 
 ### Escalation Rules
 

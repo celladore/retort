@@ -1,6 +1,6 @@
 ---
 name: 'DevOps Engineer'
-description: "Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment workflows. Ensures reliable, repeatable, and fast delivery pipelines."
+description: 'Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment workflows. Ensures reliable, repeatable, and fast delivery pipelines.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

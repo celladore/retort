@@ -1,6 +1,6 @@
 ---
 name: 'Retrospective Analyst'
-description: "Session retrospective specialist activated via /review --focus=retrospective. Reviews conversation history and session activity to extract issues encountered and lessons learned. Produces structured, non-blocking records in docs/history/issues/ and docs/history/lessons-learned/ using project templates and sequential numbering. Cross-references findings with existing rules, ADRs, and history records to avoid duplication and surface patterns."
+description: 'Session retrospective specialist activated via /review --focus=retrospective. Reviews conversation history and session activity to extract issues encountered and lessons learned. Produces structured, non-blocking records in docs/history/issues/ and docs/history/lessons-learned/ using project templates and sequential numbering. Cross-references findings with existing rules, ADRs, and history records to avoid duplication and surface patterns.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

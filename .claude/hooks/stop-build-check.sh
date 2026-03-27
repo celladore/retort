@@ -61,7 +61,7 @@ emit_block() { printf '%s' "$1" | jq -Rs '{"decision": "block", "reason": .}'; }
 if [[ -d "${CWD}/.agentkit/spec" ]] && command -v git &>/dev/null && git -C "$CWD" rev-parse --is-inside-work-tree &>/dev/null; then
     spec_dirty=$(git -C "$CWD" diff --name-only HEAD 2>/dev/null | { grep -c '^\.agentkit/spec/' || true; })
     if [[ "$spec_dirty" -gt 0 ]]; then
-        echo "⚠️  .agentkit/spec/ has uncommitted changes — remember to run 'pnpm --dir .agentkit agentkit:sync' before pushing." >&2
+        echo "⚠️  .agentkit/spec/ has uncommitted changes — remember to run 'pnpm -C .agentkit agentkit:sync' before pushing." >&2
     fi
 fi
 

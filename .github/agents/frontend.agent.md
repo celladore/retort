@@ -1,6 +1,6 @@
 ---
 name: 'Frontend Engineer'
-description: "Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experience. Champions accessibility, performance, and responsive design."
+description: 'Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experience. Champions accessibility, performance, and responsive design.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

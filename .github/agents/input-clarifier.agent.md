@@ -1,6 +1,6 @@
 ---
 name: 'Input Clarifier'
-description: "Assesses raw team creation requests, extracts constraints, validates against existing teams to prevent scope overlap, and enriches the request with missing context before passing to the mission definer."
+description: 'Assesses raw team creation requests, extracts constraints, validates against existing teams to prevent scope overlap, and enriches the request with missing context before passing to the mission definer.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

@@ -1,6 +1,6 @@
 ---
 name: 'Product Manager'
-description: "Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeholder alignment. Translates business needs into actionable engineering work."
+description: 'Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeholder alignment. Translates business needs into actionable engineering work.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

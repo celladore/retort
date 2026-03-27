@@ -25,6 +25,7 @@ When invoked, follow the Retort orchestration lifecycle:
 3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
 4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
 5. **Report** results clearly
+   
 
 ## Project Context
 

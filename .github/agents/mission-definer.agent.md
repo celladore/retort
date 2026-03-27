@@ -1,6 +1,6 @@
 ---
 name: 'Mission Definer'
-description: "Locks the team mission, scope, accepted task types, and handoff chain. Produces a complete team definition entry for teams.yaml with all required fields validated against the schema."
+description: 'Locks the team mission, scope, accepted task types, and handoff chain. Produces a complete team definition entry for teams.yaml with all required fields validated against the schema.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

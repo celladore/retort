@@ -28,6 +28,7 @@ For the specified feature, trace its complete flow:
 #### 1. Spec Definition
 
 Read `.agentkit/spec/features.yaml` and find the feature entry. Report:
+
 - **ID**: The feature identifier
 - **Name**: Human-readable name
 - **Category**: Which category it belongs to
@@ -40,6 +41,7 @@ Read `.agentkit/spec/features.yaml` and find the feature entry. Report:
 #### 2. Overlay Configuration
 
 Read the current overlay `settings.yaml` and determine:
+
 - Whether this feature is currently **enabled** or **disabled**
 - How it was resolved (via preset, explicit list, or defaults)
 - Whether it appears in `disabledFeatures` (explicit exclusion)
@@ -47,6 +49,7 @@ Read the current overlay `settings.yaml` and determine:
 #### 3. Template Variables
 
 Show which template variables this feature sets and their current values:
+
 ```
 hasTeamOrchestration = true
 feature_team_orchestration = true
@@ -55,6 +58,7 @@ feature_team_orchestration = true
 #### 4. Template Consumers
 
 Search for template files that reference this feature's template vars:
+
 ```bash
 # Find templates that use this feature's conditional
 grep -r "{{#if hasTeamOrchestration}}" .agentkit/templates/
@@ -81,34 +85,41 @@ List the `affectsTemplates` paths from the feature definition and verify they ex
 ## Feature Flow: <feature-name> (<feature-id>)
 
 ### 1. Definition
-| Field          | Value                    |
-|----------------|--------------------------|
-| Category       | <category>               |
-| Always On      | <yes/no>                 |
-| Default        | <enabled/disabled>       |
-| Dependencies   | <list or none>           |
-| Dependents     | <list or none>           |
-| Template Vars  | <var1>, <var2>           |
+
+| Field         | Value              |
+| ------------- | ------------------ |
+| Category      | <category>         |
+| Always On     | <yes/no>           |
+| Default       | <enabled/disabled> |
+| Dependencies  | <list or none>     |
+| Dependents    | <list or none>     |
+| Template Vars | <var1>, <var2>     |
 
 ### 2. Current Status
+
 - **Enabled**: <yes/no>
 - **Resolution**: <preset: standard | explicit | default>
 - **Overlay**: <file path>
 
 ### 3. Template Consumers
-| Template File                    | Conditional Used              |
-|----------------------------------|-------------------------------|
-| claude/CLAUDE.md                 | {{#if hasTeamOrchestration}}  |
-| cursor/rules/project-context.mdc | {{#if hasTeamOrchestration}}  |
+
+| Template File                    | Conditional Used             |
+| -------------------------------- | ---------------------------- |
+| claude/CLAUDE.md                 | {{#if hasTeamOrchestration}} |
+| cursor/rules/project-context.mdc | {{#if hasTeamOrchestration}} |
 
 ### 4. Impact Analysis
+
 Enabling this feature adds/changes:
+
 - <list of output changes>
 
 Disabling this feature removes:
+
 - <list of output changes>
 
 ### 5. Related Features
+
 - <dependency/dependent relationships>
 ```
 

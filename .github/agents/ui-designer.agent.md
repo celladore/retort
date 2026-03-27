@@ -1,6 +1,6 @@
 ---
 name: 'UI Designer'
-description: "UI/UX design specialist responsible for interaction patterns, component design, layout systems, and visual hierarchy. Bridges design intent and implementation."
+description: 'UI/UX design specialist responsible for interaction patterns, component design, layout systems, and visual hierarchy. Bridges design intent and implementation.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

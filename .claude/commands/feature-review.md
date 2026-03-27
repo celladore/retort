@@ -77,16 +77,20 @@ Based on `$ARGUMENTS`, perform one or more of these review modes:
 ## Feature Review — retort
 
 ### Configuration
+
 - Mode: [preset: <name> | explicit list | defaults]
 - Enabled: <N> / <total> features
 
 ### Status by Category
+
 [Category tables with enabled/disabled status]
 
 ### Findings
+
 [Issues, recommendations, audit results]
 
 ### Recommended Actions
+
 [Specific agentkit commands to run]
 ```
 

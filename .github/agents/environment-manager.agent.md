@@ -1,6 +1,6 @@
 ---
 name: 'Environment Manager'
-description: "Environment configuration specialist ensuring consistent, secure, and documented environment setups across development, CI, staging, and production."
+description: 'Environment configuration specialist ensuring consistent, secure, and documented environment setups across development, CI, staging, and production.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''
