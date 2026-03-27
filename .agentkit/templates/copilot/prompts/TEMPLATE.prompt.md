@@ -25,7 +25,7 @@ When invoked, follow the Retort orchestration lifecycle:
 3. **Execute** the task following project conventions and command-specific checks (tests/lint/build when applicable)
 4. **Validate** the output with explicit quality gates (`/check` and `pnpm check-all` where applicable)
 5. **Report** results clearly
-{{/if}}
+   {{/if}}
 
 ## Project Context
 
@@ -51,14 +51,15 @@ When invoked, follow the Retort orchestration lifecycle:
 - See `docs/` for architecture, runbooks, and guides
 
 {{#if isSyncBacklog}}
+
 ## Intake Semantics
 
 - Tracker: `{{issueTracker}}`
 - Intake owner team: `{{intakeOwnerTeam}}`
 - Operations team: `{{intakeOperationsTeam}}`
 - Cadence: `{{intakeCadence}}`
-{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
-{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+  {{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+  {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Apply tracker-neutral issue intake behavior and ownership-aware routing when running this command.
 {{/if}}

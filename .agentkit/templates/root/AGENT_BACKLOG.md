@@ -22,18 +22,18 @@
 
 ## Active Sprint
 
-| Priority | Team              | Task                                          | Phase          | Status      | Notes                    |
-| -------- | ----------------- | --------------------------------------------- | -------------- | ----------- | ------------------------ |
+| Priority | Team              | Task                                          | Phase          | Status      | Notes                                                                                 |
+| -------- | ----------------- | --------------------------------------------- | -------------- | ----------- | ------------------------------------------------------------------------------------- |
 | P0       | T4-Infrastructure | Configure CI pipeline for main branch         | Implementation | In Progress | GitHub Actions workflow; scope: branch-protection, drift check, quality gates on main |
-| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul; scope: .agentkit test suite, 80% coverage target, run in CI         |
-| P1       | T1-Backend        | Define core API route structure               | Planning       | In Progress | REST endpoints for v1    |
-| P1       | T3-Data           | Design initial database schema                | Planning       | Todo        | Depends on T1 API design |
-| P1       | T8-DevEx          | Configure linting and formatting rules        | Implementation | Done        | ESLint + Prettier        |
-| P2       | T7-Documentation  | Write initial ADR for tech stack decisions    | Discovery      | In Progress | ADR-001 through ADR-003  |
-| P2       | T2-Frontend       | Scaffold component library structure          | Planning       | Todo        | Waiting on design system |
-| P2       | T5-Auth           | Evaluate authentication providers             | Discovery      | Todo        | OAuth2 + JWT candidates  |
-| P3       | T6-Integration    | Inventory third-party service requirements    | Discovery      | Todo        | Not yet scoped           |
-| P3       | T9-Platform       | Identify shared utility functions             | Discovery      | Todo        | Cross-cutting concerns   |
+| P0       | T10-Quality       | Set up test framework and coverage thresholds | Implementation | In Progress | Vitest + Istanbul; scope: .agentkit test suite, 80% coverage target, run in CI        |
+| P1       | T1-Backend        | Define core API route structure               | Planning       | In Progress | REST endpoints for v1                                                                 |
+| P1       | T3-Data           | Design initial database schema                | Planning       | Todo        | Depends on T1 API design                                                              |
+| P1       | T8-DevEx          | Configure linting and formatting rules        | Implementation | Done        | ESLint + Prettier                                                                     |
+| P2       | T7-Documentation  | Write initial ADR for tech stack decisions    | Discovery      | In Progress | ADR-001 through ADR-003                                                               |
+| P2       | T2-Frontend       | Scaffold component library structure          | Planning       | Todo        | Waiting on design system                                                              |
+| P2       | T5-Auth           | Evaluate authentication providers             | Discovery      | Todo        | OAuth2 + JWT candidates                                                               |
+| P3       | T6-Integration    | Inventory third-party service requirements    | Discovery      | Todo        | Not yet scoped                                                                        |
+| P3       | T9-Platform       | Identify shared utility functions             | Discovery      | Todo        | Cross-cutting concerns                                                                |
 
 ---
 
@@ -64,7 +64,7 @@ Items finished in previous sprints.
 | -------- | ----------------- | ------------------------------------- | ----- | --------- | -------------------- |
 | P0       | T8-DevEx          | Initialize project repository         | Ship  | Sprint 0  | Monorepo structure   |
 | P0       | T4-Infrastructure | Create initial Dockerfile             | Ship  | Sprint 0  | Multi-stage build    |
-| P0       | T7-Documentation  | Generate root documentation templates | Ship  | Sprint 0  | Retort sync  |
+| P0       | T7-Documentation  | Generate root documentation templates | Ship  | Sprint 0  | Retort sync          |
 | P1       | T10-Quality       | Define quality gate criteria          | Ship  | Sprint 0  | See QUALITY_GATES.md |
 
 ---

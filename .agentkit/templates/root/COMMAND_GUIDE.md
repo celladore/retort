@@ -211,7 +211,7 @@ This guide helps you choose the right command for your situation. Most workflow 
 | Need a plan before coding       | `/plan`                                        |
 | Full project audit / onboarding | `/project-review`                              |
 | Understand repo structure       | `/discover`                                    |
-| Validate Retort setup         | `/doctor`                                      |
+| Validate Retort setup           | `/doctor`                                      |
 | Verify build/test/lint          | `/healthcheck`                                 |
 | Inspect delegated task queue    | `/tasks`                                       |
 | Delegate work to a team         | `/delegate`                                    |

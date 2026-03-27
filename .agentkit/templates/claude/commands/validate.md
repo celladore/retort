@@ -35,10 +35,10 @@ last_updated: '{{syncDate}}'
 
 ## Output
 
-| Field | Description |
-|-------|-------------|
-| **Check** | Name of the validation check |
-| **Status** | PASS / FAIL / WARN |
+| Field       | Description                          |
+| ----------- | ------------------------------------ |
+| **Check**   | Name of the validation check         |
+| **Status**  | PASS / FAIL / WARN                   |
 | **Details** | Specifics about failures or warnings |
 
 Overall status: **PASS** (all checks green) or **FAIL** (one or more checks failed).

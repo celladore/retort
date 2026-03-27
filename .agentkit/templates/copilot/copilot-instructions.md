@@ -24,6 +24,7 @@ Follow these instructions for all code generation, suggestions, and chat respons
   {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
 
 {{#if showLanguageProfileDiagnostics}}
+
 ## Language Profile Diagnostics
 
 - **Source**: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
@@ -32,9 +33,9 @@ Follow these instructions for all code generation, suggestions, and chat respons
 - **Python**: configured={{hasLanguagePython}}, inferred={{hasLanguagePythonInferred}}, effective={{hasLanguagePythonEffective}}
 - **.NET**: configured={{hasLanguageDotnet}}, inferred={{hasLanguageDotnetInferred}}, effective={{hasLanguageDotnetEffective}}
 - **Rust**: configured={{hasLanguageRust}}, inferred={{hasLanguageRustInferred}}, effective={{hasLanguageRustEffective}}
-{{#if hasLanguageInferenceMismatch}}- **Notice**: configured and inferred language signals diverge; generation uses configured values.{{/if}}
-{{#if hasLanguageInferenceUsed}}- **Notice**: heuristics are currently prepopulating effective language flags because configured languages are empty.{{/if}}
-{{/if}}
+  {{#if hasLanguageInferenceMismatch}}- **Notice**: configured and inferred language signals diverge; generation uses configured values.{{/if}}
+  {{#if hasLanguageInferenceUsed}}- **Notice**: heuristics are currently prepopulating effective language flags because configured languages are empty.{{/if}}
+  {{/if}}
 
 ## Core Workflow
 

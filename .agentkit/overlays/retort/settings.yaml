@@ -1,8 +1,8 @@
 # Retort repo overlay settings
 # This is retort's own overlay — configures how the framework generates output for itself.
 repoName: retort
-defaultBranch: main          # Production branch — never commit directly
-integrationBranch: dev       # PRs must target dev, not main
+defaultBranch: main # Production branch — never commit directly
+integrationBranch: dev # PRs must target dev, not main
 primaryStack: auto
 windowsFirst: true
 

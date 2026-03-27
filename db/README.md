@@ -1,12 +1,14 @@
 <<<<<<< HEAD
+
 # Database — retort
 
-This repository (**retort**) is the Retort framework. It has **no database** and no ORM (see root `CLAUDE.md`: Database: none, ORM: none).
-=======
+# This repository (**retort**) is the Retort framework. It has **no database** and no ORM (see root `CLAUDE.md`: Database: none, ORM: none).
+
 # Database — agentkit-forge
 
 This repository (**agentkit-forge**) is the AgentKit Forge framework. It has **no database** and no ORM (see root `CLAUDE.md`: Database: none, ORM: none).
->>>>>>> origin/main
+
+> > > > > > > origin/main
 
 ## For adopters
 

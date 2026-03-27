@@ -17,6 +17,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 ## [Unreleased]
 
 ### Added
+
 - Kit-based domain selection and onboarding redesign ([#432](../../pull/432), [history](implementations/0001-2026-03-20-kit-based-domain-selection-and-onboarding-redesign-implementation.md))
 
 - Initial Retort integration (v3.1.0)

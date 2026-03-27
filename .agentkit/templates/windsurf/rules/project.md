@@ -7,6 +7,7 @@
 This repository uses the Retort unified agent team framework.
 
 {{#if showLanguageProfileDiagnostics}}
+
 ## Language Profile Diagnostics
 
 - Source: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
@@ -15,9 +16,9 @@ This repository uses the Retort unified agent team framework.
 - Python: configured={{hasLanguagePython}}, inferred={{hasLanguagePythonInferred}}, effective={{hasLanguagePythonEffective}}
 - .NET: configured={{hasLanguageDotnet}}, inferred={{hasLanguageDotnetInferred}}, effective={{hasLanguageDotnetEffective}}
 - Rust: configured={{hasLanguageRust}}, inferred={{hasLanguageRustInferred}}, effective={{hasLanguageRustEffective}}
-{{#if hasLanguageInferenceMismatch}}- Notice: configured and inferred language signals diverge; generation uses configured values.{{/if}}
-{{#if hasLanguageInferenceUsed}}- Notice: heuristics are prepopulating effective language flags because configured languages are empty.{{/if}}
-{{/if}}
+  {{#if hasLanguageInferenceMismatch}}- Notice: configured and inferred language signals diverge; generation uses configured values.{{/if}}
+  {{#if hasLanguageInferenceUsed}}- Notice: heuristics are prepopulating effective language flags because configured languages are empty.{{/if}}
+  {{/if}}
 
 ## Key References
 

@@ -10,12 +10,12 @@ Instructions for setting up a local development environment for {{repoName}}.
 
 ## Prerequisites
 
-| Tool          | Version             | Installation                         |
-| ------------- | ------------------- | ------------------------------------ |
-| Node.js       | <!-- e.g. >= 22 --> | [nodejs.org](https://nodejs.org)     |
+| Tool               | Version             | Installation                                            |
+| ------------------ | ------------------- | ------------------------------------------------------- |
+| Node.js            | <!-- e.g. >= 22 --> | [nodejs.org](https://nodejs.org)                        |
 | {{packageManager}} | <!-- e.g. >= 9 -->  | See [{{packageManager}}](https://{{packageManager}}.io) |
-| Docker        | <!-- e.g. >= 24 --> | [docker.com](https://www.docker.com) |
-| <!-- Tool --> | <!-- Version -->    | <!-- Link -->                        |
+| Docker             | <!-- e.g. >= 24 --> | [docker.com](https://www.docker.com)                    |
+| <!-- Tool -->      | <!-- Version -->    | <!-- Link -->                                           |
 
 ## Quick Start
 

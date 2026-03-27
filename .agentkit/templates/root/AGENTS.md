@@ -99,6 +99,7 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{/if}}
 
 {{#if hasDocScaffolding}}
+
 ## Documentation
 
 {{#if hasPrd}}- **PRDs**: `{{prdPath}}`{{/if}}
@@ -109,18 +110,20 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 {{#if hasStorybook}}- **Storybook** available for component preview{{/if}}
 {{#if hasQualityGates}}- **Quality Gates**: `QUALITY_GATES.md`{{/if}}
+
 - **Runbook**: `RUNBOOK_AI.md`
-{{/if}}
+  {{/if}}
 
 {{#if hasTeamOrchestration}}
+
 ## Agent Teams
 
 This project uses a multi-team orchestration model. Teams are specialized by domain:
 
 - Start with `/orchestrate` to assess the current state and coordinate work.
 - Use `/plan` to create structured implementation plans before coding.
-{{#if hasQualityGates}}- Run `/check` to verify quality gates (lint, test, build) before committing.{{/if}}
-{{#if hasSessionHandoff}}- Use `/handoff` to document session state for continuity.{{/if}}
+  {{#if hasQualityGates}}- Run `/check` to verify quality gates (lint, test, build) before committing.{{/if}}
+  {{#if hasSessionHandoff}}- Use `/handoff` to document session state for continuity.{{/if}}
 
 See `UNIFIED_AGENT_TEAMS.md` for full team definitions and workflow phases.
 See `COMMAND_GUIDE.md` for when to choose `/orchestrate`, `/plan`, `/project-review`, and other commands.

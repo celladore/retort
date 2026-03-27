@@ -11,11 +11,11 @@ description of the rendering pipeline and three-way merge algorithm.
 
 ## Quick Reference
 
-| Mode      | On first sync | On later syncs            | Safe to hand-edit? |
-| --------- | ------------- | ------------------------- | ------------------ |
-| `always`  | Write         | **Overwrite**             | No — edits lost    |
-| `managed` | Write         | Hash-check + 3-way merge  | Yes — edits kept   |
-| `once`    | Write         | **Skip**                  | Yes — never reset  |
+| Mode      | On first sync | On later syncs           | Safe to hand-edit? |
+| --------- | ------------- | ------------------------ | ------------------ |
+| `always`  | Write         | **Overwrite**            | No — edits lost    |
+| `managed` | Write         | Hash-check + 3-way merge | Yes — edits kept   |
+| `once`    | Write         | **Skip**                 | Yes — never reset  |
 
 ---
 
@@ -25,34 +25,34 @@ These files are regenerated from spec on **every** `retort:sync` run. Hand-edits
 are lost the next time sync runs. Do not edit them directly; change the spec and
 re-sync instead.
 
-| Output path | Template source |
-| --- | --- |
-| `AGENTS.md` | `.agentkit/templates/claude/AGENTS.md` |
-| `COMMAND_GUIDE.md` | `.agentkit/templates/docs/COMMAND_GUIDE.md` |
-| `GEMINI.md` | `.agentkit/templates/gemini/GEMINI.md` |
-| `WARP.md` | `.agentkit/templates/warp/WARP.md` |
-| `.claude/commands/**` | `.agentkit/templates/claude/commands/` |
-| `.claude/agents/**` | `.agentkit/templates/claude/agents/` |
-| `.claude/rules/languages/**` | `.agentkit/templates/language-instructions/` |
-| `.cursor/rules/**` | `.agentkit/templates/cursor/rules/` |
-| `.clinerules/**` | `.agentkit/templates/cline/` |
-| `.roo/**` | `.agentkit/templates/roo/` |
-| `.windsurf/rules/**` | `.agentkit/templates/windsurf/` |
-| `.github/instructions/**` | `.agentkit/templates/copilot/instructions/` |
-| `.github/agents/**` | `.agentkit/templates/github/agents/` |
-| `.github/chatmodes/**` | `.agentkit/templates/github/chatmodes/` |
-| `.github/prompts/**` | `.agentkit/templates/github/prompts/` |
-| `.github/copilot-instructions.md` | `.agentkit/templates/copilot/copilot-instructions.md` |
-| `.github/PULL_REQUEST_TEMPLATE.md` | `.agentkit/templates/github/PULL_REQUEST_TEMPLATE.md` |
-| `.github/workflows/branch-protection.yml` | `.agentkit/templates/github/workflows/` |
-| `.github/workflows/drift-check.yml` | `.agentkit/templates/github/workflows/` |
-| `.github/workflows/template-protection.yml` | `.agentkit/templates/github/workflows/` |
-| `.vscode/settings.json` (theme section) | `.agentkit/templates/vscode/settings.json` |
-| `.gitattributes` (generated section) | `.agentkit/templates/root/gitattributes` |
-| `UNIFIED_AGENT_TEAMS.md` | `.agentkit/templates/docs/UNIFIED_AGENT_TEAMS.md` |
-| `AGENT_TEAMS.md` | `.agentkit/templates/docs/AGENT_TEAMS.md` |
-| `QUALITY_GATES.md` | `.agentkit/templates/docs/QUALITY_GATES.md` |
-| `CLAUDE.md` | `.agentkit/templates/claude/CLAUDE.md` |
+| Output path                                 | Template source                                       |
+| ------------------------------------------- | ----------------------------------------------------- |
+| `AGENTS.md`                                 | `.agentkit/templates/claude/AGENTS.md`                |
+| `COMMAND_GUIDE.md`                          | `.agentkit/templates/docs/COMMAND_GUIDE.md`           |
+| `GEMINI.md`                                 | `.agentkit/templates/gemini/GEMINI.md`                |
+| `WARP.md`                                   | `.agentkit/templates/warp/WARP.md`                    |
+| `.claude/commands/**`                       | `.agentkit/templates/claude/commands/`                |
+| `.claude/agents/**`                         | `.agentkit/templates/claude/agents/`                  |
+| `.claude/rules/languages/**`                | `.agentkit/templates/language-instructions/`          |
+| `.cursor/rules/**`                          | `.agentkit/templates/cursor/rules/`                   |
+| `.clinerules/**`                            | `.agentkit/templates/cline/`                          |
+| `.roo/**`                                   | `.agentkit/templates/roo/`                            |
+| `.windsurf/rules/**`                        | `.agentkit/templates/windsurf/`                       |
+| `.github/instructions/**`                   | `.agentkit/templates/copilot/instructions/`           |
+| `.github/agents/**`                         | `.agentkit/templates/github/agents/`                  |
+| `.github/chatmodes/**`                      | `.agentkit/templates/github/chatmodes/`               |
+| `.github/prompts/**`                        | `.agentkit/templates/github/prompts/`                 |
+| `.github/copilot-instructions.md`           | `.agentkit/templates/copilot/copilot-instructions.md` |
+| `.github/PULL_REQUEST_TEMPLATE.md`          | `.agentkit/templates/github/PULL_REQUEST_TEMPLATE.md` |
+| `.github/workflows/branch-protection.yml`   | `.agentkit/templates/github/workflows/`               |
+| `.github/workflows/drift-check.yml`         | `.agentkit/templates/github/workflows/`               |
+| `.github/workflows/template-protection.yml` | `.agentkit/templates/github/workflows/`               |
+| `.vscode/settings.json` (theme section)     | `.agentkit/templates/vscode/settings.json`            |
+| `.gitattributes` (generated section)        | `.agentkit/templates/root/gitattributes`              |
+| `UNIFIED_AGENT_TEAMS.md`                    | `.agentkit/templates/docs/UNIFIED_AGENT_TEAMS.md`     |
+| `AGENT_TEAMS.md`                            | `.agentkit/templates/docs/AGENT_TEAMS.md`             |
+| `QUALITY_GATES.md`                          | `.agentkit/templates/docs/QUALITY_GATES.md`           |
+| `CLAUDE.md`                                 | `.agentkit/templates/claude/CLAUDE.md`                |
 
 > **Note on `.gitattributes`**: The section between the
 > `>>> Retort merge drivers` / `<<< Retort merge drivers` markers is generated.
@@ -73,10 +73,10 @@ hash stored in `.agentkit/.manifest.json`.
   - _Theirs_ = new template output
   - Clean merge → applied silently. Conflict → written with `<<<<<<< YOUR_EDITS` markers.
 
-| Output path | Notes |
-| --- | --- |
-| `docs/*/README.md` | Category README files |
-| `.claude/rules/*.md` (non-language) | Top-level rule files |
+| Output path                         | Notes                 |
+| ----------------------------------- | --------------------- |
+| `docs/*/README.md`                  | Category README files |
+| `.claude/rules/*.md` (non-language) | Top-level rule files  |
 
 ---
 
@@ -85,15 +85,15 @@ hash stored in `.agentkit/.manifest.json`.
 These files are written on the **first** sync only. Once they exist on disk, sync
 skips them entirely — even if the template changes. They are fully user-owned.
 
-| Output path | Notes |
-| --- | --- |
-| `docs/**` (most files) | Project documentation, ADRs, guides |
-| `AGENT_BACKLOG.md` | Tactical backlog |
-| `CHANGELOG.md` | Keep-a-Changelog log |
-| `CONTRIBUTING.md` | Contribution guide |
-| `.github/ISSUE_TEMPLATE/**` | Issue templates |
-| `.vscode/settings.json` (non-theme keys) | User VS Code settings |
-| `scripts/` (most) | Project scripts |
+| Output path                              | Notes                               |
+| ---------------------------------------- | ----------------------------------- |
+| `docs/**` (most files)                   | Project documentation, ADRs, guides |
+| `AGENT_BACKLOG.md`                       | Tactical backlog                    |
+| `CHANGELOG.md`                           | Keep-a-Changelog log                |
+| `CONTRIBUTING.md`                        | Contribution guide                  |
+| `.github/ISSUE_TEMPLATE/**`              | Issue templates                     |
+| `.vscode/settings.json` (non-theme keys) | User VS Code settings               |
+| `scripts/` (most)                        | Project scripts                     |
 
 ---
 
@@ -107,9 +107,9 @@ automation:
   languageProfile:
     scaffoldOverrides:
       alwaysRegenerate:
-        - docs/api/README.md      # Force always mode for this file
+        - docs/api/README.md # Force always mode for this file
       scaffoldOnce:
-        - scripts/deploy.sh       # Force once mode — never regenerate
+        - scripts/deploy.sh # Force once mode — never regenerate
 ```
 
 ---

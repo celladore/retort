@@ -27,7 +27,7 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 3. Execute the task following project conventions
 4. Validate the output against quality gates
 5. Report results clearly
-{{/if}}
+   {{/if}}
 
 ## Project Context
 

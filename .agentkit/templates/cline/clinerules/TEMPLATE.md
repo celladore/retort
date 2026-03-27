@@ -11,12 +11,14 @@
 {{ruleAppliesTo}}
 
 {{#if ruleHasEnforcement}}
+
 ## Enforcement Rules
 
 {{ruleEnforcementConventions}}
 
 {{/if}}
 {{#if ruleHasAdvisory}}
+
 ## Advisory Rules
 
 {{ruleAdvisoryConventions}}

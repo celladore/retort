@@ -8,10 +8,10 @@
 
 | Term                 | Definition                                                                                                              |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Retort**   | An opinionated project scaffolding and documentation generation tool.                                                   |
+| **Retort**           | An opinionated project scaffolding and documentation generation tool.                                                   |
 | **Spec**             | The source-of-truth configuration that defines project structure and templates.                                         |
 | **Overlay**          | A per-project customisation layer applied on top of the base spec.                                                      |
-| **Sync**             | The process of regenerating files from the spec and overlays (`retort:sync`).                                         |
+| **Sync**             | The process of regenerating files from the spec and overlays (`retort:sync`).                                           |
 | **Template**         | A file containing mustache-style placeholders (<code>&#123;&#123;key&#125;&#125;</code>) that are resolved during sync. |
 | **GENERATED header** | The comment block at the top of generated files indicating they should not be edited manually.                          |
 

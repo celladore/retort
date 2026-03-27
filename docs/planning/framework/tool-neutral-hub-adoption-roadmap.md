@@ -23,14 +23,14 @@ This roadmap converges the AgentKit Forge sync engine with the `.agents/` hub pa
 
 ### Deliverables
 
-| # | Task | Detail |
-|---|------|--------|
-| 1.1 | Define `.agents/` directory schema | Document the 5-folder structure (`guards/`, `skills/`, `traces/`, `history/`, `roadmaps/`) with file naming conventions and frontmatter schemas |
-| 1.2 | Add `.agents/` output target to sync engine | New template directory `.agentkit/templates/agents/` renders shared content from spec YAML |
+| #   | Task                                        | Detail                                                                                                                                                               |
+| --- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 | Define `.agents/` directory schema          | Document the 5-folder structure (`guards/`, `skills/`, `traces/`, `history/`, `roadmaps/`) with file naming conventions and frontmatter schemas                      |
+| 1.2 | Add `.agents/` output target to sync engine | New template directory `.agentkit/templates/agents/` renders shared content from spec YAML                                                                           |
 | 1.3 | Generate shared skills to `.agents/skills/` | Skills currently land in `.claude/skills/`, `.agents/skills/` (Claude), and `.cursor/commands/` (Cursor) separately — generate a canonical copy to `.agents/skills/` |
-| 1.4 | Generate shared agents to `.agents/agents/` | Agent personas currently in `.claude/agents/` and `.github/agents/` — generate canonical versions to `.agents/agents/` with category subdirectories |
-| 1.5 | CI drift check covers `.agents/` | Extend the existing drift check workflow to validate `.agents/` output against spec |
-| 1.6 | Update CLAUDE.md references | Add `.agents/` to the architecture section and safety rules |
+| 1.4 | Generate shared agents to `.agents/agents/` | Agent personas currently in `.claude/agents/` and `.github/agents/` — generate canonical versions to `.agents/agents/` with category subdirectories                  |
+| 1.5 | CI drift check covers `.agents/`            | Extend the existing drift check workflow to validate `.agents/` output against spec                                                                                  |
+| 1.6 | Update CLAUDE.md references                 | Add `.agents/` to the architecture section and safety rules                                                                                                          |
 
 ### Success Criteria
 
@@ -54,14 +54,14 @@ Exception: `traces/`, `history/`, and `roadmaps/` are **runtime directories** �
 
 ### Deliverables
 
-| # | Task | Detail |
-|---|------|--------|
-| 2.1 | Define guard schema | YAML frontmatter (`name`, `enabled`, `description`, `severity: warn|block`, `applies_to: glob[]`) + markdown body with `**Pattern**` regex and `**Instruction**` steps |
-| 2.2 | Add `guards` section to `rules.yaml` | Each guard defined in spec YAML, rendered to `.agents/guards/` |
-| 2.3 | Migrate existing hook logic to guards | Extract the governance intent from shell hooks (`protect-templates`, `guard-destructive-commands`, `protect-sensitive-files`) into guard definitions |
-| 2.4 | Generate shell hooks from guards | For tools that support hooks (Claude Code), auto-generate shell hook scripts from guard definitions — the guard is the source, the hook is the platform-specific enforcement |
-| 2.5 | Add guard validation to CI | Validate that guard patterns are valid regex, frontmatter follows schema, and all guards have both `Pattern` and `Instruction` sections |
-| 2.6 | Seed default guards | Ship with baseline guards: `no-secrets-in-code`, `protect-generated-files`, `no-destructive-commands`, `protect-shared-docs`, `memory-governance` |
+| #   | Task                                  | Detail                                                                                                                                                                       |
+| --- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 2.1 | Define guard schema                   | YAML frontmatter (`name`, `enabled`, `description`, `severity: warn                                                                                                          | block`, `applies_to: glob[]`) + markdown body with `**Pattern**`regex and`**Instruction**` steps |
+| 2.2 | Add `guards` section to `rules.yaml`  | Each guard defined in spec YAML, rendered to `.agents/guards/`                                                                                                               |
+| 2.3 | Migrate existing hook logic to guards | Extract the governance intent from shell hooks (`protect-templates`, `guard-destructive-commands`, `protect-sensitive-files`) into guard definitions                         |
+| 2.4 | Generate shell hooks from guards      | For tools that support hooks (Claude Code), auto-generate shell hook scripts from guard definitions — the guard is the source, the hook is the platform-specific enforcement |
+| 2.5 | Add guard validation to CI            | Validate that guard patterns are valid regex, frontmatter follows schema, and all guards have both `Pattern` and `Instruction` sections                                      |
+| 2.6 | Seed default guards                   | Ship with baseline guards: `no-secrets-in-code`, `protect-generated-files`, `no-destructive-commands`, `protect-shared-docs`, `memory-governance`                            |
 
 ### Guard Format (Canonical)
 
@@ -89,11 +89,11 @@ applies_to:
 
 ### Relationship: Guards vs Hooks vs Hookify
 
-| Layer | Scope | Enforcement | Portable? |
-|-------|-------|-------------|-----------|
-| `.agents/guards/` | All agents, all tools | Reflective (self-check) | Yes — any agent can read markdown |
-| `.claude/hooks/` | Claude Code only | Automated (shell intercept) | No — requires shell execution |
-| Hookify rules | Claude Code only | Automated (hook system) | No — Claude Code plugin |
+| Layer             | Scope                 | Enforcement                 | Portable?                         |
+| ----------------- | --------------------- | --------------------------- | --------------------------------- |
+| `.agents/guards/` | All agents, all tools | Reflective (self-check)     | Yes — any agent can read markdown |
+| `.claude/hooks/`  | Claude Code only      | Automated (shell intercept) | No — requires shell execution     |
+| Hookify rules     | Claude Code only      | Automated (hook system)     | No — Claude Code plugin           |
 
 Guards are the **canonical governance source**. Hooks and hookify rules are **platform-specific enforcement** generated from or inspired by guards. An agent that can only read files (no shell) still gets governance via guards.
 
@@ -107,22 +107,22 @@ Guards are the **canonical governance source**. Hooks and hookify rules are **pl
 
 ### Deliverables
 
-| # | Task | Detail |
-|---|------|--------|
-| 3.1 | Define `.readme.yaml` schema | JSON Schema for the file format: `purpose`, `version`, `tech_stack`, `workspace_type`, `local_services`, `agent_tooling`, `last_synced` |
-| 3.2 | Generate root `.readme.yaml` | Derived from `.agentkit/spec/project.yaml` — purpose, version, stack languages, infrastructure config |
-| 3.3 | Generate sub-directory `.readme.yaml` | For monorepo-style projects: `apps/.readme.yaml`, `packages/.readme.yaml` listing contained projects |
-| 3.4 | Add `agent_tooling` section | Points agents to `.agents/guards/`, `.agents/skills/`, etc. — acts as a directory map |
-| 3.5 | CI validation | Ensure `.readme.yaml` content matches spec — same drift check pattern as other generated files |
+| #   | Task                                  | Detail                                                                                                                                  |
+| --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.1 | Define `.readme.yaml` schema          | JSON Schema for the file format: `purpose`, `version`, `tech_stack`, `workspace_type`, `local_services`, `agent_tooling`, `last_synced` |
+| 3.2 | Generate root `.readme.yaml`          | Derived from `.agentkit/spec/project.yaml` — purpose, version, stack languages, infrastructure config                                   |
+| 3.3 | Generate sub-directory `.readme.yaml` | For monorepo-style projects: `apps/.readme.yaml`, `packages/.readme.yaml` listing contained projects                                    |
+| 3.4 | Add `agent_tooling` section           | Points agents to `.agents/guards/`, `.agents/skills/`, etc. — acts as a directory map                                                   |
+| 3.5 | CI validation                         | Ensure `.readme.yaml` content matches spec — same drift check pattern as other generated files                                          |
 
 ### Schema (v1)
 
 ```yaml
 # .readme.yaml — Machine-readable project metadata for AI agents
 # GENERATED by AgentKit Forge — DO NOT EDIT
-purpose: "AgentKit Forge framework for multi-tool AI agent orchestration"
-version: "3.1.0"
-default_branch: "main"
+purpose: 'AgentKit Forge framework for multi-tool AI agent orchestration'
+version: '3.1.0'
+default_branch: 'main'
 tech_stack:
   languages: [javascript, yaml, markdown]
   backend: node.js
@@ -133,12 +133,12 @@ infrastructure:
   default_region: global
   iac_tools: [terraform, terragrunt]
 agent_tooling:
-  guards: ".agents/guards/"
-  skills: ".agents/skills/"
-  roadmaps: ".agents/roadmaps/"
-  traces: ".agents/traces/"
-  spec: ".agentkit/spec/"
-last_synced: "2026-03-17T12:00:00Z"
+  guards: '.agents/guards/'
+  skills: '.agents/skills/'
+  roadmaps: '.agents/roadmaps/'
+  traces: '.agents/traces/'
+  spec: '.agentkit/spec/'
+last_synced: '2026-03-17T12:00:00Z'
 ```
 
 ### Token Cost Impact
@@ -155,15 +155,15 @@ An agent entering a new directory currently reads `README.md` (typically 200–5
 
 ### Deliverables
 
-| # | Task | Detail |
-|---|------|--------|
-| 4.1 | Define trace format | Frontmatter: `date`, `agent`, `branch`, `valid_until`, `tags[]`. Body sections: Current State, Mental Model, Blocked/Pending, Next Steps |
-| 4.2 | Extend `/handoff` command | Write structured trace to `.agents/traces/YYYY-MM-DD-<topic>.md` in addition to existing `docs/handoffs/` output |
-| 4.3 | Add `end-session` skill | Skill that agents invoke at session end: writes trace, updates roadmap status, flags stale traces |
-| 4.4 | Define roadmap format | Frontmatter: `title`, `status` (active/completed/abandoned), `created`, `updated`, `phases[]`. Body: phased delivery plan with acceptance criteria |
-| 4.5 | Seed `.agents/roadmaps/` in sync | Sync engine creates the directory and a `README.md` explaining the convention. Roadmap content is user/agent-authored (not generated) |
-| 4.6 | Session-start hook reads traces | On session start, check `.agents/traces/` for recent traces (< 7 days). Surface the most recent relevant trace to the incoming agent |
-| 4.7 | Retention policy | Traces older than 30 days move to `.agents/traces/archive/`. History dirs older than 90 days are candidates for deletion (warn, don't auto-delete) |
+| #   | Task                             | Detail                                                                                                                                             |
+| --- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.1 | Define trace format              | Frontmatter: `date`, `agent`, `branch`, `valid_until`, `tags[]`. Body sections: Current State, Mental Model, Blocked/Pending, Next Steps           |
+| 4.2 | Extend `/handoff` command        | Write structured trace to `.agents/traces/YYYY-MM-DD-<topic>.md` in addition to existing `docs/handoffs/` output                                   |
+| 4.3 | Add `end-session` skill          | Skill that agents invoke at session end: writes trace, updates roadmap status, flags stale traces                                                  |
+| 4.4 | Define roadmap format            | Frontmatter: `title`, `status` (active/completed/abandoned), `created`, `updated`, `phases[]`. Body: phased delivery plan with acceptance criteria |
+| 4.5 | Seed `.agents/roadmaps/` in sync | Sync engine creates the directory and a `README.md` explaining the convention. Roadmap content is user/agent-authored (not generated)              |
+| 4.6 | Session-start hook reads traces  | On session start, check `.agents/traces/` for recent traces (< 7 days). Surface the most recent relevant trace to the incoming agent               |
+| 4.7 | Retention policy                 | Traces older than 30 days move to `.agents/traces/archive/`. History dirs older than 90 days are candidates for deletion (warn, don't auto-delete) |
 
 ### Trace Format
 
@@ -175,22 +175,27 @@ branch: feat/tool-neutral-hub
 valid_until: 2026-03-24
 tags: [architecture, sync-engine, .agents]
 ---
+
 # Handover: Tool-Neutral Hub Implementation
 
 ## Current State
+
 - Phase 1 complete: `.agents/` directory generates via sync
 - Phase 2 in progress: guard schema defined, 3/6 guards migrated
 
 ## Mental Model
-The key insight is that guards are the *canonical* governance layer and hooks
-are platform-specific *enforcement*. Don't try to make guards do what hooks do
+
+The key insight is that guards are the _canonical_ governance layer and hooks
+are platform-specific _enforcement_. Don't try to make guards do what hooks do
 (automated blocking) — they serve different populations of agents.
 
 ## Blocked / Pending
+
 - [ ] Guard-to-hook generation needs a template for each hook type (PreToolUse, PostToolUse, Stop)
 - [ ] Unclear whether `.agents/guards/` should be flat or categorised by domain
 
 ## Next Steps (for incoming agent)
+
 1. Read `.agentkit/templates/claude/hooks/` to understand current hook structure
 2. Prototype guard → hook rendering in the sync engine
 3. Test with `protect-templates` guard as the first migration candidate
@@ -205,20 +210,22 @@ status: active
 created: 2026-03-17
 updated: 2026-03-17
 phases:
-  - name: ".agents/ sync target"
+  - name: '.agents/ sync target'
     status: in-progress
-  - name: "Reflective guards"
+  - name: 'Reflective guards'
     status: planned
-  - name: ".readme.yaml generation"
+  - name: '.readme.yaml generation'
     status: planned
-  - name: "Traces & roadmaps"
+  - name: 'Traces & roadmaps'
     status: planned
-  - name: "Schema formalisation"
+  - name: 'Schema formalisation'
     status: planned
 ---
+
 # Tool-Neutral Agent Hub Adoption
 
 ## Phase 1: .agents/ Sync Target
+
 ...
 ```
 
@@ -232,16 +239,16 @@ phases:
 
 ### Deliverables
 
-| # | Task | Detail |
-|---|------|--------|
-| 5.1 | JSON Schema for guards | Formal schema for guard frontmatter + body structure. Published in `.agents/schemas/` |
-| 5.2 | JSON Schema for traces | Formal schema for trace frontmatter + required sections |
-| 5.3 | JSON Schema for `.readme.yaml` | Formal schema for project metadata |
-| 5.4 | JSON Schema for roadmaps | Formal schema for roadmap frontmatter + phase structure |
-| 5.5 | `.agents/` convention spec | Single markdown document describing the full convention: directory layout, file formats, lifecycle rules, retention policy |
-| 5.6 | Onboard Mystira.workspace | Migrate Mystira's hand-authored `.agents/` to use the sync engine while preserving its existing content |
-| 5.7 | Onboard 2 additional repos | Validate the pattern works for different project types (e.g., `chaufher` as .NET + Next.js, `PhoenixRooivalk` as Rust + Next.js) |
-| 5.8 | Publish as standalone spec | Extract `.agents/` convention into its own repository or document for adoption outside the phoenixvc org |
+| #   | Task                           | Detail                                                                                                                           |
+| --- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 5.1 | JSON Schema for guards         | Formal schema for guard frontmatter + body structure. Published in `.agents/schemas/`                                            |
+| 5.2 | JSON Schema for traces         | Formal schema for trace frontmatter + required sections                                                                          |
+| 5.3 | JSON Schema for `.readme.yaml` | Formal schema for project metadata                                                                                               |
+| 5.4 | JSON Schema for roadmaps       | Formal schema for roadmap frontmatter + phase structure                                                                          |
+| 5.5 | `.agents/` convention spec     | Single markdown document describing the full convention: directory layout, file formats, lifecycle rules, retention policy       |
+| 5.6 | Onboard Mystira.workspace      | Migrate Mystira's hand-authored `.agents/` to use the sync engine while preserving its existing content                          |
+| 5.7 | Onboard 2 additional repos     | Validate the pattern works for different project types (e.g., `chaufher` as .NET + Next.js, `PhoenixRooivalk` as Rust + Next.js) |
+| 5.8 | Publish as standalone spec     | Extract `.agents/` convention into its own repository or document for adoption outside the phoenixvc org                         |
 
 ### Cross-Project Compatibility
 
@@ -272,14 +279,14 @@ Phases 1–3 can overlap (different parts of the sync engine). Phases 4–5 are 
 
 ## Risk Register
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| `.agents/` conflicts with existing directory in consumer repos | Low | Medium | Document in onboarding; provide migration guide |
-| Guard reflective enforcement is ignored by non-cooperative agents | Medium | Medium | Guards complement hooks, not replace; hooks remain for tools that support them |
-| `.readme.yaml` drifts from README.md | Medium | Low | Generate both from spec; add CI check for consistency |
-| Trace accumulation fills repos | Medium | Low | Retention policy (30d archive, 90d deletion candidates); `.gitignore` history/ for large projects |
-| Schema evolution breaks existing consumers | Low | High | Semver the schemas; use `version` field in frontmatter; maintain backwards compatibility |
-| Onboarded repos resist generated `.agents/` | Low | Medium | Offer opt-in per subdirectory; support `agents.enabled: false` in spec |
+| Risk                                                              | Likelihood | Impact | Mitigation                                                                                        |
+| ----------------------------------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------- |
+| `.agents/` conflicts with existing directory in consumer repos    | Low        | Medium | Document in onboarding; provide migration guide                                                   |
+| Guard reflective enforcement is ignored by non-cooperative agents | Medium     | Medium | Guards complement hooks, not replace; hooks remain for tools that support them                    |
+| `.readme.yaml` drifts from README.md                              | Medium     | Low    | Generate both from spec; add CI check for consistency                                             |
+| Trace accumulation fills repos                                    | Medium     | Low    | Retention policy (30d archive, 90d deletion candidates); `.gitignore` history/ for large projects |
+| Schema evolution breaks existing consumers                        | Low        | High   | Semver the schemas; use `version` field in frontmatter; maintain backwards compatibility          |
+| Onboarded repos resist generated `.agents/`                       | Low        | Medium | Offer opt-in per subdirectory; support `agents.enabled: false` in spec                            |
 
 ---
 

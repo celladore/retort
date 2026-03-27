@@ -2,6 +2,7 @@
 agentkit:
   scaffold: managed
 ---
+
 # Migrations
 
 Historical records of major migrations and upgrades.

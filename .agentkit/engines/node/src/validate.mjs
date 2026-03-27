@@ -9,7 +9,10 @@ import { extname, join, resolve } from 'path';
 import { validateSpec, PROJECT_ENUMS } from './spec-validator.mjs';
 import { emitEvent } from './event-emitter.mjs';
 import { createTask } from './task-protocol.mjs';
-import { VALID_COMMANDS, FRAMEWORK_COMMANDS as CLI_FRAMEWORK_COMMANDS } from './commands-registry.mjs';
+import {
+  VALID_COMMANDS,
+  FRAMEWORK_COMMANDS as CLI_FRAMEWORK_COMMANDS,
+} from './commands-registry.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const userContext =

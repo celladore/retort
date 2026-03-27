@@ -41,14 +41,14 @@ last_updated: '{{syncDate}}'
 
 Each suggestion includes:
 
-| Field | Description |
-|-------|-------------|
-| **Title** | Short description of the gap |
-| **Category** | One of the analysis categories |
-| **Impact** | critical / high / medium / low |
-| **Effort** | Small (< 1h) / Medium (1-4h) / Large (4h+) |
-| **Rationale** | Why this matters |
-| **Suggested Action** | What to do about it |
+| Field                | Description                                |
+| -------------------- | ------------------------------------------ |
+| **Title**            | Short description of the gap               |
+| **Category**         | One of the analysis categories             |
+| **Impact**           | critical / high / medium / low             |
+| **Effort**           | Small (< 1h) / Medium (1-4h) / Large (4h+) |
+| **Rationale**        | Why this matters                           |
+| **Suggested Action** | What to do about it                        |
 
 ## Rules
 
@@ -61,4 +61,4 @@ Each suggestion includes:
 
 - **Repository**: {{repoName}}
 - **Default Branch**: {{defaultBranch}}
-{{#if stackLanguages}}- **Stack**: {{stackLanguages}}{{/if}}
+  {{#if stackLanguages}}- **Stack**: {{stackLanguages}}{{/if}}

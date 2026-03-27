@@ -38,25 +38,25 @@ This document captures findings from a structural comparison and recommends a co
 
 ### Strengths
 
-| Capability | Detail |
-|---|---|
-| **Multi-tool sync** | One YAML change propagates to Claude, Cursor, Copilot, Gemini, Cline, Windsurf, Roo (15+ targets) |
-| **Automated enforcement** | Shell hooks block destructive commands, protect templates, validate pre-push |
-| **Spec-driven architecture** | CI drift check ensures generated output matches spec — no silent divergence |
-| **Team orchestration** | 13 teams with task delegation protocol, fan-out, and chained handoff |
-| **Quality gates** | 5-phase lifecycle with enforcement at each transition |
+| Capability                   | Detail                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Multi-tool sync**          | One YAML change propagates to Claude, Cursor, Copilot, Gemini, Cline, Windsurf, Roo (15+ targets) |
+| **Automated enforcement**    | Shell hooks block destructive commands, protect templates, validate pre-push                      |
+| **Spec-driven architecture** | CI drift check ensures generated output matches spec — no silent divergence                       |
+| **Team orchestration**       | 13 teams with task delegation protocol, fan-out, and chained handoff                              |
+| **Quality gates**            | 5-phase lifecycle with enforcement at each transition                                             |
 
 ### Weaknesses
 
-| Issue | Impact |
-|---|---|
-| **Tool-specific output dirs** | Every tool gets its own copy of agents, rules, commands — no shared layer agents can read across tools |
-| **No cross-session traces** | `/handoff` captures session state but doesn't preserve reasoning context or mental models |
-| **No directory-boundary metadata** | Agents must read full `README.md` or spec YAML to understand project structure |
-| **Flat agent listing** | 39 agents in one directory with no categorisation (empty category dirs exist but unused) |
-| **No reflective guards** | Enforcement is hook-based only — agents without shell access bypass all governance |
-| **No strategic roadmaps** | Backlog tracks tasks; nothing tracks multi-session strategic goals |
-| **State accumulation** | `events.log` grows unbounded; no rotation, archival, or freshness signals |
+| Issue                              | Impact                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Tool-specific output dirs**      | Every tool gets its own copy of agents, rules, commands — no shared layer agents can read across tools |
+| **No cross-session traces**        | `/handoff` captures session state but doesn't preserve reasoning context or mental models              |
+| **No directory-boundary metadata** | Agents must read full `README.md` or spec YAML to understand project structure                         |
+| **Flat agent listing**             | 39 agents in one directory with no categorisation (empty category dirs exist but unused)               |
+| **No reflective guards**           | Enforcement is hook-based only — agents without shell access bypass all governance                     |
+| **No strategic roadmaps**          | Backlog tracks tasks; nothing tracks multi-session strategic goals                                     |
+| **State accumulation**             | `events.log` grows unbounded; no rotation, archival, or freshness signals                              |
 
 ---
 
@@ -100,43 +100,43 @@ packages/.readme.yaml             ← Per-directory metadata
 
 ### Strengths
 
-| Capability | Detail |
-|---|---|
-| **Tool-neutral hub** | `.agents/` is readable by any agent regardless of platform — no tool-specific parsing required |
-| **Reflective guards** | YAML frontmatter + regex patterns — agents self-check during planning; no shell dependency |
-| **Cross-session traces** | Captures outgoing agent's mental model, blocked work, and first-3-tool-calls for incoming agent |
-| **`.readme.yaml`** | Structured, parseable project metadata at directory boundaries — cheaper than parsing markdown |
-| **Full audit trail** | Per-conversation-ID history with task lists, walkthroughs, plans, screenshots, `.resolved` copies |
-| **Strategic roadmaps** | Multi-session goals that bridge individual task backlogs (4 active roadmaps) |
-| **Investigation traces** | Dated traces capture root-cause analysis with architectural guards derived from debugging |
+| Capability               | Detail                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Tool-neutral hub**     | `.agents/` is readable by any agent regardless of platform — no tool-specific parsing required    |
+| **Reflective guards**    | YAML frontmatter + regex patterns — agents self-check during planning; no shell dependency        |
+| **Cross-session traces** | Captures outgoing agent's mental model, blocked work, and first-3-tool-calls for incoming agent   |
+| **`.readme.yaml`**       | Structured, parseable project metadata at directory boundaries — cheaper than parsing markdown    |
+| **Full audit trail**     | Per-conversation-ID history with task lists, walkthroughs, plans, screenshots, `.resolved` copies |
+| **Strategic roadmaps**   | Multi-session goals that bridge individual task backlogs (4 active roadmaps)                      |
+| **Investigation traces** | Dated traces capture root-cause analysis with architectural guards derived from debugging         |
 
 ### Weaknesses
 
-| Issue | Impact |
-|---|---|
-| **No automation** | Hand-authored files with no sync engine — changes don't propagate across tools |
-| **Trust-based enforcement** | Reflective guards have zero automated consequences if an agent ignores them |
-| **No spec validation** | No CI check that guard patterns are valid regex or that skills follow a schema |
+| Issue                              | Impact                                                                            |
+| ---------------------------------- | --------------------------------------------------------------------------------- |
+| **No automation**                  | Hand-authored files with no sync engine — changes don't propagate across tools    |
+| **Trust-based enforcement**        | Reflective guards have zero automated consequences if an agent ignores them       |
+| **No spec validation**             | No CI check that guard patterns are valid regex or that skills follow a schema    |
 | **Accumulation without lifecycle** | `traces/` and `history/` grow unbounded — no freshness signal or retention policy |
-| **Dual maintenance** | `.readme.yaml` + `README.md` will drift without validation |
-| **No team orchestration** | No task delegation protocol, no fan-out, no dependency chains |
+| **Dual maintenance**               | `.readme.yaml` + `README.md` will drift without validation                        |
+| **No team orchestration**          | No task delegation protocol, no fan-out, no dependency chains                     |
 
 ---
 
 ## 3. Pattern Comparison Matrix
 
-| Concern | AgentKit Forge | Mystira | Winner | Notes |
-|---|---|---|---|---|
-| Multi-tool output generation | Sync engine (15+ targets) | Manual per-tool | **Forge** | Automation beats manual every time |
-| Agent discoverability across tools | Tool-specific dirs only | `.agents/` neutral hub | **Mystira** | Agents from any tool can read `.agents/` |
-| Governance enforcement | Shell hooks (automated) | Guards (reflective) | **Draw** | Both needed — automated for capable tools, reflective for others |
-| Cross-session continuity | `/handoff` (task state only) | Traces + history + roadmaps | **Mystira** | Mental model capture is qualitatively superior to task lists |
-| Project structure discovery | `.agentkit/spec/project.yaml` | `.readme.yaml` at boundaries | **Mystira** | Boundary-level metadata is more granular and cheaper to read |
-| Quality gate enforcement | CI drift check + hooks | None | **Forge** | Mystira has no automated validation |
-| Team coordination | 13 teams + task protocol | None | **Forge** | Mystira is single-agent focused |
-| Strategic planning | Backlog only | Roadmaps as first-class | **Mystira** | Roadmaps bridge session-level and project-level goals |
-| Schema versioning | None | None | **Neither** | Both lack format evolution strategy |
-| Cost attribution | Rules exist, no tracking | None | **Neither** | Both describe cost awareness but don't measure it |
+| Concern                            | AgentKit Forge                | Mystira                      | Winner      | Notes                                                            |
+| ---------------------------------- | ----------------------------- | ---------------------------- | ----------- | ---------------------------------------------------------------- |
+| Multi-tool output generation       | Sync engine (15+ targets)     | Manual per-tool              | **Forge**   | Automation beats manual every time                               |
+| Agent discoverability across tools | Tool-specific dirs only       | `.agents/` neutral hub       | **Mystira** | Agents from any tool can read `.agents/`                         |
+| Governance enforcement             | Shell hooks (automated)       | Guards (reflective)          | **Draw**    | Both needed — automated for capable tools, reflective for others |
+| Cross-session continuity           | `/handoff` (task state only)  | Traces + history + roadmaps  | **Mystira** | Mental model capture is qualitatively superior to task lists     |
+| Project structure discovery        | `.agentkit/spec/project.yaml` | `.readme.yaml` at boundaries | **Mystira** | Boundary-level metadata is more granular and cheaper to read     |
+| Quality gate enforcement           | CI drift check + hooks        | None                         | **Forge**   | Mystira has no automated validation                              |
+| Team coordination                  | 13 teams + task protocol      | None                         | **Forge**   | Mystira is single-agent focused                                  |
+| Strategic planning                 | Backlog only                  | Roadmaps as first-class      | **Mystira** | Roadmaps bridge session-level and project-level goals            |
+| Schema versioning                  | None                          | None                         | **Neither** | Both lack format evolution strategy                              |
+| Cost attribution                   | Rules exist, no tracking      | None                         | **Neither** | Both describe cost awareness but don't measure it                |
 
 ---
 
@@ -185,21 +185,21 @@ Three guards exist: `memory-governance` (protects cross-tool memory stores), `re
 **Verified `.readme.yaml` schema (from Mystira root):**
 
 ```yaml
-purpose: "Mystira — AI-powered interactive storytelling..."
-version: "0.5.2-alpha"
+purpose: 'Mystira — AI-powered interactive storytelling...'
+version: '0.5.2-alpha'
 tech_stack:
-  dotnet: "9.0"
-  node: "22.x"
-  react: "19.x"
-workspace_type: "dotnet-sln + pnpm monorepo"
-workspace_managers: ["dotnet sln", "pnpm workspaces"]
+  dotnet: '9.0'
+  node: '22.x'
+  react: '19.x'
+workspace_type: 'dotnet-sln + pnpm monorepo'
+workspace_managers: ['dotnet sln', 'pnpm workspaces']
 local_services:
-  api: { port: 5001, path: "apps/api" }
-  web: { port: 3000, path: "apps/web" }
+  api: { port: 5001, path: 'apps/api' }
+  web: { port: 3000, path: 'apps/web' }
 agent_tooling:
-  guards: ".agents/guards/"
-  skills: ".agents/skills/"
-last_synced: "2026-03-16"
+  guards: '.agents/guards/'
+  skills: '.agents/skills/'
+last_synced: '2026-03-16'
 ```
 
 Sub-directory variants (`apps/.readme.yaml`, `packages/.readme.yaml`) list contained projects with `name`, `path`, `stack`, `description`, and `sub_solutions` fields.
@@ -210,7 +210,7 @@ Sub-directory variants (`apps/.readme.yaml`, `packages/.readme.yaml`) list conta
 
 **What it is:** Dated markdown files capturing the outgoing agent's mental model, design intuition, blocked/pending work, and concrete next steps for the incoming agent.
 
-**Why it matters:** Git commits and `/handoff` documents capture *what* happened. Traces capture *why* and *what the agent was thinking*. This reasoning context is exactly what's lost between sessions and what forces incoming agents to re-derive conclusions.
+**Why it matters:** Git commits and `/handoff` documents capture _what_ happened. Traces capture _why_ and _what the agent was thinking_. This reasoning context is exactly what's lost between sessions and what forces incoming agents to re-derive conclusions.
 
 **Adoption implication:** Extend the `/handoff` command to write structured traces. Add a freshness field (`valid_until` or `relevance_decay`) and implement cleanup in session-start hooks.
 
@@ -218,7 +218,7 @@ Sub-directory variants (`apps/.readme.yaml`, `packages/.readme.yaml`) list conta
 
 **What it is:** Markdown files in `.agents/roadmaps/` that describe multi-session goals, phased delivery plans, and coordination protocols.
 
-**Why it matters:** Backlogs track individual tasks. Roadmaps provide the strategic frame that tells agents *why* tasks exist and how they fit together. An agent asked to "improve auth" can check the roadmap to know whether that means "patch the JWT bug" or "migrate to OAuth2 as part of the compliance initiative."
+**Why it matters:** Backlogs track individual tasks. Roadmaps provide the strategic frame that tells agents _why_ tasks exist and how they fit together. An agent asked to "improve auth" can check the roadmap to know whether that means "patch the JWT bug" or "migrate to OAuth2 as part of the compliance initiative."
 
 **Adoption implication:** Add `.agents/roadmaps/` as a managed directory. Roadmaps should have lifecycle metadata (created, updated, status: active/completed/abandoned) and be referenced from the orchestrator state.
 
@@ -232,12 +232,12 @@ The `.agents/` pattern is simple enough to become a cross-project convention. If
 
 ### 5.2 Lock-In Assessment
 
-| Component | Lock-in risk | Mitigation |
-|---|---|---|
-| `.agentkit/` sync engine | Medium — Node.js/pnpm dependency | Document the output format; allow alternative generators |
-| `.agents/` hub | Low — plain markdown, no tooling dependency | Formalise the schema so other tools can generate/consume |
-| `.claude/hooks/` | High — shell-specific, platform-specific | Generate from `.agents/guards/` so the canonical source is portable |
-| `.readme.yaml` | Low — standard YAML | Publish a schema; align with existing conventions (`.devcontainer/`, `.editorconfig`) |
+| Component                | Lock-in risk                                | Mitigation                                                                            |
+| ------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `.agentkit/` sync engine | Medium — Node.js/pnpm dependency            | Document the output format; allow alternative generators                              |
+| `.agents/` hub           | Low — plain markdown, no tooling dependency | Formalise the schema so other tools can generate/consume                              |
+| `.claude/hooks/`         | High — shell-specific, platform-specific    | Generate from `.agents/guards/` so the canonical source is portable                   |
+| `.readme.yaml`           | Low — standard YAML                         | Publish a schema; align with existing conventions (`.devcontainer/`, `.editorconfig`) |
 
 ### 5.3 Missing Capabilities (Neither Repo Addresses)
 
@@ -250,13 +250,13 @@ The `.agents/` pattern is simple enough to become a cross-project convention. If
 
 ## 6. Recommendations
 
-| Priority | Action | Effort | Impact |
-|---|---|---|---|
-| **P0** | Adopt `.agents/` as sync output target | Medium | Enables tool-neutral agent discovery |
-| **P0** | Resolve empty `.claude/agents/` category dirs | Low | Unblocks agent reorganisation |
-| **P1** | Implement `.readme.yaml` generation | Low | Reduces token cost for project discovery |
-| **P1** | Add guards to `.agents/guards/` with hook generation | Medium | Portable governance + automated enforcement |
-| **P2** | Extend `/handoff` to write traces | Low | Preserves reasoning context across sessions |
-| **P2** | Add roadmaps directory to state model | Low | Strategic context for multi-session work |
-| **P3** | Formalise schemas (guards, traces, `.readme.yaml`) | Medium | Enables cross-project adoption |
-| **P3** | Add retention policy for traces/history | Low | Prevents unbounded accumulation |
+| Priority | Action                                               | Effort | Impact                                      |
+| -------- | ---------------------------------------------------- | ------ | ------------------------------------------- |
+| **P0**   | Adopt `.agents/` as sync output target               | Medium | Enables tool-neutral agent discovery        |
+| **P0**   | Resolve empty `.claude/agents/` category dirs        | Low    | Unblocks agent reorganisation               |
+| **P1**   | Implement `.readme.yaml` generation                  | Low    | Reduces token cost for project discovery    |
+| **P1**   | Add guards to `.agents/guards/` with hook generation | Medium | Portable governance + automated enforcement |
+| **P2**   | Extend `/handoff` to write traces                    | Low    | Preserves reasoning context across sessions |
+| **P2**   | Add roadmaps directory to state model                | Low    | Strategic context for multi-session work    |
+| **P3**   | Formalise schemas (guards, traces, `.readme.yaml`)   | Medium | Enables cross-project adoption              |
+| **P3**   | Add retention policy for traces/history              | Low    | Prevents unbounded accumulation             |
