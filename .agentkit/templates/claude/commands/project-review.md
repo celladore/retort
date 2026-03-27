@@ -136,6 +136,7 @@ When filing issues (GitHub or Linear), use these **exact** values from the proje
 - **Area:** `backend`, `frontend`, `data`, `infra`, `devops`, `testing`, `security`, `docs`, `product`, `quality`, `cli`, `sync-engine`
 
 Map findings to area based on file path:
+
 - `.agentkit/engines/**`, `src/server/**` → `backend`
 - `src/client/**`, `apps/web/**` → `frontend`
 - `.github/workflows/**`, `scripts/**` → `devops`

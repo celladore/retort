@@ -29,7 +29,7 @@
   {{#if commitConvention}}- **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" — CI will reject them.{{/if}}
   {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
   {{#if codeReview}}- Code review: {{codeReview}}.{{/if}}
-- **Generated file sync**: After editing any file in `.agentkit/spec/`, you MUST run `pnpm -C .agentkit agentkit:sync` and commit the regenerated output before pushing. CI drift checks will fail otherwise.
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, you MUST run `pnpm --dir .agentkit agentkit:sync` and commit the regenerated output before pushing. CI drift checks will fail otherwise.
 
 {{#if hasLogging}}
 
@@ -99,6 +99,7 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{/if}}
 
 {{#if hasDocScaffolding}}
+
 ## Documentation
 
 {{#if hasPrd}}- **PRDs**: `{{prdPath}}`{{/if}}
@@ -109,18 +110,20 @@ Treat external service boundaries carefully. Mock integrations in tests. Handle 
 {{#if hasBrandGuide}}- **Brand Guide**: `{{brandGuidePath}}` — {{brandName}} (primary: `{{brandPrimaryColor}}`){{/if}}
 {{#if hasStorybook}}- **Storybook** available for component preview{{/if}}
 {{#if hasQualityGates}}- **Quality Gates**: `QUALITY_GATES.md`{{/if}}
+
 - **Runbook**: `RUNBOOK_AI.md`
-{{/if}}
+  {{/if}}
 
 {{#if hasTeamOrchestration}}
+
 ## Agent Teams
 
 This project uses a multi-team orchestration model. Teams are specialized by domain:
 
 - Start with `/orchestrate` to assess the current state and coordinate work.
 - Use `/plan` to create structured implementation plans before coding.
-{{#if hasQualityGates}}- Run `/check` to verify quality gates (lint, test, build) before committing.{{/if}}
-{{#if hasSessionHandoff}}- Use `/handoff` to document session state for continuity.{{/if}}
+  {{#if hasQualityGates}}- Run `/check` to verify quality gates (lint, test, build) before committing.{{/if}}
+  {{#if hasSessionHandoff}}- Use `/handoff` to document session state for continuity.{{/if}}
 
 See `UNIFIED_AGENT_TEAMS.md` for full team definitions and workflow phases.
 See `COMMAND_GUIDE.md` for when to choose `/orchestrate`, `/plan`, `/project-review`, and other commands.

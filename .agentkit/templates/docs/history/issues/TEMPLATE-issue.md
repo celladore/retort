@@ -59,6 +59,7 @@
 ## Sync Status
 
 <!-- Used by scripts/sync-issues.sh to track GitHub Issue creation -->
+
 - **gh_synced**: false
 - **gh_issue_number**: —
 - **gh_synced_at**: —

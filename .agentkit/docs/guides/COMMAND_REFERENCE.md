@@ -860,7 +860,7 @@ Task added to AGENT_BACKLOG.md. Run `/team-backend` to begin work.
 
 ### Overall: PASS (1 warning)
 
-Run `pnpm -C .agentkit agentkit:sync` to regenerate outdated files.
+Run `pnpm --dir .agentkit agentkit:sync` to regenerate outdated files.
 ```
 
 ---

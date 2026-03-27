@@ -45,7 +45,7 @@ The template implements a 6-phase (optionally 7-phase with `--fix`) audit:
 | 6. Report                     | Structured findings with `DOC-GAP-*`, `DOC-DRIFT-*`, `DOC-LINK-*`, `DOC-STALE-*` IDs |
 | 7. Auto-Fix (--fix only)      | Safe corrections: counts, broken links, stale markers                                |
 
-### 3. Run `pnpm -C .agentkit agentkit:sync`
+### 3. Run `pnpm --dir .agentkit agentkit:sync`
 
 Generates `.claude/commands/doc-audit.md` and equivalents for all 15+ platform targets.
 
@@ -67,7 +67,7 @@ The full spec YAML entry and complete Handlebars template (with all 7 phases) ar
 ## Acceptance Criteria
 
 - [ ] `commands.yaml` entry passes `spec-validate`
-- [ ] Template renders correctly via `pnpm -C .agentkit agentkit:sync`
+- [ ] Template renders correctly via `pnpm --dir .agentkit agentkit:sync`
 - [ ] `/doc-audit` produces a structured report when run
 - [ ] `--fix` mode safely corrects count mismatches and broken links
 - [ ] `--scope` filters to specific doc categories

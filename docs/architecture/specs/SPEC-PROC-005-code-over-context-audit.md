@@ -150,24 +150,24 @@ defaults:
 
 **16 rules describe CI/tool enforcement that agents shouldn't need to know about:**
 
-| Rule ID                  | Domain        | Tool                              | Why Agent Doesn't Need This                |
-| ------------------------ | ------------- | --------------------------------- | ------------------------------------------ |
-| `ts-lint`                | typescript    | `eslint --fix`                    | Pre-commit hook or CI runs this            |
-| `ts-format`              | typescript    | `prettier --write`                | Pre-commit hook or CI runs this            |
-| `py-lint`                | python        | `ruff check --fix`                | Pre-commit hook or CI runs this            |
-| `py-format`              | python        | `black`                           | Pre-commit hook or CI runs this            |
-| `rs-clippy`              | rust          | `cargo clippy -- -D warnings`     | CI runs this                               |
-| `rs-fmt`                 | rust          | `cargo fmt`                       | Pre-commit hook runs this                  |
-| `iac-fmt`                | iac           | `terraform fmt`                   | Pre-commit hook runs this                  |
-| `iac-validate`           | iac           | `terraform validate`              | CI runs this                               |
-| `dn-format`              | dotnet        | `dotnet format`                   | Pre-commit hook runs this                  |
-| `qa-coverage-threshold`  | testing       | `vitest run --coverage`           | CI runs this; agents don't decide coverage |
-| `ci-quality-gates`       | ci-cd         | —                                 | Describes CI config, not agent behavior    |
-| `ci-pin-actions`         | ci-cd         | —                                 | Pre-commit or CI linter for workflows      |
-| `ci-reproducible-builds` | ci-cd         | —                                 | CI build config, not agent decision        |
-| `dep-lockfile-committed` | dependency    | —                                 | Pre-commit hook                            |
-| `gw-sync-before-pr`      | git-workflow  | `pnpm -C .agentkit agentkit:sync` | Should auto-run as pre-push hook           |
-| `doc-generated-files`    | documentation | `pnpm -C .agentkit agentkit:sync` | Same as above — auto-run                   |
+| Rule ID                  | Domain        | Tool                                 | Why Agent Doesn't Need This                |
+| ------------------------ | ------------- | ------------------------------------ | ------------------------------------------ |
+| `ts-lint`                | typescript    | `eslint --fix`                       | Pre-commit hook or CI runs this            |
+| `ts-format`              | typescript    | `prettier --write`                   | Pre-commit hook or CI runs this            |
+| `py-lint`                | python        | `ruff check --fix`                   | Pre-commit hook or CI runs this            |
+| `py-format`              | python        | `black`                              | Pre-commit hook or CI runs this            |
+| `rs-clippy`              | rust          | `cargo clippy -- -D warnings`        | CI runs this                               |
+| `rs-fmt`                 | rust          | `cargo fmt`                          | Pre-commit hook runs this                  |
+| `iac-fmt`                | iac           | `terraform fmt`                      | Pre-commit hook runs this                  |
+| `iac-validate`           | iac           | `terraform validate`                 | CI runs this                               |
+| `dn-format`              | dotnet        | `dotnet format`                      | Pre-commit hook runs this                  |
+| `qa-coverage-threshold`  | testing       | `vitest run --coverage`              | CI runs this; agents don't decide coverage |
+| `ci-quality-gates`       | ci-cd         | —                                    | Describes CI config, not agent behavior    |
+| `ci-pin-actions`         | ci-cd         | —                                    | Pre-commit or CI linter for workflows      |
+| `ci-reproducible-builds` | ci-cd         | —                                    | CI build config, not agent decision        |
+| `dep-lockfile-committed` | dependency    | —                                    | Pre-commit hook                            |
+| `gw-sync-before-pr`      | git-workflow  | `pnpm --dir .agentkit agentkit:sync` | Should auto-run as pre-push hook           |
+| `doc-generated-files`    | documentation | `pnpm --dir .agentkit agentkit:sync` | Same as above — auto-run                   |
 
 ### The Fix
 

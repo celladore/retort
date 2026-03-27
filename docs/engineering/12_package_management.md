@@ -14,7 +14,7 @@ Retort uses a two-layer package architecture:
 │ Scripts: ak:setup, ak:sync, ak:validate                 │
 │ PM: auto-detected from project.yaml (pnpm/npm/yarn)     │
 └─────────────────────────────────────────────────────────┘
-           │ pnpm -C .agentkit agentkit:sync
+           │ pnpm --dir .agentkit agentkit:sync
            ↓
 ┌─────────────────────────────────────────────────────────┐
 │ ENGINE LAYER (.agentkit/)                               │

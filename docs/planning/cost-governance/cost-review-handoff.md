@@ -97,7 +97,7 @@ domain-rules:
 ### Step 3: Re-sync
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 ### Step 4: Verify handoff routing

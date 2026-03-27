@@ -107,7 +107,7 @@ jobs:
               echo "## Sync Drift Detected"
               echo ""
               echo "Generated outputs are out of sync with spec sources."
-              echo "Run \`pnpm -C .agentkit agentkit:sync\` locally and commit the changes."
+              echo "Run \`pnpm --dir .agentkit agentkit:sync\` locally and commit the changes."
               echo ""
               echo "### Changed files"
               echo '```'
@@ -116,7 +116,7 @@ jobs:
               echo ""
               echo "### Fix"
               echo '```bash'
-              echo "pnpm -C .agentkit agentkit:sync"
+              echo "pnpm --dir .agentkit agentkit:sync"
               echo "git add -A && git commit -m 'chore(sync): regenerate outputs'"
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"

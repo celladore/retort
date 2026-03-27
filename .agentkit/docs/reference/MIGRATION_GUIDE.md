@@ -26,19 +26,19 @@ git remote add agentkit-forge https://github.com/<org>/agentkit-forge.git
 ### 2. Install Dependencies
 
 ```bash
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 ```
 
 ### 3. Re-sync
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 ### 4. Validate
 
 ```bash
-pnpm -C .agentkit agentkit:validate
+pnpm --dir .agentkit agentkit:validate
 ```
 
 ### 5. Commit

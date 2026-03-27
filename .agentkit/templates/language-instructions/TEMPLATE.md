@@ -18,6 +18,7 @@
 
 {{#if ruleConventions}}
 {{#if ruleHasEnforcement}}
+
 ## Enforcement Rules
 
 These rules are hard constraints — violations block CI or are prevented by hooks.
@@ -26,6 +27,7 @@ These rules are hard constraints — violations block CI or are prevented by hoo
 
 {{/if}}
 {{#if ruleHasAdvisory}}
+
 ## Advisory Rules
 
 These rules are guidance for agents — violations are flagged but do not block CI.

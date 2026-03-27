@@ -2,6 +2,7 @@
 agentkit:
   scaffold: managed
 ---
+
 # Agent Teams — {{repoName}}
 
 > Repo-local team mapping derived from `.agentkit/spec/teams.yaml`.

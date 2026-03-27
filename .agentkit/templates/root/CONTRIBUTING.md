@@ -66,7 +66,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 1. Ensure your branch is up to date with `{{defaultBranch}}`
 2. Run all quality gates locally: `retort validate`
-3. If you changed `.agentkit/spec/*.yaml`, run `pnpm -C .agentkit retort:sync` and commit the regenerated outputs
+3. If you changed `.agentkit/spec/*.yaml`, run `pnpm --dir .agentkit retort:sync` and commit the regenerated outputs
 4. Create a PR — **title MUST use Conventional Commits format**: `type(scope): description`
    - Example: `feat(auth): add OAuth2 login flow` — NOT `Plan: Add OAuth2 login flow`
    - CI enforces this and will reject non-conforming titles
@@ -103,4 +103,4 @@ Key conventions:
 
 ---
 
-This guide is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate.
+This guide is maintained by Retort. Run `pnpm --dir .agentkit retort:sync` to regenerate.

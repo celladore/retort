@@ -34,7 +34,7 @@ This roadmap converges the AgentKit Forge sync engine with the `.agents/` hub pa
 
 ### Success Criteria
 
-- `pnpm -C .agentkit agentkit:sync` generates `.agents/` directory
+- `pnpm --dir .agentkit agentkit:sync` generates `.agents/` directory
 - CI drift check validates `.agents/` content
 - Any agent tool can `ls .agents/skills/` to discover available skills without knowing tool-specific paths
 

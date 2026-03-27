@@ -277,28 +277,30 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
 2. Verify all auto-created cross-agent tasks (test, docs, security) from Phase 3 step 9 have also reached terminal state. If not, wait or process them before proceeding.
 3. Invoke `/check --coverage` to run the full quality gate **including coverage threshold enforcement** (format, lint, typecheck, tests, coverage, build).
 4. Invoke `/review` on all changed files since the orchestration began. This now includes automated coverage delta checking.
-{{#if hasInfraEval}}
+   {{#if hasInfraEval}}
 5. Invoke `/infra-eval` to assess infrastructure fitness. Delegate to `team-infra` as an `investigate` task. Log results to `events.log` using the `INFRA_EVAL_COMPLETED` schema (`data.overall_score`, `data.hard_gates_passed`, `data.dimension_scores`). A hard-gate FAIL should be surfaced as a risk but does not block Phase 5 unless the user explicitly requires it.
-{{/if}}
-{{#if hasInfraEval}}6{{else}}5{{/if}}. **Test failure routing:** If `/check` reports test, lint, or typecheck failures:
+   {{/if}}
+   {{#if hasInfraEval}}6{{else}}5{{/if}}. **Test failure routing:** If `/check` reports test, lint, or typecheck failures:
    - Create a `test` task assigned to `team-testing` (not just the engineering team) to diagnose and fix the failures.
    - Include the failure details, responsible teams, and affected files in the task description.
    - The testing team coordinates with the responsible engineering team to resolve issues.
-{{#if hasInfraEval}}7{{else}}6{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
-{{#if hasInfraEval}}8{{else}}7{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
+     {{#if hasInfraEval}}7{{else}}6{{/if}}. If any check{{#if hasInfraEval}}, review, or evaluation{{else}} or review{{/if}} finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
+     {{#if hasInfraEval}}8{{else}}7{{/if}}. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
- **Retry key convention:**
- - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
- - `"validation:<issue-id>"` format tracks retries of a specific validation issue.
- - Both formats may coexist in `retryPolicy.roundRetries` but represent independent counters.
- - **Rule:** Do not create multiple keys for the same logical target (e.g., do not use both formats for the same round or same issue).
+**Retry key convention:**
 
- **Retry flow:**
- - Track retries per round or issue key in `retryPolicy.roundRetries[roundKey]`.
- - On each replacement-task retry, increment `retryPolicy.roundRetries[roundKey]` and `retryPolicy.totalRetries`, then persist `orchestrator.json` before continuing.
- - If `retryPolicy.roundRetries[roundKey] >= retryPolicy.maxRetryCount`, escalate and stop automatic retries for that round/issue.
- - When escalation occurs:
-   1. Append a structured entry to `events.log`:
+- `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
+- `"validation:<issue-id>"` format tracks retries of a specific validation issue.
+- Both formats may coexist in `retryPolicy.roundRetries` but represent independent counters.
+- **Rule:** Do not create multiple keys for the same logical target (e.g., do not use both formats for the same round or same issue).
+
+**Retry flow:**
+
+- Track retries per round or issue key in `retryPolicy.roundRetries[roundKey]`.
+- On each replacement-task retry, increment `retryPolicy.roundRetries[roundKey]` and `retryPolicy.totalRetries`, then persist `orchestrator.json` before continuing.
+- If `retryPolicy.roundRetries[roundKey] >= retryPolicy.maxRetryCount`, escalate and stop automatic retries for that round/issue.
+- When escalation occurs:
+  1.  Append a structured entry to `events.log`:
 
       ```json
       {
@@ -310,16 +312,17 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
       }
       ```
 
-   2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
-   3. Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
+  2.  Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
+  3.  Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
 
   **Reset behavior:** Enforce these exact rules in the orchestration validation path:
-  - Require `retryPolicy.allowReset === true` before allowing any reset.
-  - If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
-  - If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
-  - Treat null/undefined/malformed timestamps as non-newer and deny reset.
-  - When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
-  - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
+
+- Require `retryPolicy.allowReset === true` before allowing any reset.
+- If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
+- If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
+- Treat null/undefined/malformed timestamps as non-newer and deny reset.
+- When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
+- Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
 
 {{#if hasInfraEval}}7{{else}}6{{/if}}. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 

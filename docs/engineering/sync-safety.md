@@ -125,7 +125,7 @@ The underlying engine supports `--dry-run` natively:
 
 ```bash
 # Via pnpm
-pnpm -C .agentkit retort:sync -- --dry-run
+pnpm --dir .agentkit retort:sync -- --dry-run
 
 # Via node directly
 node .agentkit/engines/node/src/cli.mjs sync --dry-run

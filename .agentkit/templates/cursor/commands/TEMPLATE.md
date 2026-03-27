@@ -19,7 +19,7 @@ When invoked, follow the Retort orchestration lifecycle:
 3. **Execute** the task following project conventions
 4. **Validate** the output meets quality gates
 5. **Report** results clearly
-{{/if}}
+   {{/if}}
 
 ## Project Context
 
@@ -36,14 +36,15 @@ When invoked, follow the Retort orchestration lifecycle:
 - Follow the project's coding standards and quality gates
 
 {{#if isSyncBacklog}}
+
 ## Intake Semantics
 
 - Tracker: `{{issueTracker}}`
 - Intake owner team: `{{intakeOwnerTeam}}`
 - Operations team: `{{intakeOperationsTeam}}`
 - Cadence: `{{intakeCadence}}`
-{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
-{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+  {{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+  {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Keep backlog sync tracker-neutral (GitHub/Linear) and ownership-aware using the configured intake values.
 {{/if}}

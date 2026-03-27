@@ -37,7 +37,7 @@ Or, if adding AgentKit Forge to an existing project, see the
 ### 2. Install runtime dependencies
 
 ```bash
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 ```
 
 This installs the Node.js dependencies (including `js-yaml`) required by the
@@ -70,17 +70,17 @@ node .agentkit/engines/node/src/cli.mjs <command> [options]
 Several commands have shorthand scripts defined in `.agentkit/package.json`:
 
 ```bash
-pnpm -C .agentkit agentkit:sync           # equivalent to: cli.mjs sync
-pnpm -C .agentkit agentkit:init           # equivalent to: cli.mjs init
-pnpm -C .agentkit agentkit:validate       # equivalent to: cli.mjs validate
-pnpm -C .agentkit agentkit:discover       # equivalent to: cli.mjs discover
-pnpm -C .agentkit agentkit:spec-validate  # equivalent to: cli.mjs spec-validate
-pnpm -C .agentkit agentkit:add            # equivalent to: cli.mjs add
-pnpm -C .agentkit agentkit:remove         # equivalent to: cli.mjs remove
-pnpm -C .agentkit agentkit:list           # equivalent to: cli.mjs list
-pnpm -C .agentkit agentkit:healthcheck    # equivalent to: cli.mjs healthcheck
-pnpm -C .agentkit agentkit:check          # equivalent to: cli.mjs check
-pnpm -C .agentkit agentkit:cost           # equivalent to: cli.mjs cost
+pnpm --dir .agentkit agentkit:sync           # equivalent to: cli.mjs sync
+pnpm --dir .agentkit agentkit:init           # equivalent to: cli.mjs init
+pnpm --dir .agentkit agentkit:validate       # equivalent to: cli.mjs validate
+pnpm --dir .agentkit agentkit:discover       # equivalent to: cli.mjs discover
+pnpm --dir .agentkit agentkit:spec-validate  # equivalent to: cli.mjs spec-validate
+pnpm --dir .agentkit agentkit:add            # equivalent to: cli.mjs add
+pnpm --dir .agentkit agentkit:remove         # equivalent to: cli.mjs remove
+pnpm --dir .agentkit agentkit:list           # equivalent to: cli.mjs list
+pnpm --dir .agentkit agentkit:healthcheck    # equivalent to: cli.mjs healthcheck
+pnpm --dir .agentkit agentkit:check          # equivalent to: cli.mjs check
+pnpm --dir .agentkit agentkit:cost           # equivalent to: cli.mjs cost
 ```
 
 ### Flag syntax
@@ -180,7 +180,7 @@ Run any command with `--help` to see its specific flags.
 
 ```bash
 # 1. Install dependencies
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 
 # 2. Initialize for your repository
 node .agentkit/engines/node/src/cli.mjs init --repoName my-project
@@ -217,7 +217,7 @@ Add a validation step to your CI pipeline to ensure spec files and generated
 outputs stay consistent:
 
 ```bash
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 node .agentkit/engines/node/src/cli.mjs spec-validate
 node .agentkit/engines/node/src/cli.mjs validate
 node .agentkit/engines/node/src/cli.mjs check --bail
@@ -246,7 +246,7 @@ Verify you are using one of the valid CLI commands listed above.
 Make sure you installed dependencies first:
 
 ```bash
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 ```
 
 If the error persists, verify your Node.js version is 22.0.0 or higher:

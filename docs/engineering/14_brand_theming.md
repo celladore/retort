@@ -115,7 +115,7 @@ design token files from `brand.yaml`.
 
 3. Run sync:
    ```bash
-   pnpm -C .agentkit agentkit:sync
+   pnpm --dir .agentkit agentkit:sync
    ```
 
 ### Output Formats

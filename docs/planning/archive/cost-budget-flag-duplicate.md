@@ -69,7 +69,7 @@ If budget is exceeded and enforcement is `enforce`, the PreToolUse hook (`budget
 ### After editing the template
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 Commit both the template change and regenerated output.

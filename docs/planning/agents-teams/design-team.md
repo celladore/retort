@@ -105,7 +105,7 @@ This ensures UI changes get brand/design review before testing.
 1. Add `design` team to `.agentkit/spec/teams.yaml`
 2. Add `design` to intake routing
 3. Update `frontend` handoff chain to include `design`
-4. Run `pnpm -C .agentkit agentkit:sync`
+4. Run `pnpm --dir .agentkit agentkit:sync`
 5. Update `UNIFIED_AGENT_TEAMS.md` team-agent mapping table
 6. Verify all generated outputs
 

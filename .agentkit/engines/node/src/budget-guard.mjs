@@ -98,28 +98,36 @@ function extractBudgetPolicyRegex(content) {
   // Check if budgetPolicy section exists at all
   if (!/^budgetPolicy:/m.test(content)) return null;
 
-  const getNum = (key) => {
-    const m = content.match(new RegExp(`${key}:\\s*['"]?(\\d+)['"]?`));
-    return m ? parseInt(m[1], 10) : undefined;
-  };
-  const getStr = (key) => {
-    const m = content.match(new RegExp(`${key}:\\s*['"]?([\\w]+)['"]?`));
-    return m ? m[1] : undefined;
-  };
-
-  return {
-    session: {
+  // Extract values scoped to a named YAML section block
+  const getSection = (sectionName) => {
+    const sectionMatch = content.match(
+      new RegExp(`^  ${sectionName}:\\s*\\n((?:[ \\t]+\\S.*\\n?)*)`, 'm')
+    );
+    if (!sectionMatch) return {};
+    const block = sectionMatch[1];
+    const getNum = (key) => {
+      const m = block.match(new RegExp(`${key}:\\s*(\\d+)`));
+      return m ? parseInt(m[1], 10) : undefined;
+    };
+    return {
       maxDurationMinutes: getNum('maxDurationMinutes'),
       maxCommands: getNum('maxCommands'),
       maxFilesModified: getNum('maxFilesModified'),
-      warnAtPercent: getNum('warnAtPercent'),
-    },
-    daily: {
       maxSessions: getNum('maxSessions'),
       maxTotalDurationMinutes: getNum('maxTotalDurationMinutes'),
       maxTotalCommands: getNum('maxTotalCommands'),
       warnAtPercent: getNum('warnAtPercent'),
-    },
+    };
+  };
+
+  const getStr = (key) => {
+    const m = content.match(new RegExp(`^  ${key}:\\s*([\\w]+)`, 'm'));
+    return m ? m[1] : undefined;
+  };
+
+  return {
+    session: getSection('session'),
+    daily: getSection('daily'),
     enforcement: getStr('enforcement'),
   };
 }
@@ -127,6 +135,7 @@ function extractBudgetPolicyRegex(content) {
 function deepMerge(defaults, overrides) {
   const result = { ...defaults };
   for (const key of Object.keys(overrides)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     if (overrides[key] === undefined || overrides[key] === null) continue;
     if (
       typeof defaults[key] === 'object' &&
@@ -173,7 +182,7 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
 
   const reasons = [];
   let status = 'ok';
-  const warnPct = (policy.session?.warnAtPercent || 80) / 100;
+  const warnPct = (policy.session?.warnAtPercent ?? 80) / 100;
   const enforce = policy.enforcement === 'enforce';
 
   const metrics = {
@@ -186,7 +195,7 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
   if (session.startTime) {
     const elapsed = Date.now() - new Date(session.startTime).getTime();
     metrics.durationMinutes = Math.round(elapsed / 60_000);
-    const maxMin = policy.session?.maxDurationMinutes || DEFAULT_POLICY.session.maxDurationMinutes;
+    const maxMin = policy.session?.maxDurationMinutes ?? DEFAULT_POLICY.session.maxDurationMinutes;
 
     if (metrics.durationMinutes >= maxMin) {
       reasons.push(`Session duration (${metrics.durationMinutes}m) exceeds limit (${maxMin}m)`);
@@ -201,7 +210,7 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
 
   // Command count check
   metrics.commandCount = Array.isArray(session.commandsRun) ? session.commandsRun.length : 0;
-  const maxCmds = policy.session?.maxCommands || DEFAULT_POLICY.session.maxCommands;
+  const maxCmds = policy.session?.maxCommands ?? DEFAULT_POLICY.session.maxCommands;
 
   if (metrics.commandCount >= maxCmds) {
     reasons.push(`Command count (${metrics.commandCount}) exceeds limit (${maxCmds})`);
@@ -214,7 +223,7 @@ export function checkSessionBudget(agentkitRoot, policyOverride) {
   }
 
   // Files modified check
-  const maxFiles = policy.session?.maxFilesModified || DEFAULT_POLICY.session.maxFilesModified;
+  const maxFiles = policy.session?.maxFilesModified ?? DEFAULT_POLICY.session.maxFilesModified;
   if (metrics.filesModified >= maxFiles) {
     reasons.push(`Files modified (${metrics.filesModified}) exceeds limit (${maxFiles})`);
     status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
@@ -248,7 +257,7 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
   const todaySessions = getTodaySessions(agentkitRoot);
   const reasons = [];
   let status = 'ok';
-  const warnPct = (policy.daily?.warnAtPercent || 80) / 100;
+  const warnPct = (policy.daily?.warnAtPercent ?? 80) / 100;
   const enforce = policy.enforcement === 'enforce';
 
   const metrics = {
@@ -257,19 +266,21 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
     totalCommands: 0,
   };
 
+  // Sum milliseconds first, then convert once to avoid per-session rounding accumulation
+  let totalDurationMs = 0;
+  const now = Date.now();
   for (const s of todaySessions) {
     if (s.durationMs) {
-      metrics.totalDurationMinutes += Math.round(s.durationMs / 60_000);
+      totalDurationMs += s.durationMs;
     } else if (s.startTime && s.status === 'active') {
-      metrics.totalDurationMinutes += Math.round(
-        (Date.now() - new Date(s.startTime).getTime()) / 60_000
-      );
+      totalDurationMs += now - new Date(s.startTime).getTime();
     }
     metrics.totalCommands += Array.isArray(s.commandsRun) ? s.commandsRun.length : 0;
   }
+  metrics.totalDurationMinutes = Math.round(totalDurationMs / 60_000);
 
   // Session count
-  const maxSessions = policy.daily?.maxSessions || DEFAULT_POLICY.daily.maxSessions;
+  const maxSessions = policy.daily?.maxSessions ?? DEFAULT_POLICY.daily.maxSessions;
   if (metrics.sessionCount >= maxSessions) {
     reasons.push(`Daily sessions (${metrics.sessionCount}) exceeds limit (${maxSessions})`);
     status = enforce ? 'deny' : 'warn';
@@ -282,7 +293,7 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
 
   // Total duration
   const maxDur =
-    policy.daily?.maxTotalDurationMinutes || DEFAULT_POLICY.daily.maxTotalDurationMinutes;
+    policy.daily?.maxTotalDurationMinutes ?? DEFAULT_POLICY.daily.maxTotalDurationMinutes;
   if (metrics.totalDurationMinutes >= maxDur) {
     reasons.push(`Daily duration (${metrics.totalDurationMinutes}m) exceeds limit (${maxDur}m)`);
     status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
@@ -294,7 +305,7 @@ export function checkDailyBudget(agentkitRoot, policyOverride) {
   }
 
   // Total commands
-  const maxCmds = policy.daily?.maxTotalCommands || DEFAULT_POLICY.daily.maxTotalCommands;
+  const maxCmds = policy.daily?.maxTotalCommands ?? DEFAULT_POLICY.daily.maxTotalCommands;
   if (metrics.totalCommands >= maxCmds) {
     reasons.push(`Daily commands (${metrics.totalCommands}) exceeds limit (${maxCmds})`);
     status = enforce ? 'deny' : status === 'deny' ? 'deny' : 'warn';
@@ -471,8 +482,17 @@ function getTodaySessions(agentkitRoot) {
   const sessDir = resolve(agentkitRoot, 'logs', 'sessions');
   if (!existsSync(sessDir)) return [];
 
-  const todayPrefix = new Date().toISOString().split('T')[0].replace(/-/g, '');
-  const files = readdirSync(sessDir).filter((f) => f.startsWith('session-') && f.endsWith('.json'));
+  // Capture once to avoid midnight boundary race between the two date comparisons
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayPrefix = todayStr.replace(/-/g, '');
+
+  // Pre-filter filenames by date prefix before reading content (performance)
+  const files = readdirSync(sessDir).filter(
+    (f) =>
+      f.startsWith('session-') &&
+      f.endsWith('.json') &&
+      (f.includes(todayPrefix) || !f.match(/^session-\d{8}/))
+  );
 
   const sessions = [];
   for (const file of files) {
@@ -481,14 +501,11 @@ function getTodaySessions(agentkitRoot) {
       // Session IDs start with YYYYMMDD — match today's date
       if (session.sessionId && session.sessionId.startsWith(todayPrefix)) {
         sessions.push(session);
-      } else if (
-        session.startTime &&
-        session.startTime.startsWith(new Date().toISOString().split('T')[0])
-      ) {
+      } else if (session.startTime && session.startTime.startsWith(todayStr)) {
         sessions.push(session);
       }
     } catch {
-      /* skip */
+      /* skip malformed session files */
     }
   }
 

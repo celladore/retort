@@ -46,24 +46,24 @@ The backlog consolidates items from:
 ## CLI Equivalent
 
 ```bash
-pnpm -C .agentkit agentkit:backlog -- [--format json] [--team backend] [--priority P0,P1] [--source github] [--status open] [--sort priority]
+pnpm --dir .agentkit agentkit:backlog -- [--format json] [--team backend] [--priority P0,P1] [--source github] [--status open] [--sort priority]
 ```
 
 ## Fields per Item
 
-| Field | Description |
-|-------|-------------|
-| `id` | Local backlog item ID |
-| `externalId` | External tracker reference (e.g., GH#42) |
-| `title` | Issue title |
-| `priority` | P0–P3 |
-| `status` | open, in-progress, completed, blocked, deferred |
-| `team` | Assigned team |
-| `source` | Where the item came from |
-| `phase` | Discovery, Planning, Implementation, Validation, Ship |
-| `assignee` | Human assignee (if any) |
-| `labels` | Original tracker labels |
-| `milestone` | Milestone/sprint |
+| Field        | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| `id`         | Local backlog item ID                                 |
+| `externalId` | External tracker reference (e.g., GH#42)              |
+| `title`      | Issue title                                           |
+| `priority`   | P0–P3                                                 |
+| `status`     | open, in-progress, completed, blocked, deferred       |
+| `team`       | Assigned team                                         |
+| `source`     | Where the item came from                              |
+| `phase`      | Discovery, Planning, Implementation, Validation, Ship |
+| `assignee`   | Human assignee (if any)                               |
+| `labels`     | Original tracker labels                               |
+| `milestone`  | Milestone/sprint                                      |
 
 ## Rules
 

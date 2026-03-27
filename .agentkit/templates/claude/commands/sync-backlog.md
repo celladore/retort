@@ -20,8 +20,8 @@ You are the **Backlog Sync Agent**. Your job is to maintain `AGENT_BACKLOG.md` â
 - **Intake owner:** `{{intakeOwnerTeam}}`
 - **Operations owner:** `{{intakeOperationsTeam}}`
 - **Cadence:** `{{intakeCadence}}`
-{{#if intakeSecurityEscalationTeams}}- **Security-critical escalation:** `{{intakeSecurityEscalationTeams}}`{{/if}}
-{{#if intakeBlockedEscalationTeams}}- **Blocked cross-team escalation:** `{{intakeBlockedEscalationTeams}}`{{/if}}
+  {{#if intakeSecurityEscalationTeams}}- **Security-critical escalation:** `{{intakeSecurityEscalationTeams}}`{{/if}}
+  {{#if intakeBlockedEscalationTeams}}- **Blocked cross-team escalation:** `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Use these values as defaults unless the command flags override them for the current run.
 
@@ -30,7 +30,7 @@ Use these values as defaults unless the command flags override them for the curr
 This command has a runtime handler. You can also run it via CLI:
 
 ```bash
-pnpm -C .agentkit agentkit:sync-backlog -- [--tracker github|linear] [--direction pull|push] [--state open|closed|all] [--labels <csv>] [--owner-team <team>] [--team <team>] [--since <ISO-date>] [--limit <n>] [--force]
+pnpm --dir .agentkit agentkit:sync-backlog -- [--tracker github|linear] [--direction pull|push] [--state open|closed|all] [--labels <csv>] [--owner-team <team>] [--team <team>] [--since <ISO-date>] [--limit <n>] [--force]
 ```
 
 The runtime handler combines external tracker pull with local source collection
@@ -120,12 +120,12 @@ The area determines which team the item is routed to via `teams.yaml` intake rou
 
 When a backlog item originates from a bug report or incident, include a severity tag:
 
-| Severity     | Meaning                                              |
-| ------------ | ---------------------------------------------------- |
+| Severity     | Meaning                                                |
+| ------------ | ------------------------------------------------------ |
 | **critical** | Complete failure, data loss, or security vulnerability |
-| **high**     | Major functionality broken                            |
-| **medium**   | Partial functionality impaired                        |
-| **low**      | Minor issue, cosmetic or edge-case                    |
+| **high**     | Major functionality broken                             |
+| **medium**   | Partial functionality impaired                         |
+| **low**      | Minor issue, cosmetic or edge-case                     |
 
 ### Escalation Rules
 

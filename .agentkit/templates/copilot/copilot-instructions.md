@@ -24,6 +24,7 @@ Follow these instructions for all code generation, suggestions, and chat respons
   {{#if projectPhase}}- **Phase**: {{projectPhase}}{{/if}}
 
 {{#if showLanguageProfileDiagnostics}}
+
 ## Language Profile Diagnostics
 
 - **Source**: {{languageInferenceSource}} (confidence: {{languageInferenceConfidence}})
@@ -32,9 +33,9 @@ Follow these instructions for all code generation, suggestions, and chat respons
 - **Python**: configured={{hasLanguagePython}}, inferred={{hasLanguagePythonInferred}}, effective={{hasLanguagePythonEffective}}
 - **.NET**: configured={{hasLanguageDotnet}}, inferred={{hasLanguageDotnetInferred}}, effective={{hasLanguageDotnetEffective}}
 - **Rust**: configured={{hasLanguageRust}}, inferred={{hasLanguageRustInferred}}, effective={{hasLanguageRustEffective}}
-{{#if hasLanguageInferenceMismatch}}- **Notice**: configured and inferred language signals diverge; generation uses configured values.{{/if}}
-{{#if hasLanguageInferenceUsed}}- **Notice**: heuristics are currently prepopulating effective language flags because configured languages are empty.{{/if}}
-{{/if}}
+  {{#if hasLanguageInferenceMismatch}}- **Notice**: configured and inferred language signals diverge; generation uses configured values.{{/if}}
+  {{#if hasLanguageInferenceUsed}}- **Notice**: heuristics are currently prepopulating effective language flags because configured languages are empty.{{/if}}
+  {{/if}}
 
 ## Core Workflow
 
@@ -68,7 +69,7 @@ understand team assignments, ownership boundaries, and escalation paths.
   (TypeScript strict mode, Rust's type system, Python type hints with mypy).
   {{#if commitConvention}}- **Conventional Commits (MANDATORY)**: All commit messages AND PR titles must use the format `type(scope): description`. Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert. Do NOT use natural-language titles like "Plan: Something" or "Update files" — CI will reject them.{{/if}}
   {{#if branchStrategy}}- Branch strategy: {{branchStrategy}}.{{/if}}
-- **Generated file sync**: After editing any file in `.agentkit/spec/`, run `pnpm -C .agentkit retort:sync` and commit the regenerated output. CI drift checks will fail otherwise.
+- **Generated file sync**: After editing any file in `.agentkit/spec/`, run `pnpm --dir .agentkit retort:sync` and commit the regenerated output. CI drift checks will fail otherwise.
 
 {{#if hasLogging}}
 
