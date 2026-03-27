@@ -7,7 +7,7 @@
  */
 import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'fs';
 import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
@@ -2006,8 +2006,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       overlaySettings.repoName ||
       repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
-    integrationBranch:
-      overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
+    integrationBranch: overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     commandPrefix: overlaySettings.commandPrefix || null,
     // syncDateMode controls {{syncDate}} in generated headers (issue #417).
@@ -2954,9 +2953,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           }
         }
         if (formattedCount > 0) {
-          logVerbose(
-            `[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
-          );
+          logVerbose(`[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`);
         }
       } catch {
         // If prettier is not available or fails entirely, just continue
@@ -2993,6 +2990,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       }
     }
   } finally {
-    await rm(tmpDir, { recursive: true, force: true });
+    // Use rmSync to avoid the Windows async-rm race (ENOTEMPTY when parent rmdir
+    // is attempted before async child deletions have fully completed).
+    rmSync(tmpDir, { recursive: true, force: true });
   }
 }
