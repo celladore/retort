@@ -234,5 +234,15 @@ if [[ -n "$AGENTKIT_ROOT" ]] && command -v jq &>/dev/null; then
         >> "$LOG_FILE" 2>/dev/null || true
 fi
 
+# -- Aggregate agent metrics (non-blocking) --------------------------------
+# Runs aggregate-metrics.mjs to parse events.log and update agent-metrics.json
+# and agent-health.json in .claude/state/. Failures are silently ignored so
+# they never block a stop.
+STATE_DIR="${CWD}/.claude/state"
+METRICS_SCRIPT="${CWD}/scripts/aggregate-metrics.mjs"
+if [[ -f "$METRICS_SCRIPT" ]] && [[ -f "${STATE_DIR}/events.log" ]] && command -v node &>/dev/null; then
+    node "$METRICS_SCRIPT" --state "$STATE_DIR" 2>/dev/null || true
+fi
+
 # If no build tools were found, or all checks passed -- allow stop.
 exit 0
