@@ -89,6 +89,8 @@ if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
     if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
         while IFS= read -r line; do
             MSG=$(echo "$line" | cut -d' ' -f2-)
+            # Skip auto-generated merge commits — they are never user-authored
+            [[ "$MSG" =~ ^Merge\ (remote-tracking\ branch|branch|pull\ request) ]] && continue
             if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
                 BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
             fi
