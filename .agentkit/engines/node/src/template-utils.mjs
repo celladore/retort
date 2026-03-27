@@ -88,7 +88,7 @@ export function renderTemplate(template, vars, targetPath = '') {
   result = resolveEachBlocks(result, vars, sanitizeStrings);
 
   // Phase 3: Replace {{key}} placeholders
-  result = replacePlaceholders(result, vars, sanitizeStrings);
+  result = replacePlaceholders(result, vars, sanitizeStrings, { filePath: targetPath });
 
   // Phase 4: Collapse excessive blank lines left by removed conditionals
   result = collapseBlankLines(result);

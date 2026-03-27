@@ -13,26 +13,26 @@ Git branching strategy and contribution workflow for {{repoName}}.
 | Branch      | Purpose               | Deploys To |
 | ----------- | --------------------- | ---------- |
 | `main`      | Production-ready code | Production |
-| `develop`   | Integration branch    | Staging    |
+| `{{integrationBranch}}`   | Integration branch    | Staging    |
 | `feature/*` | New features          | —          |
 | `fix/*`     | Bug fixes             | —          |
 | `release/*` | Release preparation   | —          |
 
 ## Workflow
 
-1. **Create a branch** from `develop` (or `main` for hotfixes):
+1. **Create a branch** from `{{integrationBranch}}` (or `main` for hotfixes):
 
    ```bash
-   git checkout -b feature/my-feature develop
+   git checkout -b feature/my-feature {{integrationBranch}}
    ```
 
 2. **Commit changes** following the commit message format below.
 
-3. **Push and open a Pull Request** targeting `develop`.
+3. **Push and open a Pull Request** targeting `{{integrationBranch}}`.
 
 4. **Code review** — At least one approval required.
 
-5. **Merge** — Squash-merge into `develop`.
+5. **Merge** — Squash-merge into `{{integrationBranch}}`.
 
 ## Commit Message Format
 
@@ -77,16 +77,13 @@ Apply these settings on the default branch (`main`):
 
 Set these checks as **required**:
 
-- `CI`
-- `CodeQL`
-
-Keep these checks **advisory** (not required initially):
-
-- `Semgrep (Advisory)`
-
-Promotion guidance:
-
-- Promote selected Semgrep checks to required only after at least 2 sprints of low-noise results.
+{{#if bpRequiredStatusChecks}}
+{{#each bpRequiredStatusChecks}}
+- `{{.}}`
+{{/each}}
+{{else}}
+- _(configure `branchProtection.requiredStatusChecks` in `.agentkit/spec/project.yaml`)_
+{{/if}}
 
 ## References
 

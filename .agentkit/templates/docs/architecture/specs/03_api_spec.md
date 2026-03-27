@@ -21,8 +21,8 @@
 | Convention    | Value                     |
 | ------------- | ------------------------- |
 | Date format   | ISO 8601                  |
-| Pagination    | Cursor-based              |
-| Error format  | RFC 7807 Problem Details  |
+| Pagination    | {{apiPagination|Cursor-based}}              |
+| Error format  | {{apiErrorFormat|RFC 7807 Problem Details}}  |
 | Rate limiting | <!-- e.g. 100 req/min --> |
 
 ## Endpoints Summary
