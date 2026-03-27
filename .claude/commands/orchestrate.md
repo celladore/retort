@@ -200,6 +200,14 @@ Execute the following loop. Each iteration corresponds to one phase:
 
 Delegate work using the **task protocol** (`.claude/state/tasks/`):
 
+**Worktree isolation** — when dispatching code-writing agents (task types
+`implement`, `fix`, `refactor`, `migration`, `test`), pass
+`isolation: "worktree"` in the Agent tool call. Read-only agents (`review`,
+`investigate`, `discover`, `audit`) are exempt. Name agent branches using the
+convention `feat/agent-<agent-name>/<task-slug>` (adjust prefix to match the
+Conventional Commits type). See `.claude/rules/worktree-isolation.md` for the
+full pattern including `EnterWorktree`/`ExitWorktree` usage.
+
 1. Ensure `.claude/state/` and `.claude/state/tasks/` exist before creating task files.
 2. For each planned work item, create a task JSON file:
 
