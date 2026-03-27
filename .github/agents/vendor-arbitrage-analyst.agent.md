@@ -1,6 +1,6 @@
 ---
 name: 'Vendor Arbitrage Analyst'
-description: "Multi-vendor cost arbitrage specialist. Maximizes free tiers, committed use discounts, spot/preemptible pricing, and time-based rate variations. Manages vendor credit programs, startup benefit packages, and negotiated enterprise agreements."
+description: 'Multi-vendor cost arbitrage specialist. Maximizes free tiers, committed use discounts, spot/preemptible pricing, and time-based rate variations. Manages vendor credit programs, startup benefit packages, and negotiated enterprise agreements.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

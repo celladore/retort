@@ -1,6 +1,6 @@
 ---
 name: 'Cost Ops Monitor'
-description: "Central monitoring and reporting agent for the Cost Ops team. Aggregates cost data from all agents, produces dashboards, sets budget alerts, and triggers escalation when spend exceeds thresholds. Maintains the cost ops cadence (weekly reviews, monthly deep dives, quarterly strategy)."
+description: 'Central monitoring and reporting agent for the Cost Ops team. Aggregates cost data from all agents, produces dashboards, sets budget alerts, and triggers escalation when spend exceeds thresholds. Maintains the cost ops cadence (weekly reviews, monthly deep dives, quarterly strategy).'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

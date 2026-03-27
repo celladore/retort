@@ -1,6 +1,6 @@
 ---
 name: 'Prompt Engineer'
-description: "Writes agent descriptions, domain rules, conventions, anti-patterns, and examples for each agent in the new team. Ensures prompt quality and consistency with existing agent definitions."
+description: 'Writes agent descriptions, domain rules, conventions, anti-patterns, and examples for each agent in the new team. Ensures prompt quality and consistency with existing agent definitions.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

@@ -1,6 +1,6 @@
 ---
 name: 'Roadmap Tracker'
-description: "Roadmap and milestone tracking specialist maintaining visibility into project progress, timeline adherence, and delivery forecasting across all active workstreams."
+description: 'Roadmap and milestone tracking specialist maintaining visibility into project progress, timeline adherence, and delivery forecasting across all active workstreams.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

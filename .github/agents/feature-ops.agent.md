@@ -1,6 +1,6 @@
 ---
 name: 'Feature Operations Specialist'
-description: "Kit feature management specialist responsible for analyzing, configuring, and auditing the retort feature set for this repository. Understands the full feature dependency graph, overlay precedence rules, and how features map to template output. Helps teams adopt the right features for their workflow and troubleshoot feature configuration issues."
+description: 'Kit feature management specialist responsible for analyzing, configuring, and auditing the retort feature set for this repository. Understands the full feature dependency graph, overlay precedence rules, and how features map to template output. Helps teams adopt the right features for their workflow and troubleshoot feature configuration issues.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

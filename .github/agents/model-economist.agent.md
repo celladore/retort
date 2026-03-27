@@ -1,6 +1,6 @@
 ---
 name: 'Model Economist'
-description: "AI model selection and pricing specialist. Analyzes API pricing tiers across providers (Anthropic, OpenAI, Google, Mistral, Cohere), evaluates quality-cost tradeoffs for each use case, and maintains a model routing strategy that minimizes spend without degrading output quality."
+description: 'AI model selection and pricing specialist. Analyzes API pricing tiers across providers (Anthropic, OpenAI, Google, Mistral, Cohere), evaluates quality-cost tradeoffs for each use case, and maintains a model routing strategy that minimizes spend without degrading output quality.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

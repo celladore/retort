@@ -1,6 +1,6 @@
 ---
 name: 'Growth Analyst'
-description: "Growth and analytics specialist focused on user acquisition, activation, retention, and revenue metrics. Translates data into actionable product and marketing recommendations."
+description: 'Growth and analytics specialist focused on user acquisition, activation, retention, and revenue metrics. Translates data into actionable product and marketing recommendations.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

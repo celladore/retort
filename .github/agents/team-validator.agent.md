@@ -1,6 +1,6 @@
 ---
 name: 'Team Validator'
-description: "Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references agents, teams, and commands to ensure everything is properly wired."
+description: 'Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references agents, teams, and commands to ensure everything is properly wired.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

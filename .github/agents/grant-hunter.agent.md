@@ -1,6 +1,6 @@
 ---
 name: 'Grant & Programs Hunter'
-description: "Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator credits, academic partnerships, bug bounty programs, community contribution rewards, and referral bonuses. Maintains an active pipeline of applications."
+description: 'Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator credits, academic partnerships, bug bounty programs, community contribution rewards, and referral bonuses. Maintains an active pipeline of applications.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

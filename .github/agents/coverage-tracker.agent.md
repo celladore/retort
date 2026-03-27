@@ -1,6 +1,6 @@
 ---
 name: 'Coverage Tracker'
-description: "Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing coverage thresholds across the codebase."
+description: 'Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing coverage thresholds across the codebase.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

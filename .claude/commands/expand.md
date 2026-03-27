@@ -46,14 +46,14 @@ Runs the expansion analyzer to identify gaps, missing capabilities, undocumented
 
 Each suggestion includes:
 
-| Field | Description |
-|-------|-------------|
-| **Title** | Short description of the gap |
-| **Category** | One of the analysis categories |
-| **Impact** | critical / high / medium / low |
-| **Effort** | Small (< 1h) / Medium (1-4h) / Large (4h+) |
-| **Rationale** | Why this matters |
-| **Suggested Action** | What to do about it |
+| Field                | Description                                |
+| -------------------- | ------------------------------------------ |
+| **Title**            | Short description of the gap               |
+| **Category**         | One of the analysis categories             |
+| **Impact**           | critical / high / medium / low             |
+| **Effort**           | Small (< 1h) / Medium (1-4h) / Large (4h+) |
+| **Rationale**        | Why this matters                           |
+| **Suggested Action** | What to do about it                        |
 
 ## Rules
 
@@ -66,4 +66,4 @@ Each suggestion includes:
 
 - **Repository**: retort
 - **Default Branch**: main
-- **Stack**: javascript, yaml, markdown
+  - **Stack**: javascript, yaml, markdown
