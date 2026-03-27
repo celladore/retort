@@ -1,6 +1,6 @@
 ---
 name: 'Infrastructure Engineer'
-description: "Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliability. Ensures reproducible environments and cost-effective resource provisioning. Enforces the project naming convention {org}-{env}-{project}-{resourcetype}-{region} using project-configured defaults. Preferred IaC toolchain: Terraform + Terragrunt."
+description: 'Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliability. Ensures reproducible environments and cost-effective resource provisioning. Enforces the project naming convention {org}-{env}-{project}-{resourcetype}-{region} using project-configured defaults. Preferred IaC toolchain: Terraform + Terragrunt.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

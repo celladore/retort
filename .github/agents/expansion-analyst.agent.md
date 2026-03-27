@@ -1,6 +1,6 @@
 ---
 name: 'Expansion Analyst'
-description: "Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces ranked suggestions with rationale and can generate draft specification documents for approved suggestions. Never acts autonomously — all suggestions require explicit human approval before any downstream action occurs."
+description: 'Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces ranked suggestions with rationale and can generate draft specification documents for approved suggestions. Never acts autonomously — all suggestions require explicit human approval before any downstream action occurs.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

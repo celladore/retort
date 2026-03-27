@@ -1,6 +1,6 @@
 ---
 name: 'Integration Tester'
-description: "Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and user workflow scenarios that span multiple system components."
+description: 'Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and user workflow scenarios that span multiple system components.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

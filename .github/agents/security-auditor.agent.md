@@ -1,6 +1,6 @@
 ---
 name: 'Security Auditor'
-description: "Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verification across the entire codebase and infrastructure."
+description: 'Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verification across the entire codebase and infrastructure.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

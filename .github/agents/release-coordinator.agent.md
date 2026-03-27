@@ -1,6 +1,6 @@
 ---
 name: 'Release Coordinator'
-description: "Orchestrates framework releases — coordinates version bumps, changelog generation, cross-repo sync waves, and release communication across the portfolio."
+description: 'Orchestrates framework releases — coordinates version bumps, changelog generation, cross-repo sync waves, and release communication across the portfolio.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

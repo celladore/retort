@@ -1,6 +1,6 @@
 ---
 name: 'Brand Guardian'
-description: "Brand consistency specialist ensuring all visual and written outputs align with the established brand identity, design tokens, and style guidelines across all touchpoints. The canonical brand source of truth is .agentkit/spec/brand.yaml; editor theming is configured in .agentkit/spec/editor-theme.yaml. Use /brand to validate, preview, scaffold, or regenerate brand assets."
+description: 'Brand consistency specialist ensuring all visual and written outputs align with the established brand identity, design tokens, and style guidelines across all touchpoints. The canonical brand source of truth is .agentkit/spec/brand.yaml; editor theming is configured in .agentkit/spec/editor-theme.yaml. Use /brand to validate, preview, scaffold, or regenerate brand assets.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

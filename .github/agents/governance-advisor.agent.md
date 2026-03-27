@@ -1,6 +1,6 @@
 ---
 name: 'Governance Advisor'
-description: "Defines and enforces framework governance policies — versioning strategy, breaking change protocols, deprecation timelines, and cross-repo consistency standards."
+description: 'Defines and enforces framework governance policies — versioning strategy, breaking change protocols, deprecation timelines, and cross-repo consistency standards.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

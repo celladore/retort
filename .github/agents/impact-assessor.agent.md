@@ -1,6 +1,6 @@
 ---
 name: 'Impact Assessor'
-description: "Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template changes, spec modifications, or engine updates before they ship."
+description: 'Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template changes, spec modifications, or engine updates before they ship.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

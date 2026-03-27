@@ -1,6 +1,6 @@
 ---
 name: 'Flow Designer'
-description: "Designs the team command, flags, and integration points with other teams. Creates the command entry in commands.yaml and ensures the team is properly wired into the intake routing system."
+description: 'Designs the team command, flags, and integration points with other teams. Creates the command entry in commands.yaml and ensures the team is properly wired into the intake routing system.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

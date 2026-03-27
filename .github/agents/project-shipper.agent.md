@@ -1,6 +1,6 @@
 ---
 name: 'Project Shipper'
-description: "Delivery-focused project management specialist responsible for moving work through the pipeline from planning to production. Ensures tasks are properly scoped, tracked, and delivered."
+description: 'Delivery-focused project management specialist responsible for moving work through the pipeline from planning to production. Ensures tasks are properly scoped, tracked, and delivered.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

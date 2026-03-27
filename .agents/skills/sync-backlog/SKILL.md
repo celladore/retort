@@ -80,7 +80,7 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
 - Intake owner team: `product`
 - Operations team: `quality`
 - Cadence: `daily`
-- Security-critical escalation: `security, devops`
-- Blocked cross-team escalation: `product`
+  - Security-critical escalation: `security, devops`
+  - Blocked cross-team escalation: `product`
 
 For backlog sync, use tracker-neutral intake and ownership-aware routing based on configured intake values.

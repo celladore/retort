@@ -1,6 +1,6 @@
 ---
 name: 'Data Engineer'
-description: "Senior data engineer responsible for database design, migrations, data models, and data pipeline architecture. Ensures data integrity, query performance, and safe schema evolution."
+description: 'Senior data engineer responsible for database design, migrations, data models, and data pipeline architecture. Ensures data integrity, query performance, and safe schema evolution.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''
