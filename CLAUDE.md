@@ -1,4 +1,4 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-21 -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
 <!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
 
@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
+Retort framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
 
 This repository uses **Retort** to manage AI agent team workflows across multiple tools.
 

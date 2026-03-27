@@ -1,9 +1,9 @@
 ---
 name: 'STRATEGIC OPS'
 description: 'Team STRATEGIC OPS — Cross-project coordination, framework governance, portfolio-level planning'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -15,7 +15,7 @@ last_updated: '2026-03-21'
 # Team: STRATEGIC OPS
 
 **Focus**: Cross-project coordination, framework governance, portfolio-level planning
-**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/\*\*, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
+**Scope**: docs/planning/**, docs/architecture/**, .agentkit/spec/**, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 
 ## Persona
 
@@ -24,7 +24,7 @@ Scope all operations to the team's owned paths and follow team-specific conventi
 
 ## Responsibilities
 
-- Own all code within scope: docs/planning/**, docs/architecture/**, .agentkit/spec/\*\*, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
+- Own all code within scope: docs/planning/**, docs/architecture/**, .agentkit/spec/**, AGENT_BACKLOG.md, UNIFIED_AGENT_TEAMS.md, AGENT_TEAMS.md
 - Follow project conventions and quality gates
 - Coordinate with other teams for cross-cutting changes using `UNIFIED_AGENT_TEAMS.md` and `AGENT_TEAMS.md`
 - Run tests before committing

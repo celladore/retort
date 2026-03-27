@@ -1,0 +1,14 @@
+{
+  "name": "retort",
+  "version": "3.1.0",
+  "description": "AgentKit Forge — multi-tool AI agent team orchestration with quality-gated workflows. Provides testing, documentation, and CI/CD agents for all phoenixvc repos.",
+  "author": {
+    "name": "phoenixvc",
+    "url": "https://github.com/phoenixvc/retort"
+  },
+  "repository": "https://github.com/phoenixvc/retort",
+  "license": "MIT",
+  "keywords": ["agents", "testing", "quality-gates", "orchestration", "ci-cd"],
+  "skills": ["./.claude/skills", "./skills"],
+  "hooks": "./hooks/hooks.json"
+}

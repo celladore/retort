@@ -1,9 +1,9 @@
 ---
 name: 'Cost Ops Monitor'
-description: 'Central monitoring and reporting agent for the Cost Ops team. Aggregates cost data from all agents, produces dashboards, sets budget alerts, and triggers escalation when spend exceeds thresholds. Maintains the cost ops cadence (weekly reviews, monthly deep dives, quarterly strategy).'
-generated_by: 'agentkit-forge'
+description: "Central monitoring and reporting agent for the Cost Ops team. Aggregates cost data from all agents, produces dashboards, sets budget alerts, and triggers escalation when spend exceeds thresholds. Maintains the cost ops cadence (weekly reviews, monthly deep dives, quarterly strategy)."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,9 +32,9 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- docs/cost-ops/\*\*
-- docs/cost-ops/reports/\*\*
-- .claude/state/\*\*
+- docs/cost-ops/**
+- docs/cost-ops/reports/**
+- .claude/state/**
 
 ## Responsibilities
 

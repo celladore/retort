@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'Session cost and usage tracking. Shows session summaries, lists recent sessions, and generates aggregate usage reports. Tracks session duration, commands run, and files modified via lifecycle hooks.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -25,12 +25,12 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 
 ## Available Views
 
-| Command                    | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
-| `--summary`                | Recent session overview with durations and file counts |
-| `--sessions`               | List all recent sessions                               |
-| `--report --month YYYY-MM` | Monthly aggregate report                               |
-| `--report --format json`   | Export report as JSON                                  |
+| Command | Description |
+|---------|-------------|
+| `--summary` | Recent session overview with durations and file counts |
+| `--sessions` | List all recent sessions |
+| `--report --month YYYY-MM` | Monthly aggregate report |
+| `--report --format json` | Export report as JSON |
 
 ## Notes
 
@@ -60,3 +60,4 @@ Session cost and usage tracking. Shows session summaries, lists recent sessions,
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

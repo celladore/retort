@@ -1,9 +1,10 @@
 ---
+
 description: 'Top-level orchestration command. Assesses the current repository state, identifies work to be done, delegates to appropriate team agents, and synthesizes results. The primary entry point for multi-step workflows.'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(dotnet *), Bash(cargo *)
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -287,20 +288,18 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
 6. If any check or review finding requires changes, create new tasks for the relevant teams and loop back to Phase 3.
 7. Enforce a bounded retry policy for replacement-task loops using persisted `orchestrator.json.retryPolicy` fields (`maxRetryCount`, default 2; per-round `roundRetries`; optional reset metadata).
 
-**Retry key convention:**
+ **Retry key convention:**
+ - `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
+ - `"validation:<issue-id>"` format tracks retries of a specific validation issue.
+ - Both formats may coexist in `retryPolicy.roundRetries` but represent independent counters.
+ - **Rule:** Do not create multiple keys for the same logical target (e.g., do not use both formats for the same round or same issue).
 
-- `"round-<n>"` format (e.g., `"round-4"`) tracks retries of an entire validation round.
-- `"validation:<issue-id>"` format tracks retries of a specific validation issue.
-- Both formats may coexist in `retryPolicy.roundRetries` but represent independent counters.
-- **Rule:** Do not create multiple keys for the same logical target (e.g., do not use both formats for the same round or same issue).
-
-**Retry flow:**
-
-- Track retries per round or issue key in `retryPolicy.roundRetries[roundKey]`.
-- On each replacement-task retry, increment `retryPolicy.roundRetries[roundKey]` and `retryPolicy.totalRetries`, then persist `orchestrator.json` before continuing.
-- If `retryPolicy.roundRetries[roundKey] >= retryPolicy.maxRetryCount`, escalate and stop automatic retries for that round/issue.
-- When escalation occurs:
-  1.  Append a structured entry to `events.log`:
+ **Retry flow:**
+ - Track retries per round or issue key in `retryPolicy.roundRetries[roundKey]`.
+ - On each replacement-task retry, increment `retryPolicy.roundRetries[roundKey]` and `retryPolicy.totalRetries`, then persist `orchestrator.json` before continuing.
+ - If `retryPolicy.roundRetries[roundKey] >= retryPolicy.maxRetryCount`, escalate and stop automatic retries for that round/issue.
+ - When escalation occurs:
+   1. Append a structured entry to `events.log`:
 
       ```json
       {
@@ -312,17 +311,16 @@ Delegate work using the **task protocol** (`.claude/state/tasks/`):
       }
       ```
 
-  2.  Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
-  3.  Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
+   2. Persist `retryPolicy.retryEscalated = { "reason": "retry-limit-reached", "at": "<ISO-8601 timestamp>", "roundKey": "<round-or-issue-key>", "roundRetryCount": <number> }`.
+   3. Continue overall processing (move to Phase 5) without further automatic retries for that key until human intervention.
 
   **Reset behavior:** Enforce these exact rules in the orchestration validation path:
-
-- Require `retryPolicy.allowReset === true` before allowing any reset.
-- If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
-- If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
-- Treat null/undefined/malformed timestamps as non-newer and deny reset.
-- When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
-- Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
+  - Require `retryPolicy.allowReset === true` before allowing any reset.
+  - If `retryEscalated === null`, allow reset when `allowReset === true` (no timestamp comparison).
+  - If `retryEscalated` is non-null, require `retryPolicy.lastResetAt` to be a valid ISO-8601 timestamp and newer than `retryEscalated.at` after UTC normalization.
+  - Treat null/undefined/malformed timestamps as non-newer and deny reset.
+  - When reset is denied for stale timestamps, do NOT clear `roundRetries` and surface: `reset prevented: lastResetAt not newer than retryEscalated.at`.
+  - Unit tests: same timestamps, timezone differences, null/undefined, invalid ISO strings, and the negative case where stale `lastResetAt` leaves `roundRetries` unchanged.
 
 6. Record validation results in `orchestrator.json` and in task artifacts, including resolution metadata for failed/rejected tasks.
 

@@ -7,7 +7,7 @@
  */
 import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
@@ -2990,8 +2990,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       }
     }
   } finally {
-    // Use rmSync to avoid the Windows async-rm race (ENOTEMPTY when parent rmdir
-    // is attempted before async child deletions have fully completed).
-    rmSync(tmpDir, { recursive: true, force: true });
+    // Wrap cleanup so it cannot mask the primary sync error.
+    // maxRetries handles transient ENOTEMPTY on tmpfs/overlayfs (Node.js
+    // fs.rm defaults to maxRetries:0, so the first failed rmdir throws).
+    try {
+      await rm(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch (cleanupErr) {
+      if (process.env.DEBUG) {
+        console.error(`[retort:sync] Warning: tmpDir cleanup failed — ${cleanupErr.message}`);
+      }
+    }
   }
 }

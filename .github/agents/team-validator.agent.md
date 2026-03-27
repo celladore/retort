@@ -1,9 +1,9 @@
 ---
 name: 'Team Validator'
-description: 'Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references agents, teams, and commands to ensure everything is properly wired.'
-generated_by: 'agentkit-forge'
+description: "Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references agents, teams, and commands to ensure everything is properly wired."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -32,7 +32,7 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 ## Focus Areas
 
-- .agentkit/spec/\*\*
+- .agentkit/spec/**
 
 ## Responsibilities
 

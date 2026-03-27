@@ -1,9 +1,10 @@
 ---
+
 description: 'Reviews the current feature configuration for the repo. Analyzes which features are enabled/disabled, checks for misconfigured dependencies, identifies unused features (enabled but no matching code patterns), and recommends features to enable based on codebase analysis.'
-allowed-tools: ''
-generated_by: 'agentkit-forge'
-last_model: 'sync-engine'
-last_updated: '2026-03-21'
+allowed-tools: ""
+generated_by: "retort"
+last_model: "sync-engine"
+last_updated: ""
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---
@@ -76,20 +77,16 @@ Based on `$ARGUMENTS`, perform one or more of these review modes:
 ## Feature Review — retort
 
 ### Configuration
-
 - Mode: [preset: <name> | explicit list | defaults]
 - Enabled: <N> / <total> features
 
 ### Status by Category
-
 [Category tables with enabled/disabled status]
 
 ### Findings
-
 [Issues, recommendations, audit results]
 
 ### Recommended Actions
-
 [Specific agentkit commands to run]
 ```
 

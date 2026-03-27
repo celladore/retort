@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -48,3 +48,4 @@ When invoked, follow the Retort orchestration lifecycle:
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

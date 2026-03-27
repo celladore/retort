@@ -39,6 +39,9 @@ COMMAND_GUIDE.md
 # Scaffold cache — generated merge bases, not committed
 .agentkit/.scaffold-cache
 
+# Overlay YAML — protected source-of-truth, managed by retort maintainers
+.agentkit/overlays/**
+
 # Test scratch directories
 .test-validate
 
@@ -47,3 +50,7 @@ COMMAND_GUIDE.md
 
 # Git worktrees — external branches, not part of main source
 .claude/worktrees
+
+# Runtime state — generated at runtime, not source files
+.claude/state/**
+.agentkit/state/**

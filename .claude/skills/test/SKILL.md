@@ -1,9 +1,9 @@
 ---
 name: 'test'
 description: 'Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

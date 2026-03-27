@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'Top-level orchestration command. Assesses the current repository state, identifies work to be done, delegates to appropriate team agents, and synthesizes results. The primary entry point for multi-step workflows.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -71,3 +71,4 @@ Produce a summary with: Actions Taken, Files Changed, Validation Commands, Updat
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+

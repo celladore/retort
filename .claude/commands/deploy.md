@@ -1,9 +1,10 @@
 ---
+
 description: 'Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.'
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(docker *), Bash(kubectl *), Bash(az *), Bash(aws *), Bash(gcloud *), Bash(vercel *), Bash(netlify *), Bash(fly *), Bash(wrangler *)
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

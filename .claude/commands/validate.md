@@ -1,9 +1,10 @@
 ---
+
 description: 'Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.'
 allowed-tools: Read, Glob
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -33,10 +34,10 @@ Validates generated outputs for correctness. Checks that all required directorie
 
 ## Output
 
-| Field       | Description                          |
-| ----------- | ------------------------------------ |
-| **Check**   | Name of the validation check         |
-| **Status**  | PASS / FAIL / WARN                   |
+| Field | Description |
+|-------|-------------|
+| **Check** | Name of the validation check |
+| **Status** | PASS / FAIL / WARN |
 | **Details** | Specifics about failures or warnings |
 
 Overall status: **PASS** (all checks green) or **FAIL** (one or more checks failed).

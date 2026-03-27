@@ -1,9 +1,9 @@
 ---
 name: 'feature-flow'
 description: 'Traces a specific feature end-to-end through the kit: shows which spec files define it, which template vars it injects, which templates consume those vars, what generated output it produces, and what overlay settings control it. Use this to understand or debug a feature's behavior.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

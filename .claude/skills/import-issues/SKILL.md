@@ -1,9 +1,9 @@
 ---
 name: 'import-issues'
 description: 'Imports issues from the configured external tracker (GitHub or Linear), normalizes fields to the canonical backlog schema, deduplicates against existing items, assigns teams via intake routing rules, and merges into AGENT_BACKLOG.md and .claude/state/backlog.json. Gated behind the process.intake.autoImport flag (can be overridden with --force).'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

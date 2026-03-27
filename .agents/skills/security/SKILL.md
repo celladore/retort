@@ -1,9 +1,9 @@
 ---
 name: 'security'
 description: 'Runs security-focused analysis: dependency vulnerability scanning, secret detection, OWASP compliance checks, and permission auditing. Generates a security report with severity ratings.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

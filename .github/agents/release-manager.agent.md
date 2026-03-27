@@ -1,9 +1,9 @@
 ---
 name: 'Release Manager'
-description: 'Release management specialist responsible for coordinating releases, managing versioning, generating changelogs, and ensuring smooth deployment workflows from staging to production. During code review, validates that breaking changes are documented, version bumps are correct, changelogs are updated, and deprecations are marked properly.'
-generated_by: 'agentkit-forge'
+description: "Release management specialist responsible for coordinating releases, managing versioning, generating changelogs, and ensuring smooth deployment workflows from staging to production. During code review, validates that breaking changes are documented, version bumps are correct, changelogs are updated, and deprecations are marked properly."
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
@@ -36,9 +36,9 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 - package.json
 - Cargo.toml
 - pyproject.toml
-- .github/workflows/release\*
-- scripts/release\*
-- docs/releases/\*\*
+- .github/workflows/release*
+- scripts/release*
+- docs/releases/**
 
 ## Responsibilities
 

@@ -1,9 +1,9 @@
 ---
 name: 'sync'
-description: 'Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
-generated_by: 'agentkit-forge'
+description: 'Regenerates all AI tool configurations from the Retort spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -14,7 +14,7 @@ last_updated: '2026-03-21'
 
 # sync
 
-Regenerates all AI tool configurations from the AgentKit Forge spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.
+Regenerates all AI tool configurations from the Retort spec. Renders templates for every active render target (Claude, Cursor, Copilot, Windsurf, Codex, Gemini, Cline, Roo, Warp) and updates generated files in the repository.
 
 ## Usage
 
@@ -22,7 +22,7 @@ Invoke this skill when you need to perform the `sync` operation.
 
 ## Role
 
-You are the **Sync Agent**. Regenerate all AI tool configurations from the AgentKit Forge spec files.
+You are the **Sync Agent**. Regenerate all AI tool configurations from the Retort spec files.
 
 ## How to Sync
 
@@ -57,7 +57,7 @@ pnpm --dir .agentkit agentkit:sync
 
 - After modifying any file in `.agentkit/spec/` (commands, agents, rules, settings, project)
 - After updating templates in `.agentkit/templates/`
-- After upgrading AgentKit Forge to a new version
+- After upgrading Retort to a new version
 - When CI reports "generated outputs are out of sync with sources"
 
 ## Platform Note

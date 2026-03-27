@@ -1,9 +1,9 @@
 ---
 name: 'expand'
 description: 'Runs the expansion analyzer to identify gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces a ranked list of suggestions with rationale, impact scores, and effort estimates. Never creates tasks in analysis mode — all suggestions require explicit human approval. Use --save to persist suggestions to disk for later review.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

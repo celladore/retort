@@ -1,11 +1,11 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-21 -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
 <!-- Format: Plain Markdown team rule for Windsurf Cascade AI. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
 # Team: TEAMFORGE
 
 **Focus**: Meta-team — creates, validates, and deploys new agent team specifications
-**Scope**: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/\*\*
+**Scope**: .agentkit/spec/**, docs/planning/agents-teams/**, docs/architecture/**
 
 ## Persona
 

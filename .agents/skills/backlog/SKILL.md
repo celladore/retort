@@ -1,9 +1,9 @@
 ---
 name: 'backlog'
 description: 'Displays a consolidated backlog view from all sources (external tracker, discovery, healthcheck, code TODOs, review findings, manual entries). Supports filtering and multiple output formats for CLI and future UI consumption.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

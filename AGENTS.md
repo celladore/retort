@@ -4,7 +4,7 @@
 
 # retort
 
-AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
+Retort framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
 
 ## Project Context
 

@@ -1,9 +1,10 @@
 ---
+
 description: 'Runs the expansion analyzer to identify gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces a ranked list of suggestions with rationale, impact scores, and effort estimates. Never creates tasks in analysis mode — all suggestions require explicit human approval. Use --save to persist suggestions to disk for later review.'
 allowed-tools: Read, Write, Glob, Grep
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---
@@ -24,13 +25,13 @@ Runs the expansion analyzer to identify gaps, missing capabilities, undocumented
 
 ## Flags
 
-| Flag                | Description                                                                                                | Default  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------- | -------- |
-| `--category`        | Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature | —        |
-| `--max-suggestions` | Maximum number of suggestions to return                                                                    | 10       |
-| `--min-impact`      | Minimum impact level to include: critical, high, medium, low                                               | low      |
-| `--output`          | Output format: markdown, yaml, or json                                                                     | markdown |
-| `--save`            | Save suggestions to .claude/state/suggestions/ for later review                                            | false    |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--category` | Comma-separated categories to analyze: documentation, testing, security, architecture, operations, feature | — |
+| `--max-suggestions` | Maximum number of suggestions to return | 10 |
+| `--min-impact` | Minimum impact level to include: critical, high, medium, low | low |
+| `--output` | Output format: markdown, yaml, or json | markdown |
+| `--save` | Save suggestions to .claude/state/suggestions/ for later review | false |
 
 ## Analysis Categories
 
@@ -45,14 +46,14 @@ Runs the expansion analyzer to identify gaps, missing capabilities, undocumented
 
 Each suggestion includes:
 
-| Field                | Description                                |
-| -------------------- | ------------------------------------------ |
-| **Title**            | Short description of the gap               |
-| **Category**         | One of the analysis categories             |
-| **Impact**           | critical / high / medium / low             |
-| **Effort**           | Small (< 1h) / Medium (1-4h) / Large (4h+) |
-| **Rationale**        | Why this matters                           |
-| **Suggested Action** | What to do about it                        |
+| Field | Description |
+|-------|-------------|
+| **Title** | Short description of the gap |
+| **Category** | One of the analysis categories |
+| **Impact** | critical / high / medium / low |
+| **Effort** | Small (< 1h) / Medium (1-4h) / Large (4h+) |
+| **Rationale** | Why this matters |
+| **Suggested Action** | What to do about it |
 
 ## Rules
 

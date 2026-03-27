@@ -1,9 +1,9 @@
 ---
 mode: 'agent'
 description: 'Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available.'
-generated_by: 'agentkit-forge'
+generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-21'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
@@ -22,15 +22,15 @@ You are the **Test Agent**. Run the test suite, auto-detecting the framework and
 
 ## Framework Detection (priority order)
 
-| Signal                        | Run Command              |
-| ----------------------------- | ------------------------ |
-| vitest in devDependencies     | `npx vitest run`         |
-| jest in devDependencies       | `npx jest`               |
+| Signal | Run Command |
+|--------|-------------|
+| vitest in devDependencies | `npx vitest run` |
+| jest in devDependencies | `npx jest` |
 | `test` script in package.json | `pnpm test` / `npm test` |
-| `Cargo.toml`                  | `cargo test`             |
-| `*.csproj` with test refs     | `dotnet test`            |
-| pytest in dependencies        | `pytest`                 |
-| `go.mod`                      | `go test ./...`          |
+| `Cargo.toml` | `cargo test` |
+| `*.csproj` with test refs | `dotnet test` |
+| pytest in dependencies | `pytest` |
+| `go.mod` | `go test ./...` |
 
 ## Scoped Tests
 
@@ -76,3 +76,4 @@ Report: framework, scope, exact command, summary table (Total/Passed/Failed/Skip
 - See `AGENT_BACKLOG.md` for active work items
 - See `CLAUDE.md` for project context and workflow
 - See `docs/` for architecture, runbooks, and guides
+
