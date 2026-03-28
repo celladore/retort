@@ -949,7 +949,7 @@ async function syncAgentRegistry(tmpDir, agentsSpec, version, repoName) {
 
   // REGISTRY.json — machine-readable
   const json = JSON.stringify(
-    { generatedAt: new Date().toISOString(), version, agents: allAgents },
+    { version, agents: allAgents },
     null,
     2
   );
