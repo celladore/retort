@@ -154,6 +154,38 @@ function threeWayMerge(oursContent, baseContent, theirsContent) {
 }
 
 // ---------------------------------------------------------------------------
+// Normalize content for semantic comparison (ignores table-cell padding)
+// ---------------------------------------------------------------------------
+
+/**
+ * Strips trailing whitespace and normalises markdown table-cell padding so
+ * that a Prettier-aligned table and a compact table compare as equal when
+ * the cell *values* are identical.  Used to detect whether a disk file
+ * differs from the scaffold cache for reasons other than whitespace.
+ *
+ * @param {string} content
+ * @returns {string}
+ */
+export function normalizeForComparison(content) {
+  return content
+    .split('\n')
+    .map((line) => {
+      // Normalise markdown table rows (data rows only, not separator rows like |---|---|)
+      if (/^\s*\|/.test(line) && !/^\s*\|[\s|:-]+\|\s*$/.test(line)) {
+        return line
+          .split('|')
+          .map((cell, i, arr) =>
+            i === 0 || i === arr.length - 1 ? cell.trimEnd() : ` ${cell.trim()} `
+          )
+          .join('|');
+      }
+      return line.trimEnd();
+    })
+    .join('\n')
+    .trimEnd();
+}
+
+// ---------------------------------------------------------------------------
 // I/O helpers
 // ---------------------------------------------------------------------------
 
@@ -2906,51 +2938,65 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           const prevHash = previousManifest?.files?.[normalizedRel]?.hash;
 
           if (prevHash && diskHash !== prevHash) {
-            // User edited this file — attempt three-way merge
             const cachePath = resolve(scaffoldCacheDir, relPath);
             const newContent = await readFile(srcFile, 'utf-8');
 
             if (existsSync(cachePath)) {
               const baseContent = readFileSync(cachePath, 'utf-8');
               const diskText = diskContent.toString('utf-8');
-              const result = threeWayMerge(diskText, baseContent, newContent);
 
-              if (result) {
-                // Write merged result
-                await ensureDir(dirname(destFile));
-                await writeFile(destFile, result.merged, 'utf-8');
-                // Update scaffold cache with new generated content
-                await ensureDir(dirname(cachePath));
-                await writeFile(cachePath, newContent, 'utf-8');
-                count++;
+              // Check whether the disk differs from the cache for reasons other
+              // than table-cell padding (Prettier alignment).  If the normalised
+              // forms are identical the file contains no real user edits — fall
+              // through to the pristine overwrite path below.
+              if (normalizeForComparison(diskText) !== normalizeForComparison(baseContent)) {
+                // Real user edit — attempt three-way merge
+                const result = threeWayMerge(diskText, baseContent, newContent);
 
-                writtenFiles.push(destFile);
-                if (result.hasConflicts) {
-                  scaffoldResults.managedConflicts.push(normalizedRel);
-                  console.warn(
-                    `[retort:sync] CONFLICT in ${normalizedRel} — resolve <<<< markers manually`
-                  );
-                } else {
-                  scaffoldResults.managedMerged.push(normalizedRel);
-                  logVerbose(`  merged ${normalizedRel} (user edits + template changes combined)`);
+                if (result) {
+                  // Write merged result
+                  await ensureDir(dirname(destFile));
+                  await writeFile(destFile, result.merged, 'utf-8');
+                  // Update scaffold cache with new generated content
+                  await ensureDir(dirname(cachePath));
+                  await writeFile(cachePath, newContent, 'utf-8');
+                  count++;
+
+                  writtenFiles.push(destFile);
+                  if (result.hasConflicts) {
+                    scaffoldResults.managedConflicts.push(normalizedRel);
+                    console.warn(
+                      `[retort:sync] CONFLICT in ${normalizedRel} — resolve <<<< markers manually`
+                    );
+                  } else {
+                    scaffoldResults.managedMerged.push(normalizedRel);
+                    logVerbose(
+                      `  merged ${normalizedRel} (user edits + template changes combined)`
+                    );
+                  }
+                  return;
                 }
+                // git merge-file unavailable — skip and preserve user edits
+                skippedScaffold++;
+                scaffoldResults.managedPreserved.push(normalizedRel);
+                logVerbose(
+                  `  skipped ${normalizedRel} (user edits detected, hash: ${prevHash} → ${diskHash})`
+                );
                 return;
               }
-              // git merge-file unavailable — fall back to skip
-            }
-
-            // No cache or git unavailable — skip and preserve user edits
-            skippedScaffold++;
-            scaffoldResults.managedPreserved.push(normalizedRel);
-            if (!existsSync(resolve(scaffoldCacheDir, relPath))) {
+              // Formatting-only diff — fall through to pristine overwrite
+            } else {
+              // No cache — skip and preserve user edits
+              skippedScaffold++;
+              scaffoldResults.managedPreserved.push(normalizedRel);
               scaffoldResults.managedNoCache.push(normalizedRel);
+              logVerbose(
+                `  skipped ${normalizedRel} (user edits detected, hash: ${prevHash} → ${diskHash})`
+              );
+              return;
             }
-            logVerbose(
-              `  skipped ${normalizedRel} (user edits detected, hash: ${prevHash} → ${diskHash})`
-            );
-            return;
           }
-          // Hash matches or no previous hash — safe to overwrite (pristine)
+          // Hash matches, no previous hash, or formatting-only diff — safe to overwrite (pristine)
           scaffoldResults.managedRegenerated.push(normalizedRel);
         } else {
           // action === 'write' for scaffold: always
