@@ -2673,6 +2673,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       managedConflicts: [],
       managedPreserved: [],
       managedNoCache: [],
+      // scaffold: once — path-derived, skipped because file exists
+      scaffoldOnce: [],
+      // scaffold: adopt-if-missing — explicit metadata, skipped because file exists
+      adoptIfMissing: [],
     };
 
     await runConcurrent(allTmpFiles, async (srcFile) => {
@@ -2697,7 +2701,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         return;
       }
 
-      // Scaffold action resolution: always | managed (check-hash) | once (skip)
+      // Scaffold action resolution: always | managed (check-hash) | once (skip) | adopt-if-missing
       const meta = getTemplateMeta(normalizedRel);
       const overwrite = flags?.overwrite || flags?.force;
       if (!overwrite && existsSync(destFile)) {
@@ -2705,6 +2709,14 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
         if (action === 'skip') {
           skippedScaffold++;
+          scaffoldResults.scaffoldOnce.push(normalizedRel);
+          return;
+        }
+
+        if (action === 'adopt-if-missing') {
+          // File already exists — honour user's version, do not overwrite
+          skippedScaffold++;
+          scaffoldResults.adoptIfMissing.push(normalizedRel);
           return;
         }
 
@@ -3015,6 +3027,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           failed: failedFiles.length,
         },
         fileSummary,
+        scaffoldResults,
         unresolvedPlaceholders: reportCollector?.unresolvedPlaceholders ?? [],
         errors: failedFiles,
       };

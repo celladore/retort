@@ -578,6 +578,17 @@ describe('resolveScaffoldAction', () => {
     expect(resolveScaffoldAction('some/file.md', {}, meta)).toBe('skip');
   });
 
+  it('returns adopt-if-missing for scaffold: adopt-if-missing', () => {
+    const meta = { agentkit: { scaffold: 'adopt-if-missing' } };
+    expect(resolveScaffoldAction('some/file.md', {}, meta)).toBe('adopt-if-missing');
+  });
+
+  it('adopt-if-missing overrides scaffold-once path defaults', () => {
+    const meta = { agentkit: { scaffold: 'adopt-if-missing' } };
+    // docs/ is normally scaffold-once, adopt-if-missing takes precedence
+    expect(resolveScaffoldAction('docs/README.md', {}, meta)).toBe('adopt-if-missing');
+  });
+
   it('falls through to isScaffoldOnce when no meta', () => {
     // docs/ is scaffold-once by default
     expect(resolveScaffoldAction('docs/README.md', {}, null)).toBe('skip');

@@ -990,6 +990,10 @@ export function resolveScaffoldAction(relPath, vars = {}, templateMeta = null) {
   if (scaffold === 'always') return 'write';
   if (scaffold === 'managed') return 'check-hash';
   if (scaffold === 'once') return 'skip';
+  // adopt-if-missing: write only when the destination does not yet exist.
+  // Same runtime behaviour as 'skip' but tracked separately in scaffoldResults
+  // so the sync report can distinguish intentional adoption from path-derived once.
+  if (scaffold === 'adopt-if-missing') return 'adopt-if-missing';
 
   // Test suite guard: skip test files unless the adopter has opted in.
   // Set `automation.testingExamples: true` in project.yaml to allow scaffolding.
