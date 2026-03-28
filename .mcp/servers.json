@@ -12,5 +12,12 @@
     "headers": {
       "Authorization": "Bearer ${MCP_SECRET}"
     }
+  },
+  "retort-mcp-production": {
+    "type": "http",
+    "url": "https://retort-production.up.railway.app/mcp",
+    "headers": {
+      "Authorization": "Bearer ${RETORT_MCP_SECRET}"
+    }
   }
 }
