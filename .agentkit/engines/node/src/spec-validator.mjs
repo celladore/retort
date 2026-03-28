@@ -3,7 +3,7 @@
  * Validates YAML spec files against expected schemas before sync.
  * Catches malformed configs early — before they produce broken output.
  */
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
@@ -1049,9 +1049,35 @@ export function validateSpec(agentkitRoot) {
     }
   }
 
+  // Load agents spec: directory-first (spec/agents/*.yaml), fallback to agents.yaml
+  function loadAgentsSpec() {
+    const agentsDir = resolve(specDir, 'agents');
+    if (existsSync(agentsDir)) {
+      const merged = { agents: {} };
+      const files = readdirSync(agentsDir)
+        .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+        .sort();
+      for (const file of files) {
+        const filePath = resolve(agentsDir, file);
+        try {
+          const parsed = yaml.load(readFileSync(filePath, 'utf-8'));
+          if (!parsed || typeof parsed !== 'object') continue;
+          for (const [category, agentList] of Object.entries(parsed)) {
+            if (!Array.isArray(agentList)) continue;
+            merged.agents[category] = (merged.agents[category] || []).concat(agentList);
+          }
+        } catch (err) {
+          errors.push(`agents/${file}: YAML parse error — ${err.message}`);
+        }
+      }
+      return merged;
+    }
+    return loadYaml('agents.yaml');
+  }
+
   // Load all spec files
   const teams = loadYaml('teams.yaml');
-  const agents = loadYaml('agents.yaml');
+  const agents = loadAgentsSpec();
   const commands = loadYaml('commands.yaml');
   const rules = loadYaml('rules.yaml');
   const settings = loadYaml('settings.yaml');
