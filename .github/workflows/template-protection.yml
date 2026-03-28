@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   label-and-gate:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       issues: write
@@ -53,8 +53,8 @@ jobs:
               '',
               '### Review checklist',
               '- [ ] Changes are intentional and not accidental AI agent modifications',
-              '- [ ] Spec schema validation passes (`pnpm -C .agentkit agentkit:spec-validate`)',
-              '- [ ] Sync produces expected output (`pnpm -C .agentkit agentkit:sync`)',
+              '- [ ] Spec schema validation passes (`pnpm --dir .agentkit agentkit:spec-validate`)',
+              '- [ ] Sync produces expected output (`pnpm --dir .agentkit agentkit:sync`)',
               '- [ ] No secrets or credentials in template variables',
               '- [ ] Breaking changes documented in an ADR',
               '',
@@ -82,7 +82,7 @@ jobs:
             }
 
   validate-templates:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 

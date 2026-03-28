@@ -173,7 +173,7 @@ The existing `retrospective-analyst` agent (operations category, line 651) focus
 1. Add `docs-writer` agent to `agents.yaml` under `operations` category
 2. Add `quality-reviewer` agent to `agents.yaml` under `operations` category
 3. Optionally map `retrospective-analyst` to Quality team in team routing
-4. Run `pnpm -C .agentkit agentkit:sync`
+4. Run `pnpm --dir .agentkit agentkit:sync`
 5. Verify all platform outputs regenerated correctly
 6. Update `UNIFIED_AGENT_TEAMS.md` team-agent mapping table
 

@@ -123,7 +123,7 @@ Implement Option A when **any** of these conditions are met:
 2. Remove lines 165-167 from Data Engineer responsibilities
 3. Remove `adx/**` and `grafana/**` from Data Engineer focus paths
 4. Add `finops-specialist` to intake routing in `teams.yaml`
-5. Run `pnpm -C .agentkit agentkit:sync`
+5. Run `pnpm --dir .agentkit agentkit:sync`
 6. Update `UNIFIED_AGENT_TEAMS.md`
 7. Verify all existing tests pass
 

@@ -74,7 +74,7 @@ Append to the operations category in `.agentkit/spec/agents.yaml`:
 ### Step 2: Run sync to generate outputs (~5 min)
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 This generates:

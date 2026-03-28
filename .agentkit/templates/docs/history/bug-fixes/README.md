@@ -2,6 +2,7 @@
 agentkit:
   scaffold: managed
 ---
+
 # Bug Fixes
 
 Historical records of complex or critical bug resolutions.

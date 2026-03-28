@@ -18,10 +18,10 @@
 
 | Command             | Purpose                                  |
 | ------------------- | ---------------------------------------- |
-| `retort sync`     | Regenerate all AI tool configs from spec |
-| `retort validate` | Check config integrity and security      |
+| `retort sync`       | Regenerate all AI tool configs from spec |
+| `retort validate`   | Check config integrity and security      |
 | `agentkit discover` | Scan repo and detect tech stacks         |
-| `retort init`     | Initialize a new repo overlay            |
+| `retort init`       | Initialize a new repo overlay            |
 | `/orchestrate`      | Run multi-team coordination workflow     |
 | `/check`            | Run quality gates locally                |
 | `/review`           | Request code review from relevant teams  |
@@ -113,4 +113,4 @@ If `.claude/state/orchestrator.json` becomes corrupted:
 
 ---
 
-_This runbook is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate._
+_This runbook is maintained by Retort. Run `pnpm --dir .agentkit retort:sync` to regenerate._

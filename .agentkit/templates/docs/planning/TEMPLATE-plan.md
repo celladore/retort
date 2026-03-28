@@ -21,7 +21,7 @@
 ## Files to Modify
 
 | File | Change |
-|------|--------|
+| ---- | ------ |
 
 ## Acceptance Criteria
 

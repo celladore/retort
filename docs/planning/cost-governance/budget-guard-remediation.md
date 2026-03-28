@@ -169,8 +169,8 @@ function extractBudgetPolicyRegex(content) {
 
 ```bash
 # After applying fixes:
-pnpm -C .agentkit vitest run src/__tests__/budget-guard.test.mjs
-pnpm -C .agentkit agentkit:sync   # regenerate .claude/hooks/budget-guard-check.sh
+pnpm --dir .agentkit vitest run src/__tests__/budget-guard.test.mjs
+pnpm --dir .agentkit agentkit:sync   # regenerate .claude/hooks/budget-guard-check.sh
 ```
 
 ---
@@ -378,7 +378,7 @@ Phase 1 ──> Phase 2 ──> Phase 3 ──> Phase 4
 After all phases:
 
 ```bash
-pnpm -C .agentkit vitest run                    # all tests pass
-pnpm -C .agentkit agentkit:sync                 # regenerate outputs
+pnpm --dir .agentkit vitest run                    # all tests pass
+pnpm --dir .agentkit agentkit:sync                 # regenerate outputs
 git diff --quiet                                 # no unexpected drift
 ```

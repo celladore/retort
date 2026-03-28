@@ -121,9 +121,56 @@ budgetPolicy:
       expect(result.daily.maxSessions).toBe(20);
       expect(result.daily.maxTotalDurationMinutes).toBe(240);
       expect(result.daily.maxTotalCommands).toBe(500);
-      // Regex fallback matches first occurrence of warnAtPercent (session: 75)
-      // since it doesn't parse YAML hierarchy — this is expected behavior
-      expect(result.daily.warnAtPercent).toBe(75);
+      // Section-aware extraction correctly returns the daily-scoped value
+      expect(result.daily.warnAtPercent).toBe(85);
+    });
+
+    it('should return correct daily.warnAtPercent when different from session.warnAtPercent', () => {
+      const yaml = `
+budgetPolicy:
+  enforcement: warn
+  session:
+    warnAtPercent: 70
+  daily:
+    warnAtPercent: 90
+`;
+      const result = extractBudgetPolicyRegex(yaml);
+      expect(result.session.warnAtPercent).toBe(70);
+      expect(result.daily.warnAtPercent).toBe(90);
+    });
+
+    it('should not read enforcement from a sibling top-level section (parser scope regression)', () => {
+      // Regression: getStr previously searched `^  enforcement:` globally in content.
+      // If a sibling section (e.g. costTracking) has enforcement before budgetPolicy,
+      // getStr would return the wrong value. getStr must now scope to the budgetPolicy block.
+      const yaml = `
+costTracking:
+  enforcement: off
+budgetPolicy:
+  enforcement: enforce
+  session:
+    maxCommands: 50
+`;
+      const result = extractBudgetPolicyRegex(yaml);
+      expect(result.enforcement).toBe('enforce');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // deepMerge — additional edge cases
+  // -------------------------------------------------------------------------
+  describe('deepMerge — additional edge cases', () => {
+    it('should preserve 0 values (not treat as null/undefined)', () => {
+      const result = deepMerge({ a: 10, b: 5 }, { a: 0 });
+      expect(result.a).toBe(0);
+      expect(result.b).toBe(5);
+    });
+
+    it('should not be affected by __proto__ keys', () => {
+      // deepMerge skips __proto__ key — no prototype pollution
+      const overrides = JSON.parse('{"__proto__":{"polluted":true},"maxCommands":5}');
+      expect(() => deepMerge({}, overrides)).not.toThrow();
+      expect({}.polluted).toBeUndefined();
     });
   });
 
@@ -266,6 +313,34 @@ budgetPolicy:
       expect(result.status).toBe('deny');
       expect(result.reasons.some((r) => r.includes('Files modified'))).toBe(true);
     });
+
+    it('should respect maxCommands: 0 — deny immediately on any command', () => {
+      const policy = {
+        ...DEFAULT_POLICY,
+        enforcement: 'enforce',
+        session: { ...DEFAULT_POLICY.session, maxCommands: 0 },
+      };
+      writeActiveSession({
+        commandsRun: [{ command: 'check', timestamp: new Date().toISOString() }],
+      });
+
+      const result = checkSessionBudget(TEST_AGENTKIT, policy);
+      expect(result.status).toBe('deny');
+    });
+
+    it('should respect warnAtPercent: 0 — warn at any non-zero usage', () => {
+      const policy = {
+        ...DEFAULT_POLICY,
+        enforcement: 'warn',
+        session: { ...DEFAULT_POLICY.session, maxCommands: 10, warnAtPercent: 0 },
+      };
+      writeActiveSession({
+        commandsRun: [{ command: 'check', timestamp: new Date().toISOString() }],
+      });
+
+      const result = checkSessionBudget(TEST_AGENTKIT, policy);
+      expect(result.status).toBe('warn');
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -330,6 +405,79 @@ budgetPolicy:
       const result = checkDailyBudget(TEST_AGENTKIT, policy);
       expect(result.status).toBe('warn');
       expect(result.reasons.some((r) => r.includes('Daily sessions'))).toBe(true);
+    });
+
+    it('should sum durations without per-session rounding accumulation', () => {
+      // 10 sessions of 90s each = 900s = exactly 15 min
+      // Per-session rounding (Math.round(90000 / 60000) = 2) would give 20 min
+      const today = new Date().toISOString().split('T')[0];
+      for (let i = 0; i < 10; i++) {
+        const sid = `dur-sess-${i}`;
+        writeFileSync(
+          resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${sid}.json`),
+          JSON.stringify({
+            sessionId: sid,
+            startTime: `${today}T10:0${i}:00.000Z`,
+            status: 'completed',
+            durationMs: 90_000, // 90 seconds
+            commandsRun: [],
+            filesModified: 0,
+          }),
+          'utf-8'
+        );
+      }
+
+      const result = checkDailyBudget(TEST_AGENTKIT);
+      expect(result.metrics.totalDurationMinutes).toBe(15);
+    });
+
+    it('should exclude yesterday sessions from daily totals', () => {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0];
+      // Use YYYYMMDD-prefixed filenames so the getTodaySessions() filename fast-path
+      // is exercised: yesterday's file is filtered out by name alone without reading content.
+      const todayYYYYMMDD = today.replace(/-/g, '');
+      const yesterdayYYYYMMDD = yesterday.replace(/-/g, '');
+
+      writeFileSync(
+        resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${yesterdayYYYYMMDD}-main.json`),
+        JSON.stringify({
+          sessionId: 'yesterday-sess',
+          startTime: `${yesterday}T10:00:00.000Z`,
+          status: 'completed',
+          durationMs: 60 * 60_000,
+          commandsRun: [{ command: 'build' }],
+          filesModified: 5,
+        }),
+        'utf-8'
+      );
+      writeFileSync(
+        resolve(TEST_AGENTKIT, 'logs', 'sessions', `session-${todayYYYYMMDD}-main.json`),
+        JSON.stringify({
+          sessionId: 'today-sess',
+          startTime: `${today}T08:00:00.000Z`,
+          status: 'completed',
+          durationMs: 10 * 60_000,
+          commandsRun: [{ command: 'check' }],
+          filesModified: 1,
+        }),
+        'utf-8'
+      );
+
+      const result = checkDailyBudget(TEST_AGENTKIT);
+      expect(result.metrics.sessionCount).toBe(1);
+      expect(result.metrics.totalDurationMinutes).toBe(10);
+      expect(result.metrics.totalCommands).toBe(1);
+    });
+
+    it('should skip malformed session JSON without crashing', () => {
+      writeFileSync(
+        resolve(TEST_AGENTKIT, 'logs', 'sessions', 'session-corrupt.json'),
+        'not valid json{{{',
+        'utf-8'
+      );
+
+      expect(() => checkDailyBudget(TEST_AGENTKIT)).not.toThrow();
     });
   });
 

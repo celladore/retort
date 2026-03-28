@@ -62,15 +62,15 @@ Extended existing Tembo "Enrich Linear Issue" automation to also apply routing l
 
 ### Agent Assignment
 
-| Team | Primary Agents |
-|------|---------------|
-| Coding | Codex (autonomous), Cursor (interactive), GitHub Copilot (PR gen) |
+| Team     | Primary Agents                                                     |
+| -------- | ------------------------------------------------------------------ |
+| Coding   | Codex (autonomous), Cursor (interactive), GitHub Copilot (PR gen)  |
 | Research | Tembo (orchestrator), ChatGPT (deep research), Solo (codebase Q&A) |
-| QA | Ranger (recommended), Tusk (recommended) — not yet enabled |
-| Ops | GitHub integration (broken auth) |
-| Design | Stilla (meeting context + drafts) |
-| Docs | Claude Code, Notion AI |
-| Support | Intercom (MCP), ChatGPT |
+| QA       | Ranger (recommended), Tusk (recommended) — not yet enabled         |
+| Ops      | GitHub integration (broken auth)                                   |
+| Design   | Stilla (meeting context + drafts)                                  |
+| Docs     | Claude Code, Notion AI                                             |
+| Support  | Intercom (MCP), ChatGPT                                            |
 
 ## Lessons Learned
 

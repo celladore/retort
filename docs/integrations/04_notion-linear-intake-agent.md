@@ -64,26 +64,26 @@ Use the best available mapping from the intake item:
 
 **Team assignment:** Assign to the correct sub-team based on the routing label you apply (see labels below):
 
-| Routing label | Sub-team |
-|---|---|
-| `ready-to-code` | Coding (COD) |
-| `needs-investigation` | Research (RES) |
-| `needs-tests` | QA (QA) |
-| `ci-cd` or `find-similar` | Ops (OPS) |
-| `needs-visual-check` | Design (DES) |
-| `needs-docs` | Docs (DOC) |
-| `customer-issue` | Support (SUP) |
+| Routing label             | Sub-team       |
+| ------------------------- | -------------- |
+| `ready-to-code`           | Coding (COD)   |
+| `needs-investigation`     | Research (RES) |
+| `needs-tests`             | QA (QA)        |
+| `ci-cd` or `find-similar` | Ops (OPS)      |
+| `needs-visual-check`      | Design (DES)   |
+| `needs-docs`              | Docs (DOC)     |
+| `customer-issue`          | Support (SUP)  |
 
 **Assignees:** Leave unassigned by default — the team's triage process will handle assignment. Only assign `@Tembo` if your research was inconclusive and deeper investigation is needed before the issue is actionable.
 
 **Priority (Linear):**
 
 | Notion Priority | Linear Priority |
-|---|---|
-| Critical | P0 (Urgent) |
-| High | P1 (High) |
-| Medium | P2 (Medium) |
-| Low | P3 (Low) |
+| --------------- | --------------- |
+| Critical        | P0 (Urgent)     |
+| High            | P1 (High)       |
+| Medium          | P2 (Medium)     |
+| Low             | P3 (Low)        |
 
 **Labels (required — exactly 2):**
 
@@ -107,12 +107,12 @@ You may also add additional surface-area labels that help based on Area, Compone
 
 Every intake item must end up somewhere — **never leave it in Intake**.
 
-| Outcome | Action |
-|---|---|
-| **Filed to Linear** | Set Status to `Filed`. Move page out of Intake. |
-| **Duplicate** | Set Status to `Duplicate`. Move page to **Rejections**. Link the existing Linear issue in the page body or comments. |
-| **Track but don't file** | Move page to **Backlog**. Set Status to `Backlog` or `To Do`. |
-| **Not tracking** | Move page to **Rejections**. Set Status to `Rejected`. |
+| Outcome                  | Action                                                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| **Filed to Linear**      | Set Status to `Filed`. Move page out of Intake.                                                                      |
+| **Duplicate**            | Set Status to `Duplicate`. Move page to **Rejections**. Link the existing Linear issue in the page body or comments. |
+| **Track but don't file** | Move page to **Backlog**. Set Status to `Backlog` or `To Do`.                                                        |
+| **Not tracking**         | Move page to **Rejections**. Set Status to `Rejected`.                                                               |
 
 ---
 
@@ -157,12 +157,12 @@ Perform research when the issue seems non-trivial, unclear, or risky. Skip resea
 
 ## 📊 Team routing reference
 
-| # | Team | Key | Routing Label | Primary Agents |
-|---|------|-----|---------------|----------------|
-| 1 | Coding | COD | `ready-to-code` | Codex, Cursor, Copilot |
-| 2 | Research | RES | `needs-investigation` | Tembo, ChatGPT, Solo |
-| 3 | QA | QA | `needs-tests` | Ranger, Tusk |
-| 4 | Ops | OPS | `ci-cd` / `find-similar` | GitHub integration |
-| 5 | Design | DES | `needs-visual-check` | Stilla |
-| 6 | Docs | DOC | `needs-docs` | Claude Code, Notion AI |
-| 7 | Support | SUP | `customer-issue` | Intercom (MCP), ChatGPT |
+| #   | Team     | Key | Routing Label            | Primary Agents          |
+| --- | -------- | --- | ------------------------ | ----------------------- |
+| 1   | Coding   | COD | `ready-to-code`          | Codex, Cursor, Copilot  |
+| 2   | Research | RES | `needs-investigation`    | Tembo, ChatGPT, Solo    |
+| 3   | QA       | QA  | `needs-tests`            | Ranger, Tusk            |
+| 4   | Ops      | OPS | `ci-cd` / `find-similar` | GitHub integration      |
+| 5   | Design   | DES | `needs-visual-check`     | Stilla                  |
+| 6   | Docs     | DOC | `needs-docs`             | Claude Code, Notion AI  |
+| 7   | Support  | SUP | `customer-issue`         | Intercom (MCP), ChatGPT |

@@ -466,10 +466,10 @@ runtime implementation — it's a prompt-only slash command with no CLI handler.
    - Document the `autoImport` flag behavior
 
 2. Run the full validation matrix:
-   - `pnpm -C .agentkit agentkit:spec-validate`
-   - `pnpm -C .agentkit agentkit:sync`
-   - `pnpm -C .agentkit agentkit:validate`
-   - `pnpm -C .agentkit test`
+   - `pnpm --dir .agentkit agentkit:spec-validate`
+   - `pnpm --dir .agentkit agentkit:sync`
+   - `pnpm --dir .agentkit agentkit:validate`
+   - `pnpm --dir .agentkit test`
    - Verify determinism (sync twice, no drift)
 
 ---

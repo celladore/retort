@@ -229,7 +229,7 @@ try {
     Write-Host ""
     if ($merged.Count -gt 0) {
         Write-Info "Next steps:"
-        Write-Host "  1. Run: pnpm -C .agentkit retort:sync"
+        Write-Host "  1. Run: pnpm --dir .agentkit retort:sync"
         Write-Host "  2. Run: pnpm test"
         Write-Host "  3. Review with: git log --oneline -20"
     }

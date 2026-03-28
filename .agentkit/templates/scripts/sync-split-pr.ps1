@@ -45,7 +45,7 @@ if (-not $Branch) {
 }
 
 Write-Host "Running sync..."
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 
 $changed = git status --porcelain
 if (-not $changed) {
@@ -86,7 +86,7 @@ $prBody = @"
 Automated sync-only PR.
 
 - Source branch: $currentBranch
-- Sync command: pnpm -C .agentkit agentkit:sync
+- Sync command: pnpm --dir .agentkit agentkit:sync
 - Changed files: $filesCount
 "@
 

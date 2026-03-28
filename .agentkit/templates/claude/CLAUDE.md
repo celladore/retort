@@ -12,6 +12,7 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 
 - **Repository**: {{repoName}}
 - **Default Branch**: {{defaultBranch}}
+- **Integration Branch** (PR target): {{integrationBranch}}
 - **Framework Version**: {{version}}
   {{#if projectPhase}}
 
@@ -36,28 +37,31 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
   {{/if}}
 
 {{#if hasSlashCommands}}
+
 ## Quick Reference
 
-| Command              | Purpose                                      |
-| -------------------- | -------------------------------------------- |
-| `/start`             | New user entry point — guided next steps     |
-{{#if hasTeamOrchestration}}| `/orchestrate`       | Master coordinator — assess, plan, delegate  |
-{{/if}}| `/discover`          | Scan codebase, detect tech stacks            |
-{{#if hasHealthcheck}}| `/healthcheck`       | Pre-flight validation                        |
-{{/if}}{{#if hasCodeReview}}| `/review`            | Code review with quality gates               |
-{{/if}}{{#if hasQualityGates}}| `/check`             | Universal quality gate (lint + test + build) |
-{{/if}}| `/plan`              | Structured planning before implementation    |
-| `/build`             | Build project (auto-detects stack)           |
-| `/test`              | Run tests (auto-detects stack)               |
-| `/format`            | Format code (auto-detects stack)             |
-| `/deploy`            | Deployment automation                        |
-| `/security`          | Security audit                               |
-| `/sync-backlog`      | Update AGENT_BACKLOG.md                      |
-| `/document-history`  | Create history doc for completed work        |
-{{#if hasSessionHandoff}}| `/handoff`           | Session handoff summary                      |
+| Command                        | Purpose                                  |
+| ------------------------------ | ---------------------------------------- | -------------------------------------------- |
+| `/start`                       | New user entry point — guided next steps |
+| {{#if hasTeamOrchestration}}   | `/orchestrate`                           | Master coordinator — assess, plan, delegate  |
+| {{/if}}                        | `/discover`                              | Scan codebase, detect tech stacks            |
+| {{#if hasHealthcheck}}         | `/healthcheck`                           | Pre-flight validation                        |
+| {{/if}}{{#if hasCodeReview}}   | `/review`                                | Code review with quality gates               |
+| {{/if}}{{#if hasQualityGates}} | `/check`                                 | Universal quality gate (lint + test + build) |
+| {{/if}}                        | `/plan`                                  | Structured planning before implementation    |
+| `/build`                       | Build project (auto-detects stack)       |
+| `/test`                        | Run tests (auto-detects stack)           |
+| `/format`                      | Format code (auto-detects stack)         |
+| `/deploy`                      | Deployment automation                    |
+| `/security`                    | Security audit                           |
+| `/sync-backlog`                | Update AGENT_BACKLOG.md                  |
+| `/document-history`            | Create history doc for completed work    |
+| {{#if hasSessionHandoff}}      | `/handoff`                               | Session handoff summary                      |
+
 {{/if}}{{/if}}
 
 {{#if hasTeamOrchestration}}
+
 ## Team Commands
 
 | Command          | Team                | Focus                     |
@@ -72,7 +76,9 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 | `/team-docs`     | Documentation (T8)  | Docs, guides              |
 | `/team-product`  | Product (T9)        | Features, PRDs            |
 | `/team-quality`  | Quality (T10)       | Review, refactor          |
+
 {{/if}}
+
 ## Workflow
 
 ### 5-Phase Lifecycle
@@ -84,9 +90,10 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 5. **Ship** — Deploy, document{{#if hasSessionHandoff}}, hand off (`/deploy`, `/handoff`){{/if}}
 
 {{#if hasTeamOrchestration}}
+
 ### Standard Session Flow
 
-```text
+````text
 /orchestrate --assess-only → Understand current state
 /plan                     → Design implementation
 /team-<name>              → Execute with appropriate team
@@ -197,32 +204,32 @@ After completing significant work (bug fixes, features, implementations, or migr
 
 ```bash
 ./scripts/create-doc.sh <type> "<title>" [pr-number]
-```
+````
 
-| Work Type | Command | Trigger |
-| --- | --- | --- |
-| Bug fix (non-trivial) | `./scripts/create-doc.sh bugfix "Title"` | Any bug fix touching 2+ files or requiring root-cause analysis |
-| New feature | `./scripts/create-doc.sh feature "Title"` | Any user-facing feature or new capability |
-| Implementation | `./scripts/create-doc.sh implementation "Title"` | Architecture changes, refactors, new subsystems |
-| Migration | `./scripts/create-doc.sh migration "Title"` | Library upgrades, data migrations, infrastructure changes |
+| Work Type             | Command                                          | Trigger                                                        |
+| --------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
+| Bug fix (non-trivial) | `./scripts/create-doc.sh bugfix "Title"`         | Any bug fix touching 2+ files or requiring root-cause analysis |
+| New feature           | `./scripts/create-doc.sh feature "Title"`        | Any user-facing feature or new capability                      |
+| Implementation        | `./scripts/create-doc.sh implementation "Title"` | Architecture changes, refactors, new subsystems                |
+| Migration             | `./scripts/create-doc.sh migration "Title"`      | Library upgrades, data migrations, infrastructure changes      |
 
 Templates are in `docs/history/` — fill in all sections after generation. The `/review --focus=retrospective` command captures issues and lessons learned separately. See `docs/engineering/06_pr_documentation.md` for the full strategy.
 
 All project documentation follows a domain-driven structure in `docs/`:
 
-| Category           | Purpose                                        |
-| ------------------ | ---------------------------------------------- |
-| `product/`         | Product vision, strategy, personas, PRDs       |
-| `architecture/`    | Specs, ADRs, diagrams, tech stack decisions    |
-| `orchestration/`   | Orchestration guide, PM guide, protocols       |
-| `agents/`          | Agent catalog, roles, team mappings            |
-| `api/`             | API reference, authentication, versioning      |
-| `operations/`      | Deployment, monitoring, SLAs                   |
-| `engineering/`     | Setup, coding standards, testing, contributing |
-| `integrations/`    | External services, third-party connections     |
-| `reference/`       | Glossary, acronyms, FAQ, tool config           |
-| `handoffs/`        | AI session handoff documents                   |
-| `history/`         | Bug fixes, features, implementations, lessons  |
+| Category         | Purpose                                        |
+| ---------------- | ---------------------------------------------- |
+| `product/`       | Product vision, strategy, personas, PRDs       |
+| `architecture/`  | Specs, ADRs, diagrams, tech stack decisions    |
+| `orchestration/` | Orchestration guide, PM guide, protocols       |
+| `agents/`        | Agent catalog, roles, team mappings            |
+| `api/`           | API reference, authentication, versioning      |
+| `operations/`    | Deployment, monitoring, SLAs                   |
+| `engineering/`   | Setup, coding standards, testing, contributing |
+| `integrations/`  | External services, third-party connections     |
+| `reference/`     | Glossary, acronyms, FAQ, tool config           |
+| `handoffs/`      | AI session handoff documents                   |
+| `history/`       | Bug fixes, features, implementations, lessons  |
 
 {{#if hasIntegrations}}
 
@@ -355,6 +362,16 @@ Then commit the regenerated output. The CI drift check **will fail** if generate
 ### Branch Naming
 
 Feature branches: `type/short-description` (e.g., `feat/add-user-auth`, `fix/token-refresh`)
+
+### PR Target Branch
+
+All PRs **must** target `{{integrationBranch}}` — not `{{defaultBranch}}` or any other branch unless explicitly instructed:
+
+```bash
+gh pr create --base {{integrationBranch}} --title "type(scope): description"
+```
+
+The integration branch (`{{integrationBranch}}`) is the configured PR target for this repo. Creating PRs against `{{defaultBranch}}` directly causes reverse-merge noise and bypasses the integration pipeline. A hookify rule in `.claude/rules/pr-base-branch.md` enforces this at runtime.
 
 ## Safety Rules
 

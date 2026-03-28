@@ -410,7 +410,7 @@ Project start date: **2026-03-03**
 
 | Product                  | Centralized Mapping | Coding Scorecards | Drift Detection | Gotcha Docs |
 | ------------------------ | ------------------- | ----------------- | --------------- | ----------- |
-| Retort           | Yes                 | Yes               | Planned         | Yes         |
+| Retort                   | Yes                 | Yes               | Planned         | Yes         |
 | LangChain                | No                  | Partial           | No              | No          |
 | OSS Agent Bundles        | No                  | No                | No              | No          |
 | Enterprise RAG Platforms | Yes                 | Partial           | Yes             | Partial     |

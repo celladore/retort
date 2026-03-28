@@ -225,7 +225,7 @@ For findings that are safe to auto-fix:
 Run:
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 ```
 
 This will generate `.claude/commands/doc-audit.md` (and equivalents for other platforms).

@@ -26,11 +26,13 @@ This command participates in the shared workflow state. Read and update:
 - **.windsurf/state/events.log** — Append a log line when completing significant actions
 
 {{#if commandFlags}}
+
 ## Flags
 
 {{commandFlags}}
 
 {{/if}}
+
 ## Implementation
 
 Execute the steps defined in the corresponding command (`.windsurf/commands/{{commandName}}.md`). The full specification and allowed tools are in that file.
@@ -44,14 +46,15 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/{{co
 - See `COMMAND_GUIDE.md` for when to choose each command
 
 {{#if isSyncBacklog}}
+
 ## Intake Semantics
 
 - Tracker: `{{issueTracker}}`
 - Intake owner team: `{{intakeOwnerTeam}}`
 - Operations team: `{{intakeOperationsTeam}}`
 - Cadence: `{{intakeCadence}}`
-{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
-{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+  {{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+  {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 Run sync-backlog against the configured tracker with ownership-based routing and escalation.
 

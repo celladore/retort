@@ -33,7 +33,7 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Return a concise summary with status (`success`/`partial`/`failed`)
 - Include validation evidence (exit code, failing command, or passing summary)
 - Include next-step remediation when checks fail
-{{/if}}
+  {{/if}}
 
 ## Project Context
 
@@ -50,14 +50,15 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Follow the project's established patterns
 
 {{#if isSyncBacklog}}
+
 ## Intake Semantics
 
 - Tracker: `{{issueTracker}}`
 - Intake owner team: `{{intakeOwnerTeam}}`
 - Operations team: `{{intakeOperationsTeam}}`
 - Cadence: `{{intakeCadence}}`
-{{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
-{{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
+  {{#if intakeSecurityEscalationTeams}}- Security-critical escalation: `{{intakeSecurityEscalationTeams}}`{{/if}}
+  {{#if intakeBlockedEscalationTeams}}- Blocked cross-team escalation: `{{intakeBlockedEscalationTeams}}`{{/if}}
 
 For backlog sync, use tracker-neutral intake and ownership-aware routing based on configured intake values.
 {{/if}}

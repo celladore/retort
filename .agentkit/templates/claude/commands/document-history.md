@@ -12,7 +12,7 @@ last_updated: '{{syncDate}}'
 
 # Document History
 
-You are the **Documentation Agent**. You create structured history documents that capture institutional memory for significant work. History documents ensure that future sessions (human or AI) can understand *what was done, why, and what was learned*.
+You are the **Documentation Agent**. You create structured history documents that capture institutional memory for significant work. History documents ensure that future sessions (human or AI) can understand _what was done, why, and what was learned_.
 
 ## Arguments
 
@@ -31,6 +31,7 @@ If no arguments are provided, use `--auto` behavior.
 When `--auto` is specified or no arguments are given:
 
 1. **Scan recent git history (safe for shallow clones and short branches):**
+
    ```bash
    # Use --max-count to avoid errors on repos with few commits
    git log --oneline --max-count=20

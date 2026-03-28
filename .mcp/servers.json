@@ -4,5 +4,20 @@
     "puppeteer": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-puppeteer"] },
     "memory": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"] },
     "fetch": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-fetch"] }
+  },
+  "retort-mcp-local": {
+    "comment": "Local dev — run 'npm run dev' in .mcp/server/ first",
+    "type": "http",
+    "url": "http://localhost:3000/mcp",
+    "headers": {
+      "Authorization": "Bearer ${MCP_SECRET}"
+    }
+  },
+  "retort-mcp-production": {
+    "type": "http",
+    "url": "https://retort-production.up.railway.app/mcp",
+    "headers": {
+      "Authorization": "Bearer ${RETORT_MCP_SECRET}"
+    }
   }
 }

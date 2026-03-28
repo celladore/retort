@@ -292,6 +292,7 @@ export const PROJECT_MAPPING = [
     check: 'not-none',
   },
   { src: 'crosscutting.api.responseFormat', dest: 'apiResponseFormat' },
+  { src: 'crosscutting.api.errorFormat', dest: 'apiErrorFormat' },
   { src: 'crosscutting.api.rateLimiting', dest: 'hasRateLimiting', type: 'boolean' },
 
   // Database

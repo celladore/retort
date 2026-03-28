@@ -257,13 +257,13 @@ npx retort ui
 
 ### User Flow Matrix
 
-| Step         | CLI / Automation          | UI Path                | Outcome                |
-| ------------ | ------------------------- | ---------------------- | ---------------------- |
-| Install      | `npm i -D retort` | PWA onboarding wizard  | Retort ready   |
-| Sync / init  | `npx retort sync` | "Sync Now" in UI       | Overlays in place      |
-| Overlay mgmt | CLI commands              | Dashboard editor       | Changes committed      |
-| Drift check  | GitHub Action step        | CI status in UI        | Drift flagged/cleared  |
-| Update       | `npm update` + sync       | "Apply/Rollback" in UI | State current/restored |
+| Step         | CLI / Automation    | UI Path                | Outcome                |
+| ------------ | ------------------- | ---------------------- | ---------------------- |
+| Install      | `npm i -D retort`   | PWA onboarding wizard  | Retort ready           |
+| Sync / init  | `npx retort sync`   | "Sync Now" in UI       | Overlays in place      |
+| Overlay mgmt | CLI commands        | Dashboard editor       | Changes committed      |
+| Drift check  | GitHub Action step  | CI status in UI        | Drift flagged/cleared  |
+| Update       | `npm update` + sync | "Apply/Rollback" in UI | State current/restored |
 
 ### Edge Cases
 
@@ -304,8 +304,8 @@ npx retort ui
 
 ### CLI Commands
 
-| Command                       | Description                                        |
-| ----------------------------- | -------------------------------------------------- |
+| Command               | Description                                        |
+| --------------------- | -------------------------------------------------- |
 | `retort init`         | Initialize overlays for a new consumer repo        |
 | `retort sync`         | Regenerate outputs from current overlays and specs |
 | `retort ui`           | Launch PWA UI on localhost:4827                    |
@@ -564,7 +564,7 @@ Minimal manual steps, rapid path to first agent deployed or registered:
 
 ### Competitive Analysis
 
-| Capability                | GitHub Copilot | Claude | Cursor | Retort        |
+| Capability                | GitHub Copilot | Claude | Cursor | Retort                |
 | ------------------------- | -------------- | ------ | ------ | --------------------- |
 | Multi-tool overlay system | No             | No     | No     | **Yes**               |
 | PWA / UI-based editing    | No             | No     | No     | **Yes**               |

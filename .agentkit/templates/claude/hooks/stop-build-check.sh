@@ -48,6 +48,10 @@ run_check() {
 
 FAILURE_REASON=""
 
+# Helper: emit a block decision — passes reason via stdin to avoid E2BIG on
+# Windows Git Bash when $FAILURE_REASON contains large command output (issue #453).
+emit_block() { printf '%s' "$1" | jq -Rs '{"decision": "block", "reason": .}'; }
+
 # -- Check for spec-modified-without-sync (lightweight git check only) ------
 # Never re-runs agentkit sync here — that can take 30s+ and is too slow for a
 # stop hook. Instead, warn non-blockingly if spec files look dirty.
@@ -85,6 +89,8 @@ if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
     if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
         while IFS= read -r line; do
             MSG=$(echo "$line" | cut -d' ' -f2-)
+            # Skip auto-generated merge commits — they are never user-authored
+            [[ "$MSG" =~ ^Merge\ (remote-tracking\ branch|branch|pull\ request) ]] && continue
             if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
                 BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
             fi
@@ -93,7 +99,7 @@ if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
 
     if [[ -n "$BAD_COMMITS" ]]; then
         FAILURE_REASON="Commits with non-conventional messages detected. PR titles must follow 'type(scope): description'.\nBad commits:\n${BAD_COMMITS}\nFix with: git rebase -i and reword, or ensure the PR title follows the format."
-        jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+        emit_block "$FAILURE_REASON"
         exit 0
     fi
 fi
@@ -129,7 +135,7 @@ if [[ -f "${CWD}/package.json" ]] && _has_changed '\.(ts|tsx|js|jsx|mjs|cjs)$'; 
 
     if has_script "lint"; then
         if ! run_check "${pm} lint" "$pm" run lint; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            emit_block "$FAILURE_REASON"
             exit 0
         fi
     fi
@@ -143,7 +149,7 @@ if _has_changed '\.(cs|csproj|fsproj|vbproj|sln)$'; then
     if [[ -n "$SLN_FILE" ]] && command -v dotnet &>/dev/null; then
         ran_check=true
         if ! run_check "dotnet build" dotnet build "$SLN_FILE" --nologo --verbosity quiet; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            emit_block "$FAILURE_REASON"
             exit 0
         fi
     fi
@@ -156,7 +162,7 @@ if _has_changed '\.(rs)$|Cargo\.(toml|lock)$'; then
     if [[ -f "${CWD}/Cargo.toml" ]] && command -v cargo &>/dev/null; then
         ran_check=true
         if ! run_check "cargo check" cargo check --manifest-path "${CWD}/Cargo.toml" --quiet; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            emit_block "$FAILURE_REASON"
             exit 0
         fi
     fi
@@ -169,7 +175,7 @@ if _has_changed '\.py$'; then
     ran_check=true
     if command -v ruff &>/dev/null; then
         if ! run_check "ruff check" ruff check "$CWD" --quiet; then
-            jq -n --arg reason "$FAILURE_REASON" '{ decision: "block", reason: $reason }'
+            emit_block "$FAILURE_REASON"
             exit 0
         fi
     fi
@@ -226,6 +232,16 @@ if [[ -n "$AGENTKIT_ROOT" ]] && command -v jq &>/dev/null; then
     jq -n --arg ts "$TIMESTAMP" --arg sid "$SESSION_ID" --arg files "$files_changed" \
         '{timestamp: $ts, event: "session_end", sessionId: $sid, filesModified: ($files | tonumber)}' \
         >> "$LOG_FILE" 2>/dev/null || true
+fi
+
+# -- Aggregate agent metrics (non-blocking) --------------------------------
+# Runs aggregate-metrics.mjs to parse events.log and update agent-metrics.json
+# and agent-health.json in .claude/state/. Failures are silently ignored so
+# they never block a stop.
+STATE_DIR="${CWD}/.claude/state"
+METRICS_SCRIPT="${CWD}/scripts/aggregate-metrics.mjs"
+if [[ -f "$METRICS_SCRIPT" ]] && [[ -f "${STATE_DIR}/events.log" ]] && command -v node &>/dev/null; then
+    node "$METRICS_SCRIPT" --state "$STATE_DIR" 2>/dev/null || true
 fi
 
 # If no build tools were found, or all checks passed -- allow stop.

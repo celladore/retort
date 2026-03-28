@@ -267,6 +267,19 @@ automation:
     scaffoldOverrides:
       alwaysRegenerate: [] # relative paths that must always be regenerated even if scaffold-once by default
       scaffoldOnce: [] # relative paths that should be treated as scaffold-once
+  # Test suite scaffolding: disabled by default (GH#422).
+  # Retort will never write test files (tests/, __tests__/, *.test.*, vitest.config.*, etc.)
+  # into adopter repos unless this is explicitly set to true.
+  # Set to true only when you want retort to scaffold example tests as a starting point.
+  testingExamples: false
+
+# Domain selection — controls which rule domains are generated
+# When omitted, domains are auto-selected from stack.languages (mode: configured/hybrid)
+# or all domains are included (mode: heuristic).
+# Uncomment and specify to override auto-detection:
+# domains:
+#   rules: [typescript, security, testing, git-workflow, documentation,
+#           ci-cd, dependency-management, agent-conduct, template-protection]
 
 # Domain selection — controls which rule domains are generated
 # When omitted, domains are auto-selected from stack.languages (mode: configured/hybrid)

@@ -1,0 +1,122 @@
+name: Sync Bug Report
+description: Report a bug with retort:sync — generated output, placeholder warnings, drift, or scaffolding issues
+title: 'fix(sync): '
+labels: ['bug', 'sync-engine']
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for bugs related to `retort:sync` / `agentkit:sync` output — wrong files generated,
+        placeholder warnings, drift check failures, scaffolding issues, or LF/CRLF churn.
+
+        For general bugs unrelated to sync, use the standard **Bug Report** template instead.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong? What did you expect instead?
+      placeholder: Describe the sync bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Run `pnpm --dir .agentkit retort:sync`
+        2. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: sync-diagnostics
+    attributes:
+      label: Sync Diagnostics
+      description: |
+        Run the following and paste the output. This is **required** for sync bugs —
+        it gives us the provenance and placeholder locations needed to reproduce the issue.
+
+        ```bash
+        # Sync command and version
+        pnpm --dir .agentkit retort:sync --verbose 2>&1 | tail -20
+
+        # Retort / AgentKit version
+        node .agentkit/engines/node/src/index.mjs --version 2>/dev/null || cat .agentkit/package.json | grep '"version"'
+
+        # OS and git EOL config
+        uname -a || ver
+        git config core.autocrlf
+        git config core.eol
+
+        # Attach sync-report.json if present
+        cat .agentkit/sync-report.json 2>/dev/null || echo "no sync-report.json"
+        ```
+      placeholder: Paste sync diagnostic output here...
+    validations:
+      required: true
+
+  - type: input
+    id: retort-version
+    attributes:
+      label: Retort Version
+      description: From `.agentkit/package.json` or `retort:sync --version`
+      placeholder: '3.1.0'
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: 'e.g., Windows 11, macOS 14, Ubuntu 22.04'
+      placeholder: Windows 11
+    validations:
+      required: true
+
+  - type: input
+    id: autocrlf
+    attributes:
+      label: git core.autocrlf
+      description: Output of `git config core.autocrlf`
+      placeholder: 'true / false / input'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sync_category
+    attributes:
+      label: Affected Area
+      options:
+        - Generated file content wrong
+        - Unresolved placeholder ({{variable}} in output)
+        - Drift check false positive
+        - LF/CRLF churn
+        - Scaffolding overwrote project files
+        - Test files scaffolded unexpectedly
+        - Sync-report missing or incorrect
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-files
+    attributes:
+      label: Affected Files
+      description: List the generated files that are wrong or unexpectedly changed.
+      placeholder: |
+        .claude/commands/orchestrate.md
+        .github/copilot-instructions.md
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Relevant spec changes, overlay settings, or related issues.
+    validations:
+      required: false

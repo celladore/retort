@@ -72,7 +72,7 @@ if [[ -z "$NEW_BRANCH" ]]; then
 fi
 
 echo "Running sync..."
-pnpm -C .agentkit agentkit:sync
+pnpm --dir .agentkit agentkit:sync
 
 CHANGED_FILES="$(git status --porcelain)"
 if [[ -z "$CHANGED_FILES" ]]; then
@@ -103,7 +103,7 @@ git push -u origin "$NEW_BRANCH"
 PR_BODY="Automated sync-only PR.
 
 - Source branch: $CURRENT_BRANCH
-- Sync command: pnpm -C .agentkit agentkit:sync
+- Sync command: pnpm --dir .agentkit agentkit:sync
 - Changed files: $FILES_COUNT"
 
 PR_URL="$(gh pr create --base "$BASE_BRANCH" --head "$NEW_BRANCH" --title "$PR_TITLE" --body "$PR_BODY")"

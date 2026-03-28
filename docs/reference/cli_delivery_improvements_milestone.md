@@ -15,11 +15,11 @@ repositories that have integrated Retort.
 
 ## Issues in this Milestone
 
-| #                                                              | Title                                                                                           | Status | PRD / Spec                                          |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------- |
+| #                                                      | Title                                                                                           | Status | PRD / Spec                                          |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------- |
 | [#196](https://github.com/phoenixvc/retort/issues/196) | adoption/startup-hooks: enforce required CLI toolchain availability (gh, az, etc.)              | Open   | N/A                                                 |
 | [#194](https://github.com/phoenixvc/retort/issues/194) | governance: enforce agentkit sync pre-PR (blocking) and post-commit (non-blocking) for adopters | Open   | N/A                                                 |
-| [#258](https://github.com/phoenixvc/retort/issues/258) | feat(cli): implement autoupdate functionality for repositories adopting Retort          | Open   | [PRD-007](../product/PRD-007-adopter-autoupdate.md) |
+| [#258](https://github.com/phoenixvc/retort/issues/258) | feat(cli): implement autoupdate functionality for repositories adopting Retort                  | Open   | [PRD-007](../product/PRD-007-adopter-autoupdate.md) |
 
 > **Status update:** Milestone and autoupdate issue have been created.
 >

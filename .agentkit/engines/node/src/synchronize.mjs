@@ -32,6 +32,7 @@ import {
   filterDomainsByStack,
   flattenProjectYaml,
   formatCommandFlags,
+  getSyncReportData,
   insertHeader,
   isScaffoldOnce,
   mergePermissions,
@@ -41,6 +42,7 @@ import {
   resolveRenderTargets,
   resolveScaffoldAction,
   simpleDiff,
+  startSyncReport,
 } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -1860,6 +1862,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // Clear module-level state from any previous run (e.g. in tests)
   templateMetaMap.clear();
   templateTextCache.clear();
+  startSyncReport();
 
   const log = (...args) => {
     if (!quiet) console.log(...args);
@@ -2006,9 +2009,19 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       overlaySettings.repoName ||
       repoName,
     defaultBranch: overlaySettings.defaultBranch || 'main',
+    integrationBranch: overlaySettings.integrationBranch || overlaySettings.defaultBranch || 'main',
     primaryStack: overlaySettings.primaryStack || 'auto',
     commandPrefix: overlaySettings.commandPrefix || null,
-    syncDate: new Date().toISOString().slice(0, 10),
+    // syncDateMode controls {{syncDate}} in generated headers (issue #417).
+    // 'run' (default) — today's date; causes churn on every sync
+    // 'version'       — the spec VERSION; stable until the spec changes
+    // 'none'          — empty string; removes the date field entirely
+    syncDate: (() => {
+      const mode = overlaySettings.syncDateMode ?? settingsSpec.sync?.dateMode ?? 'run';
+      if (mode === 'none') return '';
+      if (mode === 'version') return version || '';
+      return new Date().toISOString().slice(0, 10);
+    })(),
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'retort',
     // Branch protection defaults — ensure generated scripts produce valid
@@ -2660,6 +2673,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       managedConflicts: [],
       managedPreserved: [],
       managedNoCache: [],
+      // scaffold: once — path-derived, skipped because file exists
+      scaffoldOnce: [],
+      // scaffold: adopt-if-missing — explicit metadata, skipped because file exists
+      adoptIfMissing: [],
     };
 
     await runConcurrent(allTmpFiles, async (srcFile) => {
@@ -2684,7 +2701,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         return;
       }
 
-      // Scaffold action resolution: always | managed (check-hash) | once (skip)
+      // Scaffold action resolution: always | managed (check-hash) | once (skip) | adopt-if-missing
       const meta = getTemplateMeta(normalizedRel);
       const overwrite = flags?.overwrite || flags?.force;
       if (!overwrite && existsSync(destFile)) {
@@ -2692,6 +2709,14 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
         if (action === 'skip') {
           skippedScaffold++;
+          scaffoldResults.scaffoldOnce.push(normalizedRel);
+          return;
+        }
+
+        if (action === 'adopt-if-missing') {
+          // File already exists — honour user's version, do not overwrite
+          skippedScaffold++;
+          scaffoldResults.adoptIfMissing.push(normalizedRel);
           return;
         }
 
@@ -2943,9 +2968,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           }
         }
         if (formattedCount > 0) {
-          logVerbose(
-            `[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`
-          );
+          logVerbose(`[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`);
         }
       } catch {
         // If prettier is not available or fails entirely, just continue
@@ -2972,7 +2995,51 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
     log(`[retort:sync] Done! Generated ${count} files.`);
 
-    // 12. First-sync hint (when not called from init)
+    // 12. Write sync-report.json
+    if (!dryRun && !diff) {
+      const reportCollector = getSyncReportData();
+      let gitAutocrlf = null;
+      let hasGitattributes = false;
+      try {
+        gitAutocrlf = execFileSync('git', ['-C', projectRoot, 'config', 'core.autocrlf'], {
+          encoding: 'utf-8',
+          stdio: 'pipe',
+        }).trim();
+      } catch {
+        // git not available or not a repo
+      }
+      try {
+        hasGitattributes = existsSync(resolve(projectRoot, '.gitattributes'));
+      } catch {
+        // ignore
+      }
+      const syncReport = {
+        version,
+        generatedAt: new Date().toISOString(),
+        command: 'retort sync',
+        argv: process.argv.slice(2),
+        os: { platform: process.platform, arch: process.arch, nodeVersion: process.version },
+        git: { autocrlf: gitAutocrlf, hasGitattributes },
+        counts: {
+          generated: count,
+          skipped: skippedScaffold,
+          cleaned: cleanedCount,
+          failed: failedFiles.length,
+        },
+        fileSummary,
+        scaffoldResults,
+        unresolvedPlaceholders: reportCollector?.unresolvedPlaceholders ?? [],
+        errors: failedFiles,
+      };
+      const reportPath = resolve(agentkitRoot, 'sync-report.json');
+      try {
+        await writeFile(reportPath, JSON.stringify(syncReport, null, 2) + '\n', 'utf-8');
+      } catch (err) {
+        console.warn(`[retort:sync] Warning: could not write sync-report.json — ${err.message}`);
+      }
+    }
+
+    // 13. First-sync hint (when not called from init)
     if (!flags?.overlay) {
       const markerPath = resolve(projectRoot, '.agentkit-repo');
       if (!existsSync(markerPath)) {
@@ -2982,6 +3049,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       }
     }
   } finally {
-    await rm(tmpDir, { recursive: true, force: true });
+    // Wrap cleanup so it cannot mask the primary sync error.
+    // maxRetries handles transient ENOTEMPTY on tmpfs/overlayfs (Node.js
+    // fs.rm defaults to maxRetries:0, so the first failed rmdir throws).
+    try {
+      await rm(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch (cleanupErr) {
+      if (process.env.DEBUG) {
+        console.error(`[retort:sync] Warning: tmpDir cleanup failed — ${cleanupErr.message}`);
+      }
+    }
   }
 }

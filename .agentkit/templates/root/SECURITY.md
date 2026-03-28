@@ -115,4 +115,4 @@ The `validate` command scans for common secret patterns:
 
 ---
 
-_This policy is maintained by Retort. Run `pnpm -C .agentkit retort:sync` to regenerate._
+_This policy is maintained by Retort. Run `pnpm --dir .agentkit retort:sync` to regenerate._

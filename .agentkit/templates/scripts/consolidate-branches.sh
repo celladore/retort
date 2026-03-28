@@ -282,7 +282,7 @@ fi
 echo ""
 if [ ${#MERGED[@]} -gt 0 ]; then
   info "Next steps:"
-  echo "  1. Run: pnpm -C .agentkit agentkit:sync"
+  echo "  1. Run: pnpm --dir .agentkit agentkit:sync"
   echo "  2. Run: pnpm test"
   echo "  3. Review with: git log --oneline -20"
 fi

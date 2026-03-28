@@ -1,17 +1,18 @@
-<!-- generated_by: agentkit-forge | last_model: sync-engine | last_updated: 2026-03-17 -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
 <!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
 
-# agentkit-forge — Claude Code Instructions
+# retort — Claude Code Instructions
 
 ## Project Overview
 
-AgentKit Forge framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
+Retort framework for multi-tool AI agent team orchestration, sync generation, and quality-gated workflows.
 
-This repository uses **AgentKit Forge** to manage AI agent team workflows across multiple tools.
+This repository uses **Retort** to manage AI agent team workflows across multiple tools.
 
-- **Repository**: agentkit-forge
+- **Repository**: retort
 - **Default Branch**: main
+- **Integration Branch** (PR target): dev
 - **Framework Version**: 3.1.0
 
 - **Phase**: active
@@ -28,21 +29,23 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 
 ## Quick Reference
 
-| Command             | Purpose                                      |
-| ------------------- | -------------------------------------------- |
-| `/start`            | New user entry point — guided next steps     |
-| `/orchestrate`      | Master coordinator — assess, plan, delegate  |
-| `/discover`         | Scan codebase, detect tech stacks            |
-| `/review`           | Code review with quality gates               |
-| `/check`            | Universal quality gate (lint + test + build) |
-| `/plan`             | Structured planning before implementation    |
-| `/build`            | Build project (auto-detects stack)           |
-| `/test`             | Run tests (auto-detects stack)               |
-| `/format`           | Format code (auto-detects stack)             |
-| `/deploy`           | Deployment automation                        |
-| `/security`         | Security audit                               |
-| `/sync-backlog`     | Update AGENT_BACKLOG.md                      |
-| `/document-history` | Create history doc for completed work        |
+| Command             | Purpose                                  |
+| ------------------- | ---------------------------------------- | -------------------------------------------- |
+| `/start`            | New user entry point — guided next steps |
+|                     | `/orchestrate`                           | Master coordinator — assess, plan, delegate  |
+|                     | `/discover`                              | Scan codebase, detect tech stacks            |
+|                     | `/review`                                | Code review with quality gates               |
+|                     | `/check`                                 | Universal quality gate (lint + test + build) |
+|                     | `/plan`                                  | Structured planning before implementation    |
+| `/build`            | Build project (auto-detects stack)       |
+| `/test`             | Run tests (auto-detects stack)           |
+| `/format`           | Format code (auto-detects stack)         |
+| `/deploy`           | Deployment automation                    |
+| `/security`         | Security audit                           |
+| `/sync-backlog`     | Update AGENT_BACKLOG.md                  |
+| `/document-history` | Create history doc for completed work    |
+
+|
 
 ## Team Commands
 
@@ -71,7 +74,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 
 ### Standard Session Flow
 
-```text
+````text
 /orchestrate --assess-only → Understand current state
 /plan                     → Design implementation
 /team-<name>              → Execute with appropriate team
@@ -85,7 +88,7 @@ This repository uses **AgentKit Forge** to manage AI agent team workflows across
 ### Authentication
 
 Provider: custom-jwt, strategy: jwt-bearer.
-RBAC is enforced.
+ RBAC is enforced.
 
 ### API
 
@@ -124,7 +127,7 @@ After completing significant work (bug fixes, features, implementations, or migr
 
 ```bash
 ./scripts/create-doc.sh <type> "<title>" [pr-number]
-```
+````
 
 | Work Type             | Command                                          | Trigger                                                        |
 | --------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
@@ -213,7 +216,7 @@ The CI `branch-protection` workflow **rejects PRs** with non-conforming titles. 
 When you modify any file in `.agentkit/spec/`, you **MUST** run sync before committing:
 
 ```bash
-pnpm -C .agentkit agentkit:sync
+pnpm -C .agentkit retort:sync
 ```
 
 Then commit the regenerated output. The CI drift check **will fail** if generated files are out of sync. This is the #1 cause of CI failures across branches.
@@ -221,7 +224,7 @@ Then commit the regenerated output. The CI drift check **will fail** if generate
 **Workflow:**
 
 1. Edit spec files in `.agentkit/spec/`
-2. Run `pnpm -C .agentkit agentkit:sync`
+2. Run `pnpm -C .agentkit retort:sync`
 3. Commit spec changes and generated output together (or in two atomic commits)
 4. Verify with `git diff --quiet` — if there's output, you missed something
 
@@ -229,13 +232,23 @@ Then commit the regenerated output. The CI drift check **will fail** if generate
 
 Feature branches: `type/short-description` (e.g., `feat/add-user-auth`, `fix/token-refresh`)
 
+### PR Target Branch
+
+All PRs **must** target `dev` — not `main` or any other branch unless explicitly instructed:
+
+```bash
+gh pr create --base dev --title "type(scope): description"
+```
+
+The integration branch (`dev`) is the configured PR target for this repo. Creating PRs against `main` directly causes reverse-merge noise and bypasses the integration pipeline. A hookify rule in `.claude/rules/pr-base-branch.md` enforces this at runtime.
+
 ## Safety Rules
 
 1. **Never** commit secrets, API keys, or credentials
 2. **Never** force-push to main
 3. **Never** run destructive commands without confirmation
-4. **Never** modify files in `.agentkit/templates/`, `.agentkit/engines/`, `.agentkit/overlays/`, or `.agentkit/bin/` — these are the upstream source-of-truth for AgentKit Forge and are protected by a PreToolUse hook. Note: `.agentkit/spec/` is the intended edit point for project configuration — modify spec YAML files there and run `agentkit sync` to regenerate output
-5. **Never** directly edit files marked `<!-- GENERATED by AgentKit Forge — DO NOT EDIT -->` — modify the spec in `.agentkit/spec/` and run `agentkit sync` instead; if spec files changed, run `pnpm -C .agentkit agentkit:sync` and commit regenerated outputs before creating a PR
+4. **Never** modify files in `.agentkit/templates/`, `.agentkit/engines/`, `.agentkit/overlays/`, or `.agentkit/bin/` — these are the upstream source-of-truth for Retort and are protected by a PreToolUse hook. Note: `.agentkit/spec/` is the intended edit point for project configuration — modify spec YAML files there and run `retort sync` to regenerate output
+5. **Never** directly edit files marked `<!-- GENERATED by Retort — DO NOT EDIT -->` — modify the spec in `.agentkit/spec/` and run `retort sync` instead; if spec files changed, run `pnpm -C .agentkit retort:sync` and commit regenerated outputs before creating a PR
 6. **Always** run `/check` before creating a PR
 7. **Always** use Conventional Commits format for PR titles: `type(scope): description` — CI rejects non-conforming titles (valid types: feat, fix, docs, style, refactor, test, chore, ci, perf, build, revert)
 8. **Always** document breaking changes — PRs with `!:` or `BREAKING` in the title must include a `## Breaking Changes` section, ADR reference, or migration guide in the PR body (CI enforces this)

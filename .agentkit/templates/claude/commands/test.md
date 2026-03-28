@@ -32,15 +32,15 @@ If no arguments are provided, run the full test suite.
 
 Detect the test framework in the following priority order:
 
-| Priority | Signal                                                                | Run Command              |
-| -------- | --------------------------------------------------------------------- | ------------------------ |
-| 1        | `vitest` in devDependencies or vitest config file                     | `npx vitest run`         |
-| 2        | `jest` in devDependencies or jest config file                         | `npx jest`               |
-| 3        | `test` script in `package.json`                                       | `{{pmRun}} test`         |
-| 4        | `Cargo.toml`                                                          | `cargo test`             |
-| 5        | `*.csproj` with test framework references                             | `dotnet test`            |
-| 6        | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest`                 |
-| 7        | `go.mod`                                                              | `go test ./...`          |
+| Priority | Signal                                                                | Run Command      |
+| -------- | --------------------------------------------------------------------- | ---------------- |
+| 1        | `vitest` in devDependencies or vitest config file                     | `npx vitest run` |
+| 2        | `jest` in devDependencies or jest config file                         | `npx jest`       |
+| 3        | `test` script in `package.json`                                       | `{{pmRun}} test` |
+| 4        | `Cargo.toml`                                                          | `cargo test`     |
+| 5        | `*.csproj` with test framework references                             | `dotnet test`    |
+| 6        | `pytest` in dependencies or `pytest.ini`/`setup.cfg`/`pyproject.toml` | `pytest`         |
+| 7        | `go.mod`                                                              | `go test ./...`  |
 
 ## Scoped Test Runs
 

@@ -23,7 +23,7 @@ Dependencies have not been installed. The CLI now auto-installs on first run; if
 **Fix:** Run the package install from the .agentkit directory:
 
 ```bash
-pnpm -C .agentkit install
+pnpm --dir .agentkit install
 ```
 
 If `pnpm` is not installed, install it first:

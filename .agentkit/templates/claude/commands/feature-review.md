@@ -19,6 +19,7 @@ You are the **Feature Operations Specialist**. You review the current kit featur
 This repository uses **Retort** feature management. Features are defined in `.agentkit/spec/features.yaml` and controlled per-repo via the overlay settings at `.agentkit/overlays/*/settings.yaml`.
 
 {{#if featureSummary}}
+
 ### Current Feature Configuration
 
 {{featureSummary}}
@@ -68,16 +69,20 @@ Based on `$ARGUMENTS`, perform one or more of these review modes:
 ## Feature Review — {{repoName}}
 
 ### Configuration
+
 - Mode: [preset: <name> | explicit list | defaults]
 - Enabled: <N> / <total> features
 
 ### Status by Category
+
 [Category tables with enabled/disabled status]
 
 ### Findings
+
 [Issues, recommendations, audit results]
 
 ### Recommended Actions
+
 [Specific agentkit commands to run]
 ```
 

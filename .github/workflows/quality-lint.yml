@@ -27,7 +27,7 @@ concurrency:
 jobs:
   markdown-lint:
     name: Markdown Lint
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -61,7 +61,7 @@ jobs:
             echo ""
             echo "Markdown lint found formatting issues. Run locally to fix:"
             echo '```bash'
-            echo "pnpm -C .agentkit lint:md"
+            echo "pnpm --dir .agentkit lint:md"
             echo '```'
             echo ""
             echo "### Details"

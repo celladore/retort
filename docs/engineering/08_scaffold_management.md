@@ -111,8 +111,8 @@ scaffoldOverrides:
 ### CLI Flags (Overrides Everything)
 
 ```bash
-pnpm -C .agentkit agentkit:sync --overwrite  # Overwrite ALL files regardless of mode
-pnpm -C .agentkit agentkit:sync --force       # Same as --overwrite
+pnpm --dir .agentkit agentkit:sync --overwrite  # Overwrite ALL files regardless of mode
+pnpm --dir .agentkit agentkit:sync --force       # Same as --overwrite
 ```
 
 ### Priority Order
@@ -137,7 +137,7 @@ or skips the file entirely.
 
 ### "I want to reset a file to the latest template"
 
-Delete the file and run `pnpm -C .agentkit agentkit:sync`. The file will be regenerated
+Delete the file and run `pnpm --dir .agentkit agentkit:sync`. The file will be regenerated
 from the template. Alternatively, use `--overwrite` to force-regenerate all files.
 
 ### "Sync shows CONFLICT markers in my file"
@@ -154,7 +154,7 @@ section is which:
 If you've made improvements to a generated file that would benefit the template:
 
 1. Modify the template in `.agentkit/templates/`
-2. Run `pnpm -C .agentkit agentkit:sync`
+2. Run `pnpm --dir .agentkit agentkit:sync`
 3. Submit a PR to the retort repository
 
 ## Scaffold Cache

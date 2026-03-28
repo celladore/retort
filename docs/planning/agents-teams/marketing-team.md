@@ -100,7 +100,7 @@ routing:
 
 1. Add `marketing` team to `.agentkit/spec/teams.yaml`
 2. Add `marketing` to intake routing
-3. Run `pnpm -C .agentkit agentkit:sync`
+3. Run `pnpm --dir .agentkit agentkit:sync`
 4. Update `UNIFIED_AGENT_TEAMS.md` team-agent mapping table
 5. Verify all generated outputs
 

@@ -51,19 +51,19 @@ spec/*.yaml → project-mapping.mjs → synchronize.mjs (vars) → renderTemplat
 
 These variables are used **directly** (no conditional guard) and will render as literal `{{varName}}` if the value is missing:
 
-| Variable           | Usage count                                                 | Has default in sync?             | Risk                                           |
-| ------------------ | ----------------------------------------------------------- | -------------------------------- | ---------------------------------------------- |
-| `repoName`         | 126                                                         | ✅ fallback to overlay/dir name  | Low                                            |
-| `version`          | 88                                                          | ✅ from package.json             | Low                                            |
-| `syncDate`         | 74                                                          | ✅ `new Date().toISOString()`    | Low                                            |
-| `lastModel`        | 74                                                          | ✅ env var or `'sync-engine'`    | Low                                            |
-| `lastAgent`        | 74                                                          | ✅ env var or `'retort'` | Low                                            |
-| `defaultBranch`    | 26                                                          | ✅ `'main'`                      | Low                                            |
-| `testingCoverage`  | 19                                                          | ❌ No default, used bare         | **Medium** — will render `{{testingCoverage}}` |
-| `commitConvention` | 7                                                           | ❌ comes from project.yaml only  | **Medium**                                     |
-| `loggingFramework` | Used bare in sections guarded by `{{#if hasLogging}}`       | Indirect guard                   | Low                                            |
-| `errorStrategy`    | Used bare in sections guarded by `{{#if hasErrorHandling}}` | Indirect guard                   | Low                                            |
-| `authProvider`     | Used bare in `{{#if hasAuth}}` guarded sections             | Indirect guard                   | Low                                            |
+| Variable           | Usage count                                                 | Has default in sync?            | Risk                                           |
+| ------------------ | ----------------------------------------------------------- | ------------------------------- | ---------------------------------------------- |
+| `repoName`         | 126                                                         | ✅ fallback to overlay/dir name | Low                                            |
+| `version`          | 88                                                          | ✅ from package.json            | Low                                            |
+| `syncDate`         | 74                                                          | ✅ `new Date().toISOString()`   | Low                                            |
+| `lastModel`        | 74                                                          | ✅ env var or `'sync-engine'`   | Low                                            |
+| `lastAgent`        | 74                                                          | ✅ env var or `'retort'`        | Low                                            |
+| `defaultBranch`    | 26                                                          | ✅ `'main'`                     | Low                                            |
+| `testingCoverage`  | 19                                                          | ❌ No default, used bare        | **Medium** — will render `{{testingCoverage}}` |
+| `commitConvention` | 7                                                           | ❌ comes from project.yaml only | **Medium**                                     |
+| `loggingFramework` | Used bare in sections guarded by `{{#if hasLogging}}`       | Indirect guard                  | Low                                            |
+| `errorStrategy`    | Used bare in sections guarded by `{{#if hasErrorHandling}}` | Indirect guard                  | Low                                            |
+| `authProvider`     | Used bare in `{{#if hasAuth}}` guarded sections             | Indirect guard                  | Low                                            |
 
 ### D. Agent variables — all properly wired via `buildAgentVars()`
 
