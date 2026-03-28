@@ -61,7 +61,9 @@ async function readYaml(filename: string): Promise<unknown> {
     } catch (err) {
       // Rethrow with context instead of swallowing exceptions
       if (err instanceof Error) {
-        throw new Error(`Failed to read or parse YAML from ${filePath}: ${err.message}`, { cause: err });
+        throw new Error(`Failed to read or parse YAML from ${filePath}: ${err.message}`, {
+          cause: err,
+        });
       }
       throw err;
     }
@@ -75,7 +77,9 @@ async function readYaml(filename: string): Promise<unknown> {
   } catch (err) {
     // Rethrow with context instead of swallowing exceptions
     if (err instanceof Error) {
-      throw new Error(`Failed to parse YAML content from ${filename}: ${err.message}`, { cause: err });
+      throw new Error(`Failed to parse YAML content from ${filename}: ${err.message}`, {
+        cause: err,
+      });
     }
     throw err;
   }
@@ -93,7 +97,7 @@ async function getPipelineStatus(): Promise<unknown> {
     },
   });
   if (!res.ok) return { error: `GitHub API ${res.status}` };
-  const data = await res.json() as { workflow_runs: unknown[] };
+  const data = (await res.json()) as { workflow_runs: unknown[] };
   return data.workflow_runs.map((r: any) => ({
     name: r.name,
     status: r.status,
@@ -106,7 +110,10 @@ async function getPipelineStatus(): Promise<unknown> {
 
 function mcpError(tool: string, err: unknown) {
   console.error(`[MCP:${tool}]`, String(err));
-  return { content: [{ type: 'text' as const, text: `Tool error: ${String(err)}` }], isError: true };
+  return {
+    content: [{ type: 'text' as const, text: `Tool error: ${String(err)}` }],
+    isError: true,
+  };
 }
 
 const app = express();
@@ -121,10 +128,7 @@ app.get('/health', (_req, res) => {
 
 app.get('/ready', async (_req, res) => {
   try {
-    const [todo, roadmap] = await Promise.all([
-      readYaml('.todo.yaml'),
-      readYaml('.roadmap.yaml'),
-    ]);
+    const [todo, roadmap] = await Promise.all([readYaml('.todo.yaml'), readYaml('.roadmap.yaml')]);
     res.json({
       status: 'ok',
       repo: REPO,
@@ -148,77 +152,111 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   const server = new McpServer({ name: `mcp-${REPO.split('/')[1]}`, version: '0.1.0' });
 
-  server.registerTool('get_tasks', {
-    description: `Get tasks and todo items from ${REPO}`,
-    inputSchema: z.object({
-      status: z.enum(['todo', 'inprogress', 'done', 'blocked']).optional(),
-      priority: z.enum(['high', 'medium', 'low']).optional(),
-    }),
-  }, async ({ status, priority }) => {
-    try {
-      const todo = (await readYaml('.todo.yaml')) as any;
-      if (!todo) return { content: [{ type: 'text', text: 'No .todo.yaml found in repo' }] };
-      let tasks = todo.tasks ?? [];
-      if (status) tasks = tasks.filter((t: any) => t.status === status);
-      if (priority) tasks = tasks.filter((t: any) => t.priority === priority);
-      return { content: [{ type: 'text', text: JSON.stringify(tasks, null, 2) }] };
-    } catch (err) { return mcpError('get_tasks', err); }
-  });
+  server.registerTool(
+    'get_tasks',
+    {
+      description: `Get tasks and todo items from ${REPO}`,
+      inputSchema: z.object({
+        status: z.enum(['todo', 'inprogress', 'done', 'blocked']).optional(),
+        priority: z.enum(['high', 'medium', 'low']).optional(),
+      }),
+    },
+    async ({ status, priority }) => {
+      try {
+        const todo = (await readYaml('.todo.yaml')) as any;
+        if (!todo) return { content: [{ type: 'text', text: 'No .todo.yaml found in repo' }] };
+        let tasks = todo.tasks ?? [];
+        if (status) tasks = tasks.filter((t: any) => t.status === status);
+        if (priority) tasks = tasks.filter((t: any) => t.priority === priority);
+        return { content: [{ type: 'text', text: JSON.stringify(tasks, null, 2) }] };
+      } catch (err) {
+        return mcpError('get_tasks', err);
+      }
+    }
+  );
 
-  server.registerTool('get_roadmap', {
-    description: `Get the roadmap for ${REPO}`,
-    inputSchema: z.object({
-      status: z.string().optional(),
-    }),
-  }, async ({ status }) => {
-    try {
-      const roadmap = (await readYaml('.roadmap.yaml')) as any;
-      if (!roadmap) return { content: [{ type: 'text', text: 'No .roadmap.yaml found in repo' }] };
-      let items = roadmap.tasks ?? roadmap.milestones ?? roadmap.items ?? [];
-      if (status) items = items.filter((i: any) => i.status === status);
-      return { content: [{ type: 'text', text: JSON.stringify({ meta: roadmap.meta ?? {}, items }, null, 2) }] };
-    } catch (err) { return mcpError('get_roadmap', err); }
-  });
+  server.registerTool(
+    'get_roadmap',
+    {
+      description: `Get the roadmap for ${REPO}`,
+      inputSchema: z.object({
+        status: z.string().optional(),
+      }),
+    },
+    async ({ status }) => {
+      try {
+        const roadmap = (await readYaml('.roadmap.yaml')) as any;
+        if (!roadmap)
+          return { content: [{ type: 'text', text: 'No .roadmap.yaml found in repo' }] };
+        let items = roadmap.tasks ?? roadmap.milestones ?? roadmap.items ?? [];
+        if (status) items = items.filter((i: any) => i.status === status);
+        return {
+          content: [
+            { type: 'text', text: JSON.stringify({ meta: roadmap.meta ?? {}, items }, null, 2) },
+          ],
+        };
+      } catch (err) {
+        return mcpError('get_roadmap', err);
+      }
+    }
+  );
 
-  server.registerTool('get_pipeline_status', {
-    description: `Get the latest GitHub Actions run status for ${REPO}`,
-    inputSchema: z.object({}),
-  }, async () => {
-    try {
-      const runs = await getPipelineStatus();
-      return { content: [{ type: 'text', text: JSON.stringify(runs, null, 2) }] };
-    } catch (err) { return mcpError('get_pipeline_status', err); }
-  });
+  server.registerTool(
+    'get_pipeline_status',
+    {
+      description: `Get the latest GitHub Actions run status for ${REPO}`,
+      inputSchema: z.object({}),
+    },
+    async () => {
+      try {
+        const runs = await getPipelineStatus();
+        return { content: [{ type: 'text', text: JSON.stringify(runs, null, 2) }] };
+      } catch (err) {
+        return mcpError('get_pipeline_status', err);
+      }
+    }
+  );
 
-  server.registerTool('get_project_info', {
-    description: `Get combined project context for ${REPO} — tasks, roadmap, and pipeline in one call`,
-    inputSchema: z.object({}),
-  }, async () => {
-    try {
-      const [todo, roadmap, pipeline] = await Promise.all([
-        readYaml('.todo.yaml'),
-        readYaml('.roadmap.yaml'),
-        getPipelineStatus(),
-      ]) as [any, any, any];
-      const roadmapItems = roadmap?.tasks ?? roadmap?.milestones ?? roadmap?.items ?? [];
-      const summary = {
-        repo: REPO,
-        tasks: {
-          total: todo?.tasks?.length ?? 0,
-          todo: todo?.tasks?.filter((t: any) => t.status === 'todo').length ?? 0,
-          inprogress: todo?.tasks?.filter((t: any) => t.status === 'inprogress').length ?? 0,
-          done: todo?.tasks?.filter((t: any) => t.status === 'done').length ?? 0,
-          high_priority_open: todo?.tasks?.filter((t: any) => t.priority === 'high' && t.status !== 'done').map((t: any) => t.title) ?? [],
-        },
-        roadmap: {
-          total: roadmapItems.length,
-          inprogress: roadmapItems.filter((i: any) => i.status === 'inprogress').map((i: any) => i.title),
-        },
-        pipeline,
-      };
-      return { content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }] };
-    } catch (err) { return mcpError('get_project_info', err); }
-  });
+  server.registerTool(
+    'get_project_info',
+    {
+      description: `Get combined project context for ${REPO} — tasks, roadmap, and pipeline in one call`,
+      inputSchema: z.object({}),
+    },
+    async () => {
+      try {
+        const [todo, roadmap, pipeline] = (await Promise.all([
+          readYaml('.todo.yaml'),
+          readYaml('.roadmap.yaml'),
+          getPipelineStatus(),
+        ])) as [any, any, any];
+        const roadmapItems = roadmap?.tasks ?? roadmap?.milestones ?? roadmap?.items ?? [];
+        const summary = {
+          repo: REPO,
+          tasks: {
+            total: todo?.tasks?.length ?? 0,
+            todo: todo?.tasks?.filter((t: any) => t.status === 'todo').length ?? 0,
+            inprogress: todo?.tasks?.filter((t: any) => t.status === 'inprogress').length ?? 0,
+            done: todo?.tasks?.filter((t: any) => t.status === 'done').length ?? 0,
+            high_priority_open:
+              todo?.tasks
+                ?.filter((t: any) => t.priority === 'high' && t.status !== 'done')
+                .map((t: any) => t.title) ?? [],
+          },
+          roadmap: {
+            total: roadmapItems.length,
+            inprogress: roadmapItems
+              .filter((i: any) => i.status === 'inprogress')
+              .map((i: any) => i.title),
+          },
+          pipeline,
+        };
+        return { content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }] };
+      } catch (err) {
+        return mcpError('get_project_info', err);
+      }
+    }
+  );
 
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   res.on('close', () => transport.close());

@@ -89,11 +89,11 @@ git status   # should show only real content changes
 
 ## When to Use `core.autocrlf` vs `.gitattributes`
 
-| Setting | Scope | Recommended for |
-|---------|-------|-----------------|
-| `core.autocrlf = true` | Per-developer | Windows-only teams not using `.gitattributes` |
-| `core.autocrlf = input` | Per-developer | Prevent CRLF commit on checkout |
-| `.gitattributes eol=lf` | Per-repo | **Recommended** — enforces LF for everyone regardless of local config |
+| Setting                 | Scope         | Recommended for                                                       |
+| ----------------------- | ------------- | --------------------------------------------------------------------- |
+| `core.autocrlf = true`  | Per-developer | Windows-only teams not using `.gitattributes`                         |
+| `core.autocrlf = input` | Per-developer | Prevent CRLF commit on checkout                                       |
+| `.gitattributes eol=lf` | Per-repo      | **Recommended** — enforces LF for everyone regardless of local config |
 
 `.gitattributes` wins over `core.autocrlf` when both are set. Always prefer
 `.gitattributes` in shared repos so behavior is consistent across all platforms and CI.

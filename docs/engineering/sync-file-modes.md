@@ -135,11 +135,11 @@ contain a date stamp, so repeated syncs produce no diff when inputs are unchange
 
 **Mode reference:**
 
-| Mode | `{{syncDate}}` value | Stable? |
-|------|---------------------|---------|
-| `run` (default) | Today's ISO date (YYYY-MM-DD) | No — changes every day |
-| `version` | Spec VERSION string | Yes — stable until spec version bumps |
-| `none` | Empty string | Yes — date field removed entirely |
+| Mode            | `{{syncDate}}` value          | Stable?                               |
+| --------------- | ----------------------------- | ------------------------------------- |
+| `run` (default) | Today's ISO date (YYYY-MM-DD) | No — changes every day                |
+| `version`       | Spec VERSION string           | Yes — stable until spec version bumps |
+| `none`          | Empty string                  | Yes — date field removed entirely     |
 
 **Temporary workaround** (if you cannot update the overlay yet) — reset files where
 only the date line changed:
