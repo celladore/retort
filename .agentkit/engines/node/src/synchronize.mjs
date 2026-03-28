@@ -2950,7 +2950,20 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
               // forms are identical the file contains no real user edits — fall
               // through to the pristine overwrite path below.
               if (normalizeForComparison(diskText) !== normalizeForComparison(baseContent)) {
-                // Real user edit — attempt three-way merge
+                // Real user edit.  Only attempt a three-way merge when the template
+                // has actually changed since the last sync (base ≠ theirs after
+                // normalisation).  When the template is unchanged the merge would
+                // be a no-op (result === disk) — skip it to stop the churn loop.
+                if (normalizeForComparison(baseContent) === normalizeForComparison(newContent)) {
+                  // Template unchanged — preserve user edits, no write needed
+                  skippedScaffold++;
+                  scaffoldResults.managedPreserved.push(normalizedRel);
+                  logVerbose(
+                    `  skipped ${normalizedRel} (user edits preserved, template unchanged)`
+                  );
+                  return;
+                }
+
                 const result = threeWayMerge(diskText, baseContent, newContent);
 
                 if (result) {
