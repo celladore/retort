@@ -11,7 +11,7 @@
  * - Gap 7: Routes test failures to testing team in Phase 4
  * - Gap 8: Enforces test acceptance criteria on task completion
  */
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { createTask, listTasks, TERMINAL_STATES } from './task-protocol.mjs';
@@ -31,38 +31,55 @@ export function loadAgentNotifies(agentkitRoot) {
   const agentNotifies = {};
   const teamToAgents = {};
 
+  // Load merged agents spec: directory-first, fallback to monolithic agents.yaml
+  let mergedAgents = null;
+  const agentsDir = resolve(agentkitRoot, 'spec', 'agents');
   const agentsPath = resolve(agentkitRoot, 'spec', 'agents.yaml');
-  if (!existsSync(agentsPath)) {
-    return { agentNotifies, teamToAgents };
-  }
 
   try {
-    const spec = yaml.load(readFileSync(agentsPath, 'utf-8'));
-    if (!spec?.agents || typeof spec.agents !== 'object') {
-      return { agentNotifies, teamToAgents };
-    }
-
-    for (const [category, agents] of Object.entries(spec.agents)) {
-      if (!Array.isArray(agents)) continue;
-      for (const agent of agents) {
-        if (!agent?.id) continue;
-
-        // Build notifies map
-        if (Array.isArray(agent.notifies) && agent.notifies.length > 0) {
-          agentNotifies[agent.id] = [...agent.notifies];
+    if (existsSync(agentsDir)) {
+      mergedAgents = {};
+      const files = readdirSync(agentsDir)
+        .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+        .sort();
+      for (const file of files) {
+        const parsed = yaml.load(readFileSync(resolve(agentsDir, file), 'utf-8'));
+        if (!parsed || typeof parsed !== 'object') continue;
+        for (const [category, agents] of Object.entries(parsed)) {
+          if (!Array.isArray(agents)) continue;
+          mergedAgents[category] = (mergedAgents[category] || []).concat(agents);
         }
-
-        // Build category → agents map
-        if (!teamToAgents[category]) {
-          teamToAgents[category] = [];
-        }
-        teamToAgents[category].push(agent.id);
       }
+    } else if (existsSync(agentsPath)) {
+      const spec = yaml.load(readFileSync(agentsPath, 'utf-8'));
+      mergedAgents = spec?.agents ?? null;
     }
   } catch (err) {
     console.warn(
-      `[agentkit:integration] Could not load agents.yaml: ${err?.message ?? String(err)}`
+      `[agentkit:integration] Could not load agents spec: ${err?.message ?? String(err)}`
     );
+  }
+
+  if (!mergedAgents || typeof mergedAgents !== 'object') {
+    return { agentNotifies, teamToAgents };
+  }
+
+  for (const [category, agents] of Object.entries(mergedAgents)) {
+    if (!Array.isArray(agents)) continue;
+    for (const agent of agents) {
+      if (!agent?.id) continue;
+
+      // Build notifies map
+      if (Array.isArray(agent.notifies) && agent.notifies.length > 0) {
+        agentNotifies[agent.id] = [...agent.notifies];
+      }
+
+      // Build category → agents map
+      if (!teamToAgents[category]) {
+        teamToAgents[category] = [];
+      }
+      teamToAgents[category].push(agent.id);
+    }
   }
 
   return { agentNotifies, teamToAgents };
