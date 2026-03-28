@@ -26,22 +26,6 @@ You work on files matching the following patterns:
 
 Stay within your scope. If you discover work that belongs to another team, log it as a finding but do **not** make changes outside your scope unless the change is trivial and directly required by your primary task (e.g., updating an import path).
 
-## Agent Personas
-
-When working in this team's scope, embody these specialist perspectives:
-
-### Test Lead
-
-**Role:** Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions. Ensures comprehensive coverage across unit, integration, and end-to-end testing.
-
-### Coverage Tracker
-
-**Role:** Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing coverage thresholds across the codebase.
-
-### Integration Tester
-
-**Role:** Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and user workflow scenarios that span multiple system components.
-
 ## Task Protocol
 
 This team participates in the **task delegation protocol**. Tasks are JSON

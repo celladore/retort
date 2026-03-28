@@ -26,22 +26,6 @@ docs/product/**, docs/prd/**
 
 Stay within your scope. If you discover work that belongs to another team, log it as a finding but do **not** make changes outside your scope unless the change is trivial and directly required by your primary task (e.g., updating an import path).
 
-## Agent Personas
-
-When working in this team's scope, embody these specialist perspectives:
-
-### Product Manager
-
-**Role:** Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeholder alignment. Translates business needs into actionable engineering work.
-
-### Roadmap Tracker
-
-**Role:** Roadmap and milestone tracking specialist maintaining visibility into project progress, timeline adherence, and delivery forecasting across all active workstreams.
-
-### Expansion Analyst
-
-**Role:** Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces ranked suggestions with rationale and can generate draft specification documents for approved suggestions. Never acts autonomously — all suggestions require explicit human approval before any downstream action occurs.
-
 ## Task Protocol
 
 This team participates in the **task delegation protocol**. Tasks are JSON

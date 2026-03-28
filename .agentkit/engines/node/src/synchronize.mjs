@@ -7,7 +7,7 @@
  */
 import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
@@ -32,7 +32,6 @@ import {
   filterDomainsByStack,
   flattenProjectYaml,
   formatCommandFlags,
-  getSyncReportData,
   insertHeader,
   isScaffoldOnce,
   mergePermissions,
@@ -42,7 +41,6 @@ import {
   resolveRenderTargets,
   resolveScaffoldAction,
   simpleDiff,
-  startSyncReport,
 } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -167,6 +165,33 @@ export function readYaml(filePath) {
 export function readText(filePath) {
   if (!existsSync(filePath)) return null;
   return readFileSync(filePath, 'utf-8');
+}
+
+/**
+ * Loads the agents spec from either a directory of per-category YAML files
+ * (.agentkit/spec/agents/) or the monolithic agents.yaml fallback.
+ *
+ * Directory format: each file is a map { <categoryKey>: [...agents] }.
+ * The filename stem is used as the category key and must match the top-level key.
+ */
+export function loadAgentsSpec(agentkitRoot) {
+  const agentsDir = resolve(agentkitRoot, 'spec', 'agents');
+  if (existsSync(agentsDir)) {
+    const merged = { agents: {} };
+    const files = readdirSync(agentsDir)
+      .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+      .sort();
+    for (const file of files) {
+      const parsed = readYaml(resolve(agentsDir, file));
+      if (!parsed || typeof parsed !== 'object') continue;
+      for (const [category, agents] of Object.entries(parsed)) {
+        if (!Array.isArray(agents)) continue;
+        merged.agents[category] = (merged.agents[category] || []).concat(agents);
+      }
+    }
+    return merged;
+  }
+  return readYaml(resolve(agentkitRoot, 'spec', 'agents.yaml')) || {};
 }
 
 /**
@@ -884,7 +909,8 @@ async function syncClaudeAgents(
   version,
   repoName,
   agentsSpec,
-  _rulesSpec
+  _rulesSpec,
+  registry = new Map()
 ) {
   if (!isFeatureEnabled('agent-personas', vars)) return;
   const tplPath = join(templatesDir, 'claude', 'agents', 'TEMPLATE.md');
@@ -893,12 +919,41 @@ async function syncClaudeAgents(
 
   for (const [category, agents] of Object.entries(agentsSpec.agents || {})) {
     for (const agent of agents) {
-      const agentVars = buildAgentVars(agent, category, vars);
+      const agentVars = buildAgentVars(agent, category, vars, registry);
       const rendered = renderTemplate(template, agentVars, tplPath);
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
     }
   }
+}
+
+/**
+ * Generates .claude/agents/REGISTRY.md and .claude/agents/REGISTRY.json —
+ * always-regenerated agent directory files for orchestrator and peer lookup.
+ */
+async function syncAgentRegistry(tmpDir, agentsSpec, version, repoName) {
+  const registry = buildAgentRegistry(agentsSpec);
+  const allAgents = [...registry.values()];
+
+  if (allAgents.length === 0) return;
+
+  // REGISTRY.md — markdown table
+  const header = `<!-- generated_by: retort | last_model: sync-engine | last_updated: ${new Date().toISOString().slice(0, 10)} -->\n# Agent Registry\n\n| ID | Name | Category | Accepts | Role |\n|---|---|---|---|---|\n`;
+  const rows = allAgents
+    .map(
+      (a) =>
+        `| \`${a.id}\` | ${a.name} | ${a.category} | ${a.accepts.join(', ')} | ${a.roleSummary} |`
+    )
+    .join('\n');
+  await writeOutput(join(tmpDir, '.claude', 'agents', 'REGISTRY.md'), header + rows + '\n');
+
+  // REGISTRY.json — machine-readable
+  const json = JSON.stringify(
+    { generatedAt: new Date().toISOString(), version, agents: allAgents },
+    null,
+    2
+  );
+  await writeOutput(join(tmpDir, '.claude', 'agents', 'REGISTRY.json'), json + '\n');
 }
 
 /**
@@ -1756,7 +1811,137 @@ function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
   };
 }
 
-function buildAgentVars(agent, category, vars) {
+/**
+ * Builds a flat registry Map of agentId → compact summary for all agents in the spec.
+ * Used by buildCollaboratorsSection to render peer context without loading full specs.
+ */
+export function buildAgentRegistry(agentsSpec) {
+  const registry = new Map();
+  for (const [category, agents] of Object.entries(agentsSpec.agents || {})) {
+    for (const agent of agents) {
+      const role = typeof agent.role === 'string' ? agent.role.trim() : '';
+      // First sentence — split on '. ' or end of string, cap at 120 chars
+      const firstSentence = role.split(/\.\s+/)[0].replace(/\s+/g, ' ').trim();
+      const roleSummary =
+        firstSentence.length > 120 ? firstSentence.slice(0, 117) + '...' : firstSentence;
+      registry.set(agent.id, {
+        id: agent.id,
+        name: agent.name || agent.id,
+        category,
+        roleSummary,
+        accepts: Array.isArray(agent.accepts) ? agent.accepts : [],
+      });
+    }
+  }
+  return registry;
+}
+
+/**
+ * Builds a compact markdown list of agents this agent collaborates with,
+ * drawn from depends-on, notifies, and negotiation.can-negotiate-with.
+ * Only includes agents present in the registry (unknown IDs are skipped with a warning).
+ */
+export function buildCollaboratorsSection(agent, registry, { warn = () => {} } = {}) {
+  const raw = [
+    ...(agent['depends-on'] || []),
+    ...(agent.notifies || []),
+    ...((agent.negotiation || {})['can-negotiate-with'] || []),
+  ];
+  const seen = new Set();
+  const peers = [];
+  for (const id of raw) {
+    if (seen.has(id) || id === agent.id) continue;
+    seen.add(id);
+    const entry = registry.get(id);
+    if (!entry) {
+      warn(`[collaborators] agent '${agent.id}' references unknown peer '${id}' — skipping`);
+      continue;
+    }
+    peers.push(entry);
+  }
+  if (peers.length === 0) return '';
+  return peers
+    .map(
+      (p) =>
+        `- **[${p.id}]** ${p.name} *(${p.category})* — ${p.roleSummary}` +
+        (p.accepts.length > 0 ? ` · accepts: ${p.accepts.join(', ')}` : '')
+    )
+    .join('\n');
+}
+
+function buildAgentDecisionModelSection(dm) {
+  if (!dm) return '';
+  const lines = [];
+  if (dm.type) lines.push(`- **Type:** ${dm.type}`);
+  if (dm['hybrid-of'] && dm['hybrid-of'].length > 0)
+    lines.push(`- **Hybrid of:** ${dm['hybrid-of'].join(', ')}`);
+  if (dm.description) lines.push(`- **Rationale:** ${dm.description.trim()}`);
+  return lines.join('\n');
+}
+
+function buildAgentRetryPolicySection(rp) {
+  if (!rp) return '';
+  const lines = [];
+  if (rp['max-retries'] !== undefined) lines.push(`- **Max retries:** ${rp['max-retries']}`);
+  const fc = rp['failure-classification'];
+  if (fc) {
+    const parts = [];
+    if (fc.transient) parts.push(`transient→${fc.transient}`);
+    if (fc.logic) parts.push(`logic→${fc.logic}`);
+    if (fc.permanent) parts.push(`permanent→${fc.permanent}`);
+    if (parts.length > 0) lines.push(`- **Failure handling:** ${parts.join(', ')}`);
+  }
+  if (rp.backoff && rp.backoff !== 'none') lines.push(`- **Backoff:** ${rp.backoff}`);
+  if (rp['escalate-to']) lines.push(`- **Escalate to:** ${rp['escalate-to']}`);
+  return lines.join('\n');
+}
+
+function buildAgentBeliefSystemSection(bs) {
+  if (!bs) return '';
+  const lines = [];
+  const reads = bs['state-reads'];
+  if (reads && reads.length > 0) lines.push(`- **State reads:** ${reads.join(', ')}`);
+  if (bs['task-reads'] !== undefined) lines.push(`- **Task reads:** ${bs['task-reads']}`);
+  const updateOn = bs['update-on'];
+  if (updateOn && updateOn.length > 0) lines.push(`- **Update on:** ${updateOn.join(', ')}`);
+  if (bs['revision-strategy']) lines.push(`- **Revision strategy:** ${bs['revision-strategy']}`);
+  return lines.join('\n');
+}
+
+function buildAgentConfidenceSection(conf) {
+  if (!conf) return '';
+  const lines = [];
+  if (conf['output-threshold'] !== undefined)
+    lines.push(`- **Output threshold:** ${conf['output-threshold']}`);
+  if (conf['requires-validation'] !== undefined)
+    lines.push(`- **Requires validation:** ${conf['requires-validation']}`);
+  if (conf['validation-agent']) lines.push(`- **Validation agent:** ${conf['validation-agent']}`);
+  if (conf['low-confidence-action'])
+    lines.push(`- **Low confidence action:** ${conf['low-confidence-action']}`);
+  return lines.join('\n');
+}
+
+function buildAgentNegotiationSection(neg) {
+  if (!neg) return '';
+  const lines = [];
+  if (neg['conflict-scope']) lines.push(`- **Conflict scope:** ${neg['conflict-scope']}`);
+  if (neg['resolution-strategy'])
+    lines.push(`- **Resolution strategy:** ${neg['resolution-strategy']}`);
+  const peers = neg['can-negotiate-with'];
+  if (peers && peers.length > 0) lines.push(`- **Can negotiate with:** ${peers.join(', ')}`);
+  return lines.join('\n');
+}
+
+function buildAgentLookaheadSection(la) {
+  if (!la || !la.enabled) return '';
+  const lines = [`- **Enabled:** ${la.enabled}`];
+  if (la.depth !== undefined && la.depth > 0) lines.push(`- **Depth:** ${la.depth}`);
+  if (la['simulation-budget'] !== undefined && la['simulation-budget'] > 0)
+    lines.push(`- **Simulation budget:** ${la['simulation-budget']} tool calls`);
+  return lines.join('\n');
+}
+
+function buildAgentVars(agent, category, vars, registry = new Map()) {
   const focus = agent.focus || [];
   const responsibilities = agent.responsibilities || [];
   const tools = agent['preferred-tools'] || agent.tools || [];
@@ -1783,6 +1968,13 @@ function buildAgentVars(agent, category, vars) {
         : '',
     agentAntiPatterns: antiPatterns.length > 0 ? antiPatterns.map((a) => `- ${a}`).join('\n') : '',
     agentDomainRules: domainRules.length > 0 ? domainRules.map((r) => `- ${r}`).join('\n') : '',
+    agentDecisionModel: buildAgentDecisionModelSection(agent['decision-model']),
+    agentRetryPolicy: buildAgentRetryPolicySection(agent['retry-policy']),
+    agentBeliefSystem: buildAgentBeliefSystemSection(agent['belief-system']),
+    agentConfidence: buildAgentConfidenceSection(agent.confidence),
+    agentNegotiation: buildAgentNegotiationSection(agent.negotiation),
+    agentLookahead: buildAgentLookaheadSection(agent.lookahead),
+    agentCollaborators: buildCollaboratorsSection(agent, registry),
   };
 }
 
@@ -1862,7 +2054,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   // Clear module-level state from any previous run (e.g. in tests)
   templateMetaMap.clear();
   templateTextCache.clear();
-  startSyncReport();
 
   const log = (...args) => {
     if (!quiet) console.log(...args);
@@ -1924,7 +2115,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const commandsSpec = readYaml(resolve(agentkitRoot, 'spec', 'commands.yaml')) || {};
   const rulesSpec = readYaml(resolve(agentkitRoot, 'spec', 'rules.yaml')) || {};
   const settingsSpec = readYaml(resolve(agentkitRoot, 'spec', 'settings.yaml')) || {};
-  const agentsSpec = readYaml(resolve(agentkitRoot, 'spec', 'agents.yaml')) || {};
+  const agentsSpec = loadAgentsSpec(agentkitRoot);
   const skillsSpec = readYaml(resolve(agentkitRoot, 'spec', 'skills.yaml')) || {};
   const docsSpec = readYaml(resolve(agentkitRoot, 'spec', 'docs.yaml')) || {};
   const sectionsSpec = readYaml(resolve(agentkitRoot, 'spec', 'sections.yaml')) || {};
@@ -2192,6 +2383,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       }
     }
 
+    // --- Build agent registry (used by persona collaborators + REGISTRY files) ---
+    const agentRegistry = buildAgentRegistry(agentsSpec);
+
     // --- Gated by renderTargets ---
     const gatedTasks = [];
 
@@ -2223,8 +2417,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           version,
           headerRepoName,
           agentsSpec,
-          filteredRulesSpec
+          filteredRulesSpec,
+          agentRegistry
         ),
+        syncAgentRegistry(tmpDir, agentsSpec, version, headerRepoName),
         syncDirectCopy(
           templatesDir,
           vars.overlayTemplatesDir,
@@ -2673,10 +2869,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       managedConflicts: [],
       managedPreserved: [],
       managedNoCache: [],
-      // scaffold: once — path-derived, skipped because file exists
-      scaffoldOnce: [],
-      // scaffold: adopt-if-missing — explicit metadata, skipped because file exists
-      adoptIfMissing: [],
     };
 
     await runConcurrent(allTmpFiles, async (srcFile) => {
@@ -2701,7 +2893,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         return;
       }
 
-      // Scaffold action resolution: always | managed (check-hash) | once (skip) | adopt-if-missing
+      // Scaffold action resolution: always | managed (check-hash) | once (skip)
       const meta = getTemplateMeta(normalizedRel);
       const overwrite = flags?.overwrite || flags?.force;
       if (!overwrite && existsSync(destFile)) {
@@ -2709,14 +2901,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
         if (action === 'skip') {
           skippedScaffold++;
-          scaffoldResults.scaffoldOnce.push(normalizedRel);
-          return;
-        }
-
-        if (action === 'adopt-if-missing') {
-          // File already exists — honour user's version, do not overwrite
-          skippedScaffold++;
-          scaffoldResults.adoptIfMissing.push(normalizedRel);
           return;
         }
 
@@ -2995,51 +3179,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
     log(`[retort:sync] Done! Generated ${count} files.`);
 
-    // 12. Write sync-report.json
-    if (!dryRun && !diff) {
-      const reportCollector = getSyncReportData();
-      let gitAutocrlf = null;
-      let hasGitattributes = false;
-      try {
-        gitAutocrlf = execFileSync('git', ['-C', projectRoot, 'config', 'core.autocrlf'], {
-          encoding: 'utf-8',
-          stdio: 'pipe',
-        }).trim();
-      } catch {
-        // git not available or not a repo
-      }
-      try {
-        hasGitattributes = existsSync(resolve(projectRoot, '.gitattributes'));
-      } catch {
-        // ignore
-      }
-      const syncReport = {
-        version,
-        generatedAt: new Date().toISOString(),
-        command: 'retort sync',
-        argv: process.argv.slice(2),
-        os: { platform: process.platform, arch: process.arch, nodeVersion: process.version },
-        git: { autocrlf: gitAutocrlf, hasGitattributes },
-        counts: {
-          generated: count,
-          skipped: skippedScaffold,
-          cleaned: cleanedCount,
-          failed: failedFiles.length,
-        },
-        fileSummary,
-        scaffoldResults,
-        unresolvedPlaceholders: reportCollector?.unresolvedPlaceholders ?? [],
-        errors: failedFiles,
-      };
-      const reportPath = resolve(agentkitRoot, 'sync-report.json');
-      try {
-        await writeFile(reportPath, JSON.stringify(syncReport, null, 2) + '\n', 'utf-8');
-      } catch (err) {
-        console.warn(`[retort:sync] Warning: could not write sync-report.json — ${err.message}`);
-      }
-    }
-
-    // 13. First-sync hint (when not called from init)
+    // 12. First-sync hint (when not called from init)
     if (!flags?.overlay) {
       const markerPath = resolve(projectRoot, '.agentkit-repo');
       if (!existsSync(markerPath)) {

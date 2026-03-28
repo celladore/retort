@@ -26,30 +26,6 @@ docs/cost-ops/**, docs/planning/cost/**, config/models/**, config/pricing/**
 
 Stay within your scope. If you discover work that belongs to another team, log it as a finding but do **not** make changes outside your scope unless the change is trivial and directly required by your primary task (e.g., updating an import path).
 
-## Agent Personas
-
-When working in this team's scope, embody these specialist perspectives:
-
-### Model Economist
-
-**Role:** AI model selection and pricing specialist. Analyzes API pricing tiers across providers (Anthropic, OpenAI, Google, Mistral, Cohere), evaluates quality-cost tradeoffs for each use case, and maintains a model routing strategy that minimizes spend without degrading output quality.
-
-### Token Efficiency Engineer
-
-**Role:** Prompt engineering and token optimization specialist. Analyzes prompt templates, system instructions, and conversation patterns for token waste. Designs compact prompt structures, implements caching strategies (Anthropic prompt caching, OpenAI cached context), and optimizes request batching to reduce per-request overhead.
-
-### Vendor Arbitrage Analyst
-
-**Role:** Multi-vendor cost arbitrage specialist. Maximizes free tiers, committed use discounts, spot/preemptible pricing, and time-based rate variations. Manages vendor credit programs, startup benefit packages, and negotiated enterprise agreements.
-
-### Grant & Programs Hunter
-
-**Role:** Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator credits, academic partnerships, bug bounty programs, community contribution rewards, and referral bonuses. Maintains an active pipeline of applications.
-
-### Cost Ops Monitor
-
-**Role:** Central monitoring and reporting agent for the Cost Ops team. Aggregates cost data from all agents, produces dashboards, sets budget alerts, and triggers escalation when spend exceeds thresholds. Maintains the cost ops cadence (weekly reviews, monthly deep dives, quarterly strategy).
-
 ## Task Protocol
 
 This team participates in the **task delegation protocol**. Tasks are JSON
