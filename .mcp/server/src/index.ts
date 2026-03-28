@@ -12,11 +12,47 @@ const REPO_ROOT = resolve(process.env.REPO_ROOT ?? join(__dirname, '../../..'));
 const REPO = process.env.REPO ?? 'phoenixvc/retort';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-function readYaml(filename: string): unknown {
-  const filePath = join(REPO_ROOT, filename);
-  if (!existsSync(filePath)) return null;
+async function fetchGitHubContent(path: string): Promise<string | null> {
+  if (!GITHUB_TOKEN) return null;
+  const [owner, repo] = REPO.split('/');
   try {
-    return yaml.load(readFileSync(filePath, 'utf8'));
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        headers: {
+          Authorization: `Bearer ${GITHUB_TOKEN}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      }
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { content: string; encoding: string };
+    if (data.encoding === 'base64') {
+      return Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf8');
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function readYaml(filename: string): Promise<unknown> {
+  // Try filesystem first (local dev where REPO_ROOT points to full repo)
+  const filePath = join(REPO_ROOT, filename);
+  if (existsSync(filePath)) {
+    try {
+      return yaml.load(readFileSync(filePath, 'utf8'));
+    } catch {
+      return null;
+    }
+  }
+  // Fall back to GitHub API (Railway production — rootDirectory builds only
+  // deploy .mcp/server/ contents to /app, so repo root files aren't on disk)
+  const content = await fetchGitHubContent(filename);
+  if (!content) return null;
+  try {
+    return yaml.load(content);
   } catch {
     return null;
   }
@@ -53,9 +89,9 @@ function mcpError(tool: string, err: unknown) {
 const app = express();
 app.use(express.json());
 
-app.get('/health', (_req, res) => {
-  const todo = readYaml('.todo.yaml');
-  const roadmap = readYaml('.roadmap.yaml');
+app.get('/health', async (_req, res) => {
+  const todo = await readYaml('.todo.yaml');
+  const roadmap = await readYaml('.roadmap.yaml');
   res.json({
     status: 'ok',
     repo: REPO,
@@ -83,7 +119,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
     }),
   }, async ({ status, priority }) => {
     try {
-      const todo = readYaml('.todo.yaml') as any;
+      const todo = (await readYaml('.todo.yaml')) as any;
       if (!todo) return { content: [{ type: 'text', text: 'No .todo.yaml found in repo' }] };
       let tasks = todo.tasks ?? [];
       if (status) tasks = tasks.filter((t: any) => t.status === status);
@@ -99,7 +135,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
     }),
   }, async ({ status }) => {
     try {
-      const roadmap = readYaml('.roadmap.yaml') as any;
+      const roadmap = (await readYaml('.roadmap.yaml')) as any;
       if (!roadmap) return { content: [{ type: 'text', text: 'No .roadmap.yaml found in repo' }] };
       let items = roadmap.milestones ?? roadmap.items ?? roadmap.roadmap ?? [];
       if (status) items = items.filter((i: any) => i.status === status);
@@ -122,8 +158,8 @@ app.post('/mcp', async (req: Request, res: Response) => {
     inputSchema: z.object({}),
   }, async () => {
     try {
-      const todo = readYaml('.todo.yaml') as any;
-      const roadmap = readYaml('.roadmap.yaml') as any;
+      const todo = (await readYaml('.todo.yaml')) as any;
+      const roadmap = (await readYaml('.roadmap.yaml')) as any;
       const pipeline = await getPipelineStatus();
       const summary = {
         repo: REPO,
