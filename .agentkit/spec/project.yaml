@@ -281,6 +281,14 @@ automation:
 #   rules: [typescript, security, testing, git-workflow, documentation,
 #           ci-cd, dependency-management, agent-conduct, template-protection]
 
+# Domain selection — controls which rule domains are generated
+# When omitted, domains are auto-selected from stack.languages (mode: configured/hybrid)
+# or all domains are included (mode: heuristic).
+# Uncomment and specify to override auto-detection:
+# domains:
+#   rules: [typescript, security, testing, git-workflow, documentation,
+#           ci-cd, dependency-management, agent-conduct, template-protection]
+
 # External integrations (helps agents understand system boundaries)
 # Uncomment and add entries to describe external system boundaries:
 # integrations:

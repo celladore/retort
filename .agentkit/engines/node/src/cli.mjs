@@ -473,6 +473,7 @@ async function main() {
     process.exit(0);
   }
 
+
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);
   }
