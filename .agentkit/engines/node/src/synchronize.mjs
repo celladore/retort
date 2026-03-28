@@ -2249,6 +2249,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       if (mode === 'version') return version || '';
       return new Date().toISOString().slice(0, 10);
     })(),
+    // autoSyncOnPush controls whether the pre-push hook runs agentkit sync
+    // before every push (issue #410). Defaults to false; opt-in per repo.
+    autoSyncOnPush: overlaySettings.autoSyncOnPush ?? settingsSpec.sync?.autoSyncOnPush ?? false,
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'retort',
     // Branch protection defaults — ensure generated scripts produce valid
