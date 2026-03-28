@@ -26,12 +26,12 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `action` | Action: list, show, create, budget, map, unmap, status, unbudgeted, audit | list |
-| `--centre-id` | Cost centre identifier | — |
-| `--rg` | Azure resource group name | — |
-| `--amount` | Monthly budget amount in USD | — |
+| Flag          | Description                                                               | Default |
+| ------------- | ------------------------------------------------------------------------- | ------- |
+| `action`      | Action: list, show, create, budget, map, unmap, status, unbudgeted, audit | list    |
+| `--centre-id` | Cost centre identifier                                                    | —       |
+| `--rg`        | Azure resource group name                                                 | —       |
+| `--amount`    | Monthly budget amount in USD                                              | —       |
 
 ## Implementation
 
@@ -43,4 +43,3 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/cost
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

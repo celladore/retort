@@ -5,7 +5,7 @@
  * 8 cross-reference matrices plus supplementary analyses (orphans,
  * cycles, coverage gaps, coupling, bottlenecks, reachability).
  */
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 
@@ -19,6 +19,7 @@ import { resolve } from 'path';
  * @returns {{ agents: object[], teams: object[], categories: string[], teamMap: Map, agentMap: Map, relationships: object }}
  */
 export function loadFullAgentGraph(agentkitRoot) {
+  const agentsDir = resolve(agentkitRoot, 'spec', 'agents');
   const agentsPath = resolve(agentkitRoot, 'spec', 'agents.yaml');
   const teamsPath = resolve(agentkitRoot, 'spec', 'teams.yaml');
 
@@ -27,20 +28,37 @@ export function loadFullAgentGraph(agentkitRoot) {
   const agentMap = new Map(); // agentId → agent
   const categoryMap = new Map(); // category → agentId[]
 
-  if (existsSync(agentsPath)) {
-    const spec = yaml.load(readFileSync(agentsPath, 'utf-8'));
-    if (spec?.agents && typeof spec.agents === 'object') {
-      for (const [category, agentList] of Object.entries(spec.agents)) {
+  // Load agents: directory-first, fallback to monolithic agents.yaml
+  let mergedAgentCategories = null;
+  if (existsSync(agentsDir)) {
+    mergedAgentCategories = {};
+    const files = readdirSync(agentsDir)
+      .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+      .sort();
+    for (const file of files) {
+      const parsed = yaml.load(readFileSync(resolve(agentsDir, file), 'utf-8'));
+      if (!parsed || typeof parsed !== 'object') continue;
+      for (const [category, agentList] of Object.entries(parsed)) {
         if (!Array.isArray(agentList)) continue;
-        categories.push(category);
-        categoryMap.set(category, []);
-        for (const agent of agentList) {
-          if (!agent?.id) continue;
-          const enriched = { ...agent, _category: category };
-          agents.push(enriched);
-          agentMap.set(agent.id, enriched);
-          categoryMap.get(category).push(agent.id);
-        }
+        mergedAgentCategories[category] = (mergedAgentCategories[category] || []).concat(agentList);
+      }
+    }
+  } else if (existsSync(agentsPath)) {
+    const spec = yaml.load(readFileSync(agentsPath, 'utf-8'));
+    mergedAgentCategories = spec?.agents ?? null;
+  }
+
+  if (mergedAgentCategories && typeof mergedAgentCategories === 'object') {
+    for (const [category, agentList] of Object.entries(mergedAgentCategories)) {
+      if (!Array.isArray(agentList)) continue;
+      categories.push(category);
+      categoryMap.set(category, []);
+      for (const agent of agentList) {
+        if (!agent?.id) continue;
+        const enriched = { ...agent, _category: category };
+        agents.push(enriched);
+        agentMap.set(agent.id, enriched);
+        categoryMap.get(category).push(agent.id);
       }
     }
   }

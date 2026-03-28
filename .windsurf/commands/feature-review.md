@@ -26,11 +26,11 @@ This command participates in the shared workflow state. Read and update:
 
 ## Flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--recommend` | Analyze codebase and recommend features to enable or disable | false |
-| `--audit` | Audit feature usage — find enabled features with no matching code patterns | false |
-| `--verbose` | Show detailed feature metadata including template vars and affected templates | false |
+| Flag          | Description                                                                   | Default |
+| ------------- | ----------------------------------------------------------------------------- | ------- |
+| `--recommend` | Analyze codebase and recommend features to enable or disable                  | false   |
+| `--audit`     | Audit feature usage — find enabled features with no matching code patterns    | false   |
+| `--verbose`   | Show detailed feature metadata including template vars and affected templates | false   |
 
 ## Implementation
 
@@ -42,4 +42,3 @@ Execute the steps defined in the corresponding command (`.windsurf/commands/feat
 - `/plan` — Structured planning before implementation
 - `/project-review` — Comprehensive project audit
 - See `COMMAND_GUIDE.md` for when to choose each command
-

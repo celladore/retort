@@ -62,4 +62,3 @@ Produce: Quality Gate Results table (Step | Status | Duration | Details), Overal
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

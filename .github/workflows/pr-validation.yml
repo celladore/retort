@@ -16,7 +16,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   terraform-fmt:
     name: Terraform format check
     runs-on: self-hosted

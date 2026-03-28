@@ -948,11 +948,7 @@ async function syncAgentRegistry(tmpDir, agentsSpec, version, repoName) {
   await writeOutput(join(tmpDir, '.claude', 'agents', 'REGISTRY.md'), header + rows + '\n');
 
   // REGISTRY.json — machine-readable
-  const json = JSON.stringify(
-    { version, agents: allAgents },
-    null,
-    2
-  );
+  const json = JSON.stringify({ version, agents: allAgents }, null, 2);
   await writeOutput(join(tmpDir, '.claude', 'agents', 'REGISTRY.json'), json + '\n');
 }
 

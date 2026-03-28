@@ -46,4 +46,3 @@ Report: per-check pass/fail with details, overall PASS/FAIL status, list of miss
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
-

@@ -73,4 +73,3 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
   - Blocked cross-team escalation: `product`
 
 Keep backlog sync tracker-neutral (GitHub/Linear) and ownership-aware using the configured intake values.
-
