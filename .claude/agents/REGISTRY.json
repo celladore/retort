@@ -1,0 +1,415 @@
+{
+  "generatedAt": "2026-03-28T20:27:25.134Z",
+  "version": "3.1.0",
+  "agents": [
+    {
+      "id": "model-economist",
+      "name": "Model Economist",
+      "category": "cost-operations",
+      "roleSummary": "AI model selection and pricing specialist",
+      "accepts": [
+        "investigate",
+        "review",
+        "plan"
+      ]
+    },
+    {
+      "id": "token-efficiency-engineer",
+      "name": "Token Efficiency Engineer",
+      "category": "cost-operations",
+      "roleSummary": "Prompt engineering and token optimization specialist",
+      "accepts": [
+        "investigate",
+        "review",
+        "plan",
+        "implement"
+      ]
+    },
+    {
+      "id": "vendor-arbitrage-analyst",
+      "name": "Vendor Arbitrage Analyst",
+      "category": "cost-operations",
+      "roleSummary": "Multi-vendor cost arbitrage specialist",
+      "accepts": [
+        "investigate",
+        "plan",
+        "document"
+      ]
+    },
+    {
+      "id": "grant-hunter",
+      "name": "Grant & Programs Hunter",
+      "category": "cost-operations",
+      "roleSummary": "Identifies and pursues external funding sources for AI infrastructure costs: research grants, startup accelerator cre...",
+      "accepts": [
+        "investigate",
+        "plan",
+        "document"
+      ]
+    },
+    {
+      "id": "cost-ops-monitor",
+      "name": "Cost Ops Monitor",
+      "category": "cost-operations",
+      "roleSummary": "Central monitoring and reporting agent for the Cost Ops team",
+      "accepts": [
+        "investigate",
+        "review",
+        "document"
+      ]
+    },
+    {
+      "id": "brand-guardian",
+      "name": "Brand Guardian",
+      "category": "design",
+      "roleSummary": "Brand consistency specialist ensuring all visual and written outputs align with the established brand identity, desig...",
+      "accepts": [
+        "review",
+        "plan",
+        "investigate"
+      ]
+    },
+    {
+      "id": "ui-designer",
+      "name": "UI Designer",
+      "category": "design",
+      "roleSummary": "UI/UX design specialist responsible for interaction patterns, component design, layout systems, and visual hierarchy",
+      "accepts": [
+        "review",
+        "plan"
+      ]
+    },
+    {
+      "id": "backend",
+      "name": "Backend Engineer",
+      "category": "engineering",
+      "roleSummary": "Senior backend engineer responsible for API design, service architecture, core business logic, and server-side perfor...",
+      "accepts": [
+        "implement",
+        "review",
+        "plan"
+      ]
+    },
+    {
+      "id": "frontend",
+      "name": "Frontend Engineer",
+      "category": "engineering",
+      "roleSummary": "Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experi...",
+      "accepts": [
+        "implement",
+        "review",
+        "plan"
+      ]
+    },
+    {
+      "id": "data",
+      "name": "Data Engineer",
+      "category": "engineering",
+      "roleSummary": "Senior data engineer responsible for database design, migrations, data models, and data pipeline architecture",
+      "accepts": [
+        "implement",
+        "review",
+        "plan"
+      ]
+    },
+    {
+      "id": "devops",
+      "name": "DevOps Engineer",
+      "category": "engineering",
+      "roleSummary": "Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment wor...",
+      "accepts": [
+        "implement",
+        "review",
+        "plan"
+      ]
+    },
+    {
+      "id": "infra",
+      "name": "Infrastructure Engineer",
+      "category": "engineering",
+      "roleSummary": "Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliab...",
+      "accepts": [
+        "implement",
+        "review",
+        "plan",
+        "investigate"
+      ]
+    },
+    {
+      "id": "feature-ops",
+      "name": "Feature Operations Specialist",
+      "category": "feature-management",
+      "roleSummary": "Kit feature management specialist responsible for analyzing, configuring, and auditing the retort feature set for thi...",
+      "accepts": [
+        "investigate",
+        "review",
+        "plan",
+        "document"
+      ]
+    },
+    {
+      "id": "content-strategist",
+      "name": "Content Strategist",
+      "category": "marketing",
+      "roleSummary": "Content strategy specialist responsible for messaging, copy, documentation voice, and content architecture",
+      "accepts": [
+        "implement",
+        "review"
+      ]
+    },
+    {
+      "id": "growth-analyst",
+      "name": "Growth Analyst",
+      "category": "marketing",
+      "roleSummary": "Growth and analytics specialist focused on user acquisition, activation, retention, and revenue metrics",
+      "accepts": [
+        "investigate",
+        "review"
+      ]
+    },
+    {
+      "id": "dependency-watcher",
+      "name": "Dependency Watcher",
+      "category": "operations",
+      "roleSummary": "Dependency management specialist responsible for monitoring, updating, and auditing project dependencies across all t...",
+      "accepts": [
+        "investigate",
+        "implement",
+        "review"
+      ]
+    },
+    {
+      "id": "environment-manager",
+      "name": "Environment Manager",
+      "category": "operations",
+      "roleSummary": "Environment configuration specialist ensuring consistent, secure, and documented environment setups across developmen...",
+      "accepts": [
+        "implement",
+        "review"
+      ]
+    },
+    {
+      "id": "security-auditor",
+      "name": "Security Auditor",
+      "category": "operations",
+      "roleSummary": "Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verificat...",
+      "accepts": [
+        "review",
+        "investigate"
+      ]
+    },
+    {
+      "id": "retrospective-analyst",
+      "name": "Retrospective Analyst",
+      "category": "operations",
+      "roleSummary": "Session retrospective specialist activated via /review --focus=retrospective",
+      "accepts": [
+        "review",
+        "investigate"
+      ]
+    },
+    {
+      "id": "spec-compliance-auditor",
+      "name": "Spec Compliance Auditor",
+      "category": "operations",
+      "roleSummary": "Agent performance evaluator that closes the feedback loop between agent specifications and actual behavior",
+      "accepts": [
+        "review",
+        "investigate"
+      ]
+    },
+    {
+      "id": "product-manager",
+      "name": "Product Manager",
+      "category": "product",
+      "roleSummary": "Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeho...",
+      "accepts": [
+        "plan",
+        "review"
+      ]
+    },
+    {
+      "id": "roadmap-tracker",
+      "name": "Roadmap Tracker",
+      "category": "product",
+      "roleSummary": "Roadmap and milestone tracking specialist maintaining visibility into project progress, timeline adherence, and deliv...",
+      "accepts": [
+        "investigate",
+        "review"
+      ]
+    },
+    {
+      "id": "expansion-analyst",
+      "name": "Expansion Analyst",
+      "category": "product",
+      "roleSummary": "Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportun...",
+      "accepts": [
+        "investigate",
+        "review"
+      ]
+    },
+    {
+      "id": "project-shipper",
+      "name": "Project Shipper",
+      "category": "project-management",
+      "roleSummary": "Delivery-focused project management specialist responsible for moving work through the pipeline from planning to prod...",
+      "accepts": [
+        "plan",
+        "review"
+      ]
+    },
+    {
+      "id": "release-manager",
+      "name": "Release Manager",
+      "category": "project-management",
+      "roleSummary": "Release management specialist responsible for coordinating releases, managing versioning, generating changelogs, and ...",
+      "accepts": [
+        "implement",
+        "plan",
+        "review"
+      ]
+    },
+    {
+      "id": "portfolio-analyst",
+      "name": "Portfolio Analyst",
+      "category": "strategic-operations",
+      "roleSummary": "Scans the adoption landscape — inventories downstream repos using AgentKit Forge, compares spec versions, detects dri...",
+      "accepts": [
+        "investigate",
+        "review"
+      ]
+    },
+    {
+      "id": "governance-advisor",
+      "name": "Governance Advisor",
+      "category": "strategic-operations",
+      "roleSummary": "Defines and enforces framework governance policies — versioning strategy, breaking change protocols, deprecation time...",
+      "accepts": [
+        "plan",
+        "review",
+        "document"
+      ]
+    },
+    {
+      "id": "adoption-strategist",
+      "name": "Adoption Strategist",
+      "category": "strategic-operations",
+      "roleSummary": "Plans and executes adoption campaigns — onboarding new repos, migration paths for existing projects, and rollout stra...",
+      "accepts": [
+        "plan",
+        "document"
+      ]
+    },
+    {
+      "id": "impact-assessor",
+      "name": "Impact Assessor",
+      "category": "strategic-operations",
+      "roleSummary": "Evaluates the blast radius of proposed changes — estimates which repos, teams, and workflows are affected by template...",
+      "accepts": [
+        "review",
+        "investigate"
+      ]
+    },
+    {
+      "id": "release-coordinator",
+      "name": "Release Coordinator",
+      "category": "strategic-operations",
+      "roleSummary": "Orchestrates framework releases — coordinates version bumps, changelog generation, cross-repo sync waves, and release...",
+      "accepts": [
+        "plan",
+        "review",
+        "document"
+      ]
+    },
+    {
+      "id": "input-clarifier",
+      "name": "Input Clarifier",
+      "category": "team-creation",
+      "roleSummary": "Assesses raw team creation requests, extracts constraints, validates against existing teams to prevent scope overlap,...",
+      "accepts": [
+        "plan",
+        "investigate"
+      ]
+    },
+    {
+      "id": "mission-definer",
+      "name": "Mission Definer",
+      "category": "team-creation",
+      "roleSummary": "Locks the team mission, scope, accepted task types, and handoff chain",
+      "accepts": [
+        "plan"
+      ]
+    },
+    {
+      "id": "role-architect",
+      "name": "Role Architect",
+      "category": "team-creation",
+      "roleSummary": "Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team",
+      "accepts": [
+        "plan"
+      ]
+    },
+    {
+      "id": "prompt-engineer",
+      "name": "Prompt Engineer",
+      "category": "team-creation",
+      "roleSummary": "Writes agent descriptions, domain rules, conventions, anti-patterns, and examples for each agent in the new team",
+      "accepts": [
+        "plan",
+        "implement"
+      ]
+    },
+    {
+      "id": "flow-designer",
+      "name": "Flow Designer",
+      "category": "team-creation",
+      "roleSummary": "Designs the team command, flags, and integration points with other teams",
+      "accepts": [
+        "plan",
+        "implement"
+      ]
+    },
+    {
+      "id": "team-validator",
+      "name": "Team Validator",
+      "category": "team-creation",
+      "roleSummary": "Quality gate — validates the complete team spec for consistency, conflicts, and completeness",
+      "accepts": [
+        "review",
+        "investigate"
+      ]
+    },
+    {
+      "id": "test-lead",
+      "name": "Test Lead",
+      "category": "testing",
+      "roleSummary": "Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions",
+      "accepts": [
+        "implement",
+        "review",
+        "test"
+      ]
+    },
+    {
+      "id": "coverage-tracker",
+      "name": "Coverage Tracker",
+      "category": "testing",
+      "roleSummary": "Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing co...",
+      "accepts": [
+        "investigate",
+        "review"
+      ]
+    },
+    {
+      "id": "integration-tester",
+      "name": "Integration Tester",
+      "category": "testing",
+      "roleSummary": "Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and use...",
+      "accepts": [
+        "implement",
+        "review",
+        "test"
+      ]
+    }
+  ]
+}
