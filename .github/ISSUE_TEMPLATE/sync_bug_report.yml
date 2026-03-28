@@ -87,7 +87,7 @@ body:
       required: true
 
   - type: dropdown
-    id: area
+    id: sync_category
     attributes:
       label: Affected Area
       options:

@@ -31,9 +31,8 @@ if (!existsSync(eventsLog)) {
 }
 
 // ── Parse events.log ──────────────────────────────────────────────────────
-const windowStart = windowDays > 0
-  ? new Date(Date.now() - windowDays * 86_400_000).toISOString()
-  : null;
+const windowStart =
+  windowDays > 0 ? new Date(Date.now() - windowDays * 86_400_000).toISOString() : null;
 
 const raw = readFileSync(eventsLog, 'utf8').split('\n').filter(Boolean);
 
@@ -84,7 +83,11 @@ for (const line of raw) {
 
   // ── JSON lines (check_completed, TURN_LIMIT_REACHED, etc.) ───────────
   let obj;
-  try { obj = JSON.parse(line); } catch { continue; }
+  try {
+    obj = JSON.parse(line);
+  } catch {
+    continue;
+  }
 
   const ts = obj.timestamp;
   if (windowStart && ts && ts < windowStart) continue;
@@ -97,9 +100,7 @@ for (const line of raw) {
 // ── Compute derived fields ────────────────────────────────────────────────
 for (const a of Object.values(agents)) {
   const total = a.tasksAccepted;
-  a.avgToolCallsPerTask = total > 0
-    ? parseFloat((a.toolCallsTotal / total).toFixed(2))
-    : 0;
+  a.avgToolCallsPerTask = total > 0 ? parseFloat((a.toolCallsTotal / total).toFixed(2)) : 0;
 }
 
 // ── Write agent-metrics.json ──────────────────────────────────────────────
@@ -110,10 +111,7 @@ const metrics = {
   windowDays: windowDays > 0 ? windowDays : null,
   agents,
   teams: Object.fromEntries(
-    Object.entries(agents).map(([name, a]) => [
-      name,
-      { tasksRouted: a.tasksAccepted },
-    ])
+    Object.entries(agents).map(([name, a]) => [name, { tasksRouted: a.tasksAccepted }])
   ),
 };
 
@@ -130,9 +128,7 @@ console.log(`[aggregate-metrics] Wrote ${metricsOut}`);
 
 const health = {};
 for (const [team, a] of Object.entries(agents)) {
-  const completionRate = a.tasksAccepted > 0
-    ? a.tasksCompleted / a.tasksAccepted
-    : null; // null = never used
+  const completionRate = a.tasksAccepted > 0 ? a.tasksCompleted / a.tasksAccepted : null; // null = never used
 
   let flag = null;
   let trend = 'stable';

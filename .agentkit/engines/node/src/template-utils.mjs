@@ -177,7 +177,10 @@ export function replacePlaceholders(template, vars, sanitizeStrings = false, opt
     const loc = opts?.filePath ? ` in ${opts.filePath}` : '';
     console.warn(`[agentkit:sync] Warning: unresolved placeholders${loc}: ${unique.join(', ')}`);
     if (_syncReportCollector) {
-      _syncReportCollector.unresolvedPlaceholders.push({ file: opts?.filePath || '', vars: unique });
+      _syncReportCollector.unresolvedPlaceholders.push({
+        file: opts?.filePath || '',
+        vars: unique,
+      });
     }
   }
   return result;

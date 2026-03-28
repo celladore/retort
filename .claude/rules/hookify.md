@@ -6,12 +6,13 @@ Rules for writing correct hookify guard files in `.claude/hookify.*.local.md`.
 
 The simple `pattern:` shorthand behaves differently depending on event type:
 
-| Event | `pattern:` matches |
-|-------|-------------------|
-| `bash` | The shell command string — correct and intuitive |
+| Event  | `pattern:` matches                                    |
+| ------ | ----------------------------------------------------- |
+| `bash` | The shell command string — correct and intuitive      |
 | `file` | The **file content** (`new_text`) — NOT the file path |
 
 This means path-based file guards written with the shorthand silently misbehave:
+
 - The rule fires on any file whose **content** contains the pattern
 - The rule does NOT fire based on the destination file path
 
