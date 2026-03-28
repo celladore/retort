@@ -13,17 +13,21 @@ const REPO = process.env.REPO ?? 'phoenixvc/retort';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 async function fetchGitHubContent(path: string): Promise<string | null> {
-  if (!GITHUB_TOKEN) return null;
+  if (!GITHUB_TOKEN) throw new Error(`Missing GITHUB_TOKEN — cannot fetch ${path} from GitHub API`);
   const [owner, repo] = REPO.split('/');
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const res = await fetch(url, {
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${GITHUB_TOKEN}`,
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
       },
     });
+    clearTimeout(timeout);
     // Return null only for genuine 404 "file not found" responses
     if (res.status === 404) return null;
     // For other non-OK responses (rate limits, auth failures, 5xx), throw an error
@@ -39,6 +43,7 @@ async function fetchGitHubContent(path: string): Promise<string | null> {
     }
     return null;
   } catch (err) {
+    clearTimeout(timeout);
     // Rethrow with context instead of swallowing exceptions
     if (err instanceof Error) {
       throw new Error(`Failed to fetch GitHub content from ${url}: ${err.message}`, { cause: err });
@@ -115,14 +120,21 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/ready', async (_req, res) => {
-  const todo = await readYaml('.todo.yaml');
-  const roadmap = await readYaml('.roadmap.yaml');
-  res.json({
-    status: 'ok',
-    repo: REPO,
-    todoLoaded: todo !== null,
-    roadmapLoaded: roadmap !== null,
-  });
+  try {
+    const [todo, roadmap] = await Promise.all([
+      readYaml('.todo.yaml'),
+      readYaml('.roadmap.yaml'),
+    ]);
+    res.json({
+      status: 'ok',
+      repo: REPO,
+      todoLoaded: todo !== null,
+      roadmapLoaded: roadmap !== null,
+    });
+  } catch (err) {
+    console.error('[ready]', err);
+    res.status(503).json({ status: 'error', repo: REPO });
+  }
 });
 
 app.post('/mcp', async (req: Request, res: Response) => {
@@ -162,7 +174,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
     try {
       const roadmap = (await readYaml('.roadmap.yaml')) as any;
       if (!roadmap) return { content: [{ type: 'text', text: 'No .roadmap.yaml found in repo' }] };
-      let items = roadmap.milestones ?? roadmap.items ?? roadmap.roadmap ?? [];
+      let items = roadmap.tasks ?? roadmap.milestones ?? roadmap.items ?? [];
       if (status) items = items.filter((i: any) => i.status === status);
       return { content: [{ type: 'text', text: JSON.stringify({ meta: roadmap.meta ?? {}, items }, null, 2) }] };
     } catch (err) { return mcpError('get_roadmap', err); }
@@ -183,9 +195,12 @@ app.post('/mcp', async (req: Request, res: Response) => {
     inputSchema: z.object({}),
   }, async () => {
     try {
-      const todo = (await readYaml('.todo.yaml')) as any;
-      const roadmap = (await readYaml('.roadmap.yaml')) as any;
-      const pipeline = await getPipelineStatus();
+      const [todo, roadmap, pipeline] = await Promise.all([
+        readYaml('.todo.yaml'),
+        readYaml('.roadmap.yaml'),
+        getPipelineStatus(),
+      ]) as [any, any, any];
+      const roadmapItems = roadmap?.tasks ?? roadmap?.milestones ?? roadmap?.items ?? [];
       const summary = {
         repo: REPO,
         tasks: {
@@ -196,8 +211,8 @@ app.post('/mcp', async (req: Request, res: Response) => {
           high_priority_open: todo?.tasks?.filter((t: any) => t.priority === 'high' && t.status !== 'done').map((t: any) => t.title) ?? [],
         },
         roadmap: {
-          total: (roadmap?.milestones ?? roadmap?.items ?? []).length,
-          inprogress: (roadmap?.milestones ?? roadmap?.items ?? []).filter((i: any) => i.status === 'inprogress').map((i: any) => i.title),
+          total: roadmapItems.length,
+          inprogress: roadmapItems.filter((i: any) => i.status === 'inprogress').map((i: any) => i.title),
         },
         pipeline,
       };
