@@ -15,25 +15,35 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 async function fetchGitHubContent(path: string): Promise<string | null> {
   if (!GITHUB_TOKEN) return null;
   const [owner, repo] = REPO.split('/');
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
   try {
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        headers: {
-          Authorization: `Bearer ${GITHUB_TOKEN}`,
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      }
-    );
-    if (!res.ok) return null;
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+    // Return null only for genuine 404 "file not found" responses
+    if (res.status === 404) return null;
+    // For other non-OK responses (rate limits, auth failures, 5xx), throw an error
+    if (!res.ok) {
+      const responseText = await res.text();
+      throw new Error(
+        `GitHub API error: status ${res.status} for ${url}. Response: ${responseText}`
+      );
+    }
     const data = (await res.json()) as { content: string; encoding: string };
     if (data.encoding === 'base64') {
       return Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf8');
     }
     return null;
-  } catch {
-    return null;
+  } catch (err) {
+    // Rethrow with context instead of swallowing exceptions
+    if (err instanceof Error) {
+      throw new Error(`Failed to fetch GitHub content from ${url}: ${err.message}`, { cause: err });
+    }
+    throw err;
   }
 }
 
@@ -43,8 +53,12 @@ async function readYaml(filename: string): Promise<unknown> {
   if (existsSync(filePath)) {
     try {
       return yaml.load(readFileSync(filePath, 'utf8'));
-    } catch {
-      return null;
+    } catch (err) {
+      // Rethrow with context instead of swallowing exceptions
+      if (err instanceof Error) {
+        throw new Error(`Failed to read or parse YAML from ${filePath}: ${err.message}`, { cause: err });
+      }
+      throw err;
     }
   }
   // Fall back to GitHub API (Railway production — rootDirectory builds only
@@ -53,8 +67,12 @@ async function readYaml(filename: string): Promise<unknown> {
   if (!content) return null;
   try {
     return yaml.load(content);
-  } catch {
-    return null;
+  } catch (err) {
+    // Rethrow with context instead of swallowing exceptions
+    if (err instanceof Error) {
+      throw new Error(`Failed to parse YAML content from ${filename}: ${err.message}`, { cause: err });
+    }
+    throw err;
   }
 }
 
@@ -89,7 +107,14 @@ function mcpError(tool: string, err: unknown) {
 const app = express();
 app.use(express.json());
 
-app.get('/health', async (_req, res) => {
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    repo: REPO,
+  });
+});
+
+app.get('/ready', async (_req, res) => {
   const todo = await readYaml('.todo.yaml');
   const roadmap = await readYaml('.roadmap.yaml');
   res.json({
