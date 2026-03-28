@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npm run build"
+
+[deploy]
+startCommand = "node dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+
+[environments.production.variables]
+NODE_ENV = "production"
+# Set these via Railway dashboard:
+# PORT (auto-set by Railway)
+# MCP_SECRET
+# GITHUB_TOKEN
+# REPO = "phoenixvc/retort"
+# REPO_ROOT = "/app"  — Railway sets working dir to /app by default
