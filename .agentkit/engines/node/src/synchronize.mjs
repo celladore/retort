@@ -170,8 +170,13 @@ export function normalizeForComparison(content) {
   return content
     .split('\n')
     .map((line) => {
-      // Normalise markdown table rows (data rows only, not separator rows like |---|---|)
-      if (/^\s*\|/.test(line) && !/^\s*\|[\s|:-]+\|\s*$/.test(line)) {
+      if (/^\s*\|/.test(line)) {
+        // Separator rows (|---|---| or | --- | --- |) — collapse to |---| canonical form
+        if (/^\s*\|[\s|:-]+\|\s*$/.test(line)) {
+          const cols = line.split('|').filter((_, i, a) => i > 0 && i < a.length - 1);
+          return '|' + cols.map((c) => c.trim().replace(/^(:?)-+(:?)$/, '$1-$2')).join('|') + '|';
+        }
+        // Data rows — normalise cell padding to a single space either side
         return line
           .split('|')
           .map((cell, i, arr) =>
@@ -3022,10 +3027,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       // Content-hash guard: skip write if content is identical to the existing file.
       // This prevents mtime churn on generated files that haven't logically changed,
       // reducing adopter merge-conflict counts on framework-update merges.
+      // Also skips when the only difference is markdown table-cell padding (Prettier
+      // alignment vs compact template output) so formatted files are not reverted each run.
       if (existsSync(destFile)) {
+        const existingContent = await readFile(destFile);
         const newHash = newManifestFiles[normalizedRel]?.hash;
         if (newHash) {
-          const existingContent = await readFile(destFile);
           const existingHash = createHash('sha256')
             .update(existingContent)
             .digest('hex')
@@ -3034,6 +3041,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
             logVerbose(`  unchanged ${normalizedRel} (content identical, skipping write)`);
             return;
           }
+        }
+        // Slower path: skip write when the only difference is table-cell padding.
+        const newContent = await readFile(srcFile, 'utf-8');
+        if (
+          normalizeForComparison(existingContent.toString('utf-8')) ===
+          normalizeForComparison(newContent)
+        ) {
+          logVerbose(`  unchanged ${normalizedRel} (formatting-only diff, skipping write)`);
+          return;
         }
       }
 
