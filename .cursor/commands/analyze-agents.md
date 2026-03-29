@@ -18,6 +18,7 @@ When invoked, follow the Retort orchestration lifecycle:
 3. **Execute** the task following project conventions
 4. **Validate** the output meets quality gates
 5. **Report** results clearly
+   
 
 ## Project Context
 
@@ -32,3 +33,4 @@ When invoked, follow the Retort orchestration lifecycle:
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+
