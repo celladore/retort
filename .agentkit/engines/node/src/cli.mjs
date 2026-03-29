@@ -54,6 +54,9 @@ const CLI_INTERNAL_FLAGS = {
     'external-markdown-files',
     'external-git-repos',
     'external-target-platforms',
+    'config-only',
+    'skip-retortconfig',
+    'write-retortconfig',
     'help',
   ],
   sync: [
@@ -105,6 +108,9 @@ const CLI_INTERNAL_FLAG_TYPES = {
   'non-interactive': 'boolean',
   ci: 'boolean',
   'external-knowledge': 'boolean',
+  'config-only': 'boolean',
+  'skip-retortconfig': 'boolean',
+  'write-retortconfig': 'boolean',
   // sync flags
   overlay: 'string',
   only: 'string',
@@ -511,6 +517,16 @@ async function main() {
   try {
     switch (command) {
       case 'init': {
+        if (flags['config-only']) {
+          const { runRetortConfigWizard } = await import('./retort-config-wizard.mjs');
+          await runRetortConfigWizard({
+            agentkitRoot: AGENTKIT_ROOT,
+            projectRoot: PROJECT_ROOT,
+            flags,
+            prefill: null,
+          });
+          break;
+        }
         const { runInit } = await import('./init.mjs');
         await runInit({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
         break;
