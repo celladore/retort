@@ -1,4 +1,4 @@
-<!-- generated_by: retort | last_model: sync-engine | last_updated: 2026-03-28 -->
+<!-- generated_by: retort | last_model: sync-engine | content_hash: 816fa8ae -->
 # Agent Registry
 
 | ID | Name | Category | Accepts | Role |
