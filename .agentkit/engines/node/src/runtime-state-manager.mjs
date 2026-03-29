@@ -16,6 +16,7 @@ import {
   readdirSync,
   readFileSync,
   renameSync,
+  unlinkSync,
   writeFileSync,
 } from 'fs';
 import { readFile } from 'fs/promises';
@@ -30,10 +31,15 @@ import { join } from 'path';
  * Map of currentState → Set of allowed next states.
  */
 const VALID_TRANSITIONS = new Map([
-  ['submitted', new Set(['accepted', 'rejected'])],
-  ['accepted', new Set(['working'])],
-  ['working', new Set(['completed', 'failed'])],
+  ['submitted', new Set(['accepted', 'rejected', 'canceled'])],
+  ['accepted', new Set(['working', 'rejected', 'canceled'])],
+  ['working', new Set(['completed', 'failed', 'input-required', 'canceled'])],
+  ['input-required', new Set(['working', 'canceled'])],
   ['failed', new Set(['working'])], // retry
+  // Terminal states — no further transitions
+  ['completed', new Set()],
+  ['rejected', new Set()],
+  ['canceled', new Set()],
 ]);
 
 // ---------------------------------------------------------------------------
@@ -71,8 +77,17 @@ function eventsPath(projectRoot) {
  */
 function writeAtomicJson(filePath, data) {
   const tmp = filePath + '.tmp';
-  writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n', 'utf-8');
-  renameSync(tmp, filePath);
+  try {
+    writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+    renameSync(tmp, filePath);
+  } catch (err) {
+    try {
+      unlinkSync(tmp);
+    } catch {
+      /* ignore cleanup failure */
+    }
+    throw err;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -226,25 +241,29 @@ export class RuntimeStateManager {
    * @returns {object} Updated task
    */
   transitionTask(taskId, newState, data = {}) {
-    const task = this.getTask(taskId);
-    if (!task) throw new Error(`Task not found: ${taskId}`);
+    const lockKey = `task:${taskId}`;
+    this.lock(lockKey);
+    try {
+      const task = this.getTask(taskId);
+      if (!task) throw new Error(`Task not found: ${taskId}`);
 
-    const allowed = VALID_TRANSITIONS.get(task.state);
-    if (!allowed || !allowed.has(newState)) {
-      throw new Error(
-        `Invalid task transition: ${task.state} → ${newState} (task: ${taskId})`
-      );
+      const allowed = VALID_TRANSITIONS.get(task.state);
+      if (!allowed || !allowed.has(newState)) {
+        throw new Error(`Invalid task transition: ${task.state} → ${newState} (task: ${taskId})`);
+      }
+
+      const updated = {
+        ...task,
+        ...data,
+        state: newState,
+        updatedAt: new Date().toISOString(),
+      };
+      writeAtomicJson(taskPath(this._projectRoot, taskId), updated);
+      this._emitter.emit('task:transitioned', { taskId, from: task.state, to: newState });
+      return updated;
+    } finally {
+      this.unlock(lockKey);
     }
-
-    const updated = {
-      ...task,
-      ...data,
-      state: newState,
-      updatedAt: new Date().toISOString(),
-    };
-    writeAtomicJson(taskPath(this._projectRoot, taskId), updated);
-    this._emitter.emit('task:transitioned', { taskId, from: task.state, to: newState });
-    return updated;
   }
 
   /**

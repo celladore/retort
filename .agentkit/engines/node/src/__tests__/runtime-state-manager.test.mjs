@@ -257,6 +257,61 @@ describe('transitionTask()', () => {
     manager.transitionTask(task.id, 'accepted');
     expect(events[0]).toMatchObject({ taskId: task.id, from: 'submitted', to: 'accepted' });
   });
+
+  it('transitions submitted to canceled', () => {
+    const task = manager.createTask({ title: 'T' });
+    const updated = manager.transitionTask(task.id, 'canceled');
+    expect(updated.state).toBe('canceled');
+  });
+
+  it('transitions accepted to canceled', () => {
+    const task = manager.createTask({ title: 'T' });
+    manager.transitionTask(task.id, 'accepted');
+    const updated = manager.transitionTask(task.id, 'canceled');
+    expect(updated.state).toBe('canceled');
+  });
+
+  it('transitions working to input-required', () => {
+    const task = manager.createTask({ title: 'T' });
+    manager.transitionTask(task.id, 'accepted');
+    manager.transitionTask(task.id, 'working');
+    const updated = manager.transitionTask(task.id, 'input-required');
+    expect(updated.state).toBe('input-required');
+  });
+
+  it('transitions input-required to working', () => {
+    const task = manager.createTask({ title: 'T' });
+    manager.transitionTask(task.id, 'accepted');
+    manager.transitionTask(task.id, 'working');
+    manager.transitionTask(task.id, 'input-required');
+    const updated = manager.transitionTask(task.id, 'working');
+    expect(updated.state).toBe('working');
+  });
+
+  it('transitions input-required to canceled', () => {
+    const task = manager.createTask({ title: 'T' });
+    manager.transitionTask(task.id, 'accepted');
+    manager.transitionTask(task.id, 'working');
+    manager.transitionTask(task.id, 'input-required');
+    const updated = manager.transitionTask(task.id, 'canceled');
+    expect(updated.state).toBe('canceled');
+  });
+
+  it('transitions working to canceled', () => {
+    const task = manager.createTask({ title: 'T' });
+    manager.transitionTask(task.id, 'accepted');
+    manager.transitionTask(task.id, 'working');
+    const updated = manager.transitionTask(task.id, 'canceled');
+    expect(updated.state).toBe('canceled');
+  });
+
+  it('throws on transition out of terminal state completed', () => {
+    const task = manager.createTask({ title: 'T' });
+    manager.transitionTask(task.id, 'accepted');
+    manager.transitionTask(task.id, 'working');
+    manager.transitionTask(task.id, 'completed');
+    expect(() => manager.transitionTask(task.id, 'working')).toThrow(/Invalid task transition/);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -325,7 +380,11 @@ describe('getEventLog()', () => {
   it('reads events written to the log file', async () => {
     const stateDir = join(tmpRoot, '.claude', 'state');
     mkdirSyncRecursive(stateDir);
-    const line = JSON.stringify({ action: 'test_event', value: 1, timestamp: new Date().toISOString() });
+    const line = JSON.stringify({
+      action: 'test_event',
+      value: 1,
+      timestamp: new Date().toISOString(),
+    });
     writeFileSync(join(stateDir, 'events.log'), line + '\n', 'utf-8');
 
     const events = await manager.getEventLog();
@@ -336,16 +395,32 @@ describe('getEventLog()', () => {
   it('filters events by action', async () => {
     const stateDir = join(tmpRoot, '.claude', 'state');
     mkdirSyncRecursive(stateDir);
-    const lines = [
-      JSON.stringify({ action: 'phase_advanced', ts: '1' }),
-      JSON.stringify({ action: 'task_created', ts: '2' }),
-      JSON.stringify({ action: 'phase_advanced', ts: '3' }),
-    ].join('\n') + '\n';
+    const lines =
+      [
+        JSON.stringify({ action: 'phase_advanced', ts: '1' }),
+        JSON.stringify({ action: 'task_created', ts: '2' }),
+        JSON.stringify({ action: 'phase_advanced', ts: '3' }),
+      ].join('\n') + '\n';
     writeFileSync(join(stateDir, 'events.log'), lines, 'utf-8');
 
     const filtered = await manager.getEventLog({ action: 'phase_advanced' });
     expect(filtered).toHaveLength(2);
     expect(filtered.every((e) => e.action === 'phase_advanced')).toBe(true);
+  });
+
+  it('respects limit parameter', async () => {
+    const stateDir = join(tmpRoot, '.claude', 'state');
+    mkdirSyncRecursive(stateDir);
+    const lines =
+      Array.from({ length: 10 }, (_, i) => JSON.stringify({ action: 'test', idx: i })).join('\n') +
+      '\n';
+    writeFileSync(join(stateDir, 'events.log'), lines, 'utf-8');
+
+    const limited = await manager.getEventLog({ limit: 3 });
+    expect(limited).toHaveLength(3);
+    // newest (last) entries returned in reverse order
+    expect(limited[0].idx).toBe(9);
+    expect(limited[2].idx).toBe(7);
   });
 });
 
