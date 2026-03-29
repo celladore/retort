@@ -26,3 +26,7 @@ featurePreset: standard
 # Suppress date churn in generated file headers (issue #417).
 # 'none' writes an empty string for {{syncDate}} so headers are stable across runs.
 syncDateMode: none
+
+# Retort itself runs sync before every push to catch generated-file drift early.
+# New adopters get autoSyncOnPush: false (the framework default).
+autoSyncOnPush: true

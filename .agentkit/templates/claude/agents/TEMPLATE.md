@@ -4,6 +4,13 @@
 
 # {{agentName}}
 
+{{#if retortRemapTarget}}
+
+> **Routing note**: This agent is mapped to **{{retortRemapTarget}}** in `.retortconfig`.
+> Invoke `{{retortRemapTarget}}` directly for project-specific behaviour.
+
+{{/if}}
+
 ## Role
 
 {{agentRole}}

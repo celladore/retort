@@ -29,6 +29,7 @@ fi
 
 ERRORS=""
 
+{{#if autoSyncOnPush}}
 # -- Check 1: Generated file drift ----------------------------------------
 # Run agentkit sync and check if it produces changes
 if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.mjs" ]]; then
@@ -45,6 +46,11 @@ if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.m
         fi
     fi
 fi
+{{else}}
+# -- Check 1: Generated file drift (skipped) ------------------------------
+# autoSyncOnPush is disabled — skipping sync validation.
+# Run '{{packageManager}} -C .agentkit retort:sync' manually before pushing if you've edited spec files.
+{{/if}}
 
 # -- Check 2: Conventional Commits on unpushed commits --------------------
 # Get commits that would be pushed
