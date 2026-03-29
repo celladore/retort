@@ -3051,6 +3051,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           normalizeForComparison(existingContent.toString('utf-8')) ===
           normalizeForComparison(newContent)
         ) {
+          // Still queue for Prettier even though we skip the write — the file on
+          // disk may be unformatted from a previous sync that predates this guard.
+          writtenFiles.push(destFile);
           logVerbose(`  unchanged ${normalizedRel} (formatting-only diff, skipping write)`);
           return;
         }
