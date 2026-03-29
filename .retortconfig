@@ -1,0 +1,13 @@
+retort_version: "3.x"
+
+project:
+  name: retort
+  type: framework
+  stacks:
+    - javascript
+    - yaml
+    - markdown
+
+agents:
+  # No grant-seeking activity for an open-source developer tool.
+  grant-hunter: ~
