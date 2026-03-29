@@ -190,3 +190,8 @@ sync:
   # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
   #   syncDateMode: none
   dateMode: run
+  # Whether to run agentkit sync automatically before every git push.
+  # Defaults to false so new adopters are not surprised by the sync overhead.
+  # Set autoSyncOnPush: true in the repo's overlay settings to restore the
+  # previous always-on behaviour.
+  autoSyncOnPush: false
