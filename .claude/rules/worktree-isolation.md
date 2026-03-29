@@ -73,6 +73,39 @@ When orchestrating manually rather than via Agent tool dispatches:
 The worktree is **automatically cleaned up** if no files were changed. If changes
 were made, the worktree path and branch name are returned so you can create a PR.
 
+## `.agentkit-repo` Marker in Worktrees
+
+Every worktree root **must** contain a `.agentkit-repo` file with the overlay name
+(e.g. `retort`). The sync engine reads this file to select the correct overlay when
+generating AI-tool configuration inside a worktree. If the marker is absent, the
+engine falls back to `__TEMPLATE__` and produces incorrect output — this was the root
+cause of the "overlay miss" issues reported in PRs #478 and #479.
+
+**Correct approach:** Use `retort worktree create` instead of `git worktree add`
+directly. The CLI command creates the worktree and writes the marker automatically:
+
+```bash
+# Creates the worktree AND writes .agentkit-repo
+retort worktree create .worktrees/my-feature feat/my-feature
+
+# Equivalent with explicit base branch
+retort worktree create .worktrees/my-feature feat/my-feature --base dev
+```
+
+**If you used `git worktree add` directly** (or `EnterWorktree`) and the marker is
+missing, create it manually before running any sync command:
+
+```bash
+# From inside the new worktree directory:
+echo "retort" > .agentkit-repo          # replace "retort" with the repo overlay name
+
+# Or use the project root's marker as the source of truth:
+cp <project-root>/.agentkit-repo <worktree-root>/.agentkit-repo
+```
+
+The marker file contains **only the overlay name** (one line, no trailing whitespace
+other than a newline).
+
 ## Exemptions
 
 The following scenarios are exempt from worktree isolation:

@@ -33,6 +33,7 @@ export const VALID_COMMANDS = [
   'preflight',
   'analyze-agents',
   'cicd-optimize',
+  'worktree',
 ];
 
 /**
@@ -49,4 +50,5 @@ export const FRAMEWORK_COMMANDS = new Set([
   'delegate',
   'features',
   'init',
+  'worktree',
 ]);

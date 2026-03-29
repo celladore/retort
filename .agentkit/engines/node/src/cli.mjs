@@ -89,6 +89,7 @@ const CLI_INTERNAL_FLAGS = {
   list: ['help'],
   features: ['verbose', 'help'],
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
+  worktree: ['base', 'no-setup', 'dry-run', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -135,6 +136,9 @@ const CLI_INTERNAL_FLAG_TYPES = {
   output: 'string',
   matrix: 'string',
   format: 'string',
+  // worktree flags
+  base: 'string',
+  'no-setup': 'boolean',
 };
 
 /**
@@ -375,6 +379,13 @@ Backlog & Issue Tracking:
                   --since <date>      Only issues updated since ISO date
                   --limit <n>         Max issues to fetch
                   --force             Override autoImport gate
+
+Worktree Management:
+  worktree create <path> [branch]
+                  Create a git worktree and write .agentkit-repo marker
+                  --base <branch>     Branch to base the new worktree branch on
+                  --no-setup          Skip automatic pnpm install
+                  --dry-run           Preview without making changes
 
 Utility Commands:
   cost            Session cost and usage tracking
@@ -681,6 +692,11 @@ async function main() {
         console.log(
           `  ${graph.agents.length} agents, ${graph.teams.length} teams, ${graph.categories.length} categories`
         );
+        break;
+      }
+      case 'worktree': {
+        const { runWorktree } = await import('./worktree.mjs');
+        await runWorktree({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
         break;
       }
       default: {
