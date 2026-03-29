@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
-import { loadAgentsSpec, buildAgentRegistry, buildCollaboratorsSection } from '../synchronize.mjs';
+import { loadAgentsSpec } from '../spec-loader.mjs';
+import { buildAgentRegistry, buildCollaboratorsSection } from '../var-builders.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers

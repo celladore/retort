@@ -2,7 +2,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { loadSpecDefaults } from '../synchronize.mjs';
+import { loadSpecDefaults } from '../spec-loader.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers
