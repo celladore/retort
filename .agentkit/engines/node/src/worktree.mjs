@@ -175,13 +175,9 @@ export async function runWorktree({ agentkitRoot, projectRoot, flags }) {
     // Strip the sub-action token from positionals so runWorktreeCreate sees
     // [path, branch?] as positionals[0] and positionals[1].
     const adjustedFlags =
-      subAction === 'create'
-        ? { ...flags, _args: (flags._args || []).slice(1) }
-        : flags;
+      subAction === 'create' ? { ...flags, _args: (flags._args || []).slice(1) } : flags;
     return runWorktreeCreate({ agentkitRoot, projectRoot, flags: adjustedFlags });
   }
 
-  throw new Error(
-    `Unknown worktree sub-action: "${subAction}". Available: create`
-  );
+  throw new Error(`Unknown worktree sub-action: "${subAction}". Available: create`);
 }
