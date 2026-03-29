@@ -2,7 +2,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { resolveTeamAgents, readYaml, runSync, loadAgentsSpec } from '../synchronize.mjs';
+import { readYaml, loadAgentsSpec } from '../spec-loader.mjs';
+import { resolveTeamAgents } from '../var-builders.mjs';
+import { runSync } from '../synchronize.mjs';
 import { renderTemplate, replacePlaceholders } from '../template-utils.mjs';
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatConventionLine, buildRuleVars } from '../synchronize.mjs';
+import { formatConventionLine, buildRuleVars } from '../var-builders.mjs';
 
 // ---------------------------------------------------------------------------
 // formatConventionLine()

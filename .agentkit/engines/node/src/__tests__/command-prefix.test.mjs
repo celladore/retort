@@ -2,7 +2,8 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { resolveCommandPath, runSync } from '../synchronize.mjs';
+import { resolveCommandPath } from '../var-builders.mjs';
+import { runSync } from '../synchronize.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers

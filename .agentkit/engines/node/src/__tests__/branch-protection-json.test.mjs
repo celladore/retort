@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildBranchProtectionJson } from '../synchronize.mjs';
+import { buildBranchProtectionJson } from '../var-builders.mjs';
 
 describe('buildBranchProtectionJson', () => {
   // ---------------------------------------------------------------------------
