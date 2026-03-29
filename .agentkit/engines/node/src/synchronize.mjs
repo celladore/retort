@@ -42,6 +42,7 @@ import {
   resolveScaffoldAction,
   simpleDiff,
 } from './template-utils.mjs';
+import { applyRetortConfig, loadRetortConfig } from './retort-config.mjs';
 
 // ---------------------------------------------------------------------------
 // Scaffold metadata map — populated during template rendering, consumed in Step 7
@@ -954,9 +955,20 @@ async function syncClaudeAgents(
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
+  const disabledAgents = vars.retortDisabledAgents || new Set();
+  const agentMap = vars.retortAgentMap || {};
+
   for (const [category, agents] of Object.entries(agentsSpec.agents || {})) {
     for (const agent of agents) {
+      // Skip agents disabled in .retortconfig
+      if (disabledAgents.has(agent.id)) continue;
+
       const agentVars = buildAgentVars(agent, category, vars, registry);
+
+      // Inject remapping note if this agent has been remapped in .retortconfig
+      const remapTarget = agentMap[agent.id];
+      agentVars.retortRemapTarget = remapTarget || '';
+
       const rendered = renderTemplate(template, agentVars, tplPath);
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
@@ -2314,6 +2326,67 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     const gate = section.gate;
     const isGateEnabled = !gate || vars[gate];
     vars[`shared_${key}`] = isGateEnabled ? section.content || '' : '';
+  }
+
+  // Load .retortconfig from the project root and apply overrides into vars.
+  // This must happen after the base vars are assembled so that .retortconfig
+  // can selectively override feature flags without replacing the full feature set.
+  try {
+    const retortConfig = loadRetortConfig(projectRoot);
+    if (retortConfig) {
+      // Collect known agent IDs so we can warn on unmapped entries
+      const knownAgentIds = Object.values(agentsSpec.agents || {})
+        .flat()
+        .map((a) => a.id)
+        .filter(Boolean);
+      applyRetortConfig(vars, retortConfig, { log, warn: log, agentIds: knownAgentIds });
+
+      // Apply feature flag overrides from .retortconfig into the feature vars.
+      // disabledFeatures: re-resolve after adding .retortconfig exclusions.
+      if (vars.retortDisabledFeatures?.size || vars.retortEnabledFeatures?.size) {
+        try {
+          const { features: featureList, presets } = loadFeatureSpec(agentkitRoot, { log });
+          // Build merged overlay settings with .retortconfig feature adjustments
+          const mergedOverlaySettings = { ...overlaySettings };
+          if (vars.retortDisabledFeatures?.size) {
+            const existingDisabled = new Set(overlaySettings.disabledFeatures || []);
+            for (const id of vars.retortDisabledFeatures) existingDisabled.add(id);
+            mergedOverlaySettings.disabledFeatures = [...existingDisabled];
+          }
+          if (vars.retortEnabledFeatures?.size) {
+            const existingEnabled = new Set(overlaySettings.enabledFeatures || []);
+            for (const id of vars.retortEnabledFeatures) existingEnabled.add(id);
+            mergedOverlaySettings.enabledFeatures = [...existingEnabled];
+          }
+          const enabledFeaturesWithOverrides = resolveFeatures(
+            featureList,
+            mergedOverlaySettings,
+            presets,
+            { log }
+          );
+          const updatedFeatureVars = buildFeatureVars(featureList, enabledFeaturesWithOverrides);
+          // Merge updated feature vars back into vars (feature vars start with 'has')
+          Object.assign(vars, updatedFeatureVars);
+          log(
+            `[retort] .retortconfig feature overrides applied (${vars.retortDisabledFeatures?.size ?? 0} disabled, ${vars.retortEnabledFeatures?.size ?? 0} force-enabled)`
+          );
+        } catch (featErr) {
+          log(
+            `[retort] Warning: could not apply .retortconfig feature overrides: ${featErr.message}`
+          );
+        }
+      }
+
+      if (vars.retortAgentMap && Object.keys(vars.retortAgentMap).length > 0) {
+        log(`[retort] .retortconfig agent remaps: ${Object.keys(vars.retortAgentMap).join(', ')}`);
+      }
+      if (vars.retortDisabledAgents?.size) {
+        log(`[retort] .retortconfig disabled agents: ${[...vars.retortDisabledAgents].join(', ')}`);
+      }
+    }
+  } catch (configErr) {
+    // Surface validation errors as fatal — a malformed .retortconfig is a user error
+    throw configErr;
   }
 
   // Teams list for root templates (AGENT_TEAMS.md {{#each}} iteration)
