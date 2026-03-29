@@ -969,7 +969,6 @@ async function syncClaudeAgents(
       const remapTarget = agentMap[agent.id];
       agentVars.retortRemapTarget = remapTarget || '';
 
-
       const rendered = renderTemplate(template, agentVars, tplPath);
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
