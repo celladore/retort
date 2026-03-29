@@ -40,13 +40,14 @@ import {
 // ---------------------------------------------------------------------------
 // Step 3 — spec-loader.mjs re-exports
 // ---------------------------------------------------------------------------
-export {
+export { readYaml, readText, loadAgentsSpec, loadSpecDefaults } from './spec-loader.mjs';
+import {
   readYaml,
   readText,
   loadAgentsSpec,
   loadSpecDefaults,
+  clearTemplateTextCache,
 } from './spec-loader.mjs';
-import { readYaml, readText, loadAgentsSpec, loadSpecDefaults, clearTemplateTextCache } from './spec-loader.mjs';
 
 // ---------------------------------------------------------------------------
 // Step 4 — overlay-resolver.mjs re-exports

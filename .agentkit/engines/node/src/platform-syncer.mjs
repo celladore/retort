@@ -16,11 +16,7 @@ import {
 } from './brand-resolver.mjs';
 
 import { readYaml } from './spec-loader.mjs';
-import {
-  insertHeader,
-  parseTemplateFrontmatter,
-  renderTemplate,
-} from './template-utils.mjs';
+import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
 import {
   buildAgentRegistry,
   buildAgentVars,
@@ -1163,14 +1159,7 @@ export async function syncGemini(templatesDir, tmpDir, vars, version, repoName) 
 /**
  * Generates .agents/skills/<name>/SKILL.md for each non-team command.
  */
-export async function syncCodexSkills(
-  templatesDir,
-  tmpDir,
-  vars,
-  version,
-  repoName,
-  commandsSpec
-) {
+export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoName, commandsSpec) {
   const { readTemplateText } = await import('./spec-loader.mjs');
   const tplPath = join(templatesDir, 'codex', 'skills', 'TEMPLATE', 'SKILL.md');
   if (!existsSync(tplPath)) return;

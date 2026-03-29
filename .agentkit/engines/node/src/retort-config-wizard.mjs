@@ -153,9 +153,7 @@ function serializeConfig(config) {
 
   // Post-process: replace ': null\n' with ': ~\n' and ': null$' with ': ~'
   // Also handle list entries that are null: '- null' -> '- ~'
-  return raw
-    .replace(/: null(\n|$)/g, ': ~$1')
-    .replace(/^- null$/gm, '- ~');
+  return raw.replace(/: null(\n|$)/g, ': ~$1').replace(/^- null$/gm, '- ~');
 }
 
 // ---------------------------------------------------------------------------
@@ -185,8 +183,7 @@ export async function runRetortConfigWizard({ agentkitRoot, projectRoot, flags =
   const configPath = resolve(projectRoot, '.retortconfig');
 
   // Resolve prefill: use passed prefill, or auto-detect for --config-only mode
-  const resolvedPrefill =
-    prefill ?? detectContextFromRepo(agentkitRoot, projectRoot);
+  const resolvedPrefill = prefill ?? detectContextFromRepo(agentkitRoot, projectRoot);
 
   // Load spec data
   const agentCatalog = loadAgentCatalog(agentkitRoot);
@@ -201,8 +198,7 @@ export async function runRetortConfigWizard({ agentkitRoot, projectRoot, flags =
   }
 
   // Check if we can run interactively
-  const isNonInteractive =
-    flags['non-interactive'] || flags.ci || !process.stdout.isTTY;
+  const isNonInteractive = flags['non-interactive'] || flags.ci || !process.stdout.isTTY;
 
   if (isNonInteractive) {
     const config = buildNonInteractiveConfig(resolvedPrefill);
@@ -267,9 +263,7 @@ export async function runRetortConfigWizard({ agentkitRoot, projectRoot, flags =
   ];
 
   const prefillStacks = Array.isArray(resolvedPrefill.stacks) ? resolvedPrefill.stacks : [];
-  const initialStacks = prefillStacks.filter((s) =>
-    stackOptions.some((opt) => opt.value === s)
-  );
+  const initialStacks = prefillStacks.filter((s) => stackOptions.some((opt) => opt.value === s));
 
   const selectedStacks = await clack.multiselect({
     message: 'Tech stacks (space to toggle)',

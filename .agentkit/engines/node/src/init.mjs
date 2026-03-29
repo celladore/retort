@@ -750,7 +750,10 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
 
   // --- Phase 8: .retortconfig generation ---
   if (!flags['skip-retortconfig'] && !nonInteractive && !dryRun) {
-    const confirmed = await clack.confirm({ message: 'Generate .retortconfig?', initialValue: true });
+    const confirmed = await clack.confirm({
+      message: 'Generate .retortconfig?',
+      initialValue: true,
+    });
     if (!clack.isCancel(confirmed) && confirmed) {
       const { runRetortConfigWizard } = await import('./retort-config-wizard.mjs');
       await runRetortConfigWizard({
