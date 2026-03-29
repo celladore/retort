@@ -975,13 +975,16 @@ async function syncAgentRegistry(tmpDir, agentsSpec, version, repoName) {
   if (allAgents.length === 0) return;
 
   // REGISTRY.md — markdown table
-  const header = `<!-- generated_by: retort | last_model: sync-engine | last_updated: ${new Date().toISOString().slice(0, 10)} -->\n# Agent Registry\n\n| ID | Name | Category | Accepts | Role |\n|---|---|---|---|---|\n`;
   const rows = allAgents
     .map(
       (a) =>
         `| \`${a.id}\` | ${a.name} | ${a.category} | ${a.accepts.join(', ')} | ${a.roleSummary} |`
     )
     .join('\n');
+  // Use a content hash of the rows so the header is stable between syncs and only
+  // changes when agent definitions actually change (not just because the date rolled over).
+  const contentHash = createHash('sha256').update(rows).digest('hex').slice(0, 8);
+  const header = `<!-- generated_by: retort | last_model: sync-engine | content_hash: ${contentHash} -->\n# Agent Registry\n\n| ID | Name | Category | Accepts | Role |\n|---|---|---|---|---|\n`;
   await writeOutput(join(tmpDir, '.claude', 'agents', 'REGISTRY.md'), header + rows + '\n');
 
   // REGISTRY.json — machine-readable
