@@ -35,8 +35,18 @@ function setupAgentkitRoot(dir) {
     resolve(agentsDir, 'engineering.yaml'),
     yaml.dump({
       engineering: [
-        { id: 'backend', category: 'engineering', name: 'Backend Engineer', accepts: ['implement'] },
-        { id: 'frontend', category: 'engineering', name: 'Frontend Engineer', accepts: ['implement'] },
+        {
+          id: 'backend',
+          category: 'engineering',
+          name: 'Backend Engineer',
+          accepts: ['implement'],
+        },
+        {
+          id: 'frontend',
+          category: 'engineering',
+          name: 'Frontend Engineer',
+          accepts: ['implement'],
+        },
       ],
     }),
     'utf-8'
@@ -47,9 +57,27 @@ function setupAgentkitRoot(dir) {
     resolve(specDir, 'features.yaml'),
     yaml.dump({
       features: [
-        { id: 'team-orchestration', name: 'Team Orchestration', category: 'workflow', alwaysOn: true, default: true },
-        { id: 'cost-tracking', name: 'Cost Tracking', category: 'infra', alwaysOn: false, default: true },
-        { id: 'drift-check', name: 'Drift Check', category: 'quality', alwaysOn: false, default: false },
+        {
+          id: 'team-orchestration',
+          name: 'Team Orchestration',
+          category: 'workflow',
+          alwaysOn: true,
+          default: true,
+        },
+        {
+          id: 'cost-tracking',
+          name: 'Cost Tracking',
+          category: 'infra',
+          alwaysOn: false,
+          default: true,
+        },
+        {
+          id: 'drift-check',
+          name: 'Drift Check',
+          category: 'quality',
+          alwaysOn: false,
+          default: false,
+        },
       ],
       presets: {
         standard: { label: 'Standard', features: ['cost-tracking'] },
