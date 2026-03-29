@@ -97,14 +97,17 @@ export class SpecAccessor {
     let parsed;
     if (existsSync(agentsDir)) {
       try {
-        const files = readdirSync(agentsDir).filter(f => f.endsWith('.yaml'));
+        const files = readdirSync(agentsDir).filter((f) => f.endsWith('.yaml'));
         const agents = {};
         for (const f of files) {
           const category = f.replace('.yaml', '');
           const raw = readYamlSafe(resolve(agentsDir, f));
           // Files may wrap content under the category key (e.g. `engineering: [...]`)
-          agents[category] = Array.isArray(raw?.[category]) ? raw[category]
-            : Array.isArray(raw) ? raw : [];
+          agents[category] = Array.isArray(raw?.[category])
+            ? raw[category]
+            : Array.isArray(raw)
+              ? raw
+              : [];
         }
         parsed = { agents };
       } catch {

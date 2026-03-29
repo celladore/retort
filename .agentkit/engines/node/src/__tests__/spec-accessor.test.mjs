@@ -285,7 +285,9 @@ describe('SpecAccessor', () => {
     it('returns agents from spec/agents/ directory when present', () => {
       const agentsDir = resolve(specDir, 'agents');
       mkdirSync(agentsDir, { recursive: true });
-      writeFile(resolve(agentsDir, 'engineering.yaml'), `
+      writeFile(
+        resolve(agentsDir, 'engineering.yaml'),
+        `
 engineering:
   - id: eng-agent
     name: Engineer
@@ -294,7 +296,8 @@ engineering:
       - src/**
     responsibilities:
       - implement features
-`.trimStart());
+`.trimStart()
+      );
       const accessor = new SpecAccessor(agentkitRoot);
       const agents = accessor.agents();
       expect(agents).not.toBeNull();
@@ -383,7 +386,10 @@ engineering:
     });
 
     it('returns null when project.testing has no coverage field', () => {
-      writeFile(resolve(specDir, 'project.yaml'), 'name: minimal\ntesting:\n  unit:\n    - vitest\n');
+      writeFile(
+        resolve(specDir, 'project.yaml'),
+        'name: minimal\ntesting:\n  unit:\n    - vitest\n'
+      );
       const accessor = new SpecAccessor(agentkitRoot);
       expect(accessor.coverage()).toBeNull();
     });
