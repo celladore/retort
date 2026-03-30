@@ -29,9 +29,7 @@ function makeWorktree(overrides = {}) {
 
 describe('WorktreesPanel', () => {
   it('should render nothing when there is only the main worktree', () => {
-    getAgentWorktrees.mockReturnValue([
-      makeWorktree({ path: '/repo', isMain: true }),
-    ]);
+    getAgentWorktrees.mockReturnValue([makeWorktree({ path: '/repo', isMain: true })]);
 
     const { lastFrame } = render(React.createElement(WorktreesPanel, {}));
     // Ink renders an empty string when the component returns null
