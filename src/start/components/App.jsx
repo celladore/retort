@@ -15,6 +15,7 @@
 import React, { useState, useEffect, Component } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import StatusBar from './StatusBar.jsx';
+import MCPPanel from './MCPPanel.jsx';
 import ConversationFlow from './ConversationFlow.jsx';
 import CommandPalette from './CommandPalette.jsx';
 
@@ -100,6 +101,7 @@ function AppInner({ ctx }) {
           </Text>
         </Box>
 
+        <MCPPanel />
         <StatusBar ctx={ctx} />
       </Box>
     );
@@ -141,6 +143,7 @@ function AppInner({ ctx }) {
         />
       )}
 
+      <MCPPanel />
       <StatusBar ctx={ctx} />
     </Box>
   );
