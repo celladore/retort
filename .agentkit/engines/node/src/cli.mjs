@@ -93,6 +93,7 @@ const CLI_INTERNAL_FLAGS = {
   features: ['verbose', 'help'],
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
   worktree: ['base', 'no-setup', 'dry-run', 'help'],
+  run: ['id', 'assignee', 'dry-run', 'json', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -145,6 +146,7 @@ const CLI_INTERNAL_FLAG_TYPES = {
   // worktree flags
   base: 'string',
   'no-setup': 'boolean',
+  json: 'boolean',
 };
 
 /**
