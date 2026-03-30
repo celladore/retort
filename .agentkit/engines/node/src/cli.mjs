@@ -644,6 +644,11 @@ async function main() {
         await runDelegate({ projectRoot: PROJECT_ROOT, flags });
         break;
       }
+      case 'run': {
+        const { runRun } = await import('./run-cli.mjs');
+        await runRun({ projectRoot: PROJECT_ROOT, flags });
+        break;
+      }
       case 'add': {
         const { runAdd } = await import('./tool-manager.mjs');
         await runAdd({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
