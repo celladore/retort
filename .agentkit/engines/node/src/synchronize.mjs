@@ -5,10 +5,9 @@
  * readYaml/readText use synchronous fs APIs for simplicity at startup.
  * Pure template helpers live in template-utils.mjs.
  */
-import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
 import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
-import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { tmpdir } from 'os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
@@ -27,7 +26,15 @@ import {
   resolveFeatures,
 } from './feature-manager.mjs';
 import { ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
-import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
+import {
+  cleanStaleFiles,
+  clearTemplateMeta,
+  getTemplateMeta,
+  runPostSyncPrettier,
+  setTemplateMeta,
+  writeManifest,
+  writeScaffoldOutputs,
+} from './scaffold-engine.mjs';
 import {
   categorizeFile,
   computeProjectCompleteness,
@@ -41,26 +48,12 @@ import {
   printSyncSummary,
   renderTemplate,
   resolveRenderTargets,
-  resolveScaffoldAction,
   simpleDiff,
 } from './template-utils.mjs';
 import { applyRetortConfig, loadRetortConfig } from './retort-config.mjs';
 
-// ---------------------------------------------------------------------------
-// Scaffold metadata map — populated during template rendering, consumed in Step 7
-// ---------------------------------------------------------------------------
-
-/** @type {Map<string, object>} relPath → parsed template frontmatter */
-const templateMetaMap = new Map();
-
-/**
- * Retrieve parsed frontmatter metadata for a generated file.
- * @param {string} relPath - Relative path from project root
- * @returns {object|null}
- */
-export function getTemplateMeta(relPath) {
-  return templateMetaMap.get(relPath.replace(/\\/g, '/')) || null;
-}
+// templateMetaMap, getTemplateMeta, setTemplateMeta, clearTemplateMeta
+// live in scaffold-engine.mjs (imported above).
 
 function getTeamCommandStem(teamId) {
   return teamId.startsWith('team-') ? teamId : `team-${teamId}`;
@@ -83,7 +76,7 @@ export function resolveCommandPath(cmdName, prefix, strategy = 'filename') {
   return { dir: '', stem: `${prefix}-${cmdName}` };
 }
 
-// threeWayMerge and normalizeForComparison live in scaffold-merge.mjs (imported above)
+// threeWayMerge and normalizeForComparison live in scaffold-merge.mjs (used by scaffold-engine.mjs)
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -275,8 +268,7 @@ export async function syncDirectCopy(
     // Parse and strip template frontmatter (agentkit scaffold directives)
     const { meta, content: stripped } = parseTemplateFrontmatter(content);
     if (meta) {
-      const normalizedRel = destRelPath.replace(/\\/g, '/');
-      templateMetaMap.set(normalizedRel, meta);
+      setTemplateMeta(destRelPath, meta);
     }
 
     const rendered = renderTemplate(stripped, vars, srcFile);
@@ -1960,7 +1952,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const noClean = flags?.['no-clean'] || false;
 
   // Clear module-level state from any previous run (e.g. in tests)
-  templateMetaMap.clear();
+  clearTemplateMeta();
   templateTextCache.clear();
 
   const log = (...args) => {
@@ -2822,355 +2814,40 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       /* ignore corrupt manifest */
     }
 
-    // 7. Atomic swap: move temp outputs to project root & build new manifest
+    // 7. Write scaffold outputs (scaffold-once / managed / always)
     log('[retort:sync] Writing outputs...');
-    const resolvedRoot = resolve(projectRoot) + sep;
-    const scaffoldCacheDir = resolve(agentkitRoot, '.scaffold-cache');
-
-    // Use shared counters and tracking lists
-    let count = 0;
-    let skippedScaffold = 0;
-    const failedFiles = [];
-    // NOTE: Safe for single-threaded async (Array.push is synchronous in V8).
-    // If runConcurrent ever uses worker threads, this needs synchronization.
-    const writtenFiles = []; // absolute paths of files written, for post-sync formatting
-    const scaffoldResults = {
-      alwaysRegenerated: [],
-      managedRegenerated: [],
-      managedMerged: [],
-      managedConflicts: [],
-      managedPreserved: [],
-      managedNoCache: [],
-    };
-
-    await runConcurrent(allTmpFiles, async (srcFile) => {
-      if (!existsSync(srcFile)) return;
-      const relPath = relative(tmpDir, srcFile);
-      const normalizedRel = relPath.replace(/\\/g, '/');
-      const destFile = resolve(projectRoot, relPath);
-
-      // Interactive skip: user chose to skip this file in "prompt each" mode
-      if (flags?._skipPaths?.has(normalizedRel)) {
-        logVerbose(`  skipped ${normalizedRel} (user chose to skip)`);
-        return;
-      }
-
-      // Path traversal protection: ensure all output stays within project root
-      if (
-        !resolve(destFile).startsWith(resolvedRoot) &&
-        resolve(destFile) !== resolve(projectRoot)
-      ) {
-        console.error(`[retort:sync] BLOCKED: path traversal detected — ${normalizedRel}`);
-        failedFiles.push({ file: normalizedRel, error: 'path traversal blocked' });
-        return;
-      }
-
-      // Scaffold action resolution: always | managed (check-hash) | once (skip)
-      const meta = getTemplateMeta(normalizedRel);
-      const overwrite = flags?.overwrite || flags?.force;
-      if (!overwrite && existsSync(destFile)) {
-        const action = resolveScaffoldAction(normalizedRel, vars, meta);
-
-        if (action === 'skip') {
-          skippedScaffold++;
-          return;
-        }
-
-        if (action === 'check-hash') {
-          const diskContent = await readFile(destFile);
-          const diskHash = createHash('sha256').update(diskContent).digest('hex').slice(0, 12);
-          const prevHash = previousManifest?.files?.[normalizedRel]?.hash;
-
-          if (prevHash && diskHash !== prevHash) {
-            const cachePath = resolve(scaffoldCacheDir, relPath);
-            const newContent = await readFile(srcFile, 'utf-8');
-
-            if (existsSync(cachePath)) {
-              const baseContent = readFileSync(cachePath, 'utf-8');
-              const diskText = diskContent.toString('utf-8');
-
-              // Check whether the disk differs from the cache for reasons other
-              // than table-cell padding (Prettier alignment).  If the normalised
-              // forms are identical the file contains no real user edits — fall
-              // through to the pristine overwrite path below.
-              if (normalizeForComparison(diskText) !== normalizeForComparison(baseContent)) {
-                // Real user edit.  Only attempt a three-way merge when the template
-                // has actually changed since the last sync (base ≠ theirs after
-                // normalisation).  When the template is unchanged the merge would
-                // be a no-op (result === disk) — skip it to stop the churn loop.
-                if (normalizeForComparison(baseContent) === normalizeForComparison(newContent)) {
-                  // Template unchanged — preserve user edits, no write needed
-                  skippedScaffold++;
-                  scaffoldResults.managedPreserved.push(normalizedRel);
-                  logVerbose(
-                    `  skipped ${normalizedRel} (user edits preserved, template unchanged)`
-                  );
-                  return;
-                }
-
-                const result = threeWayMerge(diskText, baseContent, newContent);
-
-                if (result) {
-                  // Write merged result
-                  await ensureDir(dirname(destFile));
-                  await writeFile(destFile, result.merged, 'utf-8');
-                  // Update scaffold cache with new generated content
-                  await ensureDir(dirname(cachePath));
-                  await writeFile(cachePath, newContent, 'utf-8');
-                  count++;
-
-                  writtenFiles.push(destFile);
-                  if (result.hasConflicts) {
-                    scaffoldResults.managedConflicts.push(normalizedRel);
-                    console.warn(
-                      `[retort:sync] CONFLICT in ${normalizedRel} — resolve <<<< markers manually`
-                    );
-                  } else {
-                    scaffoldResults.managedMerged.push(normalizedRel);
-                    logVerbose(
-                      `  merged ${normalizedRel} (user edits + template changes combined)`
-                    );
-                  }
-                  return;
-                }
-                // git merge-file unavailable — skip and preserve user edits
-                skippedScaffold++;
-                scaffoldResults.managedPreserved.push(normalizedRel);
-                logVerbose(
-                  `  skipped ${normalizedRel} (user edits detected, hash: ${prevHash} → ${diskHash})`
-                );
-                return;
-              }
-              // Formatting-only diff — fall through to pristine overwrite
-            } else {
-              // No cache — skip and preserve user edits
-              skippedScaffold++;
-              scaffoldResults.managedPreserved.push(normalizedRel);
-              scaffoldResults.managedNoCache.push(normalizedRel);
-              logVerbose(
-                `  skipped ${normalizedRel} (user edits detected, hash: ${prevHash} → ${diskHash})`
-              );
-              return;
-            }
-          }
-          // Hash matches, no previous hash, or formatting-only diff — safe to overwrite (pristine)
-          scaffoldResults.managedRegenerated.push(normalizedRel);
-        } else {
-          // action === 'write' for scaffold: always
-          if (meta?.agentkit?.scaffold === 'always') {
-            scaffoldResults.alwaysRegenerated.push(normalizedRel);
-          }
-        }
-      }
-
-      // Content-hash guard: skip write if content is identical to the existing file.
-      // This prevents mtime churn on generated files that haven't logically changed,
-      // reducing adopter merge-conflict counts on framework-update merges.
-      // Also skips when the only difference is markdown table-cell padding (Prettier
-      // alignment vs compact template output) so formatted files are not reverted each run.
-      if (existsSync(destFile)) {
-        const existingContent = await readFile(destFile);
-        const newHash = newManifestFiles[normalizedRel]?.hash;
-        if (newHash) {
-          const existingHash = createHash('sha256')
-            .update(existingContent)
-            .digest('hex')
-            .slice(0, 12);
-          if (existingHash === newHash) {
-            logVerbose(`  unchanged ${normalizedRel} (content identical, skipping write)`);
-            return;
-          }
-        }
-        // Slower path: skip write when the only difference is table-cell padding.
-        const newContent = await readFile(srcFile, 'utf-8');
-        if (
-          normalizeForComparison(existingContent.toString('utf-8')) ===
-          normalizeForComparison(newContent)
-        ) {
-          // Still queue for Prettier even though we skip the write — the file on
-          // disk may be unformatted from a previous sync that predates this guard.
-          writtenFiles.push(destFile);
-          logVerbose(`  unchanged ${normalizedRel} (formatting-only diff, skipping write)`);
-          return;
-        }
-      }
-
-      try {
-        await ensureDir(dirname(destFile));
-        await cp(srcFile, destFile, { force: true, recursive: false });
-
-        // Update scaffold cache for managed files
-        if (meta?.agentkit?.scaffold === 'managed' || meta?.agentkit?.scaffold === 'always') {
-          const cachePath = resolve(scaffoldCacheDir, relPath);
-          try {
-            await ensureDir(dirname(cachePath));
-            const content = await readFile(srcFile, 'utf-8');
-            await writeFile(cachePath, content, 'utf-8');
-          } catch {
-            /* ignore cache write failures */
-          }
-        }
-
-        // Make .sh files executable
-        if (extname(srcFile) === '.sh') {
-          try {
-            await chmod(destFile, 0o755);
-          } catch {
-            /* ignore on Windows */
-          }
-        }
-        count++;
-        writtenFiles.push(destFile);
-        logVerbose(`  wrote ${normalizedRel}`);
-      } catch (err) {
-        failedFiles.push({ file: normalizedRel, error: err.message });
-        console.error(`[retort:sync] Failed to write: ${normalizedRel} — ${err.message}`);
-      }
+    const { count, skippedScaffold, writtenFiles } = await writeScaffoldOutputs({
+      projectRoot,
+      agentkitRoot,
+      tmpDir,
+      allTmpFiles,
+      flags,
+      newManifestFiles,
+      previousManifest,
+      vars,
+      log,
+      logVerbose,
     });
 
-    if (failedFiles.length > 0) {
-      console.error(`[retort:sync] Error: ${failedFiles.length} file(s) failed to write:`);
-      for (const f of failedFiles) {
-        console.error(`  - ${f.file}: ${f.error}`);
-      }
-      throw new Error(`Sync completed with ${failedFiles.length} write failure(s)`);
-    }
-
-    // 7b. Scaffold summary
-    const hasManagedActivity =
-      scaffoldResults.alwaysRegenerated.length > 0 ||
-      scaffoldResults.managedRegenerated.length > 0 ||
-      scaffoldResults.managedMerged.length > 0 ||
-      scaffoldResults.managedConflicts.length > 0 ||
-      scaffoldResults.managedPreserved.length > 0;
-
-    if (hasManagedActivity) {
-      log('[retort:sync] Scaffold summary:');
-      if (scaffoldResults.alwaysRegenerated.length > 0) {
-        log(`  ${scaffoldResults.alwaysRegenerated.length} file(s) always-regenerated`);
-      }
-      if (scaffoldResults.managedRegenerated.length > 0) {
-        log(
-          `  ${scaffoldResults.managedRegenerated.length} managed file(s) regenerated (pristine)`
-        );
-      }
-      if (scaffoldResults.managedMerged.length > 0) {
-        log(
-          `  ${scaffoldResults.managedMerged.length} managed file(s) merged (user edits + template changes)`
-        );
-      }
-      if (scaffoldResults.managedConflicts.length > 0) {
-        console.warn(
-          `  ${scaffoldResults.managedConflicts.length} managed file(s) with CONFLICTS — resolve manually:`
-        );
-        for (const f of scaffoldResults.managedConflicts) {
-          console.warn(`    - ${f}`);
-        }
-      }
-      if (scaffoldResults.managedPreserved.length > 0) {
-        log(
-          `  ${scaffoldResults.managedPreserved.length} managed file(s) preserved (user edits detected)`
-        );
-        for (const f of scaffoldResults.managedPreserved) {
-          logVerbose(`    - ${f}`);
-        }
-      }
-    }
-    const scaffoldOnceSkipped = skippedScaffold - scaffoldResults.managedPreserved.length;
-    if (scaffoldOnceSkipped > 0) {
-      logVerbose(`  ${scaffoldOnceSkipped} scaffold-once file(s) skipped`);
-    }
-
-    // 7b. Carry forward scaffold-once files from previous manifest.
-    // When a file was generated in a previous sync but skipped this time (scaffold-once),
-    // it must remain in the new manifest so orphan cleanup does not delete it.
-    if (previousManifest?.files) {
-      for (const [prevFile, prevMeta] of Object.entries(previousManifest.files)) {
-        if (!newManifestFiles[prevFile]) {
-          const prevPath = resolve(projectRoot, prevFile);
-          if (existsSync(prevPath)) {
-            // File exists on disk but was not regenerated — carry forward its manifest entry
-            newManifestFiles[prevFile] = prevMeta;
-          }
-        }
-      }
-    }
-
     // 8. Stale file cleanup: delete orphaned files from previous sync (unless --no-clean)
-    let cleanedCount = 0;
-    if (!noClean && previousManifest?.files) {
-      const staleFiles = [];
-      for (const prevFile of Object.keys(previousManifest.files)) {
-        if (!newManifestFiles[prevFile]) {
-          staleFiles.push(prevFile);
-        }
-      }
-
-      await runConcurrent(staleFiles, async (prevFile) => {
-        const orphanPath = resolve(projectRoot, prevFile);
-        // Path traversal protection: ensure orphan path stays within project root
-        if (!orphanPath.startsWith(resolvedRoot)) {
-          console.warn(`[retort:sync] BLOCKED: path traversal in manifest — ${prevFile}`);
-          return;
-        }
-        if (existsSync(orphanPath)) {
-          try {
-            await unlink(orphanPath);
-            cleanedCount++;
-            logVerbose(`[retort:sync] Cleaned stale file: ${prevFile}`);
-          } catch (err) {
-            console.warn(
-              `[retort:sync] Warning: could not clean stale file ${prevFile} — ${err.message}`
-            );
-          }
-        }
-      });
-    }
+    const cleanedCount = await cleanStaleFiles({
+      projectRoot,
+      previousManifest,
+      newManifestFiles,
+      noClean,
+      logVerbose,
+    });
 
     // 9. Write new manifest
-    const newManifest = {
+    await writeManifest(manifestPath, {
       generatedAt: new Date().toISOString(),
       version,
       repoName: vars.repoName,
       files: newManifestFiles,
-    };
-    try {
-      await writeFile(manifestPath, JSON.stringify(newManifest, null, 2) + '\n', 'utf-8');
-    } catch (err) {
-      console.warn(`[retort:sync] Warning: could not write manifest — ${err.message}`);
-    }
+    });
 
     // 10. Post-sync prettier formatting — ensure generated files are formatted
-    const prettierBin = resolve(agentkitRoot, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
-    if (existsSync(prettierBin) && writtenFiles.length > 0) {
-      try {
-        // Format in batches to avoid argument length limits
-        const BATCH_SIZE = 50;
-        let formattedCount = 0;
-        for (let i = 0; i < writtenFiles.length; i += BATCH_SIZE) {
-          const batch = writtenFiles.slice(i, i + BATCH_SIZE);
-          try {
-            execFileSync(process.execPath, [prettierBin, '--write', ...batch], {
-              cwd: projectRoot,
-              encoding: 'utf-8',
-              stdio: 'pipe',
-              timeout: 60_000,
-            });
-            formattedCount += batch.length;
-          } catch (err) {
-            if (err?.killed) {
-              logVerbose(`[retort:sync] Prettier batch timed out, continuing...`);
-            }
-            // prettier may fail on some files (e.g. non-parseable) — continue
-          }
-        }
-        if (formattedCount > 0) {
-          logVerbose(`[retort:sync] Formatted ${formattedCount} generated file(s) with Prettier.`);
-        }
-      } catch {
-        // If prettier is not available or fails entirely, just continue
-      }
-    }
+    await runPostSyncPrettier({ agentkitRoot, projectRoot, writtenFiles, logVerbose });
 
     if (skippedScaffold > 0) {
       log(`[retort:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
