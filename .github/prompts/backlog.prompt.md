@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Displays a consolidated backlog view from all sources (external tracker, discovery, healthcheck, code TODOs, review findings, manual entries). Supports filtering and multiple output formats for CLI and future UI consumption.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

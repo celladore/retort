@@ -3,7 +3,7 @@ name: 'scaffold'
 description: 'Generates implementation skeletons aligned with project conventions. Supports endpoints, UI components, IaC modules, migrations, tests, and services. Uses project.yaml context and domain rules to prefill structure and guardrails.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -52,3 +52,4 @@ Invoke this skill when you need to perform the `scaffold` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

@@ -4,7 +4,7 @@ description: 'Performs a structured code review of staged changes, a specific PR
 allowed-tools: Bash(git *), Bash(gh issue create*), Bash(gh issue list*), Bash(gh issue view*), Bash(linear *), Bash(mkdir *)
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

@@ -4,7 +4,7 @@ description: 'Validates generated outputs for correctness. Checks that all requi
 allowed-tools: Read, Glob
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Claude slash-command definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

@@ -3,7 +3,7 @@ name: 'discover'
 description: 'Scans the repository to build a comprehensive understanding of the project structure, tech stacks in use, team boundaries, and architectural patterns. Outputs a structured discovery report used by other commands.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

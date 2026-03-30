@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'New user entry point. Detects repository state, shows contextual status, and guides users to the right command or team for their goal. Read-only — suggests commands but does not execute them.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
