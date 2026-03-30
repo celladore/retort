@@ -5,12 +5,14 @@
 ## Next Session — Start Here
 
 **Pending PRs (merge in order):**
+
 1. PR #498 — `fix(tests): rmSync maxRetries for ENOTEMPTY race` — flaky test fix
 2. PR #499 — `refactor(sync): Step 11 platform-syncer swap` — 1,287-line removal (syncJunie on this branch too)
 3. PR #500 — `feat(start): TasksPanel` — 156/156 tests pass ✓
 4. PR #501 — `feat(sync): syncJunie` — `.junie/guidelines.md` for JetBrains AI
 
 **Remaining secondary:**
+
 1. Fix `claude-code-review` workflow — rotate `CLAUDE_CODE_OAUTH_TOKEN` in `phoenixvc/retort` → Settings → Secrets (no yml change needed)
 2. Run full engine test suite (`pnpm -C .agentkit test`) — confirm pass in CI on PR #499
 
