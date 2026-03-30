@@ -17,7 +17,7 @@ branch refs/heads/main
     expect(result[0].path).toBe('/home/user/repo');
     expect(result[0].branch).toBe('main');
     expect(result[0].head).toBe('abc1234');
-    expect(result[0].isMain).toBe(false);
+    expect(result[0].isMain).toBe(true);
     expect(result[0].isAgent).toBe(false);
   });
 
@@ -57,6 +57,12 @@ branch refs/heads/feat/agent-backend/add-endpoint
       'feat/agent-backend/add-endpoint',
       'fix/agent-testing/coverage-auth',
       'chore/agent-infra/update-deps',
+      'refactor/agent-quality/extract-helpers',
+      'test/agent-testing/add-unit-tests',
+      'perf/agent-backend/optimise-query',
+      'ci/agent-devops/add-coverage-gate',
+      'build/agent-devops/update-bundler',
+      'docs/agent-docs/update-readme',
     ];
 
     for (const branch of agentBranches) {

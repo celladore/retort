@@ -14,12 +14,12 @@ import { execSync } from 'node:child_process';
  * @property {string}       branch    Branch name (e.g. 'feat/agent-frontend/my-task')
  *                                    or empty string for detached HEAD
  * @property {string}       head      Commit SHA (short)
- * @property {boolean}      isMain    True if this is the main (bare) worktree
+ * @property {boolean}      isMain    True if this is the primary worktree (first entry)
  * @property {boolean}      isAgent   True if branch matches the agent branch pattern
  */
 
 /** Regex for branches created by the agent worktree convention. */
-const AGENT_BRANCH_RE = /^(feat|fix|chore)\/agent-[^/]+\//;
+const AGENT_BRANCH_RE = /^(feat|fix|chore|refactor|test|perf|ci|build|docs)\/agent-[^/]+\//;
 
 /**
  * Parse the porcelain output of `git worktree list --porcelain`.
@@ -66,7 +66,7 @@ export function parseWorktreeOutput(raw) {
       path,
       branch,
       head,
-      isMain,
+      isMain: isMain || worktrees.length === 0,
       isAgent: AGENT_BRANCH_RE.test(branch),
     });
   }
