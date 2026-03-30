@@ -2,6 +2,26 @@
 
 > Auto-synced on 2026-03-15. Manual edits to items with external IDs will be overwritten on next sync.
 
+## Next Session — Start Here
+
+**Pending PRs (merge in order):**
+1. PR #498 — `fix(tests): rmSync maxRetries for ENOTEMPTY race` — flaky test fix
+2. PR #499 — `refactor(sync): Step 11 platform-syncer swap` — 1,287-line removal (syncJunie on this branch too)
+3. PR #500 — `feat(start): TasksPanel` — 156/156 tests pass ✓
+4. PR #501 — `feat(sync): syncJunie` — `.junie/guidelines.md` for JetBrains AI
+
+**Remaining secondary:**
+1. Fix `claude-code-review` workflow — rotate `CLAUDE_CODE_OAUTH_TOKEN` in `phoenixvc/retort` → Settings → Secrets (no yml change needed)
+2. Run full engine test suite (`pnpm -C .agentkit test`) — confirm pass in CI on PR #499
+
+**Context / realtime agent visibility:**
+For agents to "see" each other in realtime, a persistent shared MCP server is needed. Redis is overkill — a **SQLite-backed MCP** (e.g., `better-sqlite3` + `mcp-server-sqlite`) is the simplest self-hosted option with zero infrastructure. A **flat-file polling MCP** (write presence to `.claude/state/presence/*.json`, poll every 5s) is even simpler but less real-time. The current `memory` MCP is ephemeral per-session and not shared. If you want org-wide presence, the right next step is a `phoenix-flow` MCP server backed by SQLite or the existing `.claude/state/` file tree.
+
+**Context / Junie (resolved — PR #501):**
+`syncJunie` implemented on both `dev` (PR #501) and `refactor/sync-step11-platform-syncer-swap` (PR #499). Generates `.junie/guidelines.md` from the same template vars as GEMINI.md. Junie will comply once the adopter repo runs `retort sync` with `junie` in their `renderTargets`.
+
+---
+
 ## Summary
 
 - **Total items:** 114 (114 open, 0 completed)
