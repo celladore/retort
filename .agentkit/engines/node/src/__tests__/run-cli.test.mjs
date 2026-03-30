@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  rmSync(tmpRoot, { recursive: true, force: true });
+  rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   vi.restoreAllMocks();
 });
 
