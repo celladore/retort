@@ -28,6 +28,7 @@ import {
   isItemFeatureEnabled,
   resolveCommandPath,
 } from './var-builders.mjs';
+import { setTemplateMeta } from './scaffold-engine.mjs';
 
 // ---------------------------------------------------------------------------
 // Local utilities (avoid circular import — these helpers live here)
@@ -69,21 +70,6 @@ async function runConcurrent(items, fn, concurrency = 50) {
   for (const chunk of chunks) {
     await Promise.all(chunk.map(fn));
   }
-}
-
-// ---------------------------------------------------------------------------
-// Template meta map — written by syncDirectCopy, read in runSync Step 7
-// ---------------------------------------------------------------------------
-
-/** @type {Map<string, object>} relPath → parsed template frontmatter */
-const templateMetaMap = new Map();
-
-export function getTemplateMetaMap() {
-  return templateMetaMap;
-}
-
-export function clearTemplateMetaMap() {
-  templateMetaMap.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -136,8 +122,7 @@ export async function syncDirectCopy(
     // Parse and strip template frontmatter (agentkit scaffold directives)
     const { meta, content: stripped } = parseTemplateFrontmatter(content);
     if (meta) {
-      const normalizedRel = destRelPath.replace(/\\/g, '/');
-      templateMetaMap.set(normalizedRel, meta);
+      setTemplateMeta(destRelPath, meta);
     }
 
     const rendered = renderTemplate(stripped, vars, srcFile);
@@ -689,9 +674,20 @@ export async function syncClaudeAgents(
   if (!existsSync(tplPath)) return;
   const template = await readTemplateText(tplPath);
 
+  const disabledAgents = vars.retortDisabledAgents || new Set();
+  const agentMap = vars.retortAgentMap || {};
+
   for (const [category, agents] of Object.entries(agentsSpec.agents || {})) {
     for (const agent of agents) {
+      // Skip agents disabled in .retortconfig
+      if (disabledAgents.has(agent.id)) continue;
+
       const agentVars = buildAgentVars(agent, category, vars, registry);
+
+      // Inject remapping note if this agent has been remapped in .retortconfig
+      const remapTarget = agentMap[agent.id];
+      agentVars.retortRemapTarget = remapTarget || '';
+
       const rendered = renderTemplate(template, agentVars, tplPath);
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
@@ -1149,6 +1145,29 @@ export async function syncGemini(templatesDir, tmpDir, vars, version, repoName) 
       const relPath = relative(geminiDir, srcFile);
       await writeOutput(join(tmpDir, '.gemini', relPath), withHeader);
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Junie sync helper (JetBrains AI)
+// ---------------------------------------------------------------------------
+
+/**
+ * Copies templates/junie/* -> tmpDir/.junie/
+ * Junie reads .junie/guidelines.md as project-level agent instructions.
+ */
+export async function syncJunie(templatesDir, tmpDir, vars, version, repoName) {
+  const { readTemplateText } = await import('./spec-loader.mjs');
+  const junieDir = join(templatesDir, 'junie');
+  if (!existsSync(junieDir)) return;
+
+  for await (const srcFile of walkDir(junieDir)) {
+    const ext = extname(srcFile).toLowerCase();
+    const content = await readTemplateText(srcFile);
+    const rendered = renderTemplate(content, vars, srcFile);
+    const withHeader = insertHeader(rendered, ext, version, repoName);
+    const relPath = relative(junieDir, srcFile);
+    await writeOutput(join(tmpDir, '.junie', relPath), withHeader);
   }
 }
 
