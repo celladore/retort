@@ -91,7 +91,8 @@ export function getAgentWorktrees(cwd = process.cwd()) {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     return parseWorktreeOutput(raw);
-  } catch {
+  } catch (err) {
+    process.stderr.write(`[worktrees] git worktree list failed: ${err.message}\n`);
     return [];
   }
 }

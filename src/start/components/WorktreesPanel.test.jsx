@@ -45,10 +45,24 @@ describe('WorktreesPanel', () => {
     expect(lastFrame()).toBe('');
   });
 
-  it('should show the section heading when multiple worktrees exist', () => {
+  it('should not show the section heading when only non-agent worktrees exist', () => {
     getAgentWorktrees.mockReturnValue([
       makeWorktree({ path: '/repo', isMain: true }),
       makeWorktree({ path: '/repo/.worktrees/feat', branch: 'feat/something', isAgent: false }),
+    ]);
+
+    const { lastFrame } = render(React.createElement(WorktreesPanel, {}));
+    expect(lastFrame()).not.toContain('Active worktrees');
+  });
+
+  it('should show the section heading when at least one agent worktree exists', () => {
+    getAgentWorktrees.mockReturnValue([
+      makeWorktree({ path: '/repo', isMain: true }),
+      makeWorktree({
+        path: '/repo/.worktrees/agent-backend',
+        branch: 'feat/agent-backend/add-endpoint',
+        isAgent: true,
+      }),
     ]);
 
     const { lastFrame } = render(React.createElement(WorktreesPanel, {}));
@@ -59,6 +73,7 @@ describe('WorktreesPanel', () => {
     getAgentWorktrees.mockReturnValue([
       makeWorktree({ path: '/repo', isMain: true }),
       makeWorktree({ path: '/repo/.worktrees/fix', branch: 'fix/some-bug', isAgent: false }),
+      makeWorktree({ path: '/repo/.worktrees/agent', branch: 'feat/agent-x/y', isAgent: true }),
     ]);
 
     const { lastFrame } = render(React.createElement(WorktreesPanel, {}));
@@ -86,8 +101,9 @@ describe('WorktreesPanel', () => {
       makeWorktree({ path: '/repo', isMain: true }),
       makeWorktree({
         path: '/repo/.worktrees/feat',
-        branch: 'feat/something',
+        branch: 'feat/agent-x/something',
         head: 'deadbee',
+        isAgent: true,
       }),
     ]);
 
@@ -99,6 +115,7 @@ describe('WorktreesPanel', () => {
     getAgentWorktrees.mockReturnValue([
       makeWorktree({ path: '/repo', isMain: true }),
       makeWorktree({ path: '/repo/.worktrees/detached', branch: '', isAgent: false }),
+      makeWorktree({ path: '/repo/.worktrees/agent', branch: 'feat/agent-x/y', isAgent: true }),
     ]);
 
     const { lastFrame } = render(React.createElement(WorktreesPanel, {}));
@@ -108,7 +125,7 @@ describe('WorktreesPanel', () => {
   it('should show (main) label for the main worktree', () => {
     getAgentWorktrees.mockReturnValue([
       makeWorktree({ path: '/repo', isMain: true }),
-      makeWorktree({ path: '/repo/.worktrees/feat', branch: 'feat/x' }),
+      makeWorktree({ path: '/repo/.worktrees/agent', branch: 'feat/agent-x/y', isAgent: true }),
     ]);
 
     const { lastFrame } = render(React.createElement(WorktreesPanel, {}));

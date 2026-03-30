@@ -4,8 +4,8 @@
  * Lists all worktrees for the current repo, highlighting agent-owned
  * branches (those matching the feat|fix|chore/agent-<name>/ convention).
  *
- * Renders nothing if there is only one worktree (the main one) since
- * there is nothing interesting to show in that case.
+ * Renders nothing if there is only one worktree (the main one), or if no
+ * worktree is agent-owned, since there is nothing interesting to show.
  */
 
 import React from 'react';
@@ -19,8 +19,8 @@ import { getAgentWorktrees } from '../lib/worktrees.js';
 export default function WorktreesPanel({ cwd }) {
   const worktrees = getAgentWorktrees(cwd);
 
-  // Nothing worth showing when only the main worktree exists
-  if (worktrees.length <= 1) return null;
+  // Nothing worth showing when there are no agent worktrees
+  if (worktrees.length <= 1 || !worktrees.some((w) => w.isAgent)) return null;
 
   return (
     <Box flexDirection="column" paddingX={2} gap={0}>
