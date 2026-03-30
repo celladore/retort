@@ -100,6 +100,7 @@ export async function writeScaffoldOutputs({
   // NOTE: Safe for single-threaded async (Array.push is synchronous in V8).
   // If runConcurrent ever uses worker threads, this needs synchronization.
   const writtenFiles = []; // absolute paths of files written, for post-sync formatting
+  const scaffoldOnceSkippedFiles = []; // paths skipped due to scaffold:once
   const scaffoldResults = {
     alwaysRegenerated: [],
     managedRegenerated: [],
@@ -136,6 +137,7 @@ export async function writeScaffoldOutputs({
 
       if (action === 'skip') {
         skippedScaffold++;
+        scaffoldOnceSkippedFiles.push(normalizedRel);
         return;
       }
 
@@ -338,15 +340,22 @@ export async function writeScaffoldOutputs({
     logVerbose(`  ${scaffoldOnceSkipped} scaffold-once file(s) skipped`);
   }
 
-  // Carry forward scaffold-once files from previous manifest.
-  // When a file was generated in a previous sync but skipped this time (scaffold-once),
-  // it must remain in the new manifest so orphan cleanup does not delete it.
+  // Carry forward legitimately-skipped files from the previous manifest so orphan
+  // cleanup does not delete them. Only files skipped for known reasons are eligible:
+  //   - scaffold:once  — file is project-owned after first write
+  //   - managed files with user edits preserved (managedPreserved)
+  //
+  // Files absent from newManifestFiles for any other reason (template removed, feature
+  // disabled, etc.) are intentionally omitted so cleanStaleFiles() can delete them.
   if (previousManifest?.files) {
+    const legitimatelySkipped = new Set([
+      ...scaffoldOnceSkippedFiles,
+      ...scaffoldResults.managedPreserved,
+    ]);
     for (const [prevFile, prevMeta] of Object.entries(previousManifest.files)) {
-      if (!newManifestFiles[prevFile]) {
+      if (!newManifestFiles[prevFile] && legitimatelySkipped.has(prevFile)) {
         const prevPath = resolve(projectRoot, prevFile);
         if (existsSync(prevPath)) {
-          // File exists on disk but was not regenerated — carry forward its manifest entry
           newManifestFiles[prevFile] = prevMeta;
         }
       }

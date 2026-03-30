@@ -204,19 +204,43 @@ describe('writeScaffoldOutputs', () => {
   });
 
   it('carries forward scaffold-once files from previous manifest into newManifestFiles', async () => {
-    // File exists on disk but was not re-generated this sync (scaffold:once)
-    const existingFile = join(projectRoot, 'preserved.md');
-    writeSync(existingFile, 'user content\n');
+    // File exists on disk and is skipped as scaffold:once during this sync run.
+    // Its manifest entry must be carried forward so orphan cleanup does not delete it.
+    const destFile = join(projectRoot, 'preserved.md');
+    writeSync(destFile, 'user content\n');
+
+    const srcFile = join(tmpDir, 'preserved.md');
+    writeSync(srcFile, 'template content\n');
+
+    setTemplateMeta('preserved.md', { agentkit: { scaffold: 'once' } });
 
     const newManifestFiles = {};
     const previousManifest = {
       files: { 'preserved.md': { hash: 'abc123' } },
     };
 
+    await run({ allTmpFiles: [srcFile], newManifestFiles, previousManifest });
+
+    // Scaffold-once skip should carry forward the previous manifest entry
+    expect(newManifestFiles['preserved.md']).toEqual({ hash: 'abc123' });
+  });
+
+  it('does not carry forward files removed from the template set', async () => {
+    // File exists on disk and in the previous manifest, but was NOT processed
+    // this sync (template removed / feature disabled). It must NOT be carried
+    // forward — cleanStaleFiles() should be free to delete it.
+    const existingFile = join(projectRoot, 'stale.md');
+    writeSync(existingFile, 'old content\n');
+
+    const newManifestFiles = {};
+    const previousManifest = {
+      files: { 'stale.md': { hash: 'abc123' } },
+    };
+
+    // No allTmpFiles entry for stale.md — simulates template being removed
     await run({ allTmpFiles: [], newManifestFiles, previousManifest });
 
-    // The file should be carried forward so orphan cleanup doesn't delete it
-    expect(newManifestFiles['preserved.md']).toEqual({ hash: 'abc123' });
+    expect(newManifestFiles['stale.md']).toBeUndefined();
   });
 
   it('does not carry forward files that no longer exist on disk', async () => {
