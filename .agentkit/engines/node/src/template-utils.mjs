@@ -1056,6 +1056,7 @@ export const ALL_RENDER_TARGETS = [
   'codex',
   'warp',
   'cline',
+  'junie',
   'roo',
   'mcp',
 ];
@@ -1093,6 +1094,7 @@ export function categorizeFile(relPath) {
   if (norm.startsWith('.gemini/')) return 'gemini';
   if (norm.startsWith('.agents/')) return 'codex';
   if (norm.startsWith('.clinerules/')) return 'cline';
+  if (norm.startsWith('.junie/')) return 'junie';
   if (norm.startsWith('.roo/')) return 'roo';
   if (norm.startsWith('.ai/')) return 'ai';
   if (norm.startsWith('.mcp/')) return 'mcp';
