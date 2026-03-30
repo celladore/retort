@@ -49,10 +49,16 @@ export default function MCPPanel() {
     const settingsPath = join(process.cwd(), '.claude', 'settings.json');
 
     readFile(settingsPath, 'utf8')
-      .then((raw) => { if (!cancelled) setServers(parseMcpServerNames(raw)); })
-      .catch(() => { if (!cancelled) setServers([]); });
+      .then((raw) => {
+        if (!cancelled) setServers(parseMcpServerNames(raw));
+      })
+      .catch(() => {
+        if (!cancelled) setServers([]);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Still loading
