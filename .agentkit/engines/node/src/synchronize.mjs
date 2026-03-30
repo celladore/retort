@@ -2838,16 +2838,34 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       logVerbose,
     });
 
-    // 9. Write new manifest
+    // 9. Post-sync prettier formatting — format before hashing so manifest hashes
+    //    reflect on-disk content. Without this, managed-file hash checks on the next
+    //    sync treat Prettier output as a "user edit" and skip regeneration.
+    await runPostSyncPrettier({ agentkitRoot, projectRoot, writtenFiles, logVerbose });
+
+    // Refresh manifest hashes for files that Prettier may have reformatted.
+    for (const absPath of writtenFiles) {
+      const relPath = relative(projectRoot, absPath).replace(/\\/g, '/');
+      if (newManifestFiles[relPath]) {
+        try {
+          const diskContent = await readFile(absPath);
+          newManifestFiles[relPath].hash = createHash('sha256')
+            .update(diskContent)
+            .digest('hex')
+            .slice(0, 12);
+        } catch {
+          // file may have been deleted or be unreadable — leave hash as-is
+        }
+      }
+    }
+
+    // 10. Write new manifest with post-format hashes
     await writeManifest(manifestPath, {
       generatedAt: new Date().toISOString(),
       version,
       repoName: vars.repoName,
       files: newManifestFiles,
     });
-
-    // 10. Post-sync prettier formatting — ensure generated files are formatted
-    await runPostSyncPrettier({ agentkitRoot, projectRoot, writtenFiles, logVerbose });
 
     if (skippedScaffold > 0) {
       log(`[retort:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
