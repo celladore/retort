@@ -3,7 +3,7 @@ name: 'Token Efficiency Engineer'
 description: 'Prompt engineering and token optimization specialist. Analyzes prompt templates, system instructions, and conversation patterns for token waste. Designs compact prompt structures, implements caching strategies (Anthropic prompt caching, OpenAI cached context), and optimizes request batching to reduce per-request overhead.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

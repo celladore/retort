@@ -32,22 +32,9 @@ fi
 
 ERRORS=""
 
-# -- Check 1: Generated file drift ----------------------------------------
-# Run agentkit sync and check if it produces changes
-if [[ -d "${CWD}/.agentkit" ]] && [[ -f "${CWD}/.agentkit/engines/node/src/cli.mjs" ]]; then
-    if command -v node &>/dev/null; then
-        # Run sync quietly
-        (cd "${CWD}/.agentkit" && node engines/node/src/cli.mjs sync 2>/dev/null) || true
-
-        # Check for drift
-        if ! git -C "$CWD" diff --quiet 2>/dev/null; then
-            DRIFT_FILES=$(git -C "$CWD" diff --name-only 2>/dev/null | head -20)
-            ERRORS="${ERRORS}GENERATED FILE DRIFT DETECTED — Run 'pnpm -C .agentkit agentkit:sync' and commit before pushing.\nOut-of-sync files:\n${DRIFT_FILES}\n\n"
-            # Restore the working tree since we're blocking
-            git -C "$CWD" checkout -- $DRIFT_FILES 2>/dev/null || true
-        fi
-    fi
-fi
+# -- Check 1: Generated file drift (skipped) ------------------------------
+# autoSyncOnPush is disabled — skipping sync validation.
+# Run 'pnpm -C .agentkit retort:sync' manually before pushing if you've edited spec files.
 
 # -- Check 2: Conventional Commits on unpushed commits --------------------
 # Get commits that would be pushed

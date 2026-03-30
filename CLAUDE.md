@@ -1,4 +1,4 @@
-<!-- generated_by: retort | last_model: sync-engine | last_updated:  -->
+<!-- generated_by: retort | last_model: sync-engine | last_updated: 2026-03-30 -->
 <!-- Format: Plain Markdown project instructions. Claude reads CLAUDE.md from the repo root. -->
 <!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory#claudemd -->
 
@@ -12,7 +12,7 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 
 - **Repository**: retort
 - **Default Branch**: main
-- **Integration Branch** (PR target): dev
+- **Integration Branch** (PR target): main
 - **Framework Version**: 3.1.0
 
 - **Phase**: active
@@ -234,13 +234,13 @@ Feature branches: `type/short-description` (e.g., `feat/add-user-auth`, `fix/tok
 
 ### PR Target Branch
 
-All PRs **must** target `dev` — not `main` or any other branch unless explicitly instructed:
+All PRs **must** target `main` — not `main` or any other branch unless explicitly instructed:
 
 ```bash
-gh pr create --base dev --title "type(scope): description"
+gh pr create --base main --title "type(scope): description"
 ```
 
-The integration branch (`dev`) is the configured PR target for this repo. Creating PRs against `main` directly causes reverse-merge noise and bypasses the integration pipeline. A hookify rule in `.claude/rules/pr-base-branch.md` enforces this at runtime.
+The integration branch (`main`) is the configured PR target for this repo. Creating PRs against `main` directly causes reverse-merge noise and bypasses the integration pipeline. A hookify rule in `.claude/rules/pr-base-branch.md` enforces this at runtime.
 
 ## Safety Rules
 

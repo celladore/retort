@@ -4,7 +4,7 @@ description: 'Runs security-focused analysis: dependency vulnerability scanning,
 allowed-tools: Bash(git *), Bash(npm *), Bash(pnpm *), Bash(npx *), Bash(dotnet *), Bash(cargo *), Bash(pip *), Bash(pip-audit *), Bash(safety *), Bash(go *), Bash(govulncheck *), Bash(grep *), Bash(find *)
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

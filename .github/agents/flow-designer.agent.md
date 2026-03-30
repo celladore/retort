@@ -3,7 +3,7 @@ name: 'Flow Designer'
 description: 'Designs the team command, flags, and integration points with other teams. Creates the command entry in commands.yaml and ensures the team is properly wired into the intake routing system.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Supports --dry-run to preview without writing.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Unified PM dashboard that aggregates orchestrator state, backlog, task progress, risks, and delivery metrics into a markdown or JSON report. Provides at-a-glance visibility into project health across all teams.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---
