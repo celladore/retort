@@ -93,6 +93,7 @@ const CLI_INTERNAL_FLAGS = {
   features: ['verbose', 'help'],
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
   worktree: ['base', 'no-setup', 'dry-run', 'help'],
+  run: ['id', 'assignee', 'dry-run', 'json', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -145,6 +146,7 @@ const CLI_INTERNAL_FLAG_TYPES = {
   // worktree flags
   base: 'string',
   'no-setup': 'boolean',
+  json: 'boolean',
 };
 
 /**
@@ -642,6 +644,11 @@ async function main() {
       case 'delegate': {
         const { runDelegate } = await import('./task-cli.mjs');
         await runDelegate({ projectRoot: PROJECT_ROOT, flags });
+        break;
+      }
+      case 'run': {
+        const { runRun } = await import('./run-cli.mjs');
+        await runRun({ projectRoot: PROJECT_ROOT, flags });
         break;
       }
       case 'add': {
