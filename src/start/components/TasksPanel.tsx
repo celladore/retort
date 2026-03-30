@@ -9,21 +9,26 @@
 
 import React from 'react';
 import { Box, Text } from 'ink';
-import { getActiveTasks } from '../lib/tasks.js';
+import { getActiveTasks, type TaskInfo } from '../lib/tasks.js';
+
+interface StatusMeta {
+  label: string;
+  color: string;
+}
 
 /** Status label and color for each active state. */
-const STATUS_META = {
+const STATUS_META: Record<string, StatusMeta> = {
   working: { label: '▶ working', color: 'green' },
   'input-required': { label: '? input', color: 'yellow' },
   accepted: { label: '✓ accepted', color: 'cyan' },
   submitted: { label: '○ submitted', color: 'gray' },
 };
 
-/**
- * @param {{ cwd?: string }} props
- *   cwd — repository root passed to getActiveTasks; defaults to process.cwd()
- */
-export default function TasksPanel({ cwd }) {
+interface TasksPanelProps {
+  cwd?: string;
+}
+
+export default function TasksPanel({ cwd }: TasksPanelProps) {
   const tasks = getActiveTasks(cwd);
 
   if (tasks.length === 0) return null;
@@ -40,11 +45,12 @@ export default function TasksPanel({ cwd }) {
   );
 }
 
-/**
- * @param {{ task: import('../lib/tasks.js').TaskInfo }} props
- */
-function TaskRow({ task }) {
-  const meta = STATUS_META[task.status] || { label: task.status, color: 'white' };
+interface TaskRowProps {
+  task: TaskInfo;
+}
+
+function TaskRow({ task }: TaskRowProps) {
+  const meta = STATUS_META[task.status] ?? { label: task.status, color: 'white' };
   const assignee = task.assignees.length > 0 ? task.assignees[0] : '';
 
   return (

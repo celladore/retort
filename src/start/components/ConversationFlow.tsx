@@ -12,19 +12,21 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
-import { TREE } from '../lib/conversation-tree.js';
+import { TREE, type FlowOption } from '../lib/conversation-tree.js';
+import type { RepoContext } from '../lib/detect.js';
 
-/**
- * @param {{ onSelect: (command: string) => void, ctx: import('../lib/detect.js').RepoContext }} props
- */
-export default function ConversationFlow({ ctx, onSelect }) {
-  const [path, setPath] = useState(['root']);
-  const [selected, setSelected] = useState(null);
+interface ConversationFlowProps {
+  ctx: RepoContext;
+  onSelect: (command: string) => void;
+}
+
+export default function ConversationFlow({ ctx, onSelect }: ConversationFlowProps) {
+  const [path, setPath] = useState<string[]>(['root']);
+  const [selected, setSelected] = useState<FlowOption | null>(null);
 
   const currentNodeId = path[path.length - 1];
   const currentNode = TREE[currentNodeId];
 
-  // Back-navigation: Escape pops the last path segment
   useInput((input, key) => {
     if (key.escape && !selected && path.length > 1) {
       setPath((p) => p.slice(0, -1));
@@ -35,7 +37,7 @@ export default function ConversationFlow({ ctx, onSelect }) {
     return <Text color="red">Flow error: unknown node &quot;{currentNodeId}&quot;</Text>;
   }
 
-  function handleSelect(item) {
+  function handleSelect(item: { label: string; value: string }) {
     const option = currentNode.options.find((o) => o.value === item.value);
     if (!option) return;
 
@@ -47,11 +49,9 @@ export default function ConversationFlow({ ctx, onSelect }) {
     }
   }
 
-  // Show the trail of questions answered so far
   const breadcrumbs = path.slice(0, -1).map((nodeId) => {
     const node = TREE[nodeId];
     const chosenValue = path[path.indexOf(nodeId) + 1];
-    // Find which option led to the next node
     const chosen = node?.options.find((o) => o.next === chosenValue || o.value === chosenValue);
     return chosen ? chosen.label.replace(/^[^\s]+\s+/, '') : '?';
   });

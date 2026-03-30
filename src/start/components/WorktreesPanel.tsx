@@ -10,16 +10,15 @@
 
 import React from 'react';
 import { Box, Text } from 'ink';
-import { getAgentWorktrees } from '../lib/worktrees.js';
+import { getAgentWorktrees, type WorktreeInfo } from '../lib/worktrees.js';
 
-/**
- * @param {{ cwd?: string }} props
- *   cwd — repository root passed to getAgentWorktrees; defaults to process.cwd()
- */
-export default function WorktreesPanel({ cwd }) {
+interface WorktreesPanelProps {
+  cwd?: string;
+}
+
+export default function WorktreesPanel({ cwd }: WorktreesPanelProps) {
   const worktrees = getAgentWorktrees(cwd);
 
-  // Nothing worth showing when there are no agent worktrees
   if (worktrees.length <= 1 || !worktrees.some((w) => w.isAgent)) return null;
 
   return (
@@ -34,10 +33,11 @@ export default function WorktreesPanel({ cwd }) {
   );
 }
 
-/**
- * @param {{ wt: import('../lib/worktrees.js').WorktreeInfo }} props
- */
-function WorktreeRow({ wt }) {
+interface WorktreeRowProps {
+  wt: WorktreeInfo;
+}
+
+function WorktreeRow({ wt }: WorktreeRowProps) {
   const label = wt.isMain ? '(main)' : wt.branch || '(detached)';
   const color = wt.isMain ? 'gray' : wt.isAgent ? 'cyan' : 'white';
 

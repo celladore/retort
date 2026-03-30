@@ -19,7 +19,7 @@
 import React from 'react';
 import { render } from 'ink';
 import { detect } from './lib/detect.js';
-import App from './components/App.jsx';
+import App from './components/App.js';
 
 const args = process.argv.slice(2);
 

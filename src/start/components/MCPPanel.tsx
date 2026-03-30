@@ -19,20 +19,16 @@ import { join } from 'path';
 /**
  * Parse mcpServers from the raw settings.json content.
  * Returns an array of server name strings, or [] on any failure.
- *
- * @param {string} raw - File content string
- * @returns {string[]}
  */
-function parseMcpServerNames(raw) {
+function parseMcpServerNames(raw: string): string[] {
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as { mcpServers?: unknown };
     const servers = parsed?.mcpServers;
     if (!servers || typeof servers !== 'object' || Array.isArray(servers)) {
       return [];
     }
-    return Object.keys(servers);
+    return Object.keys(servers as Record<string, unknown>);
   } catch {
-    // Malformed JSON — treat as no servers
     return [];
   }
 }
@@ -42,7 +38,7 @@ function parseMcpServerNames(raw) {
  * Returns null when no servers are configured or the file is unavailable.
  */
 export default function MCPPanel() {
-  const [servers, setServers] = useState(null);
+  const [servers, setServers] = useState<string[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,9 +57,7 @@ export default function MCPPanel() {
     };
   }, []);
 
-  // Still loading
   if (servers === null) return null;
-  // No servers configured
   if (servers.length === 0) return null;
 
   return (
