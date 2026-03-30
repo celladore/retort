@@ -72,6 +72,29 @@ export function inferTestingCoverage(projectPhase) {
   }
 }
 
+/**
+ * Derives browser/crawler MCP server flags from the project spec's testing.e2e array.
+ *
+ * - usesPlaywright: true when 'playwright' appears in testing.e2e
+ * - usesBrowser:   true when any browser-based e2e tool (cypress, puppeteer, webdriverio)
+ *                  appears in testing.e2e AND playwright is NOT already selected
+ *                  (playwright takes precedence and has its own MCP server)
+ *
+ * These flags control which MCP server entries are rendered in templates/mcp/servers.json.
+ */
+export function buildBrowserTestingVars(projectSpec) {
+  const e2eTools = projectSpec?.testing?.e2e;
+  const tools = Array.isArray(e2eTools)
+    ? e2eTools.map((t) => (typeof t === 'string' ? t.toLowerCase() : ''))
+    : [];
+
+  const usesPlaywright = tools.includes('playwright');
+  const browserTools = ['cypress', 'puppeteer', 'webdriverio'];
+  const usesBrowser = !usesPlaywright && tools.some((t) => browserTools.includes(t));
+
+  return { usesPlaywright, usesBrowser };
+}
+
 // ---------------------------------------------------------------------------
 // Command path helpers
 // ---------------------------------------------------------------------------

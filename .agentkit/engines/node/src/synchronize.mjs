@@ -54,6 +54,7 @@ import {
   buildAgentVars,
   buildAreaRoutingTable,
   buildBranchProtectionJson,
+  buildBrowserTestingVars,
   buildCollaboratorsSection,
   buildCommandVars,
   buildRuleVars,
@@ -424,6 +425,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   if (!vars.testingCoverage && projectSpec?.phase) {
     vars.testingCoverage = inferTestingCoverage(projectSpec.phase);
   }
+
+  // Browser/crawler MCP server flags — derived from testing.e2e in project.yaml.
+  // Injected here so all templates (including mcp/servers.json) can use {{#if usesPlaywright}}
+  // and {{#if usesBrowser}} to conditionally include the right MCP server entry.
+  const browserVars = buildBrowserTestingVars(projectSpec);
+  vars.usesPlaywright = browserVars.usesPlaywright;
+  vars.usesBrowser = browserVars.usesBrowser;
 
   // Precomputed JSON strings for branch protection — avoids {{#each}} comma
   // issues inside JSON heredocs. These render as valid JSON array literals.
