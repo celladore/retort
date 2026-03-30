@@ -92,6 +92,7 @@ import {
   syncEditorConfigs,
   syncEditorTheme,
   syncGemini,
+  syncJunie,
   syncGitattributes,
   syncGitHub,
   syncLanguageInstructions,
@@ -833,6 +834,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     if (targets.has('gemini')) {
       gatedTasks.push(syncGemini(templatesDir, tmpDir, vars, version, headerRepoName));
+    }
+
+    if (targets.has('junie')) {
+      gatedTasks.push(syncJunie(templatesDir, tmpDir, vars, version, headerRepoName));
     }
 
     if (targets.has('codex')) {

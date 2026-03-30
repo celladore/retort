@@ -1149,6 +1149,29 @@ export async function syncGemini(templatesDir, tmpDir, vars, version, repoName) 
 }
 
 // ---------------------------------------------------------------------------
+// Junie sync helper (JetBrains AI)
+// ---------------------------------------------------------------------------
+
+/**
+ * Copies templates/junie/* -> tmpDir/.junie/
+ * Junie reads .junie/guidelines.md as project-level agent instructions.
+ */
+export async function syncJunie(templatesDir, tmpDir, vars, version, repoName) {
+  const { readTemplateText } = await import('./spec-loader.mjs');
+  const junieDir = join(templatesDir, 'junie');
+  if (!existsSync(junieDir)) return;
+
+  for await (const srcFile of walkDir(junieDir)) {
+    const ext = extname(srcFile).toLowerCase();
+    const content = await readTemplateText(srcFile);
+    const rendered = renderTemplate(content, vars, srcFile);
+    const withHeader = insertHeader(rendered, ext, version, repoName);
+    const relPath = relative(junieDir, srcFile);
+    await writeOutput(join(tmpDir, '.junie', relPath), withHeader);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Codex sync helper
 // ---------------------------------------------------------------------------
 
