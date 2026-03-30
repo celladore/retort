@@ -45,9 +45,7 @@ interface CommandPaletteProps {
   onBack: () => void;
 }
 
-type FlatItem =
-  | { type: 'header'; category: string }
-  | (RankedCommand & { type: 'command' });
+type FlatItem = { type: 'header'; category: string } | (RankedCommand & { type: 'command' });
 
 export default function CommandPalette({ ctx, onSelect, onBack }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
@@ -108,7 +106,9 @@ export default function CommandPalette({ ctx, onSelect, onBack }: CommandPalette
     return displayed.map((cmd): FlatItem => ({ type: 'command', ...cmd }));
   }, [grouped, displayed]);
 
-  const commandItems = flatList.filter((i): i is RankedCommand & { type: 'command' } => i.type === 'command');
+  const commandItems = flatList.filter(
+    (i): i is RankedCommand & { type: 'command' } => i.type === 'command'
+  );
   const clampedCursor = Math.min(cursor, Math.max(0, commandItems.length - 1));
 
   useInput((input, key) => {
