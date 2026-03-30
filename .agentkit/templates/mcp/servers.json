@@ -5,6 +5,6 @@
     "fetch": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-fetch"] }{{#if usesPlaywright~}},
     "playwright": { "command": "npx", "args": ["-y", "@playwright/mcp"] }{{~/if}}{{#if usesBrowser~}},
     "puppeteer": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-puppeteer"] }{{~/if}}{{#if hasStorybook~}},
-    "storybook-crawler": { "command": "npx", "args": ["-y", "@chromatic-com/storybook-mcp-server"] }{{~/if}}
+    "storybook-crawler": { "command": "npx", "args": ["-y", "@storybook/mcp"] }{{~/if}}
   }
 }
