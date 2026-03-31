@@ -33,7 +33,7 @@ Invoke this skill when you need to perform the `{{commandName}}` operation.
 - Return a concise summary with status (`success`/`partial`/`failed`)
 - Include validation evidence (exit code, failing command, or passing summary)
 - Include next-step remediation when checks fail
-{{/if}}
+  {{/if}}
 
 ## Project Context
 
