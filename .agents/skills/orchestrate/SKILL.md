@@ -3,7 +3,7 @@ name: 'orchestrate'
 description: 'Top-level orchestration command. Assesses the current repository state, identifies work to be done, delegates to appropriate team agents, and synthesizes results. The primary entry point for multi-step workflows.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

@@ -4,7 +4,7 @@ description: 'Synchronizes the local backlog with the configured issue tracker (
 allowed-tools: Bash(git *), Bash(grep *), Bash(find *)
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

@@ -3,7 +3,7 @@ name: 'DEVOPS'
 description: 'Team DEVOPS — CI/CD, pipelines, automation'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot chat mode definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

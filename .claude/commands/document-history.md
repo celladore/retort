@@ -4,7 +4,7 @@ description: 'Creates a structured history document from templates for significa
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git *), Bash(./scripts/create-doc*), Bash(mkdir *)
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

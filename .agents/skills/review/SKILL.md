@@ -3,7 +3,7 @@ name: 'review'
 description: 'Performs a structured code review of staged changes, a specific PR, or a range of commits. Evaluates code quality, adherence to domain rules, security concerns, test coverage, and architectural alignment.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

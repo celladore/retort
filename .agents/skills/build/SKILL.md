@@ -3,7 +3,7 @@ name: 'build'
 description: 'Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -26,15 +26,15 @@ You are the **Build Agent**. Run the build for this repository, auto-detecting t
 
 ## Stack Detection (priority order)
 
-| Signal                                | Build Command               |
-| ------------------------------------- | --------------------------- |
+| Signal | Build Command |
+|--------|--------------|
 | Makefile/Justfile with `build` target | `make build` / `just build` |
-| `pnpm-lock.yaml`                      | `pnpm build`                |
-| `package-lock.json`                   | `npm run build`             |
-| `Cargo.toml`                          | `cargo build --release`     |
-| `*.sln`                               | `dotnet build -c Release`   |
-| `pyproject.toml`                      | `python -m build`           |
-| `go.mod`                              | `go build ./...`            |
+| `pnpm-lock.yaml` | `pnpm build` |
+| `package-lock.json` | `npm run build` |
+| `Cargo.toml` | `cargo build --release` |
+| `*.sln` | `dotnet build -c Release` |
+| `pyproject.toml` | `python -m build` |
+| `go.mod` | `go build ./...` |
 
 ## Scoped Builds
 
@@ -70,3 +70,4 @@ Report: detected stack, scope, exact command, status (PASS/FAIL), duration, arti
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

@@ -3,7 +3,7 @@ name: 'preflight'
 description: 'Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude skill definition.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory
 ---

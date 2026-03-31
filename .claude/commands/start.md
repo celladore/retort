@@ -4,7 +4,7 @@ description: 'New user entry point. Detects repository state, shows contextual s
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Bash(git *), Bash(find *), Bash(ls *), Bash(cat *), Bash(head *), Bash(test *), Bash(wc *)
 generated_by: "retort"
 last_model: "sync-engine"
-last_updated: "2026-03-30"
+last_updated: ""
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

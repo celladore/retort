@@ -3,7 +3,7 @@ name: 'doctor'
 description: 'Runs AgentKit Forge diagnostics: spec validation, overlay sanity checks, template availability, project.yaml completeness hints, and suggested next actions for fixing setup issues.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

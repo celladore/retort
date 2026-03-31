@@ -3,7 +3,7 @@ name: 'Project Shipper'
 description: 'Delivery-focused project management specialist responsible for moving work through the pipeline from planning to production. Ensures tasks are properly scoped, tracked, and delivered.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

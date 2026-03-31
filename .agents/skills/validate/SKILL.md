@@ -3,7 +3,7 @@ name: 'validate'
 description: 'Validates generated outputs for correctness. Checks that all required directories, JSON files, command files, and hook scripts exist and are well-formed. Scans for forbidden patterns (hardcoded secrets) and verifies the settings.json hooks configuration.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

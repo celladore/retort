@@ -3,7 +3,7 @@ name: 'feature-configure'
 description: 'Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -47,3 +47,4 @@ Invoke this skill when you need to perform the `feature-configure` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

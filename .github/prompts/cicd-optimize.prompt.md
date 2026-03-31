@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'CI/CD pipeline and local hook optimizer. Audits GitHub Actions workflows, pre-commit/stop hooks, and test configurations for speed bottlenecks. Identifies caching gaps, sequential jobs that could parallelize, missing path filters, redundant installs, and slow hook steps. Produces a prioritized list of improvements with estimated time savings per fix.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

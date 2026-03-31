@@ -4,7 +4,7 @@ description: 'Interactive feature configuration workflow. Walks through each fea
 allowed-tools: Bash(node *agentkit* features*)
 generated_by: "retort"
 last_model: "sync-engine"
-last_updated: "2026-03-30"
+last_updated: ""
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

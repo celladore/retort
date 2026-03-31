@@ -3,7 +3,7 @@ name: 'Backend Engineer'
 description: 'Senior backend engineer responsible for API design, service architecture, core business logic, and server-side performance. Ensures clean separation of concerns and robust error handling.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---
