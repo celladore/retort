@@ -27,7 +27,9 @@ COMMAND_GUIDE.md
 # (#419: these are sync outputs; formatting them adds noise and may corrupt content)
 .claude/commands/**
 .claude/agents/**
+.claude/skills/**
 .claude/rules/languages/**
+.agents/skills/**
 .cursor/rules/**
 .cursor/rules/languages/**
 .clinerules/**
