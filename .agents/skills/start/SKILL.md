@@ -3,7 +3,7 @@ name: 'start'
 description: 'New user entry point. Detects repository state, shows contextual status, and guides users to the right command or team for their goal. Read-only — suggests commands but does not execute them.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

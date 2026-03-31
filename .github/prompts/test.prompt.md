@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

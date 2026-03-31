@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Triggers a deployment pipeline or generates deployment artifacts. Validates pre-deployment checks (build, test, lint) before proceeding. Supports dry-run mode for safety.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

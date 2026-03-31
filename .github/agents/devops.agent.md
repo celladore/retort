@@ -3,7 +3,7 @@ name: 'DevOps Engineer'
 description: 'Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment workflows. Ensures reliable, repeatable, and fast delivery pipelines.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot agent definition.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-agents-in-vs-code
 ---

@@ -3,7 +3,7 @@ mode: 'agent'
 description: 'Runs the expansion analyzer to identify gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase. Produces a ranked list of suggestions with rationale, impact scores, and effort estimates. Never creates tasks in analysis mode — all suggestions require explicit human approval. Use --save to persist suggestions to disk for later review.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Copilot reusable prompt.
 # Docs: https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
 ---

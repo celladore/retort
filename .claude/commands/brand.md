@@ -4,7 +4,7 @@ description: 'Manage the project brand spec (brand.yaml) and editor theme. Suppo
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash(npx agentkit *)
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Claude slash command.
 # Docs: https://docs.anthropic.com/en/docs/claude-code/memory#slash-commands
 ---

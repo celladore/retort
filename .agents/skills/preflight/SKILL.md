@@ -3,7 +3,7 @@ name: 'preflight'
 description: 'Runs enhanced delivery checks before ship: quality gates, changelog, coverage delta, commit convention conformance, TODO/FIXME hygiene, and documentation updates for externally visible changes.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: '2026-03-30'
+last_updated: ''
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---
@@ -52,3 +52,4 @@ If `--range` is omitted, auto-detect via merge-base against the default branch. 
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+
