@@ -20,6 +20,7 @@ renderTargets:
   - roo
   - ai
   - mcp
+  - junie
 
 featurePreset: standard
 
