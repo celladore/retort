@@ -83,10 +83,6 @@ and resource lifecycle management.
 ## Toolchain
 
 - **IaC tools**: terraform, terragrunt
-  
-  
-  
-  
 
 ## Key Rules
 
