@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "git": { "command": "git", "args": [] },
-    "puppeteer": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-puppeteer"] },
     "memory": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"] },
-    "fetch": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-fetch"] }
+    "fetch": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-fetch"] }{{#if usesPlaywright~}},
+    "playwright": { "command": "npx", "args": ["-y", "@playwright/mcp"] }{{~/if}}{{#if usesBrowser~}},
+    "puppeteer": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-puppeteer"] }{{~/if}}{{#if hasStorybook~}},
+    "storybook-crawler": { "command": "npx", "args": ["-y", "@storybook/mcp"] }{{~/if}}
   }
 }
