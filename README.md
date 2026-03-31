@@ -1,6 +1,7 @@
 # retort
 
 [![CI](https://github.com/phoenixvc/retort/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/phoenixvc/retort/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen)](https://github.com/phoenixvc/retort/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-3.1.0-blue)](https://github.com/phoenixvc/retort/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -20,7 +21,7 @@ Every AI coding assistant has its own config format — `CLAUDE.md`, `.cursor/ru
 | **GitHub Copilot**  | `.github/copilot-instructions.md`, chat modes, prompts             |
 | **Gemini CLI**      | `GEMINI.md`, `.gemini/`                                            |
 | **Codex / OpenAI**  | `.agents/skills/`                                                  |
-| **JetBrains Junie** | `.junie/guidelines.md`                                             |
+| **JetBrains Junie** | `.junie/guidelines.md` ✓ shipped                                   |
 | **Cline**           | `.clinerules/`                                                     |
 | **Roo Code**        | `.roo/rules/`                                                      |
 | **Warp**            | `WARP.md`                                                          |
@@ -103,7 +104,7 @@ Customize teams in `.agentkit/spec/teams.yaml`. Add, remove, or rename teams —
 
 ### `/start` TUI
 
-An interactive terminal UI for starting agent sessions. Run it at the beginning of every session:
+An interactive terminal UI for starting agent sessions. Built with Ink + React (TypeScript). Run it at the beginning of every session:
 
 ```bash
 npx retort start    # or: ak-start
@@ -159,9 +160,9 @@ retort/
 │   ├── engines/node/src/   # sync engine: synchronize.mjs, platform-syncer.mjs, …
 │   └── overlays/           # per-repo customisations (settings.yaml, feature flags)
 ├── src/
-│   └── start/              # /start TUI (Ink + React)
-│       ├── components/     # App, TasksPanel, WorktreesPanel, MCPPanel, …
-│       └── lib/            # detect, commands, tasks, worktrees
+│   └── start/              # /start TUI (Ink + React, TypeScript)
+│       ├── components/     # App.tsx, TasksPanel.tsx, WorktreesPanel.tsx, MCPPanel.tsx, …
+│       └── lib/            # detect.ts, commands.ts, tasks.ts, worktrees.ts
 ├── scripts/                # create-doc.sh, setup-branch-protection, split-pr
 ├── docs/
 │   ├── architecture/       # ADRs, specs, diagrams
@@ -203,6 +204,7 @@ Run `retort init` to auto-detect values from your repo, or edit `project.yaml` d
 
 | Repo                                                            | Role                                                                          |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`retort-plugins`](https://github.com/phoenixvc/retort-plugins) | IDE plugins — VS Code (`@retort` Copilot Chat), JetBrains (Junie), Zed        |
 | [`phoenix-flow`](https://github.com/phoenixvc/phoenix-flow)     | Task graph + MCP server — retort projects read live tasks from phoenix-flow   |
 | [`sluice`](https://github.com/phoenixvc/sluice)                 | AI gateway — retort-scaffolded projects route model calls through sluice      |
 | [`docket`](https://github.com/phoenixvc/docket)                 | AI cost ops — tracks token spend and model costs per project                  |
