@@ -6,6 +6,7 @@
  * Pure template helpers live in template-utils.mjs.
  */
 import { createHash } from 'crypto';
+import { execFileSync } from 'child_process';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
@@ -47,6 +48,7 @@ import {
   renderTemplate,
   resolveRenderTargets,
   simpleDiff,
+  getSyncReportData,
   startSyncReport,
 } from './template-utils.mjs';
 import { applyRetortConfig, loadRetortConfig } from './retort-config.mjs';
@@ -1175,6 +1177,15 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     // 12. Write sync-report.json
     if (!dryRun && !diff) {
+      const failedFiles = [];
+      const scaffoldResults = {
+        alwaysRegenerated: [],
+        managedRegenerated: [],
+        managedMerged: [],
+        managedConflicts: [],
+        managedPreserved: [],
+        managedNoCache: [],
+      };
       const reportCollector = getSyncReportData();
       let gitAutocrlf = null;
       let hasGitattributes = false;
