@@ -115,7 +115,7 @@ Produce markdown (default) or JSON (with `--format json`) with these sections:
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

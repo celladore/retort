@@ -115,7 +115,7 @@ This command is **read-only**. It reads state files for context detection but do
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

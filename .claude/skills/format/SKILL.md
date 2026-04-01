@@ -26,15 +26,15 @@ You are the **Format Agent**. Run the appropriate code formatters. Default: **wr
 
 ## Formatter Detection (run ALL applicable, not just first match)
 
-| Stack            | Write Command                | Check Command                       |
-| ---------------- | ---------------------------- | ----------------------------------- |
-| JS/TS (Prettier) | `npx prettier --write .`     | `npx prettier --check .`            |
-| JS/TS (Biome)    | `npx biome format --write .` | `npx biome format .`                |
-| Rust             | `cargo fmt`                  | `cargo fmt --check`                 |
-| Python (Ruff)    | `ruff format .`              | `ruff format --check .`             |
-| Python (Black)   | `black .`                    | `black --check .`                   |
-| .NET             | `dotnet format`              | `dotnet format --verify-no-changes` |
-| Go               | `gofmt -w .`                 | `gofmt -l .`                        |
+| Stack | Write Command | Check Command |
+|-------|--------------|---------------|
+| JS/TS (Prettier) | `npx prettier --write .` | `npx prettier --check .` |
+| JS/TS (Biome) | `npx biome format --write .` | `npx biome format .` |
+| Rust | `cargo fmt` | `cargo fmt --check` |
+| Python (Ruff) | `ruff format .` | `ruff format --check .` |
+| Python (Black) | `black .` | `black --check .` |
+| .NET | `dotnet format` | `dotnet format --verify-no-changes` |
+| Go | `gofmt -w .` | `gofmt -l .` |
 
 ## Special Modes
 
@@ -58,7 +58,7 @@ Report: formatters run, scope, mode, files changed/needing formatting, summary c
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

@@ -92,7 +92,7 @@ Then provide **Ready-to-apply fixes** — code blocks for each high-impact chang
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

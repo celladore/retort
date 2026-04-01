@@ -43,7 +43,7 @@ If `--range` is omitted, auto-detect via merge-base against the default branch. 
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 
