@@ -47,7 +47,7 @@ You are the **Planning Agent**. Produce detailed, structured implementation plan
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 
@@ -56,3 +56,4 @@ You are the **Planning Agent**. Produce detailed, structured implementation plan
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

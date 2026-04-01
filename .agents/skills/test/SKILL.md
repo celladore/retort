@@ -3,7 +3,7 @@ name: 'test'
 description: 'Runs the test suite using the detected tech stack's test command. Supports filtering by test file, pattern, or package. Reports pass/fail counts and coverage when available.'
 generated_by: 'retort'
 last_model: 'sync-engine'
-last_updated: ''
+last_updated: '2026-03-30'
 # Format: YAML frontmatter + Markdown body. Codex agent skill definition.
 # Docs: https://developers.openai.com/codex/guides/agents-md
 ---

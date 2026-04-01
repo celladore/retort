@@ -2,7 +2,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { resolveTeamAgents, readYaml, runSync } from '../synchronize.mjs';
+import { readYaml, loadAgentsSpec } from '../spec-loader.mjs';
+import { resolveTeamAgents } from '../var-builders.mjs';
+import { runSync } from '../synchronize.mjs';
 import { renderTemplate, replacePlaceholders } from '../template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -200,8 +202,8 @@ describe('P0: resolveTeamAgents', () => {
     expect(result[0].id).toBe('product-manager');
   });
 
-  it('resolves agents from real agents.yaml', () => {
-    const agentsSpec = readYaml(resolve(AGENTKIT_ROOT, 'spec', 'agents.yaml'));
+  it('resolves agents from real agents spec', () => {
+    const agentsSpec = loadAgentsSpec(AGENTKIT_ROOT);
 
     // Product category should have agents
     const productAgents = resolveTeamAgents('product', { id: 'product' }, agentsSpec);

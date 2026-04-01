@@ -53,7 +53,7 @@ Produce: Quality Gate Results table (Step | Status | Duration | Details), Overal
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

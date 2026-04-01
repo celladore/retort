@@ -37,9 +37,34 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: .agentkit
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run tests with coverage
+        run: pnpm coverage
         working-directory: .agentkit
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          SUMMARY=".agentkit/coverage/coverage-summary.json"
+          if [ -f "$SUMMARY" ]; then
+            python3 -c "
+          import json, sys
+          with open('$SUMMARY') as f:
+              d = json.load(f)
+          t = d.get('total', {})
+          lines = t.get('lines', {}).get('pct', 'n/a')
+          branches = t.get('branches', {}).get('pct', 'n/a')
+          functions = t.get('functions', {}).get('pct', 'n/a')
+          print('## Test Coverage')
+          print('')
+          print('| Metric | Coverage |')
+          print('|--------|----------|')
+          print(f'| Lines | {lines}% |')
+          print(f'| Branches | {branches}% |')
+          print(f'| Functions | {functions}% |')
+          " >> \$GITHUB_STEP_SUMMARY
+          else
+            echo "No coverage-summary.json found — run \`pnpm coverage\` locally." >> \$GITHUB_STEP_SUMMARY
+          fi
 
   validate:
     name: Validate

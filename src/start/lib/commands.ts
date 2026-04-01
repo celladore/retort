@@ -5,19 +5,23 @@
  * and display contextually relevant suggestions.
  */
 
-/**
- * @typedef {Object} Command
- * @property {string}   id        Slash command name (e.g. '/discover')
- * @property {string}   label     Short display name
- * @property {string}   desc      One-line description
- * @property {string}   category  'workflow' | 'team' | 'quality' | 'info'
- * @property {string[]} tags      Searchable keywords
- * @property {(ctx: import('./detect.js').RepoContext) => number} rank
- *   Returns 0-100 relevance score given current context. Higher = more relevant.
- */
+import type { RepoContext, TeamInfo } from './detect.js';
 
-/** @type {Command[]} */
-export const COMMANDS = [
+export interface Command {
+  id: string;
+  label: string;
+  desc: string;
+  category: 'workflow' | 'quality' | 'info' | 'team';
+  tags: string[];
+  /** Returns 0-100 relevance score given current context. Higher = more relevant. */
+  rank: (ctx: RepoContext) => number;
+}
+
+export interface RankedCommand extends Command {
+  score: number;
+}
+
+export const COMMANDS: Command[] = [
   // ── Workflow ──────────────────────────────────────────
   {
     id: '/discover',
@@ -116,20 +120,16 @@ export const COMMANDS = [
 
 /**
  * Build the full command list including dynamic team commands.
- *
- * @param {import('./detect.js').RepoContext} ctx
- * @returns {Command[]}
  */
-export function getAllCommands(ctx) {
-  // Exclude meta-teams that coordinate other teams rather than doing direct work
-  const teams = Array.isArray(ctx.teams) ? ctx.teams : [];
-  const teamCommands = teams
+export function getAllCommands(ctx: RepoContext): Command[] {
+  const teams: TeamInfo[] = Array.isArray(ctx.teams) ? ctx.teams : [];
+  const teamCommands: Command[] = teams
     .filter((t) => !['forge', 'strategic-ops'].includes(t.id))
     .map((t) => ({
       id: `/team-${t.id}`,
       label: t.name,
       desc: t.focus || `${t.name} team`,
-      category: 'team',
+      category: 'team' as const,
       tags: [t.id, t.name.toLowerCase(), (t.focus || '').toLowerCase()],
       rank: () => 50,
     }));
@@ -139,12 +139,8 @@ export function getAllCommands(ctx) {
 
 /**
  * Rank and sort commands by contextual relevance.
- *
- * @param {Command[]} commands
- * @param {import('./detect.js').RepoContext} ctx
- * @returns {Command[]}
  */
-export function rankCommands(commands, ctx) {
+export function rankCommands(commands: Command[], ctx: RepoContext): RankedCommand[] {
   return commands
     .map((cmd) => ({ ...cmd, score: cmd.rank(ctx) }))
     .sort((a, b) => b.score - a.score);

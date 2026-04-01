@@ -12,21 +12,34 @@
  *   Ctrl+C — exit
  */
 
-import React, { useState, useEffect, Component } from 'react';
+import React, { useState, useEffect, Component, type ReactNode } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
-import StatusBar from './StatusBar.jsx';
-import ConversationFlow from './ConversationFlow.jsx';
-import CommandPalette from './CommandPalette.jsx';
+import StatusBar from './StatusBar.js';
+import MCPPanel from './MCPPanel.js';
+import TasksPanel from './TasksPanel.js';
+import ConversationFlow from './ConversationFlow.js';
+import CommandPalette from './CommandPalette.js';
+import type { RepoContext } from '../lib/detect.js';
 
-class ErrorBoundary extends Component {
-  constructor(props) {
+interface ErrorBoundaryState {
+  error: Error | null;
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { error: null };
   }
-  static getDerivedStateFromError(error) {
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { error };
   }
-  render() {
+
+  render(): ReactNode {
     if (this.state.error) {
       return React.createElement(
         Box,
@@ -44,10 +57,11 @@ class ErrorBoundary extends Component {
   }
 }
 
-/**
- * @param {{ ctx: import('../lib/detect.js').RepoContext }} props
- */
-export default function App({ ctx }) {
+interface AppProps {
+  ctx: RepoContext;
+}
+
+export default function App({ ctx }: AppProps) {
   return (
     <ErrorBoundary>
       <AppInner ctx={ctx} />
@@ -55,33 +69,31 @@ export default function App({ ctx }) {
   );
 }
 
-function AppInner({ ctx }) {
+type Mode = 'conversation' | 'palette';
+
+function AppInner({ ctx }: AppProps) {
   const { exit } = useApp();
 
-  // Determine initial mode based on context
   const isFirstRun = !ctx.discoveryDone && !ctx.hasOrchestratorState;
-  const [mode, setMode] = useState(isFirstRun ? 'conversation' : 'palette');
-  const [result, setResult] = useState(null);
+  const [mode, setMode] = useState<Mode>(isFirstRun ? 'conversation' : 'palette');
+  const [result, setResult] = useState<string | null>(null);
 
-  // Toggle between modes with Tab
   useInput((input, key) => {
     if (key.tab && !result) {
       setMode((m) => (m === 'conversation' ? 'palette' : 'conversation'));
     }
   });
 
-  function handleCommandSelected(command) {
+  function handleCommandSelected(command: string) {
     setResult(command);
   }
 
-  // Exit after the result screen has rendered
   useEffect(() => {
     if (result) {
       exit();
     }
   }, [result, exit]);
 
-  // If a command was selected, show the result and exit
   if (result) {
     return (
       <Box flexDirection="column" gap={1}>
@@ -100,6 +112,8 @@ function AppInner({ ctx }) {
           </Text>
         </Box>
 
+        <TasksPanel />
+        <MCPPanel />
         <StatusBar ctx={ctx} />
       </Box>
     );
@@ -141,12 +155,18 @@ function AppInner({ ctx }) {
         />
       )}
 
+      <TasksPanel />
+      <MCPPanel />
       <StatusBar ctx={ctx} />
     </Box>
   );
 }
 
-function Header({ mode }) {
+interface HeaderProps {
+  mode: Mode;
+}
+
+function Header({ mode }: HeaderProps) {
   return (
     <Box flexDirection="column" paddingX={1}>
       <Box gap={1}>

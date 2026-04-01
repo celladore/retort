@@ -18,6 +18,37 @@ permissions:
     - 'Bash(git show*)'
     - 'Bash(git branch*)'
     - 'Bash(git rev-parse*)'
+    - 'Bash(git ls-files*)'
+
+    # -------------------------------------------------------------------------
+    # Git — write, mutation, and worktree operations
+    # -------------------------------------------------------------------------
+    - 'Bash(git add*)'
+    - 'Bash(git rm*)'
+    - 'Bash(git commit*)'
+    - 'Bash(git push*)'
+    - 'Bash(git checkout*)'
+    - 'Bash(git switch*)'
+    - 'Bash(git stash*)'
+    - 'Bash(git worktree*)'
+    - 'Bash(git merge*)'
+    - 'Bash(git rebase*)'
+    - 'Bash(git fetch*)'
+    - 'Bash(git pull*)'
+    - 'Bash(git tag*)'
+
+    # -------------------------------------------------------------------------
+    # Shell utilities
+    # -------------------------------------------------------------------------
+    - 'Bash(ls*)'
+    - 'Bash(echo*)'
+    - 'Bash(cat*)'
+    - 'Bash(mv*)'
+    - 'Bash(cp*)'
+    - 'Bash(mkdir*)'
+    - 'Bash(prettier*)'
+    - 'Bash(bash -c*)'
+    - 'Bash(node*)'
 
     # -------------------------------------------------------------------------
     # npm / pnpm — package management and script execution
@@ -190,3 +221,8 @@ sync:
   # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
   #   syncDateMode: none
   dateMode: run
+  # Whether to run agentkit sync automatically before every git push.
+  # Defaults to false so new adopters are not surprised by the sync overhead.
+  # Set autoSyncOnPush: true in the repo's overlay settings to restore the
+  # previous always-on behaviour.
+  autoSyncOnPush: false

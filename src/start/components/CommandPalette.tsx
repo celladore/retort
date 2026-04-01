@@ -21,9 +21,10 @@ import React, { useState, useMemo } from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import Fuse from 'fuse.js';
-import { getAllCommands, rankCommands } from '../lib/commands.js';
+import { getAllCommands, rankCommands, type RankedCommand } from '../lib/commands.js';
+import type { RepoContext } from '../lib/detect.js';
 
-const CATEGORY_LABELS = {
+const CATEGORY_LABELS: Record<string, string> = {
   workflow: 'workflow',
   quality: 'quality',
   info: 'info',
@@ -38,14 +39,15 @@ const FUSE_THRESHOLD = 0.4;
 /** Minimum score for a command to be shown with the ★ recommended indicator. */
 const RECOMMENDED_SCORE = 70;
 
-/**
- * @param {{
- *   ctx: import('../lib/detect.js').RepoContext,
- *   onSelect: (command: string) => void,
- *   onBack: () => void,
- * }} props
- */
-export default function CommandPalette({ ctx, onSelect, onBack }) {
+interface CommandPaletteProps {
+  ctx: RepoContext;
+  onSelect: (command: string) => void;
+  onBack: () => void;
+}
+
+type FlatItem = { type: 'header'; category: string } | (RankedCommand & { type: 'command' });
+
+export default function CommandPalette({ ctx, onSelect, onBack }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
 
@@ -68,16 +70,14 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
     [allCommands]
   );
 
-  // Filter commands
   const displayed = useMemo(() => {
     if (!query.trim()) return allCommands;
     return fuse.search(query).map((r) => r.item);
   }, [query, allCommands, fuse]);
 
-  // Group by category (only when not searching)
   const grouped = useMemo(() => {
-    if (query.trim()) return null; // Flat list during search
-    const groups = {};
+    if (query.trim()) return null;
+    const groups: Record<string, RankedCommand[]> = {};
     for (const cmd of displayed) {
       const cat = cmd.category || 'other';
       if (!groups[cat]) groups[cat] = [];
@@ -86,30 +86,29 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
     return groups;
   }, [displayed, query]);
 
-  // Flat list for cursor navigation
-  const flatList = useMemo(() => {
+  const flatList = useMemo((): FlatItem[] => {
     if (grouped) {
-      const items = [];
+      const items: FlatItem[] = [];
       for (const cat of CATEGORY_ORDER) {
         if (grouped[cat]) {
           items.push({ type: 'header', category: cat });
-          items.push(...grouped[cat].map((cmd) => ({ type: 'command', ...cmd })));
+          items.push(...grouped[cat].map((cmd): FlatItem => ({ type: 'command', ...cmd })));
         }
       }
-      // Include any categories not in CATEGORY_ORDER (e.g. 'other')
       for (const cat of Object.keys(grouped)) {
         if (!CATEGORY_ORDER.includes(cat)) {
           items.push({ type: 'header', category: cat });
-          items.push(...grouped[cat].map((cmd) => ({ type: 'command', ...cmd })));
+          items.push(...grouped[cat].map((cmd): FlatItem => ({ type: 'command', ...cmd })));
         }
       }
       return items;
     }
-    return displayed.map((cmd) => ({ type: 'command', ...cmd }));
+    return displayed.map((cmd): FlatItem => ({ type: 'command', ...cmd }));
   }, [grouped, displayed]);
 
-  // Clamp cursor
-  const commandItems = flatList.filter((i) => i.type === 'command');
+  const commandItems = flatList.filter(
+    (i): i is RankedCommand & { type: 'command' } => i.type === 'command'
+  );
   const clampedCursor = Math.min(cursor, Math.max(0, commandItems.length - 1));
 
   useInput((input, key) => {
@@ -135,9 +134,8 @@ export default function CommandPalette({ ctx, onSelect, onBack }) {
 
   const topScore = allCommands[0]?.score ?? 0;
 
-  // Pre-compute command indices for cursor tracking (keyed by id for stability)
   const commandIndices = useMemo(() => {
-    const indices = new Map();
+    const indices = new Map<string, number>();
     let ci = 0;
     for (const item of flatList) {
       if (item.type === 'command') {

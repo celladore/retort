@@ -49,7 +49,7 @@ Create or update `AGENT_TEAMS.md` with: Repository Profile (primary stack, build
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 
@@ -58,3 +58,4 @@ Create or update `AGENT_TEAMS.md` with: Repository Profile (primary stack, build
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

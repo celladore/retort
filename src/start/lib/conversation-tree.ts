@@ -3,14 +3,22 @@
  *
  * Each node has a question and an array of options.
  * Options either point to a `next` node (branching) or a `command` (leaf).
- *
- * @typedef {Object} FlowNode
- * @property {string} question  The question to ask
- * @property {Array<{label: string, value: string, next?: string, command?: string, hint?: string}>} options
  */
 
-/** @type {Record<string, FlowNode>} */
-export const TREE = {
+export interface FlowOption {
+  label: string;
+  value: string;
+  next?: string;
+  command?: string;
+  hint?: string;
+}
+
+export interface FlowNode {
+  question: string;
+  options: FlowOption[];
+}
+
+export const TREE: Record<string, FlowNode> = {
   root: {
     question: 'What brings you here today?',
     options: [

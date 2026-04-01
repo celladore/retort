@@ -6,7 +6,7 @@
  *
  * Consumes discovery output and project metadata. Never writes files.
  */
-import { existsSync, promises as fsPromises } from 'fs';
+import { existsSync, readdirSync, readFileSync, promises as fsPromises } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'node:path';
 
@@ -91,8 +91,8 @@ export async function runExpansionAnalysis({
   // Load docs spec
   const docsSpec = await loadYamlSpec(effectiveAgentkitRoot, 'docs.yaml');
 
-  // Load agents spec
-  const agentsSpec = await loadYamlSpec(effectiveAgentkitRoot, 'agents.yaml');
+  // Load agents spec: directory-first, fallback to monolithic agents.yaml
+  const agentsSpec = loadAgentsSpecSync(effectiveAgentkitRoot);
 
   // Load existing backlog items to avoid duplicates
   const backlogItems = await loadBacklogItems(projectRoot);
@@ -727,6 +727,35 @@ async function loadProjectSpec(agentkitRoot) {
   try {
     const raw = await readFile(specPath, 'utf-8');
     return yaml.load(raw) || {};
+  } catch {
+    return {};
+  }
+}
+
+function loadAgentsSpecSync(agentkitRoot) {
+  const agentsDir = resolve(agentkitRoot, 'spec', 'agents');
+  if (existsSync(agentsDir)) {
+    const merged = { agents: {} };
+    const files = readdirSync(agentsDir)
+      .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+      .sort();
+    for (const file of files) {
+      try {
+        const parsed = yaml.load(readFileSync(resolve(agentsDir, file), 'utf-8'));
+        if (!parsed || typeof parsed !== 'object') continue;
+        for (const [category, agentList] of Object.entries(parsed)) {
+          if (!Array.isArray(agentList)) continue;
+          merged.agents[category] = (merged.agents[category] || []).concat(agentList);
+        }
+      } catch {
+        // skip unparseable files
+      }
+    }
+    return merged;
+  }
+  const agentsPath = resolve(agentkitRoot, 'spec', 'agents.yaml');
+  try {
+    return yaml.load(readFileSync(agentsPath, 'utf-8')) || {};
   } catch {
     return {};
   }

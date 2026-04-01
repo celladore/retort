@@ -40,13 +40,13 @@ pnpm --dir .agentkit agentkit:init
 
 ## Flags
 
-| Flag                | Effect                                                 |
-| ------------------- | ------------------------------------------------------ |
-| `--dry-run`         | Show what would be generated without writing any files |
-| `--non-interactive` | Skip prompts, use auto-detected defaults               |
-| `--preset <name>`   | Use a preset: minimal, full, team, infra               |
-| `--force`           | Overwrite existing overlay configuration               |
-| `--repoName <name>` | Override the detected repository name                  |
+| Flag | Effect |
+|------|--------|
+| `--dry-run` | Show what would be generated without writing any files |
+| `--non-interactive` | Skip prompts, use auto-detected defaults |
+| `--preset <name>` | Use a preset: minimal, full, team, infra |
+| `--force` | Overwrite existing overlay configuration |
+| `--repoName <name>` | Override the detected repository name |
 
 ## Kit Selection
 
@@ -68,7 +68,7 @@ Optional kits (iac, finops, ai-cost-ops) are presented for explicit opt-in.
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

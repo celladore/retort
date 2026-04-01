@@ -57,7 +57,7 @@ Produce a summary with: Actions Taken, Files Changed, Validation Commands, Updat
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

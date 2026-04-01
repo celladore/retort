@@ -8,16 +8,18 @@
  *   AK ✓ │ Phase: — │ 📋 3 │ main │ clean ✓
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { Box, Text } from 'ink';
+import type { RepoContext } from '../lib/detect.js';
 
 /** Max displayed branch name length before truncation. */
 const MAX_BRANCH_LENGTH = 24;
 
-/**
- * @param {{ ctx: import('../lib/detect.js').RepoContext }} props
- */
-export default function StatusBar({ ctx }) {
+interface StatusBarProps {
+  ctx: RepoContext;
+}
+
+export default function StatusBar({ ctx }: StatusBarProps) {
   if (!ctx) return null;
   const forgeOk = ctx.forgeInitialised && ctx.syncRun;
 
@@ -73,7 +75,13 @@ export default function StatusBar({ ctx }) {
   );
 }
 
-function Segment({ color, bold, children }) {
+interface SegmentProps {
+  color: string;
+  bold?: boolean;
+  children: ReactNode;
+}
+
+function Segment({ color, bold, children }: SegmentProps) {
   return (
     <Text color={color} bold={bold}>
       {` ${children} `}
@@ -85,7 +93,7 @@ function Divider() {
   return <Text color="gray">│</Text>;
 }
 
-function truncate(str, max) {
+function truncate(str: string, max: number): string {
   if (!str) return '';
   return str.length > max ? str.slice(0, max - 1) + '…' : str;
 }

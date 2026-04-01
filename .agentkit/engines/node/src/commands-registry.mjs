@@ -33,6 +33,8 @@ export const VALID_COMMANDS = [
   'preflight',
   'analyze-agents',
   'cicd-optimize',
+  'worktree',
+  'run',
 ];
 
 /**
@@ -47,6 +49,8 @@ export const FRAMEWORK_COMMANDS = new Set([
   'list',
   'tasks',
   'delegate',
+  'run',
   'features',
   'init',
+  'worktree',
 ]);

@@ -6,32 +6,38 @@
  * that the UI components use to decide what to render.
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-/**
- * @typedef {'brand-new' | 'discovered' | 'mid-session' | 'uncommitted'} FlowType
- *
- * @typedef {Object} RepoContext
- * @property {boolean}       forgeInitialised  .agentkit/ directory exists
- * @property {boolean}       syncRun           .claude/commands/orchestrate.md exists
- * @property {boolean}       discoveryDone     AGENT_TEAMS.md exists at repo root
- * @property {boolean}       hasOrchestratorState  orchestrator.json exists
- * @property {number|null}   orchestratorPhase current phase (1-5) or null
- * @property {string|null}   phaseName         human-readable phase name
- * @property {boolean}       hasBacklog        AGENT_BACKLOG.md has items
- * @property {number}        backlogCount      rough count of backlog items
- * @property {number}        activeTaskCount   number of task JSON files
- * @property {string}        branch            current git branch
- * @property {boolean}       isClean           working tree is clean
- * @property {number}        uncommittedCount  number of uncommitted changes
- * @property {boolean}       lockHeld          orchestrator lock exists
- * @property {FlowType}      flow              which UI flow to show
- * @property {Array<Object>} teams             parsed team definitions
- */
+export type FlowType = 'brand-new' | 'discovered' | 'mid-session' | 'uncommitted';
 
-const PHASE_NAMES = {
+export interface TeamInfo {
+  id: string;
+  name: string;
+  focus: string;
+  command: string;
+}
+
+export interface RepoContext {
+  forgeInitialised: boolean;
+  syncRun: boolean;
+  discoveryDone: boolean;
+  hasOrchestratorState: boolean;
+  orchestratorPhase: number | null;
+  phaseName: string | null;
+  hasBacklog: boolean;
+  backlogCount: number;
+  activeTaskCount: number;
+  branch: string;
+  isClean: boolean;
+  uncommittedCount: number;
+  lockHeld: boolean;
+  flow: FlowType;
+  teams: TeamInfo[];
+}
+
+const PHASE_NAMES: Record<number, string> = {
   1: 'Discovery',
   2: 'Planning',
   3: 'Implementation',
@@ -41,12 +47,8 @@ const PHASE_NAMES = {
 
 /**
  * Run a git command safely using execFileSync (no shell interpolation).
- *
- * @param {string[]} args - Git subcommand arguments
- * @param {string} cwd - Working directory for git
- * @param {string} fallback - Value to return on error
  */
-function runGit(args, cwd, fallback = '') {
+function runGit(args: string[], cwd: string, fallback = ''): string {
   try {
     return execFileSync('git', args, {
       cwd,
@@ -61,11 +63,10 @@ function runGit(args, cwd, fallback = '') {
 /**
  * Count non-empty, non-header lines in AGENT_BACKLOG.md that look like items.
  */
-function countBacklogItems(root) {
+function countBacklogItems(root: string): number {
   const backlogPath = join(root, 'AGENT_BACKLOG.md');
   if (!existsSync(backlogPath)) return 0;
   const content = readFileSync(backlogPath, 'utf8');
-  // Count table rows (lines starting with |) that aren't header separators or completed items
   const completedPattern = /\b(done|completed|closed)\b/i;
   const rows = content
     .split('\n')
@@ -76,25 +77,21 @@ function countBacklogItems(root) {
         !line.match(/^\|\s*#/) &&
         !completedPattern.test(line)
     );
-  // Subtract header row
   return Math.max(0, rows.length - 1);
 }
 
 /**
  * Parse teams from AGENT_TEAMS.md or fall back to scanning team-* commands.
  */
-function parseTeams(root) {
+function parseTeams(root: string): TeamInfo[] {
   const teamsPath = join(root, 'AGENT_TEAMS.md');
-  const teams = [];
+  const teams: TeamInfo[] = [];
 
   if (existsSync(teamsPath)) {
     const content = readFileSync(teamsPath, 'utf8');
-    // Table format: | Name | id | focus | scope | accepts | handoff | Status | Lead |
-    // Skip header rows and separator rows
     const tableRows = content
       .split('\n')
       .filter((l) => l.startsWith('|') && !l.match(/^\|\s*[-:]+\s*\|/));
-    // Drop the first row (header) if any rows exist
     const lines = tableRows.slice(1);
     for (const line of lines) {
       const cells = line
@@ -113,7 +110,6 @@ function parseTeams(root) {
     }
   }
 
-  // Fallback: scan for team-* command files
   if (teams.length === 0) {
     const cmdDir = join(root, '.claude', 'commands');
     if (existsSync(cmdDir)) {
@@ -135,22 +131,18 @@ function parseTeams(root) {
 
 /**
  * Detect repository context. This is the equivalent of /start Phase 1.
- *
- * @param {string} [root=process.cwd()] - Repository root path
- * @returns {RepoContext}
  */
-export function detect(root = process.cwd()) {
+export function detect(root = process.cwd()): RepoContext {
   const forgeInitialised = existsSync(join(root, '.agentkit'));
   const syncRun = existsSync(join(root, '.claude', 'commands', 'orchestrate.md'));
   const discoveryDone = existsSync(join(root, 'AGENT_TEAMS.md'));
 
-  // Orchestrator state
   const orchPath = join(root, '.claude', 'state', 'orchestrator.json');
   const hasOrchestratorState = existsSync(orchPath);
-  let orchestratorPhase = null;
+  let orchestratorPhase: number | null = null;
   if (hasOrchestratorState) {
     try {
-      const state = JSON.parse(readFileSync(orchPath, 'utf8'));
+      const state = JSON.parse(readFileSync(orchPath, 'utf8')) as { currentPhase?: unknown };
       const raw = state.currentPhase;
       orchestratorPhase = typeof raw === 'number' && raw >= 1 && raw <= 5 ? raw : null;
     } catch {
@@ -159,31 +151,25 @@ export function detect(root = process.cwd()) {
   }
   const phaseName = orchestratorPhase ? (PHASE_NAMES[orchestratorPhase] ?? null) : null;
 
-  // Backlog
   const backlogCount = countBacklogItems(root);
   const hasBacklog = backlogCount > 0;
 
-  // Active tasks
   const tasksDir = join(root, '.claude', 'state', 'tasks');
   let activeTaskCount = 0;
   if (existsSync(tasksDir)) {
     activeTaskCount = readdirSync(tasksDir).filter((f) => f.endsWith('.json')).length;
   }
 
-  // Git state — use cwd option to target the correct repo
   const branch = runGit(['branch', '--show-current'], root, 'unknown');
   const status = runGit(['status', '--porcelain'], root);
   const uncommittedCount = status ? status.split('\n').filter(Boolean).length : 0;
   const isClean = uncommittedCount === 0;
 
-  // Lock
   const lockHeld = existsSync(join(root, '.claude', 'state', 'orchestrator.lock'));
 
-  // Teams
   const teams = parseTeams(root);
 
-  // Determine flow
-  let flow = 'brand-new';
+  let flow: FlowType = 'brand-new';
   if (uncommittedCount > 0) {
     flow = 'uncommitted';
   } else if (hasOrchestratorState && orchestratorPhase) {

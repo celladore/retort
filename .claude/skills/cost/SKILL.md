@@ -29,12 +29,12 @@ Invoke this skill when you need to perform the `cost` operation.
 
 ## Available Views
 
-| Command                    | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
-| `--summary`                | Recent session overview with durations and file counts |
-| `--sessions`               | List all recent sessions                               |
-| `--report --month YYYY-MM` | Monthly aggregate report                               |
-| `--report --format json`   | Export report as JSON                                  |
+| Command | Description |
+|---------|-------------|
+| `--summary` | Recent session overview with durations and file counts |
+| `--sessions` | List all recent sessions |
+| `--report --month YYYY-MM` | Monthly aggregate report |
+| `--report --format json` | Export report as JSON |
 
 ## Notes
 
@@ -46,7 +46,7 @@ Invoke this skill when you need to perform the `cost` operation.
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

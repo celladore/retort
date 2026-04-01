@@ -650,6 +650,24 @@ skills:
     tags: [retort, framework, features, review]
 
   # ===========================================================================
+  # PROJECT UTILITIES
+  # Hand-authored skills for project lifecycle tasks (source: retort, not generated from commands)
+  # These live in .agents/skills/<name>/SKILL.md — sync will not overwrite them.
+  # ===========================================================================
+
+  - name: repo-naming
+    scope: global
+    source: retort
+    description: >
+      Use when the user asks to name a new repo, check if a name is taken,
+      score repo name options, or pick a project name. Runs a structured
+      naming pipeline: collision checks across npm/PyPI/GitHub/major products,
+      weighted scoring across five dimensions, TLD guidance, and tier
+      classification (standalone noun vs org-prefixed) to produce a ranked
+      shortlist.
+    tags: [project, naming, planning]
+
+  # ===========================================================================
   # RETORT BRANCH — Unmerged skills (feat/kit-domain-selection-onboarding)
   # These exist on an unmerged branch. Do NOT distribute until merged to main.
   # ===========================================================================

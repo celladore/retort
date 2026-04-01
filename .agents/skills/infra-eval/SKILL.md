@@ -38,7 +38,7 @@ Invoke this skill when you need to perform the `infra-eval` operation.
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 
@@ -47,3 +47,4 @@ Invoke this skill when you need to perform the `infra-eval` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

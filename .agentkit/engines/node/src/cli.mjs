@@ -54,6 +54,9 @@ const CLI_INTERNAL_FLAGS = {
     'external-markdown-files',
     'external-git-repos',
     'external-target-platforms',
+    'config-only',
+    'skip-retortconfig',
+    'write-retortconfig',
     'help',
   ],
   sync: [
@@ -89,6 +92,8 @@ const CLI_INTERNAL_FLAGS = {
   list: ['help'],
   features: ['verbose', 'help'],
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
+  worktree: ['base', 'no-setup', 'dry-run', 'help'],
+  run: ['id', 'assignee', 'dry-run', 'json', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -104,6 +109,9 @@ const CLI_INTERNAL_FLAG_TYPES = {
   'non-interactive': 'boolean',
   ci: 'boolean',
   'external-knowledge': 'boolean',
+  'config-only': 'boolean',
+  'skip-retortconfig': 'boolean',
+  'write-retortconfig': 'boolean',
   // sync flags
   overlay: 'string',
   only: 'string',
@@ -135,6 +143,10 @@ const CLI_INTERNAL_FLAG_TYPES = {
   output: 'string',
   matrix: 'string',
   format: 'string',
+  // worktree flags
+  base: 'string',
+  'no-setup': 'boolean',
+  json: 'boolean',
 };
 
 /**
@@ -376,6 +388,13 @@ Backlog & Issue Tracking:
                   --limit <n>         Max issues to fetch
                   --force             Override autoImport gate
 
+Worktree Management:
+  worktree create <path> [branch]
+                  Create a git worktree and write .agentkit-repo marker
+                  --base <branch>     Branch to base the new worktree branch on
+                  --no-setup          Skip automatic pnpm install
+                  --dry-run           Preview without making changes
+
 Utility Commands:
   cost            Session cost and usage tracking
   analyze-agents  Generate agent/team relationship matrix
@@ -473,7 +492,6 @@ async function main() {
     process.exit(0);
   }
 
-
   if (!ensureDependencies(AGENTKIT_ROOT)) {
     process.exit(1);
   }
@@ -501,6 +519,16 @@ async function main() {
   try {
     switch (command) {
       case 'init': {
+        if (flags['config-only']) {
+          const { runRetortConfigWizard } = await import('./retort-config-wizard.mjs');
+          await runRetortConfigWizard({
+            agentkitRoot: AGENTKIT_ROOT,
+            projectRoot: PROJECT_ROOT,
+            flags,
+            prefill: null,
+          });
+          break;
+        }
         const { runInit } = await import('./init.mjs');
         await runInit({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
         break;
@@ -618,6 +646,11 @@ async function main() {
         await runDelegate({ projectRoot: PROJECT_ROOT, flags });
         break;
       }
+      case 'run': {
+        const { runRun } = await import('./run-cli.mjs');
+        await runRun({ projectRoot: PROJECT_ROOT, flags });
+        break;
+      }
       case 'add': {
         const { runAdd } = await import('./tool-manager.mjs');
         await runAdd({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
@@ -682,6 +715,11 @@ async function main() {
         console.log(
           `  ${graph.agents.length} agents, ${graph.teams.length} teams, ${graph.categories.length} categories`
         );
+        break;
+      }
+      case 'worktree': {
+        const { runWorktree } = await import('./worktree.mjs');
+        await runWorktree({ agentkitRoot: AGENTKIT_ROOT, projectRoot: PROJECT_ROOT, flags });
         break;
       }
       default: {

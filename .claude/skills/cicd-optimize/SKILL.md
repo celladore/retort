@@ -27,7 +27,6 @@ You are the **CI/CD Optimization Agent**. Analyse this project's CI/CD pipelines
 ## Step 1 — Inventory
 
 Collect all CI/CD surface area:
-
 - `.github/workflows/*.yml` — list each workflow, its triggers, jobs, and steps
 - `.claude/hooks/` — list each hook file and its purpose
 - `package.json` scripts: `lint`, `test`, `build`, `typecheck`
@@ -39,32 +38,27 @@ Collect all CI/CD surface area:
 For each workflow, check:
 
 ### Caching
-
 - [ ] Node modules cached? (`actions/cache` with `node_modules` or `pnpm store`)
 - [ ] Cargo registry cached? (`~/.cargo/registry` and `target/`)
 - [ ] pip/poetry cached? (`~/.cache/pip`)
 - [ ] Docker layer cache used? (`cache-from: type=gha`)
 
 ### Parallelization
-
 - [ ] Jobs that depend on each other but don't need to — should they be parallel?
 - [ ] Test suites that could use matrix strategy or `--pool` (vitest), `pytest-xdist`, `cargo nextest`
 - [ ] Lint and typecheck run sequentially when they're independent
 
 ### Trigger efficiency
-
 - [ ] Workflows triggered on `push` to all branches — should use `paths:` filters
 - [ ] PR workflows trigger on `push` AND `pull_request` — often redundant
 - [ ] Scheduled workflows running more frequently than needed
 
 ### Install efficiency
-
 - [ ] `npm install` / `pnpm install` without `--frozen-lockfile` (slower)
 - [ ] Install steps duplicated across jobs (should use artifacts or caching)
 - [ ] `node_modules` copied between jobs instead of restored from cache
 
 ### Hook efficiency
-
 - [ ] Stop hook runs tests or full builds (should be lint-only with file-change gating)
 - [ ] Pre-commit hook runs expensive operations without caching
 - [ ] Hooks run regardless of which files changed
@@ -72,7 +66,6 @@ For each workflow, check:
 ## Step 3 — Test Suite Speed
 
 Check for parallelization opportunities:
-
 - vitest: `--pool=threads` or `--pool=forks`, `--reporter=verbose` adding noise
 - pytest: `pytest-xdist` (`-n auto`), test isolation issues
 - cargo: `cargo nextest` (2-3x faster than `cargo test`)
@@ -82,9 +75,9 @@ Check for parallelization opportunities:
 
 Produce a table sorted by estimated time savings (highest first):
 
-| #   | Area | Issue | Fix | Est. saving |
-| --- | ---- | ----- | --- | ----------- |
-| 1   | ...  | ...   | ... | ~Xs per run |
+| # | Area | Issue | Fix | Est. saving |
+|---|------|-------|-----|-------------|
+| 1 | ... | ... | ... | ~Xs per run |
 
 Then provide **Ready-to-apply fixes** — code blocks for each high-impact change, in order. For workflow changes, show the exact YAML diff. For hook changes, show the exact shell change. For config changes, show the file and the new content.
 
@@ -99,7 +92,7 @@ Then provide **Ready-to-apply fixes** — code blocks for each high-impact chang
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

@@ -32,7 +32,7 @@ Invoke this skill when you need to perform the `import-issues` operation.
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 

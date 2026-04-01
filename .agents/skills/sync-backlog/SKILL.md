@@ -64,7 +64,7 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 
@@ -84,3 +84,4 @@ Priorities: P0 (blocking), P1 (high — this session), P2 (medium), P3 (low — 
   - Blocked cross-team escalation: `product`
 
 For backlog sync, use tracker-neutral intake and ownership-aware routing based on configured intake values.
+

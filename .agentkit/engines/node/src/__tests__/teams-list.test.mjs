@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTeamsList } from '../synchronize.mjs';
+import { buildTeamsList } from '../var-builders.mjs';
 
 describe('buildTeamsList', () => {
   it('should map a fully-populated team correctly', () => {

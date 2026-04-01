@@ -41,14 +41,14 @@ Read the following (gracefully handle missing files with "N/A"):
 
 Calculate these metrics from the data sources. Show "N/A" when data is insufficient.
 
-| Metric           | Source     | Calculation                                                         |
-| ---------------- | ---------- | ------------------------------------------------------------------- |
-| Commit frequency | git log    | Commits per day over the last 7 days                                |
-| Throughput       | task files | Tasks completed per week                                            |
-| WIP count        | task files | Tasks in "working" or "accepted" status                             |
-| Lead time        | task files | Average time from "submitted" to "completed"                        |
-| Block rate       | task files | Percentage of tasks that entered "blocked" status                   |
-| Cycle time       | git log    | Average days from first branch commit to merge (last 10 merged PRs) |
+| Metric | Source | Calculation |
+| --- | --- | --- |
+| Commit frequency | git log | Commits per day over the last 7 days |
+| Throughput | task files | Tasks completed per week |
+| WIP count | task files | Tasks in "working" or "accepted" status |
+| Lead time | task files | Average time from "submitted" to "completed" |
+| Block rate | task files | Percentage of tasks that entered "blocked" status |
+| Cycle time | git log | Average days from first branch commit to merge (last 10 merged PRs) |
 
 If `orchestrator.json` has a `metrics` object with pre-computed values, use those.
 
@@ -64,43 +64,36 @@ Produce markdown (default) or JSON (with `--format json`) with these sections:
 **Generated:** <timestamp> | **Phase:** <N> — <name> | **Health:** HEALTHY / AT_RISK / BLOCKED
 
 ## Phase Progress
-
 | Phase | Status | Notes |
-| ----- | ------ | ----- |
+| --- | --- | --- |
 
 ## Team Health
-
 | Team | Status | Last Active | Items Done | Blockers |
-| ---- | ------ | ----------- | ---------- | -------- |
+| --- | --- | --- | --- | --- |
 
 ## Active Risks
-
-| ID  | Severity | Description | Owner | Mitigation |
-| --- | -------- | ----------- | ----- | ---------- |
+| ID | Severity | Description | Owner | Mitigation |
+| --- | --- | --- | --- | --- |
 
 ## Backlog Summary
-
 - P0: <count> items
 - P1: <count> items
 - P2+: <count> items
 
 ## Delivery Metrics
-
-| Metric           | Value            | Trend |
-| ---------------- | ---------------- | ----- |
-| Commit frequency | <N>/day (7d avg) |       |
-| Throughput       | <N> tasks/week   |       |
-| WIP count        | <N>              |       |
-| Lead time        | <N> days avg     |       |
-| Block rate       | <N>%             |       |
-| Cycle time       | <N> days avg     |       |
+| Metric | Value | Trend |
+| --- | --- | --- |
+| Commit frequency | <N>/day (7d avg) | |
+| Throughput | <N> tasks/week | |
+| WIP count | <N> | |
+| Lead time | <N> days avg | |
+| Block rate | <N>% | |
+| Cycle time | <N> days avg | |
 
 ## Recent Activity (last 5 events)
-
 ...
 
 ## Recommended Actions
-
 1. <highest priority>
 2. ...
 ```
@@ -122,7 +115,7 @@ Produce markdown (default) or JSON (with `--format json`) with these sections:
 
 - Repository: retort
 - Default branch: main
-  - Tech stack: javascript, yaml, markdown
+- Tech stack: javascript, yaml, markdown
 
 ## Conventions
 
