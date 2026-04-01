@@ -33,6 +33,7 @@ Invoke this skill when you need to perform the `document-history` operation.
 - Return a concise summary with status (`success`/`partial`/`failed`)
 - Include validation evidence (exit code, failing command, or passing summary)
 - Include next-step remediation when checks fail
+  
 
 ## Project Context
 
@@ -47,3 +48,4 @@ Invoke this skill when you need to perform the `document-history` operation.
 - Include tests for behavioral changes
 - Never expose secrets or credentials
 - Follow the project's established patterns
+

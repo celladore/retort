@@ -33,6 +33,9 @@ Follow these instructions for all code generation, suggestions, and chat respons
 - **Python**: configured=false, inferred=false, effective=false
 - **.NET**: configured=false, inferred=false, effective=false
 - **Rust**: configured=false, inferred=false, effective=false
+  
+  
+  
 
 ## Core Workflow
 

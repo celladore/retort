@@ -38,16 +38,16 @@ Gather these signals silently:
 
 Print a concise status table:
 
-| Item           | Status                              |
-| -------------- | ----------------------------------- |
-| AgentKit Forge | Initialised / Not initialised       |
-| Sync           | Up to date / Needs sync / Never run |
-| Discovery      | Complete / Not run                  |
-| Orchestrator   | Phase N (name) / No prior session   |
-| Backlog        | N items / Empty                     |
-| Active tasks   | N tasks / None                      |
-| Branch         | branch-name                         |
-| Working tree   | Clean / N uncommitted changes       |
+| Item | Status |
+| --- | --- |
+| AgentKit Forge | Initialised / Not initialised |
+| Sync | Up to date / Needs sync / Never run |
+| Discovery | Complete / Not run |
+| Orchestrator | Phase N (name) / No prior session |
+| Backlog | N items / Empty |
+| Active tasks | N tasks / None |
+| Branch | branch-name |
+| Working tree | Clean / N uncommitted changes |
 
 ## Phase 3: Guided Choices
 
@@ -75,12 +75,11 @@ If the user describes a task or asks which team to use, **build the routing tabl
 
 From the discovered teams, build a routing table with three columns:
 
-| I want to...                           | Team        | Command      |
-| -------------------------------------- | ----------- | ------------ |
+| I want to... | Team | Command |
+| --- | --- | --- |
 | (inferred from team description/scope) | (team name) | `/team-<id>` |
 
 Map the team's `description` and `scope` patterns to plain-language "I want to..." rows. For example:
-
 - A team with scope `apps/api/**, services/**` and description "API, services, core logic" → "Build or fix backend/API logic"
 - A team with scope `src/components/**, src/pages/**` and description "UI, components, PWA" → "Build or fix UI components"
 
@@ -114,3 +113,4 @@ This command is **read-only**. It reads state files for context detection but do
 - Every behavioral change must include tests
 - Never commit secrets or credentials
 - Follow the project's coding standards and quality gates
+
