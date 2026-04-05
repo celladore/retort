@@ -183,8 +183,9 @@ describe('writeScaffoldOutputs', () => {
     const { count, writtenFiles } = await run({ allTmpFiles: [srcFile], newManifestFiles });
 
     expect(count).toBe(0);
-    // writtenFiles is empty since we skipped (content-hash guard, not formatting-only)
-    expect(writtenFiles).toHaveLength(0);
+    // writtenFiles still contains the file so runPostSyncPrettier can format it
+    // (guards files written before post-sync formatting was introduced)
+    expect(writtenFiles).toEqual([destFile]);
   });
 
   it('overwrites when --force flag is set regardless of scaffold:once', async () => {

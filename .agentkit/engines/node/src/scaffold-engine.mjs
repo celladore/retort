@@ -238,6 +238,10 @@ export async function writeScaffoldOutputs({
           .digest('hex')
           .slice(0, 12);
         if (existingHash === newHash) {
+          // Queue for Prettier even though content is identical to template output.
+          // Without this, files written before post-sync formatting was introduced
+          // stay unformatted indefinitely (their pre-Prettier hash matches newHash).
+          writtenFiles.push(destFile);
           logVerbose(`  unchanged ${normalizedRel} (content identical, skipping write)`);
           return;
         }
