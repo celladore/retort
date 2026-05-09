@@ -1307,8 +1307,7 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
       rawCategory.includes('/') ||
       rawCategory.includes('\\') ||
       rawCategory.includes('..') ||
-      rawCategory === '.' ||
-      rawCategory === '..';
+      rawCategory === '.';
     if (categoryUnsafe) {
       log(
         `[agentkit:sync] org-meta skill '${skill.name}' has unsafe category '${rawCategory}' — using 'meta'`
@@ -1343,7 +1342,7 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
       }
       const resolvedCompanion = resolve(skillSrcDir, companion);
       const rel = relative(skillSrcDir, resolvedCompanion);
-      if (rel.startsWith('..') || rel === '') {
+      if (rel.startsWith('..') || rel === '' || isAbsolute(rel)) {
         log(
           `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
         );
