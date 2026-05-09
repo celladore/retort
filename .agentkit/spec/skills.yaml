@@ -23,9 +23,36 @@
 #   - use `pnpm ak:propose-skill <name>` to open a PR promoting a local skill to org-meta
 #
 # Optional fields:
-#   requiredFeature — only distributed when the feature is enabled in project.yaml
-#   tags            — semantic grouping for filtering and search
-#   alias           — alternate trigger names (future use)
+#   requiredFeature        — only distributed when the feature is enabled in project.yaml
+#   tags                   — semantic grouping for filtering and search
+#   alias                  — alternate trigger names (future use)
+#   category               — engineering | productivity | meta | internal
+#                            Used by the categorised skills layout (see settings
+#                            skills.categorised). When the layout is enabled,
+#                            skills render under .agents/skills/<category>/<name>/
+#                            and .claude/skills/<category>/<name>/. Default: meta.
+#   lifecycle              — active | in-progress | deprecated (default: active)
+#                            Skills with lifecycle: deprecated are excluded from
+#                            sync output. lifecycle: in-progress emits with a
+#                            warning header so consumers know they are unstable.
+#   disableModelInvocation — true | false (default: false)
+#                            When true, the rendered SKILL.md frontmatter sets
+#                            disable-model-invocation: true on Claude targets so
+#                            the skill only fires when explicitly invoked.
+#                            Stripped from non-Claude targets at render time.
+#   triggers               — string[] of "Use when…" phrases composed into the
+#                            rendered description, helping the agent decide when
+#                            to load the skill. Joined with "; " and prepended to
+#                            the existing description.
+#   companions             — string[] of additional .md files that live alongside
+#                            SKILL.md and must be copied during sync. Used for
+#                            progressive disclosure of deep skills (e.g. tdd ships
+#                            companions: [tests.md, mocking.md, deep-modules.md]).
+#                            Paths are relative to the skill directory in
+#                            ~/repos/org-meta/skills/<name>/ (or the configured
+#                            ORG_META_PATH).
+#   derivedFrom            — free-form attribution string for skills adapted from
+#                            an upstream source (e.g. "mattpocock/skills@<sha>").
 # =============================================================================
 
 skills:

@@ -65,6 +65,11 @@ documentation:
   historyPath: docs/history # path to retrospective/issue/lesson history docs
   hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
   brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
+  # Domain glossary — canonical project vocabulary maintained by grill-with-docs
+  # and consumed by zoom-out, to-prd, to-issues, etc. Single load-bearing file
+  # at the repo root by convention. Set to null to disable glossary references
+  # in skill bodies.
+  domainGlossaryPath: CONTEXT.md
 
 # Editor theme — generates workbench.colorCustomizations in .vscode/settings.json
 editorTheme:
@@ -180,6 +185,15 @@ process:
     escalation:
       securityCritical: [security, devops]
       blockedCrossTeam: [product]
+  # Triage labels — canonical state → repo label mapping. Consumed by triage,
+  # to-issues, and import-issues skills. Override defaults for repos that use
+  # different label strings.
+  triageLabels:
+    needsTriage: 'needs-triage'
+    needsInfo: 'needs-info'
+    readyForAgent: 'ready-for-agent'
+    readyForHuman: 'ready-for-human'
+    wontfix: 'wontfix'
 
 # Branch protection — GitHub branch protection & repository settings
 # These values feed into the generated setup-branch-protection script.

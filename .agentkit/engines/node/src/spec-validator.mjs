@@ -527,6 +527,16 @@ const projectSchema = {
             },
           },
         },
+        triageLabels: {
+          type: 'object',
+          properties: {
+            needsTriage: { type: 'string', minLength: 1 },
+            needsInfo: { type: 'string', minLength: 1 },
+            readyForAgent: { type: 'string', minLength: 1 },
+            readyForHuman: { type: 'string', minLength: 1 },
+            wontfix: { type: 'string', minLength: 1 },
+          },
+        },
       },
     },
     testing: {
