@@ -5,7 +5,7 @@
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import {
   validateSpec,
   validateMappingCoverage,
@@ -74,6 +74,74 @@ function loadOverlayRenderTargets(agentkitRoot) {
       error: `Failed to parse overlay settings at ${overlayPath}: ${err.message}`,
     };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Org-meta skill inventory
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolves the path to the org-meta skills directory.
+ * Mirrors resolveOrgMetaSkillsDir in platform-syncer.mjs intentionally —
+ * doctor must run without importing the syncer.
+ *
+ * Priority: ORG_META_PATH env var → ~/repos/org-meta (default).
+ */
+function resolveOrgMetaSkillsDir() {
+  const base = process.env.ORG_META_PATH
+    ? resolve(process.env.ORG_META_PATH)
+    : resolve(process.env.HOME || process.env.USERPROFILE || '~', 'repos', 'org-meta');
+  return join(base, 'skills');
+}
+
+/**
+ * Inventories every skill in skills.yaml whose source is `org-meta`.
+ * Each result row: { name, status: 'present' | 'missing' | 'local-divergent', srcPath }.
+ * - present:        SKILL.md exists in org-meta and matches the local copy (or no local copy yet)
+ * - missing:        SKILL.md does not exist at the resolved org-meta path
+ * - local-divergent: SKILL.md exists in both places but with different content
+ */
+export function inventoryOrgMetaSkills(specRoot, projectRoot) {
+  const skillsPath = resolve(specRoot, 'spec', 'skills.yaml');
+  if (!existsSync(skillsPath)) {
+    return { orgMetaDir: null, results: [], error: `skills.yaml not found at ${skillsPath}` };
+  }
+
+  let parsed;
+  try {
+    parsed = yaml.load(readFileSync(skillsPath, 'utf-8'), { schema: FAILSAFE_SCHEMA }) || {};
+  } catch (err) {
+    return { orgMetaDir: null, results: [], error: `Failed to parse skills.yaml: ${err.message}` };
+  }
+
+  const orgMetaDir = resolveOrgMetaSkillsDir();
+  const skills = (parsed.skills || []).filter((s) => s.source === 'org-meta');
+  const results = [];
+
+  for (const skill of skills) {
+    const srcPath = join(orgMetaDir, skill.name, 'SKILL.md');
+    if (!existsSync(srcPath)) {
+      results.push({ name: skill.name, status: 'missing', srcPath });
+      continue;
+    }
+
+    const localPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
+    if (existsSync(localPath)) {
+      try {
+        const localContent = readFileSync(localPath, 'utf-8');
+        const srcContent = readFileSync(srcPath, 'utf-8');
+        if (localContent !== srcContent) {
+          results.push({ name: skill.name, status: 'local-divergent', srcPath });
+          continue;
+        }
+      } catch {
+        // fall through to present
+      }
+    }
+    results.push({ name: skill.name, status: 'present', srcPath });
+  }
+
+  return { orgMetaDir, results, error: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -366,7 +434,38 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
     });
   }
 
-  // 5) Template hygiene — detect hardcoded values that should use template vars
+  // 5) Org-meta skill inventory
+  const inventory = inventoryOrgMetaSkills(specRoot, projectRoot);
+  if (inventory.error) {
+    findings.push({ severity: 'warning', message: `Org-meta skill inventory: ${inventory.error}` });
+  } else if (inventory.results.length === 0) {
+    findings.push({
+      severity: 'info',
+      message: 'Org-meta skill inventory: no skills sourced from org-meta in skills.yaml.',
+    });
+  } else {
+    const present = inventory.results.filter((r) => r.status === 'present').length;
+    const missing = inventory.results.filter((r) => r.status === 'missing');
+    const divergent = inventory.results.filter((r) => r.status === 'local-divergent');
+    findings.push({
+      severity: 'info',
+      message: `Org-meta skill inventory: ${present} present, ${missing.length} missing, ${divergent.length} local-divergent (org-meta dir: ${inventory.orgMetaDir}).`,
+    });
+    for (const r of missing) {
+      findings.push({
+        severity: 'warning',
+        message: `  Org-meta skill '${r.name}' missing at ${r.srcPath}`,
+      });
+    }
+    for (const r of divergent) {
+      findings.push({
+        severity: 'info',
+        message: `  Org-meta skill '${r.name}' has local divergence (sync preserves local copy)`,
+      });
+    }
+  }
+
+  // 6) Template hygiene — detect hardcoded values that should use template vars
   const hygieneFindings = checkTemplateHygiene(agentkitRoot);
   if (hygieneFindings.length === 0) {
     findings.push({
