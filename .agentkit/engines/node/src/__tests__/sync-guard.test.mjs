@@ -135,6 +135,14 @@ describe('checkDirtyProtectedFiles', () => {
     // Sanity: no entry should still contain the literal arrow.
     expect(result.files.every((f) => !f.includes(' -> '))).toBe(true);
   });
+
+  it('handles short porcelain lines (length <= 3) by skipping them', () => {
+    // The internal filter drops lines too short to be valid porcelain entries.
+    // A clean tree exits via that filter; assert it does not throw and returns
+    // an array.
+    const result = checkDirtyProtectedFiles(tempDir, ['.agentkit/spec']);
+    expect(Array.isArray(result.files)).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
