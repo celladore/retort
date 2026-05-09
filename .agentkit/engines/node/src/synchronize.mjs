@@ -393,6 +393,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     // autoSyncOnPush controls whether the pre-push hook runs agentkit sync
     // before every push (issue #410). Defaults to false; opt-in per repo.
     autoSyncOnPush: overlaySettings.autoSyncOnPush ?? settingsSpec.sync?.autoSyncOnPush ?? false,
+    // skillsCategorised opts the repo into the layered skills layout:
+    //   .claude/skills/<category>/<name>/SKILL.md
+    //   .agents/skills/<category>/<name>/SKILL.md
+    // Default false for backwards compatibility — flat layout under the skills/ dir.
+    skillsCategorised:
+      overlaySettings.skills?.categorised ?? settingsSpec.skills?.categorised ?? false,
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'retort',
     // Branch protection defaults — ensure generated scripts produce valid
@@ -853,7 +859,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (targets.has('codex')) {
       gatedTasks.push(
         syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-        syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log),
+        syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, {
+          categorised: vars.skillsCategorised,
+        }),
         syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log)
       );
     }

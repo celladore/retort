@@ -157,6 +157,15 @@ const commandSchema = {
     description: { type: 'string', required: true },
     flags: { type: 'array', items: commandFlagSchema },
     'allowed-tools': { type: 'array', items: { type: 'string' } },
+    // Claude-only frontmatter hint for skills that should only fire on
+    // explicit invocation. Stripped from non-Claude render targets at
+    // render time (the Codex skill template ignores the variable).
+    disableModelInvocation: { type: 'boolean' },
+    // Category for the optional categorised skills layout. When the layout
+    // is enabled (settings.skills.categorised: true), the rendered skill
+    // file is placed under <skills-dir>/<category>/<name>/SKILL.md.
+    // Recognised values: engineering | productivity | meta | internal.
+    category: { type: 'string', enum: ['engineering', 'productivity', 'meta', 'internal'] },
   },
 };
 

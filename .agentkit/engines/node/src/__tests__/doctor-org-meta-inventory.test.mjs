@@ -61,9 +61,7 @@ describe('inventoryOrgMetaSkills', () => {
     const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
 
     expect(result.error).toBeNull();
-    expect(result.results).toEqual([
-      expect.objectContaining({ name: 'alpha', status: 'present' }),
-    ]);
+    expect(result.results).toEqual([expect.objectContaining({ name: 'alpha', status: 'present' })]);
   });
 
   it('marks missing when org-meta does not contain the skill', () => {
@@ -71,9 +69,7 @@ describe('inventoryOrgMetaSkills', () => {
 
     const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
 
-    expect(result.results).toEqual([
-      expect.objectContaining({ name: 'beta', status: 'missing' }),
-    ]);
+    expect(result.results).toEqual([expect.objectContaining({ name: 'beta', status: 'missing' })]);
   });
 
   it('marks local-divergent when org-meta and local copy differ', () => {
@@ -95,9 +91,7 @@ describe('inventoryOrgMetaSkills', () => {
 
     const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
 
-    expect(result.results).toEqual([
-      expect.objectContaining({ name: 'delta', status: 'present' }),
-    ]);
+    expect(result.results).toEqual([expect.objectContaining({ name: 'delta', status: 'present' })]);
   });
 
   it('returns an error when skills.yaml is missing', () => {

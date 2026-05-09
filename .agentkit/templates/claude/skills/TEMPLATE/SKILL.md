@@ -1,7 +1,8 @@
 ---
 name: '{{commandName}}'
 description: '{{commandDescription}}'
-generated_by: '{{lastAgent}}'
+{{#if disableModelInvocation}}disable-model-invocation: true
+{{/if}}generated_by: '{{lastAgent}}'
 last_model: '{{lastModel}}'
 last_updated: '{{syncDate}}'
 # Format: YAML frontmatter + Markdown body. Claude skill definition.

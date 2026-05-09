@@ -761,7 +761,10 @@ export async function syncClaudeSkills(
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     // Skills use filename prefix strategy (directory-per-skill)
     const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
-    await writeOutput(join(tmpDir, '.claude', 'skills', stem, 'SKILL.md'), withHeader);
+    const segments = vars.skillsCategorised
+      ? ['.claude', 'skills', cmdVars.commandCategory, stem, 'SKILL.md']
+      : ['.claude', 'skills', stem, 'SKILL.md'];
+    await writeOutput(join(tmpDir, ...segments), withHeader);
   }
 }
 
@@ -1192,7 +1195,10 @@ export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoN
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
-    await writeOutput(join(tmpDir, '.agents', 'skills', stem, 'SKILL.md'), withHeader);
+    const segments = vars.skillsCategorised
+      ? ['.agents', 'skills', cmdVars.commandCategory, stem, 'SKILL.md']
+      : ['.agents', 'skills', stem, 'SKILL.md'];
+    await writeOutput(join(tmpDir, ...segments), withHeader);
   }
 }
 
@@ -1214,16 +1220,67 @@ function resolveOrgMetaSkillsDir() {
 }
 
 /**
- * Copies org-meta skills (source: org-meta) into tmpDir/.agents/skills/<name>/SKILL.md.
- * Non-destructive: if the skill already exists in projectRoot with different content,
- * the file is NOT written to tmpDir — the local version is preserved.
+ * Copies an org-meta skill file (SKILL.md or companion) into tmpDir.
+ * Returns true if the file was written, false if skipped (missing source, or
+ * local divergence preserved).
+ *
+ * @param {object} args
+ * @param {string} args.srcPath - Absolute path to the source file in org-meta
+ * @param {string} args.destRelPath - Path relative to projectRoot
+ * @param {string} args.tmpDir
+ * @param {string} args.projectRoot
+ * @param {string} args.label - Human label for log messages (e.g. "skill 'tdd'" or "companion 'tdd/tests.md'")
+ * @param {function} args.log
+ */
+async function copyOrgMetaFile({ srcPath, destRelPath, tmpDir, projectRoot, label, log }) {
+  if (!existsSync(srcPath)) {
+    log(`[agentkit:sync] org-meta ${label} not found at ${srcPath} — skipping`);
+    return false;
+  }
+
+  const destProjectPath = join(projectRoot, destRelPath);
+  if (existsSync(destProjectPath)) {
+    const localContent = readFileSync(destProjectPath, 'utf-8');
+    const srcContent = readFileSync(srcPath, 'utf-8');
+    if (localContent !== srcContent) {
+      log(`[agentkit:sync] org-meta ${label} differs from local — preserving local copy`);
+      return false;
+    }
+  }
+
+  const content = readFileSync(srcPath, 'utf-8');
+  await writeOutput(join(tmpDir, destRelPath), content);
+  return true;
+}
+
+/**
+ * Returns the lifecycle of a skill spec entry, defaulting to 'active'.
+ * Recognised values: 'active' | 'in-progress' | 'deprecated'.
+ */
+function skillLifecycle(skill) {
+  const value = skill?.lifecycle;
+  if (value === 'in-progress' || value === 'deprecated') return value;
+  return 'active';
+}
+
+/**
+ * Copies org-meta skills (source: org-meta) into tmpDir/.agents/skills/.
+ * - SKILL.md is always copied (subject to non-destructive divergence preservation).
+ * - companions: [...] entries listed on the skill spec are copied alongside.
+ * - lifecycle: deprecated suppresses emission entirely.
+ * - lifecycle: in-progress emits with a warning log line.
+ * - When opts.categorised is true, output goes to .agents/skills/<category>/<name>/
+ *   instead of .agents/skills/<name>/. Default category is 'meta'.
  *
  * @param {string} tmpDir - Temp directory for sync output
  * @param {string} projectRoot - Actual project root (for diffing existing files)
  * @param {object} skillsSpec - Parsed skills.yaml
  * @param {function} log - Logger
+ * @param {object} [opts]
+ * @param {boolean} [opts.categorised=false] - Layered layout flag
  */
-export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log) {
+export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, opts = {}) {
+  const categorised = opts.categorised === true;
   const orgMetaSkillsDir = resolveOrgMetaSkillsDir();
   if (!existsSync(orgMetaSkillsDir)) {
     log(`[agentkit:sync] org-meta skills: directory not found at ${orgMetaSkillsDir} — skipping`);
@@ -1233,29 +1290,49 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log) {
   const orgMetaSkills = (skillsSpec.skills || []).filter((s) => s.source === 'org-meta');
 
   for (const skill of orgMetaSkills) {
-    const srcPath = join(orgMetaSkillsDir, skill.name, 'SKILL.md');
-    if (!existsSync(srcPath)) {
-      log(`[agentkit:sync] org-meta skill '${skill.name}' not found at ${srcPath} — skipping`);
+    const lifecycle = skillLifecycle(skill);
+    if (lifecycle === 'deprecated') {
+      log(`[agentkit:sync] org-meta skill '${skill.name}' is deprecated — skipping emission`);
       continue;
     }
+    if (lifecycle === 'in-progress') {
+      log(`[agentkit:sync] org-meta skill '${skill.name}' is in-progress — emitting unstable copy`);
+    }
 
-    const destRelPath = join('.agents', 'skills', skill.name, 'SKILL.md');
-    const destProjectPath = join(projectRoot, destRelPath);
+    const category =
+      typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
+    const baseSegments = categorised
+      ? ['.agents', 'skills', category, skill.name]
+      : ['.agents', 'skills', skill.name];
 
-    // If local version exists and differs, preserve it (non-destructive)
-    if (existsSync(destProjectPath)) {
-      const localContent = readFileSync(destProjectPath, 'utf-8');
-      const srcContent = readFileSync(srcPath, 'utf-8');
-      if (localContent !== srcContent) {
+    await copyOrgMetaFile({
+      srcPath: join(orgMetaSkillsDir, skill.name, 'SKILL.md'),
+      destRelPath: join(...baseSegments, 'SKILL.md'),
+      tmpDir,
+      projectRoot,
+      label: `skill '${skill.name}'`,
+      log,
+    });
+
+    const companions = Array.isArray(skill.companions) ? skill.companions : [];
+    for (const companion of companions) {
+      if (typeof companion !== 'string' || companion.length === 0) continue;
+      // Reject anything that escapes the skill directory.
+      if (companion.includes('..') || companion.startsWith('/') || companion.startsWith('\\')) {
         log(
-          `[agentkit:sync] org-meta skill '${skill.name}' differs from local — preserving local copy`
+          `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
         );
         continue;
       }
+      await copyOrgMetaFile({
+        srcPath: join(orgMetaSkillsDir, skill.name, companion),
+        destRelPath: join(...baseSegments, companion),
+        tmpDir,
+        projectRoot,
+        label: `companion '${skill.name}/${companion}'`,
+        log,
+      });
     }
-
-    const content = readFileSync(srcPath, 'utf-8');
-    await writeOutput(join(tmpDir, destRelPath), content);
   }
 }
 
