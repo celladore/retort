@@ -8,7 +8,7 @@ describe('syncOrgMetaSkills', () => {
   let tmpDir;
   let projectRoot;
   let orgMetaRoot;
-  let originalOrgMetaPath;
+  let originalEnv;
   let logs;
   const log = (msg) => logs.push(msg);
 
@@ -16,18 +16,16 @@ describe('syncOrgMetaSkills', () => {
     tmpDir = mkdtempSync(join(tmpdir(), 'sync-orgmeta-tmp-'));
     projectRoot = mkdtempSync(join(tmpdir(), 'sync-orgmeta-proj-'));
     orgMetaRoot = mkdtempSync(join(tmpdir(), 'sync-orgmeta-src-'));
-    originalOrgMetaPath = process.env.ORG_META_PATH;
-    process.env.ORG_META_PATH = orgMetaRoot;
+    // Snapshot + replace process.env so any env mutation in this suite is
+    // scoped to the test (matches the pattern in resolveWindowsExecutable.test.mjs).
+    originalEnv = process.env;
+    process.env = { ...originalEnv, ORG_META_PATH: orgMetaRoot };
     logs = [];
     mkdirSync(join(orgMetaRoot, 'skills'), { recursive: true });
   });
 
   afterEach(() => {
-    if (originalOrgMetaPath === undefined) {
-      delete process.env.ORG_META_PATH;
-    } else {
-      process.env.ORG_META_PATH = originalOrgMetaPath;
-    }
+    process.env = originalEnv;
     rmSync(tmpDir, { recursive: true, force: true });
     rmSync(projectRoot, { recursive: true, force: true });
     rmSync(orgMetaRoot, { recursive: true, force: true });
@@ -116,6 +114,66 @@ describe('syncOrgMetaSkills', () => {
 
     expect(existsSync(join(tmpDir, '.agents', 'skills', 'tdd', 'SKILL.md'))).toBe(true);
     expect(logs.some((m) => m.includes('rejected (path escapes skill dir)'))).toBe(true);
+  });
+
+  it('rejects POSIX-absolute companion paths', async () => {
+    writeSrc('tdd', 'SKILL.md', '# tdd');
+
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'tdd', source: 'org-meta', companions: ['/etc/passwd'] }] },
+      log
+    );
+
+    expect(logs.some((m) => m.includes('rejected (path escapes skill dir)'))).toBe(true);
+  });
+
+  it('rejects Windows drive-letter absolute companion paths', async () => {
+    writeSrc('tdd', 'SKILL.md', '# tdd');
+
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'tdd', source: 'org-meta', companions: ['C:\\Windows\\evil.md'] }] },
+      log
+    );
+
+    expect(logs.some((m) => m.includes('rejected (path escapes skill dir)'))).toBe(true);
+  });
+
+  it('falls back to category "meta" when category contains path separators', async () => {
+    writeSrc('alpha', 'SKILL.md', '# alpha');
+
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'alpha', source: 'org-meta', category: '../escape' }] },
+      log,
+      { categorised: true }
+    );
+
+    // Emitted under safe fallback path, never under the attacker-controlled value.
+    expect(existsSync(join(tmpDir, '.agents', 'skills', 'meta', 'alpha', 'SKILL.md'))).toBe(true);
+    expect(existsSync(join(tmpDir, '.agents', 'skills', '..', 'escape', 'alpha', 'SKILL.md'))).toBe(
+      false
+    );
+    expect(logs.some((m) => m.includes("unsafe category '../escape'"))).toBe(true);
+  });
+
+  it('falls back to category "meta" when category is an absolute path', async () => {
+    writeSrc('alpha', 'SKILL.md', '# alpha');
+
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'alpha', source: 'org-meta', category: '/etc' }] },
+      log,
+      { categorised: true }
+    );
+
+    expect(existsSync(join(tmpDir, '.agents', 'skills', 'meta', 'alpha', 'SKILL.md'))).toBe(true);
+    expect(logs.some((m) => m.includes('unsafe category'))).toBe(true);
   });
 
   it('skips emission entirely for lifecycle: deprecated', async () => {

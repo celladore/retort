@@ -7,24 +7,22 @@ import { inventoryOrgMetaSkills } from '../doctor.mjs';
 describe('inventoryOrgMetaSkills', () => {
   let projectRoot;
   let orgMetaRoot;
-  let originalOrgMetaPath;
+  let originalEnv;
 
   beforeEach(() => {
     projectRoot = mkdtempSync(join(tmpdir(), 'doctor-inv-project-'));
     orgMetaRoot = mkdtempSync(join(tmpdir(), 'doctor-inv-orgmeta-'));
-    originalOrgMetaPath = process.env.ORG_META_PATH;
-    process.env.ORG_META_PATH = orgMetaRoot;
+    // Snapshot + replace process.env so any env mutation in this suite is
+    // scoped to the test (matches the pattern in resolveWindowsExecutable.test.mjs).
+    originalEnv = process.env;
+    process.env = { ...originalEnv, ORG_META_PATH: orgMetaRoot };
 
     mkdirSync(join(projectRoot, '.agentkit', 'spec'), { recursive: true });
     mkdirSync(join(orgMetaRoot, 'skills'), { recursive: true });
   });
 
   afterEach(() => {
-    if (originalOrgMetaPath === undefined) {
-      delete process.env.ORG_META_PATH;
-    } else {
-      process.env.ORG_META_PATH = originalOrgMetaPath;
-    }
+    process.env = originalEnv;
     rmSync(projectRoot, { recursive: true, force: true });
     rmSync(orgMetaRoot, { recursive: true, force: true });
   });
@@ -41,6 +39,12 @@ describe('inventoryOrgMetaSkills', () => {
 
   function writeLocalSkill(name, content) {
     const dir = join(projectRoot, '.agents', 'skills', name);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'SKILL.md'), content, 'utf-8');
+  }
+
+  function writeLocalSkillCategorised(category, name, content) {
+    const dir = join(projectRoot, '.agents', 'skills', category, name);
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'SKILL.md'), content, 'utf-8');
   }
@@ -107,5 +111,51 @@ describe('inventoryOrgMetaSkills', () => {
     const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
 
     expect(result.error).toMatch(/Failed to parse skills\.yaml/);
+  });
+
+  it('returns empty results when skills.yaml has skills as a non-array (e.g. {})', () => {
+    // Parseable YAML but the wrong shape — must not crash doctor.
+    writeSpec('skills: {}\n');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    expect(result.error).toBeNull();
+    expect(result.results).toEqual([]);
+  });
+
+  it('skips entries whose name is missing or non-string', () => {
+    writeSpec(
+      'skills:\n  - source: org-meta\n  - name: ""\n    source: org-meta\n  - name: valid\n    source: org-meta\n'
+    );
+    writeOrgMetaSkill('valid', '# valid');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    expect(result.error).toBeNull();
+    expect(result.results).toEqual([expect.objectContaining({ name: 'valid', status: 'present' })]);
+  });
+
+  it('detects local-divergent under the categorised layout (.agents/skills/<category>/<name>/)', () => {
+    writeSpec('skills:\n  - name: omega\n    source: org-meta\n    category: engineering\n');
+    writeOrgMetaSkill('omega', '# upstream omega');
+    writeLocalSkillCategorised('engineering', 'omega', '# locally edited omega');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    expect(result.results).toEqual([
+      expect.objectContaining({ name: 'omega', status: 'local-divergent' }),
+    ]);
+  });
+
+  it('defaults to category "meta" when checking the categorised layout', () => {
+    writeSpec('skills:\n  - name: zeta\n    source: org-meta\n');
+    writeOrgMetaSkill('zeta', '# upstream zeta');
+    writeLocalSkillCategorised('meta', 'zeta', '# diverged');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    expect(result.results).toEqual([
+      expect.objectContaining({ name: 'zeta', status: 'local-divergent' }),
+    ]);
   });
 });
