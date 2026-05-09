@@ -6,7 +6,7 @@
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import { cp, mkdir, readdir, readFile, writeFile } from 'fs/promises';
-import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path';
+import path, { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path';
 import {
   filterByTier,
   mergeThemeIntoSettings,
@@ -1331,10 +1331,11 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
     const companions = Array.isArray(skill.companions) ? skill.companions : [];
     for (const companion of companions) {
       if (typeof companion !== 'string' || companion.length === 0) continue;
-      // Reject anything that escapes the skill directory. Use isAbsolute (handles
-      // Windows drive-letter paths) and a resolved-path containment check so that
-      // sequences like "a/../../evil.md" are also caught.
-      if (isAbsolute(companion)) {
+      // Reject anything that escapes the skill directory. Check both POSIX and
+      // win32 isAbsolute so a Windows drive-letter path (e.g. "C:\\evil.md") is
+      // caught even when the engine runs on Linux CI, then verify the resolved
+      // companion is strictly inside the skill source directory.
+      if (isAbsolute(companion) || path.win32.isAbsolute(companion)) {
         log(
           `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
         );

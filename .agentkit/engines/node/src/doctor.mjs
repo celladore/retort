@@ -133,14 +133,7 @@ export function inventoryOrgMetaSkills(specRoot, projectRoot) {
     const category =
       typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
     const localFlatPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
-    const localCatPath = join(
-      projectRoot,
-      '.agents',
-      'skills',
-      category,
-      skill.name,
-      'SKILL.md'
-    );
+    const localCatPath = join(projectRoot, '.agents', 'skills', category, skill.name, 'SKILL.md');
     const localPath = existsSync(localFlatPath)
       ? localFlatPath
       : existsSync(localCatPath)

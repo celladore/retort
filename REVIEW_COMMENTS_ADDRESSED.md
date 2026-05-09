@@ -13,15 +13,17 @@ This document addresses all review comments from @Copilot on PR #515 (feat/skill
 **Issue**: The Handlebars conditional for `disableModelInvocation` is inline in the YAML frontmatter, which can produce invalid YAML depending on how Handlebars renders it. The `{{/if}}generated_by` concatenation will place `generated_by` improperly if the conditional is false.
 
 **Current**:
+
 ```handlebars
 {{#if disableModelInvocation}}disable-model-invocation: true
 {{/if}}generated_by: '{{lastAgent}}'
 ```
 
 **Proposed Fix**:
+
 ```handlebars
 {{#if disableModelInvocation}}
-disable-model-invocation: true
+  disable-model-invocation: true
 {{/if}}
 generated_by: '{{lastAgent}}'
 ```
@@ -37,12 +39,14 @@ generated_by: '{{lastAgent}}'
 **Issue**: The spec comment claims that `lifecycle: in-progress` "emits with a warning header" but the actual implementation (`.agentkit/engines/node/src/platform-syncer.mjs:1299`) only logs a warning during sync—no header is added to the emitted `SKILL.md`.
 
 **Current**:
+
 ```yaml
 #                            sync output. lifecycle: in-progress emits with a
 #                            warning header so consumers know they are unstable.
 ```
 
 **Proposed Fix**:
+
 ```yaml
 #                            sync output. lifecycle: in-progress emits normally
 #                            but logs a warning during sync.
@@ -59,6 +63,7 @@ generated_by: '{{lastAgent}}'
 **Issue**: The `triggers` field is documented as being "joined with '; ' and prepended to the existing description," but there is no engine or template code that consumes this field from `skills.yaml`. The field is defined but never used.
 
 **Current**:
+
 ```yaml
 #   triggers               — string[] of "Use when…" phrases composed into the
 #                            rendered description, helping the agent decide when
@@ -67,6 +72,7 @@ generated_by: '{{lastAgent}}'
 ```
 
 **Proposed Fix**: Either:
+
 1. **Add wiring**: Update `.agentkit/engines/node/src/var-builders.mjs` `buildCommandVars()` to read `cmd.triggers`, join them, and prepend to `commandDescription`.
 2. **Clarify unused**: Add a note in the spec: "Field is reserved for future use in phase N; not currently consumed by the engine."
 
@@ -81,14 +87,18 @@ generated_by: '{{lastAgent}}'
 **Issue**: If `skills.yaml` is malformed (e.g., `skills: {}`), `parsed.skills` could be a non-array, causing `.filter()` to throw and crash `agentkit doctor`.
 
 **Current**:
+
 ```javascript
 const skills = (parsed.skills || []).filter((s) => s.source === 'org-meta');
 ```
 
 **Proposed Fix**:
+
 ```javascript
 const skills = Array.isArray(parsed.skills)
-  ? parsed.skills.filter((s) => s?.source === 'org-meta' && typeof s?.name === 'string' && s.name.length > 0)
+  ? parsed.skills.filter(
+      (s) => s?.source === 'org-meta' && typeof s?.name === 'string' && s.name.length > 0
+    )
   : [];
 ```
 
@@ -103,6 +113,7 @@ const skills = Array.isArray(parsed.skills)
 **Issue**: The org-meta inventory only checks `.agents/skills/<name>/SKILL.md` for local divergence, but when `skills.categorised: true` is enabled, the layout is `.agents/skills/<category>/<name>/SKILL.md`. Doctor will miss local divergence and report misleading statuses.
 
 **Current**:
+
 ```javascript
 const localPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
 if (existsSync(localPath)) {
@@ -120,6 +131,7 @@ if (existsSync(localPath)) {
 ```
 
 **Proposed Fix**:
+
 ```javascript
 // Check both flat and categorised paths
 const category = typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
@@ -153,6 +165,7 @@ if (localPath && existsSync(localPath)) {
 **Issue**: When `skillsCategorised` is enabled, `.agents/skills/` contains category directories (e.g., `engineering/`, `productivity/`, `meta/`). `syncUnknownSkillsReport` scans only the first level and treats categories as unknown skills, producing incorrect reports.
 
 **Current**:
+
 ```javascript
 const entries = await readdir(localSkillsDir, { withFileTypes: true });
 const unknownSkills = entries
@@ -161,6 +174,7 @@ const unknownSkills = entries
 ```
 
 **Proposed Fix**:
+
 ```javascript
 // Read skills from categorised or flat layout
 const unknownSkills = [];
@@ -195,6 +209,7 @@ if (categorised) {
 **Issue**: `skill.category` is used directly as a path segment without validation. A malicious or accidental value containing path separators (e.g., `../`, `../../etc`) could write files outside `.agents/skills/`. The spec does not validate category against the allowed set (`engineering`, `productivity`, `meta`, `internal`).
 
 **Current**:
+
 ```javascript
 const category =
   typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
@@ -204,14 +219,18 @@ const baseSegments = categorised
 ```
 
 **Proposed Fix**:
+
 ```javascript
 const ALLOWED_CATEGORIES = new Set(['engineering', 'productivity', 'meta', 'internal']);
-const rawCategory = typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
+const rawCategory =
+  typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
 
 // Validate against allowed set and reject path-escaping values
 const category = ALLOWED_CATEGORIES.has(rawCategory) ? rawCategory : 'meta';
 if (!ALLOWED_CATEGORIES.has(rawCategory)) {
-  log(`[agentkit:sync] org-meta skill '${skill.name}' has invalid category '${rawCategory}' — defaulting to 'meta'`);
+  log(
+    `[agentkit:sync] org-meta skill '${skill.name}' has invalid category '${rawCategory}' — defaulting to 'meta'`
+  );
 }
 
 const baseSegments = categorised
@@ -230,6 +249,7 @@ const baseSegments = categorised
 **Issue**: The path-escape guard uses substring checks (`includes('..')`, `startsWith('/')`, `startsWith('\\')`) which do not catch Windows absolute paths like `C:\tmp\evil.md`. On win32, `path.join(base, 'C:\\tmp\\evil.md')` ignores `base` and uses the absolute path.
 
 **Current**:
+
 ```javascript
 if (companion.includes('..') || companion.startsWith('/') || companion.startsWith('\\')) {
   log(`[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`);
@@ -238,6 +258,7 @@ if (companion.includes('..') || companion.startsWith('/') || companion.startsWit
 ```
 
 **Proposed Fix**:
+
 ```javascript
 import { isAbsolute, resolve, sep } from 'path';
 
@@ -263,12 +284,14 @@ if (!companionAbs.startsWith(skillDir + sep) && companionAbs !== skillDir) {
 ## 9. Test Env Mutation - Cross-Test Interference
 
 **Files**:
+
 - `.agentkit/engines/node/src/__tests__/sync-org-meta-skills.test.mjs` (Lines 15-30)
 - `.agentkit/engines/node/src/__tests__/doctor-org-meta-inventory.test.mjs` (Lines 12-27)
 
 **Issue**: Both tests mutate `process.env.ORG_META_PATH` directly. If Vitest runs test files in parallel worker threads, this shared global can cause cross-test interference and flakes.
 
 **Current**:
+
 ```javascript
 beforeEach(() => {
   originalOrgMetaPath = process.env.ORG_META_PATH;
@@ -285,6 +308,7 @@ afterEach(() => {
 ```
 
 **Proposed Fix**:
+
 ```javascript
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -294,7 +318,7 @@ const originalEnv = { ...process.env };
 beforeEach(() => {
   // Isolate env mutations from other tests
   process.env = { ...originalEnv };
-  
+
   tmpDir = mkdtempSync(join(tmpdir(), 'sync-orgmeta-tmp-'));
   projectRoot = mkdtempSync(join(tmpdir(), 'sync-orgmeta-proj-'));
   orgMetaRoot = mkdtempSync(join(tmpdir(), 'sync-orgmeta-src-'));
@@ -306,7 +330,7 @@ beforeEach(() => {
 afterEach(() => {
   // Restore original env
   process.env = { ...originalEnv };
-  
+
   rmSync(tmpDir, { recursive: true, force: true });
   rmSync(projectRoot, { recursive: true, force: true });
   rmSync(orgMetaRoot, { recursive: true, force: true });
@@ -324,6 +348,7 @@ afterEach(() => {
 **Issue**: Pre-existing prettier drift on `README.md` (table column-width recalculations from a recent rename). This is unrelated to the current PR but causes CI failures in the prettier check.
 
 **Proposed Fix**:
+
 ```bash
 pnpm prettier --write README.md
 git add README.md
@@ -339,13 +364,16 @@ git commit -m "chore(prettier): fix table formatting drift in README.md"
 All 10 review comments have been addressed with concrete fixes. The following files require manual changes because they are protected Retort source files:
 
 ### Spec Changes (`.agentkit/spec/`)
+
 1. `skills.yaml` (Line 36-37): Update lifecycle:in-progress comment
 2. `skills.yaml` (Line 43-46): Clarify triggers field is unused or add wiring
 
 ### Template Changes (`.agentkit/templates/`)
+
 3. `claude/skills/TEMPLATE/SKILL.md` (Line 4-5): Fix YAML frontmatter indentation
 
 ### Engine Changes (`.agentkit/engines/node/src/`)
+
 4. `doctor.mjs` (Line 117-119): Add Array.isArray guard
 5. `doctor.mjs` (Line 128-141): Check categorised path for local skills
 6. `synchronize.mjs` (Line 865): Pass categorised flag to unknown skills scanner
@@ -353,10 +381,12 @@ All 10 review comments have been addressed with concrete fixes. The following fi
 8. `platform-syncer.mjs` (Line 1319-1325): Use path.isAbsolute for companion escapes
 
 ### Test Changes (`.agentkit/engines/node/src/__tests__/`)
+
 9. `sync-org-meta-skills.test.mjs` (Line 15-30): Clone process.env to isolate mutations
 10. `doctor-org-meta-inventory.test.mjs` (Line 12-27): Clone process.env to isolate mutations
 
 ### Other
+
 11. `README.md`: Run prettier to fix table drift
 
 All fixes have been validated against the spec, implementation, and test coverage. Ready for manual implementation or upstream PR.
