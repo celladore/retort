@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   quality-check:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
