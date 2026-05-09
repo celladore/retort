@@ -115,7 +115,10 @@ export function inventoryOrgMetaSkills(specRoot, projectRoot) {
   }
 
   const orgMetaDir = resolveOrgMetaSkillsDir();
-  const skills = (parsed.skills || []).filter((s) => s.source === 'org-meta');
+  const rawSkills = Array.isArray(parsed.skills) ? parsed.skills : [];
+  const skills = rawSkills.filter(
+    (s) => typeof s?.name === 'string' && s.name.length > 0 && s.source === 'org-meta'
+  );
   const results = [];
 
   for (const skill of skills) {
@@ -125,8 +128,26 @@ export function inventoryOrgMetaSkills(specRoot, projectRoot) {
       continue;
     }
 
-    const localPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
-    if (existsSync(localPath)) {
+    // Check both flat (.agents/skills/<name>/) and categorised (.agents/skills/<category>/<name>/)
+    // layouts so that doctor reports correct status regardless of whether categorised mode is on.
+    const category =
+      typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
+    const localFlatPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
+    const localCatPath = join(
+      projectRoot,
+      '.agents',
+      'skills',
+      category,
+      skill.name,
+      'SKILL.md'
+    );
+    const localPath = existsSync(localFlatPath)
+      ? localFlatPath
+      : existsSync(localCatPath)
+        ? localCatPath
+        : null;
+
+    if (localPath) {
       try {
         const localContent = readFileSync(localPath, 'utf-8');
         const srcContent = readFileSync(srcPath, 'utf-8');

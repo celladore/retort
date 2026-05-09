@@ -6,7 +6,7 @@
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import { cp, mkdir, readdir, readFile, writeFile } from 'fs/promises';
-import { basename, dirname, extname, join, relative, resolve } from 'path';
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path';
 import {
   filterByTier,
   mergeThemeIntoSettings,
@@ -1299,8 +1299,22 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
       log(`[agentkit:sync] org-meta skill '${skill.name}' is in-progress — emitting unstable copy`);
     }
 
-    const category =
+    // Validate category: reject values containing path separators or traversal sequences.
+    // This prevents a crafted skills.yaml from writing outside .agents/skills/.
+    const rawCategory =
       typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
+    const categoryUnsafe =
+      rawCategory.includes('/') ||
+      rawCategory.includes('\\') ||
+      rawCategory.includes('..') ||
+      rawCategory === '.' ||
+      rawCategory === '..';
+    if (categoryUnsafe) {
+      log(
+        `[agentkit:sync] org-meta skill '${skill.name}' has unsafe category '${rawCategory}' — using 'meta'`
+      );
+    }
+    const category = categoryUnsafe ? 'meta' : rawCategory;
     const baseSegments = categorised
       ? ['.agents', 'skills', category, skill.name]
       : ['.agents', 'skills', skill.name];
@@ -1314,11 +1328,22 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
       log,
     });
 
+    const skillSrcDir = resolve(orgMetaSkillsDir, skill.name);
     const companions = Array.isArray(skill.companions) ? skill.companions : [];
     for (const companion of companions) {
       if (typeof companion !== 'string' || companion.length === 0) continue;
-      // Reject anything that escapes the skill directory.
-      if (companion.includes('..') || companion.startsWith('/') || companion.startsWith('\\')) {
+      // Reject anything that escapes the skill directory. Use isAbsolute (handles
+      // Windows drive-letter paths) and a resolved-path containment check so that
+      // sequences like "a/../../evil.md" are also caught.
+      if (isAbsolute(companion)) {
+        log(
+          `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
+        );
+        continue;
+      }
+      const resolvedCompanion = resolve(skillSrcDir, companion);
+      const rel = relative(skillSrcDir, resolvedCompanion);
+      if (rel.startsWith('..') || rel === '') {
         log(
           `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
         );
@@ -1342,13 +1367,27 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
  * This is the non-destructive uptake mechanism — unknown skills are never overwritten,
  * only reported. Use `pnpm ak:propose-skill <name>` to promote them to org-meta.
  *
+ * When opts.categorised is true the layout is .agents/skills/<category>/<name>/, so
+ * first-level directories are category buckets rather than skill directories. The scan
+ * descends one level deeper in that case.
+ *
  * @param {string} tmpDir - Temp directory for sync output
  * @param {string} projectRoot - Actual project root (for reading existing skills)
  * @param {object} skillsSpec - Parsed skills.yaml
  * @param {string} syncDate - ISO date string (YYYY-MM-DD)
  * @param {function} log - Logger
+ * @param {object} [opts]
+ * @param {boolean} [opts.categorised=false] - Whether the categorised layout is active
  */
-export async function syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, syncDate, log) {
+export async function syncUnknownSkillsReport(
+  tmpDir,
+  projectRoot,
+  skillsSpec,
+  syncDate,
+  log,
+  opts = {}
+) {
+  const categorised = opts.categorised === true;
   const localSkillsDir = join(projectRoot, '.agents', 'skills');
   if (!existsSync(localSkillsDir)) return;
 
@@ -1360,9 +1399,32 @@ export async function syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, s
     return;
   }
 
-  const unknownSkills = entries
-    .filter((e) => e.isDirectory() && e.name !== '_unknown' && !knownNames.has(e.name))
-    .map((e) => e.name);
+  let unknownSkills;
+
+  if (categorised) {
+    // In categorised mode the first level contains category dirs (e.g. "meta/", "engineering/").
+    // Descend one level deeper to find the actual skill directories.
+    unknownSkills = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name === '_unknown') continue;
+      const catDir = join(localSkillsDir, entry.name);
+      let catEntries;
+      try {
+        catEntries = await readdir(catDir, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const catEntry of catEntries) {
+        if (catEntry.isDirectory() && !knownNames.has(catEntry.name)) {
+          unknownSkills.push(catEntry.name);
+        }
+      }
+    }
+  } else {
+    unknownSkills = entries
+      .filter((e) => e.isDirectory() && e.name !== '_unknown' && !knownNames.has(e.name))
+      .map((e) => e.name);
+  }
 
   if (unknownSkills.length === 0) return;
 

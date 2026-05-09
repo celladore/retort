@@ -862,7 +862,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, {
           categorised: vars.skillsCategorised,
         }),
-        syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log)
+        syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log, {
+          categorised: vars.skillsCategorised,
+        })
       );
     }
 
