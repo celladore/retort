@@ -15,6 +15,26 @@ import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Hoisted mock for @clack/prompts. vi.doMock is unreliable for bare-module
+// dynamic imports in vitest 4 thread workers on Linux — the mock factory
+// can race the dynamic import inside init.mjs, falling through to the
+// try/catch fallback and silently writing __TEMPLATE__ defaults instead of
+// wizard-supplied values. The hoisted vi.mock + mutable factory state is
+// the canonical workaround. Caches the materialized mock per import so
+// each call to clack.method() shares state (response index, spies); reset
+// in beforeEach so each test sees a fresh materialization.
+const clackMockState = vi.hoisted(() => ({ factory: null, cached: null }));
+
+vi.mock('@clack/prompts', () => {
+  if (!clackMockState.factory) {
+    throw new Error('test did not configure @clack/prompts mock');
+  }
+  if (!clackMockState.cached) {
+    clackMockState.cached = clackMockState.factory();
+  }
+  return clackMockState.cached;
+});
+
 const {
   applyDetectedKitDefaults,
   applyExternalKnowledgeFlags,
@@ -856,7 +876,8 @@ describe('runInit interactive wizard', () => {
   afterEach(() => {
     vi.doUnmock('../discover.mjs');
     vi.doUnmock('../synchronize.mjs');
-    vi.doUnmock('@clack/prompts');
+    clackMockState.factory = null;
+    clackMockState.cached = null;
     vi.restoreAllMocks();
     cleanupTmpDir(tmpRoot);
   });
@@ -889,7 +910,7 @@ describe('runInit interactive wizard', () => {
     let idx = 0;
     const next = async () => responses[idx++];
 
-    vi.doMock('@clack/prompts', () => {
+    clackMockState.factory = () => {
       const isCancel = () => false;
       const groupImpl = async (cfg) => {
         const out = {};
@@ -910,11 +931,8 @@ describe('runInit interactive wizard', () => {
         multiselect: vi.fn(async () => next()),
         group: vi.fn(groupImpl),
       };
-    });
+    };
 
-    // Reset module registry AFTER all doMocks so init.mjs picks up the
-    // @clack/prompts mock on its dynamic import (matches init.test.mjs).
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     // Act
@@ -978,7 +996,7 @@ describe('runInit interactive wizard', () => {
     ];
     let idx = 0;
     const next = async () => responses[idx++];
-    vi.doMock('@clack/prompts', () => ({
+    clackMockState.factory = () => ({
       intro: vi.fn(),
       outro: vi.fn(),
       cancel: vi.fn(),
@@ -993,12 +1011,11 @@ describe('runInit interactive wizard', () => {
         for (const k of Object.keys(cfg)) out[k] = await cfg[k]();
         return out;
       }),
-    }));
+    });
     vi.doMock('../retort-config-wizard.mjs', () => ({
       runRetortConfigWizard: vi.fn().mockResolvedValue(undefined),
     }));
 
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1094,7 +1111,7 @@ describe('runInit interactive wizard', () => {
     ];
     let idx = 0;
     const next = async () => responses[idx++];
-    vi.doMock('@clack/prompts', () => ({
+    clackMockState.factory = () => ({
       intro: vi.fn(),
       outro: vi.fn(),
       cancel: vi.fn(),
@@ -1109,13 +1126,12 @@ describe('runInit interactive wizard', () => {
         for (const k of Object.keys(cfg)) out[k] = await cfg[k]();
         return out;
       }),
-    }));
+    });
     // Use a minimal report (no documentation, no crosscutting) so those prompts are skipped.
     vi.doMock('../discover.mjs', () => ({
       runDiscover: vi.fn().mockResolvedValue(makeMinimalReport()),
     }));
 
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1157,7 +1173,7 @@ describe('runInit interactive wizard', () => {
     ];
     let idx = 0;
     const next = async () => responses[idx++];
-    vi.doMock('@clack/prompts', () => ({
+    clackMockState.factory = () => ({
       intro: vi.fn(),
       outro: vi.fn(),
       cancel: vi.fn(),
@@ -1172,12 +1188,11 @@ describe('runInit interactive wizard', () => {
         for (const k of Object.keys(cfg)) out[k] = await cfg[k]();
         return out;
       }),
-    }));
+    });
     vi.doMock('../discover.mjs', () => ({
       runDiscover: vi.fn().mockResolvedValue(makeMinimalReport()),
     }));
 
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1210,7 +1225,7 @@ describe('runInit interactive wizard', () => {
     ];
     let idx = 0;
     const next = async () => responses[idx++];
-    vi.doMock('@clack/prompts', () => ({
+    clackMockState.factory = () => ({
       intro: vi.fn(),
       outro: vi.fn(),
       cancel: vi.fn(),
@@ -1225,12 +1240,11 @@ describe('runInit interactive wizard', () => {
         for (const k of Object.keys(cfg)) out[k] = await cfg[k]();
         return out;
       }),
-    }));
+    });
     vi.doMock('../discover.mjs', () => ({
       runDiscover: vi.fn().mockResolvedValue(makeMinimalReport()),
     }));
 
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1268,7 +1282,7 @@ describe('runInit interactive wizard', () => {
   it('exits the wizard cleanly when the optional-kits prompt is cancelled', async () => {
     // Cancel on the FIRST prompt (optional kits multiselect).
     const cancelMarker = Symbol('cancel');
-    vi.doMock('@clack/prompts', () => ({
+    clackMockState.factory = () => ({
       intro: vi.fn(),
       outro: vi.fn(),
       cancel: vi.fn(),
@@ -1279,12 +1293,11 @@ describe('runInit interactive wizard', () => {
       confirm: vi.fn(async () => cancelMarker),
       multiselect: vi.fn(async () => cancelMarker),
       group: vi.fn(async () => cancelMarker),
-    }));
+    });
 
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
     });
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await expect(
@@ -1300,11 +1313,10 @@ describe('runInit interactive wizard', () => {
 
   it('falls back to non-interactive mode when @clack/prompts import fails', async () => {
     // Arrange — make the @clack/prompts dynamic import throw.
-    vi.doMock('@clack/prompts', () => {
+    clackMockState.factory = () => {
       throw new Error('clack unavailable');
-    });
+    };
 
-    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     // Act
