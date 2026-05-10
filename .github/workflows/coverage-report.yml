@@ -19,7 +19,7 @@ concurrency:
 jobs:
   coverage-node:
     name: Node.js coverage
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     continue-on-error: true
     if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
@@ -119,7 +119,7 @@ jobs:
 
   summary:
     name: Coverage summary
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [coverage-node]
     if: always()
     steps:
