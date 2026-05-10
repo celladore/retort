@@ -56,7 +56,7 @@ const PRESETS = {
   },
 };
 
-function applyPresetDefaults(project, preset) {
+export function applyPresetDefaults(project, preset) {
   if (!project) {
     throw new TypeError('applyPresetDefaults: project is required');
   }
@@ -100,7 +100,7 @@ const EXTERNAL_KNOWLEDGE_PLATFORMS = ['copilot', 'windsurf', 'claude', 'cursor']
 // Helpers
 // ---------------------------------------------------------------------------
 
-function sanitizeRepoName(value) {
+export function sanitizeRepoName(value) {
   if (!value || typeof value !== 'string') return null;
   const trimmed = value.trim();
   if (trimmed === '.' || trimmed === '..') return null;
@@ -110,7 +110,7 @@ function sanitizeRepoName(value) {
   return trimmed;
 }
 
-function parseCsvList(value) {
+export function parseCsvList(value) {
   if (typeof value !== 'string') return [];
   return value
     .split(',')
@@ -118,7 +118,7 @@ function parseCsvList(value) {
     .filter(Boolean);
 }
 
-function applyExternalKnowledgeFlags(project, flags = {}) {
+export function applyExternalKnowledgeFlags(project, flags = {}) {
   project.externalKnowledge = project.externalKnowledge || {
     enabled: false,
     mode: 'metadata-overlays',
@@ -910,7 +910,7 @@ async function finalizeInit({
 // Build project defaults from discovery report
 // ---------------------------------------------------------------------------
 
-function buildProjectDefaults(report, repoName) {
+export function buildProjectDefaults(report, repoName) {
   const project = {
     name: repoName,
     description: null,
@@ -1095,7 +1095,7 @@ function buildProjectDefaults(report, repoName) {
 // Write project.yaml with comments
 // ---------------------------------------------------------------------------
 
-function writeProjectYaml(filePath, project) {
+export function writeProjectYaml(filePath, project) {
   const header = [
     '# =============================================================================',
     '# project.yaml — Project-level metadata for rich, context-aware AI configs',
@@ -1128,7 +1128,7 @@ function writeProjectYaml(filePath, project) {
  * Used by non-interactive / preset / fallback paths so they get the same
  * language-profile configuration as the interactive wizard.
  */
-function applyDetectedKitDefaults(project, report) {
+export function applyDetectedKitDefaults(project, report) {
   project.automation = project.automation || {};
   project.automation.languageProfile = project.automation.languageProfile || {};
   // Non-interactive defaults to 'hybrid' so heuristic detection still works
@@ -1141,7 +1141,7 @@ function applyDetectedKitDefaults(project, report) {
  * Persists interactive kit selections to the project object for project.yaml.
  * Called after the optional-kit multiselect prompt.
  */
-function applyKitSelections(project, report, selectedOptionalKits) {
+export function applyKitSelections(project, report, selectedOptionalKits) {
   project.automation = project.automation || {};
   project.automation.languageProfile = project.automation.languageProfile || {};
   project.automation.languageProfile.mode = 'configured';
@@ -1161,20 +1161,20 @@ function applyKitSelections(project, report, selectedOptionalKits) {
   }
 }
 
-function detectCloudProvider(report) {
+export function detectCloudProvider(report) {
   if (report.infrastructure.includes('bicep')) return 'azure';
   if (report.infrastructure.includes('terraform')) return null;
   return null;
 }
 
-function detectIacTool(report) {
+export function detectIacTool(report) {
   if (report.infrastructure.includes('bicep')) return 'bicep';
   if (report.infrastructure.includes('terraform')) return 'terraform';
   if (report.infrastructure.includes('pulumi')) return 'pulumi';
   return null;
 }
 
-function detectExistingTools(projectRoot) {
+export function detectExistingTools(projectRoot) {
   const detected = [];
   const checks = [
     { tool: 'claude', paths: ['.claude', 'CLAUDE.md'] },
