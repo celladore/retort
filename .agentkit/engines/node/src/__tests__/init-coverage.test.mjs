@@ -15,25 +15,15 @@ import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Hoisted mock for @clack/prompts. vi.doMock is unreliable for bare-module
-// dynamic imports in vitest 4 thread workers on Linux — the mock factory
-// can race the dynamic import inside init.mjs, falling through to the
-// try/catch fallback and silently writing __TEMPLATE__ defaults instead of
-// wizard-supplied values. The hoisted vi.mock + mutable factory state is
-// the canonical workaround. Caches the materialized mock per import so
-// each call to clack.method() shares state (response index, spies); reset
-// in beforeEach so each test sees a fresh materialization.
-const clackMockState = vi.hoisted(() => ({ factory: null, cached: null }));
-
-vi.mock('@clack/prompts', () => {
-  if (!clackMockState.factory) {
-    throw new Error('test did not configure @clack/prompts mock');
-  }
-  if (!clackMockState.cached) {
-    clackMockState.cached = clackMockState.factory();
-  }
-  return clackMockState.cached;
-});
+// Per-test mock state for `@clack/prompts`. Tests assign `factory` to a
+// closure that returns the mock module; the doMock registered in each
+// wizard `beforeEach` reads the latest `factory` when `runInit` calls
+// `resolveClackPrompts()`. We mock the relative-path helper module
+// (`../_clack-prompts.mjs`) rather than the bare `@clack/prompts`
+// because vitest 4's `vi.doMock` for bare-module dynamic imports is
+// unreliable in thread workers on Linux (the mock factory races the
+// dynamic import inside init.mjs and the consumer falls back).
+const clackMockState = { factory: null };
 
 const {
   applyDetectedKitDefaults,
@@ -871,13 +861,21 @@ describe('runInit interactive wizard', () => {
     vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
+    vi.doMock('../_clack-prompts.mjs', () => ({
+      resolveClackPrompts: async () => {
+        if (!clackMockState.factory) {
+          throw new Error('test did not configure @clack/prompts mock');
+        }
+        return clackMockState.factory();
+      },
+    }));
   });
 
   afterEach(() => {
     vi.doUnmock('../discover.mjs');
     vi.doUnmock('../synchronize.mjs');
+    vi.doUnmock('../_clack-prompts.mjs');
     clackMockState.factory = null;
-    clackMockState.cached = null;
     vi.restoreAllMocks();
     cleanupTmpDir(tmpRoot);
   });

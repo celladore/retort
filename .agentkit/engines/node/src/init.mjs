@@ -14,6 +14,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { basename, resolve } from 'path';
+import { resolveClackPrompts } from './_clack-prompts.mjs';
 import { loadFeatureSpec, resolveFeatures } from './feature-manager.mjs';
 import { REPO_NAME_PATTERN } from './repo-name.mjs';
 
@@ -282,7 +283,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Interactive wizard ---
   let clack;
   try {
-    clack = await import('@clack/prompts');
+    clack = await resolveClackPrompts();
   } catch {
     console.warn(
       '[agentkit:init] @clack/prompts not available — falling back to non-interactive mode.'
