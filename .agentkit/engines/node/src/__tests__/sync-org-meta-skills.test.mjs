@@ -113,7 +113,10 @@ describe('syncOrgMetaSkills', () => {
     );
 
     expect(existsSync(join(tmpDir, '.agents', 'skills', 'tdd', 'SKILL.md'))).toBe(true);
-    expect(logs.some((m) => m.includes('rejected (path escapes skill dir)'))).toBe(true);
+    // Rejection may fire at the .md/no-subdirectory check OR the path-escape
+    // check, depending on the form of the input — either way the companion is
+    // skipped.
+    expect(logs.some((m) => m.includes('rejected'))).toBe(true);
   });
 
   it('rejects POSIX-absolute companion paths', async () => {
@@ -126,7 +129,7 @@ describe('syncOrgMetaSkills', () => {
       log
     );
 
-    expect(logs.some((m) => m.includes('rejected (path escapes skill dir)'))).toBe(true);
+    expect(logs.some((m) => m.includes('rejected'))).toBe(true);
   });
 
   it('rejects Windows drive-letter absolute companion paths', async () => {
@@ -139,7 +142,36 @@ describe('syncOrgMetaSkills', () => {
       log
     );
 
-    expect(logs.some((m) => m.includes('rejected (path escapes skill dir)'))).toBe(true);
+    expect(logs.some((m) => m.includes('rejected'))).toBe(true);
+  });
+
+  it('rejects companions that are not .md files', async () => {
+    writeSrc('tdd', 'SKILL.md', '# tdd');
+
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'tdd', source: 'org-meta', companions: ['notes.txt'] }] },
+      log
+    );
+
+    expect(existsSync(join(tmpDir, '.agents', 'skills', 'tdd', 'SKILL.md'))).toBe(true);
+    expect(existsSync(join(tmpDir, '.agents', 'skills', 'tdd', 'notes.txt'))).toBe(false);
+    expect(logs.some((m) => m.includes('must be a .md filename'))).toBe(true);
+  });
+
+  it('rejects companions with subdirectory paths', async () => {
+    writeSrc('tdd', 'SKILL.md', '# tdd');
+
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'tdd', source: 'org-meta', companions: ['nested/foo.md'] }] },
+      log
+    );
+
+    expect(existsSync(join(tmpDir, '.agents', 'skills', 'tdd', 'nested', 'foo.md'))).toBe(false);
+    expect(logs.some((m) => m.includes('no subdirectories'))).toBe(true);
   });
 
   it('falls back to category "meta" when category contains path separators', async () => {

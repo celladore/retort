@@ -1346,6 +1346,15 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
     const companions = Array.isArray(skill.companions) ? skill.companions : [];
     for (const companion of companions) {
       if (typeof companion !== 'string' || companion.length === 0) continue;
+      // Companions are documented as additional .md files alongside SKILL.md.
+      // Enforce that contract here: must be a .md filename with no path
+      // separators (subdirectories aren't supported by the spec).
+      if (companion.includes('/') || companion.includes('\\') || !companion.endsWith('.md')) {
+        log(
+          `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (must be a .md filename, no subdirectories)`
+        );
+        continue;
+      }
       // Reject anything that escapes the skill directory. Check both POSIX and
       // win32 isAbsolute so a Windows drive-letter path (e.g. "C:\\evil.md") is
       // caught even when the engine runs on Linux CI, then verify the resolved
