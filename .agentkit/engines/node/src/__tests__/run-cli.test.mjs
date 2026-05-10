@@ -16,7 +16,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  // Windows occasionally hits ENOTEMPTY when a freshly-deleted file's handle
+  // hasn't been released by the OS yet. Retry generously, then swallow —
+  // the OS will reap /tmp on its own.
+  try {
+    rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+  } catch {
+    /* best-effort cleanup */
+  }
   vi.restoreAllMocks();
 });
 
