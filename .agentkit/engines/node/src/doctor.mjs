@@ -7,7 +7,7 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
-import { isUnsafePathSegment } from './platform-syncer.mjs';
+import { isUnsafePathSegment } from './fs-utils.mjs';
 import {
   validateSpec,
   validateMappingCoverage,
@@ -84,8 +84,9 @@ function loadOverlayRenderTargets(agentkitRoot) {
 
 /**
  * Resolves the path to the org-meta skills directory.
- * Mirrors resolveOrgMetaSkillsDir in platform-syncer.mjs intentionally —
- * doctor must run without importing the syncer.
+ * Mirrors resolveOrgMetaSkillsDir in platform-syncer.mjs — kept inlined here to
+ * avoid pulling in the entire syncer just to inspect a path. The shared
+ * isUnsafePathSegment helper is now imported from fs-utils.mjs (not the syncer).
  *
  * Priority: ORG_META_PATH env var → ~/repos/org-meta (default).
  */

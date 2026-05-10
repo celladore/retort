@@ -3,7 +3,7 @@
  * Template variable construction helpers for teams, agents, rules, commands, and branch protection.
  * Extracted from synchronize.mjs (Step 5 of modularization).
  */
-import { isUnsafePathSegment } from './platform-syncer.mjs';
+import { isUnsafePathSegment } from './fs-utils.mjs';
 import { formatCommandFlags } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------

@@ -443,6 +443,31 @@ const projectSchema = {
         iacTool: { type: 'string', enum: PROJECT_ENUMS.iacTool },
       },
     },
+    // Paths and flags that describe existing project documentation. Validated so
+    // typos (e.g. `dommainGlossaryPath`) and wrong types (e.g. an array where a
+    // string is expected) surface in spec-validate rather than silently breaking
+    // template renders downstream.
+    documentation: {
+      type: 'object',
+      properties: {
+        hasPrd: { type: 'boolean' },
+        prdPath: { type: 'string' },
+        hasAdr: { type: 'boolean' },
+        adrPath: { type: 'string' },
+        hasApiSpec: { type: 'boolean' },
+        apiSpecPath: { type: 'string' },
+        hasTechnicalSpec: { type: 'boolean' },
+        technicalSpecPath: { type: 'string' },
+        hasDesignSystem: { type: 'boolean' },
+        designSystemPath: { type: ['string', 'null'] },
+        storybook: { type: 'boolean' },
+        designTokensPath: { type: ['string', 'null'] },
+        historyPath: { type: 'string' },
+        hasBrandGuide: { type: 'boolean' },
+        brandGuidePath: { type: 'string' },
+        domainGlossaryPath: { type: ['string', 'null'] },
+      },
+    },
     infrastructure: {
       type: 'object',
       properties: {

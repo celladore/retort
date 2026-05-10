@@ -16,6 +16,7 @@ import {
   validateThemeSpec,
 } from './brand-resolver.mjs';
 
+import { isUnsafePathSegment } from './fs-utils.mjs';
 import { readYaml } from './spec-loader.mjs';
 import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
 import {
@@ -1207,22 +1208,11 @@ export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoN
 // Org-meta skill distribution + uptake detection
 // ---------------------------------------------------------------------------
 
-/**
- * Returns true if `value` is unsafe to use as a single path segment — i.e.
- * not a non-empty string, or contains path separators / traversal sequences.
- * Used to defend against crafted skills.yaml / commands.yaml entries reading
- * or writing outside their intended directories.
- */
-export function isUnsafePathSegment(value) {
-  if (typeof value !== 'string' || value.length === 0) return true;
-  return (
-    value.includes('/') ||
-    value.includes('\\') ||
-    value.includes('..') ||
-    value === '.' ||
-    value.includes('\0')
-  );
-}
+// isUnsafePathSegment lives in fs-utils.mjs to break a circular dep with
+// var-builders.mjs (which is consumed by platform-syncer). Re-exported here
+// so external callers that previously imported it from platform-syncer keep
+// working.
+export { isUnsafePathSegment };
 
 /**
  * Resolves the path to the org-meta skills directory.
@@ -1305,7 +1295,10 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
     return;
   }
 
-  const orgMetaSkills = (skillsSpec.skills || []).filter((s) => s.source === 'org-meta');
+  // Guard: skills.yaml may load as a non-array (e.g. `skills: {}` or null).
+  // Without this, `.filter` would throw and crash the whole sync.
+  const skillsList = Array.isArray(skillsSpec?.skills) ? skillsSpec.skills : [];
+  const orgMetaSkills = skillsList.filter((s) => s.source === 'org-meta');
 
   for (const skill of orgMetaSkills) {
     const lifecycle = skillLifecycle(skill);
@@ -1413,7 +1406,8 @@ export async function syncUnknownSkillsReport(
   const localSkillsDir = join(projectRoot, '.agents', 'skills');
   if (!existsSync(localSkillsDir)) return;
 
-  const knownNames = new Set((skillsSpec.skills || []).map((s) => s.name));
+  const knownSkillsList = Array.isArray(skillsSpec?.skills) ? skillsSpec.skills : [];
+  const knownNames = new Set(knownSkillsList.map((s) => s.name));
   let entries;
   try {
     entries = await readdir(localSkillsDir, { withFileTypes: true });
@@ -1425,8 +1419,10 @@ export async function syncUnknownSkillsReport(
 
   if (categorised) {
     // In categorised mode the first level contains category dirs (e.g. "meta/", "engineering/").
-    // Descend one level deeper to find the actual skill directories.
-    unknownSkills = [];
+    // Descend one level deeper to find the actual skill directories. Use a Set
+    // so a stray duplicate (same skill folder accidentally placed under two
+    // categories) is reported once, not twice.
+    const unknownSet = new Set();
     for (const entry of entries) {
       if (!entry.isDirectory() || entry.name === '_unknown') continue;
       const catDir = join(localSkillsDir, entry.name);
@@ -1438,10 +1434,11 @@ export async function syncUnknownSkillsReport(
       }
       for (const catEntry of catEntries) {
         if (catEntry.isDirectory() && !knownNames.has(catEntry.name)) {
-          unknownSkills.push(catEntry.name);
+          unknownSet.add(catEntry.name);
         }
       }
     }
+    unknownSkills = [...unknownSet];
   } else {
     unknownSkills = entries
       .filter((e) => e.isDirectory() && e.name !== '_unknown' && !knownNames.has(e.name))

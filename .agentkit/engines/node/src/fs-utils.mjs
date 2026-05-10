@@ -26,6 +26,27 @@ export async function writeOutput(filePath, content) {
   await writeFile(filePath, content, 'utf-8');
 }
 
+/**
+ * Returns true if `value` is unsafe to use as a single path segment — i.e.
+ * not a non-empty string, or contains path separators / traversal sequences.
+ * Used to defend against crafted spec entries that could read or write outside
+ * their intended directories.
+ *
+ * Lives in fs-utils (not platform-syncer) so that doctor.mjs and var-builders.mjs
+ * can import it without pulling in the entire syncer (avoids a circular
+ * import — var-builders is consumed by platform-syncer).
+ */
+export function isUnsafePathSegment(value) {
+  if (typeof value !== 'string' || value.length === 0) return true;
+  return (
+    value.includes('/') ||
+    value.includes('\\') ||
+    value.includes('..') ||
+    value === '.' ||
+    value.includes('\0')
+  );
+}
+
 export async function* walkDir(dir) {
   if (!existsSync(dir)) return;
   let entries = [];
