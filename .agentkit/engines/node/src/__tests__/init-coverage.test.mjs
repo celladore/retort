@@ -16,14 +16,21 @@ import { resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Per-test mock state for `@clack/prompts`. Tests assign `factory` to a
-// closure that returns the mock module; the doMock registered in each
-// wizard `beforeEach` reads the latest `factory` when `runInit` calls
-// `resolveClackPrompts()`. We mock the relative-path helper module
-// (`../_clack-prompts.mjs`) rather than the bare `@clack/prompts`
-// because vitest 4's `vi.doMock` for bare-module dynamic imports is
-// unreliable in thread workers on Linux (the mock factory races the
-// dynamic import inside init.mjs and the consumer falls back).
+// closure that returns the mock module; the hoisted helper mock reads the
+// latest `factory` when `runInit` calls `resolveClackPrompts()`. We mock
+// the relative-path helper module (`../_clack-prompts.mjs`) rather than
+// the bare `@clack/prompts` because vitest 4's `vi.doMock` for bare-module
+// dynamic imports is unreliable in thread workers on Linux.
 const clackMockState = { factory: null };
+
+vi.mock('../_clack-prompts.mjs', () => ({
+  resolveClackPrompts: async () => {
+    if (!clackMockState.factory) {
+      throw new Error('test did not configure @clack/prompts mock');
+    }
+    return clackMockState.factory();
+  },
+}));
 
 const {
   applyDetectedKitDefaults,
@@ -861,20 +868,11 @@ describe('runInit interactive wizard', () => {
     vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
-    vi.doMock('../_clack-prompts.mjs', () => ({
-      resolveClackPrompts: async () => {
-        if (!clackMockState.factory) {
-          throw new Error('test did not configure @clack/prompts mock');
-        }
-        return clackMockState.factory();
-      },
-    }));
   });
 
   afterEach(() => {
     vi.doUnmock('../discover.mjs');
     vi.doUnmock('../synchronize.mjs');
-    vi.doUnmock('../_clack-prompts.mjs');
     clackMockState.factory = null;
     vi.restoreAllMocks();
     cleanupTmpDir(tmpRoot);
