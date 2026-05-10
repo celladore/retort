@@ -48,6 +48,13 @@ export const PROJECT_MAPPING = [
   { src: 'documentation.historyPath', dest: 'docsHistoryPath' },
   { src: 'documentation.hasBrandGuide', dest: 'hasBrandGuide', type: 'boolean' },
   { src: 'documentation.brandGuidePath', dest: 'brandGuidePath' },
+  { src: 'documentation.domainGlossaryPath', dest: 'domainGlossaryPath' },
+  {
+    src: 'documentation.domainGlossaryPath',
+    dest: 'hasDomainGlossary',
+    type: 'boolean',
+    check: 'not-none',
+  },
 
   // Editor Theme
   { src: 'editorTheme.enabled', dest: 'editorThemeEnabled', type: 'boolean' },
@@ -170,6 +177,11 @@ export const PROJECT_MAPPING = [
   { src: 'process.intake.operationsTeam', dest: 'intakeOperationsTeam', check: 'not-none' },
   { src: 'process.intake.cadence', dest: 'intakeCadence', check: 'not-none' },
   { src: 'process.intake.autoImport', dest: 'hasAutoImport', type: 'boolean' },
+  { src: 'process.triageLabels.needsTriage', dest: 'triageLabelNeedsTriage' },
+  { src: 'process.triageLabels.needsInfo', dest: 'triageLabelNeedsInfo' },
+  { src: 'process.triageLabels.readyForAgent', dest: 'triageLabelReadyForAgent' },
+  { src: 'process.triageLabels.readyForHuman', dest: 'triageLabelReadyForHuman' },
+  { src: 'process.triageLabels.wontfix', dest: 'triageLabelWontfix' },
 
   // Testing
   { src: 'testing.unit', dest: 'testingUnit', type: 'array-join' },

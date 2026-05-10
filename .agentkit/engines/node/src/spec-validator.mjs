@@ -157,6 +157,16 @@ const commandSchema = {
     description: { type: 'string', required: true },
     flags: { type: 'array', items: commandFlagSchema },
     'allowed-tools': { type: 'array', items: { type: 'string' } },
+    // Claude-only frontmatter hint for skills that should only fire on
+    // explicit invocation. The variable is passed to every target's template;
+    // only the Claude SKILL.md template emits it as YAML frontmatter — other
+    // target templates (e.g. Codex) ignore the variable.
+    disableModelInvocation: { type: 'boolean' },
+    // Category for the optional categorised skills layout. When the layout
+    // is enabled (settings.skills.categorised: true), the rendered skill
+    // file is placed under <skills-dir>/<category>/<name>/SKILL.md.
+    // Recognised values: engineering | productivity | meta | internal.
+    category: { type: 'string', enum: ['engineering', 'productivity', 'meta', 'internal'] },
   },
 };
 
@@ -433,6 +443,31 @@ const projectSchema = {
         iacTool: { type: 'string', enum: PROJECT_ENUMS.iacTool },
       },
     },
+    // Paths and flags that describe existing project documentation. Validated so
+    // typos (e.g. `dommainGlossaryPath`) and wrong types (e.g. an array where a
+    // string is expected) surface in spec-validate rather than silently breaking
+    // template renders downstream.
+    documentation: {
+      type: 'object',
+      properties: {
+        hasPrd: { type: 'boolean' },
+        prdPath: { type: 'string' },
+        hasAdr: { type: 'boolean' },
+        adrPath: { type: 'string' },
+        hasApiSpec: { type: 'boolean' },
+        apiSpecPath: { type: 'string' },
+        hasTechnicalSpec: { type: 'boolean' },
+        technicalSpecPath: { type: 'string' },
+        hasDesignSystem: { type: 'boolean' },
+        designSystemPath: { type: ['string', 'null'] },
+        storybook: { type: 'boolean' },
+        designTokensPath: { type: ['string', 'null'] },
+        historyPath: { type: 'string' },
+        hasBrandGuide: { type: 'boolean' },
+        brandGuidePath: { type: 'string' },
+        domainGlossaryPath: { type: ['string', 'null'] },
+      },
+    },
     infrastructure: {
       type: 'object',
       properties: {
@@ -525,6 +560,16 @@ const projectSchema = {
                 blockedCrossTeam: { type: 'array', items: { type: 'string' } },
               },
             },
+          },
+        },
+        triageLabels: {
+          type: 'object',
+          properties: {
+            needsTriage: { type: 'string', minLength: 1 },
+            needsInfo: { type: 'string', minLength: 1 },
+            readyForAgent: { type: 'string', minLength: 1 },
+            readyForHuman: { type: 'string', minLength: 1 },
+            wontfix: { type: 'string', minLength: 1 },
           },
         },
       },

@@ -948,6 +948,7 @@ function buildProjectDefaults(report, repoName) {
       designTokensPath: null,
       hasBrandGuide: false,
       brandGuidePath: null,
+      domainGlossaryPath: 'CONTEXT.md',
     },
     editorTheme: {
       enabled: false,
@@ -975,6 +976,13 @@ function buildProjectDefaults(report, repoName) {
       commitConvention: 'conventional',
       codeReview: 'required-pr',
       teamSize: 'small',
+      triageLabels: {
+        needsTriage: 'needs-triage',
+        needsInfo: 'needs-info',
+        readyForAgent: 'ready-for-agent',
+        readyForHuman: 'ready-for-human',
+        wontfix: 'wontfix',
+      },
     },
     testing: {
       unit: [],

@@ -23,9 +23,41 @@
 #   - use `pnpm ak:propose-skill <name>` to open a PR promoting a local skill to org-meta
 #
 # Optional fields:
-#   requiredFeature — only distributed when the feature is enabled in project.yaml
-#   tags            — semantic grouping for filtering and search
-#   alias           — alternate trigger names (future use)
+#   requiredFeature        — only distributed when the feature is enabled in project.yaml
+#   tags                   — semantic grouping for filtering and search
+#   alias                  — alternate trigger names (future use)
+#   category               — engineering | productivity | meta | internal
+#                            Used by the categorised skills layout (see settings
+#                            skills.categorised). When the layout is enabled,
+#                            skills render under .agents/skills/<category>/<name>/
+#                            and .claude/skills/<category>/<name>/. Default: meta.
+#   lifecycle              — active | in-progress | deprecated (default: active)
+#                            Skills with lifecycle: deprecated are excluded from
+#                            sync output. lifecycle: in-progress emits as normal
+#                            but logs a warning at sync time (no header is added
+#                            to the rendered SKILL.md).
+#   disableModelInvocation — true | false (default: false)
+#                            When true, the Claude SKILL.md template emits
+#                            `disable-model-invocation: true` in the rendered
+#                            frontmatter so the skill only fires on explicit
+#                            invocation. The variable is passed to every
+#                            target's template; only the Claude template
+#                            consumes it — other target templates (e.g. Codex)
+#                            ignore it by design.
+#   triggers               — string[] of "Use when…" phrases intended to be
+#                            composed into the rendered description, helping the
+#                            agent decide when to load the skill. NOTE: engine
+#                            wiring for triggers is not yet implemented; this
+#                            field is reserved for a later phase.
+#   companions             — string[] of additional .md files that live alongside
+#                            SKILL.md and must be copied during sync. Used for
+#                            progressive disclosure of deep skills (e.g. tdd ships
+#                            companions: [tests.md, mocking.md, deep-modules.md]).
+#                            Paths are relative to the skill directory in
+#                            ~/repos/org-meta/skills/<name>/ (or the configured
+#                            ORG_META_PATH).
+#   derivedFrom            — free-form attribution string for skills adapted from
+#                            an upstream source (e.g. "mattpocock/skills@<sha>").
 # =============================================================================
 
 skills:

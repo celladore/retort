@@ -6,7 +6,8 @@
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import { cp, mkdir, readdir, readFile, writeFile } from 'fs/promises';
-import { basename, dirname, extname, join, relative, resolve } from 'path';
+import { homedir } from 'os';
+import path, { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path';
 import {
   filterByTier,
   mergeThemeIntoSettings,
@@ -15,6 +16,7 @@ import {
   validateThemeSpec,
 } from './brand-resolver.mjs';
 
+import { isUnsafePathSegment } from './fs-utils.mjs';
 import { readYaml } from './spec-loader.mjs';
 import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
 import {
@@ -761,7 +763,10 @@ export async function syncClaudeSkills(
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     // Skills use filename prefix strategy (directory-per-skill)
     const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
-    await writeOutput(join(tmpDir, '.claude', 'skills', stem, 'SKILL.md'), withHeader);
+    const segments = vars.skillsCategorised
+      ? ['.claude', 'skills', cmdVars.commandCategory, stem, 'SKILL.md']
+      : ['.claude', 'skills', stem, 'SKILL.md'];
+    await writeOutput(join(tmpDir, ...segments), withHeader);
   }
 }
 
@@ -1192,13 +1197,22 @@ export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoN
     const rendered = renderTemplate(template, cmdVars, tplPath);
     const withHeader = insertHeader(rendered, '.md', version, repoName);
     const { stem } = resolveCommandPath(cmd.name, prefix, 'filename');
-    await writeOutput(join(tmpDir, '.agents', 'skills', stem, 'SKILL.md'), withHeader);
+    const segments = vars.skillsCategorised
+      ? ['.agents', 'skills', cmdVars.commandCategory, stem, 'SKILL.md']
+      : ['.agents', 'skills', stem, 'SKILL.md'];
+    await writeOutput(join(tmpDir, ...segments), withHeader);
   }
 }
 
 // ---------------------------------------------------------------------------
 // Org-meta skill distribution + uptake detection
 // ---------------------------------------------------------------------------
+
+// isUnsafePathSegment lives in fs-utils.mjs to break a circular dep with
+// var-builders.mjs (which is consumed by platform-syncer). Re-exported here
+// so external callers that previously imported it from platform-syncer keep
+// working.
+export { isUnsafePathSegment };
 
 /**
  * Resolves the path to the org-meta skills directory.
@@ -1209,53 +1223,165 @@ export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoN
 function resolveOrgMetaSkillsDir() {
   const base = process.env.ORG_META_PATH
     ? resolve(process.env.ORG_META_PATH)
-    : resolve(process.env.HOME || process.env.USERPROFILE || '~', 'repos', 'org-meta');
+    : resolve(homedir(), 'repos', 'org-meta');
   return join(base, 'skills');
 }
 
 /**
- * Copies org-meta skills (source: org-meta) into tmpDir/.agents/skills/<name>/SKILL.md.
- * Non-destructive: if the skill already exists in projectRoot with different content,
- * the file is NOT written to tmpDir — the local version is preserved.
+ * Copies an org-meta skill file (SKILL.md or companion) into tmpDir.
+ * Returns true if the file was written, false if skipped (missing source, or
+ * local divergence preserved).
+ *
+ * @param {object} args
+ * @param {string} args.srcPath - Absolute path to the source file in org-meta
+ * @param {string} args.destRelPath - Path relative to projectRoot
+ * @param {string} args.tmpDir
+ * @param {string} args.projectRoot
+ * @param {string} args.label - Human label for log messages (e.g. "skill 'tdd'" or "companion 'tdd/tests.md'")
+ * @param {function} args.log
+ */
+async function copyOrgMetaFile({ srcPath, destRelPath, tmpDir, projectRoot, label, log }) {
+  if (!existsSync(srcPath)) {
+    log(`[agentkit:sync] org-meta ${label} not found at ${srcPath} — skipping`);
+    return false;
+  }
+
+  const destProjectPath = join(projectRoot, destRelPath);
+  if (existsSync(destProjectPath)) {
+    const localContent = readFileSync(destProjectPath, 'utf-8');
+    const srcContent = readFileSync(srcPath, 'utf-8');
+    if (localContent !== srcContent) {
+      log(`[agentkit:sync] org-meta ${label} differs from local — preserving local copy`);
+      return false;
+    }
+  }
+
+  const content = readFileSync(srcPath, 'utf-8');
+  await writeOutput(join(tmpDir, destRelPath), content);
+  return true;
+}
+
+/**
+ * Returns the lifecycle of a skill spec entry, defaulting to 'active'.
+ * Recognised values: 'active' | 'in-progress' | 'deprecated'.
+ */
+function skillLifecycle(skill) {
+  const value = skill?.lifecycle;
+  if (value === 'in-progress' || value === 'deprecated') return value;
+  return 'active';
+}
+
+/**
+ * Copies org-meta skills (source: org-meta) into tmpDir/.agents/skills/.
+ * - SKILL.md is always copied (subject to non-destructive divergence preservation).
+ * - companions: [...] entries listed on the skill spec are copied alongside.
+ * - lifecycle: deprecated suppresses emission entirely.
+ * - lifecycle: in-progress emits with a warning log line.
+ * - When opts.categorised is true, output goes to .agents/skills/<category>/<name>/
+ *   instead of .agents/skills/<name>/. Default category is 'meta'.
  *
  * @param {string} tmpDir - Temp directory for sync output
  * @param {string} projectRoot - Actual project root (for diffing existing files)
  * @param {object} skillsSpec - Parsed skills.yaml
  * @param {function} log - Logger
+ * @param {object} [opts]
+ * @param {boolean} [opts.categorised=false] - Layered layout flag
  */
-export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log) {
+export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, opts = {}) {
+  const categorised = opts.categorised === true;
   const orgMetaSkillsDir = resolveOrgMetaSkillsDir();
   if (!existsSync(orgMetaSkillsDir)) {
     log(`[agentkit:sync] org-meta skills: directory not found at ${orgMetaSkillsDir} — skipping`);
     return;
   }
 
-  const orgMetaSkills = (skillsSpec.skills || []).filter((s) => s.source === 'org-meta');
+  // Guard: skills.yaml may load as a non-array (e.g. `skills: {}` or null).
+  // Without this, `.filter` would throw and crash the whole sync.
+  const skillsList = Array.isArray(skillsSpec?.skills) ? skillsSpec.skills : [];
+  const orgMetaSkills = skillsList.filter((s) => s.source === 'org-meta');
 
   for (const skill of orgMetaSkills) {
-    const srcPath = join(orgMetaSkillsDir, skill.name, 'SKILL.md');
-    if (!existsSync(srcPath)) {
-      log(`[agentkit:sync] org-meta skill '${skill.name}' not found at ${srcPath} — skipping`);
+    const lifecycle = skillLifecycle(skill);
+    if (lifecycle === 'deprecated') {
+      log(`[agentkit:sync] org-meta skill '${skill.name}' is deprecated — skipping emission`);
+      continue;
+    }
+    if (lifecycle === 'in-progress') {
+      log(`[agentkit:sync] org-meta skill '${skill.name}' is in-progress — emitting unstable copy`);
+    }
+
+    // Validate skill.name: reject values containing path separators or traversal
+    // sequences. skills.yaml isn't validated at sync time, so a crafted name
+    // could otherwise read or write outside .agents/skills/ via path.join.
+    if (isUnsafePathSegment(skill.name)) {
+      log(`[agentkit:sync] org-meta skill name '${skill.name}' is unsafe — skipping emission`);
       continue;
     }
 
-    const destRelPath = join('.agents', 'skills', skill.name, 'SKILL.md');
-    const destProjectPath = join(projectRoot, destRelPath);
+    // Validate category: same vector. Fall back to 'meta' rather than skipping
+    // the whole skill so a typo in category doesn't lose a legitimate skill.
+    const rawCategory =
+      typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
+    const categoryUnsafe = isUnsafePathSegment(rawCategory);
+    if (categoryUnsafe) {
+      log(
+        `[agentkit:sync] org-meta skill '${skill.name}' has unsafe category '${rawCategory}' — using 'meta'`
+      );
+    }
+    const category = categoryUnsafe ? 'meta' : rawCategory;
+    const baseSegments = categorised
+      ? ['.agents', 'skills', category, skill.name]
+      : ['.agents', 'skills', skill.name];
 
-    // If local version exists and differs, preserve it (non-destructive)
-    if (existsSync(destProjectPath)) {
-      const localContent = readFileSync(destProjectPath, 'utf-8');
-      const srcContent = readFileSync(srcPath, 'utf-8');
-      if (localContent !== srcContent) {
+    await copyOrgMetaFile({
+      srcPath: join(orgMetaSkillsDir, skill.name, 'SKILL.md'),
+      destRelPath: join(...baseSegments, 'SKILL.md'),
+      tmpDir,
+      projectRoot,
+      label: `skill '${skill.name}'`,
+      log,
+    });
+
+    const skillSrcDir = resolve(orgMetaSkillsDir, skill.name);
+    const companions = Array.isArray(skill.companions) ? skill.companions : [];
+    for (const companion of companions) {
+      if (typeof companion !== 'string' || companion.length === 0) continue;
+      // Companions are documented as additional .md files alongside SKILL.md.
+      // Enforce that contract here: must be a .md filename with no path
+      // separators (subdirectories aren't supported by the spec).
+      if (companion.includes('/') || companion.includes('\\') || !companion.endsWith('.md')) {
         log(
-          `[agentkit:sync] org-meta skill '${skill.name}' differs from local — preserving local copy`
+          `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (must be a .md filename, no subdirectories)`
         );
         continue;
       }
+      // Reject anything that escapes the skill directory. Check both POSIX and
+      // win32 isAbsolute so a Windows drive-letter path (e.g. "C:\\evil.md") is
+      // caught even when the engine runs on Linux CI, then verify the resolved
+      // companion is strictly inside the skill source directory.
+      if (isAbsolute(companion) || path.win32.isAbsolute(companion)) {
+        log(
+          `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
+        );
+        continue;
+      }
+      const resolvedCompanion = resolve(skillSrcDir, companion);
+      const rel = relative(skillSrcDir, resolvedCompanion);
+      if (rel.startsWith('..') || rel === '' || isAbsolute(rel)) {
+        log(
+          `[agentkit:sync] org-meta skill '${skill.name}' companion '${companion}' rejected (path escapes skill dir)`
+        );
+        continue;
+      }
+      await copyOrgMetaFile({
+        srcPath: join(orgMetaSkillsDir, skill.name, companion),
+        destRelPath: join(...baseSegments, companion),
+        tmpDir,
+        projectRoot,
+        label: `companion '${skill.name}/${companion}'`,
+        log,
+      });
     }
-
-    const content = readFileSync(srcPath, 'utf-8');
-    await writeOutput(join(tmpDir, destRelPath), content);
   }
 }
 
@@ -1265,17 +1391,32 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log) {
  * This is the non-destructive uptake mechanism — unknown skills are never overwritten,
  * only reported. Use `pnpm ak:propose-skill <name>` to promote them to org-meta.
  *
+ * When opts.categorised is true the layout is .agents/skills/<category>/<name>/, so
+ * first-level directories are category buckets rather than skill directories. The scan
+ * descends one level deeper in that case.
+ *
  * @param {string} tmpDir - Temp directory for sync output
  * @param {string} projectRoot - Actual project root (for reading existing skills)
  * @param {object} skillsSpec - Parsed skills.yaml
  * @param {string} syncDate - ISO date string (YYYY-MM-DD)
  * @param {function} log - Logger
+ * @param {object} [opts]
+ * @param {boolean} [opts.categorised=false] - Whether the categorised layout is active
  */
-export async function syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, syncDate, log) {
+export async function syncUnknownSkillsReport(
+  tmpDir,
+  projectRoot,
+  skillsSpec,
+  syncDate,
+  log,
+  opts = {}
+) {
+  const categorised = opts.categorised === true;
   const localSkillsDir = join(projectRoot, '.agents', 'skills');
   if (!existsSync(localSkillsDir)) return;
 
-  const knownNames = new Set((skillsSpec.skills || []).map((s) => s.name));
+  const knownSkillsList = Array.isArray(skillsSpec?.skills) ? skillsSpec.skills : [];
+  const knownNames = new Set(knownSkillsList.map((s) => s.name));
   let entries;
   try {
     entries = await readdir(localSkillsDir, { withFileTypes: true });
@@ -1283,9 +1424,42 @@ export async function syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, s
     return;
   }
 
-  const unknownSkills = entries
-    .filter((e) => e.isDirectory() && e.name !== '_unknown' && !knownNames.has(e.name))
-    .map((e) => e.name);
+  let unknownSkills;
+
+  if (categorised) {
+    // In categorised mode the first level contains category dirs (e.g. "meta/", "engineering/").
+    // Descend one level deeper to find the actual skill directories. Use a Set
+    // so a stray duplicate (same skill folder accidentally placed under two
+    // categories) is reported once, not twice. Stale flat skill dirs left over
+    // from before categorisation (containing SKILL.md directly at the top level)
+    // are also surfaced so the user notices and migrates them.
+    const unknownSet = new Set();
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name === '_unknown') continue;
+      const topDir = join(localSkillsDir, entry.name);
+      // Stale flat skill: the top-level dir itself contains a SKILL.md.
+      if (existsSync(join(topDir, 'SKILL.md')) && !knownNames.has(entry.name)) {
+        unknownSet.add(entry.name);
+        continue;
+      }
+      let catEntries;
+      try {
+        catEntries = await readdir(topDir, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const catEntry of catEntries) {
+        if (catEntry.isDirectory() && !knownNames.has(catEntry.name)) {
+          unknownSet.add(catEntry.name);
+        }
+      }
+    }
+    unknownSkills = [...unknownSet];
+  } else {
+    unknownSkills = entries
+      .filter((e) => e.isDirectory() && e.name !== '_unknown' && !knownNames.has(e.name))
+      .map((e) => e.name);
+  }
 
   if (unknownSkills.length === 0) return;
 
