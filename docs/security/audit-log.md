@@ -72,7 +72,11 @@ Renovate is configured for this repo (per `.claude/rules/dependency-management.m
 
 ### Recurrence
 
-Add a recurring `/loop` or scheduled audit at next quarter (2026-08) to re-run this triage and append a new entry to this log.
+Re-run this triage at the next quarter (target: **2026-08**) and append a new entry to this log. Concrete options:
+
+- A scheduled GitHub Actions workflow (cron) that runs the same `gh api` query and opens a tracking issue when alert counts change.
+- A recurring calendar reminder for whoever owns security review.
+- Manual reminder during quarterly planning.
 
 ---
 
