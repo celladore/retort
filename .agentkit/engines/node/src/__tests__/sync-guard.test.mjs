@@ -119,15 +119,20 @@ describe('checkDirtyProtectedFiles', () => {
   });
 
   it('handles renames by extracting the new path', () => {
-    // Stage a rename: move app.js from src/ into .agentkit/spec/ (so it lands inside a protected dir)
+    // To exercise the "R old -> new" rename-parsing branch, both endpoints of
+    // the rename must be inside the scope passed to `git status --porcelain`.
+    // If only the destination is in scope, git collapses the entry to "A new"
+    // (an add) and the rename branch is never hit.
     execFileSync('git', ['mv', 'src/app.js', '.agentkit/spec/app.js'], {
       cwd: tempDir,
       stdio: 'pipe',
     });
-    const result = checkDirtyProtectedFiles(tempDir, ['.agentkit/spec']);
+    const result = checkDirtyProtectedFiles(tempDir, ['src', '.agentkit/spec']);
     expect(result.dirty).toBe(true);
-    // Rename appears as "R  src/app.js -> .agentkit/spec/app.js" — we keep the destination.
+    // git emits "R  src/app.js -> .agentkit/spec/app.js" — we keep the destination.
     expect(result.files).toContain('.agentkit/spec/app.js');
+    expect(result.files).not.toContain('src/app.js');
+    // Sanity: no entry should still contain the literal arrow.
     expect(result.files.every((f) => !f.includes(' -> '))).toBe(true);
   });
 });
@@ -185,11 +190,10 @@ describe('promptDirtyFileAction', () => {
   });
 
   it('returns abort when stash subprocess fails', async () => {
-    // Use a path that git can't possibly stash because there is no repo here.
-    // The original cwd of the test process is irrelevant — what matters is that
-    // the stash command in sync-guard runs from process.cwd(), and since we never
-    // staged anything related to ".agentkit-sync-guard-test-no-such-file" git
-    // returns non-zero on the rename that follows.
+    // Force the stash subprocess to fail by running it from a directory that
+    // is NOT a git repository: `git stash push ...` exits non-zero with
+    // "fatal: not a git repository", sync-guard catches that and returns 'abort'.
+    // We chdir into a fresh temp dir (no .git) for the duration of this test.
     const origCwd = process.cwd();
     const noRepo = mkdtempSync(join(tmpdir(), 'sync-guard-norepo-'));
     process.chdir(noRepo);
