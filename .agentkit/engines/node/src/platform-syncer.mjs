@@ -1321,9 +1321,7 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
     // sequences. skills.yaml isn't validated at sync time, so a crafted name
     // could otherwise read or write outside .agents/skills/ via path.join.
     if (isUnsafePathSegment(skill.name)) {
-      log(
-        `[agentkit:sync] org-meta skill name '${skill.name}' is unsafe — skipping emission`
-      );
+      log(`[agentkit:sync] org-meta skill name '${skill.name}' is unsafe — skipping emission`);
       continue;
     }
 

@@ -193,7 +193,9 @@ describe('inventoryOrgMetaSkills', () => {
   });
 
   it('skips entries whose name contains path traversal sequences', () => {
-    writeSpec('skills:\n  - name: "../evil"\n    source: org-meta\n  - name: safe\n    source: org-meta\n');
+    writeSpec(
+      'skills:\n  - name: "../evil"\n    source: org-meta\n  - name: safe\n    source: org-meta\n'
+    );
     writeOrgMetaSkill('safe', '# safe');
 
     const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);

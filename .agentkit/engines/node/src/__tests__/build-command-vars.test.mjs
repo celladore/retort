@@ -62,18 +62,12 @@ describe('buildCommandVars — Phase 2 skill metadata fields', () => {
     // commands.yaml IS schema-validated, but the schema only runs in
     // spec-validate. A hand-edited spec at runSync time must not be able to
     // make commandCategory escape via path.join.
-    const result = buildCommandVars(
-      { name: 'foo', description: 'd', category: '../escape' },
-      {}
-    );
+    const result = buildCommandVars({ name: 'foo', description: 'd', category: '../escape' }, {});
     expect(result.commandCategory).toBe('meta');
   });
 
   it('falls back to commandCategory "meta" when category contains a path separator', () => {
-    const result = buildCommandVars(
-      { name: 'foo', description: 'd', category: 'eng/sub' },
-      {}
-    );
+    const result = buildCommandVars({ name: 'foo', description: 'd', category: 'eng/sub' }, {});
     expect(result.commandCategory).toBe('meta');
   });
 
