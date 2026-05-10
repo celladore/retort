@@ -18,7 +18,8 @@ beforeEach(() => {
 afterEach(() => {
   // Windows occasionally hits ENOTEMPTY when a freshly-deleted file's handle
   // hasn't been released by the OS yet. Retry generously, then swallow —
-  // the OS will reap /tmp on its own.
+  // a leftover dir under the system tmpdir is acceptable for tests/CI, and
+  // accepting that residue is preferable to a flaky failure here.
   try {
     rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
   } catch {
