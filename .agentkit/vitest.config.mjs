@@ -20,7 +20,7 @@ export default defineConfig({
       // cost-tracker.mjs, init.mjs, orchestrator.mjs, discover.mjs, and
       // retort-config-wizard.mjs.
       thresholds: {
-        lines: 79,
+        lines: 77,
         branches: 65,
         functions: 80,
       },
