@@ -624,8 +624,12 @@ export {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
+  buildSteps,
+  detectStacks,
   isAllowedFormatter,
   isAllowedLinter,
+  loadCoverageThreshold,
   resolveFormatter,
   resolveLinter,
+  resolveTypecheckCommand,
 };
