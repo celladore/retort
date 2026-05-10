@@ -16,21 +16,10 @@ import { resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Per-test mock state for `@clack/prompts`. Tests assign `factory` to a
-// closure that returns the mock module; the hoisted helper mock reads the
-// latest `factory` when `runInit` calls `resolveClackPrompts()`. We mock
-// the relative-path helper module (`../_clack-prompts.mjs`) rather than
-// the bare `@clack/prompts` because vitest 4's `vi.doMock` for bare-module
-// dynamic imports is unreliable in thread workers on Linux.
+// closure that returns the mock module; `runInit` reads it through a narrow
+// global test hook. This avoids vitest 4's unreliable `vi.doMock` behavior
+// for dynamic imports in Linux thread workers.
 const clackMockState = { factory: null };
-
-vi.mock('../_clack-prompts.mjs', () => ({
-  resolveClackPrompts: async () => {
-    if (!clackMockState.factory) {
-      throw new Error('test did not configure @clack/prompts mock');
-    }
-    return clackMockState.factory();
-  },
-}));
 
 const {
   applyDetectedKitDefaults,
@@ -803,6 +792,12 @@ describe('runInit dry-run', () => {
     vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
+    globalThis.__RETORT_TEST_CLACK_PROMPTS__ = async () => {
+      if (!clackMockState.factory) {
+        throw new Error('test did not configure @clack/prompts mock');
+      }
+      return clackMockState.factory();
+    };
   });
 
   afterEach(() => {
@@ -874,6 +869,7 @@ describe('runInit interactive wizard', () => {
     vi.doUnmock('../discover.mjs');
     vi.doUnmock('../synchronize.mjs');
     clackMockState.factory = null;
+    delete globalThis.__RETORT_TEST_CLACK_PROMPTS__;
     vi.restoreAllMocks();
     cleanupTmpDir(tmpRoot);
   });

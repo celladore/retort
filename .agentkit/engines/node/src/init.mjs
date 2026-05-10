@@ -282,8 +282,12 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Interactive wizard ---
   let clack;
   try {
-    const { resolveClackPrompts } = await import('./_clack-prompts.mjs');
-    clack = await resolveClackPrompts();
+    if (typeof globalThis.__RETORT_TEST_CLACK_PROMPTS__ === 'function') {
+      clack = await globalThis.__RETORT_TEST_CLACK_PROMPTS__();
+    } else {
+      const { resolveClackPrompts } = await import('./_clack-prompts.mjs');
+      clack = await resolveClackPrompts();
+    }
   } catch {
     console.warn(
       '[agentkit:init] @clack/prompts not available — falling back to non-interactive mode.'
