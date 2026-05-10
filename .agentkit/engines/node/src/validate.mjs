@@ -44,7 +44,6 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const requiredDirs = [
     '.claude/commands',
     '.claude/hooks',
-    '.agentkit/state',
     '.claude/rules',
     '.claude/agents',
     '.cursor/rules',
@@ -65,20 +64,26 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 3: Validate JSON files ──────────────────────────────────────
   console.log('\n  --- JSON Files ---');
-  const jsonFiles = ['.claude/settings.json', '.agentkit/state/schema.json'];
+  const jsonFiles = [
+    { label: '.claude/settings.json', path: resolve(projectRoot, '.claude/settings.json') },
+    {
+      label: '.agentkit/templates/claude/state/schema.json',
+      path: resolve(agentkitRoot, 'templates/claude/state/schema.json'),
+    },
+  ];
 
   for (const file of jsonFiles) {
-    const fullPath = resolve(projectRoot, file);
+    const fullPath = file.path;
     if (!existsSync(fullPath)) {
-      console.error(`  FAIL: Missing JSON file: ${file}`);
+      console.error(`  FAIL: Missing JSON file: ${file.label}`);
       errors++;
       continue;
     }
     try {
       JSON.parse(readFileSync(fullPath, 'utf-8'));
-      console.log(`  OK: ${file} (valid JSON)`);
+      console.log(`  OK: ${file.label} (valid JSON)`);
     } catch (err) {
-      console.error(`  FAIL: ${file} — invalid JSON: ${err.message}`);
+      console.error(`  FAIL: ${file.label} — invalid JSON: ${err.message}`);
       errors++;
     }
   }
