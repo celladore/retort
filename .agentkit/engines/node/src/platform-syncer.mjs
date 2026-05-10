@@ -1421,14 +1421,21 @@ export async function syncUnknownSkillsReport(
     // In categorised mode the first level contains category dirs (e.g. "meta/", "engineering/").
     // Descend one level deeper to find the actual skill directories. Use a Set
     // so a stray duplicate (same skill folder accidentally placed under two
-    // categories) is reported once, not twice.
+    // categories) is reported once, not twice. Stale flat skill dirs left over
+    // from before categorisation (containing SKILL.md directly at the top level)
+    // are also surfaced so the user notices and migrates them.
     const unknownSet = new Set();
     for (const entry of entries) {
       if (!entry.isDirectory() || entry.name === '_unknown') continue;
-      const catDir = join(localSkillsDir, entry.name);
+      const topDir = join(localSkillsDir, entry.name);
+      // Stale flat skill: the top-level dir itself contains a SKILL.md.
+      if (existsSync(join(topDir, 'SKILL.md')) && !knownNames.has(entry.name)) {
+        unknownSet.add(entry.name);
+        continue;
+      }
       let catEntries;
       try {
-        catEntries = await readdir(catDir, { withFileTypes: true });
+        catEntries = await readdir(topDir, { withFileTypes: true });
       } catch {
         continue;
       }
