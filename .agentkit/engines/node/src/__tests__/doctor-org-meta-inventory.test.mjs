@@ -158,4 +158,48 @@ describe('inventoryOrgMetaSkills', () => {
       expect.objectContaining({ name: 'zeta', status: 'local-divergent' }),
     ]);
   });
+
+  it('prefers the categorised path over a stale flat copy when both exist', () => {
+    // Repo migrated to the categorised layout but still has a stale flat
+    // .agents/skills/iota/SKILL.md left over. The active copy under
+    // .agents/skills/engineering/iota/SKILL.md is the one that matches
+    // upstream — doctor must report 'present', not be misled by the stale
+    // flat copy diverging.
+    writeSpec('skills:\n  - name: iota\n    source: org-meta\n    category: engineering\n');
+    writeOrgMetaSkill('iota', '# upstream iota');
+    // Categorised copy matches upstream exactly
+    writeLocalSkillCategorised('engineering', 'iota', '# upstream iota');
+    // Stale flat copy is older and has drifted
+    writeLocalSkill('iota', '# stale flat copy');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    // Categorised copy wins → present, not local-divergent.
+    expect(result.results).toEqual([expect.objectContaining({ name: 'iota', status: 'present' })]);
+  });
+
+  it('still detects flat divergence when no categorised copy exists', () => {
+    // Repo has not migrated to categorised yet — only a flat copy lives
+    // locally, and it diverges from upstream.
+    writeSpec('skills:\n  - name: kappa\n    source: org-meta\n');
+    writeOrgMetaSkill('kappa', '# upstream kappa');
+    writeLocalSkill('kappa', '# diverged flat');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    expect(result.results).toEqual([
+      expect.objectContaining({ name: 'kappa', status: 'local-divergent' }),
+    ]);
+  });
+
+  it('skips entries whose name contains path traversal sequences', () => {
+    writeSpec('skills:\n  - name: "../evil"\n    source: org-meta\n  - name: safe\n    source: org-meta\n');
+    writeOrgMetaSkill('safe', '# safe');
+
+    const result = inventoryOrgMetaSkills(join(projectRoot, '.agentkit'), projectRoot);
+
+    // Only the safe entry should appear — the unsafe name is filtered out
+    // before any join() call, so doctor never reads outside the org-meta dir.
+    expect(result.results).toEqual([expect.objectContaining({ name: 'safe' })]);
+  });
 });

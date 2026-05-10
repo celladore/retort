@@ -5,7 +5,9 @@
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml, { FAILSAFE_SCHEMA } from 'js-yaml';
+import { homedir } from 'os';
 import { join, resolve } from 'path';
+import { isUnsafePathSegment } from './platform-syncer.mjs';
 import {
   validateSpec,
   validateMappingCoverage,
@@ -90,7 +92,7 @@ function loadOverlayRenderTargets(agentkitRoot) {
 function resolveOrgMetaSkillsDir() {
   const base = process.env.ORG_META_PATH
     ? resolve(process.env.ORG_META_PATH)
-    : resolve(process.env.HOME || process.env.USERPROFILE || '~', 'repos', 'org-meta');
+    : resolve(homedir(), 'repos', 'org-meta');
   return join(base, 'skills');
 }
 
@@ -116,8 +118,15 @@ export function inventoryOrgMetaSkills(specRoot, projectRoot) {
 
   const orgMetaDir = resolveOrgMetaSkillsDir();
   const rawSkills = Array.isArray(parsed.skills) ? parsed.skills : [];
+  // Filter out malformed entries (missing/empty name, wrong source) AND any entries
+  // whose name would be unsafe to use as a path segment — skills.yaml isn't validated
+  // by doctor, so a crafted name with `..` or path separators must not reach join().
   const skills = rawSkills.filter(
-    (s) => typeof s?.name === 'string' && s.name.length > 0 && s.source === 'org-meta'
+    (s) =>
+      typeof s?.name === 'string' &&
+      s.name.length > 0 &&
+      s.source === 'org-meta' &&
+      !isUnsafePathSegment(s.name)
   );
   const results = [];
 
@@ -128,16 +137,20 @@ export function inventoryOrgMetaSkills(specRoot, projectRoot) {
       continue;
     }
 
-    // Check both flat (.agents/skills/<name>/) and categorised (.agents/skills/<category>/<name>/)
-    // layouts so that doctor reports correct status regardless of whether categorised mode is on.
-    const category =
+    // Check both layouts. Prefer the categorised path when it exists so a stale
+    // flat copy left over from before the layout switch doesn't mask divergence
+    // in the active categorised copy. Fall back to flat only if categorised is
+    // absent. Defaults category to 'meta' (matches the syncer); reject unsafe
+    // category values defensively (skills.yaml isn't validated here).
+    const rawCategory =
       typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
-    const localFlatPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
+    const category = isUnsafePathSegment(rawCategory) ? 'meta' : rawCategory;
     const localCatPath = join(projectRoot, '.agents', 'skills', category, skill.name, 'SKILL.md');
-    const localPath = existsSync(localFlatPath)
-      ? localFlatPath
-      : existsSync(localCatPath)
-        ? localCatPath
+    const localFlatPath = join(projectRoot, '.agents', 'skills', skill.name, 'SKILL.md');
+    const localPath = existsSync(localCatPath)
+      ? localCatPath
+      : existsSync(localFlatPath)
+        ? localFlatPath
         : null;
 
     if (localPath) {

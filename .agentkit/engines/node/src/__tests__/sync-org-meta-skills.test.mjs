@@ -176,6 +176,34 @@ describe('syncOrgMetaSkills', () => {
     expect(logs.some((m) => m.includes('unsafe category'))).toBe(true);
   });
 
+  it('skips skills whose name contains path traversal sequences', async () => {
+    // A crafted skills.yaml entry like name: "../evil" must NOT make the syncer
+    // traverse out of .agents/skills/. The entire skill is dropped (vs. category
+    // which falls back to 'meta') because the name IS the skill identifier.
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: '../evil', source: 'org-meta' }] },
+      log
+    );
+
+    expect(existsSync(join(tmpDir, '.agents', 'skills', '..', 'evil', 'SKILL.md'))).toBe(false);
+    expect(existsSync(join(tmpDir, '.agents', 'evil', 'SKILL.md'))).toBe(false);
+    expect(logs.some((m) => m.includes("name '../evil' is unsafe"))).toBe(true);
+  });
+
+  it('skips skills whose name contains a path separator', async () => {
+    await syncOrgMetaSkills(
+      tmpDir,
+      projectRoot,
+      { skills: [{ name: 'foo/bar', source: 'org-meta' }] },
+      log
+    );
+
+    expect(existsSync(join(tmpDir, '.agents', 'skills', 'foo', 'bar', 'SKILL.md'))).toBe(false);
+    expect(logs.some((m) => m.includes("name 'foo/bar' is unsafe"))).toBe(true);
+  });
+
   it('skips emission entirely for lifecycle: deprecated', async () => {
     writeSrc('legacy', 'SKILL.md', '# legacy');
 

@@ -37,10 +37,13 @@
 #                            but logs a warning at sync time (no header is added
 #                            to the rendered SKILL.md).
 #   disableModelInvocation — true | false (default: false)
-#                            When true, the rendered SKILL.md frontmatter sets
-#                            disable-model-invocation: true on Claude targets so
-#                            the skill only fires when explicitly invoked.
-#                            Stripped from non-Claude targets at render time.
+#                            When true, the Claude SKILL.md template emits
+#                            `disable-model-invocation: true` in the rendered
+#                            frontmatter so the skill only fires on explicit
+#                            invocation. The variable is passed to every
+#                            target's template; only the Claude template
+#                            consumes it — other target templates (e.g. Codex)
+#                            ignore it by design.
 #   triggers               — string[] of "Use when…" phrases intended to be
 #                            composed into the rendered description, helping the
 #                            agent decide when to load the skill. NOTE: engine

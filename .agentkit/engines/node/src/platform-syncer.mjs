@@ -6,6 +6,7 @@
 import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import { cp, mkdir, readdir, readFile, writeFile } from 'fs/promises';
+import { homedir } from 'os';
 import path, { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path';
 import {
   filterByTier,
@@ -1207,6 +1208,23 @@ export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoN
 // ---------------------------------------------------------------------------
 
 /**
+ * Returns true if `value` is unsafe to use as a single path segment — i.e.
+ * not a non-empty string, or contains path separators / traversal sequences.
+ * Used to defend against crafted skills.yaml / commands.yaml entries reading
+ * or writing outside their intended directories.
+ */
+export function isUnsafePathSegment(value) {
+  if (typeof value !== 'string' || value.length === 0) return true;
+  return (
+    value.includes('/') ||
+    value.includes('\\') ||
+    value.includes('..') ||
+    value === '.' ||
+    value.includes('\0')
+  );
+}
+
+/**
  * Resolves the path to the org-meta skills directory.
  * Priority: ORG_META_PATH env var → ~/repos/org-meta (default)
  *
@@ -1215,7 +1233,7 @@ export async function syncCodexSkills(templatesDir, tmpDir, vars, version, repoN
 function resolveOrgMetaSkillsDir() {
   const base = process.env.ORG_META_PATH
     ? resolve(process.env.ORG_META_PATH)
-    : resolve(process.env.HOME || process.env.USERPROFILE || '~', 'repos', 'org-meta');
+    : resolve(homedir(), 'repos', 'org-meta');
   return join(base, 'skills');
 }
 
@@ -1299,15 +1317,21 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
       log(`[agentkit:sync] org-meta skill '${skill.name}' is in-progress — emitting unstable copy`);
     }
 
-    // Validate category: reject values containing path separators or traversal sequences.
-    // This prevents a crafted skills.yaml from writing outside .agents/skills/.
+    // Validate skill.name: reject values containing path separators or traversal
+    // sequences. skills.yaml isn't validated at sync time, so a crafted name
+    // could otherwise read or write outside .agents/skills/ via path.join.
+    if (isUnsafePathSegment(skill.name)) {
+      log(
+        `[agentkit:sync] org-meta skill name '${skill.name}' is unsafe — skipping emission`
+      );
+      continue;
+    }
+
+    // Validate category: same vector. Fall back to 'meta' rather than skipping
+    // the whole skill so a typo in category doesn't lose a legitimate skill.
     const rawCategory =
       typeof skill.category === 'string' && skill.category.length > 0 ? skill.category : 'meta';
-    const categoryUnsafe =
-      rawCategory.includes('/') ||
-      rawCategory.includes('\\') ||
-      rawCategory.includes('..') ||
-      rawCategory === '.';
+    const categoryUnsafe = isUnsafePathSegment(rawCategory);
     if (categoryUnsafe) {
       log(
         `[agentkit:sync] org-meta skill '${skill.name}' has unsafe category '${rawCategory}' — using 'meta'`

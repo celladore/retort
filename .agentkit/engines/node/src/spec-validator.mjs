@@ -158,8 +158,9 @@ const commandSchema = {
     flags: { type: 'array', items: commandFlagSchema },
     'allowed-tools': { type: 'array', items: { type: 'string' } },
     // Claude-only frontmatter hint for skills that should only fire on
-    // explicit invocation. Stripped from non-Claude render targets at
-    // render time (the Codex skill template ignores the variable).
+    // explicit invocation. The variable is passed to every target's template;
+    // only the Claude SKILL.md template emits it as YAML frontmatter — other
+    // target templates (e.g. Codex) ignore the variable.
     disableModelInvocation: { type: 'boolean' },
     // Category for the optional categorised skills layout. When the layout
     // is enabled (settings.skills.categorised: true), the rendered skill
