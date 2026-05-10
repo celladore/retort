@@ -350,14 +350,21 @@ describe('cost-tracker — coverage push', () => {
     });
 
     it('--report defaults month to current YYYY-MM when not provided', async () => {
-      await runCost({
-        agentkitRoot: TEST_AGENTKIT,
-        projectRoot: TEST_PROJECT,
-        flags: { report: true, format: 'json' },
-      });
-      const expectedMonth = new Date().toISOString().slice(0, 7);
-      const data = JSON.parse(logSpy.mock.calls[0][0]);
-      expect(data.month).toBe(expectedMonth);
+      // Freeze the clock so the test can't straddle a month boundary
+      // between runCost's `new Date()` and our expected-month computation.
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-05-15T12:00:00Z'));
+      try {
+        await runCost({
+          agentkitRoot: TEST_AGENTKIT,
+          projectRoot: TEST_PROJECT,
+          flags: { report: true, format: 'json' },
+        });
+        const data = JSON.parse(logSpy.mock.calls[0][0]);
+        expect(data.month).toBe('2026-05');
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 
@@ -455,6 +462,10 @@ describe('cost-tracker — coverage push', () => {
 
   describe('logEvent — directory bootstrap', () => {
     it('creates logsDir if it does not yet exist', () => {
+      // Freeze the clock so the path logEvent computes (`usage-YYYY-MM-DD`)
+      // matches the path we assert on, even at midnight rollover.
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-05-15T12:00:00Z'));
       const fresh = resolve(TEST_PROJECT, 'fresh-cost-tracker', 'agentkit');
       try {
         if (existsSync(fresh)) rmSync(fresh, { recursive: true });
@@ -462,11 +473,11 @@ describe('cost-tracker — coverage push', () => {
 
         logEvent(fresh, { event: 'first' });
 
-        const today = new Date().toISOString().split('T')[0];
-        const logPath = resolve(fresh, 'logs', `usage-${today}.jsonl`);
+        const logPath = resolve(fresh, 'logs', 'usage-2026-05-15.jsonl');
         expect(existsSync(logPath)).toBe(true);
       } finally {
         if (existsSync(dirname(fresh))) rmSync(dirname(fresh), { recursive: true });
+        vi.useRealTimers();
       }
     });
   });
