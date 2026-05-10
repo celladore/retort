@@ -10,8 +10,7 @@
  */
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../runner.mjs', async () => {
@@ -44,8 +43,6 @@ const {
   resolveTypecheckCommand,
   runCheck,
 } = await import('../check.mjs');
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function makeFixture() {
   const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-cov-'));
@@ -292,9 +289,10 @@ describe('buildSteps — warning paths', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('non-string formatter'));
   });
 
-  it('warns and skips a formatter resolving to an empty/invalid command', () => {
+  it('warns and skips a whitespace-only formatter (caught by trim guard)', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    // Whitespace-only string passes the typeof check but empty-trimmed warns
+    // Whitespace-only passes typeof but trim() is empty — same code path
+    // as the non-string warning, before resolveFormatter is called.
     const stack = { name: 't', formatter: '   ' };
     const steps = buildSteps(stack, {}, '/dev/null');
     expect(steps.find((s) => s.name === 'format')).toBeUndefined();
