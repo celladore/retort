@@ -912,6 +912,9 @@ describe('runInit interactive wizard', () => {
       };
     });
 
+    // Reset module registry AFTER all doMocks so init.mjs picks up the
+    // @clack/prompts mock on its dynamic import (matches init.test.mjs).
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     // Act
@@ -995,6 +998,7 @@ describe('runInit interactive wizard', () => {
       runRetortConfigWizard: vi.fn().mockResolvedValue(undefined),
     }));
 
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1111,6 +1115,7 @@ describe('runInit interactive wizard', () => {
       runDiscover: vi.fn().mockResolvedValue(makeMinimalReport()),
     }));
 
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1172,6 +1177,7 @@ describe('runInit interactive wizard', () => {
       runDiscover: vi.fn().mockResolvedValue(makeMinimalReport()),
     }));
 
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1224,6 +1230,7 @@ describe('runInit interactive wizard', () => {
       runDiscover: vi.fn().mockResolvedValue(makeMinimalReport()),
     }));
 
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await runInit({
@@ -1277,6 +1284,7 @@ describe('runInit interactive wizard', () => {
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
     });
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     await expect(
@@ -1296,6 +1304,7 @@ describe('runInit interactive wizard', () => {
       throw new Error('clack unavailable');
     });
 
+    vi.resetModules();
     const { runInit } = await import('../init.mjs');
 
     // Act
