@@ -14,14 +14,14 @@ export default defineConfig({
       reporter: ['text', 'text-summary', 'json-summary'],
       // Thresholds are set at the realistic current floor with a small cushion
       // (lines/branches: enough to fail on regression, not block normal PRs).
-      // The 80/80/80 target was unachievable across the whole engine without
-      // a multi-day per-module branch-coverage push — see `#520` for the plan
-      // to ratchet branches back to 80 by improving coverage on check.mjs,
-      // cost-tracker.mjs, init.mjs, orchestrator.mjs, discover.mjs, and
-      // retort-config-wizard.mjs.
+      // The 80/80/80 target is being approached via the `#520` ratchet:
+      //   - Phase 1 (cost-tracker.mjs, check.mjs) — landed; branches → 70.
+      //   - Phase 2 (init.mjs, orchestrator.mjs) — in progress.
+      //   - Phase 3 (discover.mjs, retort-config-wizard.mjs) — pending.
+      // The branches floor is bumped each phase as headroom is earned.
       thresholds: {
         lines: 77,
-        branches: 65,
+        branches: 70,
         functions: 80,
       },
     },
