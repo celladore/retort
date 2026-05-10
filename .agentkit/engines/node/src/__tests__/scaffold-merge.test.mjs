@@ -127,4 +127,21 @@ describe('normalizeForComparison', () => {
 
     expect(normalizeForComparison(padded)).toBe(normalizeForComparison(compact));
   });
+
+  it('does not break lines that contain pipes but are not table rows', () => {
+    const line = 'echo "a | b | c"';
+    expect(normalizeForComparison(line)).toBe(line);
+  });
+
+  it('handles empty string input', () => {
+    expect(normalizeForComparison('')).toBe('');
+  });
+
+  it('handles single-line input', () => {
+    expect(normalizeForComparison('only one line')).toBe('only one line');
+  });
+
+  it('handles input with only whitespace lines', () => {
+    expect(normalizeForComparison('   \n\t\n')).toBe('');
+  });
 });
