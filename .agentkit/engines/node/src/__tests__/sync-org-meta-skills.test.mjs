@@ -469,5 +469,40 @@ describe('syncOrgMetaSkills', () => {
       expect(readFileSync(tmpOut, 'utf-8')).toBe('# upstream v1');
       expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe('# upstream v1');
     });
+
+    it('preserves local and leaves cache untouched when git is unavailable for merge', async () => {
+      const base = '# alpha\n\nbase content\n';
+      const upstream = '# alpha\n\nUPSTREAM CHANGE\n';
+      const local = '# alpha\n\nLOCAL CHANGE\n';
+
+      writeSrc('alpha', 'SKILL.md', upstream);
+      seedCache('alpha', base);
+      seedLocal('alpha', local);
+
+      // Make git unreachable by pointing PATH to an empty directory.
+      const emptyBin = mkdtempSync(join(tmpdir(), 'no-git-'));
+      const savedPath = process.env.PATH;
+      process.env.PATH = emptyBin;
+      try {
+        await syncOrgMetaSkills(
+          tmpDir,
+          projectRoot,
+          { skills: [{ name: 'alpha', source: 'org-meta' }] },
+          log,
+          { agentkitRoot }
+        );
+      } finally {
+        process.env.PATH = savedPath;
+        rmSync(emptyBin, { recursive: true, force: true });
+      }
+
+      // Local content must be preserved.
+      const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+      expect(readFileSync(tmpOut, 'utf-8')).toBe(local);
+      // Cache must be left untouched (still contains the original base content).
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe(base);
+      // A log message must explain why the merge was skipped.
+      expect(logs.some((m) => m.includes('git unavailable'))).toBe(true);
+    });
   });
 });

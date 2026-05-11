@@ -1343,7 +1343,12 @@ async function copyOrgMetaFile({
         await writeOrgMetaCache(agentkitRoot, destRelPath, srcContent);
         return true;
       }
-      // git merge-file unavailable — fall through to preserve-local, leave cache.
+      // git merge-file unavailable — preserve local, leave cache untouched.
+      log(
+        `[agentkit:sync] org-meta ${label} — git unavailable, merge skipped; preserving local copy`
+      );
+      await writeOutput(join(tmpDir, destRelPath), localContent);
+      return true;
     } else {
       // No cache yet — seed it from current upstream so future runs can merge.
       // This preserves the current observable behavior on the very first run
