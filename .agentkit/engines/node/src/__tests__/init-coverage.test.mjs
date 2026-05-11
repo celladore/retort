@@ -20,6 +20,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // global test hook. This avoids vitest 4's unreliable `vi.doMock` behavior
 // for dynamic imports in Linux thread workers.
 const clackMockState = { factory: null };
+const resolveTestClackPrompts = () => clackMockState.factory();
 
 const {
   applyDetectedKitDefaults,
@@ -937,7 +938,7 @@ describe('runInit interactive wizard', () => {
     await runInit({
       agentkitRoot,
       projectRoot,
-      flags: { repoName: 'demo', force: false },
+      flags: { repoName: 'demo', force: false, __clackPrompts: resolveTestClackPrompts },
     });
 
     // Assert
@@ -1028,6 +1029,7 @@ describe('runInit interactive wizard', () => {
         'external-markdown-files': 'a.md',
         'external-git-repos': 'https://example.com/r',
         'external-target-platforms': 'claude',
+        __clackPrompts: resolveTestClackPrompts,
       },
     });
 
@@ -1135,7 +1137,7 @@ describe('runInit interactive wizard', () => {
     await runInit({
       agentkitRoot,
       projectRoot,
-      flags: { repoName: 'demo' },
+      flags: { repoName: 'demo', __clackPrompts: resolveTestClackPrompts },
     });
 
     const spec = readFileSync(resolve(agentkitRoot, 'spec', 'project.yaml'), 'utf-8');
@@ -1196,7 +1198,7 @@ describe('runInit interactive wizard', () => {
     await runInit({
       agentkitRoot,
       projectRoot,
-      flags: { repoName: 'demo' },
+      flags: { repoName: 'demo', __clackPrompts: resolveTestClackPrompts },
     });
 
     const spec = readFileSync(resolve(agentkitRoot, 'spec', 'project.yaml'), 'utf-8');
@@ -1248,7 +1250,7 @@ describe('runInit interactive wizard', () => {
     await runInit({
       agentkitRoot,
       projectRoot,
-      flags: { repoName: 'demo' },
+      flags: { repoName: 'demo', __clackPrompts: resolveTestClackPrompts },
     });
 
     const settings = readFileSync(
@@ -1302,7 +1304,7 @@ describe('runInit interactive wizard', () => {
       runInit({
         agentkitRoot,
         projectRoot,
-        flags: { repoName: 'demo' },
+        flags: { repoName: 'demo', __clackPrompts: resolveTestClackPrompts },
       })
     ).rejects.toThrow('process.exit called');
 
@@ -1321,7 +1323,7 @@ describe('runInit interactive wizard', () => {
     await runInit({
       agentkitRoot,
       projectRoot,
-      flags: { repoName: 'demo' },
+      flags: { repoName: 'demo', __clackPrompts: resolveTestClackPrompts },
     });
 
     // Assert — overlay was created via fallback

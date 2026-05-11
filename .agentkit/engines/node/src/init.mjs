@@ -282,7 +282,9 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   // --- Interactive wizard ---
   let clack;
   try {
-    if (typeof globalThis.__RETORT_TEST_CLACK_PROMPTS__ === 'function') {
+    if (typeof flags.__clackPrompts === 'function') {
+      clack = await flags.__clackPrompts();
+    } else if (typeof globalThis.__RETORT_TEST_CLACK_PROMPTS__ === 'function') {
       clack = await globalThis.__RETORT_TEST_CLACK_PROMPTS__();
     } else {
       const { resolveClackPrompts } = await import('./_clack-prompts.mjs');
