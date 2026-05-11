@@ -210,7 +210,14 @@ export async function runRetortConfigWizard({ agentkitRoot, projectRoot, flags =
   // --- Interactive wizard ---
   let clack;
   try {
-    clack = await import('@clack/prompts');
+    if (typeof flags.__clackPrompts === 'function') {
+      clack = await flags.__clackPrompts();
+    } else if (typeof globalThis.__RETORT_TEST_CLACK_PROMPTS__ === 'function') {
+      clack = await globalThis.__RETORT_TEST_CLACK_PROMPTS__();
+    } else {
+      const { resolveClackPrompts } = await import('./_clack-prompts.mjs');
+      clack = await resolveClackPrompts();
+    }
   } catch {
     console.warn(
       '[retort] @clack/prompts not available — falling back to non-interactive config generation.'
