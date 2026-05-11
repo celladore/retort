@@ -132,14 +132,17 @@ description; Codecov delta as an issue comment), the REST endpoints
 ## Caching
 
 Cache GitHub responses for 60 seconds in
-`.claude/state/cache/gh-bot-reader/` to avoid hammering the API during
+`~/.claude/cache/gh-bot-reader/` (home-relative, matching the rest of
+the `.claude/` tooling conventions) to avoid hammering the API during
 a single cleanup run that may scan many PRs. Cache key: SHA-256 of the
 GraphQL query string and variables (or REST URL). On secondary rate
 limit (HTTP 403 with `x-ratelimit-remaining: 0`), back off using the
 `Retry-After` header.
 
-The cache is per-session; do not persist across runs. The directory is
-safe to delete at any time and `/cleanup` should treat it as ephemeral.
+Entries are short-lived: the 60-second TTL means each cleanup run
+effectively gets fresh data, and stale entries are ignored. The
+directory itself is safe to delete at any time; `/cleanup` should
+treat it as ephemeral.
 
 ## Per-bot adapters
 
@@ -162,10 +165,15 @@ so the consumer at least sees it. Never throw on an unknown bot.
 ## Algorithm — high level
 
 1. **List candidate PRs** with `gh pr list --state open --json number,headRefName,updatedAt`
-   (or use the supplied `pr_number`).
+   (or use the supplied `pr_number`). `updatedAt` here is only a
+   pre-filter for the `since` option; the per-PR "last push" timestamp
+   used for `new_since_push` is fetched in the next step.
 2. For each PR, **fetch review threads** via the GraphQL query in the
-   CodeRabbit companion. Filter by `since` if supplied; drop resolved
-   threads unless `include_resolved`.
+   CodeRabbit companion. The same query also returns `headRefOid` and
+   `headRef.target.committedDate` — the committer date of the head
+   commit, used as the authoritative "last push" timestamp when
+   deriving each thread's `status`. Filter threads by `since` if
+   supplied; drop resolved threads unless `include_resolved`.
 3. **Group threads by author**. For each author:
    - Match the author against the username table above to pick an adapter.
    - Delegate the thread set to the adapter; receive `BotFinding[]`.

@@ -39,6 +39,14 @@ query ReviewThreads($owner: String!, $name: String!, $number: Int!, $after: Stri
     pullRequest(number: $number) {
       number
       url
+      headRefOid
+      headRef {
+        target {
+          ... on Commit {
+            committedDate
+          }
+        }
+      }
       reviewThreads(first: 100, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes {
@@ -112,9 +120,11 @@ comment:
 | neither — comment posted after last push  | `new_since_push` |
 | neither — comment posted before last push | `unresolved`     |
 
-"Last push" is `pullRequest.headRefOid`'s committer date — fetch it
-once per PR and compare against each thread's earliest comment
-`createdAt`.
+"Last push" is the committer date of the head commit
+(`pullRequest.headRef.target.committedDate` in the query above) —
+fetched once per PR and compared against each thread's earliest
+comment `createdAt`. `headRefOid` is fetched alongside so the
+consumer can verify the SHA hasn't changed mid-scan.
 
 By default the skill drops `resolved` threads. The
 `include_resolved: true` option keeps them.
