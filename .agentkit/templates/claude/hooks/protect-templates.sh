@@ -18,16 +18,16 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 # -- Source repo detection -----------------------------------------------------
-# If we are in the agentkit-forge source repo, agents are maintaining the
-# templates and engine — protection is not needed. Detection: check if
-# .agentkit/package.json name is "agentkit-forge" (the upstream source repo).
+# If we are in the Retort source repo (agentkit-forge-runtime or
+# retort-runtime), agents are maintaining the templates and engine —
+# protection is not needed. Detection: check .agentkit/package.json name.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AGENTKIT_PKG="${SCRIPT_DIR}/../../.agentkit/package.json"
 
 if [[ -f "$AGENTKIT_PKG" ]]; then
     PKG_NAME=$(jq -r '.name // empty' "$AGENTKIT_PKG" 2>/dev/null || true)
     if [[ "$PKG_NAME" == "agentkit-forge-runtime" || "$PKG_NAME" == "retort-runtime" ]]; then
-        # This IS the agentkit-forge source repo — agents maintain these files.
+        # This IS the Retort source repo — agents maintain these files.
         exit 0
     fi
 fi

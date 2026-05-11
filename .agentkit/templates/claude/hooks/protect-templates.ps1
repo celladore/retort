@@ -24,15 +24,16 @@ if (-not $filePath) {
 }
 
 # -- Source repo detection -----------------------------------------------------
-# If we are in the agentkit-forge source repo, agents are maintaining the
-# templates and engine — protection is not needed.
+# If we are in the Retort source repo (agentkit-forge-runtime or
+# retort-runtime), agents are maintaining the templates and engine —
+# protection is not needed.
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $agentkitPkg = Join-Path $scriptDir '..\..\.agentkit\package.json'
 if (Test-Path $agentkitPkg) {
     try {
         $pkg = Get-Content $agentkitPkg -Raw | ConvertFrom-Json
         if ($pkg.name -eq 'agentkit-forge-runtime' -or $pkg.name -eq 'retort-runtime') {
-            # This IS the agentkit-forge source repo — agents maintain these files.
+            # This IS the Retort source repo — agents maintain these files.
             exit 0
         }
     } catch {

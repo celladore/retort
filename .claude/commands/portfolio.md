@@ -172,16 +172,3 @@ When done, print a table:
 | Demo plan    | `docs/portfolio/<slug>/demo-script.md`       | 60-second storyboard |
 | LinkedIn     | `docs/portfolio/<slug>/linkedin-post.md`     | Publish-ready draft  |
 | Index        | `docs/portfolio/<slug>/README.md`            | Links to the above   |
-
-## Rules
-
-1. **Evidence before assertions** — never invent metrics, awards, or
-   collaborators that are not visible in the source material.
-2. **Never auto-publish** — write files only; no LinkedIn API calls, no
-   external posting.
-3. **Respect existing files** — if `docs/portfolio/<slug>/` exists, show
-   a diff and ask before overwriting.
-4. **No emoji** in generated artifacts unless the user's notes already
-   used them or `--audience` calls for it.
-5. **PAARL is the spine** — even when generating only one artifact via
-   `--only`, keep its claims consistent with the full case study.
