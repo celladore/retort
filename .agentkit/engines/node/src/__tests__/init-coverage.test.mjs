@@ -863,6 +863,12 @@ describe('runInit interactive wizard', () => {
     vi.doMock('../synchronize.mjs', () => ({
       runSync: vi.fn().mockResolvedValue(undefined),
     }));
+    globalThis.__RETORT_TEST_CLACK_PROMPTS__ = async () => {
+      if (!clackMockState.factory) {
+        throw new Error('test did not configure @clack/prompts mock');
+      }
+      return clackMockState.factory();
+    };
   });
 
   afterEach(() => {
