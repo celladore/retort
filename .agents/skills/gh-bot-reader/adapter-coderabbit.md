@@ -34,7 +34,7 @@ works for every review-comment adapter — pass it once per PR and route
 results by author.
 
 ```graphql
-query ReviewThreads($owner: String!, $name: String!, $number: Int!, $after: String) {
+query ReviewThreads($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
       number
@@ -47,7 +47,7 @@ query ReviewThreads($owner: String!, $name: String!, $number: Int!, $after: Stri
           }
         }
       }
-      reviewThreads(first: 100, after: $after) {
+      reviewThreads(first: 100, after: $endCursor) {
         pageInfo { hasNextPage endCursor }
         nodes {
           id
@@ -56,7 +56,8 @@ query ReviewThreads($owner: String!, $name: String!, $number: Int!, $after: Stri
           path
           line
           startLine
-          comments(first: 100) {
+          comments(first: 1) {
+            totalCount
             nodes {
               id
               url
@@ -71,6 +72,17 @@ query ReviewThreads($owner: String!, $name: String!, $number: Int!, $after: Stri
   }
 }
 ```
+
+The cursor variable is named `$endCursor` — `gh api graphql --paginate`
+looks for that specific name to feed `pageInfo.endCursor` back in on
+the next page. Renaming it (e.g. `$after`) silently disables
+auto-pagination.
+
+`comments(first: 1) { totalCount }` is intentional: the adapter only
+reads `comments.nodes[0]` (the originating bot comment) and uses
+`totalCount` for `meta.thread_size`. Fetching all replies wastes
+payload and breaks `meta.thread_size` for threads with more than 100
+comments.
 
 Invocation pattern with `gh`:
 
@@ -144,7 +156,7 @@ By default the skill drops `resolved` threads. The
 | `body`             | `comments.nodes[0].body`, first 500 chars after stripping markers |
 | `url`              | `comments.nodes[0].url`                                           |
 | `posted_at`        | `comments.nodes[0].createdAt`                                     |
-| `meta.thread_size` | `comments.nodes.length`                                           |
+| `meta.thread_size` | `comments.totalCount`                                             |
 | `meta.is_outdated` | `reviewThreads.nodes[i].isOutdated`                               |
 
 ## Body sanitisation

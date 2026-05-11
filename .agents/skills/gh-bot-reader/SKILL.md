@@ -164,10 +164,13 @@ so the consumer at least sees it. Never throw on an unknown bot.
 
 ## Algorithm — high level
 
-1. **List candidate PRs** with `gh pr list --state open --json number,headRefName,updatedAt`
-   (or use the supplied `pr_number`). `updatedAt` here is only a
-   pre-filter for the `since` option; the per-PR "last push" timestamp
-   used for `new_since_push` is fetched in the next step.
+1. **List candidate PRs** with
+   `gh pr list --state open --limit 1000 --json number,headRefName,updatedAt`
+   (or use the supplied `pr_number`). `--limit` is mandatory:
+   without it `gh pr list` caps at 30 items and silently skips older
+   open PRs in busy repos. `updatedAt` here is only a pre-filter for
+   the `since` option; the per-PR "last push" timestamp used for
+   `new_since_push` is fetched in the next step.
 2. For each PR, **fetch review threads** via the GraphQL query in the
    CodeRabbit companion. The same query also returns `headRefOid` and
    `headRef.target.committedDate` — the committer date of the head
