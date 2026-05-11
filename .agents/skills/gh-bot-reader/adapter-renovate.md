@@ -27,7 +27,7 @@ through this adapter.
 Renovate produces three kinds of artefact on a PR. Only the first two
 are in scope for this adapter:
 
-1. **PR body** — Renovate is the PR author, so `pullRequest.body` is
+1. **PR body** — Renovate is the PR author, so `pull.body` is
    the update announcement. Contains the package table, release notes,
    configuration block, and a rebase checkbox. Edited in-place as the
    PR progresses; never a separate comment.
@@ -49,12 +49,15 @@ Use these two endpoints per PR:
 ```bash
 # PR body (Renovate is the author)
 gh api "repos/$OWNER/$REPO/pulls/$PR" \
-  --jq '{number, body, user: .user.login, head_sha: .head.sha, updated_at, html_url}'
+  --jq '{number, body, user, head, state, merged, mergeable_state, updated_at, html_url}'
 
 # Conversation comments — filter to Renovate-authored after fetch
 gh api "repos/$OWNER/$REPO/issues/$PR/comments" --paginate \
   --jq '[.[] | select(.user.login | test("^(renovate(-bot)?|renovate\\[bot\\]|mend-renovate\\[bot\\])$"))]'
 ```
+
+Use the full `pulls/{n}` response (no projection) when implementing the
+adapter so additional fields remain available for status/severity logic.
 
 `--paginate` is mandatory for the comments endpoint — repos that run
 Renovate continuously can accumulate dozens of automerge-failure
@@ -119,7 +122,7 @@ is derived from PR-level fields:
 | Comment is from a previous PR head SHA that has since been force-pushed by Renovate  | `outdated`       |
 
 For a body-only finding, "the comment" is the PR body itself —
-`posted_at` is `pullRequest.updated_at` (the last body edit) and
+`posted_at` is `pull.updated_at` (the last body edit) and
 `status` is always one of `unresolved`, `new_since_push`, or
 `resolved` (never `outdated` for the body — old body content is
 overwritten, not preserved).
