@@ -14,14 +14,14 @@ export default defineConfig({
       reporter: ['text', 'text-summary', 'json-summary'],
       // Thresholds are set at the realistic current floor with a small cushion
       // (lines/branches: enough to fail on regression, not block normal PRs).
-      // The 80/80/80 target is being approached via the `#520` ratchet:
+      // The 80/80/80 target was reached via the `#520` ratchet:
       //   - Phase 1 (cost-tracker.mjs, check.mjs) — landed; branches → 70.
-      //   - Phase 2 (init.mjs, orchestrator.mjs) — in progress.
-      //   - Phase 3 (discover.mjs, retort-config-wizard.mjs) — pending.
-      // The branches floor is bumped each phase as headroom is earned.
+      //   - Phase 2 (init.mjs, orchestrator.mjs) — landed (#531, #533).
+      //   - Phase 3 (discover.mjs, retort-config-wizard.mjs) — landed (#536).
+      // Each phase ratcheted the branches floor up as headroom was earned.
       thresholds: {
         lines: 77,
-        branches: 70,
+        branches: 75,
         functions: 80,
       },
     },
