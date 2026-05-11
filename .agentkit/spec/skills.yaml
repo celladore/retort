@@ -266,6 +266,18 @@ skills:
       review agents directly.
     tags: [plugins, routing, review]
 
+  - name: gh-bot-reader
+    scope: global
+    source: org-meta
+    description: >
+      Parse bot-authored PR comments and review threads (CodeRabbit, Copilot,
+      Renovate, Codecov, Sonatype, Claude review) into a structured BotFinding
+      list. Use when /cleanup, /preflight, /review, or /document-history need
+      to surface unresolved bot feedback without each command rolling its own
+      parser. Read-only; never replies or resolves threads.
+    tags: [pr, review, automation, bots]
+    companions: [adapter-coderabbit.md]
+
   - name: using-superpowers
     scope: global
     source: org-meta
