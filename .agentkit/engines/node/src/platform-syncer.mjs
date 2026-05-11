@@ -1252,7 +1252,12 @@ async function copyOrgMetaFile({ srcPath, destRelPath, tmpDir, projectRoot, labe
     const srcContent = readFileSync(srcPath, 'utf-8');
     if (localContent !== srcContent) {
       log(`[agentkit:sync] org-meta ${label} differs from local — preserving local copy`);
-      return false;
+      // Write the LOCAL content (not src) to tmpDir so the file flows through
+      // manifest registration. Without this, the file is absent from
+      // newManifestFiles and cleanStaleFiles deletes it as an orphan —
+      // immediately undoing the "preserve" decision above.
+      await writeOutput(join(tmpDir, destRelPath), localContent);
+      return true;
     }
   }
 

@@ -264,7 +264,7 @@ describe('syncOrgMetaSkills', () => {
     expect(logs.some((m) => m.includes("'wip' is in-progress"))).toBe(true);
   });
 
-  it('preserves a divergent local SKILL.md (non-destructive contract)', async () => {
+  it('preserves a divergent local SKILL.md by routing LOCAL content through tmpDir (non-destructive contract)', async () => {
     writeSrc('alpha', 'SKILL.md', '# upstream');
     const localPath = join(projectRoot, '.agents', 'skills', 'alpha', 'SKILL.md');
     mkdirSync(join(projectRoot, '.agents', 'skills', 'alpha'), { recursive: true });
@@ -277,8 +277,14 @@ describe('syncOrgMetaSkills', () => {
       log
     );
 
-    // tmpDir output is suppressed when local diverges
-    expect(existsSync(join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md'))).toBe(false);
+    // When local diverges, the file MUST still appear in tmpDir — otherwise
+    // newManifestFiles omits it and cleanStaleFiles deletes the local copy
+    // as a stale orphan, immediately undoing the "preserve" decision. The
+    // content written to tmpDir is the LOCAL content (not src), so the
+    // post-sync write-back is a no-op for the local file.
+    const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+    expect(existsSync(tmpOut)).toBe(true);
+    expect(readFileSync(tmpOut, 'utf-8')).toBe('# locally edited');
     expect(logs.some((m) => m.includes('differs from local'))).toBe(true);
   });
 });
