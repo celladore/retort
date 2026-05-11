@@ -17,6 +17,7 @@ import {
 } from './brand-resolver.mjs';
 
 import { isUnsafePathSegment } from './fs-utils.mjs';
+import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { readYaml } from './spec-loader.mjs';
 import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
 import {
@@ -1228,41 +1229,137 @@ function resolveOrgMetaSkillsDir() {
 }
 
 /**
+ * Writes a cached "last synced upstream" copy of an org-meta file under
+ * .scaffold-cache. Used by copyOrgMetaFile as the common-ancestor for the
+ * next three-way merge. Failures are non-fatal — a missing cache just falls
+ * back to the seed path on subsequent runs.
+ *
+ * @param {string} agentkitRoot
+ * @param {string} destRelPath
+ * @param {string} content
+ */
+async function writeOrgMetaCache(agentkitRoot, destRelPath, content) {
+  const cachePath = resolve(agentkitRoot, '.scaffold-cache', destRelPath);
+  try {
+    await ensureDir(dirname(cachePath));
+    await writeFile(cachePath, content, 'utf-8');
+  } catch {
+    /* cache write failures are non-fatal — next run will seed again */
+  }
+}
+
+/**
  * Copies an org-meta skill file (SKILL.md or companion) into tmpDir.
- * Returns true if the file was written, false if skipped (missing source, or
- * local divergence preserved).
+ * Returns true if the file was written, false if skipped (missing source).
+ *
+ * Divergence handling (when agentkitRoot is supplied):
+ *   - No local copy → write upstream pristine + seed cache.
+ *   - Local matches upstream (modulo formatting) → write upstream + refresh cache.
+ *   - Local differs from upstream and no cache yet → preserve local + seed cache
+ *     (matches legacy behavior on first run after this change rolls out).
+ *   - Local differs, cache exists, upstream unchanged since last sync → preserve
+ *     local (template hasn't moved; nothing to merge).
+ *   - Local differs, cache exists, upstream also changed → three-way merge via
+ *     scaffold-merge.threeWayMerge. On success cache advances to new upstream;
+ *     conflicts surface as <<<< markers and a console.warn line.
+ *   - Merge unavailable (git missing) → preserve local, leave cache untouched.
+ *
+ * When agentkitRoot is omitted (older callers / unit tests), behavior degrades
+ * to the legacy preserve-on-divergence path so this function stays drop-in
+ * compatible.
  *
  * @param {object} args
  * @param {string} args.srcPath - Absolute path to the source file in org-meta
  * @param {string} args.destRelPath - Path relative to projectRoot
  * @param {string} args.tmpDir
  * @param {string} args.projectRoot
+ * @param {string} [args.agentkitRoot] - .agentkit root; enables three-way merge when set
  * @param {string} args.label - Human label for log messages (e.g. "skill 'tdd'" or "companion 'tdd/tests.md'")
  * @param {function} args.log
  */
-async function copyOrgMetaFile({ srcPath, destRelPath, tmpDir, projectRoot, label, log }) {
+async function copyOrgMetaFile({
+  srcPath,
+  destRelPath,
+  tmpDir,
+  projectRoot,
+  agentkitRoot,
+  label,
+  log,
+}) {
   if (!existsSync(srcPath)) {
     log(`[agentkit:sync] org-meta ${label} not found at ${srcPath} — skipping`);
     return false;
   }
 
   const destProjectPath = join(projectRoot, destRelPath);
-  if (existsSync(destProjectPath)) {
-    const localContent = readFileSync(destProjectPath, 'utf-8');
-    const srcContent = readFileSync(srcPath, 'utf-8');
-    if (localContent !== srcContent) {
-      log(`[agentkit:sync] org-meta ${label} differs from local — preserving local copy`);
-      // Write the LOCAL content (not src) to tmpDir so the file flows through
-      // manifest registration. Without this, the file is absent from
-      // newManifestFiles and cleanStaleFiles deletes it as an orphan —
-      // immediately undoing the "preserve" decision above.
+  const srcContent = readFileSync(srcPath, 'utf-8');
+
+  // No local copy yet — first-time install, write upstream pristine.
+  if (!existsSync(destProjectPath)) {
+    await writeOutput(join(tmpDir, destRelPath), srcContent);
+    if (agentkitRoot) await writeOrgMetaCache(agentkitRoot, destRelPath, srcContent);
+    return true;
+  }
+
+  const localContent = readFileSync(destProjectPath, 'utf-8');
+
+  // No real divergence (ignoring whitespace / table-cell padding) — propagate
+  // upstream so any cosmetic fixes flow through, and refresh the cache.
+  if (normalizeForComparison(localContent) === normalizeForComparison(srcContent)) {
+    await writeOutput(join(tmpDir, destRelPath), srcContent);
+    if (agentkitRoot) await writeOrgMetaCache(agentkitRoot, destRelPath, srcContent);
+    return true;
+  }
+
+  // Real divergence detected. The file MUST still appear in tmpDir whatever we
+  // decide — otherwise newManifestFiles omits it and cleanStaleFiles deletes
+  // the local copy as a stale orphan, immediately undoing the preserve.
+  if (agentkitRoot) {
+    const cachePath = resolve(agentkitRoot, '.scaffold-cache', destRelPath);
+    if (existsSync(cachePath)) {
+      const baseContent = readFileSync(cachePath, 'utf-8');
+
+      // Template unchanged since last sync — preserve local edits, no merge needed.
+      if (normalizeForComparison(baseContent) === normalizeForComparison(srcContent)) {
+        log(
+          `[agentkit:sync] org-meta ${label} preserved (template unchanged, local edits present)`
+        );
+        await writeOutput(join(tmpDir, destRelPath), localContent);
+        return true;
+      }
+
+      // Real upstream change + real local edits — three-way merge.
+      const result = threeWayMerge(localContent, baseContent, srcContent);
+      if (result) {
+        if (result.hasConflicts) {
+          console.warn(
+            `[agentkit:sync] CONFLICT in ${destRelPath} — resolve <<<< markers manually`
+          );
+          log(`[agentkit:sync] org-meta ${label} merged with conflicts`);
+        } else {
+          log(`[agentkit:sync] org-meta ${label} merged (local edits + upstream changes combined)`);
+        }
+        await writeOutput(join(tmpDir, destRelPath), result.merged);
+        await writeOrgMetaCache(agentkitRoot, destRelPath, srcContent);
+        return true;
+      }
+      // git merge-file unavailable — fall through to preserve-local, leave cache.
+    } else {
+      // No cache yet — seed it from current upstream so future runs can merge.
+      // This preserves the current observable behavior on the very first run
+      // after this change rolls out (local edits are kept intact).
+      log(
+        `[agentkit:sync] org-meta ${label} differs from local — preserving local copy (seeding cache)`
+      );
       await writeOutput(join(tmpDir, destRelPath), localContent);
+      await writeOrgMetaCache(agentkitRoot, destRelPath, srcContent);
       return true;
     }
   }
 
-  const content = readFileSync(srcPath, 'utf-8');
-  await writeOutput(join(tmpDir, destRelPath), content);
+  // Legacy / fallback path: preserve local copy with no caching.
+  log(`[agentkit:sync] org-meta ${label} differs from local — preserving local copy`);
+  await writeOutput(join(tmpDir, destRelPath), localContent);
   return true;
 }
 
@@ -1291,9 +1388,11 @@ function skillLifecycle(skill) {
  * @param {function} log - Logger
  * @param {object} [opts]
  * @param {boolean} [opts.categorised=false] - Layered layout flag
+ * @param {string} [opts.agentkitRoot] - .agentkit root; enables three-way merge of local edits
  */
 export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, opts = {}) {
   const categorised = opts.categorised === true;
+  const agentkitRoot = typeof opts.agentkitRoot === 'string' ? opts.agentkitRoot : undefined;
   const orgMetaSkillsDir = resolveOrgMetaSkillsDir();
   if (!existsSync(orgMetaSkillsDir)) {
     log(`[agentkit:sync] org-meta skills: directory not found at ${orgMetaSkillsDir} — skipping`);
@@ -1343,6 +1442,7 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
       destRelPath: join(...baseSegments, 'SKILL.md'),
       tmpDir,
       projectRoot,
+      agentkitRoot,
       label: `skill '${skill.name}'`,
       log,
     });
@@ -1383,6 +1483,7 @@ export async function syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, op
         destRelPath: join(...baseSegments, companion),
         tmpDir,
         projectRoot,
+        agentkitRoot,
         label: `companion '${skill.name}/${companion}'`,
         log,
       });
