@@ -44,7 +44,6 @@ What are you reviewing?
 **Tool:** `/review-pr` (pr-review-toolkit)
 
 **What it does:** Dispatches 6 specialized agents in sequence:
-
 - `code-reviewer` — style, bugs, project conventions
 - `code-simplifier` — unnecessary complexity
 - `comment-analyzer` — existing review comments to address
@@ -53,7 +52,6 @@ What are you reviewing?
 - `type-design-analyzer` — TypeScript/C# type safety issues
 
 **Trigger phrase examples:**
-
 - "review PR #123"
 - "review my pull request before I merge"
 - "full review of this PR"
@@ -67,14 +65,12 @@ What are you reviewing?
 **Tool:** `/coderabbit:review`
 
 **Prerequisites:** CodeRabbit CLI must be installed and authenticated:
-
 ```bash
 curl -fsSL https://cli.coderabbit.ai/install.sh | sh
 coderabbit auth login
 ```
 
 **Options:**
-
 ```bash
 /review                    # all changes
 /review committed          # committed only
@@ -83,14 +79,12 @@ coderabbit auth login
 ```
 
 **When to prefer over Tier 1 (`/review-pr`):**
-
 - No open PR yet — you want review before pushing
 - Want security/bug-focused analysis (CodeRabbit categorizes: Critical → Suggestions → Positive)
 - Want autonomous fix-review cycles (implement → review → fix → re-review)
 - Want a second model's opinion after `/review-pr`
 
 **Trigger phrase examples:**
-
 - "coderabbit review"
 - "review my uncommitted changes"
 - "check for security issues in what I just wrote"
@@ -106,7 +100,6 @@ coderabbit auth login
 **What it does:** Reviews files changed in the current feature branch against project conventions in CLAUDE.md. Focused on correctness and architecture, not PR-level nits.
 
 **Trigger phrase examples:**
-
 - "review what I just built"
 - "check my feature before I commit"
 - "is this implementation correct?"
@@ -122,7 +115,6 @@ coderabbit auth login
 **What it does:** Refactors recently written code for clarity, removes unnecessary complexity, normalizes to project patterns. Does NOT change behaviour — purely structural.
 
 **Trigger phrase examples:**
-
 - `/simplify`
 - `/simplify src/MyService.cs`
 - "simplify the code I just wrote"
@@ -136,14 +128,12 @@ coderabbit auth login
 **Tool:** `/sanity-plugin:review` (sanity-plugin)
 
 **What it checks:**
-
 - Schema: `defineType`/`defineField` syntax, data modeling, references vs nested objects
 - Queries: `defineQuery` wrapping, TypeGen compatibility, no string interpolation
 - Frontend: `_key` usage, `stegaClean`, Visual Editing integration
 - Type safety: using generated types from `sanity.types.ts`
 
 **Trigger phrase examples:**
-
 - "review my Sanity schema"
 - "check my GROQ queries"
 - "review my Sanity frontend integration"
@@ -154,28 +144,28 @@ coderabbit auth login
 
 Use individual pr-review-toolkit agents for targeted analysis:
 
-| Focus               | Agent/Command                             | When                                               |
-| ------------------- | ----------------------------------------- | -------------------------------------------------- |
-| Type safety         | `pr-review-toolkit:type-design-analyzer`  | TypeScript `any`, missing generics, C# nullability |
-| Test gaps           | `pr-review-toolkit:pr-test-analyzer`      | Before merging untested code                       |
-| Silent failures     | `pr-review-toolkit:silent-failure-hunter` | Error handling audit                               |
-| Review comments     | `pr-review-toolkit:comment-analyzer`      | Addressing existing PR feedback                    |
-| Sanity schemas/GROQ | `/sanity-plugin:review`                   | Sanity CMS projects only                           |
+| Focus | Agent/Command | When |
+|-------|--------------|------|
+| Type safety | `pr-review-toolkit:type-design-analyzer` | TypeScript `any`, missing generics, C# nullability |
+| Test gaps | `pr-review-toolkit:pr-test-analyzer` | Before merging untested code |
+| Silent failures | `pr-review-toolkit:silent-failure-hunter` | Error handling audit |
+| Review comments | `pr-review-toolkit:comment-analyzer` | Addressing existing PR feedback |
+| Sanity schemas/GROQ | `/sanity-plugin:review` | Sanity CMS projects only |
 
 ---
 
 ## Quick Reference
 
-| Situation                                    | Command / Agent                           |
-| -------------------------------------------- | ----------------------------------------- |
-| Full PR on GitHub                            | `/review-pr`                              |
-| Local changes (pre-push, security/bug focus) | `/review` (coderabbit CLI)                |
-| Post-feature check                           | `feature-dev:code-reviewer`               |
-| Just wrote code, clean it up                 | `code-simplifier`                         |
-| Sanity schema / GROQ / frontend              | `/sanity-plugin:review`                   |
-| Type safety audit                            | `pr-review-toolkit:type-design-analyzer`  |
-| Test coverage check                          | `pr-review-toolkit:pr-test-analyzer`      |
-| Error handling audit                         | `pr-review-toolkit:silent-failure-hunter` |
+| Situation | Command / Agent |
+|-----------|----------------|
+| Full PR on GitHub | `/review-pr` |
+| Local changes (pre-push, security/bug focus) | `/review` (coderabbit CLI) |
+| Post-feature check | `feature-dev:code-reviewer` |
+| Just wrote code, clean it up | `code-simplifier` |
+| Sanity schema / GROQ / frontend | `/sanity-plugin:review` |
+| Type safety audit | `pr-review-toolkit:type-design-analyzer` |
+| Test coverage check | `pr-review-toolkit:pr-test-analyzer` |
+| Error handling audit | `pr-review-toolkit:silent-failure-hunter` |
 
 ---
 
