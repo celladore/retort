@@ -1130,7 +1130,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   );
 
   const fwCountForEvent = Object.values(report.frameworks).flat().length;
-  emitEvent(
+  await emitEvent(
     projectRoot,
     'discover_completed',
     {
