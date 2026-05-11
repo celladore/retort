@@ -537,7 +537,7 @@ export async function runDoctor({ agentkitRoot, projectRoot, flags = {} }) {
     }
   }
 
-  emitEvent(
+  await emitEvent(
     projectRoot,
     'doctor_completed',
     {

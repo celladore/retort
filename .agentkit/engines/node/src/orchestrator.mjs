@@ -1070,7 +1070,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
     const released = releaseLock(projectRoot);
     if (released) {
       console.log('[agentkit:orchestrate] Lock released.');
-      appendEvent(projectRoot, 'lock_force_released');
+      await appendEvent(projectRoot, 'lock_force_released');
     } else {
       console.log('[agentkit:orchestrate] No lock to release.');
     }
@@ -1104,7 +1104,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
         return;
       }
       saveState(projectRoot, result.state);
-      appendEvent(projectRoot, 'phase_set', { phase, phase_name: PHASES[phase] });
+      await appendEvent(projectRoot, 'phase_set', { phase, phase_name: PHASES[phase] });
       console.log(`[agentkit:orchestrate] Phase set to ${phase} — ${PHASES[phase]}`);
       console.log(`Next action: ${result.state.next_action}`);
       return;
@@ -1117,7 +1117,7 @@ export async function runOrchestrate({ agentkitRoot, projectRoot, flags }) {
     console.log(`Current phase: ${state.current_phase}/5 — ${state.phase_name}`);
     console.log(`Next action: ${state.next_action}`);
 
-    appendEvent(projectRoot, 'orchestrate_invoked', {
+    await appendEvent(projectRoot, 'orchestrate_invoked', {
       phase: state.current_phase,
       phase_name: state.phase_name,
       ...(userContext ? { userContext } : {}),
