@@ -844,14 +844,9 @@ describe('orchestrator — coverage push', () => {
       exit.mockRestore();
     });
 
-    it('reports corrupted lock when existingLock is null', async () => {
-      // Write a lock file then make it unreadable by replacing with bad json AFTER acquireLock returns existingLock=null
-      // Simpler: mock acquireLock path by manually creating a non-existent existing lock scenario.
-      // The "corrupted" branch (existingLock null) is triggered when the corrupted-lock recovery in acquireLock
-      // also fails. We instead exercise the "Session lock exists but is corrupted." console output by
-      // pre-seeding a corrupted lock + chmod-style block.
-      // Practically we can rely on the regular locked-branch covering 90%+, so skip this hard-to-trigger path.
-      expect(true).toBe(true);
-    });
+    // Note: the "Session lock exists but is corrupted." branch in runOrchestrate
+    // (where acquireLock returns acquired=false with existingLock=null) requires
+    // the corrupted-lock recovery in acquireLock to also fail — infeasible to
+    // trigger reliably without invasive fs mocking. Left intentionally uncovered.
   });
 });
