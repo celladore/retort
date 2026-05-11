@@ -31,7 +31,7 @@ $agentkitPkg = Join-Path $scriptDir '..\..\.agentkit\package.json'
 if (Test-Path $agentkitPkg) {
     try {
         $pkg = Get-Content $agentkitPkg -Raw | ConvertFrom-Json
-        if ($pkg.name -eq 'agentkit-forge-runtime') {
+        if ($pkg.name -eq 'agentkit-forge-runtime' -or $pkg.name -eq 'retort-runtime') {
             # This IS the agentkit-forge source repo — agents maintain these files.
             exit 0
         }
