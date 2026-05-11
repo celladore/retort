@@ -3,7 +3,7 @@ name: vercel-cli-with-tokens
 description: Deploy and manage projects on Vercel using token-based authentication. Use when working with Vercel CLI using access tokens rather than interactive login — e.g. "deploy to vercel", "set up vercel", "add environment variables to vercel".
 metadata:
   author: vercel
-  version: '1.0.0'
+  version: "1.0.0"
 ---
 
 # Vercel CLI with Tokens
@@ -222,7 +222,6 @@ vercel inspect <deployment-url>
 ### About `.vercel/` Directory
 
 A linked project has either:
-
 - `.vercel/project.json` — from `vercel link`. Contains `projectId` and `orgId`.
 - `.vercel/repo.json` — from `vercel link --repo`. Contains `orgId`, `remoteName`, and a `projects` map.
 
@@ -297,7 +296,6 @@ grep -i vercel .env 2>/dev/null
 ### Authentication error
 
 If the CLI fails with `Authentication required`:
-
 - The token may be expired or invalid.
 - Verify: `vercel whoami` (uses `VERCEL_TOKEN` from environment).
 - Ask the user for a fresh token.
@@ -319,7 +317,6 @@ vercel logs <deployment-url>
 ```
 
 Common causes:
-
 - Missing dependencies — ensure `package.json` is complete and committed.
 - Missing environment variables — add with `vercel env add`.
 - Framework misconfiguration — check `vercel.json`. Vercel auto-detects frameworks (Next.js, Remix, Vite, etc.) from `package.json`; override with `vercel.json` if detection is wrong.
