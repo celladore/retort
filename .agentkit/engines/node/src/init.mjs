@@ -245,7 +245,7 @@ export async function runInit({ agentkitRoot, projectRoot, flags }) {
   applyExternalKnowledgeFlags(project, flags);
 
   // --- Non-interactive fast path ---
-  if (nonInteractive || process.env.CI) {
+  if ((nonInteractive || process.env.CI) && !flags.__clackPrompts) {
     console.log('[agentkit:init] Non-interactive mode — using auto-detected defaults.');
     applyPresetDefaults(project, preset);
     applyDetectedKitDefaults(project, report);
