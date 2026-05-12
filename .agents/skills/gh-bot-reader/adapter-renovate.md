@@ -27,7 +27,7 @@ through this adapter.
 Renovate produces three kinds of artefact on a PR. Only the first two
 are in scope for this adapter:
 
-1. **PR body** — Renovate is the PR author, so `pull.body` is
+1. **PR body** — Renovate is the PR author, so `pullRequest.body` is
    the update announcement. Contains the package table, release notes,
    configuration block, and a rebase checkbox. Edited in-place as the
    PR progresses; never a separate comment.
@@ -49,15 +49,12 @@ Use these two endpoints per PR:
 ```bash
 # PR body (Renovate is the author)
 gh api "repos/$OWNER/$REPO/pulls/$PR" \
-  --jq '{number, body, user, head, state, merged, mergeable_state, updated_at, html_url}'
+  --jq '{number, body, user: .user.login, head_sha: .head.sha, updated_at, html_url}'
 
 # Conversation comments — filter to Renovate-authored after fetch
 gh api "repos/$OWNER/$REPO/issues/$PR/comments" --paginate \
   --jq '[.[] | select(.user.login | test("^(renovate(-bot)?|renovate\\[bot\\]|mend-renovate\\[bot\\])$"))]'
 ```
-
-Use the full `pulls/{n}` response (no projection) when implementing the
-adapter so additional fields remain available for status/severity logic.
 
 `--paginate` is mandatory for the comments endpoint — repos that run
 Renovate continuously can accumulate dozens of automerge-failure
@@ -77,14 +74,15 @@ order; first match wins.
 
 | Signal                                                                                                              | Severity     |
 | ------------------------------------------------------------------------------------------------------------------- | ------------ |
-| Rebase-loop signature (≥ 4 Renovate force-pushes within 24h, or `<!-- renovate-debug -->` reports repeated retries) | `blocking`   |
+| Rebase-loop signature (≥ 4 Renovate force-pushes within 24h, or `<!--renovate-debug:BASE64-->` decodes to a payload with `retryCount` ≥ 3) | `blocking`   |
 | Body or comment contains `⚠ Artifact update problem` / `Lock file maintenance failed`                               | `blocking`   |
 | Comment titled `Branch automerge failure` / body line `Automerge failed`                                            | `blocking`   |
 | Comment titled `Edited/Blocked` (rebase paused because PR was hand-edited)                                          | `blocking`   |
 | Body section `## ⚠ Warning` / `## ❗ Closure` / `## ⚠ Rebase failed`                                                 | `blocking`   |
 | Comment `Status check failure` listing required checks                                                              | `suggestion` |
-| Body update is a **major** version bump (`Update: major` row in the package table)                                  | `suggestion` |
+| PR title contains `(major)` suffix, or any package `Change` cell shows a major transition (e.g. `^20.4.3` → `^21.0.0`) | `suggestion` |
 | Vulnerability fix indicated by `vulnerabilityAlerts` flag in body, or `[SECURITY]` prefix in PR title               | `suggestion` |
+| Comment titled `### Renovate Ignore Notification` (PR closed without merging — informational)                       | `info`       |
 | Plain dependency update with no warning sections — body is the status table only                                    | `info`       |
 | Renovate-authored comment with no recognised pattern                                                                | `info`       |
 
@@ -101,8 +99,14 @@ The simplest reliable detector:
 2. Compare timestamps. If 4 or more land within a 24-hour window with
    no human commits between them, mark the PR `blocking` with
    `meta.rebase_loop = true`.
-3. As a secondary signal, look for a `<!-- renovate-debug -->` HTML
-   comment in the body whose JSON includes `"retryCount"` ≥ 3.
+3. As a secondary signal, look for a `<!--renovate-debug:BASE64-->`
+   HTML comment in the body (single-line, no surrounding spaces). The
+   payload is base64-encoded JSON with fields like `createdInVer`,
+   `updatedInVer`, `targetBranch`, `labels`. Some Renovate versions
+   also include a `retryCount` field — decode the base64 and check
+   for `"retryCount"` ≥ 3. Most installs (including current Mend
+   Renovate) omit this field, so the primary detection remains the
+   force-push count.
 
 The 4-pushes-in-24h threshold is conservative. Adjust per-repo in the
 consumer (`/cleanup` may want a looser threshold on monorepos with
@@ -122,7 +126,7 @@ is derived from PR-level fields:
 | Comment is from a previous PR head SHA that has since been force-pushed by Renovate  | `outdated`       |
 
 For a body-only finding, "the comment" is the PR body itself —
-`posted_at` is `pull.updated_at` (the last body edit) and
+`posted_at` is `pullRequest.updated_at` (the last body edit) and
 `status` is always one of `unresolved`, `new_since_push`, or
 `resolved` (never `outdated` for the body — old body content is
 overwritten, not preserved).
@@ -167,12 +171,14 @@ Conversation-comment finding:
 | `body`                | sanitised comment body, first 500 chars                      |
 | `url`                 | `comment.html_url`                                           |
 | `posted_at`           | `comment.created_at`                                         |
-| `meta.comment_kind`   | `'automerge-failure'` \| `'edited-blocked'` \| `'status-check-failure'` \| `'rebase-failed'` \| `'other'` |
+| `meta.comment_kind`   | `'automerge-failure'` \| `'edited-blocked'` \| `'status-check-failure'` \| `'rebase-failed'` \| `'ignore-notification'` \| `'other'` |
 
 `meta.comment_kind` is derived from the first non-empty line of the
 comment body — Renovate uses stable headings (`Branch automerge
-failure`, `Edited/Blocked`, etc.) that survive minor wording drift
-since 2023.
+failure`, `Edited/Blocked`, `### Renovate Ignore Notification`, etc.)
+that survive minor wording drift since 2023. The `ignore-notification`
+kind is emitted when a PR is closed without merging; Renovate posts a
+notice that future updates in the same version range will be skipped.
 
 ## Body sanitisation
 
@@ -180,15 +186,24 @@ Renovate bodies are long (release notes, configuration blocks, etc.).
 Before truncating to 500 chars:
 
 1. **Strip the package table** if it is followed by other content —
-   the consumer wants the warning, not the diff matrix. Detect by
-   `| Package | Type | Update |` header and remove through the next
-   `---` separator. Keep the table if there is nothing else in the
-   body (a plain update).
+   the consumer wants the warning, not the diff matrix. Detect by a
+   `| Package |` header line; the column names that follow vary by
+   config. Current Mend Renovate emits
+   `| Package | Change | Age | Confidence |` with merge-confidence
+   enabled (the default); installs without merge-confidence emit
+   `| Package | Change |`. Some older repos may still emit the
+   legacy `| Package | Type | Update |`. Match any of these
+   variants, then remove through the next `---` separator. Keep
+   the table if there is nothing else in the body (a plain update).
 2. **Strip the `<details>` blocks**: "Release Notes", "Configuration",
    the rebase checkbox `<details>`. They are noise in a one-line
    summary.
-3. **Strip HTML comments** — `<!-- rebase-check -->`,
-   `<!-- renovate-debug -->...-->`, `<!-- renovate-release-notes-... -->`.
+3. **Strip HTML comments** — `<!-- rebase-check -->` (unclosed
+   inline placeholder; appears immediately before the rebase checkbox
+   text on the same line), `<!--renovate-debug:BASE64-->` (single-line,
+   no surrounding spaces; payload is opaque base64), and any other
+   `<!-- renovate-* -->` markers Renovate may emit (e.g.
+   `<!-- renovate-release-notes-... -->` on older installs).
 4. **Strip the footer** — the `This PR was generated by [Mend Renovate]`
    line and everything after.
 5. **Collapse runs of two or more blank lines** to one.
@@ -241,8 +256,35 @@ are short.
 
 ## Reference sample
 
-A small captured payload will land at
-`org-meta/skills/gh-bot-reader/renovate.sample.json` (added in the
-same follow-up that ships the test-fixture harness for the CodeRabbit
-adapter). Treat that file as the canonical shape; the field mapping
-above is the source of truth until then.
+Captured payloads ship alongside this adapter at
+`org-meta/skills/gh-bot-reader/renovate.sample.json`. The fixture
+covers four scenarios from `phoenixvc/mystira-workspace`:
+
+1. **`plain-patch-update`** — single npm patch, body only, no
+   warnings (info / patch).
+2. **`major-multi-package-bump`** — monorepo major version bump,
+   `(major)` suffix in the title, `^20.x` → `^21.0.0` transition in
+   the Change column (suggestion / major).
+3. **`non-major-group-update`** — multi-package non-major group with
+   mixed patch and minor entries (info / mixed).
+4. **`ignore-notification-comment`** — `### Renovate Ignore
+   Notification` comment posted after a PR was closed without merging
+   (info / ignore-notification).
+
+When extending the adapter, run new heuristics against each scenario
+and verify the `expected` block reproduces. The fixture is the
+ground-truth shape; the field mapping in this document derives from
+it.
+
+Notable real-world drift that the fixture exposed (and this document
+now reflects):
+
+- Package table header is `| Package | Change | Age | Confidence |`,
+  not `| Package | Type | Update |`.
+- Major bumps have no `Update: major` row — detect via the title
+  pattern or the version-transition in the Change column.
+- `<!--renovate-debug:BASE64-->` is a single-line base64 payload, not
+  a multi-line JSON block. Current Mend Renovate does not emit
+  `retryCount`; force-push count is the primary rebase-loop detector.
+- The `### Renovate Ignore Notification` comment kind was not
+  previously enumerated; added as an `info` finding.
