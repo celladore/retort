@@ -276,7 +276,7 @@ skills:
       to surface unresolved bot feedback without each command rolling its own
       parser. Read-only; never replies or resolves threads.
     tags: [pr, review, automation, bots]
-    companions: [adapter-coderabbit.md, adapter-renovate.md]
+    companions: [adapter-coderabbit.md, adapter-codecov.md, adapter-renovate.md]
 
   - name: using-superpowers
     scope: global
