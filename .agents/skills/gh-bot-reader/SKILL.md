@@ -106,7 +106,7 @@ sniffing. The mapping:
 | `bot` value  | GitHub username pattern                          |
 | ------------ | ------------------------------------------------ |
 | `coderabbit` | `coderabbitai[bot]`, `coderabbitai`              |
-| `copilot`    | `github-copilot[bot]`, `copilot-pull-request-reviewer[bot]` |
+| `copilot`    | `github-copilot[bot]`, `copilot-pull-request-reviewer[bot]`, `copilot-pull-request-reviewer` |
 | `renovate`   | `renovate[bot]`, `renovate-bot`, `mend-renovate[bot]` |
 | `codecov`    | `codecov[bot]`, `codecov-commenter`              |
 | `sonatype`   | `sonatype-lift[bot]`, `sonatype[bot]`            |
@@ -152,7 +152,11 @@ ships with this skill; the rest land as follow-up PRs:
 
 - `adapter-coderabbit.md` — **included.** CodeRabbit review threads
   with `[!CAUTION]` / `[!WARNING]` / `nit:` blocks.
-- `adapter-copilot.md` — pending. GitHub Copilot for PRs.
+- `adapter-copilot.md` — **included.** GitHub Copilot for PRs:
+  review-thread inline comments (severity: `suggestion`, no
+  markers) plus the review summary (`/pulls/{n}/reviews` body,
+  severity: `info`). Second review-thread adapter — shares the
+  canonical GraphQL query from `adapter-coderabbit.md`.
 - `adapter-renovate.md` — pending. Renovate status table + rebase-loop signature.
 - `adapter-codecov.md` — pending. Coverage delta comment + project threshold.
 - `adapter-sonatype.md` — pending. Vulnerability advisories with CVSS.
