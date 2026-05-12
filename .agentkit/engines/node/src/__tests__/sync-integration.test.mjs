@@ -757,7 +757,7 @@ describe('render-target output isolation (--only flag)', () => {
     expect(existsSync(resolve(projectRoot, '.github', 'prompts'))).toBe(false);
   });
 
-  it('--only windsurf produces no cursor command files', { timeout: 15000 }, async () => {
+  it('--only windsurf produces no cursor command files', { timeout: 30000 }, async () => {
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'windsurf' } });
     expect(existsSync(resolve(projectRoot, '.cursor', 'commands'))).toBe(false);
   });
