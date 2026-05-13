@@ -665,6 +665,18 @@ skills:
       from git history when invoked without arguments.
     tags: [retort, documentation, history]
 
+  - name: portfolio
+    scope: project
+    source: retort
+    description: >
+      Turns a hackathon or weekend project into a portfolio-ready case study.
+      Generates a PAARL-framed write-up (Problem, Approach, Architecture,
+      Results, Lessons), a README technical section, a 60-second demo video
+      plan, and a publish-ready LinkedIn post. Reads the repo and any
+      supplied notes/slides to ground every artifact in real project details.
+      Writes outputs to docs/portfolio/<slug>/ — never auto-publishes.
+    tags: [retort, documentation, portfolio, hackathon]
+
   - name: feature-configure
     scope: project
     source: retort
