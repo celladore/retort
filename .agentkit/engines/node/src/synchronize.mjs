@@ -863,6 +863,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
         syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, {
           categorised: vars.skillsCategorised,
+          agentkitRoot,
         }),
         syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log, {
           categorised: vars.skillsCategorised,

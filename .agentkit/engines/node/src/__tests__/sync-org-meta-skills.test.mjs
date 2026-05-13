@@ -287,4 +287,222 @@ describe('syncOrgMetaSkills', () => {
     expect(readFileSync(tmpOut, 'utf-8')).toBe('# locally edited');
     expect(logs.some((m) => m.includes('differs from local'))).toBe(true);
   });
+
+  describe('three-way merge (agentkitRoot supplied)', () => {
+    let agentkitRoot;
+
+    beforeEach(() => {
+      agentkitRoot = mkdtempSync(join(tmpdir(), 'sync-orgmeta-ak-'));
+    });
+
+    afterEach(() => {
+      rmSync(agentkitRoot, { recursive: true, force: true });
+    });
+
+    function seedLocal(skill, content) {
+      const dir = join(projectRoot, '.agents', 'skills', skill);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'SKILL.md'), content, 'utf-8');
+    }
+
+    function seedCache(skill, content) {
+      const dir = join(agentkitRoot, '.scaffold-cache', '.agents', 'skills', skill);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'SKILL.md'), content, 'utf-8');
+    }
+
+    function cachePath(skill) {
+      return join(agentkitRoot, '.scaffold-cache', '.agents', 'skills', skill, 'SKILL.md');
+    }
+
+    it('seeds the scaffold cache on first divergent run and preserves local', async () => {
+      writeSrc('alpha', 'SKILL.md', '# upstream v1');
+      seedLocal('alpha', '# locally edited');
+
+      await syncOrgMetaSkills(
+        tmpDir,
+        projectRoot,
+        { skills: [{ name: 'alpha', source: 'org-meta' }] },
+        log,
+        { agentkitRoot }
+      );
+
+      const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+      expect(readFileSync(tmpOut, 'utf-8')).toBe('# locally edited');
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe('# upstream v1');
+      expect(logs.some((m) => m.includes('seeding cache'))).toBe(true);
+    });
+
+    it('writes upstream and refreshes cache when local matches upstream', async () => {
+      writeSrc('alpha', 'SKILL.md', '# upstream v2');
+      seedLocal('alpha', '# upstream v2');
+
+      await syncOrgMetaSkills(
+        tmpDir,
+        projectRoot,
+        { skills: [{ name: 'alpha', source: 'org-meta' }] },
+        log,
+        { agentkitRoot }
+      );
+
+      const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+      expect(readFileSync(tmpOut, 'utf-8')).toBe('# upstream v2');
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe('# upstream v2');
+    });
+
+    it('preserves local when cache equals upstream (template unchanged, local edits present)', async () => {
+      writeSrc('alpha', 'SKILL.md', '# upstream v1');
+      seedCache('alpha', '# upstream v1');
+      seedLocal('alpha', '# upstream v1\n\nMy local note.\n');
+
+      await syncOrgMetaSkills(
+        tmpDir,
+        projectRoot,
+        { skills: [{ name: 'alpha', source: 'org-meta' }] },
+        log,
+        { agentkitRoot }
+      );
+
+      const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+      expect(readFileSync(tmpOut, 'utf-8')).toBe('# upstream v1\n\nMy local note.\n');
+      expect(logs.some((m) => m.includes('template unchanged'))).toBe(true);
+    });
+
+    it('performs clean three-way merge when local and upstream changed non-overlapping regions', async () => {
+      const base = [
+        '# alpha',
+        '',
+        '## section one',
+        'base text',
+        '',
+        '## section two',
+        'base text',
+        '',
+      ].join('\n');
+      const upstream = [
+        '# alpha',
+        '',
+        '## section one',
+        'UPSTREAM EDIT',
+        '',
+        '## section two',
+        'base text',
+        '',
+      ].join('\n');
+      const local = [
+        '# alpha',
+        '',
+        '## section one',
+        'base text',
+        '',
+        '## section two',
+        'LOCAL EDIT',
+        '',
+      ].join('\n');
+
+      writeSrc('alpha', 'SKILL.md', upstream);
+      seedCache('alpha', base);
+      seedLocal('alpha', local);
+
+      await syncOrgMetaSkills(
+        tmpDir,
+        projectRoot,
+        { skills: [{ name: 'alpha', source: 'org-meta' }] },
+        log,
+        { agentkitRoot }
+      );
+
+      const merged = readFileSync(join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md'), 'utf-8');
+      expect(merged).toContain('UPSTREAM EDIT');
+      expect(merged).toContain('LOCAL EDIT');
+      expect(merged).not.toContain('<<<<');
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe(upstream);
+      expect(logs.some((m) => m.includes('merged ('))).toBe(true);
+    });
+
+    it('surfaces conflict markers when local and upstream changed the same lines', async () => {
+      const base = '# alpha\n\nshared line\n';
+      const upstream = '# alpha\n\nUPSTREAM version of shared line\n';
+      const local = '# alpha\n\nLOCAL version of shared line\n';
+
+      writeSrc('alpha', 'SKILL.md', upstream);
+      seedCache('alpha', base);
+      seedLocal('alpha', local);
+
+      const warnings = [];
+      const originalWarn = console.warn;
+      console.warn = (msg) => warnings.push(msg);
+
+      try {
+        await syncOrgMetaSkills(
+          tmpDir,
+          projectRoot,
+          { skills: [{ name: 'alpha', source: 'org-meta' }] },
+          log,
+          { agentkitRoot }
+        );
+      } finally {
+        console.warn = originalWarn;
+      }
+
+      const merged = readFileSync(join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md'), 'utf-8');
+      expect(merged).toContain('<<<<');
+      expect(warnings.some((m) => m.includes('CONFLICT'))).toBe(true);
+      // Cache still advances so the next run's "base" reflects the upstream
+      // that produced the conflict markers, otherwise the conflict reappears
+      // on every subsequent run.
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe(upstream);
+    });
+
+    it('writes pristine upstream + seeds cache on first install (no local copy)', async () => {
+      writeSrc('alpha', 'SKILL.md', '# upstream v1');
+
+      await syncOrgMetaSkills(
+        tmpDir,
+        projectRoot,
+        { skills: [{ name: 'alpha', source: 'org-meta' }] },
+        log,
+        { agentkitRoot }
+      );
+
+      const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+      expect(readFileSync(tmpOut, 'utf-8')).toBe('# upstream v1');
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe('# upstream v1');
+    });
+
+    it('preserves local and leaves cache untouched when git is unavailable for merge', async () => {
+      const base = '# alpha\n\nbase content\n';
+      const upstream = '# alpha\n\nUPSTREAM CHANGE\n';
+      const local = '# alpha\n\nLOCAL CHANGE\n';
+
+      writeSrc('alpha', 'SKILL.md', upstream);
+      seedCache('alpha', base);
+      seedLocal('alpha', local);
+
+      // Make git unreachable by pointing PATH to an empty directory.
+      const emptyBin = mkdtempSync(join(tmpdir(), 'no-git-'));
+      const savedPath = process.env.PATH;
+      process.env.PATH = emptyBin;
+      try {
+        await syncOrgMetaSkills(
+          tmpDir,
+          projectRoot,
+          { skills: [{ name: 'alpha', source: 'org-meta' }] },
+          log,
+          { agentkitRoot }
+        );
+      } finally {
+        process.env.PATH = savedPath;
+        rmSync(emptyBin, { recursive: true, force: true });
+      }
+
+      // Local content must be preserved.
+      const tmpOut = join(tmpDir, '.agents', 'skills', 'alpha', 'SKILL.md');
+      expect(readFileSync(tmpOut, 'utf-8')).toBe(local);
+      // Cache must be left untouched (still contains the original base content).
+      expect(readFileSync(cachePath('alpha'), 'utf-8')).toBe(base);
+      // A log message must explain why the merge was skipped.
+      expect(logs.some((m) => m.includes('git unavailable'))).toBe(true);
+    });
+  });
 });
