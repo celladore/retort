@@ -107,7 +107,7 @@ sniffing. The mapping:
 | ------------ | ------------------------------------------------ |
 | `coderabbit` | `coderabbitai[bot]`, `coderabbitai`              |
 | `copilot`    | `github-copilot[bot]`, `copilot-pull-request-reviewer[bot]` |
-| `renovate`   | `renovate[bot]`, `renovate-bot`                  |
+| `renovate`   | `renovate[bot]`, `renovate-bot`, `mend-renovate[bot]` |
 | `codecov`    | `codecov[bot]`, `codecov-commenter`              |
 | `sonatype`   | `sonatype-lift[bot]`, `sonatype[bot]`            |
 | `claude`     | `anthropic[bot]`, `claude[bot]`                  |
