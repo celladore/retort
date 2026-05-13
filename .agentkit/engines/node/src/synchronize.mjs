@@ -615,7 +615,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     await Promise.all(alwaysOnTasks);
 
     // --- Editor theme (must run after vscode template copy to merge into settings) ---
-    // Scaffold-once: per-output target — only skip targets that already exist in projectRoot
+    // Scaffold-once: per-output target — preserve existing targets, write new ones.
+    // syncEditorTheme is always called so it can copy existing outputs into tmpDir;
+    // without this carry-forward, scaffold-engine's orphan cleanup would delete them
+    // on the second sync run.
     const forceTheme = flags?.overwrite || flags?.force;
     if (forceTheme) {
       await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags);
@@ -628,11 +631,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           existingOutputs.add(outputPath);
         }
       }
-      if (existingOutputs.size < Object.keys(outputs).length) {
-        await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs);
-      } else {
+      await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs, projectRoot);
+      if (existingOutputs.size === Object.keys(outputs).length) {
         log(
-          '[retort:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.'
+          '[retort:sync] Editor theme: all output targets exist (scaffold-once) — preserving existing content. Use --overwrite to regenerate.'
         );
       }
     }

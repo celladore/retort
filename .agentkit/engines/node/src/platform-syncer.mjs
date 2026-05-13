@@ -329,8 +329,20 @@ ${GITATTR_END}
  * @param {Function} log - Logging function
  * @param {{ force?: boolean }} [flags] - Optional flags (force skips scaffold-once check)
  * @param {Set<string>} [skipOutputs] - Output paths to skip (scaffold-once)
+ * @param {string} [projectRoot] - When provided, scaffold-once-skipped outputs are
+ *   copied byte-identical from projectRoot into tmpDir so they appear in the new
+ *   manifest. Without this, the second sync run would orphan-delete them — see
+ *   the editor-theme oscillation bug.
  */
-export async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, skipOutputs) {
+export async function syncEditorTheme(
+  agentkitRoot,
+  tmpDir,
+  vars,
+  log,
+  flags,
+  skipOutputs,
+  projectRoot
+) {
   if (!vars.editorThemeEnabled) return;
 
   const brandSpec = readYaml(resolve(agentkitRoot, 'spec', 'brand.yaml'));
@@ -465,9 +477,35 @@ export async function syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, sk
   for (const [tool, outputPath] of Object.entries(outputs)) {
     if (!outputPath) continue; // null = skip this target
 
-    // Scaffold-once: skip targets that already exist in projectRoot (unless --overwrite/--force)
+    // Scaffold-once: target already exists in projectRoot (unless --overwrite/--force).
+    // Copy the existing content into tmpDir so it appears in the new manifest and
+    // survives orphan cleanup. Without this carry-forward, the second sync run
+    // sees the file in previousManifest, never in newManifestFiles, and deletes it.
     if (skipOutputs && skipOutputs.has(outputPath)) {
-      log(`[retort:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
+      const normalizedRel = String(outputPath).replace(/^\/+/, '');
+      if (projectRoot) {
+        const existingPath = resolve(projectRoot, normalizedRel);
+        const destFile = resolve(tmpDir, normalizedRel);
+        if (existsSync(existingPath)) {
+          writePromises.push(
+            (async () => {
+              const content = await readFile(existingPath, 'utf-8');
+              await ensureDir(dirname(destFile));
+              await writeFile(destFile, content, 'utf-8');
+              log(`[retort:sync] Editor theme: ${outputPath} preserved (scaffold-once)`);
+            })()
+          );
+        } else {
+          log(
+            `[retort:sync] Editor theme: ${outputPath} marked existing but missing on disk — skipping`
+          );
+        }
+      } else {
+        // Legacy callers that don't pass projectRoot: log and skip, matching prior
+        // behaviour. The oscillation bug will reappear on next sync — pass
+        // projectRoot to opt into the fix.
+        log(`[retort:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
+      }
       continue;
     }
 
