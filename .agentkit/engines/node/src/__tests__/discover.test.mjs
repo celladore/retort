@@ -79,6 +79,54 @@ describe('runDiscover()', () => {
     expect(Array.isArray(report.structure.topLevelDirs)).toBe(true);
   });
 
+  it('renders a markdown report when output=markdown', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await runDiscover({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: tmpDir,
+      flags: { output: 'markdown' },
+    });
+
+    const out = logSpy.mock.calls.flat().join('\n');
+    expect(out).toContain('# Discovery Report');
+    expect(out).toContain('## Tech Stacks');
+    expect(out).toContain('## Project Structure');
+  });
+
+  it('renders a markdown report including recommendations and frameworks when present', async () => {
+    // Add some framework markers and an extra config to populate more sections
+    writeFile(join(tmpDir, 'next.config.js'), 'module.exports = {};\n');
+    writeFile(join(tmpDir, 'tailwind.config.js'), 'module.exports = {};\n');
+    writeFile(join(tmpDir, 'docs', 'README.md'), '# docs\n');
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await runDiscover({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: tmpDir,
+      flags: { output: 'markdown' },
+    });
+
+    const out = logSpy.mock.calls.flat().join('\n');
+    expect(out).toContain('# Discovery Report');
+    // Frameworks/Documentation/CI section headers should appear when populated
+    expect(out).toContain('## CI/CD');
+  });
+
+  it('passes a userContext through when extra args supplied', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const report = await runDiscover({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: tmpDir,
+      flags: { output: 'json', _args: ['investigate', 'auth'] },
+    });
+
+    expect(report).toBeDefined();
+    expect(logSpy).toHaveBeenCalled();
+  });
+
   it('detects GitHub Actions CI', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
 

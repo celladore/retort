@@ -7,6 +7,7 @@ import {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
+  auditUnresolvedPlaceholders,
   isAllowedFormatter,
   isAllowedLinter,
   resolveFormatter,
@@ -267,4 +268,226 @@ describe('isAllowedLinter()', () => {
     expect(ALLOWED_LINTER_BASES.has('eslint')).toBe(true);
     expect(ALLOWED_LINTER_BASES.has('pylint')).toBe(true);
   });
+});
+
+// ---------------------------------------------------------------------------
+// auditUnresolvedPlaceholders
+// ---------------------------------------------------------------------------
+
+describe('auditUnresolvedPlaceholders()', () => {
+  let tempDir;
+
+  afterEach(() => {
+    if (tempDir && existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns empty array when no output dirs exist', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-no-dirs-'));
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude', '.cursor']);
+    expect(findings).toEqual([]);
+  });
+
+  it('finds unresolved {{variable}} placeholders in markdown files', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-find-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'README.md'),
+      'Hello {{userName}} — welcome to {{projectName}}!'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings.length).toBe(1);
+    expect(findings[0].variables).toEqual(expect.arrayContaining(['userName', 'projectName']));
+  });
+
+  it('skips block helpers and else markers', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-helpers-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'a.md'),
+      '{{#if foo}}yes{{else}}no{{/if}} — but {{realVar}} should be flagged'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings.length).toBe(1);
+    expect(findings[0].variables).toEqual(['realVar']);
+  });
+
+  it('returns no findings when files have no placeholders', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-clean-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(resolve(tempDir, '.claude', 'a.md'), 'plain text — no placeholders here');
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings).toEqual([]);
+  });
+
+  it('skips node_modules and .git directories', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-skip-'));
+    mkdirSync(resolve(tempDir, '.claude', 'node_modules'), { recursive: true });
+    mkdirSync(resolve(tempDir, '.claude', '.git'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'node_modules', 'leak.md'),
+      'Has {{shouldBeIgnored}} placeholder'
+    );
+    writeFileSync(
+      resolve(tempDir, '.claude', '.git', 'leak.md'),
+      'Has {{alsoIgnored}} placeholder'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings).toEqual([]);
+  });
+
+  it('recurses into subdirectories', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-recurse-'));
+    mkdirSync(resolve(tempDir, '.claude', 'sub', 'deep'), { recursive: true });
+    writeFileSync(resolve(tempDir, '.claude', 'sub', 'deep', 'a.md'), 'Has {{deepVar}} marker');
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings.length).toBe(1);
+    expect(findings[0].variables).toEqual(['deepVar']);
+  });
+
+  it('only scans markdown/yaml/json/mjs/js/ts files', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-ext-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(resolve(tempDir, '.claude', 'a.md'), '{{mdVar}}');
+    writeFileSync(resolve(tempDir, '.claude', 'b.txt'), '{{txtVar}}'); // ignored
+    writeFileSync(resolve(tempDir, '.claude', 'c.json'), '{"k": "{{jsonVar}}"}');
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    const allVars = findings.flatMap((f) => f.variables);
+    expect(allVars).toContain('mdVar');
+    expect(allVars).toContain('jsonVar');
+    expect(allVars).not.toContain('txtVar');
+  });
+
+  it('deduplicates the variables list per file', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-dedup-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'a.md'),
+      '{{repeated}} {{repeated}} {{unique}} {{repeated}}'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings).toHaveLength(1);
+    // Each variable appears only once in the variables array
+    expect(findings[0].variables.sort()).toEqual(['repeated', 'unique']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// runCheck — coverage results / unresolved placeholders / event logging error
+// ---------------------------------------------------------------------------
+
+describe('runCheck() — additional branches', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('logs unresolved placeholder findings without crashing', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture();
+    try {
+      // Seed an output dir with an unresolved placeholder
+      mkdirSync(resolve(fixture.projectRoot, '.claude'), { recursive: true });
+      writeFileSync(resolve(fixture.projectRoot, '.claude', 'demo.md'), 'Hello {{unresolved_var}}');
+
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+      expect(result).toBeDefined();
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Unresolved Placeholders');
+      expect(out).toContain('unresolved_var');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('runs the coverage step when --coverage is set', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture();
+    try {
+      // project.yaml with coverage threshold
+      writeFileSync(
+        resolve(fixture.agentkitRoot, 'spec', 'project.yaml'),
+        'testing:\n  coverage: 50\n',
+        'utf-8'
+      );
+
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true, coverage: true },
+      });
+
+      expect(result).toBeDefined();
+      // The coverage attempt should at least be present in some form
+      expect(Array.isArray(result.coverage)).toBe(true);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('skips invalid commands and reports SKIP / warning for invalid formatter', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture({ withBuild: false, formatter: '   ' });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+      expect(result).toBeDefined();
+      // Empty/whitespace formatter should trigger a warning
+      expect(warnSpy).toHaveBeenCalled();
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('skips disallowed formatter (not in ALLOWED list) with a warning', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture({ withBuild: false, formatter: 'untrusted-formatter' });
+    try {
+      await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+      const warnText = warnSpy.mock.calls.flat().join('\n');
+      expect(warnText).toContain('unrecognized formatter');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('passes a userContext through when extra args are supplied', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture();
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true, _args: ['my', 'context'] },
+      });
+      expect(result.userContext).toBe('my context');
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Context: my context');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 });

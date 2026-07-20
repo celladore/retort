@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   PHASES,
   VALID_TEAM_IDS,
@@ -11,12 +11,18 @@ import {
   checkLock,
   clearTeamsSpecCache,
   computeEscalation,
+  delegateTask,
   getStatus,
   getTasksSummary,
+  getTasksSummaryAsync,
   loadState,
+  orchestratorCheckDependencies,
+  orchestratorProcessHandoffs,
   readEvents,
   releaseLock,
   resolveTeamByArea,
+  routePhase4TestFailure,
+  runOrchestrate,
   saveState,
   setPhase,
   updateTeamStatus,
@@ -504,6 +510,286 @@ describe('orchestrator', () => {
       expect(result).toContain('devops');
       expect(result).toContain('infra');
       expect(result).toContain('engineering');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // getTasksSummaryAsync — async equivalent of getTasksSummary
+  // -------------------------------------------------------------------------
+
+  describe('getTasksSummaryAsync()', () => {
+    it('returns empty-queue message when there are no tasks', async () => {
+      const result = await getTasksSummaryAsync(TEST_ROOT);
+      expect(result).toBe('No tasks in the task queue.');
+    });
+
+    it('returns active task counts for in-progress tasks', async () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      writeFileSync(
+        resolve(TASKS_DIR, 't1.json'),
+        JSON.stringify({
+          id: 'task-001',
+          status: 'in_progress',
+          title: 'Active',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: new Date().toISOString(),
+        })
+      );
+      const result = await getTasksSummaryAsync(TEST_ROOT);
+      expect(result).toContain('Active tasks: 1');
+    });
+
+    it('counts terminal tasks separately', async () => {
+      mkdirSync(TASKS_DIR, { recursive: true });
+      writeFileSync(
+        resolve(TASKS_DIR, 't1.json'),
+        JSON.stringify({
+          id: 'task-001',
+          status: 'completed',
+          title: 'Done',
+          priority: 'P1',
+          assignees: ['team-backend'],
+          createdAt: new Date().toISOString(),
+        })
+      );
+      const result = await getTasksSummaryAsync(TEST_ROOT);
+      expect(result).toContain('Completed/closed tasks: 1');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // runOrchestrate — CLI handler
+  // -------------------------------------------------------------------------
+
+  describe('runOrchestrate()', () => {
+    let logSpy;
+    let errorSpy;
+    let exitSpy;
+
+    beforeEach(() => {
+      logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+        throw new Error('process.exit called');
+      });
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
+      errorSpy.mockRestore();
+      exitSpy.mockRestore();
+    });
+
+    it('--status prints orchestrator status and returns', async () => {
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: { status: true },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Orchestrator Status');
+    });
+
+    it('--force-unlock with no existing lock prints "no lock"', async () => {
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: { 'force-unlock': true },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('No lock to release');
+    });
+
+    it('--force-unlock with existing lock releases it', async () => {
+      acquireLock(TEST_ROOT);
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: { 'force-unlock': true },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Lock released');
+    });
+
+    it('--phase N sets the orchestrator phase and persists state', async () => {
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: { phase: '3' },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Phase set to 3');
+      const state = await loadState(TEST_ROOT);
+      expect(state.current_phase).toBe(3);
+    });
+
+    it('--phase with an invalid value reports an error', async () => {
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: { phase: '99' },
+      });
+      const errOut = errorSpy.mock.calls.flat().join('\n');
+      expect(errOut.length).toBeGreaterThan(0);
+    });
+
+    it('default flow prints phase, next action, and event log entry', async () => {
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: {},
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Current phase:');
+      expect(out).toContain('Next action:');
+    });
+
+    it('exits with error when an existing lock blocks execution', async () => {
+      // Acquire a lock to force the locked-state branch
+      acquireLock(TEST_ROOT, { pid: 99999 });
+
+      await expect(
+        runOrchestrate({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: TEST_ROOT,
+          flags: {},
+        })
+      ).rejects.toThrow('process.exit called');
+
+      const errOut = errorSpy.mock.calls.flat().join('\n');
+      expect(errOut).toContain('Session locked');
+    });
+
+    it('passes userContext through when extra args supplied', async () => {
+      await runOrchestrate({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot: TEST_ROOT,
+        flags: { _args: ['build', 'auth'] },
+      });
+      // The event log should have userContext embedded
+      const events = await readEvents(TEST_ROOT);
+      const orchEvent = events.find((e) => e.action === 'orchestrate_invoked');
+      expect(orchEvent).toBeDefined();
+      // userContext is part of the data payload
+      const userCtx = orchEvent?.userContext ?? orchEvent?.data?.userContext;
+      expect(userCtx).toBe('build auth');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // delegateTask
+  // -------------------------------------------------------------------------
+
+  describe('delegateTask()', () => {
+    it('creates a task and updates orchestrator state with active_tasks and team_progress', async () => {
+      const state = await loadState(TEST_ROOT);
+      const result = await delegateTask(TEST_ROOT, state, {
+        type: 'implement',
+        title: 'Add pagination',
+        assignees: ['team-backend'],
+        priority: 'P1',
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.task.id).toMatch(/^task-/);
+      expect(result.task.assignees).toEqual(['team-backend']);
+      expect(result.state.active_tasks['team-backend']).toContain(result.task.id);
+      expect(result.state.team_progress['team-backend'].status).toBe('in_progress');
+    });
+
+    it('preserves existing team_progress entries on subsequent delegations', async () => {
+      const state = await loadState(TEST_ROOT);
+      const r1 = await delegateTask(TEST_ROOT, state, {
+        type: 'implement',
+        title: 'First',
+        assignees: ['team-backend'],
+      });
+      const r2 = await delegateTask(TEST_ROOT, r1.state, {
+        type: 'implement',
+        title: 'Second',
+        assignees: ['team-backend'],
+      });
+
+      expect(r2.state.active_tasks['team-backend'].length).toBe(2);
+      expect(Object.keys(r2.state.team_progress['team-backend'].tasks).length).toBe(2);
+    });
+
+    it('handles tasks with multiple assignees', async () => {
+      const state = await loadState(TEST_ROOT);
+      const result = await delegateTask(TEST_ROOT, state, {
+        type: 'implement',
+        title: 'Cross-team task',
+        assignees: ['team-backend', 'team-frontend'],
+      });
+
+      expect(result.state.active_tasks['team-backend']).toContain(result.task.id);
+      expect(result.state.active_tasks['team-frontend']).toContain(result.task.id);
+    });
+
+    it('returns the original state and an error when createTask fails', async () => {
+      const state = await loadState(TEST_ROOT);
+      const result = await delegateTask(TEST_ROOT, state, {
+        // missing required fields — should fail validation
+        type: 'invalid-type-that-does-not-exist',
+        title: '',
+      });
+
+      expect(result.error).toBeDefined();
+      expect(result.task).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // orchestratorCheckDependencies
+  // -------------------------------------------------------------------------
+
+  describe('orchestratorCheckDependencies()', () => {
+    it('returns a state object even when there are no tasks', async () => {
+      const state = await loadState(TEST_ROOT);
+      const result = await orchestratorCheckDependencies(TEST_ROOT, state);
+      expect(result).toBeDefined();
+      expect(result.state).toBeDefined();
+      expect(Array.isArray(result.unblocked)).toBe(true);
+      expect(Array.isArray(result.errors)).toBe(true);
+    });
+
+    it('clones state defensively (does not mutate input)', async () => {
+      const state = await loadState(TEST_ROOT);
+      const beforeJson = JSON.stringify(state);
+      await orchestratorCheckDependencies(TEST_ROOT, state);
+      expect(JSON.stringify(state)).toBe(beforeJson);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // orchestratorProcessHandoffs
+  // -------------------------------------------------------------------------
+
+  describe('orchestratorProcessHandoffs()', () => {
+    it('returns the state unchanged when there are no handoffs to process', async () => {
+      const state = await loadState(TEST_ROOT);
+      const result = await orchestratorProcessHandoffs(TEST_ROOT, state);
+      expect(result.created).toEqual([]);
+      expect(result.errors).toEqual([]);
+      expect(result.state).toBeDefined();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // routePhase4TestFailure
+  // -------------------------------------------------------------------------
+
+  describe('routePhase4TestFailure()', () => {
+    it('returns null task when no failed checks are present', async () => {
+      const state = await loadState(TEST_ROOT);
+      const checkResult = {
+        overallStatus: 'PASS',
+        stacks: [],
+      };
+      const result = await routePhase4TestFailure(TEST_ROOT, state, checkResult, ['team-backend']);
+      expect(result.task).toBeNull();
+      expect(result.state).toBe(state); // returns same state when nothing routed
     });
   });
 });

@@ -169,4 +169,87 @@ describe('runHandoff()', () => {
     const content = readFileSync(resolve(handoffDir, files[0]), 'utf-8');
     expect(content).toContain('# Session Handoff');
   });
+
+  it('renders uncommitted files section when there are uncommitted changes', async () => {
+    // Override git status mock to return many uncommitted files (>10 to exercise truncation)
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const fileLines = Array.from({ length: 13 }, (_, i) => ` M  src/file${i}.js`).join('\n');
+    vi.mocked(runner.execCommand).mockImplementation((cmd) => {
+      if (cmd.includes('rev-parse --abbrev-ref'))
+        return { exitCode: 0, stdout: 'feat/x\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git status --porcelain'))
+        return { exitCode: 0, stdout: fileLines + '\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git log -5'))
+        return {
+          exitCode: 0,
+          stdout: 'abc1 first\ndef2 second\n',
+          stderr: '',
+          durationMs: 5,
+        };
+      if (cmd.includes('git log'))
+        return { exitCode: 0, stdout: 'abc1234 Initial\n', stderr: '', durationMs: 5 };
+      if (cmd.includes('git diff')) return { exitCode: 0, stdout: '', stderr: '', durationMs: 5 };
+      return { exitCode: 1, stdout: '', stderr: '', durationMs: 0 };
+    });
+
+    const result = await runHandoff({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+
+    expect(result.uncommittedCount).toBe(13);
+    expect(result.document).toContain('### Uncommitted Files');
+    expect(result.document).toContain('### Recent Commits');
+    expect(result.document).toContain('and 3 more'); // truncation marker
+    // Next-steps should mention reviewing uncommitted changes
+    expect(result.document).toContain('Review and commit');
+  });
+
+  it('warns and falls back to "unknown" branch when git is not available', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    vi.mocked(runner.execCommand).mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'not a git repo',
+      durationMs: 5,
+    });
+
+    const result = await runHandoff({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+    expect(result.branch).toBe('unknown');
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('handles state with no team_progress and no todo_items gracefully', async () => {
+    setupTestProject({ team_progress: {}, todo_items: [] });
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const result = await runHandoff({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+
+    // Without active teams or todos, those sections should be omitted
+    expect(result.document).not.toContain('## Team Progress');
+    expect(result.document).not.toContain('## Open Items');
+  });
+
+  it('passes userContext through when extra args supplied', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await runHandoff({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: TEST_ROOT,
+      flags: { _args: ['extra', 'context'] },
+    });
+    const out = logSpy.mock.calls.flat().join('\n');
+    expect(out).toContain('Context: extra context');
+  });
 });
