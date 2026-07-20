@@ -1,6 +1,6 @@
 ---
 name: 'feature-flow'
-description: 'Traces a specific feature end-to-end through the kit: shows which spec files define it, which template vars it injects, which templates consume those vars, what generated output it produces, and what overlay settings control it. Use this to understand or debug a feature's behavior.'
+description: 'Traces a specific feature end-to-end through the kit: shows which spec files define it, which template vars it injects, which templates consume those vars, what generated output it produces, and what overlay settings control it. Use this to understand or debug a feature''s behavior.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''

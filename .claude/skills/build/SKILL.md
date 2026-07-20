@@ -1,6 +1,6 @@
 ---
 name: 'build'
-description: 'Builds the project using the detected tech stack's build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
+description: 'Builds the project using the detected tech stack''s build command. Supports targeting specific packages in a monorepo or building the entire workspace.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''
