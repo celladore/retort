@@ -6,6 +6,8 @@ import {
   formatDuration,
   isValidCommand,
   formatTimestamp,
+  runWithConcurrency,
+  runInPool,
 } from '../runner.mjs';
 
 describe('execCommand()', () => {
@@ -143,5 +145,68 @@ describe('formatTimestamp()', () => {
 
   it('handles timestamps without milliseconds', () => {
     expect(formatTimestamp('2026-02-23T17:30:00Z')).toBe('2026-02-23 17:30:00');
+  });
+});
+
+describe('runWithConcurrency', () => {
+  it('runs all tasks and returns results in original order', async () => {
+    const tasks = [1, 2, 3, 4, 5].map((n) => () => Promise.resolve(n * 2));
+    const results = await runWithConcurrency(tasks, 2);
+    expect(results).toEqual([2, 4, 6, 8, 10]);
+  });
+
+  it('respects the concurrency limit', async () => {
+    let active = 0;
+    let maxActive = 0;
+    const tasks = Array.from({ length: 10 }, () => async () => {
+      active++;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((r) => setTimeout(r, 5));
+      active--;
+      return 'ok';
+    });
+    await runWithConcurrency(tasks, 3);
+    expect(maxActive).toBeLessThanOrEqual(3);
+  });
+
+  it('handles an empty task list', async () => {
+    const results = await runWithConcurrency([], 5);
+    expect(results).toEqual([]);
+  });
+
+  it('handles concurrency higher than the task count', async () => {
+    const tasks = [() => Promise.resolve(1), () => Promise.resolve(2)];
+    const results = await runWithConcurrency(tasks, 10);
+    expect(results).toEqual([1, 2]);
+  });
+});
+
+describe('runInPool', () => {
+  it('runs all tasks and returns results in order', async () => {
+    const tasks = [1, 2, 3, 4].map((n) => () => Promise.resolve(`r${n}`));
+    const results = await runInPool(tasks, 2);
+    expect(results).toEqual(['r1', 'r2', 'r3', 'r4']);
+  });
+
+  it('throws TypeError when tasks is not an array', async () => {
+    await expect(runInPool('not an array', 2)).rejects.toThrow(TypeError);
+  });
+
+  it('returns empty array for empty input', async () => {
+    expect(await runInPool([], 5)).toEqual([]);
+  });
+
+  it('throws RangeError for non-finite or non-positive concurrency', async () => {
+    const tasks = [() => Promise.resolve(1)];
+    await expect(runInPool(tasks, 0)).rejects.toThrow(RangeError);
+    await expect(runInPool(tasks, -1)).rejects.toThrow(RangeError);
+    await expect(runInPool(tasks, Infinity)).rejects.toThrow(RangeError);
+    await expect(runInPool(tasks, NaN)).rejects.toThrow(RangeError);
+  });
+
+  it('caps concurrency to the number of tasks', async () => {
+    const tasks = [() => Promise.resolve('a'), () => Promise.resolve('b')];
+    const results = await runInPool(tasks, 100);
+    expect(results).toEqual(['a', 'b']);
   });
 });

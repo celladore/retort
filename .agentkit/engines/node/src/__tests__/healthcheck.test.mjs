@@ -175,6 +175,223 @@ describe('runHealthcheck()', () => {
     }
   });
 
+  it('detects stacks via wildcard markers and runs build/test/lint checks', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    // Tooling: irrelevant for this test
+    vi.spyOn(runner, 'commandExists').mockReturnValue(false);
+    vi.spyOn(runner, 'execCommand').mockReturnValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+      durationMs: 50,
+    });
+    vi.spyOn(runner, 'isValidCommand').mockReturnValue(true);
+
+    vi.spyOn(orchestrator, 'loadState').mockReturnValue({});
+    vi.spyOn(orchestrator, 'saveState').mockImplementation(() => {});
+    vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+
+    // Build a tiny project with a JS file so the wildcard '*.js' marker matches
+    mkdirSync(TEST_ROOT, { recursive: true });
+    writeFileSync(resolve(TEST_ROOT, 'main.js'), 'console.log(1)\n');
+
+    // Build an agentkitRoot with a teams.yaml that has wildcard detection
+    const tinyAgentkit = resolve(TEST_ROOT, '.agentkit-tiny');
+    mkdirSync(resolve(tinyAgentkit, 'spec'), { recursive: true });
+    writeFileSync(
+      resolve(tinyAgentkit, 'spec', 'teams.yaml'),
+      `techStacks:\n` +
+        `  - name: js-stack\n` +
+        `    detect: ['*.js']\n` +
+        `    buildCommand: 'echo build'\n` +
+        `    testCommand: 'echo test'\n` +
+        `    linter: 'eslint'\n`
+    );
+
+    const result = await runHealthcheck({
+      agentkitRoot: tinyAgentkit,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+
+    expect(result.stacks.length).toBe(1);
+    expect(result.stacks[0].name).toBe('js-stack');
+    // build, test, lint
+    expect(result.stacks[0].checks.length).toBe(3);
+    expect(result.stacks[0].checks.every((c) => c.status === 'PASS')).toBe(true);
+    expect(result.overallHealth).toBe('HEALTHY');
+  });
+
+  it('marks overallHealth UNHEALTHY when a stack check fails', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    vi.spyOn(runner, 'commandExists').mockReturnValue(false);
+    // Build returns failure, test/lint succeed
+    vi.spyOn(runner, 'execCommand').mockImplementation((cmd) => {
+      if (cmd.includes('build')) {
+        return { exitCode: 1, stdout: '', stderr: 'fail', durationMs: 10 };
+      }
+      return { exitCode: 0, stdout: '', stderr: '', durationMs: 10 };
+    });
+    vi.spyOn(runner, 'isValidCommand').mockReturnValue(true);
+
+    vi.spyOn(orchestrator, 'loadState').mockReturnValue({});
+    vi.spyOn(orchestrator, 'saveState').mockImplementation(() => {});
+    vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+
+    mkdirSync(TEST_ROOT, { recursive: true });
+    writeFileSync(resolve(TEST_ROOT, 'package.json'), '{}\n');
+
+    const tinyAgentkit = resolve(TEST_ROOT, '.agentkit-tiny2');
+    mkdirSync(resolve(tinyAgentkit, 'spec'), { recursive: true });
+    writeFileSync(
+      resolve(tinyAgentkit, 'spec', 'teams.yaml'),
+      `techStacks:\n` +
+        `  - name: pkg-stack\n` +
+        `    detect: ['package.json']\n` +
+        `    buildCommand: 'npm run build'\n` +
+        `    testCommand: 'npm test'\n`
+    );
+
+    const result = await runHealthcheck({
+      agentkitRoot: tinyAgentkit,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+
+    expect(result.overallHealth).toBe('UNHEALTHY');
+    const buildCheck = result.stacks[0].checks.find((c) => c.name === 'build');
+    expect(buildCheck.status).toBe('FAIL');
+  });
+
+  it('skips invalid commands and reports SKIP status', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    vi.spyOn(runner, 'commandExists').mockReturnValue(false);
+    vi.spyOn(runner, 'execCommand').mockReturnValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+      durationMs: 5,
+    });
+    // Force isValidCommand to return false to exercise the SKIP branch
+    vi.spyOn(runner, 'isValidCommand').mockReturnValue(false);
+
+    vi.spyOn(orchestrator, 'loadState').mockReturnValue({});
+    vi.spyOn(orchestrator, 'saveState').mockImplementation(() => {});
+    vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+
+    mkdirSync(TEST_ROOT, { recursive: true });
+    writeFileSync(resolve(TEST_ROOT, 'package.json'), '{}\n');
+
+    const tinyAgentkit = resolve(TEST_ROOT, '.agentkit-tiny3');
+    mkdirSync(resolve(tinyAgentkit, 'spec'), { recursive: true });
+    writeFileSync(
+      resolve(tinyAgentkit, 'spec', 'teams.yaml'),
+      `techStacks:\n` +
+        `  - name: stack\n` +
+        `    detect: ['package.json']\n` +
+        `    buildCommand: 'malicious; rm -rf /'\n`
+    );
+
+    const result = await runHealthcheck({
+      agentkitRoot: tinyAgentkit,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+
+    expect(result.stacks[0].checks[0].status).toBe('SKIP');
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('creates auto-tasks when auto-task flag set and a stack check fails', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    vi.spyOn(runner, 'commandExists').mockReturnValue(false);
+    vi.spyOn(runner, 'execCommand').mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'broken',
+      durationMs: 10,
+    });
+    vi.spyOn(runner, 'isValidCommand').mockReturnValue(true);
+
+    vi.spyOn(orchestrator, 'loadState').mockReturnValue({});
+    vi.spyOn(orchestrator, 'saveState').mockImplementation(() => {});
+    vi.spyOn(orchestrator, 'appendEvent').mockImplementation(() => {});
+
+    const createTaskSpy = vi
+      .spyOn(taskProtocol, 'createTask')
+      .mockResolvedValue({ task: { id: 't-1' }, error: null });
+
+    mkdirSync(TEST_ROOT, { recursive: true });
+    writeFileSync(resolve(TEST_ROOT, 'package.json'), '{}\n');
+
+    const tinyAgentkit = resolve(TEST_ROOT, '.agentkit-auto-task');
+    mkdirSync(resolve(tinyAgentkit, 'spec'), { recursive: true });
+    writeFileSync(
+      resolve(tinyAgentkit, 'spec', 'teams.yaml'),
+      `techStacks:\n` +
+        `  - name: pkg-stack\n` +
+        `    detect: ['package.json']\n` +
+        `    buildCommand: 'npm run build'\n`
+    );
+
+    const result = await runHealthcheck({
+      agentkitRoot: tinyAgentkit,
+      projectRoot: TEST_ROOT,
+      flags: { 'auto-task': true },
+    });
+
+    expect(result.overallHealth).toBe('UNHEALTHY');
+    expect(createTaskSpy).toHaveBeenCalled();
+    const call = createTaskSpy.mock.calls[0];
+    expect(call[1].delegator).toBe('healthcheck');
+    expect(call[1].type).toBe('investigate');
+    expect(call[1].assignees).toEqual(['testing']);
+  });
+
+  it('warns when state update fails', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    vi.spyOn(runner, 'commandExists').mockReturnValue(false);
+    vi.spyOn(runner, 'execCommand').mockReturnValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+      durationMs: 5,
+    });
+
+    // loadState rejects (simulates lock or filesystem error)
+    vi.spyOn(orchestrator, 'loadState').mockImplementation(() => {
+      throw new Error('state load failed');
+    });
+
+    mkdirSync(TEST_ROOT, { recursive: true });
+
+    const result = await runHealthcheck({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot: TEST_ROOT,
+      flags: {},
+    });
+
+    expect(result).toBeDefined();
+    // Warn should have been called for the state update failure
+    const warnCalls = warnSpy.mock.calls.flat().join('\n');
+    expect(warnCalls).toContain('State update failed');
+  });
+
   it('handles project root without agentkit setup', async () => {
     mkdirSync(TEST_ROOT, { recursive: true });
     mkdirSync(STATE_DIR, { recursive: true });

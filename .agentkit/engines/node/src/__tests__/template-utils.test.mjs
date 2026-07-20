@@ -24,6 +24,8 @@ import {
   collapseBlankLines,
   escapeYamlString,
   resolveHelpers,
+  simpleDiff,
+  categorizeFile,
 } from '../template-utils.mjs';
 import { transform } from '../project-mapping.mjs';
 
@@ -1743,5 +1745,52 @@ describe('sync report collector', () => {
     expect(getSyncReportData()).not.toBeNull();
     resetSyncReport();
     expect(getSyncReportData()).toBeNull();
+  });
+});
+
+describe('simpleDiff', () => {
+  it('returns empty string when both inputs are equal', () => {
+    expect(simpleDiff('hello', 'hello')).toBe('');
+  });
+
+  it('marks added lines with +', () => {
+    const out = simpleDiff('a', 'a\nb');
+    expect(out).toContain('+ b');
+  });
+
+  it('marks removed lines with -', () => {
+    const out = simpleDiff('a\nb', 'a');
+    expect(out).toContain('- b');
+  });
+
+  it('marks changed lines with both - and +', () => {
+    const out = simpleDiff('a\nold', 'a\nnew');
+    expect(out).toContain('- old');
+    expect(out).toContain('+ new');
+  });
+
+  it('truncates output after 20 lines and appends "..."', () => {
+    const a = '';
+    const b = Array.from({ length: 25 }, (_, i) => `line${i}`).join('\n');
+    const out = simpleDiff(a, b);
+    expect(out).toContain('...');
+    // Each added line is one entry; output is truncated to 20 entries
+    expect(out.split('\n').filter((l) => l.startsWith('+ ')).length).toBeLessThanOrEqual(20);
+  });
+
+  it('handles CRLF line endings consistently with LF', () => {
+    expect(simpleDiff('a\r\nb', 'a\nb')).toBe('');
+  });
+});
+
+describe('categorizeFile', () => {
+  it('returns a string label', () => {
+    const cat = categorizeFile('docs/README.md');
+    expect(typeof cat).toBe('string');
+    expect(cat.length).toBeGreaterThan(0);
+  });
+
+  it('handles deeply nested paths', () => {
+    expect(typeof categorizeFile('apps/api/src/index.ts')).toBe('string');
   });
 });
