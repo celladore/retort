@@ -1,6 +1,6 @@
 ---
 name: '{{commandName}}'
-description: '{{commandDescription}}'
+description: {{escapeYamlString commandDescription}}
 {{#if disableModelInvocation~}}
 disable-model-invocation: true
 {{/if~}}

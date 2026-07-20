@@ -1,6 +1,6 @@
 ---
 name: 'format'
-description: 'Formats code using the detected tech stack's formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
+description: 'Formats code using the detected tech stack''s formatter. Can target specific files, directories, or the entire workspace. Reports files that were changed.'
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: ''
