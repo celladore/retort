@@ -2,11 +2,20 @@
   "nextNumber": 1,
   "sequences": {
     "implementation": 1,
-    "bugfix": 1,
+    "bugfix": 2,
     "feature": 1,
     "migration": 1,
     "issue": 1,
     "lesson": 1
   },
-  "entries": []
+  "entries": [
+    {
+      "number": 1,
+      "type": "bugfix",
+      "title": "SessionStart hook schema and duplicate Python detection",
+      "date": "2026-08-06",
+      "pr": "",
+      "file": "bug-fixes/0001-2026-08-06-sessionstart-hook-schema-and-duplicate-python-detection-bugfix.md"
+    }
+  ]
 }
