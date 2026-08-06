@@ -34,16 +34,10 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 - package.json
 - pnpm-lock.yaml
-- Cargo.toml
-- Cargo.lock
-- pyproject.toml
-- requirements*.txt
-- *.csproj
-- Directory.Packages.props
 
 ## Responsibilities
 
-- Monitor dependencies for security vulnerabilities (npm audit, cargo audit)
+- Monitor dependencies for security vulnerabilities (pnpm audit)
 - Evaluate and plan dependency updates (major, minor, patch)
 - Assess risk of dependency changes and breaking updates
 - Maintain dependency update policies and automation rules
