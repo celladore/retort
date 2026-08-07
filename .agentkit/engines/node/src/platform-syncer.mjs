@@ -16,7 +16,7 @@ import {
   validateThemeSpec,
 } from './brand-resolver.mjs';
 
-import { isUnsafePathSegment } from './fs-utils.mjs';
+import { applyUtf8Bom, isUnsafePathSegment } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { readYaml } from './spec-loader.mjs';
 import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
@@ -43,7 +43,7 @@ async function ensureDir(dirPath) {
 
 async function writeOutput(filePath, content) {
   await ensureDir(dirname(filePath));
-  await writeFile(filePath, content, 'utf-8');
+  await writeFile(filePath, applyUtf8Bom(filePath, content), 'utf-8');
 }
 
 async function* walkDir(dir) {

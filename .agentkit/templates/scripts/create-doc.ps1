@@ -32,7 +32,9 @@ $ErrorActionPreference = 'Stop'
 
 $ScriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot   = Split-Path -Parent $ScriptDir
-$HistoryDir = Join-Path $RepoRoot 'docs' 'history'
+# Join-Path takes at most two path segments on Windows PowerShell 5.1
+# (-AdditionalChildPath is PowerShell 6+), so multi-segment joins must nest.
+$HistoryDir = Join-Path (Join-Path $RepoRoot 'docs') 'history'
 $IndexFile  = Join-Path $HistoryDir '.index.json'
 
 # ---------------------------------------------------------------------------
@@ -108,7 +110,12 @@ $DestFile = Join-Path $DestDir $Filename
 # Copy template and substitute placeholders
 # ---------------------------------------------------------------------------
 
-$TemplateSrc = Join-Path $RepoRoot '.agentkit' 'templates' 'docs' 'history' $Subdir "TEMPLATE-${Type}.md"
+$TemplateDir = Join-Path $RepoRoot '.agentkit'
+$TemplateDir = Join-Path $TemplateDir 'templates'
+$TemplateDir = Join-Path $TemplateDir 'docs'
+$TemplateDir = Join-Path $TemplateDir 'history'
+$TemplateDir = Join-Path $TemplateDir $Subdir
+$TemplateSrc = Join-Path $TemplateDir "TEMPLATE-${Type}.md"
 
 if (-not (Test-Path $TemplateSrc)) {
   Write-Error "Template not found at $TemplateSrc"

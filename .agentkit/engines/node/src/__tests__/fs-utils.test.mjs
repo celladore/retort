@@ -6,7 +6,18 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-import { ensureDir, runConcurrent, walkDir, writeOutput } from '../fs-utils.mjs';
+import {
+  applyUtf8Bom,
+  ensureDir,
+  needsUtf8Bom,
+  runConcurrent,
+  UTF8_BOM,
+  walkDir,
+  writeOutput,
+} from '../fs-utils.mjs';
+
+/** Raw bytes a UTF-8 BOM must occupy on disk. */
+const BOM_BYTES = Buffer.from([0xef, 0xbb, 0xbf]);
 
 describe('runConcurrent', () => {
   it('processes all items in chunks', async () => {
@@ -117,5 +128,78 @@ describe('walkDir', () => {
     }
     expect(found.some((f) => f.endsWith('top.txt'))).toBe(true);
     expect(found.some((f) => f.endsWith('inner.txt'))).toBe(true);
+  });
+});
+
+describe('needsUtf8Bom', () => {
+  it('requires a BOM for .ps1 output', () => {
+    expect(needsUtf8Bom('scripts/create-doc.ps1')).toBe(true);
+  });
+
+  it('matches the extension case-insensitively', () => {
+    expect(needsUtf8Bom('scripts/Create-Doc.PS1')).toBe(true);
+  });
+
+  it('does not require a BOM for other shell or text output', () => {
+    // A BOM would break the shebang line on POSIX shells.
+    expect(needsUtf8Bom('scripts/create-doc.sh')).toBe(false);
+    expect(needsUtf8Bom('CLAUDE.md')).toBe(false);
+    expect(needsUtf8Bom('.claude/settings.json')).toBe(false);
+    expect(needsUtf8Bom('noextension')).toBe(false);
+  });
+});
+
+describe('applyUtf8Bom', () => {
+  it('prefixes .ps1 content with a BOM', () => {
+    expect(applyUtf8Bom('a.ps1', '# hi')).toBe(`${UTF8_BOM}# hi`);
+  });
+
+  it('is idempotent — never double-prefixes', () => {
+    const once = applyUtf8Bom('a.ps1', '# hi');
+    expect(applyUtf8Bom('a.ps1', once)).toBe(once);
+  });
+
+  it('leaves non-.ps1 content untouched', () => {
+    expect(applyUtf8Bom('a.md', '# hi')).toBe('# hi');
+  });
+
+  it('passes non-string content through unchanged', () => {
+    const buf = Buffer.from('x');
+    expect(applyUtf8Bom('a.ps1', buf)).toBe(buf);
+  });
+});
+
+describe('writeOutput — PowerShell 5.1 encoding', () => {
+  let tempDir;
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'fsutils-bom-'));
+  });
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('writes .ps1 files with a leading UTF-8 BOM', async () => {
+    const file = join(tempDir, 'hook.ps1');
+    await writeOutput(file, 'Write-Host "hi"\n');
+
+    expect(readFileSync(file).subarray(0, 3)).toEqual(BOM_BYTES);
+  });
+
+  it('keeps non-ASCII bytes intact after the BOM', async () => {
+    // The exact characters that broke parsing under Windows PowerShell 5.1:
+    // an em-dash in a comment and an info emoji in a Write-Host string.
+    const file = join(tempDir, 'doc.ps1');
+    await writeOutput(file, '# note — here\nWrite-Host "ℹ️ done"\n');
+
+    const raw = readFileSync(file);
+    expect(raw.subarray(0, 3)).toEqual(BOM_BYTES);
+    expect(raw.toString('utf-8').slice(1)).toBe('# note — here\nWrite-Host "ℹ️ done"\n');
+  });
+
+  it('does not add a BOM to .sh output', async () => {
+    const file = join(tempDir, 'hook.sh');
+    await writeOutput(file, '#!/usr/bin/env bash\n');
+
+    expect(readFileSync(file).subarray(0, 3)).not.toEqual(BOM_BYTES);
   });
 });

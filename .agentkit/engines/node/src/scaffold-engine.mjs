@@ -16,7 +16,7 @@ import { createHash } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
 import { chmod, cp, readFile, unlink, writeFile } from 'fs/promises';
 import { dirname, extname, relative, resolve, sep } from 'path';
-import { ensureDir, runConcurrent } from './fs-utils.mjs';
+import { applyUtf8Bom, ensureDir, runConcurrent } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { resolveScaffoldAction } from './template-utils.mjs';
 
@@ -174,9 +174,10 @@ export async function writeScaffoldOutputs({
               const result = threeWayMerge(diskText, baseContent, newContent);
 
               if (result) {
-                // Write merged result
+                // Write merged result. Re-apply the BOM: a merge whose winning
+                // hunk came from the user's BOM-less side would otherwise drop it.
                 await ensureDir(dirname(destFile));
-                await writeFile(destFile, result.merged, 'utf-8');
+                await writeFile(destFile, applyUtf8Bom(destFile, result.merged), 'utf-8');
                 // Update scaffold cache with new generated content
                 await ensureDir(dirname(cachePath));
                 await writeFile(cachePath, newContent, 'utf-8');
