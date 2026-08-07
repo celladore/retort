@@ -2,11 +2,20 @@
   "nextNumber": 1,
   "sequences": {
     "implementation": 1,
-    "bugfix": 1,
+    "bugfix": 2,
     "feature": 1,
     "migration": 1,
     "issue": 1,
     "lesson": 1
   },
-  "entries": []
+  "entries": [
+    {
+      "number": 1,
+      "type": "bugfix",
+      "title": "Dangling hook wiring in generated Claude settings",
+      "date": "2026-08-07",
+      "pr": "",
+      "file": "bug-fixes/0001-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
+    }
+  ]
 }
