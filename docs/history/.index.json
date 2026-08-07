@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 3,
+    "bugfix": 4,
     "feature": 1,
     "migration": 1,
     "issue": 1,
@@ -23,6 +23,14 @@
       "date": "2026-08-07",
       "pr": "572",
       "file": "bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
+    },
+    {
+      "number": 3,
+      "type": "bugfix",
+      "title": "Harden create-doc and widen numbering validation",
+      "date": "2026-08-07",
+      "pr": "576",
+      "file": "bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md"
     },
     {
       "number": 10,
