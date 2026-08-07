@@ -42,6 +42,14 @@ gate was silently absent.
 `ci.yml`'s own header comment already documented the correct name, so the spec
 contradicted the repo's own documentation.
 
+**The live setting was corrected independently while this branch was in flight** —
+`dev`'s required contexts now read `["Test","Validate","branch-rules"]`, and #579
+merged `CLEAN` without admin bypass as a result. That does not make this fix
+redundant: spec still declared the broken value, so the next run of
+`setup-branch-protection.sh` or `setup-agentkit-branch-governance.sh` would have
+silently re-broken `dev`. The fix is now a regression guard rather than an
+unblock.
+
 A second, compounding cause: `setup-agentkit-branch-governance.{sh,ps1}`
 **hardcoded** the contexts array while templating every neighbouring field from
 spec. Two independent definitions of the same value meant fixing the spec alone
