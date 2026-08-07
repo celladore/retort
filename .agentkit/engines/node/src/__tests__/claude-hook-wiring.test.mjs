@@ -238,6 +238,31 @@ describe('buildHooksFromSpec()', () => {
     expect(Object.keys(built)).toEqual(['SessionStart', 'PreToolUse', 'PostToolUse', 'Stop']);
   });
 
+  it('should not double the extension when the spec names one', () => {
+    // Arrange — the spec names hooks by stem, but tolerate an extension
+    const built = buildHooksFromSpec({
+      sessionStart: 'session-start.sh',
+      preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands.ps1' }],
+    });
+
+    // Assert
+    expect(built.SessionStart[0].hooks[0].command).not.toContain('.sh.sh');
+    expect(built.SessionStart[0].hooks[0].command).toContain('session-start.ps1 ||');
+    expect(built.PreToolUse[0].hooks[0].command).toBe(
+      '"$CLAUDE_PROJECT_DIR"/.claude/hooks/guard-destructive-commands.sh'
+    );
+  });
+
+  it('should omit the matcher key entirely when the spec sets none', () => {
+    // Arrange — an undefined matcher would vanish in JSON.stringify anyway;
+    // omitting it explicitly keeps the object and its serialized form the same
+    const built = buildHooksFromSpec({ preToolUse: [{ hook: 'guard-destructive-commands' }] });
+
+    // Assert
+    expect(built.PreToolUse[0]).not.toHaveProperty('matcher');
+    expect(JSON.parse(JSON.stringify(built.PreToolUse[0]))).toEqual(built.PreToolUse[0]);
+  });
+
   it('should skip entries that name no hook', () => {
     const built = buildHooksFromSpec({
       sessionStart: '   ',

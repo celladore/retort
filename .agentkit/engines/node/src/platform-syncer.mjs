@@ -657,10 +657,15 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
 export function buildHooksFromSpec(hooksSpec) {
   if (!hooksSpec || typeof hooksSpec !== 'object') return null;
 
+  // The spec names a hook by stem. Tolerate an extension being written anyway
+  // — `session-start.sh` must not become `session-start.sh.sh`, which would
+  // both break the command and defeat extractHookFiles()/gating downstream.
+  const stemOf = (name) => name.trim().replace(/\.(sh|ps1)$/i, '');
+
   // session-start is the one hook invoked via pwsh with a shell fallback; the
   // rest are invoked as .sh, matching how they have always been wired.
   const command = (name, crossPlatform) => {
-    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${name}`;
+    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stemOf(name)}`;
     return crossPlatform
       ? `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1 || ${base}.sh`
       : `${base}.sh`;
@@ -671,7 +676,7 @@ export function buildHooksFromSpec(hooksSpec) {
   const addSingle = (key, event, crossPlatform) => {
     const name = hooksSpec[key];
     if (typeof name !== 'string' || !name.trim()) return;
-    hooks[event] = [{ hooks: [{ type: 'command', command: command(name.trim(), crossPlatform) }] }];
+    hooks[event] = [{ hooks: [{ type: 'command', command: command(name, crossPlatform) }] }];
   };
 
   const addMatched = (key, event) => {
@@ -679,10 +684,14 @@ export function buildHooksFromSpec(hooksSpec) {
     const entries = [];
     for (const item of hooksSpec[key]) {
       if (!item || typeof item.hook !== 'string' || !item.hook.trim()) continue;
-      entries.push({
-        matcher: item.matcher,
-        hooks: [{ type: 'command', command: command(item.hook.trim(), false) }],
-      });
+      const entry = { hooks: [{ type: 'command', command: command(item.hook, false) }] };
+      // Only carry a matcher when the spec sets one — an undefined value would
+      // be dropped by JSON.stringify anyway, so make the omission explicit
+      if (typeof item.matcher === 'string' && item.matcher) {
+        entries.push({ matcher: item.matcher, ...entry });
+      } else {
+        entries.push(entry);
+      }
     }
     if (entries.length) hooks[event] = entries;
   };
