@@ -174,12 +174,24 @@ export async function writeScaffoldOutputs({
               const result = threeWayMerge(diskText, baseContent, newContent);
 
               if (result) {
-                // Write merged result
-                await ensureDir(dirname(destFile));
-                await writeFile(destFile, result.merged, 'utf-8');
-                // Update scaffold cache with new generated content
+                // Refresh the cache regardless — it must track the latest
+                // generated content so the next sync compares against the right
+                // base, even when the merge turns out to be a no-op.
                 await ensureDir(dirname(cachePath));
                 await writeFile(cachePath, newContent, 'utf-8');
+
+                // Write-if-changed also applies here. A merge whose result equals
+                // what is already on disk must not be written: doing so bumps
+                // mtime for nothing and leaves sync reporting a file it did not
+                // meaningfully change. Observed as a 1-file oscillation on
+                // docs/architecture/decisions/README.md. See ADR-11.
+                if (result.merged === diskText) {
+                  logVerbose(`  unchanged ${normalizedRel} (merge is a no-op, skipping write)`);
+                  return;
+                }
+
+                await ensureDir(dirname(destFile));
+                await writeFile(destFile, result.merged, 'utf-8');
                 count++;
 
                 writtenFiles.push(destFile);
