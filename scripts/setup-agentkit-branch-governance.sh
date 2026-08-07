@@ -79,11 +79,7 @@ PAYLOAD=$(cat <<'JSON'
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": [
-      "Test",
-      "Validate",
-      "Branch Protection / branch-rules"
-    ]
+    "contexts": ["Test","Validate","branch-rules"]
   },
   "enforce_admins": false,
   "required_pull_request_reviews": {

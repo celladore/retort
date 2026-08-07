@@ -47,11 +47,7 @@ $payload = @"
 {
   "required_status_checks": {
     "strict": {{bpStrictStatusChecks}},
-    "contexts": [
-      "Test",
-      "Validate",
-      "Branch Protection / branch-rules"
-    ]
+    "contexts": {{bpRequiredStatusChecksJson}}
   },
   "enforce_admins": {{bpEnforceAdmins}},
   "required_pull_request_reviews": {

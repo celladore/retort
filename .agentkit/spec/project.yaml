@@ -207,10 +207,15 @@ branchProtection:
 
   # Status checks
   strictStatusChecks: true # branch must be up-to-date before merge
+  # Each entry must be the status-check CONTEXT, which for GitHub Actions is the
+  # job's `name:` (or its job id when `name:` is omitted) — NOT "Workflow / Job".
+  # The "Workflow / Job" form only applies to reusable workflows called via
+  # `uses:` at job level. A context that never matches can never go green, which
+  # blocks every PR to the branch.
   requiredStatusChecks: # CI job names that must pass
-    - 'Test'
-    - 'Validate'
-    - 'Branch Protection / branch-rules'
+    - 'Test' # ci.yml -> jobs.test.name
+    - 'Validate' # ci.yml -> jobs.validate.name
+    - 'branch-rules' # branch-protection.yml -> jobs.branch-rules (no name:)
 
   # Branch rules
   enforceAdmins: false # apply rules to repo admins too
