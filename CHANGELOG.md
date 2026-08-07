@@ -35,6 +35,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Harden create-doc against a corrupted history index, render PR references as links, and widen numbering validation to all six subdirectories ([#576](../../pull/576), [history](docs/history/bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md))
 
 - Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
+- Orphaned hook scripts never wired in generated Claude settings ([#577](../../pull/577), [history](docs/history/bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md))
 
 ### Removed
 
