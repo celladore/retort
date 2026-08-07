@@ -141,11 +141,13 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   if (existsSync(settingsFile)) {
     try {
       const parsed = JSON.parse(readFileSync(settingsFile, 'utf-8'));
-      // Structurally malformed entries (null matchers, non-array hook lists)
-      // are skipped rather than thrown on — Phase 7 reports the shape error,
-      // and aborting here would suppress the rest of this phase.
+      // Skip structurally malformed entries (null matchers, non-array hook
+      // lists) rather than throwing on them. Phase 7 only checks that each
+      // event maps to an array, so these shapes go unreported — but this
+      // phase's job is the exists-on-disk invariant, and aborting here would
+      // drop the valid hooks alongside them.
       // `parsed` may be null — `null` is valid JSON — so keep the catch
-      // reserved for genuine parse failures
+      // reserved for genuine parse failures.
       for (const matchers of Object.values(parsed?.hooks || {})) {
         if (!Array.isArray(matchers)) continue;
         for (const matcher of matchers) {
