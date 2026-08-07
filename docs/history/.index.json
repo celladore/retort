@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 4,
+    "bugfix": 5,
     "feature": 1,
     "migration": 1,
     "issue": 1,
@@ -39,6 +39,14 @@
       "date": "2026-08-07",
       "pr": "575",
       "file": "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
+    },
+    {
+      "number": 4,
+      "type": "bugfix",
+      "title": "PowerShell hook variants never invoked",
+      "date": "2026-08-07",
+      "pr": "578",
+      "file": "bug-fixes/0004-2026-08-07-powershell-hook-variants-never-invoked-bugfix.md"
     }
   ]
 }
