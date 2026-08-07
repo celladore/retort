@@ -5,6 +5,7 @@ description: {{escapeYamlString agentDescription}}
 {{/if}}{{#if agentTools}}tools: {{agentTools}}
 {{/if}}{{#if agentDisallowedTools}}disallowedTools: {{agentDisallowedTools}}
 {{/if}}{{#if agentIsolation}}isolation: {{agentIsolation}}
+{{/if}}{{#if agentBackground}}background: {{agentBackground}}
 {{/if}}{{#if agentColor}}color: {{agentColor}}
 {{/if}}---
 

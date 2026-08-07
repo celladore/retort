@@ -14,21 +14,26 @@ import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { syncClaudeAgents } from '../platform-syncer.mjs';
+import { syncClaudeAgents, syncClaudeSettings } from '../platform-syncer.mjs';
 import { clearTemplateTextCache, loadAgentsSpec } from '../spec-loader.mjs';
 import { renderTemplate } from '../template-utils.mjs';
 import {
   AGENT_CATEGORY_COLORS,
   AGENT_NAME_PATTERN,
   CODE_WRITING_TASK_TYPES,
+  DEFAULT_SUBAGENT_SPAWN_DEPTH,
   DISPATCH_CAPABLE_CATEGORIES,
   MAX_AGENT_DESCRIPTION_LENGTH,
+  MAX_SUBAGENT_SPAWN_DEPTH,
+  MIN_SUBAGENT_SPAWN_DEPTH,
   WRITE_TASK_TYPES,
   buildAgentVars,
   deriveAgentDescription,
   deriveAgentIsolation,
+  deriveAgentTools,
   deriveCanDispatch,
   deriveDisallowedTools,
+  resolveMaxSubagentSpawnDepth,
 } from '../var-builders.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -151,6 +156,136 @@ describe('deriveAgentIsolation', () => {
 
   it('returns worktree when a code-writing type is mixed with read-only types', () => {
     expect(deriveAgentIsolation(['plan', 'review', 'implement'])).toBe('worktree');
+  });
+
+  it('lets dispatch.isolation override the derivation in both directions', () => {
+    expect(deriveAgentIsolation(['implement'], { isolation: 'none' })).toBe('');
+    expect(deriveAgentIsolation(['review'], { isolation: 'worktree' })).toBe('worktree');
+  });
+
+  it('derives normally for auto, an absent block, or an unrecognised value', () => {
+    expect(deriveAgentIsolation(['implement'], { isolation: 'auto' })).toBe('worktree');
+    expect(deriveAgentIsolation(['implement'], {})).toBe('worktree');
+    // A typo must not silently disable isolation — the validator reports it
+    expect(deriveAgentIsolation(['implement'], { isolation: 'worktee' })).toBe('worktree');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deriveAgentTools
+// ---------------------------------------------------------------------------
+
+describe('deriveAgentTools', () => {
+  const base = {
+    id: 'backend',
+    accepts: ['implement'],
+    'preferred-tools': ['Read', 'Write', 'Bash'],
+  };
+
+  it('returns an empty string in the default inherit mode', () => {
+    expect(deriveAgentTools(base, true)).toBe('');
+    expect(deriveAgentTools({ ...base, dispatch: { 'tools-mode': 'inherit' } }, true)).toBe('');
+  });
+
+  it('emits the allowlist when the agent opts in', () => {
+    const agent = { ...base, dispatch: { 'tools-mode': 'allowlist' } };
+
+    expect(deriveAgentTools(agent, false)).toBe('Read, Write, Bash');
+  });
+
+  it('appends Agent only when the agent may dispatch', () => {
+    const agent = { ...base, dispatch: { 'tools-mode': 'allowlist' } };
+
+    expect(deriveAgentTools(agent, true)).toBe('Read, Write, Bash, Agent');
+  });
+
+  it('does not append Agent twice when it is already listed', () => {
+    const agent = {
+      ...base,
+      'preferred-tools': ['Read', 'Agent'],
+      dispatch: { 'tools-mode': 'allowlist' },
+    };
+
+    expect(deriveAgentTools(agent, true)).toBe('Read, Agent');
+  });
+
+  it('subtracts the write tools for a read-only agent', () => {
+    const agent = {
+      ...base,
+      accepts: ['review'],
+      'preferred-tools': ['Read', 'Write', 'Edit', 'NotebookEdit', 'Grep'],
+      dispatch: { 'tools-mode': 'allowlist' },
+    };
+
+    expect(deriveAgentTools(agent, false)).toBe('Read, Grep');
+  });
+
+  it('falls back to inherit rather than emitting an empty allowlist', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const agent = { ...base, 'preferred-tools': [], dispatch: { 'tools-mode': 'allowlist' } };
+
+      // An empty `tools:` launches a subagent with no tools at all
+      expect(deriveAgentTools(agent, false)).toBe('');
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('backend'));
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('ignores blank and non-string tool entries', () => {
+    const agent = {
+      ...base,
+      'preferred-tools': ['Read', '  ', null, 42, ' Grep '],
+      dispatch: { 'tools-mode': 'allowlist' },
+    };
+
+    expect(deriveAgentTools(agent, false)).toBe('Read, Grep');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveMaxSubagentSpawnDepth
+// ---------------------------------------------------------------------------
+
+describe('resolveMaxSubagentSpawnDepth', () => {
+  it('defaults to 2 when the setting is absent', () => {
+    expect(resolveMaxSubagentSpawnDepth(undefined)).toBe(DEFAULT_SUBAGENT_SPAWN_DEPTH);
+    expect(resolveMaxSubagentSpawnDepth({})).toBe(DEFAULT_SUBAGENT_SPAWN_DEPTH);
+    expect(resolveMaxSubagentSpawnDepth({ 'max-subagent-spawn-depth': null })).toBe(
+      DEFAULT_SUBAGENT_SPAWN_DEPTH
+    );
+  });
+
+  it.each([MIN_SUBAGENT_SPAWN_DEPTH, 2, MAX_SUBAGENT_SPAWN_DEPTH])(
+    'accepts the in-range value %i',
+    (depth) => {
+      expect(resolveMaxSubagentSpawnDepth({ 'max-subagent-spawn-depth': depth })).toBe(depth);
+    }
+  );
+
+  it.each([0, -1, 4, 7, 2.5, '2', true])(
+    'warns and falls back to the default for the invalid value %p',
+    (depth) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        // Falls back rather than clamping — clamping 7 to 3 emits a number nobody asked for
+        expect(resolveMaxSubagentSpawnDepth({ 'max-subagent-spawn-depth': depth })).toBe(
+          DEFAULT_SUBAGENT_SPAWN_DEPTH
+        );
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('max-subagent-spawn-depth'));
+      } finally {
+        warn.mockRestore();
+      }
+    }
+  );
+
+  it('is not derived from max-handoff-chain-depth (ADR-11 §4)', () => {
+    // A spawn tree nests and multiplies where a handoff chain runs sequentially;
+    // 7 nested contexts is a token-budget hazard, not a deeper handoff chain.
+    expect(resolveMaxSubagentSpawnDepth({ 'max-handoff-chain-depth': 7 })).toBe(
+      DEFAULT_SUBAGENT_SPAWN_DEPTH
+    );
   });
 });
 
@@ -275,7 +410,7 @@ describe('buildAgentVars dispatch variables', () => {
     expect(result.agentColor).toBe(AGENT_CATEGORY_COLORS.engineering);
   });
 
-  it('never promotes preferred-tools to an allowlist', () => {
+  it('never promotes preferred-tools to an allowlist by default', () => {
     const withTools = { ...agent, 'preferred-tools': ['Read', 'Write', 'Bash'] };
 
     const result = buildAgentVars(withTools, 'engineering', {});
@@ -285,18 +420,63 @@ describe('buildAgentVars dispatch variables', () => {
     expect(result.agentToolsList).toBe('- Read\n- Write\n- Bash');
   });
 
-  it('does not deny the Agent tool in phase 1/2 even for a leaf category', () => {
+  it('denies the Agent tool to a leaf category', () => {
     const readOnly = { ...agent, accepts: ['review'] };
 
     expect(buildAgentVars(readOnly, 'engineering', {}).agentDisallowedTools).toBe(
-      'Write, Edit, NotebookEdit'
+      'Write, Edit, NotebookEdit, Agent'
     );
+    expect(buildAgentVars(readOnly, 'engineering', {}).agentCanDispatch).toBe(false);
+  });
+
+  it('leaves the Agent tool with a coordinator category', () => {
+    const result = buildAgentVars(agent, 'strategic-operations', {});
+
+    expect(result.agentDisallowedTools).toBe('');
+    expect(result.agentCanDispatch).toBe(true);
   });
 
   it('honours an authored dispatch.model', () => {
     const withModel = { ...agent, dispatch: { model: 'opus' } };
 
     expect(buildAgentVars(withModel, 'engineering', {}).agentModel).toBe('opus');
+  });
+
+  it('honours dispatch.isolation over the accepts-derived value', () => {
+    const forcedOff = { ...agent, dispatch: { isolation: 'none' } };
+    const forcedOn = { ...agent, accepts: ['review'], dispatch: { isolation: 'worktree' } };
+
+    expect(buildAgentVars(forcedOff, 'engineering', {}).agentIsolation).toBe('');
+    expect(buildAgentVars(forcedOn, 'engineering', {}).agentIsolation).toBe('worktree');
+  });
+
+  it('honours dispatch.color over the category default', () => {
+    const withColour = { ...agent, dispatch: { color: 'red' } };
+
+    expect(buildAgentVars(withColour, 'engineering', {}).agentColor).toBe('red');
+  });
+
+  it('emits background only when the agent opts in', () => {
+    expect(buildAgentVars(agent, 'engineering', {}).agentBackground).toBe('');
+    expect(
+      buildAgentVars({ ...agent, dispatch: { background: true } }, 'engineering', {})
+        .agentBackground
+    ).toBe('true');
+  });
+
+  it('drops disallowedTools when an allowlist takes over as the single authority', () => {
+    const allowlisted = {
+      ...agent,
+      accepts: ['review'],
+      'preferred-tools': ['Read', 'Write', 'Grep'],
+      dispatch: { 'tools-mode': 'allowlist' },
+    };
+
+    const result = buildAgentVars(allowlisted, 'engineering', {});
+
+    // Read-only guardrail applied by subtraction from the list, not by a second key
+    expect(result.agentTools).toBe('Read, Grep');
+    expect(result.agentDisallowedTools).toBe('');
   });
 
   it('omits the colour for an unknown category rather than guessing', () => {
@@ -420,12 +600,24 @@ describe('syncClaudeAgents frontmatter emission', () => {
     }
   });
 
-  it('never emits a tools allowlist (it would strip Agent from every agent)', () => {
+  it('emits no tools allowlist, because no retort agent opts into allowlist mode', () => {
     for (const [id, content] of files) {
       const parsed = yaml.load(splitFrontmatter(content).frontmatter);
 
       expect(parsed, id).not.toHaveProperty('tools');
     }
+  });
+
+  it('withholds Agent from leaf categories and leaves it with coordinators', () => {
+    const denies = (id) =>
+      String(yaml.load(splitFrontmatter(files.get(id)).frontmatter).disallowedTools || '')
+        .split(', ')
+        .includes('Agent');
+
+    // engineering is a leaf category — a backend agent fanning out is where budgets die
+    expect(denies('backend')).toBe(true);
+    // strategic-operations coordinates; the team graph already models it fanning out
+    expect(denies('adoption-strategist')).toBe(false);
   });
 
   it('renders the write-capable backend agent with worktree isolation', () => {
@@ -436,8 +628,9 @@ describe('syncClaudeAgents frontmatter emission', () => {
       model: 'inherit',
       isolation: 'worktree',
       color: 'blue',
+      // write-capable, so only the leaf-category Agent denial applies
+      disallowedTools: 'Agent',
     });
-    expect(parsed).not.toHaveProperty('disallowedTools');
     expect(parsed.description).toContain('Use for implement, review, plan work in');
   });
 
@@ -446,8 +639,9 @@ describe('syncClaudeAgents frontmatter emission', () => {
 
     expect(parsed).toMatchObject({
       name: 'security-auditor',
-      model: 'inherit',
-      disallowedTools: 'Write, Edit, NotebookEdit',
+      // routed to opus by dispatch.model — a missed authorisation gap costs more
+      model: 'opus',
+      disallowedTools: 'Write, Edit, NotebookEdit, Agent',
     });
     expect(parsed).not.toHaveProperty('isolation');
   });
@@ -531,5 +725,58 @@ describe('agent TEMPLATE.md frontmatter quoting', () => {
 
     expect(() => yaml.load(frontmatter)).not.toThrow();
     expect(frontmatter.split('\n').filter((l) => l.startsWith('---'))).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// syncClaudeSettings — CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH
+// ---------------------------------------------------------------------------
+
+describe('syncClaudeSettings spawn depth env', () => {
+  const PERMISSIONS = { allow: [], deny: [] };
+
+  /** Runs the real settings template through the syncer and parses the output. */
+  async function renderSettings(vars) {
+    const dir = mkdtempSync(join(tmpdir(), 'agent-dispatch-settings-'));
+    try {
+      await syncClaudeSettings(TEMPLATES_DIR, dir, vars, '3.2.0', PERMISSIONS, {});
+      return JSON.parse(readFileSync(join(dir, '.claude', 'settings.json'), 'utf-8'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it('emits the configured depth as a string', async () => {
+    const settings = await renderSettings({ maxSubagentSpawnDepth: 2 });
+
+    // settings.json env values must be strings, not numbers
+    expect(settings.env).toEqual({ CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH: '2' });
+  });
+
+  it('emits whatever depth the spec resolved to', async () => {
+    const settings = await renderSettings({ maxSubagentSpawnDepth: 3 });
+
+    expect(settings.env.CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH).toBe('3');
+  });
+
+  it('omits the env block entirely when no depth is resolved', async () => {
+    const settings = await renderSettings({});
+
+    expect(settings).not.toHaveProperty('env');
+  });
+
+  it('leaves permissions untouched', async () => {
+    const settings = await renderSettings({ maxSubagentSpawnDepth: 2 });
+
+    expect(settings.permissions).toEqual(PERMISSIONS);
+  });
+
+  it('matches the depth the repo spec actually configures', () => {
+    const teamsSpec = yaml.load(
+      readFileSync(resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'), 'utf-8')
+    );
+
+    // Guards the one number that decides how wide a live /orchestrate run can go
+    expect(resolveMaxSubagentSpawnDepth(teamsSpec)).toBe(DEFAULT_SUBAGENT_SPAWN_DEPTH);
   });
 });

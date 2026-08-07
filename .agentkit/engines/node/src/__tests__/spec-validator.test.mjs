@@ -16,12 +16,16 @@ import { tmpdir } from 'os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 
-function writeTempSpecRoot(commandsObj) {
+/**
+ * Writes a minimal but valid spec tree to a temp dir. `overrides` replaces whole
+ * spec objects (`teams`, `agents`) so a test can introduce exactly one defect.
+ */
+function writeTempSpecRoot(commandsObj, overrides = {}) {
   const root = mkdtempSync(resolve(tmpdir(), 'agentkit-spec-validator-'));
   const specDir = resolve(root, 'spec');
   mkdirSync(specDir, { recursive: true });
 
-  const teams = {
+  const teams = overrides.teams ?? {
     teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }],
     techStacks: [
       {
@@ -32,7 +36,7 @@ function writeTempSpecRoot(commandsObj) {
       },
     ],
   };
-  const agents = {
+  const agents = overrides.agents ?? {
     agents: {
       engineering: [
         {
@@ -1136,5 +1140,150 @@ describe('convention type and phase validation', () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ADR-11 native agent dispatch — teams.yaml spawn depth + per-agent dispatch
+// ---------------------------------------------------------------------------
+
+describe('validateSpec() — ADR-11 dispatch settings', () => {
+  const MINIMAL_COMMANDS = {
+    commands: [
+      {
+        name: 'orchestrate',
+        type: 'workflow',
+        description: 'desc',
+        'allowed-tools': ['Read', 'Bash'],
+      },
+    ],
+  };
+
+  /** The default teams spec plus whatever top-level settings a test needs. */
+  const teamsWith = (extra) => ({
+    teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }],
+    techStacks: [
+      {
+        name: 'node',
+        buildCommand: 'pnpm build',
+        testCommand: 'pnpm test',
+        detect: ['package.json'],
+      },
+    ],
+    ...extra,
+  });
+
+  /** The default agents spec with one agent carrying the supplied fields. */
+  const agentsWith = (extra) => ({
+    agents: {
+      engineering: [
+        {
+          id: 'backend',
+          name: 'Backend Engineer',
+          role: 'backend role',
+          focus: ['src/**'],
+          responsibilities: ['build api'],
+          ...extra,
+        },
+      ],
+    },
+  });
+
+  function expectErrors(overrides, predicate) {
+    const root = writeTempSpecRoot(MINIMAL_COMMANDS, overrides);
+    try {
+      return predicate(validateSpec(root).errors);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  it.each([1, 2, 3])('accepts max-subagent-spawn-depth %i', (depth) => {
+    expectErrors({ teams: teamsWith({ 'max-subagent-spawn-depth': depth }) }, (errors) =>
+      expect(errors.filter((e) => e.includes('max-subagent-spawn-depth'))).toEqual([])
+    );
+  });
+
+  it('accepts an omitted max-subagent-spawn-depth', () => {
+    expectErrors({ teams: teamsWith({}) }, (errors) =>
+      expect(errors.filter((e) => e.includes('max-subagent-spawn-depth'))).toEqual([])
+    );
+  });
+
+  it.each([0, 4, 7])('rejects out-of-range max-subagent-spawn-depth %i', (depth) => {
+    // A handoff chain of 7 is legitimate; 7 nested spawn contexts is not (ADR-11 §4)
+    expectErrors({ teams: teamsWith({ 'max-subagent-spawn-depth': depth }) }, (errors) =>
+      expect(errors.some((e) => e.includes('max-subagent-spawn-depth'))).toBe(true)
+    );
+  });
+
+  it('rejects a non-integer max-subagent-spawn-depth', () => {
+    expectErrors({ teams: teamsWith({ 'max-subagent-spawn-depth': 2.5 }) }, (errors) =>
+      expect(errors.some((e) => e.includes('must be an integer'))).toBe(true)
+    );
+  });
+
+  it('rejects an unknown dispatch.tools-mode', () => {
+    expectErrors({ agents: agentsWith({ dispatch: { 'tools-mode': 'denylist' } }) }, (errors) =>
+      expect(errors.some((e) => e.includes('tools-mode'))).toBe(true)
+    );
+  });
+
+  it('rejects an unknown dispatch.isolation', () => {
+    expectErrors({ agents: agentsWith({ dispatch: { isolation: 'worktee' } }) }, (errors) =>
+      expect(errors.some((e) => e.includes('isolation'))).toBe(true)
+    );
+  });
+
+  it('rejects a non-boolean dispatch.can-dispatch', () => {
+    expectErrors({ agents: agentsWith({ dispatch: { 'can-dispatch': 'yes' } }) }, (errors) =>
+      expect(errors.some((e) => e.includes('can-dispatch'))).toBe(true)
+    );
+  });
+
+  it('rejects tools-mode: allowlist without preferred-tools', () => {
+    // An empty allowlist emits `tools:` with nothing in it, and the subagent
+    // fails at its first tool call rather than at sync time
+    expectErrors({ agents: agentsWith({ dispatch: { 'tools-mode': 'allowlist' } }) }, (errors) =>
+      expect(errors.some((e) => e.includes('empty allowlist'))).toBe(true)
+    );
+  });
+
+  it('accepts tools-mode: allowlist with preferred-tools', () => {
+    expectErrors(
+      {
+        agents: agentsWith({
+          'preferred-tools': ['Read', 'Grep'],
+          dispatch: { 'tools-mode': 'allowlist' },
+        }),
+      },
+      (errors) => expect(errors.filter((e) => e.includes('allowlist'))).toEqual([])
+    );
+  });
+
+  it('accepts a fully populated dispatch block', () => {
+    expectErrors(
+      {
+        agents: agentsWith({
+          'preferred-tools': ['Read'],
+          dispatch: {
+            'when-to-use': 'Use for API work.',
+            'can-dispatch': true,
+            'tools-mode': 'allowlist',
+            model: 'opus',
+            isolation: 'worktree',
+            background: false,
+            color: 'blue',
+          },
+        }),
+      },
+      (errors) => expect(errors).toEqual([])
+    );
+  });
+
+  it('rejects an agent id that Claude Code would refuse to register', () => {
+    expectErrors({ agents: agentsWith({ id: 'forge:backend' }) }, (errors) =>
+      expect(errors.some((e) => e.includes('dispatchable'))).toBe(true)
+    );
   });
 });

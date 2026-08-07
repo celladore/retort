@@ -1,14 +1,24 @@
 # Agent Dispatch Capability — Implementation Spec
 
-**Status:** Phases 1–2 implemented · Phases 3–4 pending
+**Status:** Phases 1–3 implemented · Phase 4 pending
 **Owner:** TEAMFORGE (T11)
 **ADR:** [ADR-11 Native Agent Dispatch](../../architecture/decisions/11-native-agent-dispatch.md)
 **Target:** Retort v3.2.0
 
-> **Implementation status.** Phases 1 and 2 have landed: all 38 agents now emit valid
-> subagent frontmatter, with `isolation: worktree` on 14 code-writing agents and
-> `disallowedTools: Write, Edit, NotebookEdit` on 18 read-only agents. The "Current State"
-> table below describes the pre-implementation baseline and is kept for context.
+> **Implementation status.** Phases 1–3 have landed:
+>
+> - All 38 agents emit valid subagent frontmatter, with `isolation: worktree` on 14
+>   code-writing agents and `disallowedTools: Write, Edit, NotebookEdit` on 18 read-only ones.
+> - The full `dispatch:` block is honoured — `when-to-use`, `can-dispatch`, `tools-mode`,
+>   `model`, `isolation`, `background`, `color`.
+> - `can-dispatch` defaults by category: 13 coordinator agents keep the `Agent` tool, the
+>   other 25 receive `disallowedTools: Agent`.
+> - Model routing is live: 4 agents on `haiku`, 5 on `opus`, 29 inheriting.
+> - `max-subagent-spawn-depth: 2` in teams.yaml emits
+>   `env.CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` into `.claude/settings.json`.
+>
+> The "Current State" table below describes the pre-implementation baseline and is kept
+> for context.
 
 ## Summary
 
@@ -137,6 +147,14 @@ Per-agent `dispatch.can-dispatch: true` overrides. Emission:
 > parenthesised type list is ignored. Restricting _which_ agents may be spawned must go
 > through `permissions.deny: ["Agent(<name>)"]` in `settings.json`.
 
+> **Corrected during implementation.** The third row above would emit `tools:` _and_
+> `disallowedTools:` for a read-only agent in allowlist mode — the same restriction stated
+> twice, in two languages, with no documented precedence between them. As shipped,
+> `tools:` is the single authority in allowlist mode: the read-only denials are subtracted
+> from the list and `disallowedTools` is omitted. An allowlist that resolves to nothing
+> falls back to `inherit` with a warning rather than emitting an empty `tools:`, which
+> would launch a subagent with no tools at all.
+
 ### `model`
 
 Default `inherit`. Recommended assignments, implementing `aicost-model-routing`:
@@ -197,10 +215,16 @@ testable in isolation.
 
 ### `.agentkit/templates/claude/settings.json`
 
+> **Corrected during implementation.** The template is `JSON.parse`d, not rendered — a
+> `{{maxSubagentSpawnDepth}}` placeholder would survive verbatim into the generated file.
+> The `env` block is therefore built in `syncClaudeSettings`, alongside the permissions
+> and hook wiring that are already merged in the same way. The value is stringified:
+> `settings.json` env values must be strings, not numbers.
+
 ```json
 {
   "env": {
-    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "{{maxSubagentSpawnDepth}}"
+    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "2"
   }
 }
 ```
@@ -241,6 +265,11 @@ Templates to update in Phase 4: `.agentkit/templates/claude/commands/orchestrate
 
 Phase 1 alone resolves the blocking defect. Phases 3–4 should not start until Phase 1 output
 is confirmed registering in a live session.
+
+> Phase 3 narrows capability rather than widening it: `can-dispatch` defaults leave the
+> `Agent` tool with 13 coordinator agents and withhold it from the other 25, where before
+> all 38 inherited it. The token-cost risk in the table is what fan-out _would_ cost if the
+> defaults were inverted, not what this change introduces.
 
 ## Test Plan
 

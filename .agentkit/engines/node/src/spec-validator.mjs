@@ -8,6 +8,13 @@ import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
+import {
+  AGENT_ISOLATION_MODES,
+  AGENT_NAME_PATTERN,
+  AGENT_TOOLS_MODES,
+  MAX_SUBAGENT_SPAWN_DEPTH,
+  MIN_SUBAGENT_SPAWN_DEPTH,
+} from './var-builders.mjs';
 
 // ---------------------------------------------------------------------------
 // Schema definitions (lightweight — no external deps needed)
@@ -116,6 +123,63 @@ const agentSchema = {
     responsibilities: { type: 'array', required: true, items: { type: 'string' } },
   },
 };
+
+/**
+ * Schema for the optional per-agent `dispatch` block (ADR-11). Every field is
+ * optional; the block itself is optional.
+ */
+const agentDispatchSchema = {
+  type: 'object',
+  properties: {
+    'when-to-use': { type: 'string' },
+    'can-dispatch': { type: 'boolean' },
+    'tools-mode': { type: 'string', enum: AGENT_TOOLS_MODES },
+    model: { type: 'string' },
+    isolation: { type: 'string', enum: AGENT_ISOLATION_MODES },
+    background: { type: 'boolean' },
+    color: { type: 'string' },
+  },
+};
+
+/**
+ * Validates the parts of an agent that decide whether Claude Code can register
+ * and launch it. These are the failure modes that produce a file which looks
+ * correct and registers as nothing, or a subagent that launches with no tools.
+ */
+function validateAgentDispatch(agent, category) {
+  const errors = [];
+  if (!agent || typeof agent !== 'object') return errors;
+
+  const where = `agents.yaml: agent "${agent.id}"`;
+
+  // `name:` in the emitted frontmatter is the agent id. Claude Code silently
+  // skips a file whose name breaks this pattern, logging only to the debug log.
+  if (typeof agent.id === 'string' && !AGENT_NAME_PATTERN.test(agent.id)) {
+    errors.push(
+      `${where} (category "${category}") id must match ${AGENT_NAME_PATTERN} to be dispatchable — ` +
+        'Claude Code skips agent files with a non-conforming name'
+    );
+  }
+
+  const dispatch = agent.dispatch;
+  if (dispatch === undefined || dispatch === null) return errors;
+
+  errors.push(...validate(dispatch, agentDispatchSchema, `${where} dispatch`));
+
+  // An allowlist that resolves to nothing emits `tools:` with no tools, and the
+  // subagent fails at its first tool call rather than at sync time.
+  if (dispatch['tools-mode'] === 'allowlist') {
+    const preferred = agent['preferred-tools'] || agent.tools;
+    if (!Array.isArray(preferred) || preferred.filter(Boolean).length === 0) {
+      errors.push(
+        `${where} sets dispatch.tools-mode: allowlist but has no preferred-tools — ` +
+          'an empty allowlist launches the subagent with no tools'
+      );
+    }
+  }
+
+  return errors;
+}
 
 // ---------------------------------------------------------------------------
 // Schema: commands.yaml
@@ -1203,6 +1267,22 @@ export function validateSpec(agentkitRoot) {
     if (teams.intake !== undefined && teams.intake !== null) {
       errors.push(...validate(teams.intake, teamsIntakeSchema, 'teams.yaml.intake'));
     }
+    // Nested subagent contexts (ADR-11 §4) — deliberately not derived from
+    // max-handoff-chain-depth, whose cost is additive rather than multiplicative.
+    const spawnDepth = teams['max-subagent-spawn-depth'];
+    const spawnDepthErrors = validate(
+      spawnDepth,
+      { type: 'number', min: MIN_SUBAGENT_SPAWN_DEPTH, max: MAX_SUBAGENT_SPAWN_DEPTH },
+      'teams.yaml.max-subagent-spawn-depth'
+    );
+    if (spawnDepthErrors.length === 0 && spawnDepth !== undefined && spawnDepth !== null) {
+      if (!Number.isInteger(spawnDepth)) {
+        spawnDepthErrors.push(
+          `teams.yaml.max-subagent-spawn-depth: must be an integer, got ${spawnDepth}`
+        );
+      }
+    }
+    errors.push(...spawnDepthErrors);
   }
 
   // Validate agents.yaml
@@ -1219,6 +1299,7 @@ export function validateSpec(agentkitRoot) {
           errors.push(
             ...validate(agentList[i], agentSchema, `agents.yaml.agents.${category}[${i}]`)
           );
+          errors.push(...validateAgentDispatch(agentList[i], category));
         }
       }
     }

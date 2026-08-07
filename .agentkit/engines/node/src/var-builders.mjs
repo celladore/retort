@@ -481,6 +481,29 @@ export const DISPATCH_CAPABLE_CATEGORIES = Object.freeze([
   'project-management',
 ]);
 
+/** Tools withheld from an agent whose `accepts` contains no write-capable type. */
+export const READ_ONLY_DENIED_TOOLS = Object.freeze(['Write', 'Edit', 'NotebookEdit']);
+
+/** Accepted values for `dispatch.tools-mode`. */
+export const AGENT_TOOLS_MODES = Object.freeze(['inherit', 'allowlist']);
+
+/** Accepted values for `dispatch.isolation`. */
+export const AGENT_ISOLATION_MODES = Object.freeze(['auto', 'worktree', 'none']);
+
+/**
+ * Bounds for `max-subagent-spawn-depth` (teams.yaml) → the
+ * `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` env var in settings.json.
+ *
+ * Default 2 covers orchestrator → team agent → specialist, which is every
+ * fan-out pattern retort models. This is deliberately NOT derived from
+ * `max-handoff-chain-depth` (ADR-11 §4): a handoff chain is sequential and
+ * additive, a spawn tree nests and multiplies. Deriving it would emit 7 for a
+ * 13-team repo, which blows the `aicost-token-budget` rule on the first run.
+ */
+export const DEFAULT_SUBAGENT_SPAWN_DEPTH = 2;
+export const MIN_SUBAGENT_SPAWN_DEPTH = 1;
+export const MAX_SUBAGENT_SPAWN_DEPTH = 3;
+
 /** Claude Code subagent accent colour per agent category. */
 export const AGENT_CATEGORY_COLORS = Object.freeze({
   engineering: 'blue',
@@ -565,10 +588,18 @@ export function deriveAgentDescription(agent) {
  * worktree, turning .claude/rules/worktree-isolation.md from an instruction the
  * caller must remember into a property of the agent definition.
  *
+ * `dispatch.isolation` overrides: `worktree` forces it on, `none` forces it off,
+ * `auto` (or absent) derives. An unrecognised value falls through to derivation —
+ * the spec validator is where a typo is reported, not here.
+ *
  * Returns '' (not 'none') when isolation should be omitted, so the template
  * conditional drops the key rather than emitting an empty value.
  */
-export function deriveAgentIsolation(accepts) {
+export function deriveAgentIsolation(accepts, dispatch) {
+  const override = dispatch ? dispatch.isolation : undefined;
+  if (override === 'worktree') return 'worktree';
+  if (override === 'none') return '';
+
   const list = Array.isArray(accepts) ? accepts : [];
   return list.some((type) => CODE_WRITING_TASK_TYPES.includes(type)) ? 'worktree' : '';
 }
@@ -578,14 +609,14 @@ export function deriveAgentIsolation(accepts) {
  * inherit the full subagent toolset and lose capability explicitly, rather than
  * being allowlisted into a tool set that would silently drop Agent/Skill/MCP tools.
  *
- * `canDispatch` defaults to true: withholding the `Agent` tool is Phase 3 of ADR-11,
- * and callers in Phase 1/2 must not emit an Agent denial.
+ * `canDispatch` defaults to true so a caller that has not resolved dispatch
+ * capability never accidentally withholds the `Agent` tool.
  */
 export function deriveDisallowedTools(accepts, canDispatch = true) {
   const list = Array.isArray(accepts) ? accepts : [];
   const denied = [];
   if (!list.some((type) => WRITE_TASK_TYPES.includes(type))) {
-    denied.push('Write', 'Edit', 'NotebookEdit');
+    denied.push(...READ_ONLY_DENIED_TOOLS);
   }
   if (canDispatch === false) denied.push('Agent');
   return denied.join(', ');
@@ -599,6 +630,73 @@ export function deriveCanDispatch(category, dispatch) {
   const explicit = dispatch ? dispatch['can-dispatch'] : undefined;
   if (typeof explicit === 'boolean') return explicit;
   return DISPATCH_CAPABLE_CATEGORIES.includes(category);
+}
+
+/**
+ * Derives `tools:` for agents that opt into `dispatch.tools-mode: allowlist`.
+ *
+ * Returns '' for the default `inherit` mode, where the key is omitted entirely
+ * and capability is removed subtractively via `disallowedTools` instead.
+ *
+ * In allowlist mode `tools:` is authoritative, so the read-only guardrail is
+ * applied by *subtraction from the list* rather than by also emitting
+ * `disallowedTools` — one key, one description of what the agent may do.
+ * `Agent` is appended only when the agent may dispatch.
+ *
+ * An allowlist that resolves to nothing returns '' and warns: an empty `tools:`
+ * launches a subagent with no tools at all, which fails at the first tool call
+ * rather than at sync time. Falling back to `inherit` keeps the agent usable and
+ * leaves the hard error to the spec validator.
+ */
+export function deriveAgentTools(agent, canDispatch) {
+  const spec = agent || {};
+  const dispatch = spec.dispatch || {};
+  if (dispatch['tools-mode'] !== 'allowlist') return '';
+
+  const accepts = Array.isArray(spec.accepts) ? spec.accepts : [];
+  const readOnly = !accepts.some((type) => WRITE_TASK_TYPES.includes(type));
+
+  const allowed = (spec['preferred-tools'] || spec.tools || [])
+    .filter((tool) => typeof tool === 'string' && tool.trim() !== '')
+    .map((tool) => tool.trim())
+    .filter((tool) => !(readOnly && READ_ONLY_DENIED_TOOLS.includes(tool)));
+
+  if (canDispatch && !allowed.includes('Agent')) allowed.push('Agent');
+
+  if (allowed.length === 0) {
+    console.warn(
+      `[agentkit:sync] Warning: agent '${spec.id || spec.name || 'unknown'}' sets ` +
+        "dispatch.tools-mode: allowlist but resolves to no tools — falling back to 'inherit'. " +
+        'Populate preferred-tools or drop tools-mode.'
+    );
+    return '';
+  }
+
+  return allowed.join(', ');
+}
+
+/**
+ * Resolves `max-subagent-spawn-depth` from teams.yaml into the value emitted as
+ * `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`.
+ *
+ * An out-of-range value falls back to the default with a warning rather than
+ * being clamped. Clamping 7 to 3 would emit a plausible-looking number nobody
+ * asked for; the spec validator reports the real error.
+ */
+export function resolveMaxSubagentSpawnDepth(teamsSpec) {
+  const raw = teamsSpec ? teamsSpec['max-subagent-spawn-depth'] : undefined;
+  if (raw === undefined || raw === null) return DEFAULT_SUBAGENT_SPAWN_DEPTH;
+
+  if (!Number.isInteger(raw) || raw < MIN_SUBAGENT_SPAWN_DEPTH || raw > MAX_SUBAGENT_SPAWN_DEPTH) {
+    console.warn(
+      `[agentkit:sync] Warning: teams.yaml max-subagent-spawn-depth must be an integer ` +
+        `between ${MIN_SUBAGENT_SPAWN_DEPTH} and ${MAX_SUBAGENT_SPAWN_DEPTH}, got ${JSON.stringify(raw)} — ` +
+        `using ${DEFAULT_SUBAGENT_SPAWN_DEPTH}`
+    );
+    return DEFAULT_SUBAGENT_SPAWN_DEPTH;
+  }
+
+  return raw;
 }
 
 export function buildAgentVars(agent, category, vars, registry = new Map()) {
@@ -619,6 +717,14 @@ export function buildAgentVars(agent, category, vars, registry = new Map()) {
     );
   }
 
+  const canDispatch = deriveCanDispatch(category, dispatch);
+  // `preferred-tools` is prose by default — promoting it to an allowlist would strip
+  // Agent/Skill/WebSearch/MCP tools from every agent. Only `tools-mode: allowlist`
+  // opts in, and when it does `tools:` becomes the single authority, so the
+  // subtractive `disallowedTools` is dropped to avoid describing the same
+  // restriction twice in two languages.
+  const agentTools = deriveAgentTools(agent, canDispatch);
+
   return {
     ...vars,
     agentName: agent.name,
@@ -627,15 +733,14 @@ export function buildAgentVars(agent, category, vars, registry = new Map()) {
     agentDispatchName: agent.id || '',
     agentDescription: deriveAgentDescription(agent),
     agentModel: normalizeWhitespace(dispatch.model) || 'inherit',
-    // Deliberately empty: `preferred-tools` is documentation, and promoting it to an
-    // allowlist would strip Agent/Skill/WebSearch/MCP tools from every agent. Phase 3
-    // of ADR-11 populates this from `dispatch.tools-mode: allowlist` instead.
-    agentTools: '',
-    // Phase 2 derives write guardrails from `accepts` only; the `Agent` denial that
-    // `deriveCanDispatch` feeds is Phase 3, hence the explicit `true`.
-    agentDisallowedTools: deriveDisallowedTools(accepts, true),
-    agentIsolation: deriveAgentIsolation(accepts),
-    agentColor: AGENT_CATEGORY_COLORS[category] || '',
+    agentTools,
+    agentDisallowedTools: agentTools ? '' : deriveDisallowedTools(accepts, canDispatch),
+    agentIsolation: deriveAgentIsolation(accepts, dispatch),
+    // Background subagents keep a fixed subset of built-in tools regardless of
+    // frontmatter, so this is opt-in per agent rather than derived.
+    agentBackground: dispatch.background === true ? 'true' : '',
+    agentColor: normalizeWhitespace(dispatch.color) || AGENT_CATEGORY_COLORS[category] || '',
+    agentCanDispatch: canDispatch,
     agentCategory: category,
     agentRole: typeof agent.role === 'string' ? agent.role.trim() : agent.role || '',
     agentFocusList: focus.map((f) => `- ${f}`).join('\n'),

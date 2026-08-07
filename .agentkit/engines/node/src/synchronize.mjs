@@ -69,6 +69,7 @@ import {
   isFeatureEnabled,
   isItemFeatureEnabled,
   resolveCommandPath,
+  resolveMaxSubagentSpawnDepth,
   resolveTeamAgents,
 } from './var-builders.mjs';
 import { clearTemplateTextCache } from './spec-loader.mjs';
@@ -370,6 +371,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     intakeSecurityEscalationTeams: securityEscalationTeams,
     intakeBlockedEscalationTeams: blockedEscalationTeams,
     intakeAreaRoutingTable: buildAreaRoutingTable(teamsIntake),
+    // Nested subagent contexts, not handoff hops — see ADR-11 §4 for why this is
+    // a separate setting from max-handoff-chain-depth rather than derived from it.
+    maxSubagentSpawnDepth: resolveMaxSubagentSpawnDepth(teamsSpec),
     version,
     overlayTemplatesDir: resolve(overlayDir, 'templates'),
     repoName:
