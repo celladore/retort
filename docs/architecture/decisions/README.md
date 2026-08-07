@@ -4,10 +4,10 @@
 
 # Architecture Decision Records
 
-This directory holds the Architecture Decision Records (ADRs) for **retort**. An
-ADR captures a single significant architectural decision: the context that
-forced the choice, the decision itself, and the consequences the project
-accepted by making it.
+This directory holds the Architecture Decision Records (ADRs) for
+**retort**. An ADR captures a single significant architectural decision:
+the context that forced the choice, the decision itself, and the consequences
+the project accepted by making it.
 
 ## Naming Convention
 
@@ -20,8 +20,8 @@ One decision per file, named `NN-short-title.md`:
 ```
 
 - `NN` is a zero-padded sequence number, allocated in order of creation.
-- Numbers are **never reused**, even when an ADR is deprecated or superseded — a
-  retired number stays retired so external references never go stale.
+- Numbers are **never reused**, even when an ADR is deprecated or superseded —
+  a retired number stays retired so external references never go stale.
 - The title is lowercase kebab-case and describes the decision, not the
   discussion.
 
@@ -56,22 +56,7 @@ hand.
 
 <!-- Add entries as: - [NN-short-title.md](./NN-short-title.md) — one-line summary -->
 
-| ADR | Record                                                                                               | Status   |
-| --- | ---------------------------------------------------------------------------------------------------- | -------- |
-| 01  | [Adopt Retort](./01-adopt-agentkit-forge.md)                                                         | Accepted |
-| 02  | [Fallback Policy for Missing Evidence Metric](./02-fallback-policy-tokens-problem.md)                | Proposed |
-| 03  | [Tooling Strategy — Tool Selection](./03-tooling-strategy.md)                                        | Proposed |
-| 04  | [Static Security Analysis Depth](./04-static-security-analysis-depth-tooling.md)                     | Proposed |
-| 05  | [Dependency and Supply-Chain Detection](./05-dependency-supply-chain-detection-tooling.md)           | Proposed |
-| 06  | [Code Quality and Maintainability Signal](./06-code-quality-maintainability-signal-tooling.md)       | Proposed |
-| 07  | [Delivery Strategy (Refined)](./07-delivery-strategy.md)                                             | Proposed |
-| 08  | [Issue Sync Strategy — Local Docs to GitHub Issues](./08-issue-sync-strategy.md)                     | Proposed |
-| 09  | [PM Agent Loader Design](./09-pm-agent-loader.md)                                                    | Accepted |
-| 10  | [Adopt Tool-Neutral `.agents/` Hub Pattern](./10-tool-neutral-agent-hub.md)                          | Proposed |
-| 11  | [Native Agent Dispatch](./11-native-agent-dispatch.md)                                               | Proposed |
-| 12  | [Introduce Expansion Analyst Agent](./12-expansion-analyst-agent.md)                                 | Accepted |
-| 13  | [Split-Brain Analysis](./13-split-brain-analysis.md)                                                 | Proposed |
-| 14  | [Directive Classification — Type and Phase Scoping](./14-directive-classification-type-and-phase.md) | Proposed |
+_No decision records yet._
 
 ## When to Write an ADR
 
