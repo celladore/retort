@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 4,
+    "bugfix": 6,
     "feature": 1,
     "migration": 1,
     "issue": 1,
@@ -47,6 +47,14 @@
       "date": "2026-08-07",
       "pr": "575",
       "file": "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
+    },
+    {
+      "number": 5,
+      "type": "bugfix",
+      "title": "Silently broken CI config defects",
+      "date": "2026-08-07",
+      "pr": "579",
+      "file": "bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md"
     }
   ]
 }

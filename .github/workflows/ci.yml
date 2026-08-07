@@ -10,10 +10,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# Branch protection depends on these check names. If you rename a job's `name:`
-# field, update branch protection rules for dev and main to match.
-# Current required checks: Test, Validate, YAML Lint,
-# branch-rules (from branch-protection.yml).
+# Branch protection depends on these check names. A required context is the job's
+# `name:` — or its job id when `name:` is omitted — never "Workflow / Job" (that
+# form is only for reusable workflows called via `uses:` at job level). A context
+# that never matches can never go green, which blocks every PR to the branch.
+#
+# The required set is declared in .agentkit/spec/project.yaml under
+# branchProtection.requiredStatusChecks and applied by the generated
+# .github/scripts/setup-branch-protection.sh — update the spec, not this comment,
+# then re-run that script.
+#
+# Current required checks: Test (below), Validate (below),
+# branch-rules (branch-protection.yml — job id, no `name:` field).
 # Quality checks (Markdown Lint, Prettier) are in quality-lint.yml —
 # required on main, warning-only on dev.
 jobs:
