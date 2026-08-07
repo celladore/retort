@@ -1,6 +1,6 @@
 {
   "sequences": {
-    "implementation": 1,
+    "implementation": 11,
     "bugfix": 3,
     "feature": 1,
     "migration": 1,
@@ -23,6 +23,14 @@
       "date": "2026-08-07",
       "pr": "572",
       "file": "bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
+    },
+    {
+      "number": 10,
+      "type": "implementation",
+      "title": "Hook wiring generated from spec",
+      "date": "2026-08-07",
+      "pr": "575",
+      "file": "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
     }
   ]
 }
