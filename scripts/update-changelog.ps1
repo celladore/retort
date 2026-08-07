@@ -87,14 +87,18 @@ if (sectionIdx === -1) {
     if (lines[i].trim() === '---') { insertAt = i; break; }
     if (lines[i].trim() !== '') break;
   }
-  lines.splice(insertAt, 0, '', sectionHeader, entry);
+  lines.splice(insertAt, 0, '', sectionHeader, '', entry);
 } else {
+  // Step over the header and the blank line beneath it, then past any existing
+  // entries, so the entry joins the end of one contiguous list. Splicing
+  // directly after the header would leave the heading with no blank line under
+  // it and split the list in two — markdownlint MD022 and MD032.
   let insertAt = sectionIdx + 1;
+  while (insertAt < blockEnd && lines[insertAt].trim() === '') insertAt++;
   while (
     insertAt < blockEnd &&
     lines[insertAt].trim() !== '' &&
-    !lines[insertAt].startsWith('###') &&
-    !lines[insertAt].startsWith('##') &&
+    !lines[insertAt].startsWith('#') &&
     lines[insertAt].trim() !== '---'
   ) {
     insertAt++;

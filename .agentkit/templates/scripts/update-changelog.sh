@@ -102,16 +102,19 @@ if (sectionIdx === -1) {
     if (lines[i].trim() === '---') { insertAt = i; break; }
     if (lines[i].trim() !== '') break;
   }
-  lines.splice(insertAt, 0, '', sectionHeader, entry);
+  lines.splice(insertAt, 0, '', sectionHeader, '', entry);
 } else {
-  // Section exists — insert after the header line (and any existing entries)
+  // Section exists — step over the header and the blank line beneath it, then
+  // past any existing entries, so the entry joins the end of one contiguous
+  // list. Splicing directly after the header instead would leave the heading
+  // with no blank line under it and split the list in two, which trips
+  // markdownlint MD022 and MD032.
   let insertAt = sectionIdx + 1;
-  // Find the end of this section's entries (next ### or ## or blank+##/###)
+  while (insertAt < blockEnd && lines[insertAt].trim() === '') insertAt++;
   while (
     insertAt < blockEnd &&
     lines[insertAt].trim() !== '' &&
-    !lines[insertAt].startsWith('###') &&
-    !lines[insertAt].startsWith('##')
+    !lines[insertAt].startsWith('#')
   ) {
     insertAt++;
   }

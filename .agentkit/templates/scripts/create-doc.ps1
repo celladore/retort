@@ -64,6 +64,21 @@ if (-not (Test-Path $IndexFile)) {
 
 $Index   = Get-Content $IndexFile -Raw | ConvertFrom-Json
 $SeqNum  = if ($Index.sequences.$Type) { $Index.sequences.$Type } else { 1 }
+
+# The next number is max(index counter, highest NNNN- already on disk): the index
+# only records docs created through this script, so any file added by hand — or
+# predating the index — leaves the counter behind and hands out a number that is
+# already taken. Scanning the directory keeps the two from disagreeing.
+$ExistingDir = Join-Path $HistoryDir $Subdir
+if (Test-Path $ExistingDir) {
+  foreach ($Existing in Get-ChildItem -Path $ExistingDir -File -Name) {
+    if ($Existing -match '^(\d{4})-') {
+      $Candidate = [int]$Matches[1] + 1
+      if ($Candidate -gt $SeqNum) { $SeqNum = $Candidate }
+    }
+  }
+}
+
 $Padded  = $SeqNum.ToString('0000')
 $Date    = (Get-Date -Format 'yyyy-MM-dd')
 
@@ -149,7 +164,7 @@ if (-not $ChangelogSection) {
 } elseif (Test-Path $UpdateChangelogScript) {
   try {
     & $UpdateChangelogScript -Section $ChangelogSection -Description $Title `
-      -PrNumber $PrNumber -HistoryDoc "$Subdir/$Filename"
+      -PrNumber $PrNumber -HistoryDoc "docs/history/$Subdir/$Filename"
   } catch {
     Write-Warning "Could not update CHANGELOG.md — please add the entry manually."
   }
