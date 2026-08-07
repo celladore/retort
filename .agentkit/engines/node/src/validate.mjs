@@ -140,10 +140,15 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   if (existsSync(settingsFile)) {
     try {
       const parsed = JSON.parse(readFileSync(settingsFile, 'utf-8'));
+      // Structurally malformed entries (null matchers, non-array hook lists)
+      // are skipped rather than thrown on — Phase 7 reports the shape error,
+      // and aborting here would suppress the rest of this phase.
       for (const matchers of Object.values(parsed.hooks || {})) {
         if (!Array.isArray(matchers)) continue;
         for (const matcher of matchers) {
-          for (const hook of matcher.hooks || []) {
+          if (!matcher || !Array.isArray(matcher.hooks)) continue;
+          for (const hook of matcher.hooks) {
+            if (!hook) continue;
             for (const m of String(hook.command || '').matchAll(
               /\.claude\/hooks\/([\w.-]+?\.(?:sh|ps1))\b/g
             )) {

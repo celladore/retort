@@ -320,6 +320,29 @@ describe('filterHooksToEmitted() structure', () => {
     expect(filterHooksToEmitted(hooks, map, off)).toEqual({});
   });
 
+  it('should skip a null matcher rather than throwing', () => {
+    // Arrange — structurally valid JSON, structurally invalid hook tree
+    const hooks = { Stop: [null, { hooks: [{ type: 'command', command: cmd('kept') }] }] };
+
+    // Act + Assert — the surviving matcher is still processed
+    expect(() => filterHooksToEmitted(hooks, map, off)).not.toThrow();
+    expect(filterHooksToEmitted(hooks, map, off).Stop).toHaveLength(1);
+  });
+
+  it('should skip a matcher whose hooks field is not an array', () => {
+    const hooks = { Stop: [{ matcher: 'Bash', hooks: 'not-an-array' }] };
+
+    expect(() => filterHooksToEmitted(hooks, map, off)).not.toThrow();
+    expect(filterHooksToEmitted(hooks, map, off)).toEqual({});
+  });
+
+  it('should skip a null hook entry rather than throwing', () => {
+    const hooks = { Stop: [{ hooks: [null, { type: 'command', command: cmd('kept') }] }] };
+
+    expect(() => filterHooksToEmitted(hooks, map, off)).not.toThrow();
+    expect(filterHooksToEmitted(hooks, map, off).Stop[0].hooks).toHaveLength(1);
+  });
+
   it('should not mutate the input hooks tree', () => {
     const hooks = {
       PreToolUse: [
@@ -477,6 +500,73 @@ describe('runValidate() hook phase', () => {
     expect(error).toContain(
       'settings.json wires .claude/hooks/session-start.ps1, which does not exist'
     );
+  });
+
+  it('should still collect valid hooks alongside a null matcher', async () => {
+    // Arrange — parses as JSON, so the hook phase must not abort on the shape.
+    // The valid entry proves the malformed one was skipped rather than fatal:
+    // an unguarded throw would be swallowed by the catch and lose this too.
+    scaffold({
+      settingsRaw: JSON.stringify({
+        hooks: {
+          Stop: [
+            null,
+            { hooks: [{ command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/stop-build-check.sh' }] },
+          ],
+        },
+      }),
+      present: ['stop-build-check.sh'],
+    });
+
+    // Act
+    const { log, error } = await validateTestRoot();
+
+    // Assert
+    expect(log).toContain('Checked 1 hook script(s) wired in settings.json');
+    expect(error).not.toContain('stop-build-check.sh, which does not exist');
+  });
+
+  it('should still collect valid hooks alongside a null hook entry', async () => {
+    // Arrange
+    scaffold({
+      settingsRaw: JSON.stringify({
+        hooks: {
+          Stop: [
+            {
+              hooks: [null, { command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/stop-build-check.sh' }],
+            },
+          ],
+        },
+      }),
+      present: ['stop-build-check.sh'],
+    });
+
+    // Act
+    const { log } = await validateTestRoot();
+
+    // Assert
+    expect(log).toContain('Checked 1 hook script(s) wired in settings.json');
+  });
+
+  it('should still collect valid hooks alongside a non-array hooks field', async () => {
+    // Arrange
+    scaffold({
+      settingsRaw: JSON.stringify({
+        hooks: {
+          Stop: [
+            { matcher: 'Bash', hooks: 'not-an-array' },
+            { hooks: [{ command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/stop-build-check.sh' }] },
+          ],
+        },
+      }),
+      present: ['stop-build-check.sh'],
+    });
+
+    // Act
+    const { log } = await validateTestRoot();
+
+    // Assert
+    expect(log).toContain('Checked 1 hook script(s) wired in settings.json');
   });
 
   it('should not throw on a malformed settings.json', async () => {

@@ -80,8 +80,9 @@ Two deliberate choices are worth recording:
 ### Testing
 
 - **Unit Tests**: `.agentkit/engines/node/src/__tests__/claude-hook-wiring.test.mjs`
-  — 30 assertions across the three new helpers and the rewritten validator
-  phase.
+  — 36 tests across the three new helpers and the rewritten validator phase,
+  including malformed-input cases (null matchers, non-array hook lists) that
+  must be skipped rather than abort the phase.
 - **Integration Tests**: The validator tests scaffold a real project tree under
   `.test-tmp/` and run `runValidate()` end-to-end against it.
 - **Manual Testing**: `pnpm -C .agentkit retort:validate` against this

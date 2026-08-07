@@ -614,8 +614,15 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
     if (!Array.isArray(matchers)) continue;
     const keptMatchers = [];
     for (const matcher of matchers) {
-      const kept = (matcher.hooks || []).filter((h) =>
-        [...extractHookStems(h.command)].every((stem) => isHookEmitted(stem, hookFeatureMap, vars))
+      // Skip structurally malformed entries rather than throwing — a bad
+      // hand-edited settings.json must not abort the whole sync
+      if (!matcher || !Array.isArray(matcher.hooks)) continue;
+      const kept = matcher.hooks.filter(
+        (h) =>
+          h &&
+          [...extractHookStems(h.command)].every((stem) =>
+            isHookEmitted(stem, hookFeatureMap, vars)
+          )
       );
       if (kept.length) keptMatchers.push({ ...matcher, hooks: kept });
     }
