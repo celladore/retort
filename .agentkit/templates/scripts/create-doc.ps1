@@ -71,7 +71,19 @@ if (-not (Test-Path $IndexFile)) {
   $InitialIndex | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 $IndexFile
 }
 
-$Index   = Get-Content $IndexFile -Raw | ConvertFrom-Json
+try {
+  $Index = Get-Content $IndexFile -Raw | ConvertFrom-Json
+} catch {
+  # Corrupted index — rebuild it rather than aborting. The on-disk scan below
+  # still yields a correct sequence number without it.
+  Write-Warning "Could not parse $IndexFile — rebuilding it from scratch."
+  $Index = [PSCustomObject]@{ sequences = [PSCustomObject]@{}; entries = @() }
+}
+
+if ($null -eq $Index.sequences) {
+  $Index | Add-Member -NotePropertyName 'sequences' -NotePropertyValue ([PSCustomObject]@{}) -Force
+}
+
 $Counter = if ($Index.sequences.$Type) { [int]$Index.sequences.$Type } else { 1 }
 
 $Highest = 0

@@ -172,7 +172,19 @@ NODEEOF
 node - "$INDEX_FILE" "$TYPE" "$SEQ_NUM" "$TITLE" "$DATE" "${PR_NUMBER:-}" "$SUBDIR/$FILENAME" << 'NODEEOF'
   const [,, indexFile, type, seqNum, title, date, pr, file] = process.argv;
   const fs = require('fs');
-  const idx = JSON.parse(fs.readFileSync(indexFile, 'utf8'));
+
+  let idx;
+  try {
+    idx = JSON.parse(fs.readFileSync(indexFile, 'utf8'));
+  } catch (err) {
+    // Corrupted index — rebuild it rather than aborting. The document has
+    // already been written at this point, so failing here would leave the
+    // run half-finished with no changelog entry.
+    process.stderr.write(`Warning: could not parse ${indexFile} — rebuilding it.\n`);
+    idx = {};
+  }
+
+  idx.sequences = idx.sequences || {};
   // Advance past the number actually used, not past the (possibly stale) counter.
   idx.sequences[type] = Number(seqNum) + 1;
   idx.entries = idx.entries || [];
