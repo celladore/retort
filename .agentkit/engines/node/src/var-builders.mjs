@@ -167,7 +167,16 @@ export function buildTeamsList(rawTeams) {
 
 /**
  * Resolves which agent personas should be loaded for a given team.
- * Priority: 1) explicit `agents` list in teams.yaml, 2) category match.
+ *
+ * Priority: 1) explicit `agents` list in teams.yaml, 2) category match,
+ * 3) a single agent whose id equals the team id.
+ *
+ * Step 3 exists because agent categories and team ids are different
+ * vocabularies. The `testing` team matches the `testing` category, but the
+ * `backend` team's agent lives under the `engineering` category with the id
+ * `backend` — so category matching alone left 8 of 13 teams with no personas at
+ * all, and no way to name a `subagent_type` for native dispatch.
+ *
  * Returns an array of { id, name, role, category } objects.
  */
 export function resolveTeamAgents(teamId, team, agentsSpec) {
@@ -175,7 +184,7 @@ export function resolveTeamAgents(teamId, team, agentsSpec) {
   const result = [];
 
   // If the team has an explicit agents list, use it
-  if (Array.isArray(team.agents) && team.agents.length > 0) {
+  if (Array.isArray(team?.agents) && team.agents.length > 0) {
     for (const agentId of team.agents) {
       // Search across all categories for this agent ID
       for (const [category, agents] of Object.entries(allAgents)) {
@@ -194,6 +203,17 @@ export function resolveTeamAgents(teamId, team, agentsSpec) {
   if (Array.isArray(allAgents[teamId])) {
     for (const agent of allAgents[teamId]) {
       result.push({ id: agent.id, name: agent.name, role: agent.role, category: teamId });
+    }
+    return result;
+  }
+
+  // Last resort: the agent named after the team, wherever it is categorised
+  for (const [category, agents] of Object.entries(allAgents)) {
+    if (!Array.isArray(agents)) continue;
+    const found = agents.find((a) => a.id === teamId);
+    if (found) {
+      result.push({ id: found.id, name: found.name, role: found.role, category });
+      break;
     }
   }
 
@@ -697,6 +717,60 @@ export function resolveMaxSubagentSpawnDepth(teamsSpec) {
   }
 
   return raw;
+}
+
+/** Accepted values for the delegation backend (ADR-11 §6). */
+export const DISPATCH_MODES = Object.freeze(['native', 'task-file']);
+export const DEFAULT_DISPATCH_MODE = 'native';
+
+/**
+ * Resolves which delegation backend the generated commands describe.
+ *
+ * `native` writes the task file and then dispatches a subagent with the taskId;
+ * `task-file` writes the task file only and is the behaviour of every tool
+ * without registrable subagents. The overlay wins over the shared spec so a repo
+ * can opt out without forking settings.yaml.
+ */
+export function resolveDispatchMode(overlaySettings, settingsSpec) {
+  const raw = overlaySettings?.dispatchMode ?? settingsSpec?.dispatch?.mode;
+  if (raw === undefined || raw === null || raw === '') return DEFAULT_DISPATCH_MODE;
+
+  if (!DISPATCH_MODES.includes(raw)) {
+    console.warn(
+      `[agentkit:sync] Warning: dispatch mode must be one of [${DISPATCH_MODES.join(', ')}], ` +
+        `got ${JSON.stringify(raw)} — using '${DEFAULT_DISPATCH_MODE}'`
+    );
+    return DEFAULT_DISPATCH_MODE;
+  }
+
+  return raw;
+}
+
+/**
+ * Builds the team → `subagent_type` routing table the orchestrator needs in
+ * order to dispatch natively.
+ *
+ * Without this the orchestrator has to guess an agent id from a team id, which
+ * only coincidentally works (`backend` team → `backend` agent) and silently
+ * fails everywhere else (`testing` team → `test-lead`, not `testing`).
+ *
+ * The lead is the team's first resolved agent — teams.yaml lists them in
+ * priority order. `isolation` is deliberately not included: it is a property of
+ * the agent definition now, not something the caller passes.
+ */
+export function buildTeamDispatchTable(teamsSpec, agentsSpec) {
+  const teams = teamsSpec?.teams || [];
+  const rows = [];
+
+  for (const team of teams) {
+    const agents = resolveTeamAgents(team.id, team, agentsSpec);
+    if (agents.length === 0) continue;
+    rows.push(
+      `| \`${team.id}\` | \`${agents[0].id}\` | ${agents.map((a) => `\`${a.id}\``).join(', ')} |`
+    );
+  }
+
+  return rows.join('\n');
 }
 
 export function buildAgentVars(agent, category, vars, registry = new Map()) {

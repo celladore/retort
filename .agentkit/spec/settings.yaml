@@ -210,6 +210,25 @@ hooks:
   stop: stop-build-check
 
 # =============================================================================
+# Delegation backend (ADR-11 §6)
+# =============================================================================
+dispatch:
+  # How the orchestrator hands a task to a team.
+  #
+  # 'native'    — write the task file first, then dispatch the team's agent via
+  #               the Agent tool, passing the taskId. The subagent does the work
+  #               in its own context window and returns a summary; the task file
+  #               is what survives the session. Requires registrable subagents.
+  # 'task-file' — write the task file and nothing else. The orchestrator plays
+  #               every role itself in one context. This is the only mode that
+  #               works on tools without native subagents, and the escape hatch
+  #               when fan-out is not wanted.
+  #
+  # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
+  #   dispatchMode: task-file
+  mode: native
+
+# =============================================================================
 # Sync configuration
 # =============================================================================
 sync:

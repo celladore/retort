@@ -21,19 +21,24 @@ import {
   AGENT_CATEGORY_COLORS,
   AGENT_NAME_PATTERN,
   CODE_WRITING_TASK_TYPES,
+  DEFAULT_DISPATCH_MODE,
   DEFAULT_SUBAGENT_SPAWN_DEPTH,
+  DISPATCH_MODES,
   DISPATCH_CAPABLE_CATEGORIES,
   MAX_AGENT_DESCRIPTION_LENGTH,
   MAX_SUBAGENT_SPAWN_DEPTH,
   MIN_SUBAGENT_SPAWN_DEPTH,
   WRITE_TASK_TYPES,
   buildAgentVars,
+  buildTeamDispatchTable,
   deriveAgentDescription,
   deriveAgentIsolation,
   deriveAgentTools,
   deriveCanDispatch,
   deriveDisallowedTools,
+  resolveDispatchMode,
   resolveMaxSubagentSpawnDepth,
+  resolveTeamAgents,
 } from '../var-builders.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -778,5 +783,161 @@ describe('syncClaudeSettings spawn depth env', () => {
 
     // Guards the one number that decides how wide a live /orchestrate run can go
     expect(resolveMaxSubagentSpawnDepth(teamsSpec)).toBe(DEFAULT_SUBAGENT_SPAWN_DEPTH);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 4 — delegation backend and the team → subagent_type routing table
+// ---------------------------------------------------------------------------
+
+describe('resolveDispatchMode', () => {
+  it('defaults to native when nothing is configured', () => {
+    expect(resolveDispatchMode(undefined, undefined)).toBe(DEFAULT_DISPATCH_MODE);
+    expect(resolveDispatchMode({}, {})).toBe('native');
+    expect(resolveDispatchMode({}, { dispatch: {} })).toBe('native');
+  });
+
+  it.each(DISPATCH_MODES)('accepts the mode %s from the shared spec', (mode) => {
+    expect(resolveDispatchMode({}, { dispatch: { mode } })).toBe(mode);
+  });
+
+  it('lets the repo overlay opt out without forking settings.yaml', () => {
+    expect(
+      resolveDispatchMode({ dispatchMode: 'task-file' }, { dispatch: { mode: 'native' } })
+    ).toBe('task-file');
+  });
+
+  it('warns and falls back for an unknown mode', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      expect(resolveDispatchMode({}, { dispatch: { mode: 'rpc' } })).toBe(DEFAULT_DISPATCH_MODE);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('dispatch mode'));
+    } finally {
+      warn.mockRestore();
+    }
+  });
+});
+
+describe('buildTeamDispatchTable', () => {
+  const agentsSpec = {
+    agents: {
+      backend: [{ id: 'backend', name: 'Backend Engineer', role: 'r' }],
+      testing: [
+        { id: 'test-lead', name: 'Test Lead', role: 'r' },
+        { id: 'coverage-tracker', name: 'Coverage Tracker', role: 'r' },
+      ],
+    },
+  };
+
+  it('names the lead agent, not the team, as the subagent_type', () => {
+    const table = buildTeamDispatchTable({ teams: [{ id: 'testing' }] }, agentsSpec);
+
+    // The whole point: dispatching `testing` fails; `test-lead` is the agent
+    expect(table).toBe('| `testing` | `test-lead` | `test-lead`, `coverage-tracker` |');
+  });
+
+  it('emits one row per team that resolves at least one agent', () => {
+    const table = buildTeamDispatchTable(
+      { teams: [{ id: 'backend' }, { id: 'testing' }] },
+      agentsSpec
+    );
+
+    expect(table.split('\n')).toHaveLength(2);
+  });
+
+  it('skips a team with no agents rather than emitting an empty cell', () => {
+    const table = buildTeamDispatchTable({ teams: [{ id: 'ghost' }] }, agentsSpec);
+
+    expect(table).toBe('');
+  });
+
+  it('honours an explicit agents list over category matching', () => {
+    const table = buildTeamDispatchTable(
+      { teams: [{ id: 'backend', agents: ['coverage-tracker'] }] },
+      agentsSpec
+    );
+
+    expect(table).toBe('| `backend` | `coverage-tracker` | `coverage-tracker` |');
+  });
+
+  it('returns an empty string for a missing spec', () => {
+    expect(buildTeamDispatchTable(undefined, undefined)).toBe('');
+    expect(buildTeamDispatchTable({}, {})).toBe('');
+  });
+
+  it('covers every team in the real spec that has agents', () => {
+    const teamsSpec = yaml.load(
+      readFileSync(resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'), 'utf-8')
+    );
+    const realAgents = loadAgentsSpec(AGENTKIT_ROOT);
+
+    const table = buildTeamDispatchTable(teamsSpec, realAgents);
+    const rows = table.split('\n').filter(Boolean);
+
+    expect(rows.length).toBeGreaterThan(0);
+    // Every lead named in the table must be a real, registrable agent id
+    const known = new Set(
+      Object.values(realAgents.agents)
+        .flat()
+        .map((a) => a.id)
+    );
+    for (const row of rows) {
+      const lead = row.split('|')[2].trim().replaceAll('`', '');
+      expect(known.has(lead), `${lead} is not a known agent id`).toBe(true);
+      expect(lead).toMatch(AGENT_NAME_PATTERN);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveTeamAgents — team id / agent category are different vocabularies
+// ---------------------------------------------------------------------------
+
+describe('resolveTeamAgents id fallback', () => {
+  const agentsSpec = {
+    agents: {
+      engineering: [
+        { id: 'backend', name: 'Backend Engineer', role: 'r' },
+        { id: 'frontend', name: 'Frontend Engineer', role: 'r' },
+      ],
+      testing: [{ id: 'test-lead', name: 'Test Lead', role: 'r' }],
+    },
+  };
+
+  it('resolves a team whose id names an agent in another category', () => {
+    // `backend` the team vs `backend` the agent, categorised under `engineering`
+    expect(resolveTeamAgents('backend', {}, agentsSpec)).toEqual([
+      { id: 'backend', name: 'Backend Engineer', role: 'r', category: 'engineering' },
+    ]);
+  });
+
+  it('still prefers a category match over the id fallback', () => {
+    const resolved = resolveTeamAgents('testing', {}, agentsSpec);
+
+    expect(resolved.map((a) => a.id)).toEqual(['test-lead']);
+  });
+
+  it('still prefers an explicit agents list over both', () => {
+    const resolved = resolveTeamAgents('backend', { agents: ['test-lead'] }, agentsSpec);
+
+    expect(resolved.map((a) => a.id)).toEqual(['test-lead']);
+  });
+
+  it('returns nothing when the team matches no category and no agent id', () => {
+    expect(resolveTeamAgents('ghost', {}, agentsSpec)).toEqual([]);
+  });
+
+  it('gives every team in the real spec at least one agent', () => {
+    const teamsSpec = yaml.load(
+      readFileSync(resolve(AGENTKIT_ROOT, 'spec', 'teams.yaml'), 'utf-8')
+    );
+    const realAgents = loadAgentsSpec(AGENTKIT_ROOT);
+
+    const orphans = (teamsSpec.teams || [])
+      .filter((team) => resolveTeamAgents(team.id, team, realAgents).length === 0)
+      .map((team) => team.id);
+
+    // A team with no agents has no persona section and no dispatchable target
+    expect(orphans).toEqual([]);
   });
 });

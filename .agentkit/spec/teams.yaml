@@ -64,6 +64,9 @@ teams:
     scope: ['auth/**', 'security/**', 'middleware/auth*']
     accepts: [review, investigate]
     handoff-chain: []
+    # No `security` agent category and no agent with id `security` — name the
+    # agent explicitly so the team has a persona and a dispatchable subagent_type
+    agents: [security-auditor]
 
   - id: docs
     name: DOCUMENTATION
@@ -79,6 +82,9 @@ teams:
       ]
     accepts: [implement, review, document]
     handoff-chain: []
+    # content-strategist owns documentation voice and content architecture, and
+    # its focus already includes docs/** — the closest thing to a docs persona
+    agents: [content-strategist]
 
   - id: product
     name: PRODUCT
@@ -93,6 +99,9 @@ teams:
     scope: ['**/*']
     accepts: [review, investigate]
     handoff-chain: []
+    # retrospective-analyst backs /review --focus=retrospective, this team's own
+    # command; spec-compliance-auditor covers the agent-behaviour half
+    agents: [retrospective-analyst, spec-compliance-auditor]
 
   - id: forge
     name: TEAMFORGE

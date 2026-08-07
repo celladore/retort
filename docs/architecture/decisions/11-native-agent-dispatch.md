@@ -1,6 +1,7 @@
 # ADR-11: Native Agent Dispatch — Emit Dispatchable Subagents, Keep Task Files as Record
 
-**Status:** Proposed
+**Status:** Accepted — all four phases implemented in
+[#574](https://github.com/phoenixvc/retort/pull/574)
 **Date:** 2026-08-07
 **Deciders:** JustAGhosT
 **Related:** [ADR-10 Tool-Neutral Agent Hub](./10-tool-neutral-agent-hub.md), [Implementation spec](../../planning/agents-teams/agent-dispatch-capability.md), [Worktree isolation rule](../../../.claude/rules/worktree-isolation.md)
@@ -160,3 +161,25 @@ The spec stays single-source, consistent with ADR-10's tool-neutral direction.
   any dispatch, and each later phase is independently revertible.
 - Repos can opt out entirely via the feature flag; the generated output degrades to today's
   prose personas.
+
+## Implementation Notes
+
+Three things turned out differently from the decision as written. All are reflected in the
+shipped code and in the [implementation spec](../../planning/agents-teams/agent-dispatch-capability.md).
+
+1. **§2 understates the direction of the change.** Withholding `Agent` from leaf categories
+   reads as "enables fan-out and its token cost". It does the opposite: before Phase 3 all
+   38 agents inherited `Agent`, and after it only 13 coordinators hold it. The phasing table's
+   "medium risk" describes what inverted defaults would cost, not what shipped.
+
+2. **In `tools-mode: allowlist`, `tools:` is the only key emitted.** §2's emission rule would
+   have produced `tools:` alongside `disallowedTools:` for a read-only agent — the same
+   restriction expressed twice with no documented precedence between the two. The read-only
+   denials are subtracted from the list instead. An allowlist that resolves to nothing falls
+   back to `inherit` with a warning, because an empty `tools:` launches a subagent with no
+   tools and fails at its first tool call rather than at sync time.
+
+3. **§6's dispatch needs a team → agent routing table.** The task file names a _team_ in
+   `assignees`; the `Agent` tool needs an _agent id_. They coincide for `backend` and not for
+   `testing`, whose lead agent is `test-lead`. `orchestrate.md` now renders the mapping
+   explicitly rather than leaving the orchestrator to guess.

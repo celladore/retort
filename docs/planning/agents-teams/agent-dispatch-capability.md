@@ -1,11 +1,11 @@
 # Agent Dispatch Capability — Implementation Spec
 
-**Status:** Phases 1–3 implemented · Phase 4 pending
+**Status:** Complete — all four phases implemented
 **Owner:** TEAMFORGE (T11)
 **ADR:** [ADR-11 Native Agent Dispatch](../../architecture/decisions/11-native-agent-dispatch.md)
 **Target:** Retort v3.2.0
 
-> **Implementation status.** Phases 1–3 have landed:
+> **Implementation status.** All four phases have landed:
 >
 > - All 38 agents emit valid subagent frontmatter, with `isolation: worktree` on 14
 >   code-writing agents and `disallowedTools: Write, Edit, NotebookEdit` on 18 read-only ones.
@@ -16,6 +16,8 @@
 > - Model routing is live: 4 agents on `haiku`, 5 on `opus`, 29 inheriting.
 > - `max-subagent-spawn-depth: 2` in teams.yaml emits
 >   `env.CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` into `.claude/settings.json`.
+> - `orchestrate.md` and `team-TEMPLATE.md` describe the reconciled protocol, selected by
+>   `dispatch.mode: native | task-file` in settings.yaml (overlay key: `dispatchMode`).
 >
 > The "Current State" table below describes the pre-implementation baseline and is kept
 > for context.
@@ -253,6 +255,22 @@ orchestrator
 Templates to update in Phase 4: `.agentkit/templates/claude/commands/orchestrate.md`
 (Phase 3 delegation section) and `.agentkit/templates/claude/commands/team-TEMPLATE.md`
 (Step 0 task queue — a dispatched agent is handed its `taskId` rather than scanning).
+
+> **Added during implementation.** Dispatch needs a **team → agent routing table**, which
+> this section did not account for. The task file names a _team_ in `assignees`; the `Agent`
+> tool takes an _agent id_. Those coincide for `backend` and not for `testing`, whose lead
+> agent is `test-lead` — an orchestrator deriving one from the other silently fails on most
+> teams. `orchestrate.md` now renders the mapping from a `teamDispatchTable` var built by
+> `buildTeamDispatchTable(teamsSpec, agentsSpec)`.
+>
+> Two instructions in `orchestrate.md` also became **wrong** rather than merely incomplete
+> once Phases 1–3 landed, and Phase 4 corrects them:
+>
+> - "pass `isolation: "worktree"` in the Agent tool call" — isolation is a property of the
+>   agent definition now, derived from `accepts` at sync time. The caller passing it is
+>   redundant at best and contradictory at worst.
+> - "Each team should accept or reject the task" — in `native` mode the dispatched agent
+>   does that, inside its own context, holding its own lease.
 
 ## Phasing
 

@@ -12,6 +12,7 @@ import {
   AGENT_ISOLATION_MODES,
   AGENT_NAME_PATTERN,
   AGENT_TOOLS_MODES,
+  DISPATCH_MODES,
   MAX_SUBAGENT_SPAWN_DEPTH,
   MIN_SUBAGENT_SPAWN_DEPTH,
 } from './var-builders.mjs';
@@ -338,6 +339,13 @@ const settingsSchema = {
       },
     },
     hooks: { type: 'object', required: true },
+    // ADR-11 §6 — which delegation backend the generated commands describe
+    dispatch: {
+      type: 'object',
+      properties: {
+        mode: { type: 'string', enum: DISPATCH_MODES },
+      },
+    },
   },
 };
 
