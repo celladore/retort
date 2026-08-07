@@ -86,6 +86,33 @@ path rather than introducing a second mechanism.
 
 Applies to every write in the render path, including the `cp(…, { force: true })` copy sites.
 
+#### Ordering constraint — formatting must move before the comparison
+
+A naive implementation does not work, and this is the single most important detail for whoever
+implements it. The current pipeline is:
+
+1. `platform-syncer.mjs` renders all output into a temp directory (its own local `writeOutput`).
+2. `scaffold-engine.mjs` copies and merges that temp directory into the project root.
+3. `runPostSyncPrettier` formats the **project** files afterwards, via subprocess.
+
+Because Prettier runs last, the temp directory holds **unformatted** bytes while the project
+holds **formatted** bytes from the previous sync. Comparing at the copy step therefore finds
+every file different and copies regardless — the skip never fires and the change delivers
+nothing.
+
+The pipeline must be reordered so the comparison is like-for-like:
+
+1. Render into the temp directory (unchanged).
+2. **Format the temp directory in-process**, using Prettier's Node API.
+3. Copy to the project root, skipping files whose bytes already match.
+
+This subsumes ADR-12 decision 1: moving formatting in-process is a prerequisite here, not a
+separate optimisation. It also means an unchanged sync performs zero writes _and_ zero
+formatting work, since files skipped at step 3 were already formatted at step 2 in memory.
+
+Note that writes into the temp directory are cheap and need no skip logic — the temp directory
+is created fresh per sync, so there is nothing to compare against.
+
 ### 2. Move the version stamp out of per-file headers
 
 Generated headers become version-free and therefore stable across releases:
