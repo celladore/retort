@@ -1,8 +1,8 @@
 ---
 name: spec-compliance-auditor
 description: 'Use for review, investigate work in .agentkit/spec/agents.yaml, .agentkit/spec/teams.yaml, .claude/state/tasks/**. Agent performance evaluator that closes the feedback loop between agent specifications and actual behavior.'
-model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+model: opus
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: orange
 ---
 

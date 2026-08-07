@@ -1,7 +1,8 @@
 ---
 name: dependency-watcher
 description: 'Use for investigate, implement, review work in package.json, pnpm-lock.yaml, Cargo.toml. Dependency management specialist responsible for monitoring, updating, and auditing project dependencies across all tech stacks.'
-model: inherit
+model: haiku
+disallowedTools: Agent
 isolation: worktree
 color: orange
 ---

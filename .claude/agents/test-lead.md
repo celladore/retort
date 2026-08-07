@@ -2,6 +2,7 @@
 name: test-lead
 description: 'Use for implement, review, test work in **/*.test.*, **/*.spec.*, tests/**. Test strategy lead responsible for overall test architecture, test planning, and quality gate definitions.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: green
 ---

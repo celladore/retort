@@ -2,7 +2,7 @@
 name: product-manager
 description: 'Use for plan, review work in docs/product/**, docs/prd/**, docs/roadmap/**. Product management specialist responsible for feature definition, prioritization, requirements gathering, and stakeholder alignment.'
 model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: purple
 ---
 

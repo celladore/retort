@@ -2,6 +2,7 @@
 name: backend
 description: 'Use for implement, review, plan work in apps/api/**, services/**, src/server/**. Senior backend engineer responsible for API design, service architecture, core business logic, and server-side performance.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: blue
 ---

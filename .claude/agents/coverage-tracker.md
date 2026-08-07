@@ -1,8 +1,8 @@
 ---
 name: coverage-tracker
 description: 'Use for investigate, review work in coverage/**, **/*.test.*, **/*.spec.*. Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing coverage thresholds across the codebase.'
-model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+model: haiku
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: green
 ---
 

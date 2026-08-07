@@ -2,7 +2,7 @@
 name: model-economist
 description: 'Use for investigate, review, plan work in config/models/**, config/pricing/**, docs/cost-ops/model-strategy/**. AI model selection and pricing specialist.'
 model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: cyan
 ---
 

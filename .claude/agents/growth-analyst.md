@@ -2,7 +2,7 @@
 name: growth-analyst
 description: 'Use for investigate, review work in docs/product/**, analytics/**, apps/marketing/**. Growth and analytics specialist focused on user acquisition, activation, retention, and revenue metrics.'
 model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: yellow
 ---
 

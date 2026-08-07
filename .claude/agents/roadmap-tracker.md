@@ -1,8 +1,8 @@
 ---
 name: roadmap-tracker
 description: 'Use for investigate, review work in docs/roadmap/**, docs/product/**, docs/milestones/**. Roadmap and milestone tracking specialist maintaining visibility into project progress, timeline adherence, and delivery forecasting across all active workstreams.'
-model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+model: haiku
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: purple
 ---
 

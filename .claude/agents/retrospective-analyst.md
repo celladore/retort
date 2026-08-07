@@ -1,8 +1,8 @@
 ---
 name: retrospective-analyst
 description: 'Use for review, investigate work in docs/history/issues/**, docs/history/lessons-learned/**, docs/history/.index.json. Session retrospective specialist activated via /review --focus=retrospective.'
-model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+model: opus
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: orange
 ---
 

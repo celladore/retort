@@ -2,6 +2,7 @@
 name: frontend
 description: 'Use for implement, review, plan work in apps/web/**, apps/marketing/**, src/client/**. Senior frontend engineer responsible for UI implementation, component architecture, state management, and user experience.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: blue
 ---

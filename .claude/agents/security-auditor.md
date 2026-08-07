@@ -1,8 +1,8 @@
 ---
 name: security-auditor
 description: 'Use for review, investigate work in auth/**, security/**, middleware/auth*. Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verification across the entire codebase and infrastructure.'
-model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+model: opus
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: orange
 ---
 

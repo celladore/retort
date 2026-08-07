@@ -2,6 +2,7 @@
 name: cost-ops-monitor
 description: 'Use for investigate, review, document work in docs/cost-ops/**, docs/cost-ops/reports/**, .claude/state/**. Central monitoring and reporting agent for the Cost Ops team.'
 model: inherit
+disallowedTools: Agent
 color: cyan
 ---
 

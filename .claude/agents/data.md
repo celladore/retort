@@ -2,6 +2,7 @@
 name: data
 description: 'Use for implement, review, plan work in db/**, migrations/**, models/**. Senior data engineer responsible for database design, migrations, data models, and data pipeline architecture.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: blue
 ---

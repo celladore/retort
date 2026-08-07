@@ -2,6 +2,7 @@
 name: content-strategist
 description: 'Use for implement, review work in docs/**, apps/marketing/**, content/**. Content strategy specialist responsible for messaging, copy, documentation voice, and content architecture.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: yellow
 ---

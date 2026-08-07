@@ -2,6 +2,7 @@
 name: infra
 description: 'Use for implement, review, plan, investigate work in infra/**, terraform/**, terragrunt/**. Senior infrastructure engineer responsible for Infrastructure as Code, cloud resource management, and platform reliability.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: blue
 ---

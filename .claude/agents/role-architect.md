@@ -1,7 +1,7 @@
 ---
 name: role-architect
 description: 'Use for plan work in .agentkit/spec/agents.yaml, .agentkit/spec/teams.yaml. Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team.'
-model: inherit
+model: opus
 disallowedTools: Write, Edit, NotebookEdit
 color: purple
 ---

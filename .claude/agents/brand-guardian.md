@@ -2,7 +2,7 @@
 name: brand-guardian
 description: 'Use for review, plan, investigate work in styles/**, tokens/**, design/**. Brand consistency specialist ensuring all visual and written outputs align with the established brand identity, design tokens, and style guidelines across all touchpoints.'
 model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: pink
 ---
 

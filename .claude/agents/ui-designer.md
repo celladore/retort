@@ -2,7 +2,7 @@
 name: ui-designer
 description: 'Use for review, plan work in components/**, apps/web/src/components/**, styles/**. UI/UX design specialist responsible for interaction patterns, component design, layout systems, and visual hierarchy.'
 model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: pink
 ---
 

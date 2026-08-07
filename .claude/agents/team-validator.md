@@ -1,7 +1,7 @@
 ---
 name: team-validator
 description: 'Use for review, investigate work in .agentkit/spec/**. Quality gate — validates the complete team spec for consistency, conflicts, and completeness.'
-model: inherit
+model: opus
 disallowedTools: Write, Edit, NotebookEdit
 color: purple
 ---

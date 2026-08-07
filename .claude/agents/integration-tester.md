@@ -2,6 +2,7 @@
 name: integration-tester
 description: 'Use for implement, review, test work in e2e/**, playwright/**, tests/integration/**. Integration and end-to-end test specialist responsible for testing cross-service interactions, API contracts, and user workflow scenarios that span multiple system components.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: green
 ---

@@ -2,6 +2,7 @@
 name: token-efficiency-engineer
 description: 'Use for investigate, review, plan, implement work in .claude/commands/**, .claude/agents/**, .agentkit/spec/commands.yaml. Prompt engineering and token optimization specialist.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: cyan
 ---

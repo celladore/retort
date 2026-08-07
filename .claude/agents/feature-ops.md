@@ -2,6 +2,7 @@
 name: feature-ops
 description: 'Use for investigate, review, plan, document work in .agentkit/spec/features.yaml, .agentkit/overlays/*/settings.yaml, .agentkit/engines/node/src/feature-manager.mjs. Kit feature management specialist responsible for analyzing, configuring, and auditing the retort feature set for this repository.'
 model: inherit
+disallowedTools: Agent
 color: cyan
 ---
 

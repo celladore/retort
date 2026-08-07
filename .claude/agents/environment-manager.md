@@ -1,7 +1,8 @@
 ---
 name: environment-manager
 description: 'Use for implement, review work in .env.example, docker-compose*.yml, infra/**. Environment configuration specialist ensuring consistent, secure, and documented environment setups across development, CI, staging, and production.'
-model: inherit
+model: haiku
+disallowedTools: Agent
 isolation: worktree
 color: orange
 ---

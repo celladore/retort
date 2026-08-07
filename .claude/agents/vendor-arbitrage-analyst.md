@@ -2,6 +2,7 @@
 name: vendor-arbitrage-analyst
 description: 'Use for investigate, plan, document work in docs/cost-ops/vendor-strategy/**, config/pricing/**. Multi-vendor cost arbitrage specialist.'
 model: inherit
+disallowedTools: Agent
 color: cyan
 ---
 

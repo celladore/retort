@@ -2,7 +2,7 @@
 name: expansion-analyst
 description: 'Use for investigate, review work in **/*. Strategic analysis agent that identifies gaps, missing capabilities, undocumented decisions, and improvement opportunities in the codebase.'
 model: inherit
-disallowedTools: Write, Edit, NotebookEdit
+disallowedTools: Write, Edit, NotebookEdit, Agent
 color: purple
 ---
 

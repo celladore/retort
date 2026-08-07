@@ -2,6 +2,7 @@
 name: devops
 description: 'Use for implement, review, plan work in .github/workflows/**, scripts/**, docker/**. Senior DevOps engineer responsible for CI/CD pipelines, build automation, container orchestration, and deployment workflows.'
 model: inherit
+disallowedTools: Agent
 isolation: worktree
 color: blue
 ---
