@@ -441,6 +441,166 @@ function buildAgentLookaheadSection(la) {
   return lines.join('\n');
 }
 
+// ---------------------------------------------------------------------------
+// Agent dispatch derivation (ADR-11 — native agent dispatch)
+// ---------------------------------------------------------------------------
+
+/**
+ * Task types implying the agent produces file changes of any kind.
+ * An agent accepting none of these is structurally read-only.
+ */
+export const WRITE_TASK_TYPES = Object.freeze([
+  'implement',
+  'fix',
+  'refactor',
+  'migration',
+  'test',
+  'document',
+]);
+
+/**
+ * Task types implying the agent writes source code, which is what makes worktree
+ * isolation worthwhile (see .claude/rules/worktree-isolation.md). Strict subset of
+ * WRITE_TASK_TYPES — `document` writes prose, which does not need a branch.
+ */
+export const CODE_WRITING_TASK_TYPES = Object.freeze([
+  'implement',
+  'fix',
+  'refactor',
+  'migration',
+  'test',
+]);
+
+/**
+ * Categories whose agents coordinate other agents. Leaf executors default to
+ * non-dispatching so a specialist cannot fan out and multiply the token budget.
+ */
+export const DISPATCH_CAPABLE_CATEGORIES = Object.freeze([
+  'team-creation',
+  'strategic-operations',
+  'project-management',
+]);
+
+/** Claude Code subagent accent colour per agent category. */
+export const AGENT_CATEGORY_COLORS = Object.freeze({
+  engineering: 'blue',
+  testing: 'green',
+  operations: 'orange',
+  product: 'purple',
+  design: 'pink',
+  marketing: 'yellow',
+  'cost-operations': 'cyan',
+  'feature-management': 'cyan',
+  'project-management': 'yellow',
+  'strategic-operations': 'red',
+  'team-creation': 'purple',
+});
+
+/**
+ * Claude Code refuses to register a subagent whose `name` breaks this pattern
+ * (notably any name containing `:`), and logs the rejection only to the debug log.
+ */
+export const AGENT_NAME_PATTERN = /^[a-z][a-z0-9-]*$/;
+
+/** Claude Code truncates longer descriptions; do it here so output stays predictable. */
+export const MAX_AGENT_DESCRIPTION_LENGTH = 500;
+
+function normalizeWhitespace(value) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
+}
+
+function truncateDescription(text) {
+  if (text.length <= MAX_AGENT_DESCRIPTION_LENGTH) return text;
+  return text.slice(0, MAX_AGENT_DESCRIPTION_LENGTH - 3).trimEnd() + '...';
+}
+
+/** First sentence of a role statement, normalised to one line and terminated. */
+function firstRoleSentence(role) {
+  const normalized = normalizeWhitespace(role);
+  if (!normalized) return '';
+  const head = normalized.split(/\.\s+/)[0].trim();
+  if (!head) return '';
+  return head.endsWith('.') ? head : `${head}.`;
+}
+
+/**
+ * Resolves the `description:` frontmatter value — the field Claude matches against
+ * when selecting a subagent, so it must read as a trigger, not a capability statement.
+ *
+ * 1. `dispatch.when-to-use` verbatim when authored.
+ * 2. Otherwise derived from `accepts`, the first three `focus` globs, and the first
+ *    sentence of `role`.
+ *
+ * Always returns a non-empty single-line string — an agent without a description is
+ * silently unregistered.
+ */
+export function deriveAgentDescription(agent) {
+  const spec = agent || {};
+  const dispatch = spec.dispatch || {};
+
+  const whenToUse = normalizeWhitespace(dispatch['when-to-use']);
+  if (whenToUse) return truncateDescription(whenToUse);
+
+  const accepts = (Array.isArray(spec.accepts) ? spec.accepts : []).filter(Boolean);
+  const focus = (Array.isArray(spec.focus) ? spec.focus : []).filter(Boolean);
+  const sentence = firstRoleSentence(spec.role);
+
+  let lead = '';
+  if (accepts.length > 0 && focus.length > 0) {
+    lead = `Use for ${accepts.join(', ')} work in ${focus.slice(0, 3).join(', ')}.`;
+  } else if (accepts.length > 0) {
+    lead = `Use for ${accepts.join(', ')} work.`;
+  } else if (focus.length > 0) {
+    lead = `Use for work in ${focus.slice(0, 3).join(', ')}.`;
+  }
+
+  const derived = [lead, sentence].filter(Boolean).join(' ');
+  if (derived) return truncateDescription(derived);
+
+  return truncateDescription(`Retort ${spec.name || spec.id || 'agent'} persona.`);
+}
+
+/**
+ * Derives `isolation:` from `accepts`. Code-writing agents get their own git
+ * worktree, turning .claude/rules/worktree-isolation.md from an instruction the
+ * caller must remember into a property of the agent definition.
+ *
+ * Returns '' (not 'none') when isolation should be omitted, so the template
+ * conditional drops the key rather than emitting an empty value.
+ */
+export function deriveAgentIsolation(accepts) {
+  const list = Array.isArray(accepts) ? accepts : [];
+  return list.some((type) => CODE_WRITING_TASK_TYPES.includes(type)) ? 'worktree' : '';
+}
+
+/**
+ * Derives `disallowedTools:` from `accepts`. Restriction is subtractive — agents
+ * inherit the full subagent toolset and lose capability explicitly, rather than
+ * being allowlisted into a tool set that would silently drop Agent/Skill/MCP tools.
+ *
+ * `canDispatch` defaults to true: withholding the `Agent` tool is Phase 3 of ADR-11,
+ * and callers in Phase 1/2 must not emit an Agent denial.
+ */
+export function deriveDisallowedTools(accepts, canDispatch = true) {
+  const list = Array.isArray(accepts) ? accepts : [];
+  const denied = [];
+  if (!list.some((type) => WRITE_TASK_TYPES.includes(type))) {
+    denied.push('Write', 'Edit', 'NotebookEdit');
+  }
+  if (canDispatch === false) denied.push('Agent');
+  return denied.join(', ');
+}
+
+/**
+ * Resolves whether an agent may spawn other agents. Defaults by category; a
+ * per-agent `dispatch.can-dispatch` boolean overrides in either direction.
+ */
+export function deriveCanDispatch(category, dispatch) {
+  const explicit = dispatch ? dispatch['can-dispatch'] : undefined;
+  if (typeof explicit === 'boolean') return explicit;
+  return DISPATCH_CAPABLE_CATEGORIES.includes(category);
+}
+
 export function buildAgentVars(agent, category, vars, registry = new Map()) {
   const focus = agent.focus || [];
   const responsibilities = agent.responsibilities || [];
@@ -449,11 +609,33 @@ export function buildAgentVars(agent, category, vars, registry = new Map()) {
   const examples = agent.examples || [];
   const antiPatterns = agent['anti-patterns'] || [];
   const domainRules = agent['domain-rules'] || [];
+  const accepts = Array.isArray(agent.accepts) ? agent.accepts : [];
+  const dispatch = agent.dispatch || {};
+
+  if (agent.id && !AGENT_NAME_PATTERN.test(agent.id)) {
+    console.warn(
+      `[agentkit:sync] Warning: agent id '${agent.id}' does not match ${AGENT_NAME_PATTERN} — ` +
+        'Claude Code will skip this file instead of registering a subagent'
+    );
+  }
 
   return {
     ...vars,
     agentName: agent.name,
     agentId: agent.id,
+    // --- Dispatch frontmatter (ADR-11) ---
+    agentDispatchName: agent.id || '',
+    agentDescription: deriveAgentDescription(agent),
+    agentModel: normalizeWhitespace(dispatch.model) || 'inherit',
+    // Deliberately empty: `preferred-tools` is documentation, and promoting it to an
+    // allowlist would strip Agent/Skill/WebSearch/MCP tools from every agent. Phase 3
+    // of ADR-11 populates this from `dispatch.tools-mode: allowlist` instead.
+    agentTools: '',
+    // Phase 2 derives write guardrails from `accepts` only; the `Agent` denial that
+    // `deriveCanDispatch` feeds is Phase 3, hence the explicit `true`.
+    agentDisallowedTools: deriveDisallowedTools(accepts, true),
+    agentIsolation: deriveAgentIsolation(accepts),
+    agentColor: AGENT_CATEGORY_COLORS[category] || '',
     agentCategory: category,
     agentRole: typeof agent.role === 'string' ? agent.role.trim() : agent.role || '',
     agentFocusList: focus.map((f) => `- ${f}`).join('\n'),
@@ -531,7 +713,7 @@ export function buildRuleVars(rule, vars) {
   const appliesTo = rule['applies-to'] || [];
   const conventions = rule.conventions || [];
   const enforcement = conventions.filter((c) => c.type === 'enforcement');
-  // Conventions without an explicit type default to advisory (see ADR-08)
+  // Conventions without an explicit type default to advisory (see ADR-14)
   const advisory = conventions.filter((c) => c.type !== 'enforcement');
   return {
     ...vars,

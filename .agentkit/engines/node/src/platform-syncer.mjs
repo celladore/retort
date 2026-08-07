@@ -730,6 +730,16 @@ export async function syncClaudeAgents(
       agentVars.retortRemapTarget = remapTarget || '';
 
       const rendered = renderTemplate(template, agentVars, tplPath);
+      // Claude Code only registers a subagent when YAML frontmatter is the very first
+      // thing in the file. insertHeader places the GENERATED comment after the closing
+      // `---`; without frontmatter it lands at position 0 instead and the file silently
+      // degrades to a prose persona that never becomes a dispatchable agent type.
+      if (!rendered.startsWith('---')) {
+        console.warn(
+          `[agentkit:sync] Warning: agent '${agent.id}' rendered without YAML frontmatter — ` +
+            'it will not register as a Claude Code subagent'
+        );
+      }
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
     }
