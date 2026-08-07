@@ -30,7 +30,7 @@ import { ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
 import {
   cleanStaleFiles,
   clearTemplateMeta,
-  runPostSyncPrettier,
+  formatOutputsInProcess,
   setTemplateMeta,
   writeManifest,
   writeScaffoldOutputs,
@@ -1187,9 +1187,23 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       /* ignore corrupt manifest */
     }
 
+    // 6b. Format rendered output in-process, before it is compared against the
+    //     project tree. Doing this after the copy (as previously) left temp
+    //     unformatted and the project formatted, so the content-hash guard in
+    //     writeScaffoldOutputs never matched and every Prettier-touched file was
+    //     rewritten on each sync. Also refreshes manifest hashes in place so they
+    //     describe the formatted bytes. See ADR-11 and ADR-12.
+    await formatOutputsInProcess({
+      projectRoot,
+      tmpDir,
+      allTmpFiles,
+      newManifestFiles,
+      logVerbose,
+    });
+
     // 7. Write scaffold outputs (scaffold-once / managed / always)
     log('[retort:sync] Writing outputs...');
-    const { count, skippedScaffold, writtenFiles } = await writeScaffoldOutputs({
+    const { count, skippedScaffold } = await writeScaffoldOutputs({
       projectRoot,
       agentkitRoot,
       tmpDir,
@@ -1211,26 +1225,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       logVerbose,
     });
 
-    // 9. Post-sync prettier formatting — format before hashing so manifest hashes
-    //    reflect on-disk content. Without this, managed-file hash checks on the next
-    //    sync treat Prettier output as a "user edit" and skip regeneration.
-    await runPostSyncPrettier({ agentkitRoot, projectRoot, writtenFiles, logVerbose });
-
-    // Refresh manifest hashes for files that Prettier may have reformatted.
-    for (const absPath of writtenFiles) {
-      const relPath = relative(projectRoot, absPath).replace(/\\/g, '/');
-      if (newManifestFiles[relPath]) {
-        try {
-          const diskContent = await readFile(absPath);
-          newManifestFiles[relPath].hash = createHash('sha256')
-            .update(diskContent)
-            .digest('hex')
-            .slice(0, 12);
-        } catch {
-          // file may have been deleted or be unreadable — leave hash as-is
-        }
-      }
-    }
+    // 9. Formatting already happened in step 6b, before the copy, so manifest
+    //    hashes already describe the formatted bytes. No post-copy Prettier pass
+    //    and no hash refresh are needed — reintroducing either would rewrite
+    //    unchanged files and restore the mtime churn ADR-11 describes.
 
     // 10. Write new manifest with post-format hashes
     await writeManifest(manifestPath, {

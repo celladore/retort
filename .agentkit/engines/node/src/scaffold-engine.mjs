@@ -238,10 +238,12 @@ export async function writeScaffoldOutputs({
           .digest('hex')
           .slice(0, 12);
         if (existingHash === newHash) {
-          // Queue for Prettier even though content is identical to template output.
-          // Without this, files written before post-sync formatting was introduced
-          // stay unformatted indefinitely (their pre-Prettier hash matches newHash).
-          writtenFiles.push(destFile);
+          // Genuinely unchanged: skip the write entirely and do NOT queue for
+          // formatting. Temp output is already formatted (formatOutputsInProcess
+          // runs before this step), so newHash describes formatted bytes and a
+          // match means the file on disk is already correct. Queueing it would
+          // rewrite identical content and bump mtime for nothing — the churn
+          // ADR-11 documents.
           logVerbose(`  unchanged ${normalizedRel} (content identical, skipping write)`);
           return;
         }
@@ -252,9 +254,6 @@ export async function writeScaffoldOutputs({
         normalizeForComparison(existingContent.toString('utf-8')) ===
         normalizeForComparison(newContent)
       ) {
-        // Still queue for Prettier even though we skip the write — the file on
-        // disk may be unformatted from a previous sync that predates this guard.
-        writtenFiles.push(destFile);
         logVerbose(`  unchanged ${normalizedRel} (formatting-only diff, skipping write)`);
         return;
       }
@@ -446,7 +445,105 @@ export async function writeManifest(manifestPath, manifest) {
 }
 
 // ---------------------------------------------------------------------------
-// Step 10: Post-sync Prettier formatting
+// Step 6b: Pre-copy Prettier formatting (in-process)
+// ---------------------------------------------------------------------------
+
+/**
+ * Formats every rendered file in the temp directory in-process, then refreshes
+ * the corresponding manifest hashes so they describe the formatted bytes.
+ *
+ * Ordering matters. Prettier previously ran *after* outputs were copied into the
+ * project, which left the temp tree holding unformatted bytes while the project
+ * held formatted ones. The content-hash guard in writeScaffoldOutputs therefore
+ * never matched for any file Prettier reformats, so those files were queued for
+ * a rewrite on every sync — bumping mtimes on hundreds of unchanged files and
+ * dirtying `git status` for no reason. Formatting before the comparison makes
+ * the guard compare like with like. See ADR-11.
+ *
+ * Uses Prettier's Node API rather than spawning its CLI. The previous
+ * implementation spawned one Node process per 50-file batch (13 per sync), which
+ * a CPU profile attributed ~88% of total sync time to. See ADR-12.
+ *
+ * Config and ignore resolution deliberately use each file's *destination* path:
+ * `.prettierrc` and `.prettierignore` live in the project, not the temp tree.
+ *
+ * @param {object}   opts
+ * @param {string}   opts.projectRoot
+ * @param {string}   opts.tmpDir
+ * @param {string[]} opts.allTmpFiles
+ * @param {object}   opts.newManifestFiles — mutated in place with formatted hashes
+ * @param {Function} [opts.logVerbose]
+ * @returns {Promise<number>} count of files whose bytes changed under formatting
+ */
+export async function formatOutputsInProcess({
+  projectRoot,
+  tmpDir,
+  allTmpFiles,
+  newManifestFiles = {},
+  logVerbose = () => {},
+}) {
+  let prettier;
+  try {
+    prettier = await import('prettier');
+  } catch {
+    // Prettier unavailable — emit unformatted output rather than failing the sync.
+    return 0;
+  }
+
+  const ignoreCandidate = resolve(projectRoot, '.prettierignore');
+  const ignorePath = existsSync(ignoreCandidate) ? ignoreCandidate : undefined;
+  let formatted = 0;
+
+  await runConcurrent(allTmpFiles, async (srcFile) => {
+    const relPath = relative(tmpDir, srcFile);
+    const normalizedRel = relPath.replace(/\\/g, '/');
+    const destFile = resolve(projectRoot, relPath);
+
+    let content;
+    try {
+      content = await readFile(srcFile, 'utf-8');
+    } catch {
+      return;
+    }
+
+    let output = content;
+    try {
+      const info = await prettier.getFileInfo(destFile, { ignorePath });
+      if (info.ignored || !info.inferredParser) return;
+      const options = await prettier.resolveConfig(destFile);
+      output = await prettier.format(content, { ...options, filepath: destFile });
+    } catch {
+      // Unparseable or unsupported file — leave it as rendered. Matches the
+      // continue-on-failure behaviour of the previous CLI batching.
+      return;
+    }
+
+    if (output !== content) {
+      try {
+        await writeFile(srcFile, output, 'utf-8');
+        formatted++;
+      } catch {
+        return;
+      }
+    }
+
+    if (newManifestFiles[normalizedRel]) {
+      newManifestFiles[normalizedRel].hash = createHash('sha256')
+        .update(output, 'utf-8')
+        .digest('hex')
+        .slice(0, 12);
+    }
+  });
+
+  if (formatted > 0) {
+    logVerbose(`[retort:sync] Formatted ${formatted} generated file(s) before copy.`);
+  }
+  return formatted;
+}
+
+// ---------------------------------------------------------------------------
+// Step 10: Post-sync Prettier formatting (legacy — superseded by
+// formatOutputsInProcess above, retained for callers that format after copy)
 // ---------------------------------------------------------------------------
 
 /**
