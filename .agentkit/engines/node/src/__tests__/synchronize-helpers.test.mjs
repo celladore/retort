@@ -6,7 +6,13 @@ import { tmpdir } from 'os';
 // These helpers are exported from synchronize.mjs (and re-exported from
 // spec-loader.mjs). Importing from synchronize.mjs ensures the synchronize.mjs
 // copy of each helper is exercised by the coverage reporter.
-import { readYaml, readText, loadAgentsSpec, loadSpecDefaults } from '../synchronize.mjs';
+import {
+  readYaml,
+  readText,
+  loadAgentsSpec,
+  loadSpecDefaults,
+  buildAdrList,
+} from '../synchronize.mjs';
 
 let tmp;
 
@@ -201,5 +207,62 @@ describe('loadSpecDefaults (re-exported from synchronize.mjs)', () => {
     writeYaml(['spec', 'spec-defaults.yaml'], `staticA: 1\n`);
     const result = loadSpecDefaults(tmp, { phase: 'active', teamSize: 'large' });
     expect(result).toEqual({ staticA: 1 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildAdrList — ADR index discovery
+// ---------------------------------------------------------------------------
+describe('buildAdrList', () => {
+  const adrDir = () => join(tmp, 'docs', 'architecture', 'decisions');
+
+  const writeAdr = (name, body) => {
+    mkdirSync(adrDir(), { recursive: true });
+    writeFileSync(join(adrDir(), name), body, 'utf-8');
+  };
+
+  it('should return an empty list when the decisions directory is absent', () => {
+    expect(buildAdrList(tmp)).toEqual([]);
+  });
+
+  it('should use the first H1 as the link title', () => {
+    writeAdr('01-first.md', `# ADR-01: First Decision\n\nBody.\n`);
+
+    expect(buildAdrList(tmp)).toEqual(['- [ADR-01: First Decision](./01-first.md)']);
+  });
+
+  it('should exclude README.md from the index', () => {
+    writeAdr('README.md', `# ADR Index\n`);
+    writeAdr('01-first.md', `# ADR-01: First\n`);
+
+    const list = buildAdrList(tmp);
+
+    expect(list).toHaveLength(1);
+    expect(list[0]).toContain('01-first.md');
+  });
+
+  it('should sort by filename so numeric and date prefixes both order naturally', () => {
+    writeAdr('02-second.md', `# Second\n`);
+    writeAdr('01-first.md', `# First\n`);
+    writeAdr('2026-08-07-dated.md', `# Dated\n`);
+
+    expect(buildAdrList(tmp)).toEqual([
+      '- [First](./01-first.md)',
+      '- [Second](./02-second.md)',
+      '- [Dated](./2026-08-07-dated.md)',
+    ]);
+  });
+
+  it('should fall back to the filename when a record has no H1', () => {
+    writeAdr('03-no-heading.md', `Just prose, no heading.\n`);
+
+    expect(buildAdrList(tmp)).toEqual(['- [03-no-heading.md](./03-no-heading.md)']);
+  });
+
+  it('should ignore non-markdown files', () => {
+    writeAdr('01-first.md', `# First\n`);
+    writeFileSync(join(adrDir(), 'notes.txt'), 'not an adr', 'utf-8');
+
+    expect(buildAdrList(tmp)).toEqual(['- [First](./01-first.md)']);
   });
 });
