@@ -19,4 +19,5 @@
 - [ADR-09: PM Agent Loader Design](./09-pm-agent-loader.md)
 - [ADR-10: Adopt Tool-Neutral `.agents/` Hub Pattern](./10-tool-neutral-agent-hub.md)
 - [ADR-11: Eliminate Generated-File Churn in Sync Output](./11-eliminate-sync-churn.md)
+- [ADR-12: Restore Test Suite Reliability](./12-test-suite-reliability.md)
 - [ADR-08: Split-Brain Analysis — Script-Based vs Agent-Directive Enforcement](./ADR-08-split-brain-analysis.md)
