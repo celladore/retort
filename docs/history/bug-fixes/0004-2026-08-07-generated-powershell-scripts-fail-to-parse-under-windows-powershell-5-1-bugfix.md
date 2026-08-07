@@ -2,7 +2,7 @@
 
 **Completed**: 2026-08-07
 **Bug ID**: Surfaced by a PSScriptAnalyzer `PSUseBOMForUnicodeEncodedFile` warning on a CodeRabbit review of PR #576
-**PR**: [#PR-Number]
+**PR**: [#581](https://github.com/phoenixvc/retort/pull/581)
 **Severity**: High
 
 ## Problem Description
