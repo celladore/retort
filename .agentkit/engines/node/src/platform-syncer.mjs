@@ -645,9 +645,87 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
   return filtered;
 }
 
+/** Claude Code lifecycle event name for each `hooks:` key in settings.yaml. */
+const HOOK_EVENT_NAMES = {
+  sessionStart: 'SessionStart',
+  preToolUse: 'PreToolUse',
+  postToolUse: 'PostToolUse',
+  stop: 'Stop',
+};
+
+/**
+ * Indexes the hook templates by stem, recording which extensions ship for each
+ * (e.g. `session-start` → {'ps1','sh'}). Wiring is generated from this rather
+ * than assumed, so a stem that ships only one variant is wired accordingly.
+ */
+export async function collectHookExtensions(hooksDir) {
+  const byStem = new Map();
+  if (!existsSync(hooksDir)) return byStem;
+  for (const fname of await readdir(hooksDir)) {
+    const m = fname.match(/^(.+)\.(sh|ps1)$/i);
+    if (!m) continue;
+    const stem = m[1];
+    if (!byStem.has(stem)) byStem.set(stem, new Set());
+    byStem.get(stem).add(m[2].toLowerCase());
+  }
+  return byStem;
+}
+
+/**
+ * Renders the command that invokes a hook stem.
+ *
+ * When both variants ship, the `.ps1` runs with the `.sh` as a fallback for
+ * machines without pwsh. That is safe precisely because every hook signals its
+ * decision as JSON on stdout and exits 0 — a *blocking* `.ps1` still exits 0,
+ * so the `||` never double-runs the `.sh`. The fallback fires only when pwsh
+ * cannot launch at all. Do not switch these scripts to exit-code signalling
+ * without revisiting this.
+ */
+export function buildHookCommand(stem, exts) {
+  const script = (ext) => `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stem}.${ext}`;
+  const pwsh = `pwsh -NoLogo -NoProfile -NonInteractive -File ${script('ps1')}`;
+  if (exts.has('ps1')) return exts.has('sh') ? `${pwsh} || ${script('sh')}` : pwsh;
+  return script('sh');
+}
+
+/**
+ * Builds the settings.json hooks tree from the `hooks:` block in
+ * spec/settings.yaml — the single source of truth for hook wiring.
+ *
+ * Each event accepts either a bare stem (`stop: stop-build-check`) or a list of
+ * `{matcher, hook}` entries. An entry is dropped when the stem has no template
+ * or when feature gating will not emit it, applying the same `isHookEmitted()`
+ * check `syncClaudeHooks()` uses — so spec-driven wiring cannot reintroduce the
+ * dangling references of #185.
+ *
+ * Returns null when the spec declares no hooks, letting the caller fall back to
+ * the template's own block.
+ */
+export function buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, vars) {
+  if (!hooksSpec || typeof hooksSpec !== 'object') return null;
+  const hooks = {};
+  for (const [key, event] of Object.entries(HOOK_EVENT_NAMES)) {
+    const declared = hooksSpec[key];
+    if (!declared) continue;
+    const groups = [];
+    for (const entry of Array.isArray(declared) ? declared : [declared]) {
+      const stem = typeof entry === 'string' ? entry : entry?.hook;
+      if (!stem) continue;
+      const exts = hookExtensions.get(stem);
+      if (!exts?.size) continue;
+      if (!isHookEmitted(stem, hookFeatureMap, vars)) continue;
+      const command = { type: 'command', command: buildHookCommand(stem, exts) };
+      const matcher = typeof entry === 'string' ? null : entry.matcher;
+      groups.push(matcher ? { matcher, hooks: [command] } : { hooks: [command] });
+    }
+    if (groups.length) hooks[event] = groups;
+  }
+  return hooks;
+}
+
 /**
  * Generates .claude/settings.json from templates/claude/settings.json
- * merged with the resolved permissions.
+ * merged with the resolved permissions and the spec-declared hook wiring.
  *
  * `hookFeatureMap` is optional: when omitted, hook wiring is emitted verbatim
  * (pre-gating behaviour) so older callers keep working.
@@ -658,7 +736,7 @@ export async function syncClaudeSettings(
   vars,
   version,
   mergedPermissions,
-  _settingsSpec,
+  settingsSpec,
   hookFeatureMap
 ) {
   const { readTemplateText } = await import('./spec-loader.mjs');
@@ -672,10 +750,22 @@ export async function syncClaudeSettings(
   }
   // Override permissions with merged set
   settings.permissions = mergedPermissions;
-  // Keep hook wiring in step with the hooks sync actually emits
-  if (hookFeatureMap && settings.hooks) {
+
+  // Hook wiring is generated from spec/settings.yaml. Only when the spec
+  // declares none do we fall back to a template-supplied block, which still
+  // has to be filtered down to the hooks sync actually emits.
+  const specHooks = buildHooksFromSpec(
+    settingsSpec?.hooks,
+    await collectHookExtensions(join(templatesDir, 'claude', 'hooks')),
+    hookFeatureMap,
+    vars
+  );
+  if (specHooks) {
+    settings.hooks = specHooks;
+  } else if (hookFeatureMap && settings.hooks) {
     settings.hooks = filterHooksToEmitted(settings.hooks, hookFeatureMap, vars);
   }
+
   const destFile = join(tmpDir, '.claude', 'settings.json');
   await writeOutput(destFile, JSON.stringify(settings, null, 2) + '\n');
 }
