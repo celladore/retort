@@ -27,10 +27,10 @@
     {
       "number": 3,
       "type": "bugfix",
-      "title": "Colliding history doc numbers and broken changelog links",
+      "title": "Harden create-doc and widen numbering validation",
       "date": "2026-08-07",
       "pr": "576",
-      "file": "bug-fixes/0003-2026-08-07-colliding-history-doc-numbers-and-broken-changelog-links-bugfix.md"
+      "file": "bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md"
     }
   ]
 }
