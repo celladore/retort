@@ -31,7 +31,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 
 ### Fixed
 
-- (none yet)
+- Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
 
 ### Removed
 
