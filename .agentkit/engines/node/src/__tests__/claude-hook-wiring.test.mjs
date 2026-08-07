@@ -194,12 +194,26 @@ describe('findPs1HookStems()', () => {
   it('should return an empty set when the hooks directory is absent', () => {
     expect(findPs1HookStems(resolve(TEMPLATES_DIR, 'does-not-exist')).size).toBe(0);
   });
+
+  it('should match a spec stem whose .ps1 file is cased differently', () => {
+    // Arrange — a case mismatch fails silently: the hook falls back to .sh and
+    // its .ps1 never runs, which is the bug this discovery exists to prevent
+    const built = buildHooksFromSpec({ stop: 'Stop-Build-Check' }, new Set(['stop-build-check']));
+
+    expect(built).not.toBeNull();
+
+    // Assert
+    expect(built).not.toBeNull();
+    expect(built.Stop[0].hooks[0].command).toContain('pwsh');
+  });
 });
 
 describe('buildHooksFromSpec()', () => {
   it('should invoke a hook with a .ps1 variant via pwsh with a shell fallback', () => {
     // Arrange — the command form follows what ships, not a hardcoded name
     const built = buildHooksFromSpec({ sessionStart: 'session-start' }, new Set(['session-start']));
+
+    expect(built).not.toBeNull();
 
     // Act
     const { command } = built.SessionStart[0].hooks[0];
@@ -217,6 +231,8 @@ describe('buildHooksFromSpec()', () => {
       new Set(['session-start'])
     );
 
+    expect(built).not.toBeNull();
+
     // Assert
     expect(built.PreToolUse[0].hooks[0].command).toBe(
       '"$CLAUDE_PROJECT_DIR"/.claude/hooks/budget-guard-check.sh'
@@ -232,6 +248,8 @@ describe('buildHooksFromSpec()', () => {
     // Act
     const built = buildHooksFromSpec(spec.hooks, ps1);
 
+    expect(built).not.toBeNull();
+
     // Assert — every wired stem that has a .ps1 uses it
     for (const [, matchers] of Object.entries(built)) {
       for (const matcher of matchers) {
@@ -245,6 +263,8 @@ describe('buildHooksFromSpec()', () => {
 
   it('should invoke stop as a plain shell hook with no matcher', () => {
     const built = buildHooksFromSpec({ stop: 'stop-build-check' });
+
+    expect(built).not.toBeNull();
 
     expect(built.Stop).toEqual([
       {
@@ -265,6 +285,8 @@ describe('buildHooksFromSpec()', () => {
       postToolUse: [{ matcher: 'Write|Edit', hook: 'warn-uncommitted' }],
     });
 
+    expect(built).not.toBeNull();
+
     // Assert
     expect(built.PreToolUse[0].matcher).toBe('Bash');
     expect(built.PreToolUse[0].hooks[0].command).toContain('guard-destructive-commands.sh');
@@ -278,6 +300,8 @@ describe('buildHooksFromSpec()', () => {
         { matcher: 'Bash', hook: 'second' },
       ],
     });
+
+    expect(built).not.toBeNull();
 
     expect(built.PreToolUse.map((m) => m.hooks[0].command)).toEqual([
       '"$CLAUDE_PROJECT_DIR"/.claude/hooks/first.sh',
@@ -293,6 +317,8 @@ describe('buildHooksFromSpec()', () => {
       sessionStart: 'session-start',
     });
 
+    expect(built).not.toBeNull();
+
     expect(Object.keys(built)).toEqual(['SessionStart', 'PreToolUse', 'PostToolUse', 'Stop']);
   });
 
@@ -305,6 +331,8 @@ describe('buildHooksFromSpec()', () => {
       },
       new Set(['session-start'])
     );
+
+    expect(built).not.toBeNull();
 
     // Assert
     expect(built.SessionStart[0].hooks[0].command).not.toContain('.sh.sh');
@@ -319,6 +347,8 @@ describe('buildHooksFromSpec()', () => {
     // omitting it explicitly keeps the object and its serialized form the same
     const built = buildHooksFromSpec({ preToolUse: [{ hook: 'guard-destructive-commands' }] });
 
+    expect(built).not.toBeNull();
+
     // Assert
     expect(built.PreToolUse[0]).not.toHaveProperty('matcher');
     expect(JSON.parse(JSON.stringify(built.PreToolUse[0]))).toEqual(built.PreToolUse[0]);
@@ -329,6 +359,8 @@ describe('buildHooksFromSpec()', () => {
       sessionStart: '   ',
       preToolUse: [{ matcher: 'Bash' }, null, { matcher: 'Bash', hook: 'kept' }],
     });
+
+    expect(built).not.toBeNull();
 
     expect(built).not.toHaveProperty('SessionStart');
     expect(built.PreToolUse).toHaveLength(1);
@@ -345,6 +377,8 @@ describe('buildHooksFromSpec()', () => {
         { matcher: 'Bash', hook: 'kept' },
       ],
     });
+
+    expect(built).not.toBeNull();
 
     // Assert
     expect(built).not.toHaveProperty('Stop');

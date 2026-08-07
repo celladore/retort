@@ -656,7 +656,10 @@ export function findPs1HookStems(templatesDir) {
   if (!existsSync(dir)) return new Set();
   const stems = new Set();
   for (const name of readdirSync(dir)) {
-    if (/\.ps1$/i.test(name)) stems.add(name.replace(/\.ps1$/i, ''));
+    // Lower-cased so a filename cased differently from the spec still matches.
+    // A miss here is silent — the hook falls back to .sh and its .ps1 goes
+    // unrun, which is the exact failure this discovery exists to prevent.
+    if (/\.ps1$/i.test(name)) stems.add(name.replace(/\.ps1$/i, '').toLowerCase());
   }
   return stems;
 }
@@ -684,7 +687,7 @@ export function buildHooksFromSpec(hooksSpec, ps1Stems = new Set()) {
   const command = (name) => {
     const stem = stemOf(name);
     const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stem}`;
-    return ps1Stems.has(stem)
+    return ps1Stems.has(stem.toLowerCase())
       ? `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1 || ${base}.sh`
       : `${base}.sh`;
   };
