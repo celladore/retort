@@ -153,7 +153,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
         }
       }
     } catch {
-      /* malformed settings.json is reported in the Settings phase below */
+      /* invalid JSON is already reported by the JSON Files phase above */
     }
   }
 

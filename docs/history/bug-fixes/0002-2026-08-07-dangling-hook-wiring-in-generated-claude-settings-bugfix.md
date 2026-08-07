@@ -2,7 +2,7 @@
 
 **Completed**: 2026-08-07
 **Bug ID**: [#185](https://github.com/phoenixvc/retort/issues/185)
-**PR**: [#PR-Number]
+**PR**: [#572](https://github.com/phoenixvc/retort/pull/572)
 **Severity**: Medium
 
 ## Problem Description
@@ -156,5 +156,5 @@ behaviour for every adopter and warrants its own change.
 ---
 
 **Fix Author**: Jurie Smit
-**Reviewer**: [Reviewer]
+**Reviewer**: Pending review on [#572](https://github.com/phoenixvc/retort/pull/572)
 **Status**: Resolved
