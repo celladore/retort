@@ -646,8 +646,72 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
 }
 
 /**
+ * Builds the `settings.json` hooks tree from the `hooks:` block in
+ * settings.yaml, so hook wiring is declared in exactly one place.
+ *
+ * `sessionStart` and `stop` name a single hook; `preToolUse` and `postToolUse`
+ * are lists of `{ matcher, hook }`. Entries without a hook name are skipped.
+ * Returns null when the spec declares no hooks, leaving the caller's existing
+ * wiring untouched.
+ */
+export function buildHooksFromSpec(hooksSpec) {
+  if (!hooksSpec || typeof hooksSpec !== 'object') return null;
+
+  // The spec names a hook by stem. Tolerate an extension being written anyway
+  // — `session-start.sh` must not become `session-start.sh.sh`, which would
+  // both break the command and defeat extractHookFiles()/gating downstream.
+  const stemOf = (name) => name.trim().replace(/\.(sh|ps1)$/i, '');
+
+  // session-start is the one hook invoked via pwsh with a shell fallback; the
+  // rest are invoked as .sh, matching how they have always been wired.
+  const command = (name, crossPlatform) => {
+    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stemOf(name)}`;
+    return crossPlatform
+      ? `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1 || ${base}.sh`
+      : `${base}.sh`;
+  };
+
+  const hooks = {};
+
+  // A value that is nothing but an extension normalises to an empty stem and
+  // would yield a path like `.claude/hooks/.sh` — treat it as unnamed
+  const named = (value) => typeof value === 'string' && stemOf(value) !== '';
+
+  const addSingle = (key, event, crossPlatform) => {
+    const name = hooksSpec[key];
+    if (!named(name)) return;
+    hooks[event] = [{ hooks: [{ type: 'command', command: command(name, crossPlatform) }] }];
+  };
+
+  const addMatched = (key, event) => {
+    if (!Array.isArray(hooksSpec[key])) return;
+    const entries = [];
+    for (const item of hooksSpec[key]) {
+      if (!item || !named(item.hook)) continue;
+      const entry = { hooks: [{ type: 'command', command: command(item.hook, false) }] };
+      // Only carry a matcher when the spec sets one — an undefined value would
+      // be dropped by JSON.stringify anyway, so make the omission explicit
+      if (typeof item.matcher === 'string' && item.matcher) {
+        entries.push({ matcher: item.matcher, ...entry });
+      } else {
+        entries.push(entry);
+      }
+    }
+    if (entries.length) hooks[event] = entries;
+  };
+
+  // Order matters only for readability of the generated file
+  addSingle('sessionStart', 'SessionStart', true);
+  addMatched('preToolUse', 'PreToolUse');
+  addMatched('postToolUse', 'PostToolUse');
+  addSingle('stop', 'Stop', false);
+
+  return Object.keys(hooks).length ? hooks : null;
+}
+
+/**
  * Generates .claude/settings.json from templates/claude/settings.json
- * merged with the resolved permissions.
+ * merged with the resolved permissions and the hook wiring from settings.yaml.
  *
  * `hookFeatureMap` is optional: when omitted, hook wiring is emitted verbatim
  * (pre-gating behaviour) so older callers keep working.
@@ -658,7 +722,7 @@ export async function syncClaudeSettings(
   vars,
   version,
   mergedPermissions,
-  _settingsSpec,
+  settingsSpec,
   hookFeatureMap
 ) {
   const { readTemplateText } = await import('./spec-loader.mjs');
@@ -672,6 +736,10 @@ export async function syncClaudeSettings(
   }
   // Override permissions with merged set
   settings.permissions = mergedPermissions;
+  // Hook wiring comes from settings.yaml — the template carries none, so the
+  // spec is the only place wiring is declared
+  const specHooks = buildHooksFromSpec(settingsSpec?.hooks);
+  if (specHooks) settings.hooks = specHooks;
   // Keep hook wiring in step with the hooks sync actually emits
   if (hookFeatureMap && settings.hooks) {
     settings.hooks = filterHooksToEmitted(settings.hooks, hookFeatureMap, vars);
