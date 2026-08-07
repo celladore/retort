@@ -220,6 +220,44 @@ export { syncDirectCopy } from './platform-syncer.mjs';
 // Main sync orchestration
 // ---------------------------------------------------------------------------
 
+/**
+ * Scans the project's ADR directory and returns preformatted index lines.
+ *
+ * The ADR index was previously a hardcoded list baked into the template, which
+ * meant every adopter repo received links to retort's own ADRs and newly added
+ * records never appeared. Scanning the target repo keeps the index truthful and
+ * makes it agnostic to the filename convention (numeric or date prefixes both
+ * sort naturally). See ADR-11.
+ *
+ * @param {string} projectRoot
+ * @returns {string[]} markdown list items, sorted by filename
+ */
+function buildAdrList(projectRoot) {
+  const dir = join(projectRoot, 'docs', 'architecture', 'decisions');
+  if (!existsSync(dir)) return [];
+
+  let entries;
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return [];
+  }
+
+  return entries
+    .filter((f) => f.endsWith('.md') && f.toLowerCase() !== 'readme.md')
+    .sort((a, b) => a.localeCompare(b))
+    .map((file) => {
+      let title = file;
+      try {
+        const match = readFileSync(join(dir, file), 'utf-8').match(/^#\s+(.+?)\s*$/m);
+        if (match) title = match[1];
+      } catch {
+        // Unreadable record — fall back to the filename rather than dropping it.
+      }
+      return `- [${title}](./${file})`;
+    });
+}
+
 export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const dryRun = flags?.['dry-run'] || false;
   const diff = flags?.diff || false;
@@ -538,6 +576,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const rawTeams = teamsSpec?.teams || [];
   vars.teamsList = buildTeamsList(rawTeams);
   vars.hasTeams = rawTeams.length > 0;
+
+  // ADR index — scan the project's own decision records rather than shipping a
+  // hardcoded list (see ADR-11).
+  vars.adrList = buildAdrList(projectRoot);
+  vars.hasAdrs = vars.adrList.length > 0;
 
   // Filter rule domains to those matching the active language stack.
   // Universal domains (security, testing, git-workflow, etc.) are always included.

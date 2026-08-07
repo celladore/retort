@@ -11,11 +11,9 @@ agentkit:
 
 ## Decision Records
 
-- [01-adopt-agentkit-forge.md](./01-adopt-agentkit-forge.md)
-- [02-fallback-policy-tokens-problem.md](./02-fallback-policy-tokens-problem.md)
-- [03-tooling-strategy.md](./03-tooling-strategy.md)
-- [04-static-security-analysis-depth-tooling.md](./04-static-security-analysis-depth-tooling.md)
-- [05-dependency-supply-chain-detection-tooling.md](./05-dependency-supply-chain-detection-tooling.md)
-- [06-code-quality-maintainability-signal-tooling.md](./06-code-quality-maintainability-signal-tooling.md)
-- [07-delivery-strategy.md](./07-delivery-strategy.md)
-- [08-issue-sync-strategy.md](./08-issue-sync-strategy.md)
+{{#if hasAdrs}}
+{{#each adrList}}{{.}}
+{{/each}}
+{{else}}
+- _(no decision records yet — see the ADR template in `.agentkit/spec/docs.yaml`)_
+{{/if}}
