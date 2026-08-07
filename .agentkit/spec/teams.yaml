@@ -76,6 +76,14 @@ teams:
     accepts: [plan, review]
     handoff-chain: [backend, frontend]
 
+  - id: marketing
+    name: MARKETING
+    focus: 'Content strategy, growth, positioning, lifecycle'
+    scope: ['content/**', 'blog/**', 'docs/marketing/**', 'analytics/**', 'docs/metrics/**']
+    accepts: [implement, review, investigate]
+    handoff-chain: [docs, product]
+    agents: [content-strategist, growth-analyst]
+
   - id: quality
     name: QUALITY
     focus: 'Code review, refactoring, bugs, reliability, session retrospectives'
@@ -150,6 +158,7 @@ intake:
     security: security
     docs: docs
     product: product
+    marketing: marketing # Content, growth, and positioning work routes to marketing team
     quality: quality
     forge: forge # Team creation requests route to forge team
     strategic-ops: strategic-ops # Cross-project coordination routes to strategic ops
