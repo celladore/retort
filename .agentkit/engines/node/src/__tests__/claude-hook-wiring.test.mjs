@@ -569,6 +569,17 @@ describe('runValidate() hook phase', () => {
     expect(log).toContain('Checked 1 hook script(s) wired in settings.json');
   });
 
+  it('should handle a settings.json whose entire content is null', async () => {
+    // Arrange — `null` parses fine, so the catch must not be what saves us
+    scaffold({ settingsRaw: 'null' });
+
+    // Act
+    const { log } = await validateTestRoot();
+
+    // Assert
+    expect(log).toContain('Checked 0 hook script(s) wired in settings.json');
+  });
+
   it('should not throw on a malformed settings.json', async () => {
     // Arrange
     scaffold({ settingsRaw: '{ this is not json' });

@@ -143,7 +143,9 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
       // Structurally malformed entries (null matchers, non-array hook lists)
       // are skipped rather than thrown on — Phase 7 reports the shape error,
       // and aborting here would suppress the rest of this phase.
-      for (const matchers of Object.values(parsed.hooks || {})) {
+      // `parsed` may be null — `null` is valid JSON — so keep the catch
+      // reserved for genuine parse failures
+      for (const matchers of Object.values(parsed?.hooks || {})) {
         if (!Array.isArray(matchers)) continue;
         for (const matcher of matchers) {
           if (!matcher || !Array.isArray(matcher.hooks)) continue;
