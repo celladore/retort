@@ -30,6 +30,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - (none yet)
 
 ### Fixed
+
 - SessionStart hook schema and duplicate Python detection ([history](bug-fixes/0001-2026-08-06-sessionstart-hook-schema-and-duplicate-python-detection-bugfix.md))
 
 - (none yet)
