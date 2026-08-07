@@ -112,9 +112,10 @@ The default configuration is byte-identical, confirmed by running
 
 ### Regression Testing
 
-The new suite was run against the unfixed code with the fix stashed: all 30
-tests fail. With the fix applied, all 30 pass. The full suite (excluding the
-known-flaky `sync-integration.test.mjs`) reports 2250 passing.
+The suite was run against the unfixed code with the fix stashed: every test
+fails. With the fix applied, all pass. The malformed-input cases were verified
+the same way — reverting just the guards fails five of the six. The full suite
+(excluding the known-flaky `sync-integration.test.mjs`) reports 2250 passing.
 
 ## Impact Assessment
 
