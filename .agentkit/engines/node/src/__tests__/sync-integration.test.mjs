@@ -646,40 +646,35 @@ describe('syncRooRules (via runSync --only roo)', () => {
 // Tests: Render target gating — new tools excluded when not in targets
 // ---------------------------------------------------------------------------
 describe('render target gating for new tools', () => {
-  let projectRoot;
+  let claudeFiles;
+  let warpFiles;
 
-  beforeEach(() => {
-    projectRoot = makeTmpProject();
+  beforeAll(async () => {
+    const [claudeRoot, warpRoot] = await Promise.all([
+      goldenSync({ only: 'claude' }),
+      goldenSync({ only: 'warp' }),
+    ]);
+    claudeFiles = collectFiles(claudeRoot);
+    warpFiles = collectFiles(warpRoot);
   });
-  afterEach(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+
+  it('--only claude does NOT generate gemini, warp, cline, roo, codex files', () => {
+    expect(claudeFiles.some((f) => f === 'GEMINI.md')).toBe(false);
+    expect(claudeFiles.some((f) => f === 'WARP.md')).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.gemini/'))).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.agents/'))).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.clinerules/'))).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.roo/'))).toBe(false);
   });
 
-  it(
-    '--only claude does NOT generate gemini, warp, cline, roo, codex files',
-    { timeout: 30_000 },
-    async () => {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
-      const files = collectFiles(projectRoot);
-      expect(files.some((f) => f === 'GEMINI.md')).toBe(false);
-      expect(files.some((f) => f === 'WARP.md')).toBe(false);
-      expect(files.some((f) => f.startsWith('.gemini/'))).toBe(false);
-      expect(files.some((f) => f.startsWith('.agents/'))).toBe(false);
-      expect(files.some((f) => f.startsWith('.clinerules/'))).toBe(false);
-      expect(files.some((f) => f.startsWith('.roo/'))).toBe(false);
-    }
-  );
-
-  it('always-on outputs generated regardless of --only flag', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-    const files = collectFiles(projectRoot);
+  it('always-on outputs generated regardless of --only flag', () => {
     // AGENTS.md is always-on
-    expect(files.some((f) => f === 'AGENTS.md')).toBe(true);
+    expect(warpFiles.some((f) => f === 'AGENTS.md')).toBe(true);
     // WARP.md is the only gated output
-    expect(files.some((f) => f === 'WARP.md')).toBe(true);
+    expect(warpFiles.some((f) => f === 'WARP.md')).toBe(true);
     // Claude-specific outputs should NOT be present
-    expect(files.some((f) => f === 'CLAUDE.md')).toBe(false);
-    expect(files.some((f) => f.startsWith('.claude/'))).toBe(false);
+    expect(warpFiles.some((f) => f === 'CLAUDE.md')).toBe(false);
+    expect(warpFiles.some((f) => f.startsWith('.claude/'))).toBe(false);
   });
 });
 

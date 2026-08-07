@@ -3,11 +3,13 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     testTimeout: 30_000,
-    // A single full sync renders 600+ files and measures ~25s on Windows, so a
-    // 30s hook budget left almost no headroom and made any sync-in-beforeAll
-    // intermittently fail. Sync-heavy hooks may also do a cold sync plus a
-    // recursive copy, so allow room for two while still catching real hangs.
-    hookTimeout: 120_000,
+    // Setup hooks in sync-integration.test.mjs render a full output tree: a
+    // single sync writes 600+ files and measures ~25s on Windows (more for an
+    // all-targets sync), and the first hook to request a writable tree pays a
+    // cold sync plus a recursive copy. The old 30s budget left no headroom and
+    // made those hooks fail intermittently. This is sized for that worst case
+    // while still catching a genuinely hung hook.
+    hookTimeout: 240_000,
     env: {
       GIT_CONFIG_COUNT: '1',
       GIT_CONFIG_KEY_0: 'commit.gpgsign',
