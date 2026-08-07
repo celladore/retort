@@ -83,6 +83,27 @@ resolving the module once and formatting files in the existing process. This rem
 process startups per sync and targets the single dominant cost. Prettier failures on
 individual files must remain non-fatal, matching current behaviour.
 
+**Implemented (2026-08-06)**, jointly with ADR-11 decision 1 — they proved to be the same
+change, since formatting had to move _before_ the content comparison for either to work. Sync
+dropped from ~25s to 13s warm, and now writes zero files when nothing has changed. The
+identified risk about config resolution was real and handled: Prettier's Node API does not
+resolve `.prettierrc`/`.prettierignore` implicitly, so both are resolved against each file's
+destination path. `prettier --check` passes project-wide afterwards, confirming parity with
+CLI output.
+
+Effect on the suite, measured over a full run:
+
+| Metric       | Baseline | After decision 1 |
+| ------------ | -------- | ---------------- |
+| Wall time    | ~730s    | **386s**         |
+| Failed files | 2–4      | 3                |
+
+A 47% reduction in wall time with no new failures. **It did not make the suite green.** The
+remaining failures are the same pre-existing ones — `discover`'s git-log heuristic (which passes
+in isolation) and the copilot `beforeAll` hooks, both present in the baseline run. Decision 1 was
+necessary but not sufficient; decisions 3, 4 and 5 still apply, and decision 2 should only be
+reconsidered using the script-level sequencing noted above.
+
 ### 2. Isolate sync-heavy suites from parallel execution
 
 Split the Vitest run into two projects: `unit` (the ~67 fast files, parallel) and `sync-heavy`

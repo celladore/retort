@@ -34,14 +34,24 @@ $ git ls-files -s .claude/rules/security.md
 … 82e920043d66f02f3d8c06bad2c85b493052cbd8 …
 ```
 
-The render path writes unconditionally — bare `writeFile` at `platform-syncer.mjs:46,312,495,559`
-and `cp(…, { force: true })` at `:118,1728`. No comparison against existing content occurs, so
-every managed file's mtime is bumped on every run regardless of whether the rendered bytes changed.
+**Corrected mechanism.** The first diagnosis here blamed unconditional writes on the render
+path. That was wrong, and the correction matters because it changes the fix. `writeScaffoldOutputs`
+**already had** a content-hash guard (`scaffold-engine.mjs:227–261`) that correctly skips the
+copy for byte-identical files. The writes in `platform-syncer.mjs` target a temp directory that
+is created fresh each run, so they are irrelevant to churn.
 
-Notably the engine **already implements the correct discipline elsewhere**: the org-meta skill
-path (`platform-syncer.mjs:1298–1363`) hashes content and preserves unchanged files, logging
-`template unchanged since last sync — preserve local edits`. The general render path simply never
-adopted it.
+The churn came from the **post-copy Prettier pass**. Two facts combined:
+
+1. Prettier ran _after_ the copy, so the temp tree held unformatted bytes while the project held
+   formatted bytes from the previous sync. Manifest hashes were computed from temp but stored
+   from disk, so for any file Prettier reformats the two never matched.
+2. Because of that mismatch, the skip branches explicitly re-queued unchanged files for
+   formatting — `writtenFiles.push(destFile)` with the comment "Queue for Prettier even though
+   content is identical". Prettier then rewrote all 628 files, bumping every mtime.
+
+So the write was already being skipped; the _format_ was not. The engine also already implements
+the right discipline in the org-meta skill path (`platform-syncer.mjs:1298–1363`), which hashes
+content and preserves unchanged files.
 
 Beyond git noise, unconditional mtime bumps defeat any mtime-keyed cache (build tools, test
 runners, IDE indexers, file watchers).
@@ -112,6 +122,22 @@ formatting work, since files skipped at step 3 were already formatted at step 2 
 
 Note that writes into the temp directory are cheap and need no skip logic — the temp directory
 is created fresh per sync, so there is nothing to compare against.
+
+#### Implemented (2026-08-06)
+
+Landed as `perf(sync): format output in-process before the content compare`. Formatting moved
+to a new `formatOutputsInProcess` step running before `writeScaffoldOutputs`, using Prettier's
+Node API; manifest hashes are refreshed from the formatted bytes; and the two skip branches no
+longer re-queue unchanged files. Measured on this repository:
+
+| Metric            | Before | After |
+| ----------------- | ------ | ----- |
+| Sync time (warm)  | ~25s   | 13s   |
+| Files written     | 628    | 0     |
+| Dirty files after | 26     | 0     |
+
+`prettier --check` passes project-wide afterwards, confirming that in-process config and ignore
+resolution produce byte-identical output to the CLI. Decisions 2 and 3 remain outstanding.
 
 ### 2. Move the version stamp out of per-file headers
 
