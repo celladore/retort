@@ -84,9 +84,14 @@ an entry", which is the condition we care about.
 
 ### Testing
 
-- **Unit Tests**: none added in this change — test authoring is delegated to
-  `/team-testing` per `.claude/rules/agent-delegation.md`. See Prevention Measures for
-  the coverage this fix warrants.
+- **Unit Tests**: `claude-hook-output-schema.test.mjs` — 170 assertions covering all 14
+  hook templates. Authored via `/team-testing` per `.claude/rules/agent-delegation.md`.
+  Each template is rendered with every conditional on and again with every conditional
+  off, and each `hookSpecificOutput` payload is checked for the `hookEventName`
+  discriminator, a known event name, agreement with the event the hook is wired to in
+  `settings.json`, per-event required fields, and the absence of top-level-only fields.
+  **The fixture immediately found a third instance of the same defect class — see
+  "Third defect found by the fixture" below.**
 - **Integration Tests**: not applicable; the hook contract is enforced by the Claude Code
   runtime, not by an in-repo integration suite.
 - **Manual Testing**: see Verification.
@@ -112,14 +117,14 @@ stubbed `PATH`.
 
 ### Before/After Comparison
 
-| Scenario | Before | After |
-| --- | --- | --- |
-| Hook output schema | rejected — `Invalid input` | accepted, context delivered |
-| `python3` + `python` both present | 2 `Python` entries | 1 |
-| `python3` only | 1 | 1 |
-| `python` only | 1 | 1 |
-| Neither present | 0 | 0 |
-| Windows `python3` Store stub + real `python` | 1 (both probed) | 1 (falls through correctly) |
+| Scenario                                     | Before                     | After                       |
+| -------------------------------------------- | -------------------------- | --------------------------- |
+| Hook output schema                           | rejected — `Invalid input` | accepted, context delivered |
+| `python3` + `python` both present            | 2 `Python` entries         | 1                           |
+| `python3` only                               | 1                          | 1                           |
+| `python` only                                | 1                          | 1                           |
+| Neither present                              | 0                          | 0                           |
+| Windows `python3` Store stub + real `python` | 1 (both probed)            | 1 (falls through correctly) |
 
 ### Regression Testing
 
@@ -127,6 +132,25 @@ Verified that the four regenerated/edited files are the only content changes in 
 (`git diff --stat` → 4 files, +18/−4). The other 19 files touched by sync were confirmed
 byte-identical to `HEAD` via `md5sum` — sync rewrote identical content and only changed
 mtimes.
+
+## Third defect found by the fixture
+
+The schema fixture failed on first run — 162 passing, 8 failing, every failure in
+`warn-uncommitted`. Both variants emitted:
+
+```json
+{ "hookSpecificOutput": { "systemMessage": "WARNING: There are N uncommitted changes…" } }
+```
+
+Two problems in one payload. It omitted `hookEventName` (the #192 defect, in a second
+hook nobody had looked at), and `systemMessage` is a **top-level** field — nested inside
+`hookSpecificOutput` it parses as valid JSON and is then silently ignored, so the
+uncommitted-changes warning never reached the user. `settings.json` wires this hook to
+`PostToolUse`, whose `hookSpecificOutput` only carries `additionalContext`; a
+user-facing warning belongs at the top level. Fixed by unnesting it in both templates.
+
+This is the case for schema fixtures over targeted regression tests: a test written only
+for #192 would have passed here.
 
 ## Impact Assessment
 
@@ -137,10 +161,10 @@ itself was affected by #192 but not #247.
 
 ## Prevention Measures
 
-1. **Schema fixture for hook output.** No test asserted the shape of any hook's stdout.
-   A fixture that renders each `claude/hooks/*` template and validates emitted JSON
-   against the Claude Code hook schema would have caught #192 at the source and covers
-   the other six hooks too. Delegated to `/team-testing`.
+1. **Schema fixture for hook output.** ✅ Landed in this change —
+   `.agentkit/engines/node/src/__tests__/claude-hook-output-schema.test.mjs`. It found a
+   third live defect on its first run. Runs in ~1.3s with no external binaries, so it is
+   cheap to keep.
 2. **Cross-template consistency check.** #192 was detectable by inspection — one template
    out of seven omitted a field all its siblings had. A lint asserting every hook template
    emits `hookEventName` is cheap.
@@ -152,7 +176,7 @@ itself was affected by #192 but not #247.
 ## Lessons Learned
 
 - **A comment describing behaviour is not the behaviour.** The `# fallback if python3 is
-  absent` comment made the bug read as already-fixed on casual inspection, and likely
+absent` comment made the bug read as already-fixed on casual inspection, and likely
   contributed to it sitting open for three months.
 - **Dogfooding has structural blind spots.** Retort generates config for stacks it is not
   itself written in. Any conditional block gated on a language retort does not declare is
