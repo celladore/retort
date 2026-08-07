@@ -807,7 +807,13 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
 // invalidate the negative assertions, because sync only prunes orphaned files
 // when a previous .manifest.json is present.
 const ISOLATION_CASES = [
-  { only: 'mcp', absent: [['.github', 'prompts'], ['.roo', 'rules']] },
+  {
+    only: 'mcp',
+    absent: [
+      ['.github', 'prompts'],
+      ['.roo', 'rules'],
+    ],
+  },
   { only: 'windsurf', absent: [['.cursor', 'commands']] },
   { only: 'cline', absent: [['.agents', 'skills']] },
   { only: 'ai', absent: [['.cursor', 'rules', 'team-backend.mdc']] },
@@ -1264,23 +1270,27 @@ describe('syncGitattributes (merge driver sync)', () => {
     expect(content).toContain('pnpm-lock.yaml');
   });
 
-  it('preserves user content outside managed section on re-sync', { timeout: 120_000 }, async () => {
-    const gitattrsPath = resolve(projectRoot, '.gitattributes');
-    // Prepend custom user content
-    const existing = readFileSync(gitattrsPath, 'utf-8');
-    writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
+  it(
+    'preserves user content outside managed section on re-sync',
+    { timeout: 120_000 },
+    async () => {
+      const gitattrsPath = resolve(projectRoot, '.gitattributes');
+      // Prepend custom user content
+      const existing = readFileSync(gitattrsPath, 'utf-8');
+      writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
 
-    // Re-sync
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+      // Re-sync
+      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
 
-    const updated = readFileSync(gitattrsPath, 'utf-8');
-    expect(updated).toContain('# My custom rules');
-    expect(updated).toContain('*.pdf binary');
-    expect(updated).toContain('merge=agentkit-generated');
-    // Should have exactly one managed section (not duplicated)
-    const startCount = (updated.match(/# >>> Retort merge drivers/g) || []).length;
-    expect(startCount).toBe(1);
-  });
+      const updated = readFileSync(gitattrsPath, 'utf-8');
+      expect(updated).toContain('# My custom rules');
+      expect(updated).toContain('*.pdf binary');
+      expect(updated).toContain('merge=agentkit-generated');
+      // Should have exactly one managed section (not duplicated)
+      const startCount = (updated.match(/# >>> Retort merge drivers/g) || []).length;
+      expect(startCount).toBe(1);
+    }
+  );
 
   it('replaces stale managed section without duplication', { timeout: 120_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
