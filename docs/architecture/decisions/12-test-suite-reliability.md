@@ -89,6 +89,18 @@ Split the Vitest run into two projects: `unit` (the ~67 fast files, parallel) an
 (the suites performing full syncs, sequential). Preferred over a global thread cap, which would
 slow the entire suite to stabilise a handful of files.
 
+**Attempted and reverted (2026-08-06).** This was implemented ahead of decision 1 and measured
+worse on both axes: wall time rose from ~730s to **1294s** and the suite still failed with 3
+failed files. The cause is that `fileParallelism: false` serialises files only _within_ a
+project — Vitest still runs the two projects concurrently, so the sync-heavy suites continued
+to contend with all 2017 unit tests while losing the ability to spread across workers.
+
+If revisited, the projects must be run sequentially at the script level
+(`vitest run --project unit && vitest run --project sync-heavy`) rather than via
+`fileParallelism`. But decision 1 should land and be re-measured first: `sync-integration`
+alone makes 42 `runSync` calls, so at ~25s per sync no scheduling change can bring it inside
+the hook timeouts. The cost per sync is the binding constraint, not the parallelism.
+
 ### 3. Move the Prettier check out of Vitest
 
 `prettier.test.mjs` shells out to scan the entire repository from within the unit suite. It is
@@ -152,8 +164,12 @@ different reasons each time has not been stabilised.
 
 ## Out of scope
 
-Profiling surfaced a separate defect worth its own issue: `sync --overwrite` rewrites
-scaffold-once project-owned files, and was observed modifying 24 tracked files including
-`AGENT_BACKLOG.md` and an existing decision record
-(`02-fallback-policy-tokens-problem.md`). That is a data-loss hazard rather than a test
-reliability problem and is not addressed here.
+Profiling surfaced a separate defect: `sync --overwrite` rewrites scaffold-once project-owned
+files, and was observed modifying 24 tracked files including `AGENT_BACKLOG.md` and an existing
+decision record (`02-fallback-policy-tokens-problem.md`).
+
+A guard has since landed that aborts `--overwrite` on a dirty working tree, making the
+operation recoverable via git and leaving `--force` as the explicit escape hatch. That closes
+the data-loss hazard but not the underlying semantic question: whether `--overwrite` should
+regenerate user-authored content such as decision records at all, or only the editor-theme and
+config files it was introduced for. That question remains open and is not decided here.
