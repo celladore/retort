@@ -53,11 +53,24 @@ function makeNamedTmpProject(repoName) {
 const goldenRoots = new Map();
 
 /**
+ * Every temp directory handed to a sync, tracked separately from the promises
+ * above so cleanup does not depend on those promises resolving. A failed sync
+ * still leaves files on disk, and its promise rejects without ever yielding the
+ * path, so recording the directory up front is what makes it removable.
+ *
+ * @type {Set<string>}
+ */
+const createdRoots = new Set();
+
+/**
  * Returns a pristine project root synced with the given flags, reusing an
  * existing one when the same flag-set has already been synced.
  *
  * The promise (not the resolved path) is cached so concurrent callers share a
- * single in-flight sync rather than racing to build duplicates.
+ * single in-flight sync rather than racing to build duplicates. A rejected
+ * sync stays cached deliberately: the failure is a real problem with the spec
+ * or engine, and re-running it for each of the dozen waiting blocks would bury
+ * the original error under a pile of identical ones.
  *
  * Callers MUST NOT modify the returned tree — use cloneSync() for that.
  */
@@ -69,13 +82,13 @@ function goldenSync(flags = {}) {
   );
   const key = JSON.stringify(significant, Object.keys(significant).sort());
   if (!goldenRoots.has(key)) {
+    // Created outside the async body so the path is recorded for cleanup even
+    // if runSync rejects.
+    const projectRoot = makeTmpProject();
+    createdRoots.add(projectRoot);
     goldenRoots.set(
       key,
-      (async () => {
-        const projectRoot = makeTmpProject();
-        await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags });
-        return projectRoot;
-      })()
+      runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags }).then(() => projectRoot)
     );
   }
   return goldenRoots.get(key);
@@ -85,18 +98,16 @@ function goldenSync(flags = {}) {
 async function cloneSync(flags = {}) {
   const golden = await goldenSync(flags);
   const dest = makeTmpProject();
+  createdRoots.add(dest);
   cpSync(golden, dest, { recursive: true });
   return dest;
 }
 
 afterAll(() => {
-  for (const pending of goldenRoots.values()) {
-    Promise.resolve(pending)
-      .then((root) => rmSync(root, { recursive: true, force: true }))
-      .catch(() => {
-        /* sync failed; nothing to clean up */
-      });
+  for (const root of createdRoots) {
+    rmSync(root, { recursive: true, force: true });
   }
+  createdRoots.clear();
   goldenRoots.clear();
 });
 
