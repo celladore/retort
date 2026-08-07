@@ -646,19 +646,32 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
 }
 
 /**
+ * A hook stem is interpolated into a shell command whose path is only partly
+ * quoted (`"$CLAUDE_PROJECT_DIR"/.claude/hooks/<stem>.sh`), so anything beyond
+ * a plain file name — whitespace, quotes, `$`, backticks, `;` — would alter how
+ * that command parses. Real hook names are simple, so require exactly that.
+ */
+const SAFE_HOOK_STEM = /^[A-Za-z0-9._-]+$/;
+
+/**
  * Indexes the hook templates by stem, recording which extensions ship for each
  * (e.g. `session-start` → {'ps1','sh'}).
  *
  * Wiring is derived from this rather than hardcoded, so a hook that ships a
  * `.ps1` is actually invoked as one. Five `.ps1` hooks previously shipped and
  * were wired nowhere because only `session-start` was special-cased.
+ *
+ * A template whose name is not a safe stem is left out of the index rather than
+ * wired, so it can never reach a command string. Sync still writes the file, so
+ * it surfaces as an orphan and fails the wiring test instead of silently
+ * generating a command that does not parse.
  */
 export async function collectHookExtensions(hooksDir) {
   const byStem = new Map();
   if (!existsSync(hooksDir)) return byStem;
   for (const fname of await readdir(hooksDir)) {
     const m = fname.match(/^(.+)\.(sh|ps1)$/i);
-    if (!m) continue;
+    if (!m || !SAFE_HOOK_STEM.test(m[1])) continue;
     if (!byStem.has(m[1])) byStem.set(m[1], new Set());
     byStem.get(m[1]).add(m[2].toLowerCase());
   }

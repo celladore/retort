@@ -37,6 +37,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const SETTINGS_SPEC = resolve(AGENTKIT_ROOT, 'spec', 'settings.yaml');
 const HOOK_TEMPLATE_DIR = resolve(AGENTKIT_ROOT, 'templates', 'claude', 'hooks');
+const TEST_TMP = resolve(AGENTKIT_ROOT, '..', '.test-tmp');
 
 /**
  * Hook feature map + the hook wiring as it really ships. Wiring is built from
@@ -325,6 +326,31 @@ describe('collectHookExtensions()', () => {
 
   it('should return an empty map for a directory that does not exist', async () => {
     expect((await collectHookExtensions(resolve(HOOK_TEMPLATE_DIR, 'nope'))).size).toBe(0);
+  });
+
+  it('should leave out a template whose name would not survive shell interpolation', async () => {
+    // Arrange — the stem lands in a partly-quoted command, so a name carrying
+    // whitespace or a metacharacter must never reach it
+    const dir = resolve(TEST_TMP, 'unsafe-hook-stems');
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir, { recursive: true });
+    for (const name of [
+      'ok-hook.sh',
+      'has space.sh',
+      'semi;colon.sh',
+      '$dollar.sh',
+      'back`tick.sh',
+    ]) {
+      writeFileSync(resolve(dir, name), '#!/usr/bin/env bash\n', 'utf-8');
+    }
+
+    // Act
+    const byStem = await collectHookExtensions(dir);
+
+    // Assert — only the plain name is indexed, so only it can be wired
+    expect([...byStem.keys()]).toEqual(['ok-hook']);
+
+    rmSync(dir, { recursive: true, force: true });
   });
 });
 
