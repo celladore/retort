@@ -13,9 +13,9 @@
  */
 import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { chmod, cp, readFile, unlink, writeFile } from 'fs/promises';
-import { dirname, extname, relative, resolve, sep } from 'path';
+import { dirname, extname, join, relative, resolve, sep } from 'path';
 import { ensureDir, runConcurrent } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { resolveScaffoldAction } from './template-utils.mjs';
@@ -441,6 +441,85 @@ export async function writeManifest(manifestPath, manifest) {
     await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
   } catch (err) {
     console.warn(`[retort:sync] Warning: could not write manifest — ${err.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Provenance manifest — the single tracked record of what generated the tree
+// ---------------------------------------------------------------------------
+
+/**
+ * Hashes the spec directory deterministically: files sorted by path, with each
+ * path folded into the digest alongside its bytes so that renames register.
+ *
+ * @param {string} specDir
+ * @returns {string|null} short hex digest, or null when the directory is absent
+ */
+function hashSpecDirectory(specDir) {
+  if (!existsSync(specDir)) return null;
+
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile()) files.push(full);
+    }
+  };
+
+  try {
+    walk(specDir);
+  } catch {
+    return null;
+  }
+
+  files.sort();
+  const hash = createHash('sha256');
+  for (const file of files) {
+    hash.update(relative(specDir, file).replace(/\\/g, '/'));
+    try {
+      hash.update(readFileSync(file));
+    } catch {
+      // Unreadable spec file — fold in the path only rather than aborting.
+    }
+  }
+  return hash.digest('hex').slice(0, 16);
+}
+
+/**
+ * Writes `.agentkit/GENERATED.json`, the single tracked record of which
+ * framework version and spec produced the generated tree.
+ *
+ * This exists so the version does not have to live in ~660 per-file headers,
+ * where every release rewrote all of them for no semantic change and defeated
+ * the write-if-changed guard. See ADR-11 decision 2.
+ *
+ * Deliberately carries **no timestamp**: a per-sync value would make this file
+ * change on every run, reintroducing precisely the churn it removes. The write
+ * is itself skipped when the content is unchanged, for the same reason.
+ *
+ * @param {object} opts
+ * @param {string} opts.agentkitRoot
+ * @param {string} opts.version
+ * @param {string} opts.overlay
+ * @returns {Promise<boolean>} true when the file was written
+ */
+export async function writeGeneratedManifest({ agentkitRoot, version, overlay }) {
+  const payload = {
+    framework: 'retort',
+    version,
+    overlay,
+    specHash: hashSpecDirectory(resolve(agentkitRoot, 'spec')),
+  };
+  const dest = resolve(agentkitRoot, 'GENERATED.json');
+  const content = JSON.stringify(payload, null, 2) + '\n';
+
+  try {
+    if (existsSync(dest) && (await readFile(dest, 'utf-8')) === content) return false;
+    await writeFile(dest, content, 'utf-8');
+    return true;
+  } catch {
+    return false;
   }
 }
 

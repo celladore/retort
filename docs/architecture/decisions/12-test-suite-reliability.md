@@ -148,6 +148,29 @@ Re-measure after 1 lands before committing to the project split.
 
 **3, 4 and 5 are independent** and may land in any order.
 
+## Revision (2026-08-07): the failures are Windows-only
+
+PR #571 ran the full suite on CI and **all 15 checks passed, including `Test`**. None of the
+four local failures reproduce on Linux runners. Every one was an I/O-contention timeout, and
+Linux filesystem performance dissolves them.
+
+This materially changes the problem statement above. The suite is not unreliable in CI — it is
+unreliable **for developers on Windows**. The pipeline was never at risk, so the cost is
+developer time and trust, not delivery. Priorities are revised accordingly.
+
+| Decision                     | Revised position  | Why                                                                                                                                                                                                    |
+| ---------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. In-process formatting     | **Done**          | Landed; 47% faster suite and a product-wide sync speedup.                                                                                                                                              |
+| 4. Fixture repo for git-log  | **Do first**      | Promoted. These tests read ambient repository history, which is wrong on any platform — they would also break on a shallow clone or a repo with different conventions. A correctness bug, not a flake. |
+| 6. Raise sync-heavy timeouts | **New, cheapest** | The copilot `beforeAll` hooks fail at 30s on Windows. Sync is now ~2× faster, so a modest bump likely clears them outright, at zero CI cost and no architectural change.                               |
+| 3. Prettier out of Vitest    | **Keep, lower**   | Rationale changed: no longer about flakiness, but about placement and ~90s of runtime. A whole-repo format scan duplicates the lint job.                                                               |
+| 2. Isolate sync-heavy suites | **Drop**          | Measured worse (1294s vs 730s), and it targets a problem CI does not have. Script-level sequencing would slow CI for no CI benefit.                                                                    |
+| 5. Flake visibility          | **Defer**         | There are no CI flakes to surface. Building JUnit reporting and rerun detection for a green pipeline is speculative. Revisit if CI actually starts flaking.                                            |
+
+The through-line: decision 1 fixed a real product defect that happened to be measurable in the
+suite. What remains is mostly local developer ergonomics, and the two cheapest items (4 and 6)
+address it. Decision 2 should be struck rather than deferred — it was measured and it lost.
+
 ## Consequences
 
 ### Positive

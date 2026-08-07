@@ -153,6 +153,40 @@ Version and provenance move to a single generated manifest, `.agentkit/GENERATED
 the framework version, the overlay name, and a spec content hash. This preserves the ability to
 answer "what generated this tree, and from what spec" while confining release churn to one file.
 
+#### Implemented (2026-08-07)
+
+The stamp was stripped from 91 template headers and from both engine-side builders
+(`getGeneratedHeader`, and the `.gitattributes` managed section). `writeGeneratedManifest` emits
+`.agentkit/GENERATED.json`:
+
+```json
+{
+  "framework": "retort",
+  "version": "3.1.0",
+  "overlay": "retort",
+  "specHash": "3ab3337886d474de"
+}
+```
+
+Two deliberate properties: it carries **no timestamp**, and its own write is skipped when
+unchanged. Either omission would have made this file change on every sync and simply relocated
+the churn rather than removing it.
+
+The one-time migration rewrote 425 files, after which two consecutive syncs wrote **0 files** —
+so the write-if-changed property from decision 1 survives the migration.
+
+Version references in _body content_ were left alone (for example CLAUDE.md's "Framework
+Version" line, and ADR-01's record of which version was adopted). Those are meaningful prose in
+`scaffold: once` or single files, not per-file provenance stamps, and they do not scale with
+file count.
+
+**Known residue.** 148 tracked files still carry the old stamp. These are not a migration gap —
+they are files sync no longer writes: `scaffold: once` user-owned content (docs, CHANGELOG,
+AGENT_BACKLOG), and stale orphans from rule domains outside the active stack that
+`filterDomainsByStack` stopped generating and that nothing prunes. They are inert with respect
+to release churn, since a version bump does not rewrite them either. The orphan-pruning gap is a
+separate pre-existing defect.
+
 ### 3. Resolve-or-abort on overlay selection
 
 Replace the silent `__TEMPLATE__` fallback with explicit resolution:

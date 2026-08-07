@@ -32,6 +32,7 @@ import {
   clearTemplateMeta,
   formatOutputsInProcess,
   setTemplateMeta,
+  writeGeneratedManifest,
   writeManifest,
   writeScaffoldOutputs,
 } from './scaffold-engine.mjs';
@@ -1237,6 +1238,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       repoName: vars.repoName,
       files: newManifestFiles,
     });
+
+    // 10b. Write the tracked provenance manifest. This is now the only place the
+    //      framework version is recorded, so a release touches one file instead
+    //      of the ~660 that previously carried it in their header. See ADR-11
+    //      decision 2.
+    await writeGeneratedManifest({ agentkitRoot, version, overlay: vars.repoName });
 
     if (skippedScaffold > 0) {
       log(`[retort:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);
