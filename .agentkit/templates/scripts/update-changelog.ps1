@@ -72,26 +72,35 @@ if (unreleasedIdx === -1) {
   process.exit(1);
 }
 
-let blockEnd = lines.findIndex((l, i) => i > unreleasedIdx && /^## /.test(l));
+// ...ending at the next ## heading or the --- footer, whichever comes first.
+// Without the --- bound an insert can land inside the footer, or past the end
+// of the file entirely when no released version follows.
+let blockEnd = lines.findIndex(
+  (l, i) => i > unreleasedIdx && (/^## /.test(l) || l.trim() === '---')
+);
 if (blockEnd === -1) blockEnd = lines.length;
 
 const sectionHeader = `### ${section}`;
 let sectionIdx = lines.findIndex((l, i) => i > unreleasedIdx && i < blockEnd && l.trim() === sectionHeader);
 
 if (sectionIdx === -1) {
+  // Section doesn't exist — append it at the end of the [Unreleased] block,
+  // backing over any trailing blank lines so exactly one blank ends up either
+  // side of the new heading and its entry
   let insertAt = blockEnd;
-  for (let i = blockEnd - 1; i > unreleasedIdx; i--) {
-    if (lines[i].trim() === '---') { insertAt = i; break; }
-    if (lines[i].trim() !== '') break;
-  }
-  lines.splice(insertAt, 0, '', sectionHeader, entry);
+  while (insertAt > unreleasedIdx + 1 && lines[insertAt - 1].trim() === '') insertAt--;
+  lines.splice(insertAt, 0, '', sectionHeader, '', entry);
 } else {
+  // Step over the header and the blank line beneath it, then past any existing
+  // entries, so the entry joins the end of one contiguous list. Splicing
+  // directly after the header would leave the heading with no blank line under
+  // it and split the list in two — markdownlint MD022 and MD032.
   let insertAt = sectionIdx + 1;
+  while (insertAt < blockEnd && lines[insertAt].trim() === '') insertAt++;
   while (
     insertAt < blockEnd &&
     lines[insertAt].trim() !== '' &&
-    !lines[insertAt].startsWith('###') &&
-    !lines[insertAt].startsWith('##') &&
+    !lines[insertAt].startsWith('#') &&
     lines[insertAt].trim() !== '---'
   ) {
     insertAt++;
