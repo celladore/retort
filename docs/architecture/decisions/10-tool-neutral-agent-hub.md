@@ -3,7 +3,7 @@
 **Status:** Proposed
 **Date:** 2026-03-17
 **Deciders:** JustAGhosT
-**Related:** [Findings Report](../specs/tool-neutral-agent-hub-findings.md), [Multi-IDE Plugin Plan](../../../.claude/projects/C--Users-smitj-repos-agentkit-forge/memory/project_multi_ide_plugin_plan.md)
+**Related:** [Findings Report](../specs/tool-neutral-agent-hub-findings.md), Multi-IDE Plugin Plan (maintainer-local Claude memory note, not tracked in this repository)
 
 ## Context
 

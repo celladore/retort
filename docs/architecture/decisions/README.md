@@ -2,15 +2,80 @@
 <!-- Source: .agentkit/spec + .agentkit/overlays/retort -->
 <!-- Regenerate: pnpm --dir .agentkit retort:sync -->
 
-# ADR Index
+# Architecture Decision Records
 
-## Decision Records
+This directory holds the Architecture Decision Records (ADRs) for **retort**. An
+ADR captures a single significant architectural decision: the context that
+forced the choice, the decision itself, and the consequences the project
+accepted by making it.
 
-- [01-adopt-agentkit-forge.md](./01-adopt-agentkit-forge.md)
-- [02-fallback-policy-tokens-problem.md](./02-fallback-policy-tokens-problem.md)
-- [03-tooling-strategy.md](./03-tooling-strategy.md)
-- [04-static-security-analysis-depth-tooling.md](./04-static-security-analysis-depth-tooling.md)
-- [05-dependency-supply-chain-detection-tooling.md](./05-dependency-supply-chain-detection-tooling.md)
-- [06-code-quality-maintainability-signal-tooling.md](./06-code-quality-maintainability-signal-tooling.md)
-- [07-delivery-strategy.md](./07-delivery-strategy.md)
-- [08-issue-sync-strategy.md](./08-issue-sync-strategy.md)
+## Naming Convention
+
+One decision per file, named `NN-short-title.md`:
+
+```text
+01-adopt-service-mesh.md
+02-postgres-over-mongo.md
+03-event-sourcing-for-billing.md
+```
+
+- `NN` is a zero-padded sequence number, allocated in order of creation.
+- Numbers are **never reused**, even when an ADR is deprecated or superseded — a
+  retired number stays retired so external references never go stale.
+- The title is lowercase kebab-case and describes the decision, not the
+  discussion.
+
+## Required Sections
+
+Every ADR must contain:
+
+| Section          | Purpose                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| **Title**        | `# ADR-NN: <decision>` — the heading number must match the filename                 |
+| **Status**       | `proposed`, `accepted`, `deprecated`, or `superseded by ADR-NN`                     |
+| **Date**         | ISO date the decision reached its current status                                    |
+| **Context**      | The forces, constraints, and problem that made a decision necessary                 |
+| **Decision**     | What was chosen, stated in the active voice                                         |
+| **Consequences** | What becomes easier, what becomes harder, and what the project now has to live with |
+
+Record alternatives that were seriously considered and why they were rejected —
+that is usually the most valuable part of the record a year later.
+
+## Lifecycle
+
+- ADRs are **append-only**. Do not rewrite the decision of an accepted ADR.
+- To change direction, write a new ADR and mark the old one
+  `superseded by ADR-NN`, linking forwards.
+- To retire a decision without replacing it, mark it `deprecated` and say why.
+
+## Index
+
+Add each new ADR below as it is created. This file is `scaffold: managed` — the
+sync engine preserves entries added here, so the index is safe to maintain by
+hand.
+
+<!-- Add entries as: - [NN-short-title.md](./NN-short-title.md) — one-line summary -->
+
+| ADR | Record                                                                                               | Status   |
+| --- | ---------------------------------------------------------------------------------------------------- | -------- |
+| 01  | [Adopt Retort](./01-adopt-agentkit-forge.md)                                                         | Accepted |
+| 02  | [Fallback Policy for Missing Evidence Metric](./02-fallback-policy-tokens-problem.md)                | Proposed |
+| 03  | [Tooling Strategy — Tool Selection](./03-tooling-strategy.md)                                        | Proposed |
+| 04  | [Static Security Analysis Depth](./04-static-security-analysis-depth-tooling.md)                     | Proposed |
+| 05  | [Dependency and Supply-Chain Detection](./05-dependency-supply-chain-detection-tooling.md)           | Proposed |
+| 06  | [Code Quality and Maintainability Signal](./06-code-quality-maintainability-signal-tooling.md)       | Proposed |
+| 07  | [Delivery Strategy (Refined)](./07-delivery-strategy.md)                                             | Proposed |
+| 08  | [Issue Sync Strategy — Local Docs to GitHub Issues](./08-issue-sync-strategy.md)                     | Proposed |
+| 09  | [PM Agent Loader Design](./09-pm-agent-loader.md)                                                    | Accepted |
+| 10  | [Adopt Tool-Neutral `.agents/` Hub Pattern](./10-tool-neutral-agent-hub.md)                          | Proposed |
+| 11  | [Native Agent Dispatch](./11-native-agent-dispatch.md)                                               | Proposed |
+| 12  | [Introduce Expansion Analyst Agent](./12-expansion-analyst-agent.md)                                 | Accepted |
+| 13  | [Split-Brain Analysis](./13-split-brain-analysis.md)                                                 | Proposed |
+| 14  | [Directive Classification — Type and Phase Scoping](./14-directive-classification-type-and-phase.md) | Proposed |
+
+## When to Write an ADR
+
+Write one when a choice is expensive to reverse or hard to infer from the code:
+a datastore, a framework, an authentication model, a service boundary, a
+deployment topology, a public API contract. Routine implementation choices
+belong in code review, not here.
