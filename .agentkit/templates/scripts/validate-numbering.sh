@@ -23,15 +23,10 @@ if [[ ! -f "$INDEX_FILE" ]]; then
   exit 0
 fi
 
-# Check for duplicate sequence numbers per type
-for subdir in implementations bug-fixes features migrations; do
-  case "$subdir" in
-    implementations) TYPE="implementation" ;;
-    bug-fixes)       TYPE="bugfix" ;;
-    features)        TYPE="feature" ;;
-    migrations)      TYPE="migration" ;;
-  esac
-
+# Check for duplicate sequence numbers per type.
+# Every numbered history subdirectory is scanned — issues/ and lessons-learned/
+# are numbered the same way, so omitting them would let duplicates through.
+for subdir in implementations bug-fixes features migrations issues lessons-learned; do
   DIR="$HISTORY_DIR/$subdir"
   if [[ ! -d "$DIR" ]]; then
     continue

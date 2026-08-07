@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 3,
+    "bugfix": 4,
     "feature": 1,
     "migration": 1,
     "issue": 1,
@@ -27,10 +27,18 @@
     {
       "number": 3,
       "type": "bugfix",
+      "title": "Harden create-doc and widen numbering validation",
+      "date": "2026-08-07",
+      "pr": "576",
+      "file": "bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md"
+    },
+    {
+      "number": 4,
+      "type": "bugfix",
       "title": "Orphaned hook scripts never wired in generated Claude settings",
       "date": "2026-08-07",
       "pr": "577",
-      "file": "bug-fixes/0003-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md"
+      "file": "bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md"
     },
     {
       "number": 10,
