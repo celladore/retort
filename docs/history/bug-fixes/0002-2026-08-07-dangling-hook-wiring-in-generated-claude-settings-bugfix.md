@@ -54,21 +54,24 @@ settings writer consult it, so the two cannot drift.
 
 ### Code Changes
 
-- **`.agentkit/engines/node/src/platform-syncer.mjs`**: Added three exported
-  helpers — `extractHookStems()` (parses hook script names out of a command
-  string), `isHookEmitted()` (the shared feature gate), and
-  `filterHooksToEmitted()` (drops hook entries whose scripts will not be
-  emitted, then prunes matcher groups and events left empty). `syncClaudeHooks()`
-  was rewritten to call `isHookEmitted()` rather than re-implement the gate
-  inline, and `syncClaudeSettings()` gained an optional `hookFeatureMap`
-  parameter and filters `settings.hooks` through it.
+- **`.agentkit/engines/node/src/platform-syncer.mjs`**: Added four exported
+  helpers — `extractHookFiles()` (the single parser for hook references in a
+  command string, returning file names with extensions), `extractHookStems()`
+  (the same references reduced to stems, for feature lookup),
+  `isHookEmitted()` (the shared feature gate), and `filterHooksToEmitted()`
+  (drops hook entries whose scripts will not be emitted, then prunes matcher
+  groups and events left empty). `syncClaudeHooks()` was rewritten to call
+  `isHookEmitted()` rather than re-implement the gate inline, and
+  `syncClaudeSettings()` gained an optional `hookFeatureMap` parameter and
+  filters `settings.hooks` through it.
 - **`.agentkit/engines/node/src/synchronize.mjs`**: Passes the existing
   `hookFeatureMap` into `syncClaudeSettings()`.
 - **`.agentkit/engines/node/src/validate.mjs`**: Phase 5 no longer hardcodes a
   required-hook list. It derives the required set from the scripts actually
   wired in `.claude/settings.json` and fails only when a wired script is missing
   from disk — the real invariant, which self-adjusts to any feature
-  configuration.
+  configuration. It parses those references with the shared
+  `extractHookFiles()` rather than a second regex of its own.
 
 Two deliberate choices are worth recording:
 
