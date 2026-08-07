@@ -1,6 +1,6 @@
 {
   "sequences": {
-    "implementation": 1,
+    "implementation": 10,
     "bugfix": 3,
     "feature": 1,
     "migration": 1,
