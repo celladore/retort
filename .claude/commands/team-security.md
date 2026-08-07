@@ -26,6 +26,14 @@ auth/**, security/**, middleware/auth*
 
 Stay within your scope. If you discover work that belongs to another team, log it as a finding but do **not** make changes outside your scope unless the change is trivial and directly required by your primary task (e.g., updating an import path).
 
+## Agent Personas
+
+When working in this team's scope, embody these specialist perspectives:
+
+### Security Auditor
+
+**Role:** Security audit specialist performing continuous security analysis, vulnerability assessment, and compliance verification across the entire codebase and infrastructure.
+
 ## Task Protocol
 
 This team participates in the **task delegation protocol**. Tasks are JSON
@@ -88,6 +96,19 @@ Follow these steps in order for every work session:
 
 ### Step 0: Check Task Queue
 
+**If you were dispatched with a `taskId`**, that is your work item. Read
+`.claude/state/tasks/{taskId}.json` directly and go to step 2 below — do not
+list the directory and do not pick up anything else. The orchestrator already
+decided what you are for; re-scanning risks claiming a second team's task and
+burns context on files you will not act on.
+
+Still acquire the lease in step 2. Being handed a taskId proves the orchestrator
+assigned it to you; it does not prove nobody else is holding it, and the lease
+is also what advertises liveness via its TTL.
+
+**If you were invoked without a `taskId`** (a direct `/team-security` call),
+scan for work:
+
 1. List files in `.claude/state/tasks/` and read any with status `submitted`
    where `assignees` includes `security`.
 2. For each matching task:
@@ -118,6 +139,9 @@ Follow these steps in order for every work session:
   - **Always release lock** in `finally` after accept/reject/skip paths.
 
 3. If no delegated tasks exist, fall through to Step 1 (backlog-based work).
+   This fall-through is for direct invocations only. If you
+   were dispatched with a `taskId`, finish that task and stop — do not pick up
+   backlog work the orchestrator did not delegate and cannot see.
 
 ### Step 1: Identify Work Items
 
@@ -289,6 +313,18 @@ If you were working on a delegated task from `.claude/state/tasks/`:
 
 6. If no `handoffTo` is set but you identified downstream work, set
    `handoffTo` to the appropriate team(s) from your handoff chain:
+   
+   
+7. **If you were dispatched with a `taskId`**, your final message is the only
+   thing that reaches the orchestrator's context — everything else stays in the
+   task file. Return a summary that stands on its own: what changed, whether the
+   gate passed, what you handed off, and what you deliberately did not do. Do
+   not return the full diff or paste file contents; the orchestrator can read
+   the artifacts you just wrote.
+
+   Write the task file **before** returning. The summary is transient context;
+   the task file is the record that survives the session, and an agent that
+   returns a good summary without writing artifacts has left nothing behind.
    
 
 ### Events and Orchestrator State
