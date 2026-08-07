@@ -14,16 +14,16 @@ evaluations in **retort**.
 
 A work item is complete only when all of the following pass:
 
-| Gate              | Minimum requirement                                  |
-| ----------------- | ---------------------------------------------------- |
-| Lint              | Zero new lint errors                                 |
-| Type safety       | No new type errors                                   |
-| Unit tests        | All tests green                                      |
-| Coverage          | ≥ 80%                                                |
-| Integration tests | All green                                            |
-| Secrets scan      | Clean — no credentials in diff                       |
-| PR description    | Template completely filled                           |
-| Code review       | ≥ 1 approval from a reviewer with relevant expertise |
+| Gate              | Minimum requirement                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Lint              | Zero new lint errors                                                                                     |
+| Type safety       | No new type errors                                                                                       |
+| Unit tests        | All tests green                                                                                          |
+| Coverage          | ≥ 80% |
+| Integration tests | All green                                                                                                |
+| Secrets scan      | Clean — no credentials in diff                                                                           |
+| PR description    | Template completely filled                                                                               |
+| Code review       | ≥ 1 approval from a reviewer with relevant expertise                                                     |
 
 ## Code Review Checklist
 
@@ -104,7 +104,4 @@ Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`.
 3. Create a tracking issue with `flaky-test` label and resolve within two
    sprints.
 4. Never merge a change that introduces a new flaky test.
-
-```
-
 ```

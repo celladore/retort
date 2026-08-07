@@ -12,11 +12,11 @@ These rules apply to all test files and quality assurance activities in
 
 ## Test Pyramid
 
-| Layer | Tool        | Location | Target                        |
-| ----- | ----------- | -------- | ----------------------------- | ---------------------- | --- |
-|       | Unit        | vitest   | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |     |
-|       | Integration | vitest   | `tests/integration/`          | Module interactions    |     |
-|       |
+| Layer                      | Tool        | Location               | Target                        |
+| -------------------------- | ----------- | ---------------------- | ----------------------------- | ---------------------- | ------- |
+|         | Unit        | vitest        | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |  |
+|  | Integration | vitest | `tests/integration/`          | Module interactions    |  |
+|  |
 
 ## Coverage
 
@@ -83,7 +83,8 @@ describe('PaymentService', () => {
 
 Before merging any pull request:
 
-- [ ] All unit tests pass locally - [ ] Coverage meets or exceeds the 80% threshold
+- [ ] All unit tests pass locally
+      - [ ] Coverage meets or exceeds the 80% threshold
 - [ ] No permanently skipped tests added
 - [ ] No flaky tests introduced
 - [ ] CI passes (lint + type-check + tests)
