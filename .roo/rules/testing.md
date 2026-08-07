@@ -45,6 +45,6 @@ playwright.config.*
  _(advisory · phase: validation)_
 - **[qa-contract-testing]** Use consumer-driven contract testing for all service-to-service integrations. Consumers define the contract; providers verify it. Contract tests must run in CI for both consumers and providers. Use Pact or an equivalent framework. Never mock the wire protocol in integration tests — use contract stubs instead.
  _(advisory · phase: planning, validation)_
-- **[qa-performance-regression]** Performance-sensitive code paths must have benchmark tests that run in CI. A regression of more than 10% from the baseline must block the merge. Use Vitest bench, or the benchmark tooling appropriate to the stack in use. Store benchmark results as CI artefacts for historical comparison.
+- **[qa-performance-regression]** Performance-sensitive code paths must have benchmark tests that run in CI. A regression of more than 10% from the baseline must block the merge. Use language-appropriate tools: Vitest bench, Criterion (Rust), pytest-benchmark (Python), or BenchmarkDotNet (.NET). Store benchmark results as CI artefacts for historical comparison.
  _(advisory · phase: validation)_
 

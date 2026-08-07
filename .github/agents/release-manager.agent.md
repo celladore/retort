@@ -34,6 +34,8 @@ Scan the codebase within your focus area before making changes. Read `UNIFIED_AG
 
 - CHANGELOG.md
 - package.json
+- Cargo.toml
+- pyproject.toml
 - .github/workflows/release*
 - scripts/release*
 - docs/releases/**

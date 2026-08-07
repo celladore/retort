@@ -15,6 +15,11 @@ package.json
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+Cargo.toml
+Cargo.lock
+pyproject.toml
+poetry.lock
+requirements*.txt
 renovate.json
 .renovaterc*
 
