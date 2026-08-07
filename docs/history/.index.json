@@ -2,7 +2,7 @@
   "sequences": {
     "implementation": 11,
     "bugfix": 3,
-    "feature": 1,
+    "feature": 2,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -31,6 +31,14 @@
       "date": "2026-08-07",
       "pr": "575",
       "file": "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
+    },
+    {
+      "number": 1,
+      "type": "feature",
+      "title": "Native agent dispatch",
+      "date": "2026-08-07",
+      "pr": "574",
+      "file": "features/0001-2026-08-07-native-agent-dispatch-feature.md"
     }
   ]
 }
