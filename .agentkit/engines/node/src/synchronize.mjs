@@ -128,7 +128,10 @@ export {
   resolveTeamAgents,
 } from './var-builders.mjs';
 
-// threeWayMerge and normalizeForComparison live in scaffold-merge.mjs (used by scaffold-engine.mjs)
+// threeWayMerge lives in scaffold-merge.mjs (used by scaffold-engine.mjs).
+// normalizeForComparison is imported here so the --diff preview classifies
+// changes the same way writeScaffoldOutputs does.
+import { normalizeForComparison } from './scaffold-merge.mjs';
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -233,7 +236,7 @@ export { syncDirectCopy } from './platform-syncer.mjs';
  * @param {string} projectRoot
  * @returns {string[]} markdown list items, sorted by filename
  */
-function buildAdrList(projectRoot) {
+export function buildAdrList(projectRoot) {
   const dir = join(projectRoot, 'docs', 'architecture', 'decisions');
   if (!existsSync(dir)) return [];
 
@@ -1031,6 +1034,25 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       fileSummary[cat] = (fileSummary[cat] || 0) + 1;
     }
 
+    // 6b. Format rendered output in-process, before ANY comparison against the
+    //     project tree. Doing this after the copy (as previously) left temp
+    //     unformatted and the project formatted, so the content-hash guard in
+    //     writeScaffoldOutputs never matched and every Prettier-touched file was
+    //     rewritten on each sync. Also refreshes manifest hashes in place so they
+    //     describe the formatted bytes. See ADR-11 and ADR-12.
+    //
+    //     This must precede the --diff and interactive branches below: they
+    //     compare temp content against the project, so formatting later would
+    //     make formatting-only differences show up as spurious updates or
+    //     prompts that the real write then skips.
+    await formatOutputsInProcess({
+      projectRoot,
+      tmpDir,
+      allTmpFiles,
+      newManifestFiles,
+      logVerbose,
+    });
+
     // --- Dry-run: print summary and exit without writing ---
     if (dryRun) {
       const total = Object.keys(newManifestFiles).length;
@@ -1076,7 +1098,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           log(`  create ${normPath}`);
         } else {
           const oldContent = await readFile(destFile, 'utf-8');
-          if (oldContent !== newContent) {
+          // Compare the way the writer does. writeScaffoldOutputs treats a
+          // markdown table-cell padding difference as "unchanged" and skips the
+          // write; a raw comparison here would report updates that the real sync
+          // then declines to make. Prettier-ignored outputs (.claude/rules/
+          // languages/**, .github/instructions/**, …) differ from rendered
+          // template output by padding alone, so this is the common case.
+          if (normalizeForComparison(oldContent) !== normalizeForComparison(newContent)) {
             updateCount++;
             log(`  update ${normPath}`);
             const diffOut = simpleDiff(oldContent, newContent);
@@ -1188,20 +1216,6 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     } catch {
       /* ignore corrupt manifest */
     }
-
-    // 6b. Format rendered output in-process, before it is compared against the
-    //     project tree. Doing this after the copy (as previously) left temp
-    //     unformatted and the project formatted, so the content-hash guard in
-    //     writeScaffoldOutputs never matched and every Prettier-touched file was
-    //     rewritten on each sync. Also refreshes manifest hashes in place so they
-    //     describe the formatted bytes. See ADR-11 and ADR-12.
-    await formatOutputsInProcess({
-      projectRoot,
-      tmpDir,
-      allTmpFiles,
-      newManifestFiles,
-      logVerbose,
-    });
 
     // 7. Write scaffold outputs (scaffold-once / managed / always)
     log('[retort:sync] Writing outputs...');

@@ -101,6 +101,9 @@ export async function writeScaffoldOutputs({
   // If runConcurrent ever uses worker threads, this needs synchronization.
   const writtenFiles = []; // absolute paths of files written, for post-sync formatting
   const scaffoldOnceSkippedFiles = []; // paths skipped due to scaffold:once
+  // Used only by the managed three-way merge path, whose output is synthesised
+  // here rather than in the temp tree and so misses formatOutputsInProcess.
+  const mergeFormatter = await createFormatter(projectRoot);
   const scaffoldResults = {
     alwaysRegenerated: [],
     managedRegenerated: [],
@@ -180,18 +183,26 @@ export async function writeScaffoldOutputs({
                 await ensureDir(dirname(cachePath));
                 await writeFile(cachePath, newContent, 'utf-8');
 
+                // Format the merged result. formatOutputsInProcess only covers
+                // files in allTmpFiles; result.merged is synthesised here, after
+                // that stage, so without this it would be the one output path
+                // that ships unformatted.
+                const mergedContent = mergeFormatter
+                  ? await mergeFormatter(destFile, result.merged)
+                  : result.merged;
+
                 // Write-if-changed also applies here. A merge whose result equals
                 // what is already on disk must not be written: doing so bumps
                 // mtime for nothing and leaves sync reporting a file it did not
                 // meaningfully change. Observed as a 1-file oscillation on
                 // docs/architecture/decisions/README.md. See ADR-11.
-                if (result.merged === diskText) {
+                if (mergedContent === diskText) {
                   logVerbose(`  unchanged ${normalizedRel} (merge is a no-op, skipping write)`);
                   return;
                 }
 
                 await ensureDir(dirname(destFile));
-                await writeFile(destFile, result.merged, 'utf-8');
+                await writeFile(destFile, mergedContent, 'utf-8');
                 count++;
 
                 writtenFiles.push(destFile);
@@ -540,6 +551,44 @@ export async function writeGeneratedManifest({ agentkitRoot, version, overlay })
 // ---------------------------------------------------------------------------
 
 /**
+ * Loads Prettier once and returns a formatter bound to the project's config.
+ *
+ * Config and ignore resolution deliberately use each file's *destination* path:
+ * `.prettierrc` and `.prettierignore` live in the project, not the temp tree.
+ * Prettier's Node API — unlike its CLI — resolves neither implicitly.
+ *
+ * The returned function never throws: ignored, unsupported or unparseable
+ * content comes back unchanged, preserving the continue-on-failure behaviour of
+ * the CLI batching this replaced.
+ *
+ * @param {string} projectRoot
+ * @returns {Promise<((destFile: string, content: string) => Promise<string>)|null>}
+ *          null when Prettier is unavailable
+ */
+async function createFormatter(projectRoot) {
+  let prettier;
+  try {
+    prettier = await import('prettier');
+  } catch {
+    return null;
+  }
+
+  const ignoreCandidate = resolve(projectRoot, '.prettierignore');
+  const ignorePath = existsSync(ignoreCandidate) ? ignoreCandidate : undefined;
+
+  return async function format(destFile, content) {
+    try {
+      const info = await prettier.getFileInfo(destFile, { ignorePath });
+      if (info.ignored || !info.inferredParser) return content;
+      const options = await prettier.resolveConfig(destFile);
+      return await prettier.format(content, { ...options, filepath: destFile });
+    } catch {
+      return content;
+    }
+  };
+}
+
+/**
  * Formats every rendered file in the temp directory in-process, then refreshes
  * the corresponding manifest hashes so they describe the formatted bytes.
  *
@@ -573,16 +622,8 @@ export async function formatOutputsInProcess({
   newManifestFiles = {},
   logVerbose = () => {},
 }) {
-  let prettier;
-  try {
-    prettier = await import('prettier');
-  } catch {
-    // Prettier unavailable — emit unformatted output rather than failing the sync.
-    return 0;
-  }
-
-  const ignoreCandidate = resolve(projectRoot, '.prettierignore');
-  const ignorePath = existsSync(ignoreCandidate) ? ignoreCandidate : undefined;
+  const format = await createFormatter(projectRoot);
+  if (!format) return 0;
   let formatted = 0;
 
   await runConcurrent(allTmpFiles, async (srcFile) => {
@@ -597,17 +638,9 @@ export async function formatOutputsInProcess({
       return;
     }
 
-    let output = content;
-    try {
-      const info = await prettier.getFileInfo(destFile, { ignorePath });
-      if (info.ignored || !info.inferredParser) return;
-      const options = await prettier.resolveConfig(destFile);
-      output = await prettier.format(content, { ...options, filepath: destFile });
-    } catch {
-      // Unparseable or unsupported file — leave it as rendered. Matches the
-      // continue-on-failure behaviour of the previous CLI batching.
-      return;
-    }
+    // Unparseable, ignored or unsupported files come back unchanged, matching
+    // the continue-on-failure behaviour of the previous CLI batching.
+    const output = await format(destFile, content);
 
     if (output !== content) {
       try {
