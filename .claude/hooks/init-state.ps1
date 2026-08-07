@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------
+﻿# ---------------------------------------------------------------------------
 # Hook: SessionStart (supplementary) — Windows PowerShell version
 # Purpose: Ensure .claude/state/tasks/ directories exist and warn when
 #          orchestrator state is stale or from a different branch.

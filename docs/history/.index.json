@@ -1,44 +1,52 @@
-{
-  "sequences": {
-    "implementation": 11,
-    "bugfix": 4,
-    "feature": 1,
-    "migration": 1,
-    "issue": 1,
-    "lesson": 1
-  },
-  "entries": [
-    {
-      "number": 1,
-      "type": "bugfix",
-      "title": "Infra-Eval Review Fixes",
-      "date": "2026-03-04",
-      "pr": "",
-      "file": "bug-fixes/0001-2026-03-04-infra-eval-review-fixes-bugfix.md"
-    },
-    {
-      "number": 2,
-      "type": "bugfix",
-      "title": "Dangling hook wiring in generated Claude settings",
-      "date": "2026-08-07",
-      "pr": "572",
-      "file": "bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
-    },
-    {
-      "number": 3,
-      "type": "bugfix",
-      "title": "Harden create-doc and widen numbering validation",
-      "date": "2026-08-07",
-      "pr": "576",
-      "file": "bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md"
-    },
-    {
-      "number": 10,
-      "type": "implementation",
-      "title": "Hook wiring generated from spec",
-      "date": "2026-08-07",
-      "pr": "575",
-      "file": "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
-    }
-  ]
+﻿{
+    "sequences":  {
+                      "implementation":  11,
+                      "bugfix":  5,
+                      "feature":  1,
+                      "migration":  1,
+                      "issue":  1,
+                      "lesson":  1
+                  },
+    "entries":  [
+                    {
+                        "number":  1,
+                        "type":  "bugfix",
+                        "title":  "Infra-Eval Review Fixes",
+                        "date":  "2026-03-04",
+                        "pr":  "",
+                        "file":  "bug-fixes/0001-2026-03-04-infra-eval-review-fixes-bugfix.md"
+                    },
+                    {
+                        "number":  2,
+                        "type":  "bugfix",
+                        "title":  "Dangling hook wiring in generated Claude settings",
+                        "date":  "2026-08-07",
+                        "pr":  "572",
+                        "file":  "bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
+                    },
+                    {
+                        "number":  3,
+                        "type":  "bugfix",
+                        "title":  "Harden create-doc and widen numbering validation",
+                        "date":  "2026-08-07",
+                        "pr":  "576",
+                        "file":  "bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md"
+                    },
+                    {
+                        "number":  10,
+                        "type":  "implementation",
+                        "title":  "Hook wiring generated from spec",
+                        "date":  "2026-08-07",
+                        "pr":  "575",
+                        "file":  "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
+                    },
+                    {
+                        "number":  4,
+                        "type":  "bugfix",
+                        "title":  "Generated PowerShell scripts fail to parse under Windows PowerShell 5.1",
+                        "date":  "2026-08-07",
+                        "pr":  "",
+                        "file":  "bug-fixes/0004-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
+                    }
+                ]
 }
