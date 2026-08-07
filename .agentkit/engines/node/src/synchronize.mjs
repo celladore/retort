@@ -310,6 +310,35 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
   }
 
+  // --- Overwrite safety guard ---
+  // --overwrite bypasses the entire scaffold protection block in
+  // scaffold-engine.mjs: both the `once` skip that shields user-authored files
+  // (AGENT_BACKLOG.md, docs/**, editor settings) and the `managed` three-way
+  // merge that preserves local edits. Running it against a dirty tree silently
+  // destroys uncommitted work, so refuse unless --force is passed explicitly.
+  // The guard above does not cover this — it only watches .agentkit/ source dirs.
+  if (flags?.overwrite && !flags?.force && !dryRun && !diff && !isTestEnv) {
+    let checkDirtyProtectedFiles;
+    try {
+      ({ checkDirtyProtectedFiles } = await import('./sync-guard.mjs'));
+    } catch (err) {
+      log(`[retort:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
+    }
+    const { dirty, files } = checkDirtyProtectedFiles
+      ? checkDirtyProtectedFiles(projectRoot, ['.'])
+      : { dirty: false, files: [] };
+    if (dirty) {
+      console.error(
+        '[retort:sync] Aborted: --overwrite regenerates scaffold-once and managed files,\n' +
+          '  discarding local edits. The working tree has uncommitted changes:'
+      );
+      for (const f of files.slice(0, 20)) console.error(`  ${f}`);
+      if (files.length > 20) console.error(`  ...and ${files.length - 20} more`);
+      console.error('  Commit or stash first, or pass --force to proceed anyway.');
+      return;
+    }
+  }
+
   if (dryRun) {
     log('[retort:sync] Dry-run mode — no files will be written.');
   }
