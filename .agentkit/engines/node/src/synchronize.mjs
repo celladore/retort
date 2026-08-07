@@ -727,7 +727,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           vars,
           version,
           mergedPermissionsResult,
-          settingsSpec
+          settingsSpec,
+          hookFeatureMap
         ),
         syncClaudeCommands(
           templatesDir,

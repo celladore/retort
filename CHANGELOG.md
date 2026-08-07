@@ -24,6 +24,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Support for Claude Code, Cursor, Windsurf, Copilot, and MCP/A2A
 - Hook-based safety guardrails
 - Automated quality gates and validation
+- Hook wiring generated from spec ([#575](../../pull/575), [history](docs/history/implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md))
 
 ### Changed
 
@@ -31,7 +32,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 
 ### Fixed
 
-- (none yet)
+- Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
 
 ### Removed
 

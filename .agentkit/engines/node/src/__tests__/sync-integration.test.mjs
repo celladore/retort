@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import yaml from 'js-yaml';
@@ -27,6 +35,106 @@ function makeNamedTmpProject(repoName) {
   mkdirSync(dir, { recursive: true });
   return dir;
 }
+
+// ---------------------------------------------------------------------------
+// Shared sync roots
+// ---------------------------------------------------------------------------
+// Full syncs dominate this suite's runtime — a single one renders 600+ files.
+// Many describe blocks previously ran their own sync with identical flags
+// (`--only copilot` alone ran five times), which is what pushed beforeAll
+// hooks past the 30s hook timeout.
+//
+// Each distinct flag-set is now synced at most once into a pristine "golden"
+// root. Blocks that only read the output share that root via goldenSync();
+// blocks that mutate it take a cheap recursive copy via cloneSync(), since
+// copying an already-rendered tree costs far less than re-rendering it.
+
+/** @type {Map<string, Promise<string>>} flag-set key -> pristine synced root */
+const goldenRoots = new Map();
+
+/**
+ * Every temp directory handed to a sync, tracked separately from the promises
+ * above so cleanup does not depend on those promises resolving. A failed sync
+ * still leaves files on disk, and its promise rejects without ever yielding the
+ * path, so recording the directory up front is what makes it removable.
+ *
+ * @type {Set<string>}
+ */
+const createdRoots = new Set();
+
+/**
+ * Resolves the given flag-sets to golden roots one at a time.
+ *
+ * runSync calls clearTemplateMeta() and clearTemplateTextCache() on entry
+ * (synchronize.mjs), and both operate on module-level singletons shared by all
+ * callers, so two overlapping runSync calls clear each other's in-flight state.
+ * templateMetaMap drives scaffold-mode decisions, so that corruption would be
+ * silent rather than a crash.
+ *
+ * Vitest already runs describe blocks sequentially, so the only place syncs
+ * could overlap is a Promise.all over goldenSync — this helper replaces those.
+ * Cached flag-sets resolve immediately, so the sequential walk only pays for
+ * targets no earlier block has synced.
+ *
+ * @param {object[]} flagSets
+ * @returns {Promise<string[]>} golden root per flag-set, in order
+ */
+async function goldenSyncAll(flagSets) {
+  const roots = [];
+  for (const flags of flagSets) {
+    roots.push(await goldenSync(flags));
+  }
+  return roots;
+}
+
+/**
+ * Returns a pristine project root synced with the given flags, reusing an
+ * existing one when the same flag-set has already been synced.
+ *
+ * The promise (not the resolved path) is cached so concurrent callers share a
+ * single in-flight sync rather than racing to build duplicates. A rejected
+ * sync stays cached deliberately: the failure is a real problem with the spec
+ * or engine, and re-running it for each of the dozen waiting blocks would bury
+ * the original error under a pile of identical ones.
+ *
+ * Callers MUST NOT modify the returned tree — use cloneSync() for that.
+ */
+function goldenSync(flags = {}) {
+  // quiet/verbose only gate console output (see synchronize.mjs), so they are
+  // excluded from the key — {} and { quiet: true } render identical trees.
+  const significant = Object.fromEntries(
+    Object.entries(flags).filter(([name]) => name !== 'quiet' && name !== 'verbose')
+  );
+  const key = JSON.stringify(significant, Object.keys(significant).sort());
+  if (!goldenRoots.has(key)) {
+    // Created outside the async body so the path is recorded for cleanup even
+    // if runSync rejects.
+    const projectRoot = makeTmpProject();
+    createdRoots.add(projectRoot);
+    goldenRoots.set(
+      key,
+      runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags }).then(() => projectRoot)
+    );
+  }
+  return goldenRoots.get(key);
+}
+
+/** Returns a writable copy of the golden root for the given flags. */
+async function cloneSync(flags = {}) {
+  const golden = await goldenSync(flags);
+  const dest = makeTmpProject();
+  createdRoots.add(dest);
+  cpSync(golden, dest, { recursive: true });
+  return dest;
+}
+
+afterAll(() => {
+  for (const root of createdRoots) {
+    rmSync(root, { recursive: true, force: true });
+  }
+  createdRoots.clear();
+  goldenRoots.clear();
+});
 
 function writeTestFile(filePath, content) {
   mkdirSync(dirname(filePath), { recursive: true });
@@ -200,11 +308,7 @@ describe('syncCopilotPrompts (via runSync --only copilot)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'copilot' });
   });
 
   it(
@@ -255,11 +359,7 @@ describe('syncCopilotAgents (via runSync --only copilot)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'copilot' });
   });
 
   it('generates .github/agents/*.agent.md from agents.yaml', async () => {
@@ -286,11 +386,7 @@ describe('syncCopilotChatModes (via runSync --only copilot)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'copilot' });
   });
 
   it('generates .github/chatmodes/team-*.chatmode.md from teams.yaml', async () => {
@@ -317,11 +413,7 @@ describe('syncGemini (via runSync --only gemini)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'gemini' });
   });
 
   it('generates GEMINI.md at project root', async () => {
@@ -354,11 +446,7 @@ describe('syncCodexSkills (via runSync --only codex)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'codex' });
   });
 
   it('generates .agents/skills/*/SKILL.md for non-team commands', { timeout: 15000 }, async () => {
@@ -409,11 +497,7 @@ describe('syncClaudeSkills (via runSync --only claude)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
-  }, 60000);
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'claude' });
   });
 
   it('generates .claude/skills/*/SKILL.md for non-team commands', { timeout: 15000 }, async () => {
@@ -472,11 +556,7 @@ describe('syncCursorCommands (via runSync --only cursor)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cursor' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'cursor' });
   });
 
   it('generates .cursor/commands/*.md for non-team commands', async () => {
@@ -511,11 +591,7 @@ describe('syncWindsurfCommands (via runSync --only windsurf)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'windsurf' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'windsurf' });
   });
 
   it('windsurf commands resolve {{stateDir}} to .windsurf/state', { timeout: 15000 }, async () => {
@@ -535,11 +611,7 @@ describe('syncWarp (via runSync --only warp)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'warp' });
   });
 
   it('generates WARP.md at project root', async () => {
@@ -564,11 +636,7 @@ describe('syncClineRules (via runSync --only cline)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cline' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'cline' });
   });
 
   it('generates .clinerules/*.md from rules.yaml domains', { timeout: 15000 }, async () => {
@@ -593,11 +661,7 @@ describe('syncRooRules (via runSync --only roo)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'roo' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'roo' });
   });
 
   it('generates .roo/rules/*.md from rules.yaml domains', { timeout: 15000 }, async () => {
@@ -618,40 +682,32 @@ describe('syncRooRules (via runSync --only roo)', () => {
 // Tests: Render target gating — new tools excluded when not in targets
 // ---------------------------------------------------------------------------
 describe('render target gating for new tools', () => {
-  let projectRoot;
+  let claudeFiles;
+  let warpFiles;
 
-  beforeEach(() => {
-    projectRoot = makeTmpProject();
+  beforeAll(async () => {
+    const [claudeRoot, warpRoot] = await goldenSyncAll([{ only: 'claude' }, { only: 'warp' }]);
+    claudeFiles = collectFiles(claudeRoot);
+    warpFiles = collectFiles(warpRoot);
   });
-  afterEach(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+
+  it('--only claude does NOT generate gemini, warp, cline, roo, codex files', () => {
+    expect(claudeFiles.some((f) => f === 'GEMINI.md')).toBe(false);
+    expect(claudeFiles.some((f) => f === 'WARP.md')).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.gemini/'))).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.agents/'))).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.clinerules/'))).toBe(false);
+    expect(claudeFiles.some((f) => f.startsWith('.roo/'))).toBe(false);
   });
 
-  it(
-    '--only claude does NOT generate gemini, warp, cline, roo, codex files',
-    { timeout: 30_000 },
-    async () => {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
-      const files = collectFiles(projectRoot);
-      expect(files.some((f) => f === 'GEMINI.md')).toBe(false);
-      expect(files.some((f) => f === 'WARP.md')).toBe(false);
-      expect(files.some((f) => f.startsWith('.gemini/'))).toBe(false);
-      expect(files.some((f) => f.startsWith('.agents/'))).toBe(false);
-      expect(files.some((f) => f.startsWith('.clinerules/'))).toBe(false);
-      expect(files.some((f) => f.startsWith('.roo/'))).toBe(false);
-    }
-  );
-
-  it('always-on outputs generated regardless of --only flag', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-    const files = collectFiles(projectRoot);
+  it('always-on outputs generated regardless of --only flag', () => {
     // AGENTS.md is always-on
-    expect(files.some((f) => f === 'AGENTS.md')).toBe(true);
+    expect(warpFiles.some((f) => f === 'AGENTS.md')).toBe(true);
     // WARP.md is the only gated output
-    expect(files.some((f) => f === 'WARP.md')).toBe(true);
+    expect(warpFiles.some((f) => f === 'WARP.md')).toBe(true);
     // Claude-specific outputs should NOT be present
-    expect(files.some((f) => f === 'CLAUDE.md')).toBe(false);
-    expect(files.some((f) => f.startsWith('.claude/'))).toBe(false);
+    expect(warpFiles.some((f) => f === 'CLAUDE.md')).toBe(false);
+    expect(warpFiles.some((f) => f.startsWith('.claude/'))).toBe(false);
   });
 });
 
@@ -659,14 +715,15 @@ describe('--overwrite flag', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
-  }, 60000);
+    // These tests re-sync and edit files, so take a writable copy rather than
+    // sharing the golden root.
+    projectRoot = await cloneSync({});
+  });
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
 
-  it('skips project-owned files by default', { timeout: 60000 }, async () => {
+  it('skips project-owned files by default', { timeout: 120_000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     expect(existsSync(contribPath)).toBe(true);
 
@@ -677,7 +734,7 @@ describe('--overwrite flag', () => {
     expect(readFileSync(contribPath, 'utf-8')).toBe(customContent);
   });
 
-  it('overwrites project-owned files with --overwrite', { timeout: 60000 }, async () => {
+  it('overwrites project-owned files with --overwrite', { timeout: 120_000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     const customContent = 'CUSTOM_OVERWRITE_MARKER_67890';
     writeFileSync(contribPath, customContent, 'utf-8');
@@ -686,7 +743,7 @@ describe('--overwrite flag', () => {
     expect(readFileSync(contribPath, 'utf-8')).not.toContain(customContent);
   });
 
-  it('--force is alias for --overwrite', { timeout: 60000 }, async () => {
+  it('--force is alias for --overwrite', { timeout: 120_000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     writeFileSync(contribPath, 'CUSTOM', 'utf-8');
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { force: true } });
@@ -775,65 +832,48 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
 // ---------------------------------------------------------------------------
 // Tests: Render-target output isolation (--only flag)
 // ---------------------------------------------------------------------------
+// Each case syncs a single render target and asserts that no OTHER target's
+// output appears. Previously every assertion ran its own full sync (10 syncs,
+// sequential); the targets are now synced once each, in parallel, and the
+// assertions read the resulting trees. Each target keeps its own project root —
+// sharing one root across targets would let earlier output linger and
+// invalidate the negative assertions, because sync only prunes orphaned files
+// when a previous .manifest.json is present.
+const ISOLATION_CASES = [
+  {
+    only: 'mcp',
+    absent: [
+      ['.github', 'prompts'],
+      ['.roo', 'rules'],
+    ],
+  },
+  { only: 'windsurf', absent: [['.cursor', 'commands']] },
+  { only: 'cline', absent: [['.agents', 'skills']] },
+  { only: 'ai', absent: [['.cursor', 'rules', 'team-backend.mdc']] },
+  { only: 'codex', absent: [['.windsurf', 'rules', 'team-backend.md']] },
+  { only: 'gemini', absent: [['.github', 'chatmodes']] },
+  { only: 'warp', absent: [['.github', 'agents'], ['.clinerules']] },
+  { only: 'roo', absent: [['.claude', 'agents']] },
+];
+
 describe('render-target output isolation (--only flag)', () => {
-  let projectRoot;
+  /** @type {Map<string, string>} render target -> synced project root */
+  const rootsByTarget = new Map();
 
-  beforeEach(() => {
-    projectRoot = makeTmpProject();
-  });
-  afterEach(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
-  });
-
-  it('--only mcp produces no copilot prompts', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'mcp' } });
-    expect(existsSync(resolve(projectRoot, '.github', 'prompts'))).toBe(false);
+  beforeAll(async () => {
+    // goldenSync dedupes against the per-target describe blocks above, so each
+    // render target is synced once for the whole file rather than twice.
+    const roots = await goldenSyncAll(ISOLATION_CASES.map(({ only }) => ({ only })));
+    ISOLATION_CASES.forEach(({ only }, i) => rootsByTarget.set(only, roots[i]));
   });
 
-  it('--only windsurf produces no cursor command files', { timeout: 30000 }, async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'windsurf' } });
-    expect(existsSync(resolve(projectRoot, '.cursor', 'commands'))).toBe(false);
-  });
-
-  it('--only cline produces no codex skills', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'cline' } });
-    expect(existsSync(resolve(projectRoot, '.agents', 'skills'))).toBe(false);
-  });
-
-  it('--only ai produces no cursor team rules', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'ai' } });
-    expect(existsSync(resolve(projectRoot, '.cursor', 'rules', 'team-backend.mdc'))).toBe(false);
-  });
-
-  it('--only codex produces no windsurf team rules', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'codex' } });
-    expect(existsSync(resolve(projectRoot, '.windsurf', 'rules', 'team-backend.md'))).toBe(false);
-  });
-
-  it('--only gemini produces no copilot chatmodes', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'gemini' } });
-    expect(existsSync(resolve(projectRoot, '.github', 'chatmodes'))).toBe(false);
-  });
-
-  it('--only warp produces no copilot agent files', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-    expect(existsSync(resolve(projectRoot, '.github', 'agents'))).toBe(false);
-  });
-
-  it('--only roo produces no claude agent files', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'roo' } });
-    expect(existsSync(resolve(projectRoot, '.claude', 'agents'))).toBe(false);
-  });
-
-  it('--only warp produces no cline rules', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'warp' } });
-    expect(existsSync(resolve(projectRoot, '.clinerules'))).toBe(false);
-  });
-
-  it('--only mcp produces no roo rules', async () => {
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'mcp' } });
-    expect(existsSync(resolve(projectRoot, '.roo', 'rules'))).toBe(false);
-  });
+  for (const { only, absent } of ISOLATION_CASES) {
+    for (const segments of absent) {
+      it(`--only ${only} produces no ${segments.join('/')}`, () => {
+        expect(existsSync(resolve(rootsByTarget.get(only), ...segments))).toBe(false);
+      });
+    }
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -843,11 +883,7 @@ describe('syncCopilotInstructions — testing & QA templates (via runSync --only
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'copilot' });
   });
 
   it('generates .github/instructions/testing.md', { timeout: 15000 }, () => {
@@ -938,11 +974,7 @@ describe('syncClaudeRules — testing template (via runSync --only claude)', () 
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'claude' });
   });
 
   it('generates .claude/rules/testing.md', { timeout: 15000 }, () => {
@@ -978,11 +1010,7 @@ describe('syncLanguageInstructions — generic, multi-platform dynamic generatio
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'copilot' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'copilot' });
   });
 
   // --- Copilot output (.github/instructions/languages/) ---
@@ -1077,11 +1105,7 @@ describe('syncLanguageInstructions — claude target output (.claude/rules/langu
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { only: 'claude' } });
-  });
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ only: 'claude' });
   });
 
   it('generates .claude/rules/languages/ for claude target', { timeout: 15000 }, () => {
@@ -1121,12 +1145,8 @@ describe('syncEditorTheme (brand-driven editor theme)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
     // Full sync — brand.yaml and editor-theme.yaml exist in spec, editorTheme.enabled is true
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
-  }, 60_000);
-  afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    projectRoot = await goldenSync({ quiet: true });
   });
 
   it(
@@ -1255,9 +1275,9 @@ describe('syncGitattributes (merge driver sync)', () => {
   let projectRoot;
 
   beforeAll(async () => {
-    projectRoot = makeTmpProject();
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
-  }, 120_000);
+    // These tests edit .gitattributes and re-sync, so they need a writable copy.
+    projectRoot = await cloneSync({ quiet: true });
+  });
   afterAll(() => {
     rmSync(projectRoot, { recursive: true, force: true });
   });
@@ -1280,25 +1300,29 @@ describe('syncGitattributes (merge driver sync)', () => {
     expect(content).toContain('pnpm-lock.yaml');
   });
 
-  it('preserves user content outside managed section on re-sync', { timeout: 60_000 }, async () => {
-    const gitattrsPath = resolve(projectRoot, '.gitattributes');
-    // Prepend custom user content
-    const existing = readFileSync(gitattrsPath, 'utf-8');
-    writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
+  it(
+    'preserves user content outside managed section on re-sync',
+    { timeout: 120_000 },
+    async () => {
+      const gitattrsPath = resolve(projectRoot, '.gitattributes');
+      // Prepend custom user content
+      const existing = readFileSync(gitattrsPath, 'utf-8');
+      writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
 
-    // Re-sync
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+      // Re-sync
+      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
 
-    const updated = readFileSync(gitattrsPath, 'utf-8');
-    expect(updated).toContain('# My custom rules');
-    expect(updated).toContain('*.pdf binary');
-    expect(updated).toContain('merge=agentkit-generated');
-    // Should have exactly one managed section (not duplicated)
-    const startCount = (updated.match(/# >>> Retort merge drivers/g) || []).length;
-    expect(startCount).toBe(1);
-  });
+      const updated = readFileSync(gitattrsPath, 'utf-8');
+      expect(updated).toContain('# My custom rules');
+      expect(updated).toContain('*.pdf binary');
+      expect(updated).toContain('merge=agentkit-generated');
+      // Should have exactly one managed section (not duplicated)
+      const startCount = (updated.match(/# >>> Retort merge drivers/g) || []).length;
+      expect(startCount).toBe(1);
+    }
+  );
 
-  it('replaces stale managed section without duplication', { timeout: 60_000 }, async () => {
+  it('replaces stale managed section without duplication', { timeout: 120_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Re-sync a second time to verify no duplication
     await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });

@@ -573,8 +573,148 @@ export async function syncEditorTheme(
 // ---------------------------------------------------------------------------
 
 /**
+ * Extracts the hook script file names (with extension) a settings.json hook
+ * command invokes, e.g. `session-start.ps1`. A command may name several — the
+ * SessionStart entry runs a `.ps1` with a `.sh` fallback.
+ *
+ * This is the single parser for hook references in a command string; both the
+ * sync-side gating below and `validate.mjs` Phase 5 use it, so the two cannot
+ * disagree about what a command refers to.
+ */
+export function extractHookFiles(command) {
+  const files = new Set();
+  for (const m of String(command || '').matchAll(/\.claude\/hooks\/([\w.-]+?\.(?:sh|ps1))\b/g)) {
+    files.add(m[1]);
+  }
+  return files;
+}
+
+/**
+ * Extracts the hook file stems a settings.json hook command invokes. A single
+ * command may name the same stem twice (e.g. a `.ps1` with a `.sh` fallback),
+ * which collapses to one entry here.
+ */
+export function extractHookStems(command) {
+  return new Set([...extractHookFiles(command)].map((f) => f.replace(/\.(sh|ps1)$/i, '')));
+}
+
+/**
+ * Reports whether a hook stem survives feature gating — i.e. whether
+ * syncClaudeHooks() will actually write it. Deliberately mirrors the gate in
+ * syncClaudeHooks so the wiring in settings.json cannot drift from the files
+ * on disk.
+ */
+export function isHookEmitted(stem, hookFeatureMap, vars) {
+  const { specific = {}, defaultFeature = null } = hookFeatureMap || {};
+  const requiredFeature = specific[stem] || defaultFeature;
+  if (!requiredFeature) return true;
+  return isFeatureEnabled(requiredFeature, vars);
+}
+
+/**
+ * Drops hook entries whose scripts feature gating will not emit, then prunes
+ * matcher groups and events left empty.
+ *
+ * Without this, disabling a feature such as `quality-gates` leaves
+ * settings.json pointing at a hook file sync never writes, and Claude Code
+ * errors when that lifecycle event fires. An entry is kept only when *every*
+ * script it names is emitted — a partially-resolvable command is still broken.
+ * Commands naming no hook script (plain inline shell) are always kept.
+ */
+export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
+  if (!hooks || !hookFeatureMap) return hooks;
+  const filtered = {};
+  for (const [event, matchers] of Object.entries(hooks)) {
+    if (!Array.isArray(matchers)) continue;
+    const keptMatchers = [];
+    for (const matcher of matchers) {
+      // Skip structurally malformed entries rather than throwing — a bad
+      // hand-edited settings.json must not abort the whole sync
+      if (!matcher || !Array.isArray(matcher.hooks)) continue;
+      const kept = matcher.hooks.filter(
+        (h) =>
+          h &&
+          [...extractHookStems(h.command)].every((stem) =>
+            isHookEmitted(stem, hookFeatureMap, vars)
+          )
+      );
+      if (kept.length) keptMatchers.push({ ...matcher, hooks: kept });
+    }
+    if (keptMatchers.length) filtered[event] = keptMatchers;
+  }
+  return filtered;
+}
+
+/**
+ * Builds the `settings.json` hooks tree from the `hooks:` block in
+ * settings.yaml, so hook wiring is declared in exactly one place.
+ *
+ * `sessionStart` and `stop` name a single hook; `preToolUse` and `postToolUse`
+ * are lists of `{ matcher, hook }`. Entries without a hook name are skipped.
+ * Returns null when the spec declares no hooks, leaving the caller's existing
+ * wiring untouched.
+ */
+export function buildHooksFromSpec(hooksSpec) {
+  if (!hooksSpec || typeof hooksSpec !== 'object') return null;
+
+  // The spec names a hook by stem. Tolerate an extension being written anyway
+  // — `session-start.sh` must not become `session-start.sh.sh`, which would
+  // both break the command and defeat extractHookFiles()/gating downstream.
+  const stemOf = (name) => name.trim().replace(/\.(sh|ps1)$/i, '');
+
+  // session-start is the one hook invoked via pwsh with a shell fallback; the
+  // rest are invoked as .sh, matching how they have always been wired.
+  const command = (name, crossPlatform) => {
+    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stemOf(name)}`;
+    return crossPlatform
+      ? `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1 || ${base}.sh`
+      : `${base}.sh`;
+  };
+
+  const hooks = {};
+
+  // A value that is nothing but an extension normalises to an empty stem and
+  // would yield a path like `.claude/hooks/.sh` — treat it as unnamed
+  const named = (value) => typeof value === 'string' && stemOf(value) !== '';
+
+  const addSingle = (key, event, crossPlatform) => {
+    const name = hooksSpec[key];
+    if (!named(name)) return;
+    hooks[event] = [{ hooks: [{ type: 'command', command: command(name, crossPlatform) }] }];
+  };
+
+  const addMatched = (key, event) => {
+    if (!Array.isArray(hooksSpec[key])) return;
+    const entries = [];
+    for (const item of hooksSpec[key]) {
+      if (!item || !named(item.hook)) continue;
+      const entry = { hooks: [{ type: 'command', command: command(item.hook, false) }] };
+      // Only carry a matcher when the spec sets one — an undefined value would
+      // be dropped by JSON.stringify anyway, so make the omission explicit
+      if (typeof item.matcher === 'string' && item.matcher) {
+        entries.push({ matcher: item.matcher, ...entry });
+      } else {
+        entries.push(entry);
+      }
+    }
+    if (entries.length) hooks[event] = entries;
+  };
+
+  // Order matters only for readability of the generated file
+  addSingle('sessionStart', 'SessionStart', true);
+  addMatched('preToolUse', 'PreToolUse');
+  addMatched('postToolUse', 'PostToolUse');
+  addSingle('stop', 'Stop', false);
+
+  return Object.keys(hooks).length ? hooks : null;
+}
+
+/**
  * Generates .claude/settings.json from templates/claude/settings.json
- * merged with the resolved permissions.
+ * merged with the resolved permissions and the hook wiring from settings.yaml.
+ *
+ * `hookFeatureMap` is optional: when omitted, hook wiring is emitted verbatim
+ * (pre-gating behaviour) so older callers keep working.
  */
 export async function syncClaudeSettings(
   templatesDir,
@@ -582,7 +722,8 @@ export async function syncClaudeSettings(
   vars,
   version,
   mergedPermissions,
-  _settingsSpec
+  settingsSpec,
+  hookFeatureMap
 ) {
   const { readTemplateText } = await import('./spec-loader.mjs');
   const tplPath = join(templatesDir, 'claude', 'settings.json');
@@ -595,6 +736,14 @@ export async function syncClaudeSettings(
   }
   // Override permissions with merged set
   settings.permissions = mergedPermissions;
+  // Hook wiring comes from settings.yaml — the template carries none, so the
+  // spec is the only place wiring is declared
+  const specHooks = buildHooksFromSpec(settingsSpec?.hooks);
+  if (specHooks) settings.hooks = specHooks;
+  // Keep hook wiring in step with the hooks sync actually emits
+  if (hookFeatureMap && settings.hooks) {
+    settings.hooks = filterHooksToEmitted(settings.hooks, hookFeatureMap, vars);
+  }
   const destFile = join(tmpDir, '.claude', 'settings.json');
   await writeOutput(destFile, JSON.stringify(settings, null, 2) + '\n');
 }
@@ -616,15 +765,12 @@ export async function syncClaudeHooks(
   const hooksDir = join(templatesDir, 'claude', 'hooks');
   if (!existsSync(hooksDir)) return;
 
-  const { specific, defaultFeature } = hookFeatureMap;
-
   for await (const srcFile of walkDir(hooksDir)) {
     const fname = basename(srcFile);
     // Strip extension(s) to get the hook name stem (e.g. 'protect-sensitive' from 'protect-sensitive.sh')
     const stem = fname.replace(/\.(sh|ps1)$/i, '');
-    // Check specific mapping first, then fall back to directory-level default feature
-    const requiredFeature = specific[stem] || defaultFeature;
-    if (requiredFeature && !isFeatureEnabled(requiredFeature, vars)) continue;
+    // Shared with syncClaudeSettings() so wiring and files stay consistent
+    if (!isHookEmitted(stem, hookFeatureMap, vars)) continue;
 
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);
