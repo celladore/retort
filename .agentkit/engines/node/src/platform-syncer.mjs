@@ -573,8 +573,63 @@ export async function syncEditorTheme(
 // ---------------------------------------------------------------------------
 
 /**
+ * Extracts the hook file stems a settings.json hook command invokes. A single
+ * command may name the same stem twice (e.g. a `.ps1` with a `.sh` fallback).
+ */
+export function extractHookStems(command) {
+  const stems = new Set();
+  for (const m of String(command || '').matchAll(/\.claude\/hooks\/([\w.-]+?)\.(?:sh|ps1)\b/g)) {
+    stems.add(m[1]);
+  }
+  return stems;
+}
+
+/**
+ * Reports whether a hook stem survives feature gating — i.e. whether
+ * syncClaudeHooks() will actually write it. Deliberately mirrors the gate in
+ * syncClaudeHooks so the wiring in settings.json cannot drift from the files
+ * on disk.
+ */
+export function isHookEmitted(stem, hookFeatureMap, vars) {
+  const { specific = {}, defaultFeature = null } = hookFeatureMap || {};
+  const requiredFeature = specific[stem] || defaultFeature;
+  if (!requiredFeature) return true;
+  return isFeatureEnabled(requiredFeature, vars);
+}
+
+/**
+ * Drops hook entries whose scripts feature gating will not emit, then prunes
+ * matcher groups and events left empty.
+ *
+ * Without this, disabling a feature such as `quality-gates` leaves
+ * settings.json pointing at a hook file sync never writes, and Claude Code
+ * errors when that lifecycle event fires. An entry is kept only when *every*
+ * script it names is emitted — a partially-resolvable command is still broken.
+ * Commands naming no hook script (plain inline shell) are always kept.
+ */
+export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
+  if (!hooks || !hookFeatureMap) return hooks;
+  const filtered = {};
+  for (const [event, matchers] of Object.entries(hooks)) {
+    if (!Array.isArray(matchers)) continue;
+    const keptMatchers = [];
+    for (const matcher of matchers) {
+      const kept = (matcher.hooks || []).filter((h) =>
+        [...extractHookStems(h.command)].every((stem) => isHookEmitted(stem, hookFeatureMap, vars))
+      );
+      if (kept.length) keptMatchers.push({ ...matcher, hooks: kept });
+    }
+    if (keptMatchers.length) filtered[event] = keptMatchers;
+  }
+  return filtered;
+}
+
+/**
  * Generates .claude/settings.json from templates/claude/settings.json
  * merged with the resolved permissions.
+ *
+ * `hookFeatureMap` is optional: when omitted, hook wiring is emitted verbatim
+ * (pre-gating behaviour) so older callers keep working.
  */
 export async function syncClaudeSettings(
   templatesDir,
@@ -582,7 +637,8 @@ export async function syncClaudeSettings(
   vars,
   version,
   mergedPermissions,
-  _settingsSpec
+  _settingsSpec,
+  hookFeatureMap
 ) {
   const { readTemplateText } = await import('./spec-loader.mjs');
   const tplPath = join(templatesDir, 'claude', 'settings.json');
@@ -595,6 +651,10 @@ export async function syncClaudeSettings(
   }
   // Override permissions with merged set
   settings.permissions = mergedPermissions;
+  // Keep hook wiring in step with the hooks sync actually emits
+  if (hookFeatureMap && settings.hooks) {
+    settings.hooks = filterHooksToEmitted(settings.hooks, hookFeatureMap, vars);
+  }
   const destFile = join(tmpDir, '.claude', 'settings.json');
   await writeOutput(destFile, JSON.stringify(settings, null, 2) + '\n');
 }
@@ -616,15 +676,12 @@ export async function syncClaudeHooks(
   const hooksDir = join(templatesDir, 'claude', 'hooks');
   if (!existsSync(hooksDir)) return;
 
-  const { specific, defaultFeature } = hookFeatureMap;
-
   for await (const srcFile of walkDir(hooksDir)) {
     const fname = basename(srcFile);
     // Strip extension(s) to get the hook name stem (e.g. 'protect-sensitive' from 'protect-sensitive.sh')
     const stem = fname.replace(/\.(sh|ps1)$/i, '');
-    // Check specific mapping first, then fall back to directory-level default feature
-    const requiredFeature = specific[stem] || defaultFeature;
-    if (requiredFeature && !isFeatureEnabled(requiredFeature, vars)) continue;
+    // Shared with syncClaudeSettings() so wiring and files stay consistent
+    if (!isHookEmitted(stem, hookFeatureMap, vars)) continue;
 
     const ext = extname(srcFile).toLowerCase();
     const content = await readTemplateText(srcFile);

@@ -131,25 +131,39 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 5: Check hook files ─────────────────────────────────────────
   console.log('\n  --- Hooks ---');
-  const requiredHooks = [
-    'session-start',
-    'protect-sensitive',
-    'protect-templates',
-    'guard-destructive-commands',
-    'warn-uncommitted',
-    'stop-build-check',
-  ];
-
-  for (const hook of requiredHooks) {
-    for (const ext of ['.sh', '.ps1']) {
-      const fullPath = resolve(projectRoot, '.claude', 'hooks', `${hook}${ext}`);
-      if (!existsSync(fullPath)) {
-        console.error(`  FAIL: Missing hook: .claude/hooks/${hook}${ext}`);
-        errors++;
+  // The invariant is that every hook script settings.json wires up exists on
+  // disk. Deriving the list from settings.json rather than hardcoding it keeps
+  // validation correct when feature gating legitimately omits a hook (see #185)
+  // — a hardcoded list fails such repos for a file they were never meant to get.
+  const settingsFile = resolve(projectRoot, '.claude', 'settings.json');
+  const wiredHookFiles = new Set();
+  if (existsSync(settingsFile)) {
+    try {
+      const parsed = JSON.parse(readFileSync(settingsFile, 'utf-8'));
+      for (const matchers of Object.values(parsed.hooks || {})) {
+        if (!Array.isArray(matchers)) continue;
+        for (const matcher of matchers) {
+          for (const hook of matcher.hooks || []) {
+            for (const m of String(hook.command || '').matchAll(
+              /\.claude\/hooks\/([\w.-]+?\.(?:sh|ps1))\b/g
+            )) {
+              wiredHookFiles.add(m[1]);
+            }
+          }
+        }
       }
+    } catch {
+      /* malformed settings.json is reported in the Settings phase below */
     }
   }
-  console.log(`  Checked ${requiredHooks.length} hooks (sh + ps1)`);
+
+  for (const hookFile of wiredHookFiles) {
+    if (!existsSync(resolve(projectRoot, '.claude', 'hooks', hookFile))) {
+      console.error(`  FAIL: settings.json wires .claude/hooks/${hookFile}, which does not exist`);
+      errors++;
+    }
+  }
+  console.log(`  Checked ${wiredHookFiles.size} hook script(s) wired in settings.json`);
 
   // ─── Phase 6: Check generated headers ──────────────────────────────────
   console.log('\n  --- Generated Headers ---');
