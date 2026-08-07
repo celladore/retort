@@ -88,9 +88,14 @@ if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
     BAD_COMMITS=""
     if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
         while IFS= read -r line; do
+            SHA=$(echo "$line" | cut -d' ' -f1)
             MSG=$(echo "$line" | cut -d' ' -f2-)
-            # Skip auto-generated merge commits — they are never user-authored
-            [[ "$MSG" =~ ^Merge\ (remote-tracking\ branch|branch|pull\ request) ]] && continue
+            # Skip merge commits — they are never user-authored, and squash-merge
+            # discards them anyway. Detect them structurally by parent count: a
+            # message-prefix match misses "Merge <ref> into <branch>", which is
+            # what `git merge origin/dev` produces (the prefix forms only cover
+            # "Merge branch", "Merge remote-tracking branch", "Merge pull request").
+            [[ "$(git -C "$CWD" log -1 --format=%P "$SHA" 2>/dev/null)" == *" "* ]] && continue
             if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
                 BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
             fi
