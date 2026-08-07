@@ -23,6 +23,7 @@ import {
   extractHookFiles,
   extractHookStems,
   filterHooksToEmitted,
+  findPs1HookStems,
   isHookEmitted,
 } from '../platform-syncer.mjs';
 import { buildHookFeatureMap, loadFeatureSpec } from '../feature-manager.mjs';
@@ -31,6 +32,7 @@ import { runValidate } from '../validate.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const SETTINGS_SPEC = resolve(AGENTKIT_ROOT, 'spec', 'settings.yaml');
+const TEMPLATES_DIR = resolve(AGENTKIT_ROOT, 'templates');
 
 /**
  * Hook feature map + the hook wiring as it really ships. Wiring is built from
@@ -171,10 +173,33 @@ describe('isHookEmitted()', () => {
 // buildHooksFromSpec
 // ---------------------------------------------------------------------------
 
+describe('findPs1HookStems()', () => {
+  it('should list exactly the shipped hooks that have a .ps1 variant', () => {
+    // Arrange + Act — read from the real template directory
+    const stems = findPs1HookStems(TEMPLATES_DIR);
+
+    // Assert — the two .sh-only hooks must not appear
+    expect([...stems].sort()).toEqual([
+      'guard-destructive-commands',
+      'protect-sensitive',
+      'protect-templates',
+      'session-start',
+      'stop-build-check',
+      'warn-uncommitted',
+    ]);
+    expect(stems.has('budget-guard-check')).toBe(false);
+    expect(stems.has('pre-push-validate')).toBe(false);
+  });
+
+  it('should return an empty set when the hooks directory is absent', () => {
+    expect(findPs1HookStems(resolve(TEMPLATES_DIR, 'does-not-exist')).size).toBe(0);
+  });
+});
+
 describe('buildHooksFromSpec()', () => {
-  it('should invoke sessionStart via pwsh with a shell fallback', () => {
-    // Arrange — the one hook wired cross-platform; the rest are .sh
-    const built = buildHooksFromSpec({ sessionStart: 'session-start' });
+  it('should invoke a hook with a .ps1 variant via pwsh with a shell fallback', () => {
+    // Arrange — the command form follows what ships, not a hardcoded name
+    const built = buildHooksFromSpec({ sessionStart: 'session-start' }, new Set(['session-start']));
 
     // Act
     const { command } = built.SessionStart[0].hooks[0];
@@ -183,6 +208,39 @@ describe('buildHooksFromSpec()', () => {
     expect(command).toBe(
       'pwsh -NoLogo -NoProfile -NonInteractive -File "$CLAUDE_PROJECT_DIR"/.claude/hooks/session-start.ps1 || "$CLAUDE_PROJECT_DIR"/.claude/hooks/session-start.sh'
     );
+  });
+
+  it('should invoke a hook with no .ps1 variant as a plain shell script', () => {
+    // Arrange — budget-guard-check ships only a .sh
+    const built = buildHooksFromSpec(
+      { preToolUse: [{ matcher: 'Bash', hook: 'budget-guard-check' }] },
+      new Set(['session-start'])
+    );
+
+    // Assert
+    expect(built.PreToolUse[0].hooks[0].command).toBe(
+      '"$CLAUDE_PROJECT_DIR"/.claude/hooks/budget-guard-check.sh'
+    );
+  });
+
+  it('should give every hook with a .ps1 variant the cross-platform form', () => {
+    // Arrange — the gap this closed: five hooks shipped a .ps1 that nothing
+    // ever invoked, because only session-start was wired cross-platform
+    const ps1 = findPs1HookStems(TEMPLATES_DIR);
+    const spec = loadYaml(readFileSync(SETTINGS_SPEC, 'utf-8'));
+
+    // Act
+    const built = buildHooksFromSpec(spec.hooks, ps1);
+
+    // Assert — every wired stem that has a .ps1 uses it
+    for (const [, matchers] of Object.entries(built)) {
+      for (const matcher of matchers) {
+        for (const hook of matcher.hooks) {
+          const [stem] = [...extractHookStems(hook.command)];
+          expect(hook.command.includes('pwsh')).toBe(ps1.has(stem));
+        }
+      }
+    }
   });
 
   it('should invoke stop as a plain shell hook with no matcher', () => {
@@ -240,10 +298,13 @@ describe('buildHooksFromSpec()', () => {
 
   it('should not double the extension when the spec names one', () => {
     // Arrange — the spec names hooks by stem, but tolerate an extension
-    const built = buildHooksFromSpec({
-      sessionStart: 'session-start.sh',
-      preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands.ps1' }],
-    });
+    const built = buildHooksFromSpec(
+      {
+        sessionStart: 'session-start.sh',
+        preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands.ps1' }],
+      },
+      new Set(['session-start'])
+    );
 
     // Assert
     expect(built.SessionStart[0].hooks[0].command).not.toContain('.sh.sh');

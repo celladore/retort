@@ -4,7 +4,7 @@
  * Extracted from synchronize.mjs (Step 6 of modularization).
  */
 import { createHash } from 'crypto';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { cp, mkdir, readdir, readFile, writeFile } from 'fs/promises';
 import { homedir } from 'os';
 import path, { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path';
@@ -646,15 +646,29 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
 }
 
 /**
+ * Collects the hook stems that ship a `.ps1` variant alongside their `.sh`.
+ * buildHooksFromSpec() uses this to decide which hooks are worth invoking
+ * through PowerShell, so adding or removing a variant changes the generated
+ * command with no second list to remember to update.
+ */
+export function findPs1HookStems(templatesDir) {
+  const dir = join(templatesDir, 'claude', 'hooks');
+  if (!existsSync(dir)) return new Set();
+  const stems = new Set();
+  for (const name of readdirSync(dir)) {
+    if (/\.ps1$/i.test(name)) stems.add(name.replace(/\.ps1$/i, ''));
+  }
+  return stems;
+}
+
+/**
  * Builds the `settings.json` hooks tree from the `hooks:` block in
  * settings.yaml, so hook wiring is declared in exactly one place.
  *
- * `sessionStart` and `stop` name a single hook; `preToolUse` and `postToolUse`
- * are lists of `{ matcher, hook }`. Entries without a hook name are skipped.
- * Returns null when the spec declares no hooks, leaving the caller's existing
- * wiring untouched.
+ * `ps1Stems` names the hooks that ship a PowerShell variant — see
+ * findPs1HookStems(). Anything not listed is invoked as a plain `.sh`.
  */
-export function buildHooksFromSpec(hooksSpec) {
+export function buildHooksFromSpec(hooksSpec, ps1Stems = new Set()) {
   if (!hooksSpec || typeof hooksSpec !== 'object') return null;
 
   // The spec names a hook by stem. Tolerate an extension being written anyway
@@ -662,11 +676,15 @@ export function buildHooksFromSpec(hooksSpec) {
   // both break the command and defeat extractHookFiles()/gating downstream.
   const stemOf = (name) => name.trim().replace(/\.(sh|ps1)$/i, '');
 
-  // session-start is the one hook invoked via pwsh with a shell fallback; the
-  // rest are invoked as .sh, matching how they have always been wired.
-  const command = (name, crossPlatform) => {
-    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stemOf(name)}`;
-    return crossPlatform
+  // A hook that ships a PowerShell variant is invoked through it with a shell
+  // fallback, so it still runs on a Windows box with no bash; one that ships
+  // only a .sh is invoked directly. Deriving this from what actually exists
+  // keeps a newly added .ps1 from sitting unreachable, which is what happened
+  // to five hooks when only session-start was wired cross-platform.
+  const command = (name) => {
+    const stem = stemOf(name);
+    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stem}`;
+    return ps1Stems.has(stem)
       ? `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1 || ${base}.sh`
       : `${base}.sh`;
   };
@@ -677,10 +695,10 @@ export function buildHooksFromSpec(hooksSpec) {
   // would yield a path like `.claude/hooks/.sh` — treat it as unnamed
   const named = (value) => typeof value === 'string' && stemOf(value) !== '';
 
-  const addSingle = (key, event, crossPlatform) => {
+  const addSingle = (key, event) => {
     const name = hooksSpec[key];
     if (!named(name)) return;
-    hooks[event] = [{ hooks: [{ type: 'command', command: command(name, crossPlatform) }] }];
+    hooks[event] = [{ hooks: [{ type: 'command', command: command(name) }] }];
   };
 
   const addMatched = (key, event) => {
@@ -688,7 +706,7 @@ export function buildHooksFromSpec(hooksSpec) {
     const entries = [];
     for (const item of hooksSpec[key]) {
       if (!item || !named(item.hook)) continue;
-      const entry = { hooks: [{ type: 'command', command: command(item.hook, false) }] };
+      const entry = { hooks: [{ type: 'command', command: command(item.hook) }] };
       // Only carry a matcher when the spec sets one — an undefined value would
       // be dropped by JSON.stringify anyway, so make the omission explicit
       if (typeof item.matcher === 'string' && item.matcher) {
@@ -701,10 +719,10 @@ export function buildHooksFromSpec(hooksSpec) {
   };
 
   // Order matters only for readability of the generated file
-  addSingle('sessionStart', 'SessionStart', true);
+  addSingle('sessionStart', 'SessionStart');
   addMatched('preToolUse', 'PreToolUse');
   addMatched('postToolUse', 'PostToolUse');
-  addSingle('stop', 'Stop', false);
+  addSingle('stop', 'Stop');
 
   return Object.keys(hooks).length ? hooks : null;
 }
@@ -738,7 +756,7 @@ export async function syncClaudeSettings(
   settings.permissions = mergedPermissions;
   // Hook wiring comes from settings.yaml — the template carries none, so the
   // spec is the only place wiring is declared
-  const specHooks = buildHooksFromSpec(settingsSpec?.hooks);
+  const specHooks = buildHooksFromSpec(settingsSpec?.hooks, findPs1HookStems(templatesDir));
   if (specHooks) settings.hooks = specHooks;
   // Keep hook wiring in step with the hooks sync actually emits
   if (hookFeatureMap && settings.hooks) {
