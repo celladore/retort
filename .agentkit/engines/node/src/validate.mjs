@@ -13,6 +13,7 @@ import {
   VALID_COMMANDS,
   FRAMEWORK_COMMANDS as CLI_FRAMEWORK_COMMANDS,
 } from './commands-registry.mjs';
+import { extractHookFiles } from './platform-syncer.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const userContext =
@@ -151,11 +152,7 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
           if (!matcher || !Array.isArray(matcher.hooks)) continue;
           for (const hook of matcher.hooks) {
             if (!hook) continue;
-            for (const m of String(hook.command || '').matchAll(
-              /\.claude\/hooks\/([\w.-]+?\.(?:sh|ps1))\b/g
-            )) {
-              wiredHookFiles.add(m[1]);
-            }
+            for (const file of extractHookFiles(hook.command)) wiredHookFiles.add(file);
           }
         }
       }

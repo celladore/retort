@@ -573,15 +573,29 @@ export async function syncEditorTheme(
 // ---------------------------------------------------------------------------
 
 /**
+ * Extracts the hook script file names (with extension) a settings.json hook
+ * command invokes, e.g. `session-start.ps1`. A command may name several — the
+ * SessionStart entry runs a `.ps1` with a `.sh` fallback.
+ *
+ * This is the single parser for hook references in a command string; both the
+ * sync-side gating below and `validate.mjs` Phase 5 use it, so the two cannot
+ * disagree about what a command refers to.
+ */
+export function extractHookFiles(command) {
+  const files = new Set();
+  for (const m of String(command || '').matchAll(/\.claude\/hooks\/([\w.-]+?\.(?:sh|ps1))\b/g)) {
+    files.add(m[1]);
+  }
+  return files;
+}
+
+/**
  * Extracts the hook file stems a settings.json hook command invokes. A single
- * command may name the same stem twice (e.g. a `.ps1` with a `.sh` fallback).
+ * command may name the same stem twice (e.g. a `.ps1` with a `.sh` fallback),
+ * which collapses to one entry here.
  */
 export function extractHookStems(command) {
-  const stems = new Set();
-  for (const m of String(command || '').matchAll(/\.claude\/hooks\/([\w.-]+?)\.(?:sh|ps1)\b/g)) {
-    stems.add(m[1]);
-  }
-  return stems;
+  return new Set([...extractHookFiles(command)].map((f) => f.replace(/\.(sh|ps1)$/i, '')));
 }
 
 /**

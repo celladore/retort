@@ -17,7 +17,12 @@ import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { extractHookStems, filterHooksToEmitted, isHookEmitted } from '../platform-syncer.mjs';
+import {
+  extractHookFiles,
+  extractHookStems,
+  filterHooksToEmitted,
+  isHookEmitted,
+} from '../platform-syncer.mjs';
 import { buildHookFeatureMap, loadFeatureSpec } from '../feature-manager.mjs';
 import { runValidate } from '../validate.mjs';
 
@@ -50,6 +55,28 @@ const cmd = (stem, ext = 'sh') => `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stem}.$
 // ---------------------------------------------------------------------------
 // extractHookStems
 // ---------------------------------------------------------------------------
+
+describe('extractHookFiles()', () => {
+  it('should keep the extension so callers can check the exact file', () => {
+    expect([...extractHookFiles(cmd('warn-uncommitted'))]).toEqual(['warn-uncommitted.sh']);
+  });
+
+  it('should return both extensions when a command names a .ps1 and a .sh', () => {
+    // Arrange — unlike stems, these stay distinct: both files must exist
+    const command = `pwsh -NoLogo -File ${cmd('session-start', 'ps1')} || ${cmd('session-start')}`;
+
+    // Act + Assert
+    expect([...extractHookFiles(command)].sort()).toEqual([
+      'session-start.ps1',
+      'session-start.sh',
+    ]);
+  });
+
+  it('should return an empty set for a command that invokes no hook script', () => {
+    expect([...extractHookFiles('echo hi')]).toEqual([]);
+    expect([...extractHookFiles(null)]).toEqual([]);
+  });
+});
 
 describe('extractHookStems()', () => {
   it('should extract the hook stem from a plain command', () => {
