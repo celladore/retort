@@ -1,53 +1,46 @@
 /**
- * Hook wiring in `.claude/settings.json` is generated from the `hooks:` block in
- * `spec/settings.yaml`, which is the single source of truth. Two invariants are
- * fixed here:
+ * Regression fixture for #185 — hook wiring in `.claude/settings.json` must
+ * never name a hook script that feature gating prevents sync from emitting.
  *
- * 1. (#185) Wiring must never name a hook script that feature gating prevents
- *    `syncClaudeHooks()` from emitting — a dangling reference makes Claude Code
- *    error when the lifecycle event fires.
- * 2. The orphan counterpart: a hook script that ships must not be left unwired.
- *    `budget-guard-check` and `pre-push-validate` were emitted as dead files for
- *    exactly as long as wiring came from the static template, which never named
- *    them.
+ * `settings.json` is rendered from a STATIC template that unconditionally wires
+ * six hook scripts, while `syncClaudeHooks()` skips any hook whose owning
+ * feature is disabled. The two are reconciled by `filterHooksToEmitted()`.
  *
- * Gating scenarios are derived from the real `features.yaml` `affectsTemplates`
- * declarations rather than hardcoded, so re-homing a hook under a different
- * feature fails here instead of silently shipping a dangling reference. Every
- * gating feature defaults to `true`, which is why retort's own generated output
- * was always clean and #185 survived unnoticed — the synthetic scenarios below
- * are the only thing that exercises it.
+ * The gating scenarios below are derived from the real `features.yaml`
+ * `affectsTemplates` declarations rather than hardcoded, so that re-homing a
+ * hook under a different feature fails here instead of silently shipping a
+ * dangling reference. All three gating features default to `true`, which is why
+ * retort's own generated output was always clean and this defect survived
+ * unnoticed — the synthetic scenarios are the only thing that exercises it.
  */
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { load as loadYaml } from 'js-yaml';
 import {
-  buildHookCommand,
   buildHooksFromSpec,
-  collectHookExtensions,
   extractHookFiles,
   extractHookStems,
   filterHooksToEmitted,
   isHookEmitted,
 } from '../platform-syncer.mjs';
 import { buildHookFeatureMap, loadFeatureSpec } from '../feature-manager.mjs';
-import { readYaml } from '../spec-loader.mjs';
 import { runValidate } from '../validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const SETTINGS_SPEC = resolve(AGENTKIT_ROOT, 'spec', 'settings.yaml');
-const HOOK_TEMPLATE_DIR = resolve(AGENTKIT_ROOT, 'templates', 'claude', 'hooks');
 
-/** Hook feature map, spec, and hook templates as they really ship. */
-async function realFixtures() {
+/**
+ * Hook feature map + the hook wiring as it really ships. Wiring is built from
+ * settings.yaml rather than read from a fixture so that adding or re-homing a
+ * hook in the spec is exercised here immediately.
+ */
+function realFixtures() {
   const { features } = loadFeatureSpec(AGENTKIT_ROOT, { log: () => {} });
-  return {
-    hookFeatureMap: buildHookFeatureMap(features),
-    hooksSpec: readYaml(SETTINGS_SPEC).hooks,
-    hookExtensions: await collectHookExtensions(HOOK_TEMPLATE_DIR),
-  };
+  const spec = loadYaml(readFileSync(SETTINGS_SPEC, 'utf-8'));
+  return { hookFeatureMap: buildHookFeatureMap(features), hooks: buildHooksFromSpec(spec.hooks) };
 }
 
 /** Every hook stem referenced by a settings.hooks tree. */
@@ -175,65 +168,214 @@ describe('isHookEmitted()', () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildHookCommand / collectHookExtensions
+// buildHooksFromSpec
 // ---------------------------------------------------------------------------
 
-describe('buildHookCommand()', () => {
-  it('should invoke the .sh directly when only that variant ships', () => {
-    expect(buildHookCommand('pre-push-validate', new Set(['sh']))).toBe(cmd('pre-push-validate'));
-  });
-
-  it('should prefer the .ps1 and fall back to the .sh when both ship', () => {
-    // Arrange + Act
-    const command = buildHookCommand('session-start', new Set(['sh', 'ps1']));
-
-    // Assert — hooks signal decisions as stdout JSON and always exit 0, so the
-    // `||` fires only when pwsh cannot launch, never after a blocking .ps1
-    expect(command).toBe(
-      `pwsh -NoLogo -NoProfile -NonInteractive -File ${cmd('session-start', 'ps1')} || ${cmd('session-start')}`
-    );
-  });
-
-  it('should invoke the .ps1 alone when no .sh variant ships', () => {
-    expect(buildHookCommand('windows-only', new Set(['ps1']))).toBe(
-      `pwsh -NoLogo -NoProfile -NonInteractive -File ${cmd('windows-only', 'ps1')}`
-    );
-  });
-});
-
-describe('collectHookExtensions()', () => {
-  it('should group both variants of a hook under one stem', async () => {
-    const byStem = await collectHookExtensions(HOOK_TEMPLATE_DIR);
-
-    expect([...byStem.get('session-start')].sort()).toEqual(['ps1', 'sh']);
-  });
-
-  it('should record a single variant for a hook that ships only a .sh', async () => {
-    const byStem = await collectHookExtensions(HOOK_TEMPLATE_DIR);
-
-    expect([...byStem.get('pre-push-validate')]).toEqual(['sh']);
-  });
-
-  it('should return an empty map for a directory that does not exist', async () => {
-    expect((await collectHookExtensions(resolve(HOOK_TEMPLATE_DIR, 'nope'))).size).toBe(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildHooksFromSpec — against the real spec and hook templates
-// ---------------------------------------------------------------------------
-
-describe('buildHooksFromSpec() against the shipped spec', () => {
-  it('should wire every hook the spec declares when all features are enabled', async () => {
-    // Arrange
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
+describe('buildHooksFromSpec()', () => {
+  it('should invoke sessionStart via pwsh with a shell fallback', () => {
+    // Arrange — the one hook wired cross-platform; the rest are .sh
+    const built = buildHooksFromSpec({ sessionStart: 'session-start' });
 
     // Act
-    const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {});
+    const { command } = built.SessionStart[0].hooks[0];
 
-    // Assert — the orphan invariant: budget-guard-check and pre-push-validate
-    // ship as files, so they must appear in the wiring
-    expect([...referencedStems(hooks)].sort()).toEqual([
+    // Assert
+    expect(command).toBe(
+      'pwsh -NoLogo -NoProfile -NonInteractive -File "$CLAUDE_PROJECT_DIR"/.claude/hooks/session-start.ps1 || "$CLAUDE_PROJECT_DIR"/.claude/hooks/session-start.sh'
+    );
+  });
+
+  it('should invoke stop as a plain shell hook with no matcher', () => {
+    const built = buildHooksFromSpec({ stop: 'stop-build-check' });
+
+    expect(built.Stop).toEqual([
+      {
+        hooks: [
+          {
+            type: 'command',
+            command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/stop-build-check.sh',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should carry the matcher through for each pre/post tool-use entry', () => {
+    // Arrange
+    const built = buildHooksFromSpec({
+      preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands' }],
+      postToolUse: [{ matcher: 'Write|Edit', hook: 'warn-uncommitted' }],
+    });
+
+    // Assert
+    expect(built.PreToolUse[0].matcher).toBe('Bash');
+    expect(built.PreToolUse[0].hooks[0].command).toContain('guard-destructive-commands.sh');
+    expect(built.PostToolUse[0].matcher).toBe('Write|Edit');
+  });
+
+  it('should preserve the order the spec declares', () => {
+    const built = buildHooksFromSpec({
+      preToolUse: [
+        { matcher: 'Bash', hook: 'first' },
+        { matcher: 'Bash', hook: 'second' },
+      ],
+    });
+
+    expect(built.PreToolUse.map((m) => m.hooks[0].command)).toEqual([
+      '"$CLAUDE_PROJECT_DIR"/.claude/hooks/first.sh',
+      '"$CLAUDE_PROJECT_DIR"/.claude/hooks/second.sh',
+    ]);
+  });
+
+  it('should emit events in a stable SessionStart/Pre/Post/Stop order', () => {
+    const built = buildHooksFromSpec({
+      stop: 'stop-build-check',
+      postToolUse: [{ matcher: 'Write', hook: 'warn-uncommitted' }],
+      preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands' }],
+      sessionStart: 'session-start',
+    });
+
+    expect(Object.keys(built)).toEqual(['SessionStart', 'PreToolUse', 'PostToolUse', 'Stop']);
+  });
+
+  it('should not double the extension when the spec names one', () => {
+    // Arrange — the spec names hooks by stem, but tolerate an extension
+    const built = buildHooksFromSpec({
+      sessionStart: 'session-start.sh',
+      preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands.ps1' }],
+    });
+
+    // Assert
+    expect(built.SessionStart[0].hooks[0].command).not.toContain('.sh.sh');
+    expect(built.SessionStart[0].hooks[0].command).toContain('session-start.ps1 ||');
+    expect(built.PreToolUse[0].hooks[0].command).toBe(
+      '"$CLAUDE_PROJECT_DIR"/.claude/hooks/guard-destructive-commands.sh'
+    );
+  });
+
+  it('should omit the matcher key entirely when the spec sets none', () => {
+    // Arrange — an undefined matcher would vanish in JSON.stringify anyway;
+    // omitting it explicitly keeps the object and its serialized form the same
+    const built = buildHooksFromSpec({ preToolUse: [{ hook: 'guard-destructive-commands' }] });
+
+    // Assert
+    expect(built.PreToolUse[0]).not.toHaveProperty('matcher');
+    expect(JSON.parse(JSON.stringify(built.PreToolUse[0]))).toEqual(built.PreToolUse[0]);
+  });
+
+  it('should skip entries that name no hook', () => {
+    const built = buildHooksFromSpec({
+      sessionStart: '   ',
+      preToolUse: [{ matcher: 'Bash' }, null, { matcher: 'Bash', hook: 'kept' }],
+    });
+
+    expect(built).not.toHaveProperty('SessionStart');
+    expect(built.PreToolUse).toHaveLength(1);
+    expect(built.PreToolUse[0].hooks[0].command).toContain('kept.sh');
+  });
+
+  it('should skip a value that is nothing but an extension', () => {
+    // Arrange — '.sh' would normalise to an empty stem and build a path
+    // pointing at `.claude/hooks/.sh`
+    const built = buildHooksFromSpec({
+      stop: '.sh',
+      preToolUse: [
+        { matcher: 'Bash', hook: '.ps1' },
+        { matcher: 'Bash', hook: 'kept' },
+      ],
+    });
+
+    // Assert
+    expect(built).not.toHaveProperty('Stop');
+    expect(built.PreToolUse).toHaveLength(1);
+    expect(built.PreToolUse[0].hooks[0].command).toContain('kept.sh');
+  });
+
+  it('should return null when the spec declares no hooks', () => {
+    // Arrange + Act + Assert — the caller then leaves existing wiring alone
+    expect(buildHooksFromSpec(undefined)).toBeNull();
+    expect(buildHooksFromSpec(null)).toBeNull();
+    expect(buildHooksFromSpec({})).toBeNull();
+    expect(buildHooksFromSpec({ preToolUse: [] })).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// filterHooksToEmitted — against the real spec and template
+// ---------------------------------------------------------------------------
+
+describe('filterHooksToEmitted() against the shipped spec', () => {
+  it('should keep every hook and event when all features are enabled', () => {
+    // Arrange
+    const { hookFeatureMap, hooks } = realFixtures();
+
+    // Act
+    const filtered = filterHooksToEmitted(hooks, hookFeatureMap, {});
+
+    // Assert — the default configuration must be untouched, otherwise the
+    // generated output in this repo would drift on the next sync
+    expect(filtered).toEqual(hooks);
+    expect(referencedStems(filtered).size).toBe(8);
+  });
+
+  it('should drop the Stop event entirely when quality-gates is disabled', () => {
+    // Arrange — quality-gates owns stop-build-check, the only Stop hook
+    const { hookFeatureMap, hooks } = realFixtures();
+
+    // Act
+    const filtered = filterHooksToEmitted(hooks, hookFeatureMap, {
+      feature_quality_gates: false,
+    });
+
+    // Assert
+    expect(referencedStems(filtered).has('stop-build-check')).toBe(false);
+    expect(filtered).not.toHaveProperty('Stop');
+    expect(Object.keys(filtered)).toEqual(['SessionStart', 'PreToolUse', 'PostToolUse']);
+  });
+
+  it('should drop only protect-sensitive when sensitive-file-protection is disabled', () => {
+    const { hookFeatureMap, hooks } = realFixtures();
+
+    const filtered = filterHooksToEmitted(hooks, hookFeatureMap, {
+      feature_sensitive_file_protection: false,
+    });
+
+    const stems = referencedStems(filtered);
+    expect(stems.has('protect-sensitive')).toBe(false);
+    // Its sibling PreToolUse Write|Edit hook must survive
+    expect(stems.has('protect-templates')).toBe(true);
+    expect(stems.size).toBe(7);
+  });
+
+  it('should drop all directory-gated hooks when permission-guards is disabled', () => {
+    // Arrange — permission-guards claims `claude/hooks/`, so it gates every
+    // hook not claimed by a more specific feature
+    const { hookFeatureMap, hooks } = realFixtures();
+
+    // Act
+    const filtered = filterHooksToEmitted(hooks, hookFeatureMap, {
+      feature_permission_guards: false,
+    });
+
+    // Assert — only the two specifically-claimed hooks remain
+    expect([...referencedStems(filtered)].sort()).toEqual([
+      'protect-sensitive',
+      'stop-build-check',
+    ]);
+    expect(Object.keys(filtered).sort()).toEqual(['PreToolUse', 'Stop']);
+  });
+
+  it('should wire every hook the spec declares', () => {
+    // Arrange — the orphan half of #185: budget-guard-check and
+    // pre-push-validate were emitted as files but wired to nothing, because
+    // the static template was maintained separately from the spec
+    const { hooks } = realFixtures();
+
+    // Act
+    const stems = referencedStems(hooks);
+
+    // Assert
+    expect([...stems].sort()).toEqual([
       'budget-guard-check',
       'guard-destructive-commands',
       'pre-push-validate',
@@ -243,97 +385,12 @@ describe('buildHooksFromSpec() against the shipped spec', () => {
       'stop-build-check',
       'warn-uncommitted',
     ]);
-    expect(Object.keys(hooks)).toEqual(['SessionStart', 'PreToolUse', 'PostToolUse', 'Stop']);
   });
 
-  it('should wire every hook template that ships, leaving no orphan files', async () => {
-    // Arrange — the defect this change fixes, asserted against the template
-    // directory rather than a hardcoded list so a newly added hook fails here
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
-
-    // Act
-    const wired = referencedStems(
-      buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {})
-    );
-
-    // Assert
-    for (const stem of hookExtensions.keys()) {
-      expect(wired.has(stem), `hook template "${stem}" ships but no event wires it`).toBe(true);
-    }
-  });
-
-  it('should carry the matcher the spec declares for each PreToolUse entry', async () => {
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
-
-    const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {});
-
-    const matcherFor = (stem) =>
-      hooks.PreToolUse.find((g) => extractHookStems(g.hooks[0].command).has(stem))?.matcher;
-    expect(matcherFor('budget-guard-check')).toBe('Bash|Write|Edit');
-    expect(matcherFor('pre-push-validate')).toBe('Bash');
-    expect(matcherFor('protect-templates')).toBe('Write|Edit');
-  });
-
-  it('should omit the matcher key on events the spec declares as a bare stem', async () => {
-    // Arrange — `stop: stop-build-check` has no matcher to carry
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
-
-    // Act
-    const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {});
-
-    // Assert
-    expect(hooks.Stop[0]).not.toHaveProperty('matcher');
-    expect(hooks.SessionStart[0]).not.toHaveProperty('matcher');
-  });
-
-  it('should drop the Stop event entirely when quality-gates is disabled', async () => {
-    // Arrange — quality-gates owns stop-build-check, the only Stop hook
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
-
-    // Act
-    const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {
-      feature_quality_gates: false,
-    });
-
-    // Assert
-    expect(referencedStems(hooks).has('stop-build-check')).toBe(false);
-    expect(hooks).not.toHaveProperty('Stop');
-    expect(Object.keys(hooks)).toEqual(['SessionStart', 'PreToolUse', 'PostToolUse']);
-  });
-
-  it('should drop only protect-sensitive when sensitive-file-protection is disabled', async () => {
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
-
-    const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {
-      feature_sensitive_file_protection: false,
-    });
-
-    const stems = referencedStems(hooks);
-    expect(stems.has('protect-sensitive')).toBe(false);
-    // Its sibling PreToolUse Write|Edit hook must survive
-    expect(stems.has('protect-templates')).toBe(true);
-    expect(stems.size).toBe(7);
-  });
-
-  it('should drop all directory-gated hooks when permission-guards is disabled', async () => {
-    // Arrange — permission-guards claims `claude/hooks/`, so it gates every
-    // hook not claimed by a more specific feature
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
-
-    // Act
-    const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, {
-      feature_permission_guards: false,
-    });
-
-    // Assert — only the two specifically-claimed hooks remain
-    expect([...referencedStems(hooks)].sort()).toEqual(['protect-sensitive', 'stop-build-check']);
-    expect(Object.keys(hooks).sort()).toEqual(['PreToolUse', 'Stop']);
-  });
-
-  it('should never wire a hook that gating would skip, in any single-feature scenario', async () => {
+  it('should never reference a hook that gating would skip, in any single-feature scenario', () => {
     // Arrange — the invariant #185 violated, asserted across every feature
     // that owns a hook rather than a fixed list
-    const { hookFeatureMap, hooksSpec, hookExtensions } = await realFixtures();
+    const { hookFeatureMap, hooks } = realFixtures();
     const owning = new Set(
       [...Object.values(hookFeatureMap.specific), hookFeatureMap.defaultFeature].filter(Boolean)
     );
@@ -343,52 +400,16 @@ describe('buildHooksFromSpec() against the shipped spec', () => {
       const vars = { [`feature_${featureId.replace(/-/g, '_')}`]: false };
 
       // Act
-      const hooks = buildHooksFromSpec(hooksSpec, hookExtensions, hookFeatureMap, vars);
+      const filtered = filterHooksToEmitted(hooks, hookFeatureMap, vars);
 
       // Assert
-      for (const stem of referencedStems(hooks)) {
+      for (const stem of referencedStems(filtered)) {
         expect(
           isHookEmitted(stem, hookFeatureMap, vars),
           `${featureId} disabled: settings.json still wires "${stem}", which sync will not emit`
         ).toBe(true);
       }
     }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildHooksFromSpec — structural behaviour
-// ---------------------------------------------------------------------------
-
-describe('buildHooksFromSpec() structure', () => {
-  const exts = new Map([['kept', new Set(['sh'])]]);
-
-  it('should return null when the spec declares no hooks, so the caller can fall back', () => {
-    expect(buildHooksFromSpec(undefined, exts, null, {})).toBeNull();
-    expect(buildHooksFromSpec(null, exts, null, {})).toBeNull();
-  });
-
-  it('should skip a spec entry naming a hook with no template on disk', () => {
-    // Arrange — a typo in settings.yaml must not produce a dangling reference
-    const spec = { stop: 'does-not-exist' };
-
-    // Act + Assert
-    expect(buildHooksFromSpec(spec, exts, null, {})).toEqual({});
-  });
-
-  it('should ignore an unrecognised lifecycle key rather than emitting it', () => {
-    const spec = { stop: 'kept', notAnEvent: 'kept' };
-
-    expect(Object.keys(buildHooksFromSpec(spec, exts, null, {}))).toEqual(['Stop']);
-  });
-
-  it('should skip a malformed list entry that names no hook', () => {
-    const spec = { preToolUse: [{ matcher: 'Bash' }, { matcher: 'Write', hook: 'kept' }] };
-
-    const hooks = buildHooksFromSpec(spec, exts, null, {});
-
-    expect(hooks.PreToolUse).toHaveLength(1);
-    expect(hooks.PreToolUse[0].matcher).toBe('Write');
   });
 });
 

@@ -70,12 +70,23 @@ if [[ ! -f "$INDEX_FILE" ]]; then
   echo '{"sequences":{"implementation":1,"bugfix":1,"feature":1,"migration":1,"issue":1,"lesson":1},"entries":[]}' > "$INDEX_FILE"
 fi
 
-# Use node to read the current sequence number safely (no user input interpolated)
-SEQ_NUM=$(node - "$INDEX_FILE" "$TYPE" << 'NODEEOF'
-  const [,, indexFile, type] = process.argv;
+# Use node to read the current sequence number safely (no user input interpolated).
+# The next number is max(index counter, highest NNNN- already on disk): the index
+# only records docs created through this script, so any file added by hand — or
+# predating the index — leaves the counter behind and hands out a number that is
+# already taken. Scanning the directory keeps the two from disagreeing.
+SEQ_NUM=$(node - "$INDEX_FILE" "$TYPE" "$HISTORY_DIR/$SUBDIR" << 'NODEEOF'
+  const [,, indexFile, type, destDir] = process.argv;
   const fs = require('fs');
   const idx = JSON.parse(fs.readFileSync(indexFile, 'utf8'));
-  process.stdout.write(String(idx.sequences[type] || 1));
+  let next = idx.sequences[type] || 1;
+  if (fs.existsSync(destDir)) {
+    for (const name of fs.readdirSync(destDir)) {
+      const m = /^(\d{4})-/.exec(name);
+      if (m) next = Math.max(next, Number(m[1]) + 1);
+    }
+  }
+  process.stdout.write(String(next));
 NODEEOF
 )
 
@@ -137,7 +148,7 @@ node - "$INDEX_FILE" "$TYPE" "$SEQ_NUM" "$TITLE" "$DATE" "${PR_NUMBER:-}" "$SUBD
   const [,, indexFile, type, seqNum, title, date, pr, file] = process.argv;
   const fs = require('fs');
   const idx = JSON.parse(fs.readFileSync(indexFile, 'utf8'));
-  idx.sequences[type] = (idx.sequences[type] || 1) + 1;
+  idx.sequences[type] = Number(seqNum) + 1;
   idx.entries = idx.entries || [];
   idx.entries.push({ number: Number(seqNum), type, title, date, pr, file });
   fs.writeFileSync(indexFile, JSON.stringify(idx, null, 2) + '\n');
@@ -163,7 +174,7 @@ UPDATE_CHANGELOG="$SCRIPT_DIR/update-changelog.sh"
 if [[ -z "$CHANGELOG_SECTION" ]]; then
   echo "ℹ️  ${TYPE} records are not added to CHANGELOG.md — skipping changelog update."
 elif [[ -f "$UPDATE_CHANGELOG" ]]; then
-  bash "$UPDATE_CHANGELOG" "$CHANGELOG_SECTION" "$TITLE" "${PR_NUMBER:-}" "$SUBDIR/$FILENAME" || \
+  bash "$UPDATE_CHANGELOG" "$CHANGELOG_SECTION" "$TITLE" "${PR_NUMBER:-}" "docs/history/$SUBDIR/$FILENAME" || \
     echo "⚠️  Could not update CHANGELOG.md — please add the entry manually."
 else
   echo "ℹ️  update-changelog.sh not found — skipping changelog update."
