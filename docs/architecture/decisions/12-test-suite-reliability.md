@@ -91,18 +91,28 @@ resolve `.prettierrc`/`.prettierignore` implicitly, so both are resolved against
 destination path. `prettier --check` passes project-wide afterwards, confirming parity with
 CLI output.
 
-Effect on the suite, measured over a full run:
+Effect on the suite is **not cleanly measurable on this machine**. Wall times across runs of
+essentially equivalent code:
 
-| Metric       | Baseline | After decision 1 |
-| ------------ | -------- | ---------------- |
-| Wall time    | ~730s    | **386s**         |
-| Failed files | 2–4      | 3                |
+| Run                             | Wall time |
+| ------------------------------- | --------- |
+| Baseline                        | 756s      |
+| Baseline (repeat)               | 726s      |
+| With decision 2 (reverted)      | 1294s     |
+| After decision 1                | 386s      |
+| After decision 1 (later, clean) | 857s      |
 
-A 47% reduction in wall time with no new failures. **It did not make the suite green.** The
-remaining failures are the same pre-existing ones — `discover`'s git-log heuristic (which passes
-in isolation) and the copilot `beforeAll` hooks, both present in the baseline run. Decision 1 was
-necessary but not sufficient; decisions 3, 4 and 5 still apply, and decision 2 should only be
-reconsidered using the script-level sequencing noted above.
+An earlier revision of this ADR claimed a 47% wall-time reduction from decision 1. That was a
+single 386s sample, and the 857s run of equivalent code contradicts it. **The claim is
+withdrawn.** Run-to-run variance on this Windows machine exceeds the effect being measured, so
+no suite-level speedup should be asserted from these numbers.
+
+The **sync-level** measurement is trustworthy by contrast — ~25s to 13s, repeated across several
+runs of a single deterministic operation with a clear mechanism (13 removed process startups).
+Suite wall time is simply the wrong instrument here.
+
+Decision 1 also **did not make the suite green**. Failure counts have ranged 4 to 8 across runs
+of the same code, all timeouts, all on Windows only.
 
 ### 2. Isolate sync-heavy suites from parallel execution
 
@@ -160,7 +170,7 @@ developer time and trust, not delivery. Priorities are revised accordingly.
 
 | Decision                     | Revised position  | Why                                                                                                                                                                                                    |
 | ---------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. In-process formatting     | **Done**          | Landed; 47% faster suite and a product-wide sync speedup.                                                                                                                                              |
+| 1. In-process formatting     | **Done**          | Landed. Sync ~25s to 13s (reliable). No suite-level speedup claimed — see withdrawn measurement above.                                                                                                 |
 | 4. Fixture repo for git-log  | **Do first**      | Promoted. These tests read ambient repository history, which is wrong on any platform — they would also break on a shallow clone or a repo with different conventions. A correctness bug, not a flake. |
 | 6. Raise sync-heavy timeouts | **New, cheapest** | The copilot `beforeAll` hooks fail at 30s on Windows. Sync is now ~2× faster, so a modest bump likely clears them outright, at zero CI cost and no architectural change.                               |
 | 3. Prettier out of Vitest    | **Keep, lower**   | Rationale changed: no longer about flakiness, but about placement and ~90s of runtime. A whole-repo format scan duplicates the lint job.                                                               |
