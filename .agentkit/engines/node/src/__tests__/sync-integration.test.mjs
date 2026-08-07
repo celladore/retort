@@ -63,6 +63,31 @@ const goldenRoots = new Map();
 const createdRoots = new Set();
 
 /**
+ * Resolves the given flag-sets to golden roots one at a time.
+ *
+ * runSync calls clearTemplateMeta() and clearTemplateTextCache() on entry
+ * (synchronize.mjs), and both operate on module-level singletons shared by all
+ * callers, so two overlapping runSync calls clear each other's in-flight state.
+ * templateMetaMap drives scaffold-mode decisions, so that corruption would be
+ * silent rather than a crash.
+ *
+ * Vitest already runs describe blocks sequentially, so the only place syncs
+ * could overlap is a Promise.all over goldenSync — this helper replaces those.
+ * Cached flag-sets resolve immediately, so the sequential walk only pays for
+ * targets no earlier block has synced.
+ *
+ * @param {object[]} flagSets
+ * @returns {Promise<string[]>} golden root per flag-set, in order
+ */
+async function goldenSyncAll(flagSets) {
+  const roots = [];
+  for (const flags of flagSets) {
+    roots.push(await goldenSync(flags));
+  }
+  return roots;
+}
+
+/**
  * Returns a pristine project root synced with the given flags, reusing an
  * existing one when the same flag-set has already been synced.
  *
@@ -661,10 +686,7 @@ describe('render target gating for new tools', () => {
   let warpFiles;
 
   beforeAll(async () => {
-    const [claudeRoot, warpRoot] = await Promise.all([
-      goldenSync({ only: 'claude' }),
-      goldenSync({ only: 'warp' }),
-    ]);
+    const [claudeRoot, warpRoot] = await goldenSyncAll([{ only: 'claude' }, { only: 'warp' }]);
     claudeFiles = collectFiles(claudeRoot);
     warpFiles = collectFiles(warpRoot);
   });
@@ -841,11 +863,8 @@ describe('render-target output isolation (--only flag)', () => {
   beforeAll(async () => {
     // goldenSync dedupes against the per-target describe blocks above, so each
     // render target is synced once for the whole file rather than twice.
-    await Promise.all(
-      ISOLATION_CASES.map(async ({ only }) => {
-        rootsByTarget.set(only, await goldenSync({ only }));
-      })
-    );
+    const roots = await goldenSyncAll(ISOLATION_CASES.map(({ only }) => ({ only })));
+    ISOLATION_CASES.forEach(({ only }, i) => rootsByTarget.set(only, roots[i]));
   });
 
   for (const { only, absent } of ISOLATION_CASES) {
