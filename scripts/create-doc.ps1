@@ -53,8 +53,17 @@ $SubdirMap = @{
 $Subdir = $SubdirMap[$Type]
 
 # ---------------------------------------------------------------------------
-# Read and update the sequential index
+# Determine the next sequence number
+#
+# The .index.json counter alone is not trustworthy: documents created before
+# the index existed were never registered, so the counter under-reports and
+# hands out a number that is already taken on disk. Scan the destination
+# directory for the highest existing NNNN- prefix and use whichever is larger.
+# The index is still updated below so it remains a usable audit trail.
 # ---------------------------------------------------------------------------
+
+$DestDir = Join-Path $HistoryDir $Subdir
+New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
 
 if (-not (Test-Path $IndexFile)) {
   $InitialIndex = @{
@@ -66,7 +75,17 @@ if (-not (Test-Path $IndexFile)) {
 }
 
 $Index   = Get-Content $IndexFile -Raw | ConvertFrom-Json
-$SeqNum  = if ($Index.sequences.$Type) { $Index.sequences.$Type } else { 1 }
+$Counter = if ($Index.sequences.$Type) { [int]$Index.sequences.$Type } else { 1 }
+
+$Highest = 0
+Get-ChildItem -Path $DestDir -Filter '*.md' -File -ErrorAction SilentlyContinue | ForEach-Object {
+  if ($_.Name -match '^(\d{4})-') {
+    $Candidate = [int]$Matches[1]
+    if ($Candidate -gt $Highest) { $Highest = $Candidate }
+  }
+}
+
+$SeqNum  = [Math]::Max($Counter, $Highest + 1)
 $Padded  = $SeqNum.ToString('0000')
 $Date    = (Get-Date -Format 'yyyy-MM-dd')
 
@@ -74,10 +93,7 @@ $Date    = (Get-Date -Format 'yyyy-MM-dd')
 $Slug = $Title.ToLower() -replace '[^a-z0-9]', '-' -replace '-+', '-' -replace '^-|-$', ''
 
 $Filename = "${Padded}-${Date}-${Slug}-${Type}.md"
-$DestDir  = Join-Path $HistoryDir $Subdir
 $DestFile = Join-Path $DestDir $Filename
-
-New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
 
 # ---------------------------------------------------------------------------
 # Copy template and substitute placeholders
@@ -90,7 +106,18 @@ if (-not (Test-Path $TemplateSrc)) {
   exit 1
 }
 
-$PrRef = if ($PrNumber) { "#$PrNumber" } else { '[#PR-Number]' }
+# Render the PR reference as a clickable link when the GitHub slug is known,
+# matching the "[#123](https://github.com/org/repo/pull/123)" convention used
+# across existing history docs. Falls back to a bare "#123" otherwise.
+$GithubSlug = "phoenixvc/retort"
+
+$PrRef = if (-not $PrNumber) {
+  '[#PR-Number]'
+} elseif ($GithubSlug -and $GithubSlug -notmatch '\{\{') {
+  "[#$PrNumber](https://github.com/$GithubSlug/pull/$PrNumber)"
+} else {
+  "#$PrNumber"
+}
 
 (Get-Content $TemplateSrc -Raw).
   Replace('[Feature/Change Name]', $Title).
@@ -146,13 +173,17 @@ $ChangelogSectionMap = @{
 }
 $ChangelogSection = $ChangelogSectionMap[$Type]
 
+# CHANGELOG.md lives at the repository root, so the link must be repo-relative
+# ("docs/history/<subdir>/<file>") — not relative to docs/history/.
+$ChangelogDocPath = "docs/history/$Subdir/$Filename"
+
 $UpdateChangelogScript = Join-Path $ScriptDir 'update-changelog.ps1'
 if (-not $ChangelogSection) {
   Write-Host "ℹ️  ${Type} records are not added to CHANGELOG.md — skipping changelog update."
 } elseif (Test-Path $UpdateChangelogScript) {
   try {
     & $UpdateChangelogScript -Section $ChangelogSection -Description $Title `
-      -PrNumber $PrNumber -HistoryDoc "$Subdir/$Filename"
+      -PrNumber $PrNumber -HistoryDoc $ChangelogDocPath
   } catch {
     Write-Warning "Could not update CHANGELOG.md — please add the entry manually."
   }
