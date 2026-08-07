@@ -646,6 +646,26 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
 }
 
 /**
+ * Indexes the hook templates by stem, recording which extensions ship for each
+ * (e.g. `session-start` → {'ps1','sh'}).
+ *
+ * Wiring is derived from this rather than hardcoded, so a hook that ships a
+ * `.ps1` is actually invoked as one. Five `.ps1` hooks previously shipped and
+ * were wired nowhere because only `session-start` was special-cased.
+ */
+export async function collectHookExtensions(hooksDir) {
+  const byStem = new Map();
+  if (!existsSync(hooksDir)) return byStem;
+  for (const fname of await readdir(hooksDir)) {
+    const m = fname.match(/^(.+)\.(sh|ps1)$/i);
+    if (!m) continue;
+    if (!byStem.has(m[1])) byStem.set(m[1], new Set());
+    byStem.get(m[1]).add(m[2].toLowerCase());
+  }
+  return byStem;
+}
+
+/**
  * Builds the `settings.json` hooks tree from the `hooks:` block in
  * settings.yaml, so hook wiring is declared in exactly one place.
  *
@@ -653,8 +673,12 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
  * are lists of `{ matcher, hook }`. Entries without a hook name are skipped.
  * Returns null when the spec declares no hooks, leaving the caller's existing
  * wiring untouched.
+ *
+ * `hookExtensions` is the optional index from `collectHookExtensions()`. When
+ * supplied it decides which variant each entry invokes; when omitted the
+ * caller-declared form is used, preserving the single-argument contract.
  */
-export function buildHooksFromSpec(hooksSpec) {
+export function buildHooksFromSpec(hooksSpec, hookExtensions) {
   if (!hooksSpec || typeof hooksSpec !== 'object') return null;
 
   // The spec names a hook by stem. Tolerate an extension being written anyway
@@ -662,13 +686,25 @@ export function buildHooksFromSpec(hooksSpec) {
   // both break the command and defeat extractHookFiles()/gating downstream.
   const stemOf = (name) => name.trim().replace(/\.(sh|ps1)$/i, '');
 
-  // session-start is the one hook invoked via pwsh with a shell fallback; the
-  // rest are invoked as .sh, matching how they have always been wired.
+  // Which variants a hook actually ships decides how it is invoked. When both
+  // exist the .ps1 runs with the .sh as a fallback for machines without pwsh.
+  // That is safe precisely because every hook signals its decision as JSON on
+  // stdout and exits 0 — a *blocking* .ps1 still exits 0, so the `||` never
+  // double-runs the .sh; the fallback fires only when pwsh cannot launch. Do
+  // not switch these scripts to exit-code signalling without revisiting this.
+  //
+  // Without an index of the hook templates, fall back to the caller-declared
+  // form so existing single-argument callers keep their behaviour.
   const command = (name, crossPlatform) => {
-    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stemOf(name)}`;
-    return crossPlatform
-      ? `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1 || ${base}.sh`
-      : `${base}.sh`;
+    const stem = stemOf(name);
+    const base = `"$CLAUDE_PROJECT_DIR"/.claude/hooks/${stem}`;
+    const pwsh = `pwsh -NoLogo -NoProfile -NonInteractive -File ${base}.ps1`;
+    const exts = hookExtensions?.get(stem);
+    if (!exts) {
+      return crossPlatform ? `${pwsh} || ${base}.sh` : `${base}.sh`;
+    }
+    if (!exts.has('ps1')) return `${base}.sh`;
+    return exts.has('sh') ? `${pwsh} || ${base}.sh` : pwsh;
   };
 
   const hooks = {};
@@ -737,8 +773,12 @@ export async function syncClaudeSettings(
   // Override permissions with merged set
   settings.permissions = mergedPermissions;
   // Hook wiring comes from settings.yaml — the template carries none, so the
-  // spec is the only place wiring is declared
-  const specHooks = buildHooksFromSpec(settingsSpec?.hooks);
+  // spec is the only place wiring is declared. The hook template index decides
+  // which variant each entry invokes.
+  const specHooks = buildHooksFromSpec(
+    settingsSpec?.hooks,
+    await collectHookExtensions(join(templatesDir, 'claude', 'hooks'))
+  );
   if (specHooks) settings.hooks = specHooks;
   // Keep hook wiring in step with the hooks sync actually emits
   if (hookFeatureMap && settings.hooks) {

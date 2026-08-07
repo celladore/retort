@@ -25,6 +25,14 @@
       "file": "bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
     },
     {
+      "number": 3,
+      "type": "bugfix",
+      "title": "Orphaned hook scripts never wired in generated Claude settings",
+      "date": "2026-08-07",
+      "pr": "577",
+      "file": "bug-fixes/0003-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md"
+    },
+    {
       "number": 10,
       "type": "implementation",
       "title": "Hook wiring generated from spec",

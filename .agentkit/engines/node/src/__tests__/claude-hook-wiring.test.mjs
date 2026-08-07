@@ -2,9 +2,13 @@
  * Regression fixture for #185 — hook wiring in `.claude/settings.json` must
  * never name a hook script that feature gating prevents sync from emitting.
  *
- * `settings.json` is rendered from a STATIC template that unconditionally wires
- * six hook scripts, while `syncClaudeHooks()` skips any hook whose owning
- * feature is disabled. The two are reconciled by `filterHooksToEmitted()`.
+ * Wiring is built from the `hooks:` block in settings.yaml (#575), while
+ * `syncClaudeHooks()` skips any hook whose owning feature is disabled. The two
+ * are reconciled by `filterHooksToEmitted()`.
+ *
+ * The converse invariant is asserted here too: a hook template that ships must
+ * not be left unwired. A dangling reference errors when its event fires, but an
+ * orphan is silent — which is how five `.ps1` hooks shipped wired to nothing.
  *
  * The gating scenarios below are derived from the real `features.yaml`
  * `affectsTemplates` declarations rather than hardcoded, so that re-homing a
@@ -20,6 +24,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { load as loadYaml } from 'js-yaml';
 import {
   buildHooksFromSpec,
+  collectHookExtensions,
   extractHookFiles,
   extractHookStems,
   filterHooksToEmitted,
@@ -31,6 +36,7 @@ import { runValidate } from '../validate.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const SETTINGS_SPEC = resolve(AGENTKIT_ROOT, 'spec', 'settings.yaml');
+const HOOK_TEMPLATE_DIR = resolve(AGENTKIT_ROOT, 'templates', 'claude', 'hooks');
 
 /**
  * Hook feature map + the hook wiring as it really ships. Wiring is built from
@@ -297,6 +303,113 @@ describe('buildHooksFromSpec()', () => {
     expect(buildHooksFromSpec(null)).toBeNull();
     expect(buildHooksFromSpec({})).toBeNull();
     expect(buildHooksFromSpec({ preToolUse: [] })).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// collectHookExtensions — which variants each hook actually ships
+// ---------------------------------------------------------------------------
+
+describe('collectHookExtensions()', () => {
+  it('should group both variants of a hook under one stem', async () => {
+    const byStem = await collectHookExtensions(HOOK_TEMPLATE_DIR);
+
+    expect([...byStem.get('session-start')].sort()).toEqual(['ps1', 'sh']);
+  });
+
+  it('should record a single variant for a hook that ships only a .sh', async () => {
+    const byStem = await collectHookExtensions(HOOK_TEMPLATE_DIR);
+
+    expect([...byStem.get('pre-push-validate')]).toEqual(['sh']);
+  });
+
+  it('should return an empty map for a directory that does not exist', async () => {
+    expect((await collectHookExtensions(resolve(HOOK_TEMPLATE_DIR, 'nope'))).size).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildHooksFromSpec — variant selection driven by the shipped templates
+// ---------------------------------------------------------------------------
+
+describe('buildHooksFromSpec() variant selection', () => {
+  const spec = { preToolUse: [{ matcher: 'Bash', hook: 'guard-destructive-commands' }] };
+  const commandFor = (built) => built.PreToolUse[0].hooks[0].command;
+
+  it('should prefer the .ps1 with a .sh fallback when both variants ship', () => {
+    // Arrange — hooks signal via stdout JSON and exit 0, so the `||` fires only
+    // when pwsh cannot launch, never after a blocking .ps1
+    const exts = new Map([['guard-destructive-commands', new Set(['sh', 'ps1'])]]);
+
+    // Act
+    const built = buildHooksFromSpec(spec, exts);
+
+    // Assert
+    expect(commandFor(built)).toBe(
+      `pwsh -NoLogo -NoProfile -NonInteractive -File ${cmd('guard-destructive-commands', 'ps1')} || ${cmd('guard-destructive-commands')}`
+    );
+  });
+
+  it('should invoke the .sh alone when no .ps1 variant ships', () => {
+    const exts = new Map([['guard-destructive-commands', new Set(['sh'])]]);
+
+    expect(commandFor(buildHooksFromSpec(spec, exts))).toBe(cmd('guard-destructive-commands'));
+  });
+
+  it('should invoke the .ps1 alone when no .sh variant ships', () => {
+    const exts = new Map([['guard-destructive-commands', new Set(['ps1'])]]);
+
+    expect(commandFor(buildHooksFromSpec(spec, exts))).toBe(
+      `pwsh -NoLogo -NoProfile -NonInteractive -File ${cmd('guard-destructive-commands', 'ps1')}`
+    );
+  });
+
+  it('should keep the declared form for a stem absent from the index', () => {
+    // Arrange — preserves the single-argument contract for existing callers
+    const exts = new Map();
+
+    // Act + Assert
+    expect(commandFor(buildHooksFromSpec(spec, exts))).toBe(cmd('guard-destructive-commands'));
+    expect(
+      buildHooksFromSpec({ sessionStart: 'session-start' }, exts).SessionStart[0].hooks[0].command
+    ).toBe(
+      `pwsh -NoLogo -NoProfile -NonInteractive -File ${cmd('session-start', 'ps1')} || ${cmd('session-start')}`
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The orphan invariant — every shipped hook template must be wired
+// ---------------------------------------------------------------------------
+
+describe('hook wiring leaves no orphaned template', () => {
+  it('should wire every hook variant that ships, in both extensions', async () => {
+    // Arrange — the counterpart to #185: a dangling reference errors when the
+    // event fires, but an orphan is silent. `pre-push-validate` shipped and ran
+    // never. Derived from the template directory rather than a fixed list, so a
+    // newly added hook nobody wires fails here.
+    const spec = loadYaml(readFileSync(SETTINGS_SPEC, 'utf-8'));
+    const exts = await collectHookExtensions(HOOK_TEMPLATE_DIR);
+
+    // Act
+    const wired = new Set();
+    for (const matchers of Object.values(buildHooksFromSpec(spec.hooks, exts))) {
+      for (const matcher of matchers) {
+        for (const hook of matcher.hooks) {
+          for (const file of extractHookFiles(hook.command)) wired.add(file);
+        }
+      }
+    }
+
+    // Assert
+    for (const [stem, variants] of exts) {
+      for (const ext of variants) {
+        expect(
+          wired.has(`${stem}.${ext}`),
+          `hook template "${stem}.${ext}" ships but nothing wires it`
+        ).toBe(true);
+      }
+    }
   });
 });
 
