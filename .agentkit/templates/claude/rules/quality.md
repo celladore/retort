@@ -113,4 +113,3 @@ Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`.
 3. Create a tracking issue with `flaky-test` label and resolve within two
    sprints.
 4. Never merge a change that introduces a new flaky test.
-```

@@ -12,11 +12,10 @@ These rules apply to all test files and quality assurance activities in
 
 ## Test Pyramid
 
-| Layer                      | Tool        | Location               | Target                        |
-| -------------------------- | ----------- | ---------------------- | ----------------------------- | ---------------------- | ------- |
-|         | Unit        | vitest        | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |  |
-|  | Integration | vitest | `tests/integration/`          | Module interactions    |  |
-|  |
+| Layer | Tool | Location | Notes |
+| ----- | ---- | -------- | ----- |
+| Unit | vitest | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |
+| Integration | vitest | `tests/integration/` | Module interactions |
 
 ## Coverage
 

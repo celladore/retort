@@ -12,11 +12,12 @@ These rules apply to all test files and quality assurance activities in
 
 ## Test Pyramid
 
-| Layer                      | Tool        | Location               | Target                        |
-| -------------------------- | ----------- | ---------------------- | ----------------------------- | ---------------------- | ------- |
-| {{#if testingUnit}}        | Unit        | {{testingUnit}}        | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O | {{/if}} |
-| {{#if testingIntegration}} | Integration | {{testingIntegration}} | `tests/integration/`          | Module interactions    | {{/if}} |
-| {{#if testingE2e}}         | E2E         | {{testingE2e}}         | `tests/e2e/` / `e2e/`         | Full user workflows    | {{/if}} |
+| Layer | Tool | Location | Notes |
+| ----- | ---- | -------- | ----- |
+{{#if testingUnit}}| Unit | {{testingUnit}} | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |
+{{/if}}{{#if testingIntegration}}| Integration | {{testingIntegration}} | `tests/integration/` | Module interactions |
+{{/if}}{{#if testingE2e}}| E2E | {{testingE2e}} | `tests/e2e/` / `e2e/` | Full user workflows |
+{{/if}}
 
 ## Coverage
 
