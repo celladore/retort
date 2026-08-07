@@ -673,9 +673,13 @@ export function buildHooksFromSpec(hooksSpec) {
 
   const hooks = {};
 
+  // A value that is nothing but an extension normalises to an empty stem and
+  // would yield a path like `.claude/hooks/.sh` — treat it as unnamed
+  const named = (value) => typeof value === 'string' && stemOf(value) !== '';
+
   const addSingle = (key, event, crossPlatform) => {
     const name = hooksSpec[key];
-    if (typeof name !== 'string' || !name.trim()) return;
+    if (!named(name)) return;
     hooks[event] = [{ hooks: [{ type: 'command', command: command(name, crossPlatform) }] }];
   };
 
@@ -683,7 +687,7 @@ export function buildHooksFromSpec(hooksSpec) {
     if (!Array.isArray(hooksSpec[key])) return;
     const entries = [];
     for (const item of hooksSpec[key]) {
-      if (!item || typeof item.hook !== 'string' || !item.hook.trim()) continue;
+      if (!item || !named(item.hook)) continue;
       const entry = { hooks: [{ type: 'command', command: command(item.hook, false) }] };
       // Only carry a matcher when the spec sets one — an undefined value would
       // be dropped by JSON.stringify anyway, so make the omission explicit

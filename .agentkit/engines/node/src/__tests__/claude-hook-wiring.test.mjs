@@ -274,6 +274,23 @@ describe('buildHooksFromSpec()', () => {
     expect(built.PreToolUse[0].hooks[0].command).toContain('kept.sh');
   });
 
+  it('should skip a value that is nothing but an extension', () => {
+    // Arrange — '.sh' would normalise to an empty stem and build a path
+    // pointing at `.claude/hooks/.sh`
+    const built = buildHooksFromSpec({
+      stop: '.sh',
+      preToolUse: [
+        { matcher: 'Bash', hook: '.ps1' },
+        { matcher: 'Bash', hook: 'kept' },
+      ],
+    });
+
+    // Assert
+    expect(built).not.toHaveProperty('Stop');
+    expect(built.PreToolUse).toHaveLength(1);
+    expect(built.PreToolUse[0].hooks[0].command).toContain('kept.sh');
+  });
+
   it('should return null when the spec declares no hooks', () => {
     // Arrange + Act + Assert — the caller then leaves existing wiring alone
     expect(buildHooksFromSpec(undefined)).toBeNull();
