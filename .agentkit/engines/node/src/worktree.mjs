@@ -3,8 +3,10 @@
  * Wraps `git worktree add` and ensures the new worktree directory has an
  * `.agentkit-repo` marker so the sync engine picks the correct overlay.
  *
- * Without the marker, `runSync` falls back to `__TEMPLATE__` (or infers from
- * the directory name), causing an "overlay miss" that generates incorrect output.
+ * Since ADR-11 decision 3 a missing marker no longer silently renders
+ * `__TEMPLATE__` — `runSync` resolves the marker from the primary worktree, and
+ * aborts if that fails too. Writing the marker up front keeps the worktree
+ * self-describing and independent of git layout.
  * See: PRs #478 and #479 (required manual `.agentkit-repo` intervention).
  *
  * Usage:
@@ -136,8 +138,9 @@ export async function runWorktreeCreate({ agentkitRoot, projectRoot, flags }) {
   }
 
   // Write the .agentkit-repo marker — this is the core fix.
-  // Without it the sync engine would fall back to __TEMPLATE__ or infer
-  // incorrectly from the directory name, producing the wrong overlay output.
+  // The sync engine can now recover the overlay from the primary worktree, but
+  // only while this stays a linked worktree of that repo; the marker is what
+  // makes the directory correct on its own.
   writeMarker(worktreePath, repoName);
   console.log(`[retort:worktree] Created .agentkit-repo marker (overlay: "${repoName}")`);
 
