@@ -1144,10 +1144,10 @@ describe('convention type and phase validation', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ADR-11 native agent dispatch — teams.yaml spawn depth + per-agent dispatch
+// ADR-15 native agent dispatch — teams.yaml spawn depth + per-agent dispatch
 // ---------------------------------------------------------------------------
 
-describe('validateSpec() — ADR-11 dispatch settings', () => {
+describe('validateSpec() — ADR-15 dispatch settings', () => {
   const MINIMAL_COMMANDS = {
     commands: [
       {
@@ -1211,7 +1211,7 @@ describe('validateSpec() — ADR-11 dispatch settings', () => {
   });
 
   it.each([0, 4, 7])('rejects out-of-range max-subagent-spawn-depth %i', (depth) => {
-    // A handoff chain of 7 is legitimate; 7 nested spawn contexts is not (ADR-11 §4)
+    // A handoff chain of 7 is legitimate; 7 nested spawn contexts is not (ADR-15 §4)
     expectErrors({ teams: teamsWith({ 'max-subagent-spawn-depth': depth }) }, (errors) =>
       expect(errors.some((e) => e.includes('max-subagent-spawn-depth'))).toBe(true)
     );

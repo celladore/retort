@@ -1,5 +1,5 @@
 /**
- * Tests for ADR-11 native agent dispatch — the frontmatter emitter that turns
+ * Tests for ADR-15 native agent dispatch — the frontmatter emitter that turns
  * generated agent personas into registrable Claude Code subagents.
  *
  * Unit coverage for the pure derivation helpers in var-builders.mjs, plus
@@ -285,7 +285,7 @@ describe('resolveMaxSubagentSpawnDepth', () => {
     }
   );
 
-  it('is not derived from max-handoff-chain-depth (ADR-11 §4)', () => {
+  it('is not derived from max-handoff-chain-depth (ADR-15 §4)', () => {
     // A spawn tree nests and multiplies where a handoff chain runs sequentially;
     // 7 nested contexts is a token-budget hazard, not a deeper handoff chain.
     expect(resolveMaxSubagentSpawnDepth({ 'max-handoff-chain-depth': 7 })).toBe(

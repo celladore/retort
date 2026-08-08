@@ -101,7 +101,7 @@ None — this is a CLI/agent framework.
 
 ### Documentation
 
-- [ADR-11](../../architecture/decisions/11-native-agent-dispatch.md) — the decision, now
+- [ADR-15](../../architecture/decisions/15-native-agent-dispatch.md) — the decision, now
   Accepted, with an Implementation Notes section recording where the decision and the
   shipped code diverged.
 - [Implementation spec](../../planning/agents-teams/agent-dispatch-capability.md) — schema,

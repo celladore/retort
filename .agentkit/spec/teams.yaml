@@ -9,7 +9,7 @@
 # 2 covers orchestrator → team agent → specialist, which is every fan-out
 # pattern retort models. Valid range 1–3.
 #
-# Deliberately NOT derived from max-handoff-chain-depth (ADR-11 §4): a handoff
+# Deliberately NOT derived from max-handoff-chain-depth (ADR-15 §4): a handoff
 # chain runs one agent at a time and costs additively; a spawn tree nests and
 # multiplies. This repo's inferred handoff depth is 7, which as a spawn depth
 # would blow the aicost-token-budget rule on the first /orchestrate run.

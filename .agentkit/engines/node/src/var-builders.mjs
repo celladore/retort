@@ -462,7 +462,7 @@ function buildAgentLookaheadSection(la) {
 }
 
 // ---------------------------------------------------------------------------
-// Agent dispatch derivation (ADR-11 — native agent dispatch)
+// Agent dispatch derivation (ADR-15 — native agent dispatch)
 // ---------------------------------------------------------------------------
 
 /**
@@ -516,7 +516,7 @@ export const AGENT_ISOLATION_MODES = Object.freeze(['auto', 'worktree', 'none'])
  *
  * Default 2 covers orchestrator → team agent → specialist, which is every
  * fan-out pattern retort models. This is deliberately NOT derived from
- * `max-handoff-chain-depth` (ADR-11 §4): a handoff chain is sequential and
+ * `max-handoff-chain-depth` (ADR-15 §4): a handoff chain is sequential and
  * additive, a spawn tree nests and multiplies. Deriving it would emit 7 for a
  * 13-team repo, which blows the `aicost-token-budget` rule on the first run.
  */
@@ -719,7 +719,7 @@ export function resolveMaxSubagentSpawnDepth(teamsSpec) {
   return raw;
 }
 
-/** Accepted values for the delegation backend (ADR-11 §6). */
+/** Accepted values for the delegation backend (ADR-15 §6). */
 export const DISPATCH_MODES = Object.freeze(['native', 'task-file']);
 export const DEFAULT_DISPATCH_MODE = 'native';
 
@@ -803,7 +803,7 @@ export function buildAgentVars(agent, category, vars, registry = new Map()) {
     ...vars,
     agentName: agent.name,
     agentId: agent.id,
-    // --- Dispatch frontmatter (ADR-11) ---
+    // --- Dispatch frontmatter (ADR-15) ---
     agentDispatchName: agent.id || '',
     agentDescription: deriveAgentDescription(agent),
     agentModel: normalizeWhitespace(dispatch.model) || 'inherit',

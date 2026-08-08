@@ -126,7 +126,7 @@ const agentSchema = {
 };
 
 /**
- * Schema for the optional per-agent `dispatch` block (ADR-11). Every field is
+ * Schema for the optional per-agent `dispatch` block (ADR-15). Every field is
  * optional; the block itself is optional.
  */
 const agentDispatchSchema = {
@@ -339,7 +339,7 @@ const settingsSchema = {
       },
     },
     hooks: { type: 'object', required: true },
-    // ADR-11 §6 — which delegation backend the generated commands describe
+    // ADR-15 §6 — which delegation backend the generated commands describe
     dispatch: {
       type: 'object',
       properties: {
@@ -1275,7 +1275,7 @@ export function validateSpec(agentkitRoot) {
     if (teams.intake !== undefined && teams.intake !== null) {
       errors.push(...validate(teams.intake, teamsIntakeSchema, 'teams.yaml.intake'));
     }
-    // Nested subagent contexts (ADR-11 §4) — deliberately not derived from
+    // Nested subagent contexts (ADR-15 §4) — deliberately not derived from
     // max-handoff-chain-depth, whose cost is additive rather than multiplicative.
     const spawnDepth = teams['max-subagent-spawn-depth'];
     const spawnDepthErrors = validate(

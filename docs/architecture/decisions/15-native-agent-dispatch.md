@@ -1,4 +1,4 @@
-# ADR-11: Native Agent Dispatch — Emit Dispatchable Subagents, Keep Task Files as Record
+# ADR-15: Native Agent Dispatch — Emit Dispatchable Subagents, Keep Task Files as Record
 
 **Status:** Accepted — all four phases implemented in
 [#574](https://github.com/phoenixvc/retort/pull/574)

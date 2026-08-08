@@ -210,7 +210,7 @@ hooks:
   stop: stop-build-check
 
 # =============================================================================
-# Delegation backend (ADR-11 §6)
+# Delegation backend (ADR-15 §6)
 # =============================================================================
 dispatch:
   # How the orchestrator hands a task to a team.

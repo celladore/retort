@@ -2,7 +2,7 @@
 
 **Status:** Complete — all four phases implemented
 **Owner:** TEAMFORGE (T11)
-**ADR:** [ADR-11 Native Agent Dispatch](../../architecture/decisions/11-native-agent-dispatch.md)
+**ADR:** [ADR-15 Native Agent Dispatch](../../architecture/decisions/15-native-agent-dispatch.md)
 **Target:** Retort v3.2.0
 
 > **Implementation status.** All four phases have landed:
@@ -82,7 +82,7 @@ All fields optional; the block itself is optional.
 
 New top-level setting, default `2`, valid range `1`–`3`.
 
-**Deliberately independent of `max-handoff-chain-depth`.** See ADR-11 §4 — handoff depth is
+**Deliberately independent of `max-handoff-chain-depth`.** See ADR-15 §4 — handoff depth is
 a sequential chain with additive cost; spawn depth is a tree with multiplicative cost. The
 current repo would emit `7` if derived, which is a token-budget hazard.
 

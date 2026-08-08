@@ -447,10 +447,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     intakeSecurityEscalationTeams: securityEscalationTeams,
     intakeBlockedEscalationTeams: blockedEscalationTeams,
     intakeAreaRoutingTable: buildAreaRoutingTable(teamsIntake),
-    // Nested subagent contexts, not handoff hops — see ADR-11 §4 for why this is
+    // Nested subagent contexts, not handoff hops — see ADR-15 §4 for why this is
     // a separate setting from max-handoff-chain-depth rather than derived from it.
     maxSubagentSpawnDepth: resolveMaxSubagentSpawnDepth(teamsSpec),
-    // Delegation backend (ADR-11 §6). `dispatchNative` is the {{#if}} handle;
+    // Delegation backend (ADR-15 §6). `dispatchNative` is the {{#if}} handle;
     // `dispatchMode` is the literal for prose.
     dispatchMode,
     dispatchNative: dispatchMode === 'native',

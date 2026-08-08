@@ -793,7 +793,7 @@ export async function syncClaudeSettings(
     await collectHookExtensions(join(templatesDir, 'claude', 'hooks'))
   );
   if (specHooks) settings.hooks = specHooks;
-  // Subagent spawn depth (ADR-11 §4). Emitted here rather than in the template
+  // Subagent spawn depth (ADR-15 §4). Emitted here rather than in the template
   // because the template is parsed as JSON, not rendered — a {{placeholder}}
   // would survive verbatim into the generated file. Env values must be strings.
   const spawnDepth = vars?.maxSubagentSpawnDepth;
