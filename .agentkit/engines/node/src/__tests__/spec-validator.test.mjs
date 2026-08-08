@@ -1316,7 +1316,6 @@ describe('validateSpec() settings.yaml hooks', () => {
   });
 });
 
-
 // ---------------------------------------------------------------------------
 // ADR-15 native agent dispatch — teams.yaml spawn depth + per-agent dispatch
 // ---------------------------------------------------------------------------
