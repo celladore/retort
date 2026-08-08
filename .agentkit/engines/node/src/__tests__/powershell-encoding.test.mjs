@@ -76,7 +76,9 @@ describe('shipped PowerShell scripts', () => {
     expect(owned.length).toBeGreaterThan(0);
   });
 
-  it.each(files)('%s is parseable by Windows PowerShell 5.1', (file) => {
+  // Name states what is asserted, not what is implied: this checks the BOM
+  // precondition for 5.1 decoding, it does not invoke a PowerShell parser.
+  it.each(files)('%s carries a BOM if it contains non-ASCII bytes', (file) => {
     const raw = readFileSync(resolve(REPO_ROOT, file));
     if (!hasNonAscii(raw)) return; // pure ASCII — decodes identically under ANSI
 

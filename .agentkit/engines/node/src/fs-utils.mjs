@@ -7,8 +7,12 @@ import { existsSync } from 'fs';
 import { mkdir, readdir, writeFile } from 'fs/promises';
 import { dirname, extname, join } from 'path';
 
-/** UTF-8 byte order mark, as the single code point Node writes as EF BB BF. */
-export const UTF8_BOM = '﻿';
+/**
+ * UTF-8 byte order mark, as the single code point Node writes as EF BB BF.
+ * Written as an escape rather than a literal — a literal BOM is invisible in an
+ * editor and trivially deleted or duplicated by accident.
+ */
+export const UTF8_BOM = '\uFEFF';
 
 /**
  * Extensions whose output must carry a UTF-8 BOM.

@@ -153,5 +153,5 @@ character`. This is a genuine pre-existing syntax bug, unrelated to encoding, an
 ---
 
 **Fix Author**: Jurie Smit
-**Reviewer**: [Reviewer]
+**Reviewer**: CodeRabbit (automated) — pending human review on [#581](https://github.com/phoenixvc/retort/pull/581)
 **Status**: Resolved

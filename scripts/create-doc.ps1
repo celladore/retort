@@ -40,6 +40,25 @@ $RepoRoot   = Split-Path -Parent $ScriptDir
 $HistoryDir = Join-Path (Join-Path $RepoRoot 'docs') 'history'
 $IndexFile  = Join-Path $HistoryDir '.index.json'
 
+# Data files written by this script (the JSON index, the rendered markdown) must
+# be UTF-8 WITHOUT a BOM. `Set-Content -Encoding UTF8` emits a BOM on Windows
+# PowerShell 5.1 but not on PowerShell 7, so the same command produced different
+# bytes per host: a BOM makes JSON.parse throw in the create-doc.sh counterpart,
+# which then treats the index as corrupt and rebuilds it, dropping entries.
+#
+# Note the deliberate asymmetry — the .ps1 files themselves DO carry a BOM so
+# that 5.1 decodes them as UTF-8 rather than Windows-1252. Script encoding and
+# data-file encoding have opposite requirements here.
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+function Write-Utf8NoBom {
+  param([string]$Path, [string]$Content)
+  # .NET resolves relative paths against its own working directory, not the
+  # PowerShell one — resolve explicitly so callers can pass either form.
+  $Full = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+  [System.IO.File]::WriteAllText($Full, $Content, $Utf8NoBom)
+}
+
 # ---------------------------------------------------------------------------
 # Determine subdirectory from type
 # ---------------------------------------------------------------------------
@@ -73,7 +92,7 @@ if (-not (Test-Path $IndexFile)) {
     sequences  = @{ implementation = 1; bugfix = 1; feature = 1; migration = 1; issue = 1; lesson = 1 }
     entries    = @()
   }
-  $InitialIndex | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 $IndexFile
+  Write-Utf8NoBom $IndexFile (($InitialIndex | ConvertTo-Json -Depth 5) + "`n")
 }
 
 try {
@@ -138,7 +157,7 @@ $PrRef = if (-not $PrNumber) {
   "#$PrNumber"
 }
 
-(Get-Content $TemplateSrc -Raw).
+$Rendered = (Get-Content $TemplateSrc -Raw).
   Replace('[Feature/Change Name]', $Title).
   Replace('[Bug Description]',      $Title).
   Replace('[Feature Name]',         $Title).
@@ -146,8 +165,9 @@ $PrRef = if (-not $PrNumber) {
   Replace('[Issue Title]',          $Title).
   Replace('[Lesson Title]',         $Title).
   Replace('[YYYY-MM-DD]',           $Date).
-  Replace('[#PR-Number]',           $PrRef) |
-  Set-Content -Encoding UTF8 $DestFile
+  Replace('[#PR-Number]',           $PrRef)
+
+Write-Utf8NoBom $DestFile $Rendered
 
 # ---------------------------------------------------------------------------
 # Update index
@@ -174,7 +194,7 @@ if ($null -eq $Index.entries) {
   $Index.entries += $Entry
 }
 
-$Index | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 $IndexFile
+Write-Utf8NoBom $IndexFile (($Index | ConvertTo-Json -Depth 5) + "`n")
 
 Write-Host "Created: $DestFile"
 
