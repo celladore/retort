@@ -212,6 +212,15 @@ Two deviations from the text above, both deliberate:
   only ever select an overlay that genuinely exists — so it resolves rather than guesses. It is
   ranked below both marker sources because a marker is a declaration and a directory name is a
   coincidence.
+
+  This turned out to be load-bearing rather than merely conservative. `.agentkit-repo` is
+  **gitignored** (`.gitignore:51`) — deliberately, since the marker is per-checkout — so a CI
+  runner never has one. `ci.yml` runs the drift check as `cli.mjs sync` from a checkout directory
+  named `retort`, and inference against the `retort` overlay is the only thing that resolves it.
+  Removing that step as the decision text literally reads would have aborted the drift check on
+  every run. Anyone tightening this further needs to give CI a marker or an explicit `--overlay`
+  first.
+
 - **The resolved name is now validated**, whatever source produced it. A name that does not
   address `overlays/<name>/settings.yaml` aborts with the same guidance, which also closes a
   typo'd marker silently rendering base templates only, and a marker containing `..` walking out
