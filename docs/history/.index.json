@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 6,
+    "bugfix": 7,
     "feature": 1,
     "migration": 1,
     "issue": 1,
@@ -57,12 +57,12 @@
       "file": "bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md"
     },
     {
-      "number": 5,
+      "number": 6,
       "type": "bugfix",
       "title": "Generated PowerShell scripts fail to parse under Windows PowerShell 5.1",
       "date": "2026-08-07",
       "pr": "581",
-      "file": "bug-fixes/0005-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
+      "file": "bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
     }
   ]
 }

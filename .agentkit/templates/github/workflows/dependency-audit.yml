@@ -46,7 +46,6 @@ jobs:
     name: Node.js dependency audit
     runs-on: ubuntu-latest
     continue-on-error: true
-    if: hashFiles('package.json') != '' || hashFiles('**/package.json') != ''
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -118,7 +117,6 @@ jobs:
     name: Rust dependency audit
     runs-on: ubuntu-latest
     continue-on-error: true
-    if: hashFiles('Cargo.toml') != '' || hashFiles('**/Cargo.toml') != ''
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -146,7 +144,6 @@ jobs:
     name: Python dependency audit
     runs-on: ubuntu-latest
     continue-on-error: true
-    if: hashFiles('pyproject.toml') != '' || hashFiles('requirements*.txt') != ''
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 

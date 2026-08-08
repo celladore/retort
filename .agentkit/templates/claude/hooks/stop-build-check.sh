@@ -87,14 +87,26 @@ if [[ -n "$BRANCH" ]] && [[ "$BRANCH" != "$DEFAULT_BRANCH" ]]; then
     CC_PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.+\))?!?:.+'
     BAD_COMMITS=""
     if git -C "$CWD" rev-parse "origin/${DEFAULT_BRANCH}" &>/dev/null; then
+        # Format is "<sha>|<parents>|<subject>". Parent SHAs come from this single
+        # git call so merge detection needs no per-commit subprocess. Neither the
+        # sha nor the parent list can contain "|", so splitting on the first two
+        # is safe even when the subject does.
         while IFS= read -r line; do
-            MSG=$(echo "$line" | cut -d' ' -f2-)
-            # Skip auto-generated merge commits — they are never user-authored
-            [[ "$MSG" =~ ^Merge\ (remote-tracking\ branch|branch|pull\ request) ]] && continue
+            SHA="${line%%|*}"
+            REST="${line#*|}"
+            PARENTS="${REST%%|*}"
+            MSG="${REST#*|}"
+            # Skip merge commits — they are never user-authored, and squash-merge
+            # discards them anyway. More than one parent means a merge. Detecting
+            # this structurally rather than by message prefix matters: the prefix
+            # forms ("Merge branch", "Merge remote-tracking branch", "Merge pull
+            # request") all miss "Merge <ref> into <branch>", which is what
+            # `git merge origin/dev` produces.
+            [[ "$PARENTS" == *" "* ]] && continue
             if [[ -n "$MSG" ]] && [[ ! "$MSG" =~ $CC_PATTERN ]]; then
-                BAD_COMMITS="${BAD_COMMITS}  ${line}\n"
+                BAD_COMMITS="${BAD_COMMITS}  ${SHA} ${MSG}\n"
             fi
-        done < <(git -C "$CWD" log --oneline "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null || true)
+        done < <(git -C "$CWD" log --format='%h|%p|%s' "origin/${DEFAULT_BRANCH}..HEAD" 2>/dev/null || true)
     fi
 
     if [[ -n "$BAD_COMMITS" ]]; then
