@@ -464,6 +464,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     // autoSyncOnPush controls whether the pre-push hook runs agentkit sync
     // before every push (issue #410). Defaults to false; opt-in per repo.
     autoSyncOnPush: overlaySettings.autoSyncOnPush ?? settingsSpec.sync?.autoSyncOnPush ?? false,
+    // windowsFirst controls whether the PowerShell variant of each hook is
+    // emitted and wired. Defaults to true: `.ps1` ships alongside the `.sh`
+    // and is invoked in preference to it, with the `.sh` as the fallback for
+    // machines without pwsh. Set false in a repo that never runs on Windows to
+    // stop emitting PowerShell files it would never execute. See
+    // isWindowsFirst() in platform-syncer.mjs for why the filter is one-directional.
+    windowsFirst: overlaySettings.windowsFirst ?? settingsSpec.sync?.windowsFirst ?? true,
     // skillsCategorised opts the repo into the layered skills layout:
     //   .claude/skills/<category>/<name>/SKILL.md
     //   .agents/skills/<category>/<name>/SKILL.md
