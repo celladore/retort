@@ -1138,3 +1138,176 @@ describe('convention type and phase validation', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// validate() — pattern and additionalProperties
+// ---------------------------------------------------------------------------
+describe('validate() pattern', () => {
+  const schema = { type: 'string', pattern: /^[a-z-]+$/ };
+
+  it('should accept a string matching the pattern', () => {
+    expect(validate('session-start', schema, 'x')).toEqual([]);
+  });
+
+  it('should reject a string that does not match, naming the offending value', () => {
+    const errors = validate('bad name;rm', schema, 'x');
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('bad name;rm');
+  });
+
+  it('should ignore the pattern for a non-string value', () => {
+    // Type errors are reported by the type check; pattern must not double-report
+    expect(validate(42, { type: 'string', pattern: /^[a-z]+$/ }, 'x')).toHaveLength(1);
+  });
+
+  it('should skip the pattern for an omitted optional field', () => {
+    expect(validate(undefined, schema, 'x')).toEqual([]);
+  });
+});
+
+describe('validate() additionalProperties', () => {
+  const base = {
+    type: 'object',
+    properties: { known: { type: 'string' } },
+  };
+
+  it('should allow undeclared keys by default, so existing schemas are unaffected', () => {
+    expect(validate({ known: 'a', extra: 'b' }, base, 'x')).toEqual([]);
+  });
+
+  it('should reject an undeclared key when additionalProperties is false', () => {
+    const schema = { ...base, additionalProperties: false };
+    const errors = validate({ known: 'a', extra: 'b' }, schema, 'x');
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('extra');
+    expect(errors[0]).toContain('unknown key');
+  });
+
+  it('should accept an object using only declared keys', () => {
+    const schema = { ...base, additionalProperties: false };
+    expect(validate({ known: 'a' }, schema, 'x')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// settings.yaml — hooks block shape
+//
+// The block was previously `{ type: 'object' }`, so every case below passed
+// validation and produced a settings.json missing the affected hook in silence.
+// ---------------------------------------------------------------------------
+describe('validateSpec() settings.yaml hooks', () => {
+  function makeSettingsRoot(hooks) {
+    const root = mkdtempSync(resolve(tmpdir(), 'agentkit-spec-hooks-'));
+    const specDir = resolve(root, 'spec');
+    mkdirSync(specDir, { recursive: true });
+
+    const files = {
+      'teams.yaml': {
+        teams: [{ id: 'backend', name: 'BACKEND', focus: 'API', scope: ['src/**'] }],
+        techStacks: [
+          {
+            name: 'node',
+            buildCommand: 'pnpm build',
+            testCommand: 'pnpm test',
+            detect: ['package.json'],
+          },
+        ],
+      },
+      'agents.yaml': {
+        agents: {
+          engineering: [
+            {
+              id: 'backend',
+              name: 'Backend Engineer',
+              role: 'backend role',
+              focus: ['src/**'],
+              responsibilities: ['build api'],
+            },
+          ],
+        },
+      },
+      'commands.yaml': { commands: [] },
+      'rules.yaml': {
+        rules: [
+          {
+            domain: 'typescript',
+            description: 'ts conventions',
+            'applies-to': ['**/*.ts'],
+            conventions: [{ id: 'ts-1', rule: 'Use strict mode', severity: 'warning' }],
+          },
+        ],
+      },
+      'settings.yaml': { permissions: { allow: [], deny: [] }, hooks },
+      'aliases.yaml': { aliases: {} },
+      'docs.yaml': { categories: [] },
+    };
+
+    for (const [name, body] of Object.entries(files)) {
+      writeFileSync(resolve(specDir, name), JSON.stringify(body, null, 2));
+    }
+    return root;
+  }
+
+  function errorsFor(hooks) {
+    const root = makeSettingsRoot(hooks);
+    try {
+      return validateSpec(root).errors.filter((e) => e.includes('settings.yaml'));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  it('should accept the shape the real spec uses', () => {
+    expect(
+      errorsFor({
+        sessionStart: 'session-start',
+        preToolUse: [{ matcher: 'Bash|Write|Edit', hook: 'budget-guard-check' }],
+        postToolUse: [{ matcher: 'Write|Edit', hook: 'warn-uncommitted' }],
+        stop: 'stop-build-check',
+      })
+    ).toEqual([]);
+  });
+
+  it('should accept an empty hooks block', () => {
+    expect(errorsFor({})).toEqual([]);
+  });
+
+  it('should accept an entry with no matcher, which is optional', () => {
+    expect(errorsFor({ preToolUse: [{ hook: 'guard-destructive-commands' }] })).toEqual([]);
+  });
+
+  it('should reject a mis-keyed lifecycle event', () => {
+    const errors = errorsFor({ preToolUsage: [{ hook: 'budget-guard-check' }] });
+    expect(errors.some((e) => e.includes('preToolUsage') && e.includes('unknown key'))).toBe(true);
+  });
+
+  it('should reject an entry whose hook key is misspelled', () => {
+    const errors = errorsFor({ preToolUse: [{ matcher: 'Bash', hoook: 'budget-guard-check' }] });
+    // Both the missing required `hook` and the stray `hoook` are reported
+    expect(errors.some((e) => e.includes('hook') && e.includes('required'))).toBe(true);
+    expect(errors.some((e) => e.includes('hoook') && e.includes('unknown key'))).toBe(true);
+  });
+
+  it('should reject a hook stem that is unsafe to interpolate into a command', () => {
+    // Semicolon and space both end the command the stem is spliced into
+    const errors = errorsFor({ preToolUse: [{ hook: 'guard;whoami' }] });
+    expect(errors.some((e) => e.includes('guard;whoami'))).toBe(true);
+  });
+
+  it('should reject a hook stem containing shell expansion characters', () => {
+    const errors = errorsFor({ sessionStart: 'start$(whoami)' });
+    expect(errors.some((e) => e.includes('start$(whoami)'))).toBe(true);
+  });
+
+  it('should reject a non-string sessionStart', () => {
+    const errors = errorsFor({ sessionStart: 42 });
+    expect(errors.some((e) => e.includes('sessionStart') && e.includes('expected string'))).toBe(
+      true
+    );
+  });
+
+  it('should reject a lifecycle list that is not an array', () => {
+    const errors = errorsFor({ preToolUse: { hook: 'budget-guard-check' } });
+    expect(errors.some((e) => e.includes('preToolUse') && e.includes('expected array'))).toBe(true);
+  });
+});

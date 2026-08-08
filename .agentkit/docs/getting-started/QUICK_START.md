@@ -76,7 +76,7 @@ After initialization, review and customize `.agentkit/overlays/my-project/settin
 repoName: my-project
 defaultBranch: main
 primaryStack: auto # auto | node | dotnet | rust | python
-windowsFirst: false
+windowsFirst: true # false skips the .ps1 hook variants (POSIX-only repos)
 renderTargets:
   - claude # Remove any tools your team does not use
   - cursor

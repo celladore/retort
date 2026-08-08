@@ -2,7 +2,7 @@
   "sequences": {
     "implementation": 11,
     "bugfix": 7,
-    "feature": 1,
+    "feature": 2,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -55,6 +55,14 @@
       "date": "2026-08-07",
       "pr": "579",
       "file": "bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md"
+    },
+    {
+      "number": 1,
+      "type": "feature",
+      "title": "Hook spec validation and windowsFirst emit filter",
+      "date": "2026-08-08",
+      "pr": "",
+      "file": "features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md"
     },
     {
       "number": 6,

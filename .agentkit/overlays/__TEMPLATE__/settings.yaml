@@ -4,6 +4,11 @@ repoName: __TEMPLATE__
 defaultBranch: main # Repository default branch (usually main or master)
 integrationBranch: main # Branch PRs should target (often dev or main; defaults to defaultBranch)
 primaryStack: auto
+# Emit the PowerShell (.ps1) variant of each hook alongside the .sh.
+# true  — .ps1 ships and is invoked in preference to the .sh, which stays as the
+#         fallback for machines without pwsh. Correct for Windows or mixed teams.
+# false — .ps1 files are not emitted or wired. Set this only if the repo never
+#         runs hooks on Windows. Hooks that ship no .ps1 are unaffected.
 windowsFirst: true
 
 # After template + overlay are combined, run an LLM synthesis pass that produces

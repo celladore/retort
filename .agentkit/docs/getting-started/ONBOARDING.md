@@ -147,11 +147,19 @@ Edit `overlays/<your-repo>/settings.yaml` to adjust global behavior:
 repoName: my-project
 defaultBranch: main
 primaryStack: typescript
-windowsFirst: false
+windowsFirst: false # POSIX-only repo: skip the .ps1 hook variants
 renderTargets:
   - claude
   - cursor
 ```
+
+`windowsFirst` controls whether the PowerShell variant of each hook is emitted
+and wired. It defaults to `true`, which ships `<hook>.ps1` alongside `<hook>.sh`
+and invokes the `.ps1` in preference, falling back to the `.sh` on machines
+without `pwsh` — the right setting for Windows or mixed-platform teams. Set it to
+`false` only when the repo never runs hooks on Windows; sync then emits no `.ps1`
+files and wires the `.sh` directly. Hooks that ship only a `.sh` are unaffected
+either way, so the setting never removes a hook — only a variant of one.
 
 ### Adding Custom Commands
 

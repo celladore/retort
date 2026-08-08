@@ -98,6 +98,21 @@ export function isUnsafePathSegment(value) {
   return false;
 }
 
+/**
+ * Characters permitted in a hook stem (the file name minus its `.sh`/`.ps1`
+ * extension). A stem is interpolated into a command whose path is only partly
+ * quoted — `"$CLAUDE_PROJECT_DIR"/.claude/hooks/<stem>.sh` — so whitespace,
+ * quotes, `$`, backticks or `;` in a name would change how that command parses.
+ * Real hook names are simple, so require exactly that.
+ *
+ * Lives in fs-utils (not platform-syncer) for the same reason as
+ * isUnsafePathSegment: spec-validator.mjs rejects an unsafe stem at validation
+ * time, and must do so against the *same* pattern the syncer filters on without
+ * importing the entire syncer. Two copies of this regex drifting apart is the
+ * exact failure this pattern exists to prevent.
+ */
+export const SAFE_HOOK_STEM = /^[A-Za-z0-9._-]+$/;
+
 export async function* walkDir(dir) {
   if (!existsSync(dir)) return;
   let entries = [];
