@@ -237,6 +237,7 @@ others — the `testing` team's lead agent is `test-lead`, and dispatching
 | `security` | `security-auditor` | `security-auditor` |
 | `docs` | `content-strategist` | `content-strategist` |
 | `product` | `product-manager` | `product-manager`, `roadmap-tracker`, `expansion-analyst` |
+| `marketing` | `content-strategist` | `content-strategist`, `growth-analyst` |
 | `quality` | `retrospective-analyst` | `retrospective-analyst`, `spec-compliance-auditor` |
 | `forge` | `input-clarifier` | `input-clarifier`, `mission-definer`, `role-architect`, `prompt-engineer`, `flow-designer`, `team-validator` |
 | `strategic-ops` | `portfolio-analyst` | `portfolio-analyst`, `governance-advisor`, `adoption-strategist`, `impact-assessor`, `release-coordinator` |
