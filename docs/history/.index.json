@@ -2,7 +2,7 @@
   "sequences": {
     "implementation": 11,
     "bugfix": 6,
-    "feature": 2,
+    "feature": 3,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -59,10 +59,18 @@
     {
       "number": 1,
       "type": "feature",
+      "title": "Hook spec validation and windowsFirst emit filter",
+      "date": "2026-08-08",
+      "pr": "",
+      "file": "features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md"
+    },
+    {
+      "number": 2,
+      "type": "feature",
       "title": "Native agent dispatch",
       "date": "2026-08-07",
       "pr": "574",
-      "file": "features/0001-2026-08-07-native-agent-dispatch-feature.md"
+      "file": "features/0002-2026-08-07-native-agent-dispatch-feature.md"
     }
   ]
 }

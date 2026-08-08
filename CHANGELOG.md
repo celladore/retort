@@ -25,7 +25,8 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Hook-based safety guardrails
 - Automated quality gates and validation
 - Hook wiring generated from spec ([#575](../../pull/575), [history](docs/history/implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md))
-- Native agent dispatch ([#574](../../pull/574), [history](docs/history/features/0001-2026-08-07-native-agent-dispatch-feature.md))
+- Hook spec validation and windowsFirst emit filter ([history](docs/history/features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md))
+- Native agent dispatch ([#574](../../pull/574), [history](docs/history/features/0002-2026-08-07-native-agent-dispatch-feature.md))
 
 ### Changed
 

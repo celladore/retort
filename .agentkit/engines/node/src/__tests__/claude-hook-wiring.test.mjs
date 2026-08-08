@@ -17,7 +17,7 @@
  * retort's own generated output was always clean and this defect survived
  * unnoticed — the synthetic scenarios are the only thing that exercises it.
  */
-import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -25,10 +25,12 @@ import { load as loadYaml } from 'js-yaml';
 import {
   buildHooksFromSpec,
   collectHookExtensions,
+  isWindowsFirst,
   extractHookFiles,
   extractHookStems,
   filterHooksToEmitted,
   isHookEmitted,
+  syncClaudeHooks,
 } from '../platform-syncer.mjs';
 import { buildHookFeatureMap, loadFeatureSpec } from '../feature-manager.mjs';
 import { runValidate } from '../validate.mjs';
@@ -352,6 +354,95 @@ describe('collectHookExtensions()', () => {
 
     rmSync(dir, { recursive: true, force: true });
   });
+
+  it('should index both variants when windowsFirst is unset', async () => {
+    const byStem = await collectHookExtensions(HOOK_TEMPLATE_DIR, {});
+
+    expect([...byStem.get('session-start')].sort()).toEqual(['ps1', 'sh']);
+  });
+
+  it('should drop the .ps1 variant when windowsFirst is false', async () => {
+    const byStem = await collectHookExtensions(HOOK_TEMPLATE_DIR, { windowsFirst: false });
+
+    expect([...byStem.get('session-start')]).toEqual(['sh']);
+  });
+
+  it('should keep every hook when windowsFirst is false, since .sh always ships', async () => {
+    // Arrange — dropping .ps1 must never remove a hook outright
+    const withPs1 = await collectHookExtensions(HOOK_TEMPLATE_DIR);
+
+    // Act
+    const shOnly = await collectHookExtensions(HOOK_TEMPLATE_DIR, { windowsFirst: false });
+
+    // Assert
+    expect([...shOnly.keys()].sort()).toEqual([...withPs1.keys()].sort());
+    for (const exts of shOnly.values()) {
+      expect([...exts]).toEqual(['sh']);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isWindowsFirst — the emit filter for the PowerShell variant
+// ---------------------------------------------------------------------------
+
+describe('isWindowsFirst()', () => {
+  it('should default to true so an overlay that never set the key is unaffected', () => {
+    expect(isWindowsFirst(undefined)).toBe(true);
+    expect(isWindowsFirst({})).toBe(true);
+    expect(isWindowsFirst({ windowsFirst: true })).toBe(true);
+  });
+
+  it('should be false only for an explicit false', () => {
+    expect(isWindowsFirst({ windowsFirst: false })).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// syncClaudeHooks — the emission half of the windowsFirst filter
+//
+// collectHookExtensions() decides what settings.json invokes; this decides what
+// lands on disk. They read the same flag, and a test on only one of them would
+// let the pair drift back apart.
+// ---------------------------------------------------------------------------
+
+describe('syncClaudeHooks() windowsFirst emission', () => {
+  const root = resolve(TEST_TMP, 'windows-first-emission');
+  const templatesDir = resolve(root, 'templates');
+  const hooksDir = resolve(templatesDir, 'claude', 'hooks');
+
+  beforeEach(() => {
+    rmSync(root, { recursive: true, force: true });
+    mkdirSync(hooksDir, { recursive: true });
+    writeFileSync(resolve(hooksDir, 'alpha.sh'), '#!/usr/bin/env bash\nexit 0\n', 'utf-8');
+    writeFileSync(resolve(hooksDir, 'alpha.ps1'), 'exit 0\n', 'utf-8');
+    writeFileSync(resolve(hooksDir, 'beta.sh'), '#!/usr/bin/env bash\nexit 0\n', 'utf-8');
+  });
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  async function emitWith(vars) {
+    const out = resolve(root, 'out');
+    await syncClaudeHooks(templatesDir, out, vars, '1.0.0', 'test-repo', null);
+    const dir = resolve(out, '.claude', 'hooks');
+    return existsSync(dir) ? readdirSync(dir).sort() : [];
+  }
+
+  it('should emit both variants by default', async () => {
+    expect(await emitWith({})).toEqual(['alpha.ps1', 'alpha.sh', 'beta.sh']);
+  });
+
+  it('should skip .ps1 files when windowsFirst is false', async () => {
+    expect(await emitWith({ windowsFirst: false })).toEqual(['alpha.sh', 'beta.sh']);
+  });
+
+  it('should still emit a hook that ships no .ps1 when windowsFirst is false', async () => {
+    // The filter drops a variant, never a hook — budget-guard-check and
+    // pre-push-validate ship only a .sh and must survive either setting
+    expect(await emitWith({ windowsFirst: false })).toContain('beta.sh');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -435,6 +526,40 @@ describe('hook wiring leaves no orphaned template', () => {
           `hook template "${stem}.${ext}" ships but nothing wires it`
         ).toBe(true);
       }
+    }
+  });
+
+  it('should hold in both directions when windowsFirst drops the .ps1 variant', async () => {
+    // Arrange — the emit filter has to move wiring and files together. Wiring a
+    // .ps1 this repo no longer writes is the dangling reference #185 was about;
+    // emitting one nothing invokes is the orphan the test above covers.
+    const spec = loadYaml(readFileSync(SETTINGS_SPEC, 'utf-8'));
+    const exts = await collectHookExtensions(HOOK_TEMPLATE_DIR, { windowsFirst: false });
+
+    // Act
+    const wired = new Set();
+    for (const matchers of Object.values(buildHooksFromSpec(spec.hooks, exts))) {
+      for (const matcher of matchers) {
+        for (const hook of matcher.hooks) {
+          for (const file of extractHookFiles(hook.command)) wired.add(file);
+        }
+      }
+    }
+
+    // Assert — nothing wired that is not emitted...
+    for (const file of wired) {
+      expect(file.endsWith('.sh'), `"${file}" is wired but windowsFirst:false emits no .ps1`).toBe(
+        true
+      );
+      const stem = file.replace(/\.sh$/, '');
+      expect(exts.has(stem), `"${file}" is wired but ships no template`).toBe(true);
+    }
+
+    // ...and nothing emitted that is not wired
+    for (const stem of exts.keys()) {
+      expect(wired.has(`${stem}.sh`), `hook template "${stem}.sh" ships but nothing wires it`).toBe(
+        true
+      );
     }
   });
 });

@@ -16,7 +16,7 @@ import {
   validateThemeSpec,
 } from './brand-resolver.mjs';
 
-import { isUnsafePathSegment } from './fs-utils.mjs';
+import { isUnsafePathSegment, SAFE_HOOK_STEM } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { readYaml } from './spec-loader.mjs';
 import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
@@ -646,12 +646,24 @@ export function filterHooksToEmitted(hooks, hookFeatureMap, vars) {
 }
 
 /**
- * A hook stem is interpolated into a shell command whose path is only partly
- * quoted (`"$CLAUDE_PROJECT_DIR"/.claude/hooks/<stem>.sh`), so anything beyond
- * a plain file name — whitespace, quotes, `$`, backticks, `;` — would alter how
- * that command parses. Real hook names are simple, so require exactly that.
+ * Whether this repo emits the PowerShell variant of a hook.
+ *
+ * `.sh` is the universal baseline and always ships; `.ps1` is additive — the
+ * native variant on Windows, invoked in preference to the `.sh` when both are
+ * present, with the `.sh` as the fallback for machines without pwsh. A repo
+ * that never runs on Windows sets `windowsFirst: false` to stop emitting
+ * PowerShell files it would never execute.
+ *
+ * The filter is deliberately one-directional. Dropping the `.sh` instead would
+ * strip the fallback that lets a Windows-authored repo still run its hooks on a
+ * Linux CI runner, and would delete outright the hooks that ship no `.ps1` at
+ * all (budget-guard-check, pre-push-validate) — silently removing a guard.
+ *
+ * Defaults to true, so an overlay that never sets the key is unaffected.
  */
-const SAFE_HOOK_STEM = /^[A-Za-z0-9._-]+$/;
+export function isWindowsFirst(vars) {
+  return vars?.windowsFirst !== false;
+}
 
 /**
  * Indexes the hook templates by stem, recording which extensions ship for each
@@ -665,15 +677,23 @@ const SAFE_HOOK_STEM = /^[A-Za-z0-9._-]+$/;
  * wired, so it can never reach a command string. Sync still writes the file, so
  * it surfaces as an orphan and fails the wiring test instead of silently
  * generating a command that does not parse.
+ *
+ * `vars` is optional and only supplies `windowsFirst`. It must be the same
+ * `vars` syncClaudeHooks() gates emission on: the index decides what settings.json
+ * *invokes*, so indexing a variant this repo does not emit would wire a command
+ * pointing at a file that was never written.
  */
-export async function collectHookExtensions(hooksDir) {
+export async function collectHookExtensions(hooksDir, vars) {
   const byStem = new Map();
   if (!existsSync(hooksDir)) return byStem;
+  const withPowerShell = isWindowsFirst(vars);
   for (const fname of await readdir(hooksDir)) {
     const m = fname.match(/^(.+)\.(sh|ps1)$/i);
     if (!m || !SAFE_HOOK_STEM.test(m[1])) continue;
+    const ext = m[2].toLowerCase();
+    if (ext === 'ps1' && !withPowerShell) continue;
     if (!byStem.has(m[1])) byStem.set(m[1], new Set());
-    byStem.get(m[1]).add(m[2].toLowerCase());
+    byStem.get(m[1]).add(ext);
   }
   return byStem;
 }
@@ -790,7 +810,7 @@ export async function syncClaudeSettings(
   // which variant each entry invokes.
   const specHooks = buildHooksFromSpec(
     settingsSpec?.hooks,
-    await collectHookExtensions(join(templatesDir, 'claude', 'hooks'))
+    await collectHookExtensions(join(templatesDir, 'claude', 'hooks'), vars)
   );
   if (specHooks) settings.hooks = specHooks;
   // Subagent spawn depth (ADR-15 §4). Emitted here rather than in the template
@@ -836,6 +856,9 @@ export async function syncClaudeHooks(
     if (!isHookEmitted(stem, hookFeatureMap, vars)) continue;
 
     const ext = extname(srcFile).toLowerCase();
+    // Mirrors collectHookExtensions(), which gates what settings.json invokes.
+    // Both read the same `vars`, so a variant is never wired without being written.
+    if (ext === '.ps1' && !isWindowsFirst(vars)) continue;
     const content = await readTemplateText(srcFile);
     const rendered = renderTemplate(content, vars, srcFile);
     const withHeader = insertHeader(rendered, ext, version, repoName);
