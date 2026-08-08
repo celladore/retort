@@ -27,7 +27,7 @@ and the older `6d2d4e6c` revision produce the same parse errors under 5.1.
 Two independent 5.1 incompatibilities, the second masked by the first.
 
 **1. Encoding (the reported defect).** Generated `.ps1` files were written as UTF-8
-*without* a BOM. Windows PowerShell 5.1 decodes a BOM-less file as ANSI/Windows-1252
+_without_ a BOM. Windows PowerShell 5.1 decodes a BOM-less file as ANSI/Windows-1252
 rather than UTF-8. Multi-byte UTF-8 sequences — em-dashes in comments, `ℹ️` in
 `Write-Host` strings — were therefore mangled into replacement characters that could
 swallow a string terminator, breaking the parse of the entire file. PowerShell 7+
@@ -97,10 +97,10 @@ end-to-end under 5.1. Sync was run twice to confirm idempotency — no drift, no
 
 ### Before/After Comparison
 
-| | Windows PowerShell 5.1 | PowerShell 7.6.3 |
-|---|---|---|
-| Before | 12 files failing to parse | clean |
-| After | 0 executable files failing | clean |
+|        | Windows PowerShell 5.1     | PowerShell 7.6.3 |
+| ------ | -------------------------- | ---------------- |
+| Before | 12 files failing to parse  | clean            |
+| After  | 0 executable files failing | clean            |
 
 `create-doc.ps1` progressed from `ParserError: TerminatorExpectedAtEndOfString` (before),
 to a `Join-Path` parameter-binding failure (after the encoding fix alone), to successful
@@ -128,7 +128,7 @@ invisible from the documentation.
 
 ## Lessons Learned
 
-A fix that makes a file *parse* is not the same as making it *work*. The encoding fix
+A fix that makes a file _parse_ is not the same as making it _work_. The encoding fix
 immediately exposed a second 5.1 incompatibility (`Join-Path` arity) that had been dead
 code behind the parse failure — verifying by execution rather than by parser check alone
 is what caught it.
@@ -138,9 +138,9 @@ both BOM-less UTF-8 and multi-segment `Join-Path`; 5.1 tolerates neither.
 
 ## Known Remaining Issues
 
-- **`.agentkit/bin/setup-branch-protection.ps1:84`** fails to parse under *both* 5.1 and
+- **`.agentkit/bin/setup-branch-protection.ps1:84`** fails to parse under _both_ 5.1 and
   pwsh 7: `Variable reference is not valid. ':' was not followed by a valid variable name
-  character`. This is a genuine pre-existing syntax bug, unrelated to encoding, and was
+character`. This is a genuine pre-existing syntax bug, unrelated to encoding, and was
   left for a separate fix.
 - `.agentkit/templates/**/*.ps1` intentionally remain BOM-less. Templates are the input
   to rendering, never executed as PowerShell, and a leading BOM would precede the
