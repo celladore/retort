@@ -183,9 +183,10 @@ describe('writeScaffoldOutputs', () => {
     const { count, writtenFiles } = await run({ allTmpFiles: [srcFile], newManifestFiles });
 
     expect(count).toBe(0);
-    // writtenFiles still contains the file so runPostSyncPrettier can format it
-    // (guards files written before post-sync formatting was introduced)
-    expect(writtenFiles).toEqual([destFile]);
+    // Unchanged files are not queued for formatting: temp output is already
+    // formatted before this step, so a hash match means the file on disk is
+    // correct. Queueing it would rewrite identical bytes and bump mtime.
+    expect(writtenFiles).toEqual([]);
   });
 
   it('overwrites when --force flag is set regardless of scaffold:once', async () => {

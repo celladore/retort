@@ -106,8 +106,8 @@ None — this is a CLI/agent framework.
   shipped code diverged.
 - [Implementation spec](../../planning/agents-teams/agent-dispatch-capability.md) — schema,
   derivation rules, phasing, test plan, and inline corrections.
-- Session handoffs [2026-08-07-02](../../handoffs/2026-08-07-02.md) and
-  [2026-08-07-03](../../handoffs/2026-08-07-03.md).
+- Session handoffs [2026-08-07-04](../../handoffs/2026-08-07-04.md) and
+  [2026-08-07-05](../../handoffs/2026-08-07-05.md).
 
 ## Rollout Plan
 

@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 3,
+    "bugfix": 6,
     "feature": 2,
     "migration": 1,
     "issue": 1,
@@ -25,12 +25,36 @@
       "file": "bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md"
     },
     {
+      "number": 3,
+      "type": "bugfix",
+      "title": "Harden create-doc and widen numbering validation",
+      "date": "2026-08-07",
+      "pr": "576",
+      "file": "bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md"
+    },
+    {
+      "number": 4,
+      "type": "bugfix",
+      "title": "Orphaned hook scripts never wired in generated Claude settings",
+      "date": "2026-08-07",
+      "pr": "577",
+      "file": "bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md"
+    },
+    {
       "number": 10,
       "type": "implementation",
       "title": "Hook wiring generated from spec",
       "date": "2026-08-07",
       "pr": "575",
       "file": "implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md"
+    },
+    {
+      "number": 5,
+      "type": "bugfix",
+      "title": "Silently broken CI config defects",
+      "date": "2026-08-07",
+      "pr": "579",
+      "file": "bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md"
     },
     {
       "number": 1,
