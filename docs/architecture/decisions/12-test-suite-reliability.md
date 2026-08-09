@@ -265,6 +265,13 @@ escaped double quotes (any subject containing a backslash would have been mangle
 identity via `git -c` removes the dependency on ambient user config — a machine with
 `commit.gpgsign` enabled previously failed here.
 
+The fixture-cost correction does not remove a separate product boundary defect found afterward:
+`detectCommitConvention()` passed only `cwd` to `git log`, but inherited `GIT_DIR`,
+`GIT_WORK_TREE`, `GIT_INDEX_FILE`, or `GIT_OBJECT_DIRECTORY` still override that directory.
+Detection now removes those inherited overrides for the subprocess. A two-repository regression
+fixture points `GIT_DIR` at a conventional decoy and confirms that discovery still reports the
+non-conventional project repository.
+
 ### Decision 6 — raise sync-heavy timeouts (partly done, and re-scoped)
 
 `hookTimeout` was already raised to 240s in #570, so the `beforeAll` half of this was addressed

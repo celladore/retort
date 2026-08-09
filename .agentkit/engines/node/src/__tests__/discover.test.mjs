@@ -427,6 +427,39 @@ describe('detectCommitConvention() — git-log heuristic', () => {
   });
 
   it(
+    'reads the project repo, not one named by an ambient GIT_DIR',
+    { timeout: 15_000 },
+    async () => {
+      initGitRepo(tmpDir, [
+        'Updated the readme',
+        'Fixed some stuff',
+        'WIP',
+        'Cleaned up code',
+        'Initial commit',
+      ]);
+
+      const otherRepo = makeTmpDir();
+      initGitRepo(otherRepo, [
+        'feat(auth): add login flow',
+        'fix(api): handle null response',
+        'docs: update readme',
+        'chore(deps): bump vitest',
+      ]);
+
+      const originalGitDir = process.env.GIT_DIR;
+      process.env.GIT_DIR = join(otherRepo, '.git');
+      try {
+        // The project's own history is not conventional; the decoy's is.
+        expect(await detectCommitConvention(tmpDir)).toBeNull();
+      } finally {
+        if (originalGitDir === undefined) delete process.env.GIT_DIR;
+        else process.env.GIT_DIR = originalGitDir;
+        rmSync(otherRepo, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it(
     'file-based detection takes priority over git-log heuristic',
     { timeout: 15_000 },
     async () => {
