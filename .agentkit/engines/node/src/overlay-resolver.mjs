@@ -197,7 +197,7 @@ function assertOverlayExists(selection, agentkitRoot) {
  * @throws {Error} when no overlay can be resolved, or the resolved one is unknown
  */
 export function resolveOverlaySelection(agentkitRoot, projectRoot, flags) {
-  if (flags?.overlay) {
+  if (flags != null && Object.hasOwn(flags, 'overlay')) {
     return assertOverlayExists(
       { repoName: String(flags.overlay).trim(), reason: '--overlay flag' },
       agentkitRoot

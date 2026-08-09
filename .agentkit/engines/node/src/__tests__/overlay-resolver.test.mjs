@@ -103,6 +103,16 @@ describe('resolveOverlaySelection — resolution order', () => {
     expect(selection.reason).toContain('--overlay flag');
   });
 
+  it('rejects an explicit blank --overlay instead of falling through to a valid marker', () => {
+    const agentkitRoot = makeAgentkitRoot();
+    const projectRoot = makeProjectRoot('demo-repo');
+    writeMarker(projectRoot, 'demo-repo');
+
+    expect(() => resolveOverlaySelection(agentkitRoot, projectRoot, { overlay: '' })).toThrow(
+      'Invalid overlay name "" (from --overlay flag)'
+    );
+  });
+
   it('reads the .agentkit-repo marker at the project root', () => {
     const agentkitRoot = makeAgentkitRoot();
     const projectRoot = makeProjectRoot('unrelated-name');
