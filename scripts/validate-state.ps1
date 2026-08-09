@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------
+﻿# ---------------------------------------------------------------------------
 # validate-state.ps1 — Validate orchestrator state before beginning work.
 #                      (Windows PowerShell version)
 #

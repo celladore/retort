@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 6,
+    "bugfix": 7,
     "feature": 2,
     "migration": 1,
     "issue": 1,
@@ -63,6 +63,14 @@
       "date": "2026-08-08",
       "pr": "",
       "file": "features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md"
+    },
+    {
+      "number": 6,
+      "type": "bugfix",
+      "title": "Generated PowerShell scripts fail to parse under Windows PowerShell 5.1",
+      "date": "2026-08-07",
+      "pr": "581",
+      "file": "bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
     }
   ]
 }

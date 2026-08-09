@@ -128,6 +128,21 @@ describe('writeScaffoldOutputs', () => {
     expect(content).toBe('# New File\n');
   });
 
+  it('writes ordinary .ps1 scaffold output with a BOM and hashes the written bytes', async () => {
+    const content = '#!/usr/bin/env pwsh\nWrite-Host "done — safely"\n';
+    const srcFile = join(tmpDir, 'scripts', 'normal.ps1');
+    writeSync(srcFile, content);
+    const newManifestFiles = { 'scripts/normal.ps1': { hash: sha256(content) } };
+
+    const { count } = await run({ allTmpFiles: [srcFile], newManifestFiles });
+
+    expect(count).toBe(1);
+    const written = await readFile(join(projectRoot, 'scripts', 'normal.ps1'));
+    expect(written.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(written.toString('utf-8').slice(1)).toBe(content);
+    expect(newManifestFiles['scripts/normal.ps1'].hash).toBe(sha256(written));
+  });
+
   it('returns count=0 when no files are provided', async () => {
     const { count, writtenFiles } = await run({ allTmpFiles: [] });
     expect(count).toBe(0);
