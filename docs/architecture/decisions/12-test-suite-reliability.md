@@ -296,6 +296,16 @@ the `ci.yml` comment says so rather than leaving the change silent.
 
 ### Status of the acceptance criterion
 
-The criterion above — three consecutive runs with an identical pass set — has **not** been
-demonstrated. The first attempt was invalidated by the disk exhaustion described here, which
-was itself the finding. It remains the right bar and is still outstanding.
+The criterion above — three consecutive runs with an identical pass set — was demonstrated on
+2026-08-09 after merging Retort `dev` through `f5262097` into PR #584. The tested code head was
+`e2ca93a2` (tree `cc2c68e9`), with no source or dependency changes between runs:
+
+| Run | Test files | Tests        | Skipped | Duration |
+| --- | ---------- | ------------ | ------- | -------- |
+| 1   | 74 passed  | 2,251 passed | 1       | 303.92s  |
+| 2   | 74 passed  | 2,251 passed | 1       | 303.49s  |
+| 3   | 74 passed  | 2,251 passed | 1       | 295.57s  |
+
+All three runs exited zero with the same pass set and no fixture-cleanup warning. This closes
+the repeatability gate for the decisions implemented by PR #584; it does not claim that every
+remaining Windows-only contention source in the wider suite has been eliminated.
