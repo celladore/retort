@@ -19,6 +19,55 @@ import { runSync } from '../synchronize.mjs';
 
 const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
 
+/**
+ * Remove a fixture tree, tolerating Windows file locking.
+ *
+ * `rmSync` throws EBUSY/EPERM on Windows when any handle is still open on a file
+ * in the tree — an antivirus scan or the search indexer is enough, and `force`
+ * does not cover it (it only suppresses ENOENT). `maxRetries` makes Node back off
+ * and retry, which clears the common transient case.
+ *
+ * Failures are swallowed deliberately: a fixture that cannot be deleted must not
+ * fail an otherwise green suite, and the OS temp directory is reclaimable.
+ *
+ * Every cleanup hook in this file routes through here. Previously they called
+ * `rmSync` bare and un-wrapped, so the *first* undeletable tree threw and
+ * stranded every remaining root in the same hook. Each sync fixture is 600+
+ * files, and 126 of them had accumulated in %TEMP% — enough to exhaust the disk
+ * and make the entire suite fail to load, which reads as catastrophic breakage
+ * rather than as a cleanup bug.
+ */
+/** @type {Map<string, string>} paths that survived every retry, reported at end of file */
+const cleanupFailures = new Map();
+
+function removeTree(path) {
+  try {
+    rmSync(path, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    cleanupFailures.delete(path);
+  } catch (err) {
+    // Recorded rather than thrown, then reported once at the end of the file.
+    // Throwing here would strand the sibling trees again — the bug this helper
+    // exists to fix — but swallowing silently would let the leak creep back and
+    // recreate the ENOSPC failure while the suite still reported green.
+    cleanupFailures.set(path, err.code ?? err.message);
+  }
+}
+
+/**
+ * Overlay these tests render from.
+ *
+ * Temp project roots carry no `.agentkit-repo` marker and have a random
+ * directory name, so overlay resolution has nothing to resolve from. Since
+ * ADR-11 decision 3 that aborts instead of silently defaulting to
+ * `__TEMPLATE__`, so the tests name the overlay explicitly — which renders
+ * exactly what the old implicit fallback rendered.
+ *
+ * Only syncs against a temp project root need this. Blocks that build their own
+ * agentkit root and a matching project directory (`makeNamedTmpProject`) resolve
+ * by name and deliberately do not pass it.
+ */
+const TEMPLATE_OVERLAY = '__TEMPLATE__';
+
 /** Creates a temp project root for testing sync output. */
 function makeTmpProject() {
   const dir = resolve(
@@ -113,7 +162,11 @@ function goldenSync(flags = {}) {
     createdRoots.add(projectRoot);
     goldenRoots.set(
       key,
-      runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags }).then(() => projectRoot)
+      runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { overlay: TEMPLATE_OVERLAY, ...flags },
+      }).then(() => projectRoot)
     );
   }
   return goldenRoots.get(key);
@@ -130,10 +183,32 @@ async function cloneSync(flags = {}) {
 
 afterAll(() => {
   for (const root of createdRoots) {
-    rmSync(root, { recursive: true, force: true });
+    removeTree(root);
   }
   createdRoots.clear();
   goldenRoots.clear();
+
+  // A tree can still be held when its describe-level cleanup runs. Retry every
+  // survivor once more after all suites and their subprocesses have finished;
+  // removeTree applies its own bounded retry/backoff and removes recovered paths
+  // from cleanupFailures.
+  for (const root of [...cleanupFailures.keys()]) {
+    removeTree(root);
+  }
+
+  // Runs after every describe-level hook in this file, so it sees the full set.
+  // Warn rather than fail: a tree held by an antivirus scan is not a broken test,
+  // and failing here would make the suite red for an environment condition. But
+  // it must not be silent — an accumulating leak is what filled the disk before,
+  // and a green suite hid it.
+  if (cleanupFailures.size > 0) {
+    console.warn(
+      `\n[sync-integration] ${cleanupFailures.size} fixture tree(s) could not be removed ` +
+        `and remain in the OS temp directory. Delete them manually if they accumulate:\n` +
+        [...cleanupFailures].map(([path, error]) => `  - ${path} (${error})`).join('\n')
+    );
+    cleanupFailures.clear();
+  }
 });
 
 function writeTestFile(filePath, content) {
@@ -232,11 +307,11 @@ describe('overlay resolution and template precedence regressions', () => {
 
   afterEach(() => {
     if (projectRoot) {
-      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
+      removeTree(resolve(projectRoot, '..'));
       projectRoot = null;
     }
     if (agentkitRoot) {
-      rmSync(agentkitRoot, { recursive: true, force: true });
+      removeTree(agentkitRoot);
       agentkitRoot = null;
     }
   });
@@ -720,7 +795,7 @@ describe('--overwrite flag', () => {
     projectRoot = await cloneSync({});
   });
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
   it('skips project-owned files by default', { timeout: 120_000 }, async () => {
@@ -730,7 +805,11 @@ describe('--overwrite flag', () => {
     const customContent = 'CUSTOM_CONTENT_MARKER_12345';
     writeFileSync(contribPath, customContent, 'utf-8');
 
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY },
+    });
     expect(readFileSync(contribPath, 'utf-8')).toBe(customContent);
   });
 
@@ -739,14 +818,22 @@ describe('--overwrite flag', () => {
     const customContent = 'CUSTOM_OVERWRITE_MARKER_67890';
     writeFileSync(contribPath, customContent, 'utf-8');
 
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { overwrite: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY, overwrite: true },
+    });
     expect(readFileSync(contribPath, 'utf-8')).not.toContain(customContent);
   });
 
   it('--force is alias for --overwrite', { timeout: 120_000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     writeFileSync(contribPath, 'CUSTOM', 'utf-8');
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { force: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY, force: true },
+    });
     expect(readFileSync(contribPath, 'utf-8')).not.toContain('CUSTOM');
   });
 });
@@ -758,10 +845,13 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     projectRoot = makeTmpProject();
   });
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
-  it('--diff shows create/update/skip without writing', { timeout: 30000 }, async () => {
+  // Performs a full sync, which measures 13–25s on Windows. The 30s budget left
+  // no headroom and timed out under load — matching the 120s already used by the
+  // --overwrite tests in this block, which do the same amount of work.
+  it('--diff shows create/update/skip without writing', { timeout: 120_000 }, async () => {
     const log = [];
     const origLog = console.log;
     console.log = (...args) => {
@@ -769,7 +859,11 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
       origLog.apply(console, args);
     };
     try {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { diff: true } });
+      await runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { overlay: TEMPLATE_OVERLAY, diff: true },
+      });
       const out = log.join('\n');
       expect(out).toContain('Diff mode');
       expect(out).toContain('create ');
@@ -791,7 +885,9 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
       mkdirSync(tempAgentkitRoot, { recursive: true });
 
       // Copy essential files from AGENTKIT_ROOT to temp
-      const essentialFiles = ['.manifest.json', 'spec', 'templates', 'engines'];
+      // `overlays` is needed as well: overlay resolution now verifies the
+      // selected overlay actually exists, so a root without it cannot sync.
+      const essentialFiles = ['.manifest.json', 'spec', 'templates', 'engines', 'overlays'];
       for (const file of essentialFiles) {
         const src = join(AGENTKIT_ROOT, file);
         const dest = join(tempAgentkitRoot, file);
@@ -809,7 +905,11 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
       }
 
       try {
-        await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: {} });
+        await runSync({
+          agentkitRoot: tempAgentkitRoot,
+          projectRoot,
+          flags: { overlay: TEMPLATE_OVERLAY },
+        });
         const manifestPath = join(tempAgentkitRoot, '.manifest.json');
         const originalManifest = existsSync(manifestPath)
           ? readFileSync(manifestPath, 'utf-8')
@@ -819,13 +919,20 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
         writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
         const orphanPath = join(projectRoot, '__TEST_ORPHAN__.md');
         writeFileSync(orphanPath, 'orphan', 'utf-8');
-        await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: { 'no-clean': true } });
+        await runSync({
+          agentkitRoot: tempAgentkitRoot,
+          projectRoot,
+          flags: { overlay: TEMPLATE_OVERLAY, 'no-clean': true },
+        });
         expect(existsSync(orphanPath)).toBe(true);
       } finally {
-        rmSync(tempAgentkitRoot, { recursive: true, force: true });
+        removeTree(tempAgentkitRoot);
       }
     },
-    60000
+    // Two full syncs plus a recursive copy of spec/, templates/ and engines/.
+    // At 13–25s per sync on Windows the old 60s budget could not fit the work,
+    // so this timed out deterministically under load rather than intermittently.
+    180_000
   );
 });
 
@@ -1239,11 +1346,11 @@ describe('syncEditorTheme — pre-existing settings.json merge', () => {
     await runSync({
       agentkitRoot: AGENTKIT_ROOT,
       projectRoot,
-      flags: { quiet: true, overwrite: true },
+      flags: { overlay: TEMPLATE_OVERLAY, quiet: true, overwrite: true },
     });
   }, 120_000);
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
   it('has workbench.colorCustomizations and _agentkit_theme after merge', () => {
@@ -1279,7 +1386,7 @@ describe('syncGitattributes (merge driver sync)', () => {
     projectRoot = await cloneSync({ quiet: true });
   });
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
   it('generates .gitattributes with merge driver section', () => {
@@ -1310,7 +1417,11 @@ describe('syncGitattributes (merge driver sync)', () => {
       writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
 
       // Re-sync
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+      await runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { overlay: TEMPLATE_OVERLAY, quiet: true },
+      });
 
       const updated = readFileSync(gitattrsPath, 'utf-8');
       expect(updated).toContain('# My custom rules');
@@ -1325,7 +1436,11 @@ describe('syncGitattributes (merge driver sync)', () => {
   it('replaces stale managed section without duplication', { timeout: 120_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Re-sync a second time to verify no duplication
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY, quiet: true },
+    });
 
     const content = readFileSync(gitattrsPath, 'utf-8');
     const startCount = (content.match(/# >>> Retort merge drivers/g) || []).length;

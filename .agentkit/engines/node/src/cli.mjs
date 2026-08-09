@@ -9,6 +9,7 @@ import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { VALID_COMMANDS } from './commands-registry.mjs';
+import { findMissingRuntimeDependencies } from './dependency-bootstrap.mjs';
 
 // Lazy-loaded after ensureDependencies() — js-yaml may not be installed yet
 let yaml;
@@ -94,6 +95,7 @@ const CLI_INTERNAL_FLAGS = {
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
   worktree: ['base', 'no-setup', 'dry-run', 'help'],
   run: ['id', 'assignee', 'dry-run', 'json', 'help'],
+  harness: ['document', 'json', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -147,6 +149,7 @@ const CLI_INTERNAL_FLAG_TYPES = {
   base: 'string',
   'no-setup': 'boolean',
   json: 'boolean',
+  document: 'string',
 };
 
 /**
@@ -360,6 +363,12 @@ Task Delegation:
 Diagnostics:
   doctor          Run Retort diagnostics and setup checks
                   --verbose         Include detailed diagnostics
+  harness doctor  Verify the vendored Agent Harnessing contract lock and schema
+  harness validate --document <path>
+                  Validate a contract document offline against the pinned schema
+  harness options:
+                  --document <path> Document to validate (validate only)
+                  --json            Emit machine-readable output (both actions)
 
 Backlog & Issue Tracking:
   import-issues   Import issues from external tracker into local backlog
@@ -444,20 +453,20 @@ Environment:
 }
 
 function ensureDependencies(agentkitRoot) {
-  const jsYamlPath = resolve(agentkitRoot, 'node_modules', 'js-yaml', 'package.json');
-  if (existsSync(jsYamlPath)) {
-    return true;
-  }
   const pkgPath = resolve(agentkitRoot, 'package.json');
   if (!existsSync(pkgPath)) {
     return true;
   }
+  const missingDependencies = findMissingRuntimeDependencies(agentkitRoot);
+  if (missingDependencies.length === 0) return true;
+
   const hasPnpm =
     spawnSync('pnpm', ['--version'], { encoding: 'utf8', windowsHide: true }).status === 0;
   const installCmd = hasPnpm ? 'pnpm' : 'npm';
   const installArgs = hasPnpm ? ['install'] : ['install'];
   console.warn(
-    `[retort] Dependencies not installed. Running ${installCmd} install in .agentkit...`
+    `[retort] Missing dependencies (${missingDependencies.join(', ')}). ` +
+      `Running ${installCmd} install in .agentkit...`
   );
   const r = spawnSync(installCmd, installArgs, {
     cwd: agentkitRoot,
@@ -602,6 +611,16 @@ async function main() {
       case 'doctor': {
         const { runDoctor } = await import('./doctor.mjs');
         const result = await runDoctor({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        if (!result.ok) process.exit(1);
+        break;
+      }
+      case 'harness': {
+        const { runHarness } = await import('./harness-contract.mjs');
+        const result = await runHarness({
           agentkitRoot: AGENTKIT_ROOT,
           projectRoot: PROJECT_ROOT,
           flags,
