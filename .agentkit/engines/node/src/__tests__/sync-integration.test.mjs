@@ -19,6 +19,40 @@ import { runSync } from '../synchronize.mjs';
 
 const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
 
+/**
+ * Remove a fixture tree, tolerating Windows file locking.
+ *
+ * `rmSync` throws EBUSY/EPERM on Windows when any handle is still open on a file
+ * in the tree — an antivirus scan or the search indexer is enough, and `force`
+ * does not cover it (it only suppresses ENOENT). `maxRetries` makes Node back off
+ * and retry, which clears the common transient case.
+ *
+ * Failures are swallowed deliberately: a fixture that cannot be deleted must not
+ * fail an otherwise green suite, and the OS temp directory is reclaimable.
+ *
+ * Every cleanup hook in this file routes through here. Previously they called
+ * `rmSync` bare and un-wrapped, so the *first* undeletable tree threw and
+ * stranded every remaining root in the same hook. Each sync fixture is 600+
+ * files, and 126 of them had accumulated in %TEMP% — enough to exhaust the disk
+ * and make the entire suite fail to load, which reads as catastrophic breakage
+ * rather than as a cleanup bug.
+ */
+/** @type {Map<string, string>} paths that survived every retry, reported at end of file */
+const cleanupFailures = new Map();
+
+function removeTree(path) {
+  try {
+    rmSync(path, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    cleanupFailures.delete(path);
+  } catch (err) {
+    // Recorded rather than thrown, then reported once at the end of the file.
+    // Throwing here would strand the sibling trees again — the bug this helper
+    // exists to fix — but swallowing silently would let the leak creep back and
+    // recreate the ENOSPC failure while the suite still reported green.
+    cleanupFailures.set(path, err.code ?? err.message);
+  }
+}
+
 /** Creates a temp project root for testing sync output. */
 function makeTmpProject() {
   const dir = resolve(
@@ -130,10 +164,32 @@ async function cloneSync(flags = {}) {
 
 afterAll(() => {
   for (const root of createdRoots) {
-    rmSync(root, { recursive: true, force: true });
+    removeTree(root);
   }
   createdRoots.clear();
   goldenRoots.clear();
+
+  // A tree can still be held when its describe-level cleanup runs. Retry every
+  // survivor once more after all suites and their subprocesses have finished;
+  // removeTree applies its own bounded retry/backoff and removes recovered paths
+  // from cleanupFailures.
+  for (const root of [...cleanupFailures.keys()]) {
+    removeTree(root);
+  }
+
+  // Runs after every describe-level hook in this file, so it sees the full set.
+  // Warn rather than fail: a tree held by an antivirus scan is not a broken test,
+  // and failing here would make the suite red for an environment condition. But
+  // it must not be silent — an accumulating leak is what filled the disk before,
+  // and a green suite hid it.
+  if (cleanupFailures.size > 0) {
+    console.warn(
+      `\n[sync-integration] ${cleanupFailures.size} fixture tree(s) could not be removed ` +
+        `and remain in the OS temp directory. Delete them manually if they accumulate:\n` +
+        [...cleanupFailures].map(([path, error]) => `  - ${path} (${error})`).join('\n')
+    );
+    cleanupFailures.clear();
+  }
 });
 
 function writeTestFile(filePath, content) {
@@ -232,11 +288,11 @@ describe('overlay resolution and template precedence regressions', () => {
 
   afterEach(() => {
     if (projectRoot) {
-      rmSync(resolve(projectRoot, '..'), { recursive: true, force: true });
+      removeTree(resolve(projectRoot, '..'));
       projectRoot = null;
     }
     if (agentkitRoot) {
-      rmSync(agentkitRoot, { recursive: true, force: true });
+      removeTree(agentkitRoot);
       agentkitRoot = null;
     }
   });
@@ -720,7 +776,7 @@ describe('--overwrite flag', () => {
     projectRoot = await cloneSync({});
   });
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
   it('skips project-owned files by default', { timeout: 120_000 }, async () => {
@@ -758,10 +814,13 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
     projectRoot = makeTmpProject();
   });
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
-  it('--diff shows create/update/skip without writing', { timeout: 30000 }, async () => {
+  // Performs a full sync, which measures 13–25s on Windows. The 30s budget left
+  // no headroom and timed out under load — matching the 120s already used by the
+  // --overwrite tests in this block, which do the same amount of work.
+  it('--diff shows create/update/skip without writing', { timeout: 120_000 }, async () => {
     const log = [];
     const origLog = console.log;
     console.log = (...args) => {
@@ -822,10 +881,13 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
         await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: { 'no-clean': true } });
         expect(existsSync(orphanPath)).toBe(true);
       } finally {
-        rmSync(tempAgentkitRoot, { recursive: true, force: true });
+        removeTree(tempAgentkitRoot);
       }
     },
-    60000
+    // Two full syncs plus a recursive copy of spec/, templates/ and engines/.
+    // At 13–25s per sync on Windows the old 60s budget could not fit the work,
+    // so this timed out deterministically under load rather than intermittently.
+    180_000
   );
 });
 
@@ -1243,7 +1305,7 @@ describe('syncEditorTheme — pre-existing settings.json merge', () => {
     });
   }, 120_000);
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
   it('has workbench.colorCustomizations and _agentkit_theme after merge', () => {
@@ -1279,7 +1341,7 @@ describe('syncGitattributes (merge driver sync)', () => {
     projectRoot = await cloneSync({ quiet: true });
   });
   afterAll(() => {
-    rmSync(projectRoot, { recursive: true, force: true });
+    removeTree(projectRoot);
   });
 
   it('generates .gitattributes with merge driver section', () => {

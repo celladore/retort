@@ -227,3 +227,89 @@ operation recoverable via git and leaving `--force` as the explicit escape hatch
 the data-loss hazard but not the underlying semantic question: whether `--overwrite` should
 regenerate user-authored content such as decision records at all, or only the editor-theme and
 config files it was introduced for. That question remains open and is not decided here.
+
+## Revision (2026-08-08): decisions 3 and 4 landed, plus a cause not previously identified
+
+Decisions 4 and 3 are implemented. A fourth problem surfaced while measuring them that was
+not in the original analysis, and it explains the most alarming failure mode.
+
+### The suite was exhausting the disk
+
+`sync-integration.test.mjs` cleanup hooks called `rmSync(root, { recursive: true, force: true })`
+bare. On Windows that throws `EBUSY`/`EPERM` whenever any handle is still open on a file in the
+tree — an antivirus scan or the search indexer suffices — and `force` does not cover it, since
+it only suppresses `ENOENT`. With no `try`/`catch`, the first undeletable tree threw and
+stranded **every remaining root in the same hook**.
+
+Each fixture is a full sync output tree of 600+ files. **126 of them had accumulated in
+`%TEMP%`.** A subsequent full run then failed to load all 74 test files with `ENOSPC`, which
+presents as total breakage rather than as a cleanup bug — and, being an out-of-space condition,
+it is not reproducible once the disk drains.
+
+This is worth recording because it invalidates naive failure-count comparisons: a run that
+reports 60+ failed files may be reporting disk state, not code state. Cleanup now routes
+through a `removeTree` helper with `maxRetries` and per-tree error isolation.
+
+### Decision 4 — fixture repositories (done)
+
+The premise in the original decision was slightly off: these tests already built fixture repos
+rather than reading ambient history. The defect was **cost**, not correctness of source.
+`initGitRepo` spawned 3 + 2N processes and measured **48s for an eight-commit fixture against a
+15s timeout** — deterministically impossible under load, passing only on an idle machine.
+
+Rebuilt on `git fast-import`: two subprocesses regardless of fixture size, ~3s. A 15× reduction
+with a clear mechanism, which is the kind of measurement this ADR has learned to trust.
+
+Two secondary gains: the length-prefixed `data` format removes a shell-quoting hack that only
+escaped double quotes (any subject containing a backslash would have been mangled), and passing
+identity via `git -c` removes the dependency on ambient user config — a machine with
+`commit.gpgsign` enabled previously failed here.
+
+### Decision 6 — raise sync-heavy timeouts (partly done, and re-scoped)
+
+`hookTimeout` was already raised to 240s in #570, so the `beforeAll` half of this was addressed
+before this revision. What remained were two **test-level** budgets, both verified failing on
+unmodified `dev`:
+
+| Test                              | Work                                              | Was | Now  |
+| --------------------------------- | ------------------------------------------------- | --- | ---- |
+| `--diff shows create/update/skip` | one full sync (13–25s)                            | 30s | 120s |
+| `--no-clean preserves orphaned`   | two full syncs + recursive copy of spec/templates | 60s | 180s |
+
+The pair now takes 100s of test time, comfortably above the old 60s — these were impossible
+budgets, not marginal ones. 120s matches what the neighbouring `--overwrite` tests already use
+for equivalent work.
+
+### Decision 3 — Prettier out of Vitest (done)
+
+Moved to a `Prettier` job in `ci.yml`, removing ~90s of suite runtime, one whole-repo I/O scan
+that contended with the sync-heavy suites, and the retry-once workaround whose own comment
+blamed "parallel tests creating and deleting files mid-scan".
+
+One implementation note for anyone revisiting it: the job runs from the **repository root**, not
+`.agentkit`. Prettier resolves `.prettierignore` relative to the working directory, so invoking
+it from `.agentkit` silently ignores the root ignore file and begins flagging `pnpm-lock.yaml`.
+
+The job is deliberately **not** in `branchProtection.requiredStatusChecks`. Formatting
+previously blocked merges as part of `Test`; making it block again is a separate decision, and
+the `ci.yml` comment says so rather than leaving the change silent.
+
+### Status of the acceptance criterion
+
+The criterion above — three consecutive runs with an identical pass set — was demonstrated on
+2026-08-09 on the Windows host where the flake occurred (Microsoft Windows build
+`10.0.28120.2546`), after merging Retort `dev` through `f5262097` into PR #584. Dependencies
+were installed from the frozen lockfile using the warm local pnpm store before the focused
+preflight; the three acceptance runs then used the same installed dependency tree and unchanged
+source. The tested code head was `e2ca93a2` (tree `cc2c68e9`):
+
+| Run | Test files | Tests        | Skipped | Duration |
+| --- | ---------- | ------------ | ------- | -------- |
+| 1   | 74 passed  | 2,251 passed | 1       | 303.92s  |
+| 2   | 74 passed  | 2,251 passed | 1       | 303.49s  |
+| 3   | 74 passed  | 2,251 passed | 1       | 295.57s  |
+
+All three Windows runs exited zero with the same pass set and no fixture-cleanup warning. This
+closes the PR #584 repeatability gate on the environment that exposed the defect; it does not
+claim that every remaining Windows-only contention source in the wider suite has been
+eliminated.

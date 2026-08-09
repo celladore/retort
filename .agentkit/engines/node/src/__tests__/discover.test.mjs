@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { mkdirSync, rmSync, writeFileSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { tmpdir } from 'os';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -43,12 +43,28 @@ describe('runDiscover()', () => {
       'name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n'
     );
     writeFile(join(tmpDir, 'src', 'index.js'), '// entry point\n');
-    // Init git repo with conventional commits
-    execSync('git init', { cwd: tmpDir, stdio: 'ignore' });
-    execSync('git config user.email "test@test.com"', { cwd: tmpDir, stdio: 'ignore' });
-    execSync('git config user.name "Test"', { cwd: tmpDir, stdio: 'ignore' });
-    execSync('git add -A', { cwd: tmpDir, stdio: 'ignore' });
-    execSync('git commit -m "feat: initial commit"', { cwd: tmpDir, stdio: 'ignore' });
+    // Init git repo with conventional commits. Identity and signing are passed
+    // inline with -c rather than via `git config` calls: two fewer subprocesses,
+    // and the fixture no longer depends on ambient user config (a machine with
+    // commit.gpgsign enabled would otherwise fail here).
+    execFileSync('git', ['init', '-b', 'main', '--quiet'], { cwd: tmpDir, stdio: 'ignore' });
+    execFileSync('git', ['add', '-A'], { cwd: tmpDir, stdio: 'ignore' });
+    execFileSync(
+      'git',
+      [
+        '-c',
+        'user.email=test@test.com',
+        '-c',
+        'user.name=Test',
+        '-c',
+        'commit.gpgsign=false',
+        'commit',
+        '--quiet',
+        '-m',
+        'feat: initial commit',
+      ],
+      { cwd: tmpDir, stdio: 'ignore' }
+    );
   });
 
   afterEach(() => {
@@ -262,15 +278,50 @@ describe('detectCommitConvention()', () => {
 /**
  * Helper: initialise a git repo and create commits with the given subjects.
  */
-function initGitRepo(dir, subjects) {
-  execSync('git init', { cwd: dir, stdio: 'ignore' });
-  execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'ignore' });
-  execSync('git config user.name "Test"', { cwd: dir, stdio: 'ignore' });
+/**
+ * Build a fast-import stream describing one commit per subject on refs/heads/main.
+ *
+ * `data <n>` is length-prefixed, so subjects are written verbatim — there is no
+ * shell quoting anywhere in this path and no character needs escaping.
+ */
+function buildFastImportStream(subjects) {
+  const EPOCH = 1700000000; // fixed timestamp keeps fixtures byte-identical between runs
+  let stream = '';
+
   for (let i = 0; i < subjects.length; i++) {
-    writeFileSync(join(dir, `f${i}.txt`), String(i), 'utf-8');
-    execSync(`git add f${i}.txt`, { cwd: dir, stdio: 'ignore' });
-    execSync(`git commit -m "${subjects[i].replace(/"/g, '\\"')}"`, { cwd: dir, stdio: 'ignore' });
+    const message = subjects[i];
+    stream += 'commit refs/heads/main\n';
+    stream += `mark :${i + 1}\n`;
+    // The committer comes from the stream, so the fixture does not depend on
+    // ambient git identity or on commit.gpgsign being unset.
+    stream += `committer Test <test@test.com> ${EPOCH + i} +0000\n`;
+    stream += `data ${Buffer.byteLength(message, 'utf-8')}\n${message}\n`;
+    if (i === 0) {
+      // fast-import needs at least one tree entry to create a root commit.
+      stream += 'M 644 inline README\ndata 1\nx\n';
+    }
+    stream += '\n';
   }
+
+  return `${stream}done\n`;
+}
+
+/**
+ * Create a throwaway git repository whose log contains exactly `subjects`.
+ *
+ * Uses `git fast-import` so the cost is two subprocesses regardless of how many
+ * commits the fixture needs. The previous implementation spawned 3 + 2N processes
+ * — 19 for an eight-commit fixture — which measured **48s on Windows against a
+ * 15s test timeout**, making these tests fail whenever the machine was loaded.
+ * The same fixture now builds in ~3s.
+ */
+function initGitRepo(dir, subjects) {
+  execFileSync('git', ['init', '-b', 'main', '--quiet'], { cwd: dir, stdio: 'ignore' });
+  execFileSync('git', ['fast-import', '--done', '--quiet'], {
+    cwd: dir,
+    input: buildFastImportStream(subjects),
+    stdio: ['pipe', 'ignore', 'pipe'],
+  });
 }
 
 describe('detectCommitConvention() — git-log heuristic', () => {
@@ -368,9 +419,8 @@ describe('detectCommitConvention() — git-log heuristic', () => {
   );
 
   it('returns null for empty git repos (no commits)', { timeout: 15_000 }, async () => {
-    execSync('git init', { cwd: tmpDir, stdio: 'ignore' });
-    execSync('git config user.email "test@test.com"', { cwd: tmpDir, stdio: 'ignore' });
-    execSync('git config user.name "Test"', { cwd: tmpDir, stdio: 'ignore' });
+    // No commit is made, so identity config is irrelevant here — `git init` alone.
+    execFileSync('git', ['init', '-b', 'main', '--quiet'], { cwd: tmpDir, stdio: 'ignore' });
 
     const result = await detectCommitConvention(tmpDir);
     expect(result).toBeNull();
