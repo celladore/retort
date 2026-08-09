@@ -153,6 +153,7 @@ describe('CLI', () => {
           'remove',
           'list',
           'features',
+          'harness',
         ];
         for (const cmd of commands) {
           const result = run(cmd, '--help');
@@ -163,6 +164,12 @@ describe('CLI', () => {
         }
       }
     );
+
+    it('runs harness doctor against the pinned offline contract', () => {
+      const result = run('harness', 'doctor', '--json');
+      expect(result.exitCode).toBe(0);
+      expect(JSON.parse(result.stdout).status).toBe('passed');
+    });
   });
 
   describe('parseArgs flag scoping', () => {

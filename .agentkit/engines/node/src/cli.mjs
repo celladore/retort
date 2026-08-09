@@ -94,6 +94,7 @@ const CLI_INTERNAL_FLAGS = {
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
   worktree: ['base', 'no-setup', 'dry-run', 'help'],
   run: ['id', 'assignee', 'dry-run', 'json', 'help'],
+  harness: ['document', 'json', 'help'],
 };
 
 const CLI_INTERNAL_FLAG_TYPES = {
@@ -147,6 +148,7 @@ const CLI_INTERNAL_FLAG_TYPES = {
   base: 'string',
   'no-setup': 'boolean',
   json: 'boolean',
+  document: 'string',
 };
 
 /**
@@ -360,6 +362,10 @@ Task Delegation:
 Diagnostics:
   doctor          Run Retort diagnostics and setup checks
                   --verbose         Include detailed diagnostics
+  harness doctor  Verify the vendored Agent Harnessing contract lock and schema
+  harness validate --document <path>
+                  Validate a contract document offline against the pinned schema
+                  --json            Emit machine-readable output
 
 Backlog & Issue Tracking:
   import-issues   Import issues from external tracker into local backlog
@@ -602,6 +608,16 @@ async function main() {
       case 'doctor': {
         const { runDoctor } = await import('./doctor.mjs');
         const result = await runDoctor({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        if (!result.ok) process.exit(1);
+        break;
+      }
+      case 'harness': {
+        const { runHarness } = await import('./harness-contract.mjs');
+        const result = await runHarness({
           agentkitRoot: AGENTKIT_ROOT,
           projectRoot: PROJECT_ROOT,
           flags,
