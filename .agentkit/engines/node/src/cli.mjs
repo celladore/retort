@@ -9,6 +9,7 @@ import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { VALID_COMMANDS } from './commands-registry.mjs';
+import { findMissingRuntimeDependencies } from './dependency-bootstrap.mjs';
 
 // Lazy-loaded after ensureDependencies() — js-yaml may not be installed yet
 let yaml;
@@ -450,20 +451,20 @@ Environment:
 }
 
 function ensureDependencies(agentkitRoot) {
-  const jsYamlPath = resolve(agentkitRoot, 'node_modules', 'js-yaml', 'package.json');
-  if (existsSync(jsYamlPath)) {
-    return true;
-  }
   const pkgPath = resolve(agentkitRoot, 'package.json');
   if (!existsSync(pkgPath)) {
     return true;
   }
+  const missingDependencies = findMissingRuntimeDependencies(agentkitRoot);
+  if (missingDependencies.length === 0) return true;
+
   const hasPnpm =
     spawnSync('pnpm', ['--version'], { encoding: 'utf8', windowsHide: true }).status === 0;
   const installCmd = hasPnpm ? 'pnpm' : 'npm';
   const installArgs = hasPnpm ? ['install'] : ['install'];
   console.warn(
-    `[retort] Dependencies not installed. Running ${installCmd} install in .agentkit...`
+    `[retort] Missing dependencies (${missingDependencies.join(', ')}). ` +
+      `Running ${installCmd} install in .agentkit...`
   );
   const r = spawnSync(installCmd, installArgs, {
     cwd: agentkitRoot,
