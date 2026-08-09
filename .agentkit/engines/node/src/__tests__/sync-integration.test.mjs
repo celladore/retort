@@ -37,18 +37,19 @@ const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
  * and make the entire suite fail to load, which reads as catastrophic breakage
  * rather than as a cleanup bug.
  */
-/** @type {string[]} trees that survived every retry, reported at end of file */
-const cleanupFailures = [];
+/** @type {Map<string, string>} paths that survived every retry, reported at end of file */
+const cleanupFailures = new Map();
 
 function removeTree(path) {
   try {
     rmSync(path, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    cleanupFailures.delete(path);
   } catch (err) {
     // Recorded rather than thrown, then reported once at the end of the file.
     // Throwing here would strand the sibling trees again — the bug this helper
     // exists to fix — but swallowing silently would let the leak creep back and
     // recreate the ENOSPC failure while the suite still reported green.
-    cleanupFailures.push(`${path} (${err.code ?? err.message})`);
+    cleanupFailures.set(path, err.code ?? err.message);
   }
 }
 
@@ -168,18 +169,26 @@ afterAll(() => {
   createdRoots.clear();
   goldenRoots.clear();
 
+  // A tree can still be held when its describe-level cleanup runs. Retry every
+  // survivor once more after all suites and their subprocesses have finished;
+  // removeTree applies its own bounded retry/backoff and removes recovered paths
+  // from cleanupFailures.
+  for (const root of [...cleanupFailures.keys()]) {
+    removeTree(root);
+  }
+
   // Runs after every describe-level hook in this file, so it sees the full set.
   // Warn rather than fail: a tree held by an antivirus scan is not a broken test,
   // and failing here would make the suite red for an environment condition. But
   // it must not be silent — an accumulating leak is what filled the disk before,
   // and a green suite hid it.
-  if (cleanupFailures.length > 0) {
+  if (cleanupFailures.size > 0) {
     console.warn(
-      `\n[sync-integration] ${cleanupFailures.length} fixture tree(s) could not be removed ` +
+      `\n[sync-integration] ${cleanupFailures.size} fixture tree(s) could not be removed ` +
         `and remain in the OS temp directory. Delete them manually if they accumulate:\n` +
-        cleanupFailures.map((f) => `  - ${f}`).join('\n')
+        [...cleanupFailures].map(([path, error]) => `  - ${path} (${error})`).join('\n')
     );
-    cleanupFailures.length = 0;
+    cleanupFailures.clear();
   }
 });
 

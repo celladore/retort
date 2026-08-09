@@ -297,8 +297,11 @@ the `ci.yml` comment says so rather than leaving the change silent.
 ### Status of the acceptance criterion
 
 The criterion above — three consecutive runs with an identical pass set — was demonstrated on
-2026-08-09 after merging Retort `dev` through `f5262097` into PR #584. The tested code head was
-`e2ca93a2` (tree `cc2c68e9`), with no source or dependency changes between runs:
+2026-08-09 on the Windows host where the flake occurred (Microsoft Windows build
+`10.0.28120.2546`), after merging Retort `dev` through `f5262097` into PR #584. Dependencies
+were installed from the frozen lockfile using the warm local pnpm store before the focused
+preflight; the three acceptance runs then used the same installed dependency tree and unchanged
+source. The tested code head was `e2ca93a2` (tree `cc2c68e9`):
 
 | Run | Test files | Tests        | Skipped | Duration |
 | --- | ---------- | ------------ | ------- | -------- |
@@ -306,6 +309,7 @@ The criterion above — three consecutive runs with an identical pass set — wa
 | 2   | 74 passed  | 2,251 passed | 1       | 303.49s  |
 | 3   | 74 passed  | 2,251 passed | 1       | 295.57s  |
 
-All three runs exited zero with the same pass set and no fixture-cleanup warning. This closes
-the repeatability gate for the decisions implemented by PR #584; it does not claim that every
-remaining Windows-only contention source in the wider suite has been eliminated.
+All three Windows runs exited zero with the same pass set and no fixture-cleanup warning. This
+closes the PR #584 repeatability gate on the environment that exposed the defect; it does not
+claim that every remaining Windows-only contention source in the wider suite has been
+eliminated.
