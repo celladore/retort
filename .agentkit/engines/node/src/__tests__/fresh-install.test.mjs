@@ -106,6 +106,12 @@ describe('fresh install (no node_modules)', () => {
       expect(
         existsSync(join(projectRoot, '.agentkit', 'node_modules', 'js-yaml', 'package.json'))
       ).toBe(true);
+      expect(
+        existsSync(join(projectRoot, '.agentkit', 'node_modules', 'ajv', 'package.json'))
+      ).toBe(true);
+      expect(
+        existsSync(join(projectRoot, '.agentkit', 'node_modules', 'ajv-formats', 'package.json'))
+      ).toBe(true);
     }
   );
 });

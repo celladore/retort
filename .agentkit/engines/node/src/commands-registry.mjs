@@ -35,6 +35,7 @@ export const VALID_COMMANDS = [
   'cicd-optimize',
   'worktree',
   'run',
+  'harness',
 ];
 
 /**
@@ -53,4 +54,5 @@ export const FRAMEWORK_COMMANDS = new Set([
   'features',
   'init',
   'worktree',
+  'harness',
 ]);
