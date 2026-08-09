@@ -53,6 +53,21 @@ function removeTree(path) {
   }
 }
 
+/**
+ * Overlay these tests render from.
+ *
+ * Temp project roots carry no `.agentkit-repo` marker and have a random
+ * directory name, so overlay resolution has nothing to resolve from. Since
+ * ADR-11 decision 3 that aborts instead of silently defaulting to
+ * `__TEMPLATE__`, so the tests name the overlay explicitly — which renders
+ * exactly what the old implicit fallback rendered.
+ *
+ * Only syncs against a temp project root need this. Blocks that build their own
+ * agentkit root and a matching project directory (`makeNamedTmpProject`) resolve
+ * by name and deliberately do not pass it.
+ */
+const TEMPLATE_OVERLAY = '__TEMPLATE__';
+
 /** Creates a temp project root for testing sync output. */
 function makeTmpProject() {
   const dir = resolve(
@@ -147,7 +162,11 @@ function goldenSync(flags = {}) {
     createdRoots.add(projectRoot);
     goldenRoots.set(
       key,
-      runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags }).then(() => projectRoot)
+      runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { overlay: TEMPLATE_OVERLAY, ...flags },
+      }).then(() => projectRoot)
     );
   }
   return goldenRoots.get(key);
@@ -786,7 +805,11 @@ describe('--overwrite flag', () => {
     const customContent = 'CUSTOM_CONTENT_MARKER_12345';
     writeFileSync(contribPath, customContent, 'utf-8');
 
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: {} });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY },
+    });
     expect(readFileSync(contribPath, 'utf-8')).toBe(customContent);
   });
 
@@ -795,14 +818,22 @@ describe('--overwrite flag', () => {
     const customContent = 'CUSTOM_OVERWRITE_MARKER_67890';
     writeFileSync(contribPath, customContent, 'utf-8');
 
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { overwrite: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY, overwrite: true },
+    });
     expect(readFileSync(contribPath, 'utf-8')).not.toContain(customContent);
   });
 
   it('--force is alias for --overwrite', { timeout: 120_000 }, async () => {
     const contribPath = join(projectRoot, 'CONTRIBUTING.md');
     writeFileSync(contribPath, 'CUSTOM', 'utf-8');
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { force: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY, force: true },
+    });
     expect(readFileSync(contribPath, 'utf-8')).not.toContain('CUSTOM');
   });
 });
@@ -828,7 +859,11 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
       origLog.apply(console, args);
     };
     try {
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { diff: true } });
+      await runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { overlay: TEMPLATE_OVERLAY, diff: true },
+      });
       const out = log.join('\n');
       expect(out).toContain('Diff mode');
       expect(out).toContain('create ');
@@ -850,7 +885,9 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
       mkdirSync(tempAgentkitRoot, { recursive: true });
 
       // Copy essential files from AGENTKIT_ROOT to temp
-      const essentialFiles = ['.manifest.json', 'spec', 'templates', 'engines'];
+      // `overlays` is needed as well: overlay resolution now verifies the
+      // selected overlay actually exists, so a root without it cannot sync.
+      const essentialFiles = ['.manifest.json', 'spec', 'templates', 'engines', 'overlays'];
       for (const file of essentialFiles) {
         const src = join(AGENTKIT_ROOT, file);
         const dest = join(tempAgentkitRoot, file);
@@ -868,7 +905,11 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
       }
 
       try {
-        await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: {} });
+        await runSync({
+          agentkitRoot: tempAgentkitRoot,
+          projectRoot,
+          flags: { overlay: TEMPLATE_OVERLAY },
+        });
         const manifestPath = join(tempAgentkitRoot, '.manifest.json');
         const originalManifest = existsSync(manifestPath)
           ? readFileSync(manifestPath, 'utf-8')
@@ -878,7 +919,11 @@ describe('--quiet, --verbose, --no-clean, --diff flags', () => {
         writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
         const orphanPath = join(projectRoot, '__TEST_ORPHAN__.md');
         writeFileSync(orphanPath, 'orphan', 'utf-8');
-        await runSync({ agentkitRoot: tempAgentkitRoot, projectRoot, flags: { 'no-clean': true } });
+        await runSync({
+          agentkitRoot: tempAgentkitRoot,
+          projectRoot,
+          flags: { overlay: TEMPLATE_OVERLAY, 'no-clean': true },
+        });
         expect(existsSync(orphanPath)).toBe(true);
       } finally {
         removeTree(tempAgentkitRoot);
@@ -1301,7 +1346,7 @@ describe('syncEditorTheme — pre-existing settings.json merge', () => {
     await runSync({
       agentkitRoot: AGENTKIT_ROOT,
       projectRoot,
-      flags: { quiet: true, overwrite: true },
+      flags: { overlay: TEMPLATE_OVERLAY, quiet: true, overwrite: true },
     });
   }, 120_000);
   afterAll(() => {
@@ -1372,7 +1417,11 @@ describe('syncGitattributes (merge driver sync)', () => {
       writeFileSync(gitattrsPath, '# My custom rules\n*.pdf binary\n\n' + existing, 'utf-8');
 
       // Re-sync
-      await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+      await runSync({
+        agentkitRoot: AGENTKIT_ROOT,
+        projectRoot,
+        flags: { overlay: TEMPLATE_OVERLAY, quiet: true },
+      });
 
       const updated = readFileSync(gitattrsPath, 'utf-8');
       expect(updated).toContain('# My custom rules');
@@ -1387,7 +1436,11 @@ describe('syncGitattributes (merge driver sync)', () => {
   it('replaces stale managed section without duplication', { timeout: 120_000 }, async () => {
     const gitattrsPath = resolve(projectRoot, '.gitattributes');
     // Re-sync a second time to verify no duplication
-    await runSync({ agentkitRoot: AGENTKIT_ROOT, projectRoot, flags: { quiet: true } });
+    await runSync({
+      agentkitRoot: AGENTKIT_ROOT,
+      projectRoot,
+      flags: { overlay: TEMPLATE_OVERLAY, quiet: true },
+    });
 
     const content = readFileSync(gitattrsPath, 'utf-8');
     const startCount = (content.match(/# >>> Retort merge drivers/g) || []).length;
