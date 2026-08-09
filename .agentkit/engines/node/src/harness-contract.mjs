@@ -103,6 +103,7 @@ export function loadHarnessContract(agentkitRoot) {
   const digest = normalizedSha256(schemaFile);
   if (digest !== lock.sha256) {
     errors.push(`schema digest mismatch: expected ${lock.sha256}, got ${digest}`);
+    return { ok: false, errors, lock, schemaFile, digest };
   }
 
   const schemaResult = readJson(schemaFile);
@@ -178,10 +179,11 @@ export async function runHarness({ agentkitRoot, projectRoot, flags = {} }) {
   const output = {
     status: result.ok ? 'passed' : 'failed',
     action,
-    contract: result.lock?.contract || EXPECTED_CONTRACT,
-    sourceRevision: result.lock?.sourceRevision,
-    lifecycle: result.lock?.lifecycle,
-    authorityPromotion: false,
+    expectedContract: EXPECTED_CONTRACT,
+    contract: result.lock?.contract ?? null,
+    sourceRevision: result.lock?.sourceRevision ?? null,
+    lifecycle: result.lock?.lifecycle ?? null,
+    authorityPromotion: result.lock?.authorityPromotion ?? null,
     errors: result.errors,
   };
 

@@ -36,6 +36,9 @@ describe('CLI', () => {
     expect(result.stdout).toContain('init');
     expect(result.stdout).toContain('sync');
     expect(result.stdout).toContain('validate');
+    expect(result.stdout).toContain(
+      '--json            Emit machine-readable output (both actions)'
+    );
   });
 
   it('shows help with -h', () => {

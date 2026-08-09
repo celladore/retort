@@ -366,7 +366,9 @@ Diagnostics:
   harness doctor  Verify the vendored Agent Harnessing contract lock and schema
   harness validate --document <path>
                   Validate a contract document offline against the pinned schema
-                  --json            Emit machine-readable output
+  harness options:
+                  --document <path> Document to validate (validate only)
+                  --json            Emit machine-readable output (both actions)
 
 Backlog & Issue Tracking:
   import-issues   Import issues from external tracker into local backlog

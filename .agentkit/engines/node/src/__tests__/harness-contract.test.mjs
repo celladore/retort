@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { loadHarnessContract, validateHarnessDocument } from '../harness-contract.mjs';
+import { loadHarnessContract, runHarness, validateHarnessDocument } from '../harness-contract.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
@@ -165,6 +165,8 @@ describe('Agent Harnessing contract', () => {
     const result = loadHarnessContract(root);
     expect(result.ok).toBe(false);
     expect(result.errors.join('\n')).toContain('schema digest mismatch');
+    expect(result.schema).toBeUndefined();
+    expect(result.validate).toBeUndefined();
   });
 
   it('accepts a valid synthetic HarnessManifest', () => {
@@ -188,9 +190,34 @@ describe('Agent Harnessing contract', () => {
   });
 
   it('rejects promotion while a critical gate is not passing', () => {
+    const validResult = validateDocument(promotionDecision());
+    expect(validResult.ok, validResult.errors.join('\n')).toBe(true);
+
     const decision = promotionDecision();
     decision.gateResults[0].status = 'pending';
     const result = validateDocument(decision);
     expect(result.ok).toBe(false);
+    expect(result.errors.join('\n')).toContain('/gateResults must NOT be valid');
+  });
+
+  it('reports observed lock values when doctor rejects a lock', async () => {
+    const root = temporaryDirectory('retort-harness-contract-');
+    cpSync(resolve(AGENTKIT_ROOT, 'contracts'), resolve(root, 'contracts'), {
+      recursive: true,
+    });
+    const lockPath = resolve(root, 'contracts', 'agent-harnessing-v1.lock.json');
+    const lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
+    lock.contract = 'unexpected-contract';
+    lock.authorityPromotion = true;
+    writeFileSync(lockPath, JSON.stringify(lock), 'utf-8');
+
+    const result = await runHarness({ agentkitRoot: root, projectRoot: root, flags: {} });
+
+    expect(result.output).toMatchObject({
+      status: 'failed',
+      expectedContract: 'harness.neuralliquid.dev/v1alpha1',
+      contract: 'unexpected-contract',
+      authorityPromotion: true,
+    });
   });
 });
