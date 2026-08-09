@@ -7,8 +7,11 @@
 
 ## Problem Description
 
-Every generated `.ps1` file failed to parse under Windows PowerShell 5.1 — the default
-shell on Windows — making the PowerShell half of the toolchain effectively unusable there.
+A parse check of all 43 tracked `.ps1` files under Windows PowerShell 5.1 found 12
+generated-script failures; 11 other generated scripts already parsed successfully. One
+additional failure in `.agentkit/bin/setup-branch-protection.ps1` was a separate,
+pre-existing syntax defect unrelated to encoding. The 12 broken generated scripts made
+the affected PowerShell tool paths unusable under the default Windows shell.
 
 ```powershell
 powershell -NoProfile -File ./scripts/create-doc.ps1 -Type implementation -Title "Test"
@@ -16,7 +19,7 @@ powershell -NoProfile -File ./scripts/create-doc.ps1 -Type implementation -Title
 # ParserError: TerminatorExpectedAtEndOfString
 ```
 
-The same files parsed clean under PowerShell 7 (`pwsh` 7.6.3), which is why the defect
+Those 12 generated files parsed clean under PowerShell 7 (`pwsh` 7.6.3), which is why the defect
 survived unnoticed: anyone testing with `pwsh` saw nothing wrong.
 
 This was long-standing, not a regression from a recent PR — `git show origin/dev:scripts/create-doc.ps1`

@@ -16,7 +16,7 @@ import { createHash } from 'crypto';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { chmod, cp, readFile, unlink, writeFile } from 'fs/promises';
 import { dirname, extname, join, relative, resolve, sep } from 'path';
-import { applyUtf8Bom, ensureDir, runConcurrent } from './fs-utils.mjs';
+import { applyUtf8Bom, ensureDir, needsUtf8Bom, runConcurrent } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { resolveScaffoldAction } from './template-utils.mjs';
 
@@ -132,6 +132,20 @@ export async function writeScaffoldOutputs({
       return;
     }
 
+    // Templates intentionally remain BOM-less so scaffold frontmatter stays at
+    // byte zero. Transform PowerShell content at the persistence boundary and
+    // make every downstream comparison/hash describe the bytes we will write.
+    let transformedContent = null;
+    if (needsUtf8Bom(destFile)) {
+      transformedContent = applyUtf8Bom(destFile, await readFile(srcFile, 'utf-8'));
+      if (newManifestFiles[normalizedRel]) {
+        newManifestFiles[normalizedRel].hash = createHash('sha256')
+          .update(transformedContent, 'utf-8')
+          .digest('hex')
+          .slice(0, 12);
+      }
+    }
+
     // Scaffold action resolution: always | managed (check-hash) | once (skip)
     const meta = getTemplateMeta(normalizedRel);
     const overwrite = flags?.overwrite || flags?.force;
@@ -151,7 +165,7 @@ export async function writeScaffoldOutputs({
 
         if (prevHash && diskHash !== prevHash) {
           const cachePath = resolve(scaffoldCacheDir, relPath);
-          const newContent = await readFile(srcFile, 'utf-8');
+          const newContent = transformedContent ?? (await readFile(srcFile, 'utf-8'));
 
           if (existsSync(cachePath)) {
             const baseContent = readFileSync(cachePath, 'utf-8');
@@ -278,7 +292,7 @@ export async function writeScaffoldOutputs({
         }
       }
       // Slower path: skip write when the only difference is table-cell padding.
-      const newContent = await readFile(srcFile, 'utf-8');
+      const newContent = transformedContent ?? (await readFile(srcFile, 'utf-8'));
       if (
         normalizeForComparison(existingContent.toString('utf-8')) ===
         normalizeForComparison(newContent)
@@ -290,14 +304,18 @@ export async function writeScaffoldOutputs({
 
     try {
       await ensureDir(dirname(destFile));
-      await cp(srcFile, destFile, { force: true, recursive: false });
+      if (transformedContent === null) {
+        await cp(srcFile, destFile, { force: true, recursive: false });
+      } else {
+        await writeFile(destFile, transformedContent, 'utf-8');
+      }
 
       // Update scaffold cache for managed files
       if (meta?.agentkit?.scaffold === 'managed' || meta?.agentkit?.scaffold === 'always') {
         const cachePath = resolve(scaffoldCacheDir, relPath);
         try {
           await ensureDir(dirname(cachePath));
-          const content = await readFile(srcFile, 'utf-8');
+          const content = transformedContent ?? (await readFile(srcFile, 'utf-8'));
           await writeFile(cachePath, content, 'utf-8');
         } catch {
           /* ignore cache write failures */
