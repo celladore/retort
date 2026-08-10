@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 7,
+    "bugfix": 8,
     "feature": 2,
     "migration": 1,
     "issue": 1,
@@ -71,6 +71,14 @@
       "date": "2026-08-07",
       "pr": "581",
       "file": "bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
+    },
+    {
+      "number": 7,
+      "type": "bugfix",
+      "title": "Real process spawns behind a mocked commandExists",
+      "date": "2026-08-10",
+      "pr": "",
+      "file": "bug-fixes/0007-2026-08-10-real-process-spawns-behind-a-mocked-commandexists-bugfix.md"
     }
   ]
 }
