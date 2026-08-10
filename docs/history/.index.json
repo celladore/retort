@@ -75,10 +75,18 @@
     {
       "number": 7,
       "type": "bugfix",
+      "title": "Real process spawns behind a mocked commandExists",
+      "date": "2026-08-10",
+      "pr": "590",
+      "file": "bug-fixes/0007-2026-08-10-real-process-spawns-behind-a-mocked-commandexists-bugfix.md"
+    },
+    {
+      "number": 8,
+      "type": "bugfix",
       "title": "Windows test flakiness from subprocess startup cost",
       "date": "2026-08-10",
-      "pr": "",
-      "file": "bug-fixes/0007-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md"
+      "pr": "591",
+      "file": "bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md"
     }
   ]
 }

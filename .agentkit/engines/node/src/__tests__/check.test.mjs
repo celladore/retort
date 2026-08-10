@@ -42,7 +42,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
-function createCheckFixture({ withBuild = true, formatter = null, withPrettierBin = false } = {}) {
+function createCheckFixture({
+  withBuild = true,
+  formatter = null,
+  withPrettierBin = false,
+  testCommand = null,
+} = {}) {
   const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-test-'));
   const agentkitRoot = resolve(root, '.agentkit');
   const projectRoot = resolve(root, 'project');
@@ -60,14 +65,18 @@ function createCheckFixture({ withBuild = true, formatter = null, withPrettierBi
 
   const buildLine = withBuild ? '    buildCommand: "node -e \\\"\\\""\n' : '';
   const formatterLine = formatter ? `    formatter: "${formatter}"\n` : '';
+  // Default to a no-op node one-liner so steps are cheap. Tests that need a
+  // recognisable runner (so resolveCoverageCommand returns a command) override it.
+  const testLine = testCommand
+    ? `    testCommand: ${JSON.stringify(testCommand)}\n`
+    : '    testCommand: "node -e \\\"\\\""\n';
   const teamsYaml = `techStacks:
   - name: test-stack
     detect:
       - package.json
 ${formatterLine}
     typecheck: "node -e \\\"\\\""
-    testCommand: "node -e \\\"\\\""
-${buildLine}`;
+${testLine}${buildLine}`;
 
   writeFileSync(resolve(agentkitRoot, 'spec', 'teams.yaml'), teamsYaml, 'utf-8');
   return { root, agentkitRoot, projectRoot };
@@ -156,6 +165,11 @@ describe('runCheck()', () => {
   it('resolves prettier path from agentkitRoot when roots are split', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    // #590 left execCommand real here so the PASS status would prove the resolved
+    // path is executable. The file-wide mock replaces that: the assertion below
+    // reads the command string handed to the runner, which pins the agentkitRoot
+    // path exactly rather than proving that *something* ran. Executing the
+    // fixture's own `process.exit(0)` stub tested Node, not the path resolution.
 
     const fixture = createCheckFixture({
       withBuild: false,
@@ -471,7 +485,22 @@ describe('runCheck() — additional branches', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
-    const fixture = createCheckFixture();
+    // The coverage step has no command-exists guard: whatever
+    // resolveCoverageCommand returns is handed straight to execCommand. The
+    // module-level mock already keeps that from spawning a real coverage run,
+    // whose 300s default timeout would outlast this test's 20s budget; this
+    // return value is what lets parseCoveragePercentage find a number.
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 0,
+      stdout: 'All files |   85.5 |',
+      stderr: '',
+      durationMs: 0,
+    });
+
+    // A bare `node -e ""` matches no runner, so resolveCoverageCommand returns
+    // a null command and the coverage step never runs — naming a real runner is
+    // what makes this test exercise coverage at all.
+    const fixture = createCheckFixture({ testCommand: 'npx vitest run' });
     try {
       // project.yaml with coverage threshold
       writeFileSync(
@@ -486,9 +515,15 @@ describe('runCheck() — additional branches', () => {
         flags: { fast: true, coverage: true },
       });
 
-      expect(result).toBeDefined();
-      // The coverage attempt should at least be present in some form
-      expect(Array.isArray(result.coverage)).toBe(true);
+      const executed = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(executed).toContain('npx vitest run --coverage');
+      expect(result.coverage).toHaveLength(1);
+      expect(result.coverage[0]).toMatchObject({
+        stack: 'test-stack',
+        percentage: 85.5,
+        threshold: 50,
+        status: 'PASS',
+      });
     } finally {
       cleanupFixture(fixture.root);
     }
