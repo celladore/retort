@@ -648,6 +648,21 @@ rules:
         autofix: false
         tool: 'vitest run --coverage'
 
+      - id: qa-run-reconciliation
+        rule: >
+          Every CI test run must emit a machine-readable report (JUnit or JSON)
+          as an uploaded artifact, and the build must fail when the reported
+          outcomes do not reconcile with the reported total — when
+          passed + failed + skipped + todo does not equal the number of tests
+          collected. A crashed worker leaves its already-collected tests in the
+          total but in none of the outcome buckets, so the run prints a passing
+          summary while silently dropping tests. A run that does not reconcile
+          is void, not green: it must never satisfy a required check.
+        severity: error
+        type: enforcement
+        phase: validation
+        autofix: false
+
       - id: qa-test-naming
         rule: >
           Test files must mirror the source structure and use the pattern
