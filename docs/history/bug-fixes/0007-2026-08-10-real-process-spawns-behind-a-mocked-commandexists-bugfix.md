@@ -2,7 +2,7 @@
 
 **Completed**: 2026-08-10
 **Bug ID**: n/a — audit follow-up to PR #588
-**PR**: [#PR-Number]
+**PR**: [#590](https://github.com/phoenixvc/retort/pull/590)
 **Severity**: Medium (test-suite reliability; no production impact)
 
 ## Problem Description
