@@ -18,6 +18,11 @@ vi.mock('../runner.mjs', async () => {
   return {
     ...actual,
     commandExists: vi.fn(() => true),
+    // Wrapped rather than replaced: almost every test here wants the real
+    // implementation, but a test that forces commandExists to true needs to be
+    // able to stub this, or the step it is exercising spawns whatever binary
+    // the stack names. beforeEach restores the real implementation.
+    execCommand: vi.fn(actual.execCommand),
   };
 });
 
@@ -30,7 +35,8 @@ vi.mock('../agent-integration.mjs', async () => {
   };
 });
 
-const { commandExists } = await import('../runner.mjs');
+const { commandExists, execCommand } = await import('../runner.mjs');
+const actualRunner = await vi.importActual('../runner.mjs');
 const { resolveCoverageCommand, parseCoveragePercentage } =
   await import('../agent-integration.mjs');
 const {
@@ -61,6 +67,7 @@ function cleanupFixture(root) {
 
 beforeEach(() => {
   vi.mocked(commandExists).mockReset().mockReturnValue(true);
+  vi.mocked(execCommand).mockReset().mockImplementation(actualRunner.execCommand);
   vi.mocked(resolveCoverageCommand)
     .mockReset()
     .mockReturnValue({ command: null, parser: 'unknown' });
@@ -874,6 +881,22 @@ describe('runCheck — advanced flag paths', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
     vi.mocked(commandExists).mockReturnValue(true);
+
+    // The assertion below is about which steps get built, not about formatting
+    // anything, so nothing here needs a real process. Stubbing the runner is
+    // what keeps that true: `black` is a real binary, and mocking commandExists
+    // to true removes the skip-not-found guard that would otherwise stop it
+    // being spawned. On a machine with black installed, the step therefore ran
+    // `black .` and `black --check .` for real — two Python interpreter
+    // startups against this test's 20s budget, which is why it failed under
+    // full-suite load while passing in isolation. execCommand's own default
+    // timeout is 300s, so it could never have rescued the shorter test budget.
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+      durationMs: 0,
+    });
 
     const fx = makeFixture();
     try {
