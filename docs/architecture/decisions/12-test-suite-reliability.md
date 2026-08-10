@@ -521,3 +521,198 @@ acceptance criterion stays open, as the section above already records.
 All three runs reconciled, which is the correct answer and the point of the exercise: the gate
 distinguishes "this suite has real failures" from "this suite lost tests", and only the second
 one voids a run.
+
+## Revision (2026-08-10): the residual flake is subprocess startup cost, and it is measurable
+
+The moving failure set recorded above narrowed to three files — `check.test.mjs`,
+`check-coverage.test.mjs` and `cli.test.mjs`. Four full runs of identical code on the same Windows
+host (build `10.0.28120`) produced 7 failures / 416s, 1 / 771s and 3 / 553s, every one a 20s or 30s
+`Test timed out`, while all 106 tests in those files passed in isolation.
+
+The 1-failure run used the **pre-change** `vitest.config.mjs` via `--config`, which rules out
+PR #589 as the cause and confirms this is the same pre-existing condition, not a regression.
+
+### The cost is process startup on this host, and it is far larger than assumed
+
+Measured directly, at idle, with 79 entries on `PATH`:
+
+| Spawn                                   | Cost per call   |
+| --------------------------------------- | --------------- |
+| `where <cmd>` (Windows `commandExists`) | **1.2 – 2.6 s** |
+| `node -e ""`                            | **0.7 – 1.9 s** |
+| `node cli.mjs <cmd> --help`             | **~1.6 s**      |
+
+These are the "cheap no-op" primitives the fixtures were built on. `where` costing over a second is
+the load-bearing surprise: `runCheck` calls `commandExists` **and** `execCommand` per step
+(`check.mjs:444`, `check.mjs:460`), so the default three-step fixture pays **six spawns**, 6–12s,
+against a 20s budget — before any contention.
+
+### The failing set is exactly the set with the least headroom
+
+Per-test timings from a JSON reporter run of the three files in isolation, against each test's own
+budget:
+
+| Test                                           | Isolated | Budget | Headroom |
+| ---------------------------------------------- | -------- | ------ | -------- |
+| `cli` — every command … `--help`               | 21.65s   | 30s    | **1.4×** |
+| `check` — resolves prettier path …             | 10.78s   | 20s    | **1.9×** |
+| `check` — logs unresolved placeholder findings | 8.84s    | 20s    | 2.3×     |
+| `check` — returns a structured result object   | 8.68s    | 20s    | 2.3×     |
+| `check` — respects `--fast` flag structure     | 6.67s    | 20s    | 3.0×     |
+| `check` — runs the coverage step               | 6.02s    | 20s    | 3.3×     |
+
+Every reported-flaky test appears here, and the ranking matches how often each was seen failing.
+Nothing else was needed to explain the moving failure set: under full-suite parallelism these
+budgets are consumed by process startup, and which ones tip over is a scheduling accident. That is
+precisely why the set moves.
+
+### Decision 7: remove the spawns rather than raise the budgets
+
+Following decisions 1 and 4, the fix is to delete the cost.
+
+**`check.test.mjs` and `check-coverage.test.mjs` — stub the runner.** Neither file asserts that a
+real process ran; the assertions are about which steps get built and how exit codes map to
+statuses. Both now mock `commandExists` and `execCommand` for the whole file. This generalises the
+per-test fix from the previous revision: that one stubbed `execCommand` for a single test and
+`beforeEach` restored the real implementation, which left every other `runCheck` test in both files
+still spawning `node -e ""` per step. Real end-to-end `execCommand` behaviour is covered by
+`runner.test.mjs`, which exercises it against actual processes in nine cases — that is where it
+belongs, and no coverage moves or is lost.
+
+#590 reached the same root cause independently and landed first, stubbing `commandExists` per
+describe block and `execCommand` per test in `check.test.mjs` alone. The file-wide mock supersedes
+that mechanism and extends it to the tests #590 left spawning, but its substantive change is kept
+and is better than what this work had: the coverage-step test now names a real runner, so
+`resolveCoverageCommand` returns a command instead of null, and it asserts the built coverage
+command and the parsed percentage rather than merely that a coverage array exists. Worth recording
+because the two changes look like duplicates and are not — one replaced a mechanism, the other
+fixed a test that was not exercising the path it named.
+
+| File                      | Test-phase time  |
+| ------------------------- | ---------------- |
+| `check.test.mjs`          | 53.1s → **1.2s** |
+| `check-coverage.test.mjs` | 16.8s → **3.1s** |
+
+Two assertions got stronger as a side effect. `resolves prettier path when roots are split` now
+asserts the resolved path reaches the runner, instead of only that the step reported `PASS` — a
+status check cannot distinguish the `agentkitRoot` copy from any other prettier that happened to
+run. And controlling exit codes made a `FAIL`-mapping test cheap enough to add, which the
+real-spawn version was not.
+
+**`cli.test.mjs` — the `--help` loop could not detect what its name promised.** It spawned the CLI
+once per command, 26 startups, 21.65s at idle against a 30s budget: an impossible budget in the
+sense of decision 6, not a marginal one. But raising it would have been the wrong fix, because
+`main()` short-circuits `--help` **before** it calls `loadCommandFlags()`/`parseFlags()`
+(`cli.mjs:499`), so `<cmd> --help` never builds an option table and no flag configuration error can
+surface. Verified directly: `cli.mjs sync --bogus-flag --help` emits no unrecognized-flag warning,
+and only `parseFlags` produces that warning. The test was spending 26 process startups to assert
+command-name membership and that `cli.mjs` boots.
+
+`cli.mjs` cannot be imported by a test — it calls `main()` at import and exits via `process.exit`.
+So the flag tables, `loadCommandFlags` and the option-table builder moved to a side-effect-free
+`cli-flags.mjs`, and the test now calls `buildParseOptions` in-process for every command in
+`VALID_COMMANDS`. This spawns nothing, tests what the name promises, and covers two things the old
+version never reached: the flags contributed by `commands.yaml`, and all 30 registry commands
+rather than a hand-maintained list of 26. The sibling test that scraped `cli.mjs` source with
+regexes to compare the two tables is replaced by a direct assertion over the real objects.
+
+### A second budget that was inverted, not merely tight
+
+`cli.test.mjs`'s `run()` helper capped each child at 10s via `execFileSync`. The heaviest command in
+the file, `harness doctor --json`, measures **6.8s at idle** — so the cap sat below the work under
+any contention at all. It fired during this investigation and the test failed **in isolation**,
+which is how it was found.
+
+Worse, it failed illegibly. `execFileSync` reports a killed child with a `null` status, so the
+assertion read `expected null to be +0` — a timeout presenting as a wrong exit code. This is the
+mirror image of the `execCommand` finding in the previous revision: there the inner timeout was
+300s and too loose to ever rescue the outer budget; here it was 10s and tight enough to pre-empt
+it. An inner timeout is a backstop, and it is only useful when it sits clearly outside the budget
+it is protecting.
+
+The cap is now 60s with the reason recorded at the constant, `run()` reports a killed child as
+`timedOut` rather than as an exit code, and the one test that spawns the heavy command carries a
+90s budget justified by the 6.8s measurement. This is the only budget raised in this revision.
+
+`execFileSync` blocks the worker synchronously, so Vitest's per-test timeout cannot pre-empt it —
+the child cap is the budget that actually governs. That is why it needs stating rather than
+inferring.
+
+### Net effect
+
+Roughly 90 process spawns are removed from the suite — about 50 from `check.test.mjs`, 12 from
+`check-coverage.test.mjs`, 26 from `cli.test.mjs`. At the measured per-spawn costs that is two to
+four minutes of idle-machine subprocess time, and more under load, since these spawns were also a
+contention source for every other file running concurrently.
+
+The worst per-test cost across the three files falls from 21.65s to **5.4s** (`harness doctor`, now
+on a 90s budget). The slowest test remaining anywhere in this group is `runner.test.mjs`'s
+`returns true for existing commands` at 7.0s against 30s — a real `where` call, in the file whose
+job is to exercise real processes.
+
+### Quarantine was considered and rejected
+
+`.agentkit/test-quarantine.json` would have excluded these files from the blocking suite
+everywhere. They pass reliably on Linux CI, so quarantining would have traded real coverage on the
+platform where the pipeline runs for a local-only symptom. The Windows-only framing from the
+2026-08-07 revision is what makes quarantine the wrong instrument here.
+
+### Fixture-leak status
+
+The `removeTree` cleanup from the previous revision is holding: `%TEMP%` held **17** leaked fixture
+trees totalling **20 MB**, against the 126 trees of 600+ files each that preceded the fix. Leakage
+is no longer a plausible contributor and should not be re-investigated without fresh evidence.
+
+### The acceptance criterion now holds
+
+Three consecutive full-suite runs on the Windows host where the flake occurs (build
+`10.0.28120`), on the merged tree — this change on top of decision 5's tooling — using that
+tooling rather than a bespoke harness: `pnpm test` for the run, `pnpm test:reconcile` for the
+integrity gate, exactly as CI invokes them.
+
+| Run | `vitest` | `test:reconcile` | Tests                    | Wall   |
+| --- | -------- | ---------------- | ------------------------ | ------ |
+| 1   | 0        | 0                | 2,379 passed / 1 skipped | 493.0s |
+| 2   | 0        | 0                | 2,379 passed / 1 skipped | 581.2s |
+| 3   | 0        | 0                | 2,379 passed / 1 skipped | 249.7s |
+
+Run 1 against run 2 and run 1 against run 3 are **identical test-for-test** — same 2,380 test
+IDs, same status on every one. That is the criterion this ADR set out, not merely three green
+runs. The single skip is `fresh-install.test.mjs > auto-installs dependencies and runs sync
+--dry-run`, pre-existing and untouched.
+
+Both false-green modes recorded in the 2026-08-09 section are now guarded by the repository's own
+machinery rather than by the care of whoever runs the gate:
+
+- **Exit codes are Vitest's own.** Captured directly from the process, with nothing piped, so
+  there is no repeat of the `vitest | perl | grep` failure that reported grep's status.
+- **Every run is reconciled** by `pnpm test:reconcile` — decision 5's gate, computed against
+  Vitest's own JSON reporter output. All three runs exit zero from it, so none is the "crashed
+  worker still prints a passing summary" case that silently dropped 53 tests before.
+
+This is the first time the criterion has been demonstrated with the reconciliation gate enforcing
+it rather than a hand-rolled check, which is the arrangement decision 5 was built for. An earlier
+set of three runs on the pre-merge tree gave the same result (2,329 passed / 1 skipped of 2,330,
+identical across runs) using equivalent hand-written reconciliation; the table above supersedes it
+because it tests the code that will actually merge.
+
+Wall time varies 250s to 581s across the three runs, which is consistent with everything this ADR
+has learned about this host: suite wall time is not a usable instrument here, and no speedup is
+claimed from it. The per-test measurements above are the trustworthy ones, for the same reason
+decision 1's sync-level numbers were trustworthy while its suite-level numbers were withdrawn.
+
+### The ~30 GB free-disk precondition does not hold as written
+
+The previous revision advised that "a run starting below roughly 30 GB free should be treated as
+unable to produce a valid result". **Six** full suites were run for this revision — three on the
+pre-merge tree, three on the merged tree — starting from **11.6 GB** free and ending at
+**8.7 GB**. Every one produced a valid, reconciled result, and both sets of three were identical
+test-for-test. That precondition is therefore too strong to use as a gate.
+
+Sampled before and after, the heaviest run moved free space by 0.7 GB and the lightest by 0.0 GB.
+This does **not** refute the earlier 27 GB figure: that came from sampling every 30s through a
+run, whereas these are before/after samples and would miss a mid-run trough that recovers. The
+peak working set was not re-measured. The correction is to the operational rule only — free disk
+below 30 GB is not grounds for discarding a run, and the ENOSPC episode that motivated the rule
+predates the `removeTree` cleanup fix, when 126 fixture trees were stranded rather than the 17
+seen now.

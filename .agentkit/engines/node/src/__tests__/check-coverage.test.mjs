@@ -18,11 +18,14 @@ vi.mock('../runner.mjs', async () => {
   return {
     ...actual,
     commandExists: vi.fn(() => true),
-    // Wrapped rather than replaced: almost every test here wants the real
-    // implementation, but a test that forces commandExists to true needs to be
-    // able to stub this, or the step it is exercising spawns whatever binary
-    // the stack names. beforeEach restores the real implementation.
-    execCommand: vi.fn(actual.execCommand),
+    // Stubbed by default. Forcing commandExists to true removes the guard that
+    // stops an absent binary being spawned, so every step behind it would run for
+    // real — the stacks below name `node -e ""`, which measured 0.7–1.9s per spawn
+    // at idle on the Windows host where this suite flakes, against a 20s budget.
+    // Nothing here asserts on real process output; the assertions are about which
+    // steps get built and how their exit codes map to statuses. runner.test.mjs
+    // covers execCommand against actual processes. See ADR-12.
+    execCommand: vi.fn(() => ({ exitCode: 0, stdout: '', stderr: '', durationMs: 0 })),
   };
 });
 
@@ -36,7 +39,6 @@ vi.mock('../agent-integration.mjs', async () => {
 });
 
 const { commandExists, execCommand } = await import('../runner.mjs');
-const actualRunner = await vi.importActual('../runner.mjs');
 const { resolveCoverageCommand, parseCoveragePercentage } =
   await import('../agent-integration.mjs');
 const {
@@ -67,7 +69,9 @@ function cleanupFixture(root) {
 
 beforeEach(() => {
   vi.mocked(commandExists).mockReset().mockReturnValue(true);
-  vi.mocked(execCommand).mockReset().mockImplementation(actualRunner.execCommand);
+  vi.mocked(execCommand)
+    .mockReset()
+    .mockReturnValue({ exitCode: 0, stdout: '', stderr: '', durationMs: 0 });
   vi.mocked(resolveCoverageCommand)
     .mockReset()
     .mockReturnValue({ command: null, parser: 'unknown' });
@@ -882,21 +886,13 @@ describe('runCheck — advanced flag paths', () => {
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
     vi.mocked(commandExists).mockReturnValue(true);
 
-    // The assertion below is about which steps get built, not about formatting
-    // anything, so nothing here needs a real process. Stubbing the runner is
-    // what keeps that true: `black` is a real binary, and mocking commandExists
-    // to true removes the skip-not-found guard that would otherwise stop it
-    // being spawned. On a machine with black installed, the step therefore ran
-    // `black .` and `black --check .` for real — two Python interpreter
-    // startups against this test's 20s budget, which is why it failed under
-    // full-suite load while passing in isolation. execCommand's own default
-    // timeout is 300s, so it could never have rescued the shorter test budget.
-    vi.mocked(execCommand).mockReturnValue({
-      exitCode: 0,
-      stdout: '',
-      stderr: '',
-      durationMs: 0,
-    });
+    // This test is where the spawn hazard was first found (#588): `black` is a
+    // real binary, and forcing commandExists true removes the skip-not-found
+    // guard, so on a machine that has it the step really ran `black .` and
+    // `black --check .` — two Python interpreter startups against a 20s budget.
+    // execCommand's own 300s default timeout could never have rescued the
+    // shorter test budget. The file-level mock now stubs execCommand for every
+    // test rather than just this one; the assertions below read its call log.
 
     const fx = makeFixture();
     try {

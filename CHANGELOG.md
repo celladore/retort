@@ -37,6 +37,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Silently broken CI config defects ([#579](../../pull/579), [history](docs/history/bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md))
 - Generated PowerShell scripts fail to parse under Windows PowerShell 5.1 ([#581](../../pull/581), [history](docs/history/bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md))
 - Real process spawns behind a mocked commandExists ([#590](../../pull/590), [history](docs/history/bug-fixes/0007-2026-08-10-real-process-spawns-behind-a-mocked-commandexists-bugfix.md))
+- Windows test flakiness from subprocess startup cost ([#591](../../pull/591), [history](docs/history/bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md))
 
 - Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
 - Orphaned hook scripts never wired in generated Claude settings ([#577](../../pull/577), [history](docs/history/bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md))

@@ -3,7 +3,28 @@ import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
+
+// runCheck() spawns two processes per step: commandExists() shells out to `where`
+// on Windows, then execCommand() runs the step itself. On the Windows host where
+// this suite flakes, `where` measured 1.2–2.6s per call and `node -e ""` 0.7–1.9s
+// — at idle. The default fixture below builds three steps, so a single runCheck()
+// paid six spawns and 6–12s against a 20s budget, leaving no room for suite
+// contention. None of the assertions here need a real process: they are about
+// which steps get built and how exit codes map to statuses. Stubbing the runner
+// removes every spawn from this file. Real end-to-end execCommand behaviour is
+// covered by runner.test.mjs, which exercises it against actual processes.
+// See ADR-12.
+vi.mock('../runner.mjs', async () => {
+  const actual = await vi.importActual('../runner.mjs');
+  return {
+    ...actual,
+    commandExists: vi.fn(() => true),
+    execCommand: vi.fn(() => ({ exitCode: 0, stdout: '', stderr: '', durationMs: 0 })),
+  };
+});
+
+const { commandExists, execCommand } = await import('../runner.mjs');
+const {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
@@ -13,8 +34,9 @@ import {
   resolveFormatter,
   resolveLinter,
   runCheck,
-} from '../check.mjs';
-import * as runner from '../runner.mjs';
+} = await import('../check.mjs');
+
+const OK = { exitCode: 0, stdout: '', stderr: '', durationMs: 0 };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
@@ -66,29 +88,12 @@ function cleanupFixture(root) {
   }
 }
 
-/**
- * Stub the per-step command-exists guard.
- *
- * The real one spawns `where` on Windows once per step, measured at ~4.5s/call
- * on a loaded host — 3.5x the cost of the `node -e ""` it is guarding. Three
- * steps therefore cost ~17s of pure process startup against these tests' 20s
- * budgets, which is what makes them time out under full-suite contention while
- * passing in isolation. No test in this file asserts skip-not-found behaviour
- * (check-coverage.test.mjs covers that), so the guard is overhead here.
- *
- * Forcing this true is safe ONLY because every command these fixtures name
- * resolves to `node`, which is present either way — so it changes nothing about
- * what runs. It also removes the guard: if a fixture here ever names a binary
- * that might really be installed (a formatter such as `black`), that binary
- * WILL be spawned. See PR #588. Stub execCommand as well in that case.
- */
-function stubCommandExists() {
-  vi.spyOn(runner, 'commandExists').mockReturnValue(true);
-}
+beforeEach(() => {
+  vi.mocked(commandExists).mockReset().mockReturnValue(true);
+  vi.mocked(execCommand).mockReset().mockReturnValue(OK);
+});
 
 describe('runCheck()', () => {
-  beforeEach(stubCommandExists);
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -96,14 +101,6 @@ describe('runCheck()', () => {
   it('returns a structured result object', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-    // Every assertion below is about the shape of the result, not about any
-    // command's effect, so nothing here needs a real process.
-    vi.spyOn(runner, 'execCommand').mockReturnValue({
-      exitCode: 0,
-      stdout: '',
-      stderr: '',
-      durationMs: 0,
-    });
 
     const fixture = createCheckFixture();
     try {
@@ -168,10 +165,11 @@ describe('runCheck()', () => {
   it('resolves prettier path from agentkitRoot when roots are split', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-    // execCommand is deliberately left real here: the PASS assertion below is
-    // what proves the resolved path is actually executable, which is this
-    // test's whole point. The fixture writes a stub prettier.cjs so that stays
-    // cheap. Only the command-exists guard is stubbed, via beforeEach.
+    // #590 left execCommand real here so the PASS status would prove the resolved
+    // path is executable. The file-wide mock replaces that: the assertion below
+    // reads the command string handed to the runner, which pins the agentkitRoot
+    // path exactly rather than proving that *something* ran. Executing the
+    // fixture's own `process.exit(0)` stub tested Node, not the path resolution.
 
     const fixture = createCheckFixture({
       withBuild: false,
@@ -200,6 +198,39 @@ describe('runCheck()', () => {
 
       const formatStep = result.stacks[0]?.steps.find((step) => step.step === 'format');
       expect(formatStep?.status).toBe('PASS');
+
+      // Assert the split-roots path actually reaches the runner. This is stronger
+      // than the status check alone, which cannot distinguish the agentkitRoot
+      // copy from any other prettier that happened to run.
+      const commands = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(commands).toContain(`node "${expectedPrettierBin}" --check .`);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('maps a non-zero step exit code to FAIL', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'boom',
+      durationMs: 0,
+    });
+
+    const fixture = createCheckFixture({ withBuild: false });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+
+      const testStep = result.stacks[0].steps.find((step) => step.step === 'test');
+      expect(testStep.status).toBe('FAIL');
+      expect(testStep.stderr).toContain('boom');
+      expect(result.overallPassed).toBe(false);
     } finally {
       cleanupFixture(fixture.root);
     }
@@ -422,8 +453,6 @@ describe('auditUnresolvedPlaceholders()', () => {
 // ---------------------------------------------------------------------------
 
 describe('runCheck() — additional branches', () => {
-  beforeEach(stubCommandExists);
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -457,10 +486,11 @@ describe('runCheck() — additional branches', () => {
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
     // The coverage step has no command-exists guard: whatever
-    // resolveCoverageCommand returns is handed straight to execCommand. Stub the
-    // runner so this exercises that branch without spawning a real coverage run,
-    // whose 300s default timeout would outlast this test's 20s budget.
-    const execCommand = vi.spyOn(runner, 'execCommand').mockReturnValue({
+    // resolveCoverageCommand returns is handed straight to execCommand. The
+    // module-level mock already keeps that from spawning a real coverage run,
+    // whose 300s default timeout would outlast this test's 20s budget; this
+    // return value is what lets parseCoveragePercentage find a number.
+    vi.mocked(execCommand).mockReturnValue({
       exitCode: 0,
       stdout: 'All files |   85.5 |',
       stderr: '',
@@ -485,7 +515,7 @@ describe('runCheck() — additional branches', () => {
         flags: { fast: true, coverage: true },
       });
 
-      const executed = execCommand.mock.calls.map(([command]) => command);
+      const executed = vi.mocked(execCommand).mock.calls.map(([command]) => command);
       expect(executed).toContain('npx vitest run --coverage');
       expect(result.coverage).toHaveLength(1);
       expect(result.coverage[0]).toMatchObject({
