@@ -916,6 +916,16 @@ describe('runCheck — advanced flag paths', () => {
       expect(result.stacks[0].steps.map((s) => s.step)).toEqual(
         expect.arrayContaining(['format', 'test'])
       );
+
+      // The name of this test promises an ordering, which the assertion above
+      // does not check — it passes whenever both steps merely exist. Now that
+      // the runner is stubbed its call log is available, so assert the ordering
+      // directly: resolveFormatter maps black to fix `black .` and check
+      // `black --check .`, and check.mjs runs the fix first when --fix is set.
+      const commands = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(commands).toContain('black .');
+      expect(commands).toContain('black --check .');
+      expect(commands.indexOf('black .')).toBeLessThan(commands.indexOf('black --check .'));
     } finally {
       cleanupFixture(fx.root);
     }
