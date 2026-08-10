@@ -657,31 +657,37 @@ is no longer a plausible contributor and should not be re-investigated without f
 ### The acceptance criterion now holds
 
 Three consecutive full-suite runs on the Windows host where the flake occurs (build
-`10.0.28120`), on the code described above:
+`10.0.28120`), on the merged tree — this change on top of decision 5's tooling — using that
+tooling rather than a bespoke harness: `pnpm test` for the run, `pnpm test:reconcile` for the
+integrity gate, exactly as CI invokes them.
 
-| Run | Exit | Test files | Tests                    | Reconciled | Wall   |
-| --- | ---- | ---------- | ------------------------ | ---------- | ------ |
-| 1   | 0    | 77 passed  | 2,329 passed / 1 skipped | yes        | 310.4s |
-| 2   | 0    | 77 passed  | 2,329 passed / 1 skipped | yes        | 240.7s |
-| 3   | 0    | 77 passed  | 2,329 passed / 1 skipped | yes        | 95.5s  |
+| Run | `vitest` | `test:reconcile` | Tests                    | Wall   |
+| --- | -------- | ---------------- | ------------------------ | ------ |
+| 1   | 0        | 0                | 2,379 passed / 1 skipped | 493.0s |
+| 2   | 0        | 0                | 2,379 passed / 1 skipped | 581.2s |
+| 3   | 0        | 0                | 2,379 passed / 1 skipped | 249.7s |
 
-Run 1 against run 2 and run 1 against run 3 are **identical test-for-test** — same 2,330 test
+Run 1 against run 2 and run 1 against run 3 are **identical test-for-test** — same 2,380 test
 IDs, same status on every one. That is the criterion this ADR set out, not merely three green
 runs. The single skip is `fresh-install.test.mjs > auto-installs dependencies and runs sync
 --dry-run`, pre-existing and untouched.
 
-Both false-green modes recorded in the 2026-08-09 section were guarded explicitly rather than
-assumed away:
+Both false-green modes recorded in the 2026-08-09 section are now guarded by the repository's own
+machinery rather than by the care of whoever runs the gate:
 
-- **Exit codes are Vitest's own.** The harness captures the child status directly through
-  `spawnSync`; nothing is piped, so there is no repeat of the `vitest | perl | grep` failure that
-  reported grep's status.
-- **Every run is reconciled.** `numTotalTests` is checked against
-  passed + failed + skipped + todo, and against the number of assertion records actually present.
-  All three runs reconcile, so none of them is the "crashed worker still prints a passing summary"
-  case that silently dropped 53 tests before.
+- **Exit codes are Vitest's own.** Captured directly from the process, with nothing piped, so
+  there is no repeat of the `vitest | perl | grep` failure that reported grep's status.
+- **Every run is reconciled** by `pnpm test:reconcile` — decision 5's gate, computed against
+  Vitest's own JSON reporter output. All three runs exit zero from it, so none is the "crashed
+  worker still prints a passing summary" case that silently dropped 53 tests before.
 
-Wall time varies 95s to 310s across the three runs, which is consistent with everything this ADR
+This is the first time the criterion has been demonstrated with the reconciliation gate enforcing
+it rather than a hand-rolled check, which is the arrangement decision 5 was built for. An earlier
+set of three runs on the pre-merge tree gave the same result (2,329 passed / 1 skipped of 2,330,
+identical across runs) using equivalent hand-written reconciliation; the table above supersedes it
+because it tests the code that will actually merge.
+
+Wall time varies 250s to 581s across the three runs, which is consistent with everything this ADR
 has learned about this host: suite wall time is not a usable instrument here, and no speedup is
 claimed from it. The per-test measurements above are the trustworthy ones, for the same reason
 decision 1's sync-level numbers were trustworthy while its suite-level numbers were withdrawn.
@@ -689,14 +695,15 @@ decision 1's sync-level numbers were trustworthy while its suite-level numbers w
 ### The ~30 GB free-disk precondition does not hold as written
 
 The previous revision advised that "a run starting below roughly 30 GB free should be treated as
-unable to produce a valid result". All three runs above started between **11.6 GB and 10.8 GB**
-free and produced valid, reconciled, identical results, so that precondition is too strong to use
-as a gate.
+unable to produce a valid result". **Six** full suites were run for this revision — three on the
+pre-merge tree, three on the merged tree — starting from **11.6 GB** free and ending at
+**8.7 GB**. Every one produced a valid, reconciled result, and both sets of three were identical
+test-for-test. That precondition is therefore too strong to use as a gate.
 
-What was actually observed here is a 0.7 GB drop across the heaviest run and 0.0 GB across the
-lightest. This does **not** refute the earlier 27 GB figure: that came from sampling every 30s
-through a run, whereas these are before/after samples and would miss a mid-run trough that
-recovers. The peak working set was not re-measured. The correction is to the operational rule
-only — free disk below 30 GB is not grounds for discarding a run, and the ENOSPC episode that
-motivated the rule predates the `removeTree` cleanup fix, when 126 fixture trees were stranded
-rather than the 17 seen now.
+Sampled before and after, the heaviest run moved free space by 0.7 GB and the lightest by 0.0 GB.
+This does **not** refute the earlier 27 GB figure: that came from sampling every 30s through a
+run, whereas these are before/after samples and would miss a mid-run trough that recovers. The
+peak working set was not re-measured. The correction is to the operational rule only — free disk
+below 30 GB is not grounds for discarding a run, and the ENOSPC episode that motivated the rule
+predates the `removeTree` cleanup fix, when 126 fixture trees were stranded rather than the 17
+seen now.

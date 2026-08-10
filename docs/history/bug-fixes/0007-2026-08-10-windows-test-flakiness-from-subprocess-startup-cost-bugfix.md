@@ -82,20 +82,30 @@ Remove the spawns rather than raise the budgets, following ADR-12 decisions 1 an
 
 ## Verification
 
-Three consecutive full-suite runs on the Windows host where the flake occurs:
+Three consecutive full-suite runs on the Windows host where the flake occurs, on the merged tree,
+using the repository's own PR #589 tooling exactly as CI invokes it — `pnpm test` for the run,
+`pnpm test:reconcile` for the integrity gate:
 
-| Run | Exit | Test files | Tests                    | Reconciled | Wall   |
-| --- | ---- | ---------- | ------------------------ | ---------- | ------ |
-| 1   | 0    | 77 passed  | 2,329 passed / 1 skipped | yes        | 310.4s |
-| 2   | 0    | 77 passed  | 2,329 passed / 1 skipped | yes        | 240.7s |
-| 3   | 0    | 77 passed  | 2,329 passed / 1 skipped | yes        | 95.5s  |
+| Run | `vitest` | `test:reconcile` | Tests                    | Wall   |
+| --- | -------- | ---------------- | ------------------------ | ------ |
+| 1   | 0        | 0                | 2,379 passed / 1 skipped | 493.0s |
+| 2   | 0        | 0                | 2,379 passed / 1 skipped | 581.2s |
+| 3   | 0        | 0                | 2,379 passed / 1 skipped | 249.7s |
 
-Run 1 against runs 2 and 3 are identical test-for-test — same 2,330 IDs, same status on each. That
-is ADR-12's stated criterion, which had not previously been met on merged `dev`.
+Run 1 against runs 2 and 3 are identical test-for-test — same 2,380 IDs, same status on each. That
+is ADR-12's stated criterion, which had not previously been met on merged `dev`, and this is the
+first time it has been demonstrated with the reconciliation gate enforcing it rather than a
+hand-rolled check.
+
+An earlier set of three runs on the pre-merge tree gave the same result (2,329 passed / 1 skipped
+of 2,330, identical across runs) using equivalent hand-written reconciliation.
 
 Both false-green modes ADR-12 records were guarded rather than assumed away: exit codes come from
-`spawnSync` directly with nothing piped, and every run is reconciled so a crashed worker silently
+the process directly with nothing piped, and every run is reconciled so a crashed worker silently
 dropping tests cannot pass as green.
+
+CI is green on all checks, including the required `Test`, `Validate` and `branch-rules` — the
+Linux `Test` job confirms the change is not a Windows-specific workaround.
 
 ### Before/After Comparison
 
@@ -142,9 +152,10 @@ A test can be expensive and still not test what its name says. The `--help` loop
 startups asserting command-name membership, and raising its budget would have preserved both the
 cost and the gap.
 
-The 30 GB free-disk precondition from the previous revision is too strong: all three acceptance
-runs started below 12 GB free and produced valid results. The peak working set was not
-re-measured, so only the operational rule is corrected, not the earlier figure.
+The 30 GB free-disk precondition from the previous revision is too strong: six full suites ran for
+this fix, starting from 11.6 GB free and ending at 8.7 GB, and every one produced a valid,
+reconciled result. The peak working set was not re-measured, so only the operational rule is
+corrected, not the earlier figure.
 
 ---
 
