@@ -35,6 +35,29 @@ That matches no runner, so `resolveCoverageCommand` returned
 assertion, `expect(Array.isArray(result.coverage)).toBe(true)`, holds for the
 `[]` that produced. The test passed without executing the code it names.
 
+### The inverse cost: an unstubbed guard is more expensive than what it guards
+
+A full-suite run after the fix above surfaced the mirror-image problem in the
+same file, and it inverts the intuition that mocking `commandExists` is the
+risky choice. Measured on this host under load, against the real runner:
+
+| Call                                                | Cost        |
+| --------------------------------------------------- | ----------- |
+| `commandExists('node')` — spawns `where` on Windows | **4486 ms** |
+| `execCommand('node -e ""')`                         | 1296 ms     |
+
+The guard costs **3.5x the command it guards**. `runCheck` calls it once per
+step, so a three-step fixture spends ~17.3s in process startup alone against a
+20s budget — a coin flip that resolves differently under full-suite contention
+than in isolation. This is why `check.test.mjs` timed out in the suite while
+passing on its own, and why `healthcheck.test.mjs`, which stubs both functions in
+all ten of its tests, never appears in the flaky set.
+
+So the two failure modes pull in opposite directions: stubbing `commandExists`
+true without also stubbing `execCommand` spawns real binaries (PR #588), while
+not stubbing it at all pays `where` per step. The resolution is to stub **both**,
+and to keep a real `execCommand` only where executing something is the point.
+
 ## Solution Implemented
 
 Name a real runner in the fixture (`npx vitest run`) so coverage resolves, and
@@ -49,7 +72,12 @@ against the test's 20s budget.
 - **`.agentkit/engines/node/src/__tests__/check.test.mjs`**: added a
   `testCommand` option to `createCheckFixture`; rewrote the coverage test to
   stub `runner.execCommand` and assert the resolved command, parsed percentage,
-  threshold and status.
+  threshold and status. Added a `stubCommandExists()` `beforeEach` to both
+  `runCheck` describes, and stubbed `execCommand` in
+  `returns a structured result object`, whose assertions are purely structural.
+  `resolves prettier path from agentkitRoot when roots are split` deliberately
+  keeps a real `execCommand` — its PASS assertion is what proves the resolved
+  path is executable, and the fixture's stub `prettier.cjs` keeps that cheap.
 
 ### Testing
 
@@ -61,8 +89,8 @@ against the test's 20s budget.
 
 ## Verification
 
-`check.test.mjs`: **31/31 passed**, whole file 34.5s. Prettier clean on the
-changed file.
+`check.test.mjs`: **31/31 passed**, whole file 9.6s (down from 153s in the failing
+suite run). Prettier clean on all changed files.
 
 The PR #588 mechanism was reproduced independently before auditing, so the audit
 started from a confirmed baseline rather than from the PR description:
@@ -82,9 +110,22 @@ started from a confirmed baseline rather than from the PR description:
 | Assertions             | 1 (`Array.isArray`, true for `[]`) | 4 (command, percentage, threshold, status) |
 | Runtime                | 2137 ms                            | 765 ms                                     |
 
+Guard-stubbing removed the timeouts entirely. Same file, same host:
+
+| Test                                 | Full suite (before)           | Isolation (before) | After            |
+| ------------------------------------ | ----------------------------- | ------------------ | ---------------- |
+| `returns a structured result object` | **timeout at 20s** (41740 ms) | 11163 ms           | **47 ms**        |
+| `resolves prettier path …`           | **timeout at 20s** (43431 ms) | 10579 ms           | **990 ms**       |
+| whole file                           | 153401 ms, 2 failed           | 58.9 s             | **9.6 s, 31/31** |
+
+The slowest test in the file is now 990 ms against a 20 s budget — a 20x margin
+rather than a coin flip.
+
 ### Regression Testing
 
-The new assertions were mutation-checked. Restoring the old fixture fails with:
+Both rewrites were mutation-checked rather than assumed.
+
+Restoring the old coverage fixture fails with:
 
 ```
 AssertionError: expected [ 'node -e ""', 'node -e ""' ] to include 'npx vitest run --coverage'
@@ -92,6 +133,10 @@ AssertionError: expected [ 'node -e ""', 'node -e ""' ] to include 'npx vitest r
 
 Those two commands are the typecheck and test steps — direct evidence that the
 coverage step previously never ran.
+
+Removing the fixture's stub `prettier.cjs` fails with
+`AssertionError: expected 'FAIL' to be 'PASS'`, confirming that test still
+validates the resolved path end to end despite the 43s -> 1s drop.
 
 ## Impact Assessment
 
@@ -136,6 +181,18 @@ any plausible cap — and `check` legitimately runs builds and full test suites
 that can exceed `healthcheck`'s 120s. Shortening the cap would abort real work to
 fix a problem that belongs in the tests. Recorded here rather than changed.
 
+### Remaining suite failures, not addressed here
+
+A local full-suite run showed four timeouts. Two were the `check.test.mjs` tests
+fixed above. The other two are left alone deliberately:
+
+- `check-coverage.test.mjs > runs --fix command …` — this is the PR #588 defect
+  itself, still present because #588 is unmerged. Fixing it here would collide
+  with that PR. It failed at 26312 ms against 20s, versus 11362 ms in isolation.
+- `cli.test.mjs > every command can be invoked with --help …` — a different
+  mechanism (it spawns the CLI once per command, ~29 processes) in a file outside
+  this change. Out of scope; a candidate for the same treatment.
+
 ## Lessons Learned
 
 A mock that removes a guard inherits everything the guard was protecting. Forcing
@@ -148,6 +205,12 @@ test. Neither was visible from the test name or its pass status — only from
 timing the first and mutating the second. An assertion that holds for the empty
 result is not a test, and `Array.isArray(x)` is the canonical shape of that
 mistake.
+
+The most useful number here was the one nobody thought to measure: `where` costs
+more than the process it is asked about. The instinct after PR #588 is to treat
+mocking `commandExists` as the dangerous move, but leaving it real is what put
+two tests within 3 seconds of their budget. Stub both, and let a real
+`execCommand` survive only where running something is the assertion.
 
 ---
 

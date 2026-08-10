@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
@@ -66,7 +66,29 @@ function cleanupFixture(root) {
   }
 }
 
+/**
+ * Stub the per-step command-exists guard.
+ *
+ * The real one spawns `where` on Windows once per step, measured at ~4.5s/call
+ * on a loaded host — 3.5x the cost of the `node -e ""` it is guarding. Three
+ * steps therefore cost ~17s of pure process startup against these tests' 20s
+ * budgets, which is what makes them time out under full-suite contention while
+ * passing in isolation. No test in this file asserts skip-not-found behaviour
+ * (check-coverage.test.mjs covers that), so the guard is overhead here.
+ *
+ * Forcing this true is safe ONLY because every command these fixtures name
+ * resolves to `node`, which is present either way — so it changes nothing about
+ * what runs. It also removes the guard: if a fixture here ever names a binary
+ * that might really be installed (a formatter such as `black`), that binary
+ * WILL be spawned. See PR #588. Stub execCommand as well in that case.
+ */
+function stubCommandExists() {
+  vi.spyOn(runner, 'commandExists').mockReturnValue(true);
+}
+
 describe('runCheck()', () => {
+  beforeEach(stubCommandExists);
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -74,6 +96,14 @@ describe('runCheck()', () => {
   it('returns a structured result object', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    // Every assertion below is about the shape of the result, not about any
+    // command's effect, so nothing here needs a real process.
+    vi.spyOn(runner, 'execCommand').mockReturnValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+      durationMs: 0,
+    });
 
     const fixture = createCheckFixture();
     try {
@@ -138,6 +168,10 @@ describe('runCheck()', () => {
   it('resolves prettier path from agentkitRoot when roots are split', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    // execCommand is deliberately left real here: the PASS assertion below is
+    // what proves the resolved path is actually executable, which is this
+    // test's whole point. The fixture writes a stub prettier.cjs so that stays
+    // cheap. Only the command-exists guard is stubbed, via beforeEach.
 
     const fixture = createCheckFixture({
       withBuild: false,
@@ -388,6 +422,8 @@ describe('auditUnresolvedPlaceholders()', () => {
 // ---------------------------------------------------------------------------
 
 describe('runCheck() — additional branches', () => {
+  beforeEach(stubCommandExists);
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
