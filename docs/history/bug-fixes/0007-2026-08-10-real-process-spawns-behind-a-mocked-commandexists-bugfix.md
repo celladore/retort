@@ -67,20 +67,20 @@ changed file.
 The PR #588 mechanism was reproduced independently before auditing, so the audit
 started from a confirmed baseline rather than from the PR description:
 
-| Measurement | Result |
-| ----------- | ------ |
-| `check-coverage.test.mjs > runs --fix command …` (unfixed, this host) | **11362 ms** against a 20s budget |
-| `black .` | 6.324 s |
-| `black --check .` | 5.180 s |
-| Sum | 11.5 s — matches the observed test duration |
+| Measurement                                                           | Result                                      |
+| --------------------------------------------------------------------- | ------------------------------------------- |
+| `check-coverage.test.mjs > runs --fix command …` (unfixed, this host) | **11362 ms** against a 20s budget           |
+| `black .`                                                             | 6.324 s                                     |
+| `black --check .`                                                     | 5.180 s                                     |
+| Sum                                                                   | 11.5 s — matches the observed test duration |
 
 ### Before/After Comparison
 
-| | Before | After |
-| --- | --- | --- |
-| Coverage step executed | never | yes |
-| Assertions | 1 (`Array.isArray`, true for `[]`) | 4 (command, percentage, threshold, status) |
-| Runtime | 2137 ms | 765 ms |
+|                        | Before                             | After                                      |
+| ---------------------- | ---------------------------------- | ------------------------------------------ |
+| Coverage step executed | never                              | yes                                        |
+| Assertions             | 1 (`Array.isArray`, true for `[]`) | 4 (command, percentage, threshold, status) |
+| Runtime                | 2137 ms                            | 765 ms                                     |
 
 ### Regression Testing
 
