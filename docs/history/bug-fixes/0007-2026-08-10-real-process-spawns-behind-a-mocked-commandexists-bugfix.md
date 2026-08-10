@@ -121,6 +121,20 @@ Guard-stubbing removed the timeouts entirely. Same file, same host:
 The slowest test in the file is now 990 ms against a 20 s budget — a 20x margin
 rather than a coin flip.
 
+Validated under real contention, not just in isolation — isolation is what these
+tests already passed. Local full-suite runs, same host:
+
+|              | Before  | After   |
+| ------------ | ------- | ------- |
+| Tests failed | 4       | **1**   |
+| Files failed | 3       | **1**   |
+| Duration     | 440.6 s | 427.4 s |
+
+`check-coverage.test.mjs > runs --fix command …` — the PR #588 defect — passed in
+the post-fix run at its borderline ~11-26s against a 20s budget, because
+`check.test.mjs` no longer holds ~144s of CPU. That is a reprieve from reduced
+contention, not a fix; #588 remains the fix.
+
 ### Regression Testing
 
 Both rewrites were mutation-checked rather than assumed.
@@ -186,12 +200,18 @@ fix a problem that belongs in the tests. Recorded here rather than changed.
 A local full-suite run showed four timeouts. Two were the `check.test.mjs` tests
 fixed above. The other two are left alone deliberately:
 
-- `check-coverage.test.mjs > runs --fix command …` — this is the PR #588 defect
-  itself, still present because #588 is unmerged. Fixing it here would collide
-  with that PR. It failed at 26312 ms against 20s, versus 11362 ms in isolation.
+- `check-coverage.test.mjs > runs --fix command …` — the PR #588 defect itself,
+  still present because #588 is unmerged. Fixing it here would collide with that
+  PR. It failed at 26312 ms against 20s, versus 11362 ms in isolation.
 - `cli.test.mjs > every command can be invoked with --help …` — a different
-  mechanism (it spawns the CLI once per command, ~29 processes) in a file outside
-  this change. Out of scope; a candidate for the same treatment.
+  mechanism in a file outside this change: it spawns the CLI once per command,
+  ~29 processes, and timed out at 62074 ms against a 30s budget.
+
+`cli.test.mjs` is the one still failing after this change and is the obvious next
+candidate. It is the same defect class — real spawns starving a test budget — but
+the remedy differs, since spawning the CLI _is_ what that test asserts. The
+options are invoking the CLI in-process, or sizing the budget to ~29 spawns at
+the ~2s/spawn this host actually delivers.
 
 ## Lessons Learned
 
