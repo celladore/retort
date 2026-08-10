@@ -20,12 +20,16 @@ concurrency:
 # .github/scripts/setup-branch-protection.sh — update the spec, not this comment,
 # then re-run that script.
 #
-# Current required checks: Test (below), Validate (below),
+# Current required checks: Test (below), Validate (below), Prettier (below),
 # branch-rules (branch-protection.yml — job id, no `name:` field).
 #
-# `Prettier` (below) is NOT currently a required check. It moved here from the
-# Vitest suite (ADR-12 decision 3); adding it to branchProtection.requiredStatusChecks
-# is a separate decision, since doing so makes formatting block merges.
+# `Prettier` (below) moved here from the Vitest suite (ADR-12 decision 3) and was
+# promoted to a required check once it was confirmed reliably green. Note that a
+# repo-wide `prettier --check .` run from inside a `.claude/worktrees/` agent
+# worktree on Windows reports ~18 false positives: the harness seeds `.claude/**`
+# and `CLAUDE.md` with CRLF, bypassing the `eol=lf` filters in .gitattributes.
+# Those never reach CI — `text eol=lf` normalises CRLF→LF on staging — so a red
+# Prettier job here is a genuine formatting regression, not that artifact.
 #
 # `Quarantined Tests` (below) is NOT a required check by design (ADR-12
 # decision 5): a quarantined test is a known flake with a tracking issue, so it
