@@ -1,7 +1,7 @@
 # Hook spec validation and windowsFirst emit filter - Historical Summary
 
 **Launched**: 2026-08-08
-**PR**: [#PR-Number]
+**PR**: [#582](https://github.com/phoenixvc/retort/pull/582)
 **Feature Type**: Enhancement (validation hardening + one new setting)
 
 ## Feature Overview

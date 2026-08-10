@@ -2,7 +2,7 @@
 
 **Completed**: 2026-08-10
 **Bug ID**: [ADR-12](../../architecture/decisions/12-test-suite-reliability.md)
-**PR**: [#PR-Number]
+**PR**: [#591](https://github.com/phoenixvc/retort/pull/591)
 **Severity**: Medium (developer experience; CI was never affected)
 
 ## Problem Description
