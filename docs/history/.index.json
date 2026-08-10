@@ -61,7 +61,7 @@
       "type": "feature",
       "title": "Hook spec validation and windowsFirst emit filter",
       "date": "2026-08-08",
-      "pr": "",
+      "pr": "582",
       "file": "features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md"
     },
     {
