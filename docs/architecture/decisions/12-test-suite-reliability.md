@@ -579,6 +579,15 @@ still spawning `node -e ""` per step. Real end-to-end `execCommand` behaviour is
 `runner.test.mjs`, which exercises it against actual processes in nine cases — that is where it
 belongs, and no coverage moves or is lost.
 
+#590 reached the same root cause independently and landed first, stubbing `commandExists` per
+describe block and `execCommand` per test in `check.test.mjs` alone. The file-wide mock supersedes
+that mechanism and extends it to the tests #590 left spawning, but its substantive change is kept
+and is better than what this work had: the coverage-step test now names a real runner, so
+`resolveCoverageCommand` returns a command instead of null, and it asserts the built coverage
+command and the parsed percentage rather than merely that a coverage array exists. Worth recording
+because the two changes look like duplicates and are not — one replaced a mechanism, the other
+fixed a test that was not exercising the path it named.
+
 | File                      | Test-phase time  |
 | ------------------------- | ---------------- |
 | `check.test.mjs`          | 53.1s → **1.2s** |
