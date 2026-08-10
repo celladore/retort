@@ -2,8 +2,29 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// runCheck() spawns two processes per step: commandExists() shells out to `where`
+// on Windows, then execCommand() runs the step itself. On the Windows host where
+// this suite flakes, `where` measured 1.2–2.6s per call and `node -e ""` 0.7–1.9s
+// — at idle. The default fixture below builds three steps, so a single runCheck()
+// paid six spawns and 6–12s against a 20s budget, leaving no room for suite
+// contention. None of the assertions here need a real process: they are about
+// which steps get built and how exit codes map to statuses. Stubbing the runner
+// removes every spawn from this file. Real end-to-end execCommand behaviour is
+// covered by runner.test.mjs, which exercises it against actual processes.
+// See ADR-12.
+vi.mock('../runner.mjs', async () => {
+  const actual = await vi.importActual('../runner.mjs');
+  return {
+    ...actual,
+    commandExists: vi.fn(() => true),
+    execCommand: vi.fn(() => ({ exitCode: 0, stdout: '', stderr: '', durationMs: 0 })),
+  };
+});
+
+const { commandExists, execCommand } = await import('../runner.mjs');
+const {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
@@ -13,7 +34,9 @@ import {
   resolveFormatter,
   resolveLinter,
   runCheck,
-} from '../check.mjs';
+} = await import('../check.mjs');
+
+const OK = { exitCode: 0, stdout: '', stderr: '', durationMs: 0 };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
@@ -55,6 +78,11 @@ function cleanupFixture(root) {
     rmSync(root, { recursive: true, force: true });
   }
 }
+
+beforeEach(() => {
+  vi.mocked(commandExists).mockReset().mockReturnValue(true);
+  vi.mocked(execCommand).mockReset().mockReturnValue(OK);
+});
 
 describe('runCheck()', () => {
   afterEach(() => {
@@ -156,6 +184,39 @@ describe('runCheck()', () => {
 
       const formatStep = result.stacks[0]?.steps.find((step) => step.step === 'format');
       expect(formatStep?.status).toBe('PASS');
+
+      // Assert the split-roots path actually reaches the runner. This is stronger
+      // than the status check alone, which cannot distinguish the agentkitRoot
+      // copy from any other prettier that happened to run.
+      const commands = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(commands).toContain(`node "${expectedPrettierBin}" --check .`);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('maps a non-zero step exit code to FAIL', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'boom',
+      durationMs: 0,
+    });
+
+    const fixture = createCheckFixture({ withBuild: false });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+
+      const testStep = result.stacks[0].steps.find((step) => step.step === 'test');
+      expect(testStep.status).toBe('FAIL');
+      expect(testStep.stderr).toContain('boom');
+      expect(result.overallPassed).toBe(false);
     } finally {
       cleanupFixture(fixture.root);
     }
