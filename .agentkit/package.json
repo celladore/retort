@@ -50,6 +50,8 @@
     "lint:md:fix": "markdownlint-cli2 --fix --config ../.markdownlint.json \"../docs/prd/**/*.md\" \"../docs/README.md\" \"../CONTRIBUTING.md\" \"docs/**/*.md\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:reconcile": "node scripts/reconcile-test-results.mjs",
+    "test:quarantine": "node scripts/run-quarantined-tests.mjs",
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {

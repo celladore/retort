@@ -1,0 +1,4 @@
+{
+  "description": "Quarantined test files (ADR-12 decision 5). Files listed here are excluded from the blocking `Test` job and run separately by the non-blocking `Quarantined Tests` job, so a confirmed flake stops corrupting the signal without being deleted. Every entry needs a tracking issue — `reconcile-test-results.mjs` fails CI on an entry that lacks one, or that points at a file which no longer exists. Paths are relative to `.agentkit`. Empty is the healthy state.",
+  "entries": []
+}

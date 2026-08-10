@@ -150,6 +150,9 @@ Emit a JUnit or JSON reporter artifact in CI and enable rerun-based flake detect
 intermittent test is labelled rather than retried into green. Quarantine confirmed flakes with
 tracking issues, per the existing `qa-e2e-stability` convention.
 
+**Implemented (2026-08-10).** Deferred on 2026-08-07 as speculative — see the revision below
+for the evidence that reversed that call.
+
 ### Sequencing
 
 **1 before 2.** If in-process formatting removes enough cost, the timeouts may stop firing and
@@ -175,7 +178,7 @@ developer time and trust, not delivery. Priorities are revised accordingly.
 | 6. Raise sync-heavy timeouts | **New, cheapest** | The copilot `beforeAll` hooks fail at 30s on Windows. Sync is now ~2× faster, so a modest bump likely clears them outright, at zero CI cost and no architectural change.                               |
 | 3. Prettier out of Vitest    | **Keep, lower**   | Rationale changed: no longer about flakiness, but about placement and ~90s of runtime. A whole-repo format scan duplicates the lint job.                                                               |
 | 2. Isolate sync-heavy suites | **Drop**          | Measured worse (1294s vs 730s), and it targets a problem CI does not have. Script-level sequencing would slow CI for no CI benefit.                                                                    |
-| 5. Flake visibility          | **Defer**         | There are no CI flakes to surface. Building JUnit reporting and rerun detection for a green pipeline is speculative. Revisit if CI actually starts flaking.                                            |
+| 5. Flake visibility          | ~~**Defer**~~     | _Reversed 2026-08-10 — see below._ The reasoning was: there are no CI flakes to surface, so reporting for a green pipeline is speculative. It assumed a green summary means the suite ran.             |
 
 The through-line: decision 1 fixed a real product defect that happened to be measurable in the
 suite. What remains is mostly local developer ergonomics, and the two cheapest items (4 and 6)
@@ -421,6 +424,103 @@ implementation, so the file's other tests are unaffected. Test-phase time for th
 
 The general rule: forcing `commandExists` true removes a guard, and every step behind that guard
 must then be checked for whether it spawns something real.
+
+## Revision (2026-08-10): decision 5 landed — the deferral was wrong
+
+The section above closes with "this is what decision 5 (make flakes visible) is for, and it is
+not yet implemented." It is now implemented. This revision records why the 2026-08-07 deferral
+was wrong, since the reasoning error is more reusable than the code.
+
+Decision 5 was deferred on the grounds that "there are no CI flakes to surface", so building
+reporting for a green pipeline was speculative. The hole: that assumed a green summary means the
+suite ran. **A run can drop tests and still print a passing summary**, and no amount of "the
+pipeline is green" tells you otherwise — which made the deferral self-confirming. The
+`2273 passed` against a `2327` total recorded above is the counter-example, and it was sitting in
+CI-adjacent scrollback the whole time, unnoticed because nothing added the numbers up.
+
+### What landed
+
+| Change                                                                     | Where                                                                           |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| JUnit + JSON reporters, uploaded as a CI artifact (14-day retention)       | `.agentkit/vitest.config.mjs`, `Upload test results` step in `ci.yml`           |
+| Reconciliation gate — fails when outcomes do not sum to the reported total | `.agentkit/scripts/reconcile-test-results.mjs`, `Reconcile test results` step   |
+| Run-integrity reporter — unhandled errors, unreported tests, flake labels  | `.agentkit/scripts/vitest-run-integrity-reporter.mjs`                           |
+| Rerun-based flake labelling (`retry: 1`, CI only)                          | `.agentkit/vitest.config.mjs`                                                   |
+| Quarantine registry + non-blocking `Quarantined Tests` job                 | `.agentkit/test-quarantine.json`, `.agentkit/scripts/run-quarantined-tests.mjs` |
+| `qa-run-reconciliation` convention                                         | `.agentkit/spec/rules.yaml`                                                     |
+
+The gate encodes the rule stated above — a run that does not reconcile is **void, not green**. It
+runs with `if: always()`, so it fails the required `Test` check even when Vitest itself exits
+zero. Beyond the headline sum it checks four more things: that the summary and the per-file
+detail agree on the count and on each bucket; that no test carries a non-terminal status (the
+precise signature of a dropped test, reported by name and file); that no unhandled error escaped
+the run; and that a report claiming `success: true` while failing to reconcile is called out as
+such.
+
+Two deliberate choices about where the numbers come from. The reconciliation is computed against
+**Vitest's own `json` reporter output**, not against a record this repo produces, so the primary
+guard cannot be defeated by a bug in the tooling added here. The integrity record is
+supplementary, and covers exactly the two things the JSON report omits: unhandled errors never
+attach to a test, and retry diagnostics are not serialised.
+
+The unhandled-error check earns its place from the capacity findings above. A fork killed by the
+commit limit produces no test failure at all — it surfaces as unrelated tests failing in varying
+combinations, which reads as flaky application code. That check turns it into a named, fatal
+condition instead.
+
+### Verification
+
+The failure mode was reproduced end-to-end rather than argued from the schema. A fixture whose
+second test calls `process.abort()` under `--pool=forks` produces the same
+`[vitest-pool]: Worker forks emitted error`, the same passing-looking summary
+(`Test Files 1 passed (2)`, `Tests 1 passed (5)`), and `success: true` in the JSON report with
+both files marked `passed`. The gate fails it with `count-mismatch`, `unreported-tests`,
+`success-inconsistent` and `unhandled-errors`, and names all four dropped tests. Against a
+healthy run it exits zero, and against a run with genuine failures it also exits zero — a failing
+suite is informative, and only a suite that has lost tests is void. The quarantine mechanism was
+exercised with a real entry: the file is excluded from the blocking suite and executed by the
+quarantine runner, and the gate rejects an entry lacking a tracking issue or pointing at a
+deleted file.
+
+### What the gate does not catch
+
+The reconciliation is computed over the tests present in Vitest's task tree at run end. A file
+that vanished from that tree entirely — never collected at all — would take its tests out of both
+the total and the buckets, and would therefore still reconcile. That is not the observed
+incident: the console reported 2327 collected against 2274 accounted for, which proves the
+dropped tests were in the tree. The residual case is covered by the unhandled-error check rather
+than by the sum, because a worker that dies always produces one. Worth stating explicitly so the
+next reader does not assume the sum alone is a complete guarantee.
+
+### On enabling `retry`
+
+`retry: 1` is enabled **in CI only**. Blanket retry is what this decision's own title warns
+against, so it is paired with labelling that cannot be missed: anything rescued by a rerun is
+recorded in the integrity artifact, surfaced by the gate as a `::warning::` annotation and a
+step-summary section, and is expected to be quarantined with a tracking issue. It is deliberately
+not enabled locally — the failures this ADR chased were Windows contention timeouts on developer
+machines, and retrying them there would hide the exact signal a developer needs while iterating.
+
+The quarantine registry is empty at time of writing, which is the correct state. What landed is
+the mechanism, so that quarantining the next confirmed flake is an entry in a JSON file rather
+than a design exercise.
+
+### The remaining Windows failures are unchanged by this
+
+Three full-suite runs on this branch, on the Windows host, before #588 was merged in: 7 failures
+(416s), 1 failure (771s), 3 failures (553s). All were 20s or 30s timeouts, concentrated in
+`check.test.mjs`, `check-coverage.test.mjs` and `cli.test.mjs`; all 106 tests in those three
+files pass in isolation in 42s. The 771s run used the **pre-change** `vitest.config.mjs` via
+`--config`, which is what establishes that decision 5 neither caused nor cured them.
+
+#588 has since fixed the `check-coverage` case at its root. `check.test.mjs` and `cli.test.mjs`
+remain, and both spawn Node subprocesses per assertion — the same shape decision 1 and decision 4
+resolved elsewhere by removing the spawn rather than raising the budget. Tracked separately; the
+acceptance criterion stays open, as the section above already records.
+
+All three runs reconciled, which is the correct answer and the point of the exercise: the gate
+distinguishes "this suite has real failures" from "this suite lost tests", and only the second
+one voids a run.
 
 ## Revision (2026-08-10): the residual flake is subprocess startup cost, and it is measurable
 
