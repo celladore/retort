@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 8,
+    "bugfix": 10,
     "feature": 2,
     "migration": 1,
     "issue": 1,
@@ -87,6 +87,14 @@
       "date": "2026-08-10",
       "pr": "591",
       "file": "bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md"
+    },
+    {
+      "number": 9,
+      "type": "bugfix",
+      "title": "Tests passing without executing their subject",
+      "date": "2026-08-11",
+      "pr": "594",
+      "file": "bug-fixes/0009-2026-08-11-tests-passing-without-executing-their-subject-bugfix.md"
     }
   ]
 }
