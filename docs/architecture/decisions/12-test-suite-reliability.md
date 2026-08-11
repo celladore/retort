@@ -518,6 +518,11 @@ remain, and both spawn Node subprocesses per assertion — the same shape decisi
 resolved elsewhere by removing the spawn rather than raising the budget. Tracked separately; the
 acceptance criterion stays open, as the section above already records.
 
+> **Superseded (2026-08-10, later the same day).** #591 removed those spawns and the criterion
+> now holds — see "The acceptance criterion now holds" below. The prediction in the paragraph
+> above was right about the mechanism and about the remedy; only its "stays open" status is
+> stale. Left in place because the reasoning that reached it is the reusable part.
+
 All three runs reconciled, which is the correct answer and the point of the exercise: the gate
 distinguishes "this suite has real failures" from "this suite lost tests", and only the second
 one voids a run.
