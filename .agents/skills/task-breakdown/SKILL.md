@@ -16,12 +16,10 @@ Analyze available skills and propose creating new skills if needed. If you propo
 **Announce at start:** "I'm using the task-breakdown skill to create a plan."
 
 **Constraints:**
-
 - Each task should have a last step that verifies the task was completed correctly
 - The very last task should verify that after completing all tasks, the changes and actions were applied correctly and as intended by the specs, if provided
 
 **Presenting the tasks:**
-
 - Once you believe you have the full task breakdown, present the tasks one-by-one to the user
 - Ask after each task whether it looks right so far
 - Be ready to go back and clarify if something doesn't make sense
@@ -31,7 +29,6 @@ Analyze available skills and propose creating new skills if needed. If you propo
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
-
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -57,11 +54,10 @@ Analyze available skills and propose creating new skills if needed. If you propo
 
 ## Task Structure
 
-````markdown
+```markdown
 ### Task N: [Component Name]
 
 **Files:**
-
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
@@ -73,7 +69,6 @@ def test_specific_behavior():
     result = function(input)
     assert result == expected
 ```
-````
 
 **Step 2: Run test to verify it fails**
 
@@ -87,6 +82,7 @@ def function(input):
     return expected
 ```
 
+
 **Step 4: Cleanup code changes**
 Use skill(s) if available to cleanup code changes
 
@@ -98,7 +94,6 @@ Make sure code follows the project's coding standards and aligns with the specs 
 
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: PASS
-
 ```
 
 ## Remember
@@ -119,4 +114,3 @@ After saving the task breakdown, offer task execution:
 - **REQUIRED SUB-SKILL:** Use subagent-task-execution
 - Stay in this session
 - Fresh subagent per task + code review
-```

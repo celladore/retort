@@ -109,6 +109,20 @@ colors:
   primary: "#1976D2"
 `.trimStart();
 
+// validateSpec also requires aliases.yaml and docs.yaml to be present; a spec
+// set without them reports "file not found" and is not a valid spec.
+const ALIASES_YAML = `
+aliases:
+  /s: '/sync'
+`.trimStart();
+
+const DOCS_YAML = `
+categories:
+  - id: engineering
+    name: Engineering
+    path: 'docs/engineering/'
+`.trimStart();
+
 // ---------------------------------------------------------------------------
 // Setup / teardown
 // ---------------------------------------------------------------------------
@@ -490,9 +504,13 @@ engineering:
       writeFile(resolve(specDir, 'commands.yaml'), COMMANDS_YAML);
       writeFile(resolve(specDir, 'rules.yaml'), RULES_YAML);
       writeFile(resolve(specDir, 'settings.yaml'), SETTINGS_YAML);
+      writeFile(resolve(specDir, 'aliases.yaml'), ALIASES_YAML);
+      writeFile(resolve(specDir, 'docs.yaml'), DOCS_YAML);
       const accessor = new SpecAccessor(agentkitRoot);
       const errors = accessor.validate();
-      expect(Array.isArray(errors)).toBe(true);
+      // The title's claim is emptiness — assert it, otherwise validate() could
+      // return anything array-shaped and still pass.
+      expect(errors).toEqual([]);
     });
 
     it('returns an array even when spec files are all missing (no throw)', () => {

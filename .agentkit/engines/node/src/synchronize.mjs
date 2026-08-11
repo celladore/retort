@@ -30,8 +30,9 @@ import { ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
 import {
   cleanStaleFiles,
   clearTemplateMeta,
-  runPostSyncPrettier,
+  formatOutputsInProcess,
   setTemplateMeta,
+  writeGeneratedManifest,
   writeManifest,
   writeScaffoldOutputs,
 } from './scaffold-engine.mjs';
@@ -127,7 +128,10 @@ export {
   resolveTeamAgents,
 } from './var-builders.mjs';
 
-// threeWayMerge and normalizeForComparison live in scaffold-merge.mjs (used by scaffold-engine.mjs)
+// threeWayMerge lives in scaffold-merge.mjs (used by scaffold-engine.mjs).
+// normalizeForComparison is imported here so the --diff preview classifies
+// changes the same way writeScaffoldOutputs does.
+import { normalizeForComparison } from './scaffold-merge.mjs';
 
 // ---------------------------------------------------------------------------
 // I/O helpers
@@ -220,6 +224,44 @@ export { syncDirectCopy } from './platform-syncer.mjs';
 // Main sync orchestration
 // ---------------------------------------------------------------------------
 
+/**
+ * Scans the project's ADR directory and returns preformatted index lines.
+ *
+ * The ADR index was previously a hardcoded list baked into the template, which
+ * meant every adopter repo received links to retort's own ADRs and newly added
+ * records never appeared. Scanning the target repo keeps the index truthful and
+ * makes it agnostic to the filename convention (numeric or date prefixes both
+ * sort naturally). See ADR-11.
+ *
+ * @param {string} projectRoot
+ * @returns {string[]} markdown list items, sorted by filename
+ */
+export function buildAdrList(projectRoot) {
+  const dir = join(projectRoot, 'docs', 'architecture', 'decisions');
+  if (!existsSync(dir)) return [];
+
+  let entries;
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return [];
+  }
+
+  return entries
+    .filter((f) => f.endsWith('.md') && f.toLowerCase() !== 'readme.md')
+    .sort((a, b) => a.localeCompare(b))
+    .map((file) => {
+      let title = file;
+      try {
+        const match = readFileSync(join(dir, file), 'utf-8').match(/^#\s+(.+?)\s*$/m);
+        if (match) title = match[1];
+      } catch {
+        // Unreadable record — fall back to the filename rather than dropping it.
+      }
+      return `- [${title}](./${file})`;
+    });
+}
+
 export async function runSync({ agentkitRoot, projectRoot, flags }) {
   const dryRun = flags?.['dry-run'] || false;
   const diff = flags?.diff || false;
@@ -269,6 +311,35 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
         console.warn('[retort:sync] Warning: uncommitted changes in protected directories:');
         for (const f of files) console.warn(`  ${f}`);
       }
+    }
+  }
+
+  // --- Overwrite safety guard ---
+  // --overwrite bypasses the entire scaffold protection block in
+  // scaffold-engine.mjs: both the `once` skip that shields user-authored files
+  // (AGENT_BACKLOG.md, docs/**, editor settings) and the `managed` three-way
+  // merge that preserves local edits. Running it against a dirty tree silently
+  // destroys uncommitted work, so refuse unless --force is passed explicitly.
+  // The guard above does not cover this — it only watches .agentkit/ source dirs.
+  if (flags?.overwrite && !flags?.force && !dryRun && !diff && !isTestEnv) {
+    let checkDirtyProtectedFiles;
+    try {
+      ({ checkDirtyProtectedFiles } = await import('./sync-guard.mjs'));
+    } catch (err) {
+      log(`[retort:sync] Warning: could not load sync-guard: ${err?.message ?? err}`);
+    }
+    const { dirty, files } = checkDirtyProtectedFiles
+      ? checkDirtyProtectedFiles(projectRoot, ['.'])
+      : { dirty: false, files: [] };
+    if (dirty) {
+      console.error(
+        '[retort:sync] Aborted: --overwrite regenerates scaffold-once and managed files,\n' +
+          '  discarding local edits. The working tree has uncommitted changes:'
+      );
+      for (const f of files.slice(0, 20)) console.error(`  ${f}`);
+      if (files.length > 20) console.error(`  ...and ${files.length - 20} more`);
+      console.error('  Commit or stash first, or pass --force to proceed anyway.');
+      return;
     }
   }
 
@@ -393,6 +464,19 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     // autoSyncOnPush controls whether the pre-push hook runs agentkit sync
     // before every push (issue #410). Defaults to false; opt-in per repo.
     autoSyncOnPush: overlaySettings.autoSyncOnPush ?? settingsSpec.sync?.autoSyncOnPush ?? false,
+    // windowsFirst controls whether the PowerShell variant of each hook is
+    // emitted and wired. Defaults to true: `.ps1` ships alongside the `.sh`
+    // and is invoked in preference to it, with the `.sh` as the fallback for
+    // machines without pwsh. Set false in a repo that never runs on Windows to
+    // stop emitting PowerShell files it would never execute. See
+    // isWindowsFirst() in platform-syncer.mjs for why the filter is one-directional.
+    windowsFirst: overlaySettings.windowsFirst ?? settingsSpec.sync?.windowsFirst ?? true,
+    // skillsCategorised opts the repo into the layered skills layout:
+    //   .claude/skills/<category>/<name>/SKILL.md
+    //   .agents/skills/<category>/<name>/SKILL.md
+    // Default false for backwards compatibility — flat layout under the skills/ dir.
+    skillsCategorised:
+      overlaySettings.skills?.categorised ?? settingsSpec.skills?.categorised ?? false,
     lastModel: process.env.AGENTKIT_LAST_MODEL || 'sync-engine',
     lastAgent: process.env.AGENTKIT_LAST_AGENT || 'retort',
     // Branch protection defaults — ensure generated scripts produce valid
@@ -533,6 +617,11 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
   vars.teamsList = buildTeamsList(rawTeams);
   vars.hasTeams = rawTeams.length > 0;
 
+  // ADR index — scan the project's own decision records rather than shipping a
+  // hardcoded list (see ADR-11).
+  vars.adrList = buildAdrList(projectRoot);
+  vars.hasAdrs = vars.adrList.length > 0;
+
   // Filter rule domains to those matching the active language stack.
   // Universal domains (security, testing, git-workflow, etc.) are always included.
   // heuristic mode keeps all domains for backward compatibility.
@@ -609,7 +698,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     await Promise.all(alwaysOnTasks);
 
     // --- Editor theme (must run after vscode template copy to merge into settings) ---
-    // Scaffold-once: per-output target — only skip targets that already exist in projectRoot
+    // Scaffold-once: per-output target — preserve existing targets, write new ones.
+    // syncEditorTheme is always called so it can copy existing outputs into tmpDir;
+    // without this carry-forward, scaffold-engine's orphan cleanup would delete them
+    // on the second sync run.
     const forceTheme = flags?.overwrite || flags?.force;
     if (forceTheme) {
       await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags);
@@ -622,11 +714,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           existingOutputs.add(outputPath);
         }
       }
-      if (existingOutputs.size < Object.keys(outputs).length) {
-        await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs);
-      } else {
+      await syncEditorTheme(agentkitRoot, tmpDir, vars, log, flags, existingOutputs, projectRoot);
+      if (existingOutputs.size === Object.keys(outputs).length) {
         log(
-          '[retort:sync] Editor theme: all output targets exist (scaffold-once) — skipping. Use --overwrite to regenerate.'
+          '[retort:sync] Editor theme: all output targets exist (scaffold-once) — preserving existing content. Use --overwrite to regenerate.'
         );
       }
     }
@@ -646,7 +737,8 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           vars,
           version,
           mergedPermissionsResult,
-          settingsSpec
+          settingsSpec,
+          hookFeatureMap
         ),
         syncClaudeCommands(
           templatesDir,
@@ -853,8 +945,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     if (targets.has('codex')) {
       gatedTasks.push(
         syncCodexSkills(templatesDir, tmpDir, vars, version, headerRepoName, commandsSpec),
-        syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log),
-        syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log)
+        syncOrgMetaSkills(tmpDir, projectRoot, skillsSpec, log, {
+          categorised: vars.skillsCategorised,
+          agentkitRoot,
+        }),
+        syncUnknownSkillsReport(tmpDir, projectRoot, skillsSpec, vars.syncDate, log, {
+          categorised: vars.skillsCategorised,
+        })
       );
     }
 
@@ -944,6 +1041,25 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       fileSummary[cat] = (fileSummary[cat] || 0) + 1;
     }
 
+    // 6b. Format rendered output in-process, before ANY comparison against the
+    //     project tree. Doing this after the copy (as previously) left temp
+    //     unformatted and the project formatted, so the content-hash guard in
+    //     writeScaffoldOutputs never matched and every Prettier-touched file was
+    //     rewritten on each sync. Also refreshes manifest hashes in place so they
+    //     describe the formatted bytes. See ADR-11 and ADR-12.
+    //
+    //     This must precede the --diff and interactive branches below: they
+    //     compare temp content against the project, so formatting later would
+    //     make formatting-only differences show up as spurious updates or
+    //     prompts that the real write then skips.
+    await formatOutputsInProcess({
+      projectRoot,
+      tmpDir,
+      allTmpFiles,
+      newManifestFiles,
+      logVerbose,
+    });
+
     // --- Dry-run: print summary and exit without writing ---
     if (dryRun) {
       const total = Object.keys(newManifestFiles).length;
@@ -989,7 +1105,13 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           log(`  create ${normPath}`);
         } else {
           const oldContent = await readFile(destFile, 'utf-8');
-          if (oldContent !== newContent) {
+          // Compare the way the writer does. writeScaffoldOutputs treats a
+          // markdown table-cell padding difference as "unchanged" and skips the
+          // write; a raw comparison here would report updates that the real sync
+          // then declines to make. Prettier-ignored outputs (.claude/rules/
+          // languages/**, .github/instructions/**, …) differ from rendered
+          // template output by padding alone, so this is the common case.
+          if (normalizeForComparison(oldContent) !== normalizeForComparison(newContent)) {
             updateCount++;
             log(`  update ${normPath}`);
             const diffOut = simpleDiff(oldContent, newContent);
@@ -1104,7 +1226,7 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
 
     // 7. Write scaffold outputs (scaffold-once / managed / always)
     log('[retort:sync] Writing outputs...');
-    const { count, skippedScaffold, writtenFiles } = await writeScaffoldOutputs({
+    const { count, skippedScaffold } = await writeScaffoldOutputs({
       projectRoot,
       agentkitRoot,
       tmpDir,
@@ -1126,26 +1248,10 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       logVerbose,
     });
 
-    // 9. Post-sync prettier formatting — format before hashing so manifest hashes
-    //    reflect on-disk content. Without this, managed-file hash checks on the next
-    //    sync treat Prettier output as a "user edit" and skip regeneration.
-    await runPostSyncPrettier({ agentkitRoot, projectRoot, writtenFiles, logVerbose });
-
-    // Refresh manifest hashes for files that Prettier may have reformatted.
-    for (const absPath of writtenFiles) {
-      const relPath = relative(projectRoot, absPath).replace(/\\/g, '/');
-      if (newManifestFiles[relPath]) {
-        try {
-          const diskContent = await readFile(absPath);
-          newManifestFiles[relPath].hash = createHash('sha256')
-            .update(diskContent)
-            .digest('hex')
-            .slice(0, 12);
-        } catch {
-          // file may have been deleted or be unreadable — leave hash as-is
-        }
-      }
-    }
+    // 9. Formatting already happened in step 6b, before the copy, so manifest
+    //    hashes already describe the formatted bytes. No post-copy Prettier pass
+    //    and no hash refresh are needed — reintroducing either would rewrite
+    //    unchanged files and restore the mtime churn ADR-11 describes.
 
     // 10. Write new manifest with post-format hashes
     await writeManifest(manifestPath, {
@@ -1154,6 +1260,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
       repoName: vars.repoName,
       files: newManifestFiles,
     });
+
+    // 10b. Write the tracked provenance manifest. This is now the only place the
+    //      framework version is recorded, so a release touches one file instead
+    //      of the ~660 that previously carried it in their header. See ADR-11
+    //      decision 2.
+    await writeGeneratedManifest({ agentkitRoot, version, overlay: vars.repoName });
 
     if (skippedScaffold > 0) {
       log(`[retort:sync] Skipped ${skippedScaffold} project-owned file(s) (already exist).`);

@@ -1,0 +1,115 @@
+{
+  "version": "1",
+  "captured_at": "2026-05-12",
+  "note": "Real GitHub Copilot for PRs review-thread payloads captured from phoenixvc/retort via gh api graphql. Copilot posts inline review-thread comments only — no admonition markers, no nits, no severity prefixes. The adapter maps every inline comment to `suggestion` (Copilot's baseline) and the review summary (state: COMMENTED with body, separate from the threads) to `info`. Status derivation includes a PR-state precedence: closed/merged PRs are `resolved` regardless of thread state. adapter-copilot.md severity heuristics and status mapping should reproduce the `expected` block for each scenario.",
+  "scenarios": [
+    {
+      "name": "security-concern-suggestion",
+      "description": "Copilot flags a path-traversal-flavoured finding on an open PR. Body has no admonition marker — just prose pointing out a subtle bypass. Per the SKILL.md rule, severity is `suggestion`, NOT `blocking` (Copilot does not emit explicit blocking markers). Comment posted ~4 minutes after the head commit, so status is `new_since_push`. This is the load-bearing severity test: a security-flavoured finding still maps to `suggestion`, because consumers must not infer `blocking` from heuristic content matching.",
+      "source": "phoenixvc/retort#551",
+      "pr_state": "OPEN",
+      "expected": {
+        "severity": "suggestion",
+        "status": "new_since_push"
+      },
+      "pullRequest": {
+        "number": 551,
+        "url": "https://github.com/phoenixvc/retort/pull/551",
+        "headRefOid": "aef4251d55a29b69a077c482cce77608a2cbf326",
+        "head_pushed_at": "2026-05-12T09:05:20Z"
+      },
+      "thread": {
+        "id": "PRRT_kwDORWR2hM6BWsEv",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": ".agentkit/engines/node/src/platform-syncer.mjs",
+        "line": 489,
+        "startLine": 487,
+        "comments": {
+          "totalCount": 1,
+          "nodes": [
+            {
+              "id": "PRRC_kwDORWR2hM7AO5mE",
+              "url": "https://github.com/phoenixvc/retort/pull/551#discussion_r3225131396",
+              "createdAt": "2026-05-12T09:09:01Z",
+              "author": { "login": "copilot-pull-request-reviewer" },
+              "body": "The \"preserved\" scaffold-once branch bypasses the path-traversal protection used for normal outputs. `normalizedRel` can contain `..` segments from `themeSpec.outputs`, and `resolve(tmpDir, normalizedRel)` could write outside `tmpDir` when an output is marked existing. Apply the same tmpDir containment check (and ideally also ensure `existingPath` stays within `projectRoot`) before copying.\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "test-quality-suggestion",
+      "description": "Typical Copilot inline review comment on a merged PR — substantive critique of test determinism. No marker, plain prose. The PR is merged so status derives from PR-state (`resolved`) rather than thread-state (which is `isResolved: false`). Severity remains `suggestion` — the baseline Copilot output level.",
+      "source": "phoenixvc/retort#533",
+      "pr_state": "MERGED",
+      "expected": {
+        "severity": "suggestion",
+        "status": "resolved"
+      },
+      "pullRequest": {
+        "number": 533,
+        "url": "https://github.com/phoenixvc/retort/pull/533",
+        "headRefOid": "a1188ccee30181f3480c9dc8b16933fa346b0664",
+        "head_pushed_at": null
+      },
+      "thread": {
+        "id": "PRRT_kwDORWR2hM6A-sfT",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": ".agentkit/engines/node/src/__tests__/orchestrator-coverage.test.mjs",
+        "line": 117,
+        "startLine": 113,
+        "comments": {
+          "totalCount": 1,
+          "nodes": [
+            {
+              "id": "PRRC_kwDORWR2hM6_ubXO",
+              "url": "https://github.com/phoenixvc/retort/pull/533#discussion_r3216618958",
+              "createdAt": "2026-05-11T05:56:48Z",
+              "author": { "login": "copilot-pull-request-reviewer" },
+              "body": "The “warns and falls back to defaults on YAML parse error” case uses YAML that might still parse successfully depending on js-yaml behavior/version, which would make this test flaky and could unexpectedly set VALID_TEAM_IDS to ['a']. Use an unambiguously invalid YAML payload (or mock yaml.load to throw) so the test deterministically exercises the catch+fallback path, and then assert the warning behavior if that’s the intent.\n"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "outdated-thread-merged-pr",
+      "description": "Copilot thread on a merged PR with `isOutdated: true`. The file was edited after Copilot flagged it, so GitHub marked the thread outdated. Even though thread-state suggests `outdated`, PR-state takes precedence — merged PR threads are `resolved` regardless of thread-level isOutdated/isResolved. `headRef` is `null` in the GraphQL response because the source branch was deleted on merge — `head_pushed_at` is therefore null and cannot be used for `new_since_push` derivation. `line` is also null because the file was edited past the flagged region. Severity stays `suggestion`.",
+      "source": "phoenixvc/retort#531",
+      "pr_state": "MERGED",
+      "expected": {
+        "severity": "suggestion",
+        "status": "resolved"
+      },
+      "pullRequest": {
+        "number": 531,
+        "url": "https://github.com/phoenixvc/retort/pull/531",
+        "headRefOid": "d08f1054cee7aeff93db049ed612eec86c0cf533",
+        "head_pushed_at": null
+      },
+      "thread": {
+        "id": "PRRT_kwDORWR2hM6A6_Wq",
+        "isResolved": false,
+        "isOutdated": true,
+        "path": ".agentkit/engines/node/src/init.mjs",
+        "line": null,
+        "startLine": null,
+        "comments": {
+          "totalCount": 1,
+          "nodes": [
+            {
+              "id": "PRRC_kwDORWR2hM6_pgnf",
+              "url": "https://github.com/phoenixvc/retort/pull/531#discussion_r3215329759",
+              "createdAt": "2026-05-10T18:42:53Z",
+              "author": { "login": "copilot-pull-request-reviewer" },
+              "body": "`runInit` now checks a `globalThis.__RETORT_TEST_CLACK_PROMPTS__` hook to supply the clack module. This introduces a test-only global override into production runtime behavior and can make `runInit` sensitive to unrelated globals in the process. Prefer keeping the test seam contained to module mocking (e.g., mock `./_clack-prompts.mjs`) and/or gating this hook behind an explicit test-only condition (env var) so it cannot affect normal usage."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

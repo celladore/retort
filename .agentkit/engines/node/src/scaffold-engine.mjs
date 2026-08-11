@@ -13,10 +13,10 @@
  */
 import { execFileSync } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { chmod, cp, readFile, unlink, writeFile } from 'fs/promises';
-import { dirname, extname, relative, resolve, sep } from 'path';
-import { ensureDir, runConcurrent } from './fs-utils.mjs';
+import { dirname, extname, join, relative, resolve, sep } from 'path';
+import { applyUtf8Bom, ensureDir, needsUtf8Bom, runConcurrent } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { resolveScaffoldAction } from './template-utils.mjs';
 
@@ -101,6 +101,9 @@ export async function writeScaffoldOutputs({
   // If runConcurrent ever uses worker threads, this needs synchronization.
   const writtenFiles = []; // absolute paths of files written, for post-sync formatting
   const scaffoldOnceSkippedFiles = []; // paths skipped due to scaffold:once
+  // Used only by the managed three-way merge path, whose output is synthesised
+  // here rather than in the temp tree and so misses formatOutputsInProcess.
+  const mergeFormatter = await createFormatter(projectRoot);
   const scaffoldResults = {
     alwaysRegenerated: [],
     managedRegenerated: [],
@@ -129,6 +132,20 @@ export async function writeScaffoldOutputs({
       return;
     }
 
+    // Templates intentionally remain BOM-less so scaffold frontmatter stays at
+    // byte zero. Transform PowerShell content at the persistence boundary and
+    // make every downstream comparison/hash describe the bytes we will write.
+    let transformedContent = null;
+    if (needsUtf8Bom(destFile)) {
+      transformedContent = applyUtf8Bom(destFile, await readFile(srcFile, 'utf-8'));
+      if (newManifestFiles[normalizedRel]) {
+        newManifestFiles[normalizedRel].hash = createHash('sha256')
+          .update(transformedContent, 'utf-8')
+          .digest('hex')
+          .slice(0, 12);
+      }
+    }
+
     // Scaffold action resolution: always | managed (check-hash) | once (skip)
     const meta = getTemplateMeta(normalizedRel);
     const overwrite = flags?.overwrite || flags?.force;
@@ -148,7 +165,7 @@ export async function writeScaffoldOutputs({
 
         if (prevHash && diskHash !== prevHash) {
           const cachePath = resolve(scaffoldCacheDir, relPath);
-          const newContent = await readFile(srcFile, 'utf-8');
+          const newContent = transformedContent ?? (await readFile(srcFile, 'utf-8'));
 
           if (existsSync(cachePath)) {
             const baseContent = readFileSync(cachePath, 'utf-8');
@@ -174,12 +191,38 @@ export async function writeScaffoldOutputs({
               const result = threeWayMerge(diskText, baseContent, newContent);
 
               if (result) {
-                // Write merged result
-                await ensureDir(dirname(destFile));
-                await writeFile(destFile, result.merged, 'utf-8');
-                // Update scaffold cache with new generated content
+                // Refresh the cache regardless — it must track the latest
+                // generated content so the next sync compares against the right
+                // base, even when the merge turns out to be a no-op.
                 await ensureDir(dirname(cachePath));
                 await writeFile(cachePath, newContent, 'utf-8');
+
+                // Format the merged result. formatOutputsInProcess only covers
+                // files in allTmpFiles; result.merged is synthesised here, after
+                // that stage, so without this it would be the one output path
+                // that ships unformatted.
+                const formattedMerge = mergeFormatter
+                  ? await mergeFormatter(destFile, result.merged)
+                  : result.merged;
+
+                // Re-apply the BOM: a merge whose winning hunk came from the
+                // user's BOM-less side would otherwise drop it. Applied before
+                // the write-if-changed comparison below, so a file that is
+                // missing its BOM counts as a real difference and gets written.
+                const mergedContent = applyUtf8Bom(destFile, formattedMerge);
+
+                // Write-if-changed also applies here. A merge whose result equals
+                // what is already on disk must not be written: doing so bumps
+                // mtime for nothing and leaves sync reporting a file it did not
+                // meaningfully change. Observed as a 1-file oscillation on
+                // docs/architecture/decisions/README.md. See ADR-11.
+                if (mergedContent === diskText) {
+                  logVerbose(`  unchanged ${normalizedRel} (merge is a no-op, skipping write)`);
+                  return;
+                }
+
+                await ensureDir(dirname(destFile));
+                await writeFile(destFile, mergedContent, 'utf-8');
                 count++;
 
                 writtenFiles.push(destFile);
@@ -238,19 +281,22 @@ export async function writeScaffoldOutputs({
           .digest('hex')
           .slice(0, 12);
         if (existingHash === newHash) {
+          // Genuinely unchanged: skip the write entirely and do NOT queue for
+          // formatting. Temp output is already formatted (formatOutputsInProcess
+          // runs before this step), so newHash describes formatted bytes and a
+          // match means the file on disk is already correct. Queueing it would
+          // rewrite identical content and bump mtime for nothing — the churn
+          // ADR-11 documents.
           logVerbose(`  unchanged ${normalizedRel} (content identical, skipping write)`);
           return;
         }
       }
       // Slower path: skip write when the only difference is table-cell padding.
-      const newContent = await readFile(srcFile, 'utf-8');
+      const newContent = transformedContent ?? (await readFile(srcFile, 'utf-8'));
       if (
         normalizeForComparison(existingContent.toString('utf-8')) ===
         normalizeForComparison(newContent)
       ) {
-        // Still queue for Prettier even though we skip the write — the file on
-        // disk may be unformatted from a previous sync that predates this guard.
-        writtenFiles.push(destFile);
         logVerbose(`  unchanged ${normalizedRel} (formatting-only diff, skipping write)`);
         return;
       }
@@ -258,14 +304,18 @@ export async function writeScaffoldOutputs({
 
     try {
       await ensureDir(dirname(destFile));
-      await cp(srcFile, destFile, { force: true, recursive: false });
+      if (transformedContent === null) {
+        await cp(srcFile, destFile, { force: true, recursive: false });
+      } else {
+        await writeFile(destFile, transformedContent, 'utf-8');
+      }
 
       // Update scaffold cache for managed files
       if (meta?.agentkit?.scaffold === 'managed' || meta?.agentkit?.scaffold === 'always') {
         const cachePath = resolve(scaffoldCacheDir, relPath);
         try {
           await ensureDir(dirname(cachePath));
-          const content = await readFile(srcFile, 'utf-8');
+          const content = transformedContent ?? (await readFile(srcFile, 'utf-8'));
           await writeFile(cachePath, content, 'utf-8');
         } catch {
           /* ignore cache write failures */
@@ -442,7 +492,206 @@ export async function writeManifest(manifestPath, manifest) {
 }
 
 // ---------------------------------------------------------------------------
-// Step 10: Post-sync Prettier formatting
+// Provenance manifest — the single tracked record of what generated the tree
+// ---------------------------------------------------------------------------
+
+/**
+ * Hashes the spec directory deterministically: files sorted by path, with each
+ * path folded into the digest alongside its bytes so that renames register.
+ *
+ * @param {string} specDir
+ * @returns {string|null} short hex digest, or null when the directory is absent
+ */
+function hashSpecDirectory(specDir) {
+  if (!existsSync(specDir)) return null;
+
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile()) files.push(full);
+    }
+  };
+
+  try {
+    walk(specDir);
+  } catch {
+    return null;
+  }
+
+  files.sort();
+  const hash = createHash('sha256');
+  for (const file of files) {
+    hash.update(relative(specDir, file).replace(/\\/g, '/'));
+    try {
+      hash.update(readFileSync(file));
+    } catch {
+      // Unreadable spec file — fold in the path only rather than aborting.
+    }
+  }
+  return hash.digest('hex').slice(0, 16);
+}
+
+/**
+ * Writes `.agentkit/GENERATED.json`, the single tracked record of which
+ * framework version and spec produced the generated tree.
+ *
+ * This exists so the version does not have to live in ~660 per-file headers,
+ * where every release rewrote all of them for no semantic change and defeated
+ * the write-if-changed guard. See ADR-11 decision 2.
+ *
+ * Deliberately carries **no timestamp**: a per-sync value would make this file
+ * change on every run, reintroducing precisely the churn it removes. The write
+ * is itself skipped when the content is unchanged, for the same reason.
+ *
+ * @param {object} opts
+ * @param {string} opts.agentkitRoot
+ * @param {string} opts.version
+ * @param {string} opts.overlay
+ * @returns {Promise<boolean>} true when the file was written
+ */
+export async function writeGeneratedManifest({ agentkitRoot, version, overlay }) {
+  const payload = {
+    framework: 'retort',
+    version,
+    overlay,
+    specHash: hashSpecDirectory(resolve(agentkitRoot, 'spec')),
+  };
+  const dest = resolve(agentkitRoot, 'GENERATED.json');
+  const content = JSON.stringify(payload, null, 2) + '\n';
+
+  try {
+    if (existsSync(dest) && (await readFile(dest, 'utf-8')) === content) return false;
+    await writeFile(dest, content, 'utf-8');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 6b: Pre-copy Prettier formatting (in-process)
+// ---------------------------------------------------------------------------
+
+/**
+ * Loads Prettier once and returns a formatter bound to the project's config.
+ *
+ * Config and ignore resolution deliberately use each file's *destination* path:
+ * `.prettierrc` and `.prettierignore` live in the project, not the temp tree.
+ * Prettier's Node API — unlike its CLI — resolves neither implicitly.
+ *
+ * The returned function never throws: ignored, unsupported or unparseable
+ * content comes back unchanged, preserving the continue-on-failure behaviour of
+ * the CLI batching this replaced.
+ *
+ * @param {string} projectRoot
+ * @returns {Promise<((destFile: string, content: string) => Promise<string>)|null>}
+ *          null when Prettier is unavailable
+ */
+async function createFormatter(projectRoot) {
+  let prettier;
+  try {
+    prettier = await import('prettier');
+  } catch {
+    return null;
+  }
+
+  const ignoreCandidate = resolve(projectRoot, '.prettierignore');
+  const ignorePath = existsSync(ignoreCandidate) ? ignoreCandidate : undefined;
+
+  return async function format(destFile, content) {
+    try {
+      const info = await prettier.getFileInfo(destFile, { ignorePath });
+      if (info.ignored || !info.inferredParser) return content;
+      const options = await prettier.resolveConfig(destFile);
+      return await prettier.format(content, { ...options, filepath: destFile });
+    } catch {
+      return content;
+    }
+  };
+}
+
+/**
+ * Formats every rendered file in the temp directory in-process, then refreshes
+ * the corresponding manifest hashes so they describe the formatted bytes.
+ *
+ * Ordering matters. Prettier previously ran *after* outputs were copied into the
+ * project, which left the temp tree holding unformatted bytes while the project
+ * held formatted ones. The content-hash guard in writeScaffoldOutputs therefore
+ * never matched for any file Prettier reformats, so those files were queued for
+ * a rewrite on every sync — bumping mtimes on hundreds of unchanged files and
+ * dirtying `git status` for no reason. Formatting before the comparison makes
+ * the guard compare like with like. See ADR-11.
+ *
+ * Uses Prettier's Node API rather than spawning its CLI. The previous
+ * implementation spawned one Node process per 50-file batch (13 per sync), which
+ * a CPU profile attributed ~88% of total sync time to. See ADR-12.
+ *
+ * Config and ignore resolution deliberately use each file's *destination* path:
+ * `.prettierrc` and `.prettierignore` live in the project, not the temp tree.
+ *
+ * @param {object}   opts
+ * @param {string}   opts.projectRoot
+ * @param {string}   opts.tmpDir
+ * @param {string[]} opts.allTmpFiles
+ * @param {object}   opts.newManifestFiles — mutated in place with formatted hashes
+ * @param {Function} [opts.logVerbose]
+ * @returns {Promise<number>} count of files whose bytes changed under formatting
+ */
+export async function formatOutputsInProcess({
+  projectRoot,
+  tmpDir,
+  allTmpFiles,
+  newManifestFiles = {},
+  logVerbose = () => {},
+}) {
+  const format = await createFormatter(projectRoot);
+  if (!format) return 0;
+  let formatted = 0;
+
+  await runConcurrent(allTmpFiles, async (srcFile) => {
+    const relPath = relative(tmpDir, srcFile);
+    const normalizedRel = relPath.replace(/\\/g, '/');
+    const destFile = resolve(projectRoot, relPath);
+
+    let content;
+    try {
+      content = await readFile(srcFile, 'utf-8');
+    } catch {
+      return;
+    }
+
+    // Unparseable, ignored or unsupported files come back unchanged, matching
+    // the continue-on-failure behaviour of the previous CLI batching.
+    const output = await format(destFile, content);
+
+    if (output !== content) {
+      try {
+        await writeFile(srcFile, output, 'utf-8');
+        formatted++;
+      } catch {
+        return;
+      }
+    }
+
+    if (newManifestFiles[normalizedRel]) {
+      newManifestFiles[normalizedRel].hash = createHash('sha256')
+        .update(output, 'utf-8')
+        .digest('hex')
+        .slice(0, 12);
+    }
+  });
+
+  if (formatted > 0) {
+    logVerbose(`[retort:sync] Formatted ${formatted} generated file(s) before copy.`);
+  }
+  return formatted;
+}
+
+// ---------------------------------------------------------------------------
+// Step 10: Post-sync Prettier formatting (legacy — superseded by
+// formatOutputsInProcess above, retained for callers that format after copy)
 // ---------------------------------------------------------------------------
 
 /**

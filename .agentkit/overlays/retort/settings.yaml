@@ -4,6 +4,9 @@ repoName: retort
 defaultBranch: main # Production branch — never commit directly
 integrationBranch: dev # PRs must target dev, not main
 primaryStack: auto
+# Emit the .ps1 variant of each hook alongside the .sh. Retort is developed on
+# Windows and tested on Linux CI, so both must ship: the .ps1 runs natively for
+# contributors, the .sh is the fallback on runners without pwsh.
 windowsFirst: true
 
 aiSynthesisLayer: false

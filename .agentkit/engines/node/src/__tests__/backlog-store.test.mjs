@@ -215,5 +215,64 @@ describe('backlog-store', () => {
       expect(sorted[1].team).toBe('docs');
       expect(sorted[2].team).toBe('frontend');
     });
+
+    it('sorts by source', () => {
+      const items = [
+        { id: 'a', source: 'github', priority: 'P1' },
+        { id: 'b', source: 'manual', priority: 'P1' },
+        { id: 'c', source: 'discovery', priority: 'P1' },
+      ];
+      const sorted = sortItems(items, 'source');
+      expect(sorted.map((i) => i.source)).toEqual(['discovery', 'github', 'manual']);
+    });
+
+    it('sorts by updated (most recent first)', () => {
+      const items = [
+        { id: 'a', updatedAt: '2026-01-01T00:00:00Z' },
+        { id: 'b', updatedAt: '2026-03-01T00:00:00Z' },
+        { id: 'c', updatedAt: '2026-02-01T00:00:00Z' },
+      ];
+      const sorted = sortItems(items, 'updated');
+      expect(sorted.map((i) => i.id)).toEqual(['b', 'c', 'a']);
+    });
+
+    it('sorts by score descending; missing scores rank last', () => {
+      const items = [
+        { id: 'a', score: 5 },
+        { id: 'b', score: 10 },
+        { id: 'c' }, // no score
+      ];
+      const sorted = sortItems(items, 'score');
+      expect(sorted.map((i) => i.id)).toEqual(['b', 'a', 'c']);
+    });
+
+    it('returns the original copy for an unknown sort key', () => {
+      const items = [{ id: 'a' }, { id: 'b' }];
+      const sorted = sortItems(items, 'totally-bogus-key');
+      expect(sorted.map((i) => i.id)).toEqual(['a', 'b']);
+      // Returns a copy, not the same array
+      expect(sorted).not.toBe(items);
+    });
+  });
+
+  describe('filterItems — additional branches', () => {
+    it('filters by status', () => {
+      const items = [
+        { id: 'a', status: 'open' },
+        { id: 'b', status: 'closed' },
+        { id: 'c', status: 'open' },
+      ];
+      const result = filterItems(items, { status: 'open' });
+      expect(result).toHaveLength(2);
+    });
+
+    it('filter is case-insensitive on status', () => {
+      const items = [
+        { id: 'a', status: 'Open' },
+        { id: 'b', status: 'CLOSED' },
+      ];
+      expect(filterItems(items, { status: 'open' })).toHaveLength(1);
+      expect(filterItems(items, { status: 'CLOSED' })).toHaveLength(1);
+    });
   });
 });

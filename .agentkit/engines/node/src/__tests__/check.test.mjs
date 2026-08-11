@@ -2,23 +2,52 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// runCheck() spawns two processes per step: commandExists() shells out to `where`
+// on Windows, then execCommand() runs the step itself. On the Windows host where
+// this suite flakes, `where` measured 1.2–2.6s per call and `node -e ""` 0.7–1.9s
+// — at idle. The default fixture below builds three steps, so a single runCheck()
+// paid six spawns and 6–12s against a 20s budget, leaving no room for suite
+// contention. None of the assertions here need a real process: they are about
+// which steps get built and how exit codes map to statuses. Stubbing the runner
+// removes every spawn from this file. Real end-to-end execCommand behaviour is
+// covered by runner.test.mjs, which exercises it against actual processes.
+// See ADR-12.
+vi.mock('../runner.mjs', async () => {
+  const actual = await vi.importActual('../runner.mjs');
+  return {
+    ...actual,
+    commandExists: vi.fn(() => true),
+    execCommand: vi.fn(() => ({ exitCode: 0, stdout: '', stderr: '', durationMs: 0 })),
+  };
+});
+
+const { commandExists, execCommand } = await import('../runner.mjs');
+const {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
+  auditUnresolvedPlaceholders,
   isAllowedFormatter,
   isAllowedLinter,
   resolveFormatter,
   resolveLinter,
   runCheck,
-} from '../check.mjs';
+} = await import('../check.mjs');
+
+const OK = { exitCode: 0, stdout: '', stderr: '', durationMs: 0 };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
-function createCheckFixture({ withBuild = true, formatter = null, withPrettierBin = false } = {}) {
+function createCheckFixture({
+  withBuild = true,
+  formatter = null,
+  withPrettierBin = false,
+  testCommand = null,
+} = {}) {
   const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-test-'));
   const agentkitRoot = resolve(root, '.agentkit');
   const projectRoot = resolve(root, 'project');
@@ -36,14 +65,18 @@ function createCheckFixture({ withBuild = true, formatter = null, withPrettierBi
 
   const buildLine = withBuild ? '    buildCommand: "node -e \\\"\\\""\n' : '';
   const formatterLine = formatter ? `    formatter: "${formatter}"\n` : '';
+  // Default to a no-op node one-liner so steps are cheap. Tests that need a
+  // recognisable runner (so resolveCoverageCommand returns a command) override it.
+  const testLine = testCommand
+    ? `    testCommand: ${JSON.stringify(testCommand)}\n`
+    : '    testCommand: "node -e \\\"\\\""\n';
   const teamsYaml = `techStacks:
   - name: test-stack
     detect:
       - package.json
 ${formatterLine}
     typecheck: "node -e \\\"\\\""
-    testCommand: "node -e \\\"\\\""
-${buildLine}`;
+${testLine}${buildLine}`;
 
   writeFileSync(resolve(agentkitRoot, 'spec', 'teams.yaml'), teamsYaml, 'utf-8');
   return { root, agentkitRoot, projectRoot };
@@ -54,6 +87,11 @@ function cleanupFixture(root) {
     rmSync(root, { recursive: true, force: true });
   }
 }
+
+beforeEach(() => {
+  vi.mocked(commandExists).mockReset().mockReturnValue(true);
+  vi.mocked(execCommand).mockReset().mockReturnValue(OK);
+});
 
 describe('runCheck()', () => {
   afterEach(() => {
@@ -127,6 +165,11 @@ describe('runCheck()', () => {
   it('resolves prettier path from agentkitRoot when roots are split', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    // #590 left execCommand real here so the PASS status would prove the resolved
+    // path is executable. The file-wide mock replaces that: the assertion below
+    // reads the command string handed to the runner, which pins the agentkitRoot
+    // path exactly rather than proving that *something* ran. Executing the
+    // fixture's own `process.exit(0)` stub tested Node, not the path resolution.
 
     const fixture = createCheckFixture({
       withBuild: false,
@@ -155,6 +198,39 @@ describe('runCheck()', () => {
 
       const formatStep = result.stacks[0]?.steps.find((step) => step.step === 'format');
       expect(formatStep?.status).toBe('PASS');
+
+      // Assert the split-roots path actually reaches the runner. This is stronger
+      // than the status check alone, which cannot distinguish the agentkitRoot
+      // copy from any other prettier that happened to run.
+      const commands = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(commands).toContain(`node "${expectedPrettierBin}" --check .`);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('maps a non-zero step exit code to FAIL', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'boom',
+      durationMs: 0,
+    });
+
+    const fixture = createCheckFixture({ withBuild: false });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+
+      const testStep = result.stacks[0].steps.find((step) => step.step === 'test');
+      expect(testStep.status).toBe('FAIL');
+      expect(testStep.stderr).toContain('boom');
+      expect(result.overallPassed).toBe(false);
     } finally {
       cleanupFixture(fixture.root);
     }
@@ -267,4 +343,247 @@ describe('isAllowedLinter()', () => {
     expect(ALLOWED_LINTER_BASES.has('eslint')).toBe(true);
     expect(ALLOWED_LINTER_BASES.has('pylint')).toBe(true);
   });
+});
+
+// ---------------------------------------------------------------------------
+// auditUnresolvedPlaceholders
+// ---------------------------------------------------------------------------
+
+describe('auditUnresolvedPlaceholders()', () => {
+  let tempDir;
+
+  afterEach(() => {
+    if (tempDir && existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns empty array when no output dirs exist', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-no-dirs-'));
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude', '.cursor']);
+    expect(findings).toEqual([]);
+  });
+
+  it('finds unresolved {{variable}} placeholders in markdown files', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-find-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'README.md'),
+      'Hello {{userName}} — welcome to {{projectName}}!'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings.length).toBe(1);
+    expect(findings[0].variables).toEqual(expect.arrayContaining(['userName', 'projectName']));
+  });
+
+  it('skips block helpers and else markers', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-helpers-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'a.md'),
+      '{{#if foo}}yes{{else}}no{{/if}} — but {{realVar}} should be flagged'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings.length).toBe(1);
+    expect(findings[0].variables).toEqual(['realVar']);
+  });
+
+  it('returns no findings when files have no placeholders', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-clean-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(resolve(tempDir, '.claude', 'a.md'), 'plain text — no placeholders here');
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings).toEqual([]);
+  });
+
+  it('skips node_modules and .git directories', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-skip-'));
+    mkdirSync(resolve(tempDir, '.claude', 'node_modules'), { recursive: true });
+    mkdirSync(resolve(tempDir, '.claude', '.git'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'node_modules', 'leak.md'),
+      'Has {{shouldBeIgnored}} placeholder'
+    );
+    writeFileSync(
+      resolve(tempDir, '.claude', '.git', 'leak.md'),
+      'Has {{alsoIgnored}} placeholder'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings).toEqual([]);
+  });
+
+  it('recurses into subdirectories', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-recurse-'));
+    mkdirSync(resolve(tempDir, '.claude', 'sub', 'deep'), { recursive: true });
+    writeFileSync(resolve(tempDir, '.claude', 'sub', 'deep', 'a.md'), 'Has {{deepVar}} marker');
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings.length).toBe(1);
+    expect(findings[0].variables).toEqual(['deepVar']);
+  });
+
+  it('only scans markdown/yaml/json/mjs/js/ts files', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-ext-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(resolve(tempDir, '.claude', 'a.md'), '{{mdVar}}');
+    writeFileSync(resolve(tempDir, '.claude', 'b.txt'), '{{txtVar}}'); // ignored
+    writeFileSync(resolve(tempDir, '.claude', 'c.json'), '{"k": "{{jsonVar}}"}');
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    const allVars = findings.flatMap((f) => f.variables);
+    expect(allVars).toContain('mdVar');
+    expect(allVars).toContain('jsonVar');
+    expect(allVars).not.toContain('txtVar');
+  });
+
+  it('deduplicates the variables list per file', async () => {
+    tempDir = mkdtempSync(resolve(tmpdir(), 'audit-dedup-'));
+    mkdirSync(resolve(tempDir, '.claude'), { recursive: true });
+    writeFileSync(
+      resolve(tempDir, '.claude', 'a.md'),
+      '{{repeated}} {{repeated}} {{unique}} {{repeated}}'
+    );
+    const findings = await auditUnresolvedPlaceholders(tempDir, ['.claude']);
+    expect(findings).toHaveLength(1);
+    // Each variable appears only once in the variables array
+    expect(findings[0].variables.sort()).toEqual(['repeated', 'unique']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// runCheck — coverage results / unresolved placeholders / event logging error
+// ---------------------------------------------------------------------------
+
+describe('runCheck() — additional branches', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('logs unresolved placeholder findings without crashing', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture();
+    try {
+      // Seed an output dir with an unresolved placeholder
+      mkdirSync(resolve(fixture.projectRoot, '.claude'), { recursive: true });
+      writeFileSync(resolve(fixture.projectRoot, '.claude', 'demo.md'), 'Hello {{unresolved_var}}');
+
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+      expect(result).toBeDefined();
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Unresolved Placeholders');
+      expect(out).toContain('unresolved_var');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('runs the coverage step when --coverage is set', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    // The coverage step has no command-exists guard: whatever
+    // resolveCoverageCommand returns is handed straight to execCommand. The
+    // module-level mock already keeps that from spawning a real coverage run,
+    // whose 300s default timeout would outlast this test's 20s budget; this
+    // return value is what lets parseCoveragePercentage find a number.
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 0,
+      stdout: 'All files |   85.5 |',
+      stderr: '',
+      durationMs: 0,
+    });
+
+    // A bare `node -e ""` matches no runner, so resolveCoverageCommand returns
+    // a null command and the coverage step never runs — naming a real runner is
+    // what makes this test exercise coverage at all.
+    const fixture = createCheckFixture({ testCommand: 'npx vitest run' });
+    try {
+      // project.yaml with coverage threshold
+      writeFileSync(
+        resolve(fixture.agentkitRoot, 'spec', 'project.yaml'),
+        'testing:\n  coverage: 50\n',
+        'utf-8'
+      );
+
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true, coverage: true },
+      });
+
+      const executed = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(executed).toContain('npx vitest run --coverage');
+      expect(result.coverage).toHaveLength(1);
+      expect(result.coverage[0]).toMatchObject({
+        stack: 'test-stack',
+        percentage: 85.5,
+        threshold: 50,
+        status: 'PASS',
+      });
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('skips invalid commands and reports SKIP / warning for invalid formatter', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture({ withBuild: false, formatter: '   ' });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+      expect(result).toBeDefined();
+      // Empty/whitespace formatter should trigger a warning
+      expect(warnSpy).toHaveBeenCalled();
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('skips disallowed formatter (not in ALLOWED list) with a warning', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture({ withBuild: false, formatter: 'untrusted-formatter' });
+    try {
+      await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+      const warnText = warnSpy.mock.calls.flat().join('\n');
+      expect(warnText).toContain('unrecognized formatter');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('passes a userContext through when extra args are supplied', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const fixture = createCheckFixture();
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true, _args: ['my', 'context'] },
+      });
+      expect(result.userContext).toBe('my context');
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Context: my context');
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
 });

@@ -16,7 +16,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  // Windows occasionally hits ENOTEMPTY when a freshly-deleted file's handle
+  // hasn't been released by the OS yet. Retry generously, then swallow —
+  // a leftover dir under the system tmpdir is acceptable for tests/CI, and
+  // accepting that residue is preferable to a flaky failure here.
+  try {
+    rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+  } catch {
+    /* best-effort cleanup */
+  }
   vi.restoreAllMocks();
 });
 
@@ -409,5 +417,119 @@ describe('runRun', () => {
 
     const result = JSON.parse(output[0]);
     expect(result.taskId).toBe(frontendTask.id);
+  });
+
+  // -------------------------------------------------------------------------
+  // Non-JSON output paths
+  // -------------------------------------------------------------------------
+
+  it('non-JSON output prints "dispatched" message and prompt', async () => {
+    await createTask(tmpRoot, {
+      type: 'implement',
+      delegator: 'orchestrator',
+      assignees: ['BACKEND'],
+      title: 'Pretty print task',
+    });
+
+    const logs = [];
+    vi.spyOn(console, 'log').mockImplementation((...args) => {
+      logs.push(args.join(' '));
+    });
+
+    await runRun({ projectRoot: tmpRoot, flags: {} });
+
+    const out = logs.join('\n');
+    expect(out).toContain('Dispatched');
+    expect(out).toContain('working');
+    expect(out).toContain('/team-backend');
+  });
+
+  it('non-JSON output prints "DRY RUN" message in dry-run mode', async () => {
+    await createTask(tmpRoot, {
+      type: 'implement',
+      delegator: 'orchestrator',
+      assignees: ['BACKEND'],
+      title: 'Dry run task',
+    });
+
+    const logs = [];
+    vi.spyOn(console, 'log').mockImplementation((...args) => {
+      logs.push(args.join(' '));
+    });
+
+    await runRun({ projectRoot: tmpRoot, flags: { 'dry-run': true } });
+
+    const out = logs.join('\n');
+    expect(out).toContain('DRY RUN');
+  });
+
+  it('non-JSON: prints empty-queue message when no tasks', async () => {
+    const logs = [];
+    vi.spyOn(console, 'log').mockImplementation((...args) => {
+      logs.push(args.join(' '));
+    });
+
+    await runRun({ projectRoot: tmpRoot, flags: {} });
+
+    const out = logs.join('\n');
+    expect(out).toContain('No submitted tasks in queue');
+  });
+
+  it('non-JSON: prints empty-queue message with assignee suffix when filter set', async () => {
+    const logs = [];
+    vi.spyOn(console, 'log').mockImplementation((...args) => {
+      logs.push(args.join(' '));
+    });
+
+    await runRun({ projectRoot: tmpRoot, flags: { assignee: 'BACKEND' } });
+
+    const out = logs.join('\n');
+    expect(out).toContain('No submitted tasks');
+    expect(out).toContain('BACKEND');
+  });
+
+  it('non-JSON: prints error to stderr for non-existent --id', async () => {
+    const errLogs = [];
+    vi.spyOn(console, 'error').mockImplementation((...args) => {
+      errLogs.push(args.join(' '));
+    });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('EXIT');
+    });
+
+    await expect(runRun({ projectRoot: tmpRoot, flags: { id: 'task-bogus' } })).rejects.toThrow(
+      'EXIT'
+    );
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errLogs.join('\n')).toContain('Task not found');
+  });
+
+  it('non-JSON: prints "not dispatchable" error for terminal-state tasks', async () => {
+    const { task: created } = await createTask(tmpRoot, {
+      type: 'implement',
+      delegator: 'orchestrator',
+      assignees: ['BACKEND'],
+      title: 'Terminal',
+    });
+    const { updateTaskStatus } = await import('../task-protocol.mjs');
+    await updateTaskStatus(tmpRoot, created.id, 'accepted');
+    await updateTaskStatus(tmpRoot, created.id, 'working');
+    await updateTaskStatus(tmpRoot, created.id, 'completed');
+
+    const errLogs = [];
+    vi.spyOn(console, 'error').mockImplementation((...args) => {
+      errLogs.push(args.join(' '));
+    });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('EXIT');
+    });
+
+    await expect(runRun({ projectRoot: tmpRoot, flags: { id: created.id } })).rejects.toThrow(
+      'EXIT'
+    );
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errLogs.join('\n')).toContain('not dispatchable');
   });
 });
