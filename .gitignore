@@ -64,6 +64,7 @@ Thumbs.db
 *~
 .idea/
 *.iml
+.serena/
 
 # =============================================================================
 # Runtime state (generated at runtime, not by sync)

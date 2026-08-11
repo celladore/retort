@@ -61,3 +61,6 @@ COMMAND_GUIDE.md
 
 # Immutable canonical contract snapshots retain org-meta byte formatting
 .agentkit/contracts/*.schema.json
+
+# Local assistant/tool metadata
+.serena/**
