@@ -122,7 +122,15 @@ if (sectionIdx === -1) {
   ) {
     insertAt++;
   }
-  lines.splice(insertAt, 0, entry);
+  // An empty section leaves insertAt on the next heading (the blank-line scan
+  // above stepped over the only blank), so a bare splice would butt the entry
+  // straight against that heading and trip MD022/MD032 — the very rules this
+  // branch exists to satisfy. Re-add the separating blank in that case.
+  const atBoundary =
+    insertAt >= blockEnd ||
+    lines[insertAt].startsWith('#') ||
+    lines[insertAt].trim() === '---';
+  lines.splice(insertAt, 0, ...(atBoundary ? [entry, ''] : [entry]));
 }
 
 fs.writeFileSync(changelogPath, lines.join('\n'), 'utf8');
