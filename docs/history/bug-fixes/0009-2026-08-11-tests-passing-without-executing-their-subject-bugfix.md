@@ -161,6 +161,13 @@ maintainer decision.
   something.
 - **A weak assertion can hide a broken fixture.** `spec-accessor` only revealed its
   incomplete spec once the assertion was tightened enough to fail.
+- **`vitest -t` is a regex, not a substring match.** Three titles here contain literal
+  parentheses (`(overlapping scope)`, `(empty for a valid spec)`), so filtering by the
+  exact title matched nothing, vitest ran zero tests, and it exited 0 — which a
+  mutation harness reads as "survived". Every one of those three was independently
+  decided by an unfiltered whole-file run, so no verdict changed, but a sweep that
+  relied on `-t` alone would have manufactured false findings. Escape the pattern, or
+  assert that the expected number of tests actually ran.
 
 ---
 
