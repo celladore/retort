@@ -2,7 +2,7 @@
   "sequences": {
     "implementation": 11,
     "bugfix": 10,
-    "feature": 2,
+    "feature": 3,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -95,6 +95,14 @@
       "date": "2026-08-11",
       "pr": "594",
       "file": "bug-fixes/0009-2026-08-11-tests-passing-without-executing-their-subject-bugfix.md"
+    },
+    {
+      "number": 2,
+      "type": "feature",
+      "title": "Test-run reconciliation gate",
+      "date": "2026-08-11",
+      "pr": "589",
+      "file": "features/0002-2026-08-11-test-run-reconciliation-gate-feature.md"
     }
   ]
 }
