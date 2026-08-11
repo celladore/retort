@@ -1787,13 +1787,25 @@ describe('simpleDiff', () => {
 });
 
 describe('categorizeFile', () => {
-  it('returns a string label', () => {
-    const cat = categorizeFile('docs/README.md');
-    expect(typeof cat).toBe('string');
-    expect(cat.length).toBeGreaterThan(0);
+  it('maps a tool directory prefix to that tool label', () => {
+    expect(categorizeFile('.claude/commands/check.md')).toBe('claude');
+    expect(categorizeFile('.github/workflows/ci.yml')).toBe('github');
+    expect(categorizeFile('.cursor/rules/ts.md')).toBe('cursor');
+    expect(categorizeFile('docs/README.md')).toBe('docs');
   });
 
-  it('handles deeply nested paths', () => {
-    expect(typeof categorizeFile('apps/api/src/index.ts')).toBe('string');
+  it('maps well-known root files to their tool label', () => {
+    expect(categorizeFile('CLAUDE.md')).toBe('claude');
+    expect(categorizeFile('GEMINI.md')).toBe('gemini');
+    expect(categorizeFile('WARP.md')).toBe('warp');
+  });
+
+  it('normalises Windows separators before matching the prefix', () => {
+    expect(categorizeFile('.claude\\commands\\check.md')).toBe('claude');
+  });
+
+  it('falls back to "root" for paths outside any tool directory', () => {
+    expect(categorizeFile('apps/api/src/index.ts')).toBe('root');
+    expect(categorizeFile('package.json')).toBe('root');
   });
 });
