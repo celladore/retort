@@ -158,6 +158,51 @@ describe('runDoctor', () => {
     );
   });
 
+  it('prints suggested next actions when --verbose flag is set (PASS branch)', async () => {
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });
+
+    vi.spyOn(fs, 'readFileSync').mockImplementation((p) => {
+      if (typeof p === 'string' && p.includes('overlays') && p.includes('settings.yaml')) {
+        return 'renderTargets: ["claude"]';
+      }
+      return '';
+    });
+    vi.spyOn(fs, 'readdirSync').mockReturnValue([]);
+
+    const logSpy = vi.spyOn(console, 'log');
+
+    await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+      flags: { verbose: true },
+    });
+
+    const out = logSpy.mock.calls.flat().join('\n');
+    expect(out).toContain('Suggested next actions');
+  });
+
+  it('prints "fix spec errors" suggestions when --verbose and validation fails', async () => {
+    const { validateSpec } = await import('../spec-validator.mjs');
+    validateSpec.mockReturnValue({
+      valid: false,
+      errors: ['Bad field'],
+      warnings: [],
+    });
+
+    const logSpy = vi.spyOn(console, 'log');
+
+    await runDoctor({
+      agentkitRoot: mockAgentkitRoot,
+      projectRoot: mockProjectRoot,
+      flags: { verbose: true },
+    });
+
+    const out = logSpy.mock.calls.flat().join('\n');
+    expect(out).toContain('Fix spec errors');
+    expect(out).toContain('spec-validate');
+  });
+
   it('should report warning if no renderTargets are defined', async () => {
     const { validateSpec } = await import('../spec-validator.mjs');
     validateSpec.mockReturnValue({ valid: true, errors: [], warnings: [] });

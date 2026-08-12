@@ -573,4 +573,107 @@ describe('runInit', () => {
       expect(settings.primaryStack).toBe('rust');
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Preset path
+  // ---------------------------------------------------------------------------
+  describe('preset path', () => {
+    it('runs init with --preset minimal', async () => {
+      const agentkitRoot = setupAgentkitRoot(resolve(tmpRoot, 'agentkit'));
+      vi.doMock('../discover.mjs', () => ({
+        runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
+      }));
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: vi.fn().mockResolvedValue(undefined),
+      }));
+      vi.resetModules();
+      const { runInit: initFn } = await import('../init.mjs');
+      await initFn({
+        agentkitRoot,
+        projectRoot,
+        flags: { preset: 'minimal', repoName: 'preset-min' },
+      });
+
+      const settings = yaml.load(
+        readFileSync(resolve(agentkitRoot, 'overlays', 'preset-min', 'settings.yaml'), 'utf-8')
+      );
+      expect(Array.isArray(settings.renderTargets)).toBe(true);
+      // minimal preset has fewer targets than full
+      expect(settings.renderTargets.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('throws on unknown preset', async () => {
+      const agentkitRoot = setupAgentkitRoot(resolve(tmpRoot, 'agentkit'));
+      vi.resetModules();
+      const { runInit: initFn } = await import('../init.mjs');
+
+      await expect(
+        initFn({
+          agentkitRoot,
+          projectRoot,
+          flags: { preset: 'totally-bogus', repoName: 'p' },
+        })
+      ).rejects.toThrow(/Unknown preset/);
+    });
+
+    it('throws when overlay already exists without --force', async () => {
+      const agentkitRoot = setupAgentkitRoot(resolve(tmpRoot, 'agentkit'));
+      // Pre-create the overlay dir
+      mkdirSync(resolve(agentkitRoot, 'overlays', 'existing-name'), { recursive: true });
+
+      vi.doMock('../discover.mjs', () => ({
+        runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
+      }));
+      vi.resetModules();
+      const { runInit: initFn } = await import('../init.mjs');
+
+      await expect(
+        initFn({
+          agentkitRoot,
+          projectRoot,
+          flags: { 'non-interactive': true, repoName: 'existing-name' },
+        })
+      ).rejects.toThrow(/already exists/);
+    });
+
+    it('throws on invalid repo name', async () => {
+      const agentkitRoot = setupAgentkitRoot(resolve(tmpRoot, 'agentkit'));
+      vi.resetModules();
+      const { runInit: initFn } = await import('../init.mjs');
+
+      await expect(
+        initFn({
+          agentkitRoot,
+          projectRoot,
+          flags: { 'non-interactive': true, repoName: '../escape-attempt' },
+        })
+      ).rejects.toThrow(/Invalid repo name/);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Dry-run path
+  // ---------------------------------------------------------------------------
+  describe('dry-run', () => {
+    it('does not create overlay directory', async () => {
+      const agentkitRoot = setupAgentkitRoot(resolve(tmpRoot, 'agentkit'));
+      vi.doMock('../discover.mjs', () => ({
+        runDiscover: vi.fn().mockResolvedValue(makeStubReport()),
+      }));
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: vi.fn().mockResolvedValue(undefined),
+      }));
+      vi.resetModules();
+      const { runInit: initFn } = await import('../init.mjs');
+      await initFn({
+        agentkitRoot,
+        projectRoot,
+        flags: { 'non-interactive': true, 'dry-run': true, repoName: 'dry-run-test' },
+      });
+
+      // No overlay dir written
+      const overlayDir = resolve(agentkitRoot, 'overlays', 'dry-run-test');
+      expect(existsSync(overlayDir)).toBe(false);
+    });
+  });
 });

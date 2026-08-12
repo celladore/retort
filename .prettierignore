@@ -58,3 +58,9 @@ COMMAND_GUIDE.md
 # Runtime state — generated at runtime, not source files
 .claude/state/**
 .agentkit/state/**
+
+# Immutable canonical contract snapshots retain org-meta byte formatting
+.agentkit/contracts/*.schema.json
+
+# Local assistant/tool metadata
+.serena/**

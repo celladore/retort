@@ -205,7 +205,7 @@ Run `retort init` to auto-detect values from your repo, or edit `project.yaml` d
 | Repo                                                            | Role                                                                          |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [`retort-plugins`](https://github.com/phoenixvc/retort-plugins) | IDE plugins — VS Code (`@retort` Copilot Chat), JetBrains (Junie), Zed        |
-| [`phoenix-flow`](https://github.com/phoenixvc/phoenix-flow)     | Task graph + MCP server — retort projects read live tasks from phoenix-flow   |
+| [`baton`](https://github.com/phoenixvc/baton)                   | Task graph + MCP server — retort projects read live tasks from baton          |
 | [`sluice`](https://github.com/phoenixvc/sluice)                 | AI gateway — retort-scaffolded projects route model calls through sluice      |
 | [`docket`](https://github.com/phoenixvc/docket)                 | AI cost ops — tracks token spend and model costs per project                  |
 | [`cognitive-mesh`](https://github.com/phoenixvc/cognitive-mesh) | Agent orchestration — complex multi-agent tasks route through cognitive-mesh  |

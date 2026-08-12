@@ -3,6 +3,7 @@
  * Template variable construction helpers for teams, agents, rules, commands, and branch protection.
  * Extracted from synchronize.mjs (Step 5 of modularization).
  */
+import { isUnsafePathSegment } from './fs-utils.mjs';
 import { formatCommandFlags } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
@@ -275,6 +276,19 @@ export function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
   }
   const prefix = vars.commandPrefix || null;
   const prefixedName = prefix ? `${prefix}-${cmd.name}` : cmd.name;
+  // disableModelInvocation is a Claude-specific frontmatter hint for skills
+  // that should only fire when explicitly invoked (e.g. zoom-out, caveman).
+  // Templates that emit non-Claude output should ignore the variable.
+  const disableModelInvocation = cmd.disableModelInvocation === true;
+  // Category drives the optional categorised skills layout. Defaults to 'meta'
+  // so legacy commands without an explicit category still group sensibly.
+  // commands.yaml IS schema-validated (allowed values are an enum), but the
+  // schema only runs in spec-validate, NOT in runSync. Apply a runtime
+  // path-segment guard so a hand-edited spec or partial validate cannot make
+  // commandCategory escape the .agents/skills/ tree at sync time.
+  const rawCommandCategory =
+    typeof cmd.category === 'string' && cmd.category.length > 0 ? cmd.category : 'meta';
+  const commandCategory = isUnsafePathSegment(rawCommandCategory) ? 'meta' : rawCommandCategory;
   return {
     ...vars,
     commandName: cmd.name,
@@ -284,6 +298,8 @@ export function buildCommandVars(cmd, vars, stateDir = '.claude/state') {
       typeof cmd.description === 'string' ? cmd.description.trim() : cmd.description || '',
     commandFlags: formatCommandFlags(cmd.flags),
     commandPrompt: prompt,
+    disableModelInvocation,
+    commandCategory,
   };
 }
 

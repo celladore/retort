@@ -762,6 +762,33 @@ describe('formatTaskSummary', () => {
     expect(summary).toContain('team-backend');
     expect(summary).toContain('team-testing');
   });
+
+  it('renders dependsOn / blockedBy / artifacts sections when populated', async () => {
+    const { task: parent } = await createTask(tmpRoot, {
+      title: 'Parent',
+      delegator: 'orch',
+      assignees: ['team-backend'],
+    });
+    const { task } = await createTask(tmpRoot, {
+      title: 'Child task',
+      delegator: 'orch',
+      assignees: ['team-frontend'],
+      dependsOn: [parent.id],
+      blockedBy: [parent.id],
+    });
+    // Synthesise a task object with artifacts since createTask discards them
+    const taskWithArtifacts = { ...task, artifacts: [{ type: 'file', path: 'src/foo.ts' }] };
+    const summary = formatTaskSummary(taskWithArtifacts);
+    expect(summary).toContain('Depends on:');
+    expect(summary).toContain(parent.id);
+    expect(summary).toContain('Blocked by:');
+    expect(summary).toContain('Artifacts: 1');
+  });
+
+  it('handles a malformed task object without throwing', () => {
+    expect(() => formatTaskSummary({})).not.toThrow();
+    expect(() => formatTaskSummary(null)).not.toThrow();
+  });
 });
 
 describe('formatTaskList', () => {

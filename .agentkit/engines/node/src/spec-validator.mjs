@@ -7,6 +7,7 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
+import { SAFE_HOOK_STEM } from './fs-utils.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
 
 // ---------------------------------------------------------------------------
@@ -61,6 +62,18 @@ function validate(value, schema, path = '') {
       for (const [key, propSchema] of Object.entries(schema.properties)) {
         errors.push(...validate(value[key], propSchema, `${path}.${key}`));
       }
+      // Opt-in, so every existing schema keeps accepting keys it does not
+      // declare. Set it only where an unrecognised key means a typo rather
+      // than an extension point: silently ignoring one is how a mis-keyed
+      // hook event vanishes from generated wiring without a word.
+      if (schema.additionalProperties === false) {
+        const declared = Object.keys(schema.properties);
+        for (const key of Object.keys(value)) {
+          if (!declared.includes(key)) {
+            errors.push(`${path}.${key}: unknown key (expected one of [${declared.join(', ')}])`);
+          }
+        }
+      }
     }
   }
 
@@ -70,6 +83,10 @@ function validate(value, schema, path = '') {
 
   if (schema.minLength && typeof value === 'string' && value.length < schema.minLength) {
     errors.push(`${path}: must be at least ${schema.minLength} characters`);
+  }
+
+  if (schema.pattern && typeof value === 'string' && !schema.pattern.test(value)) {
+    errors.push(`${path}: "${value}" must match ${schema.pattern}`);
   }
 
   return errors;
@@ -157,6 +174,16 @@ const commandSchema = {
     description: { type: 'string', required: true },
     flags: { type: 'array', items: commandFlagSchema },
     'allowed-tools': { type: 'array', items: { type: 'string' } },
+    // Claude-only frontmatter hint for skills that should only fire on
+    // explicit invocation. The variable is passed to every target's template;
+    // only the Claude SKILL.md template emits it as YAML frontmatter — other
+    // target templates (e.g. Codex) ignore the variable.
+    disableModelInvocation: { type: 'boolean' },
+    // Category for the optional categorised skills layout. When the layout
+    // is enabled (settings.skills.categorised: true), the rendered skill
+    // file is placed under <skills-dir>/<category>/<name>/SKILL.md.
+    // Recognised values: engineering | productivity | meta | internal.
+    category: { type: 'string', enum: ['engineering', 'productivity', 'meta', 'internal'] },
   },
 };
 
@@ -252,6 +279,30 @@ const ruleDomainSchema = {
 // ---------------------------------------------------------------------------
 // Schema: settings.yaml
 // ---------------------------------------------------------------------------
+/**
+ * One entry in `preToolUse` / `postToolUse`. `hook` names a script by stem;
+ * `matcher` is the regex tested against the tool name and is optional.
+ *
+ * buildHooksFromSpec() skips an entry whose `hook` is missing or unnamed rather
+ * than throwing, so without this schema a `hoook:` typo produced a settings.json
+ * quietly missing that guard. additionalProperties catches exactly that.
+ */
+const hookEntrySchema = {
+  type: 'object',
+  properties: {
+    matcher: { type: 'string', minLength: 1 },
+    hook: { type: 'string', required: true, minLength: 1, pattern: SAFE_HOOK_STEM },
+  },
+  additionalProperties: false,
+};
+
+/**
+ * The `hooks:` block was `{ type: 'object' }` — validated as "is an object" and
+ * nothing more, which is how the spec and the hook templates drifted apart
+ * unnoticed. Each lifecycle event is now checked for shape, and an unknown key
+ * is an error: a mis-keyed event (`preToolUsage:`) would otherwise be dropped in
+ * silence, emitting settings.json with that guard simply absent.
+ */
 const settingsSchema = {
   type: 'object',
   properties: {
@@ -263,7 +314,17 @@ const settingsSchema = {
         deny: { type: 'array', required: true, items: { type: 'string' } },
       },
     },
-    hooks: { type: 'object', required: true },
+    hooks: {
+      type: 'object',
+      required: true,
+      properties: {
+        sessionStart: { type: 'string', minLength: 1, pattern: SAFE_HOOK_STEM },
+        stop: { type: 'string', minLength: 1, pattern: SAFE_HOOK_STEM },
+        preToolUse: { type: 'array', items: hookEntrySchema },
+        postToolUse: { type: 'array', items: hookEntrySchema },
+      },
+      additionalProperties: false,
+    },
   },
 };
 
@@ -433,6 +494,31 @@ const projectSchema = {
         iacTool: { type: 'string', enum: PROJECT_ENUMS.iacTool },
       },
     },
+    // Paths and flags that describe existing project documentation. Validated so
+    // typos (e.g. `dommainGlossaryPath`) and wrong types (e.g. an array where a
+    // string is expected) surface in spec-validate rather than silently breaking
+    // template renders downstream.
+    documentation: {
+      type: 'object',
+      properties: {
+        hasPrd: { type: 'boolean' },
+        prdPath: { type: 'string' },
+        hasAdr: { type: 'boolean' },
+        adrPath: { type: 'string' },
+        hasApiSpec: { type: 'boolean' },
+        apiSpecPath: { type: 'string' },
+        hasTechnicalSpec: { type: 'boolean' },
+        technicalSpecPath: { type: 'string' },
+        hasDesignSystem: { type: 'boolean' },
+        designSystemPath: { type: ['string', 'null'] },
+        storybook: { type: 'boolean' },
+        designTokensPath: { type: ['string', 'null'] },
+        historyPath: { type: 'string' },
+        hasBrandGuide: { type: 'boolean' },
+        brandGuidePath: { type: 'string' },
+        domainGlossaryPath: { type: ['string', 'null'] },
+      },
+    },
     infrastructure: {
       type: 'object',
       properties: {
@@ -525,6 +611,16 @@ const projectSchema = {
                 blockedCrossTeam: { type: 'array', items: { type: 'string' } },
               },
             },
+          },
+        },
+        triageLabels: {
+          type: 'object',
+          properties: {
+            needsTriage: { type: 'string', minLength: 1 },
+            needsInfo: { type: 'string', minLength: 1 },
+            readyForAgent: { type: 'string', minLength: 1 },
+            readyForHuman: { type: 'string', minLength: 1 },
+            wontfix: { type: 'string', minLength: 1 },
           },
         },
       },

@@ -13,6 +13,7 @@ import {
   VALID_COMMANDS,
   FRAMEWORK_COMMANDS as CLI_FRAMEWORK_COMMANDS,
 } from './commands-registry.mjs';
+import { extractHookFiles } from './platform-syncer.mjs';
 
 export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const userContext =
@@ -44,7 +45,6 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   const requiredDirs = [
     '.claude/commands',
     '.claude/hooks',
-    '.agentkit/state',
     '.claude/rules',
     '.claude/agents',
     '.cursor/rules',
@@ -65,20 +65,26 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 3: Validate JSON files ──────────────────────────────────────
   console.log('\n  --- JSON Files ---');
-  const jsonFiles = ['.claude/settings.json', '.agentkit/state/schema.json'];
+  const jsonFiles = [
+    { label: '.claude/settings.json', path: resolve(projectRoot, '.claude/settings.json') },
+    {
+      label: '.agentkit/templates/claude/state/schema.json',
+      path: resolve(agentkitRoot, 'templates/claude/state/schema.json'),
+    },
+  ];
 
   for (const file of jsonFiles) {
-    const fullPath = resolve(projectRoot, file);
+    const fullPath = file.path;
     if (!existsSync(fullPath)) {
-      console.error(`  FAIL: Missing JSON file: ${file}`);
+      console.error(`  FAIL: Missing JSON file: ${file.label}`);
       errors++;
       continue;
     }
     try {
       JSON.parse(readFileSync(fullPath, 'utf-8'));
-      console.log(`  OK: ${file} (valid JSON)`);
+      console.log(`  OK: ${file.label} (valid JSON)`);
     } catch (err) {
-      console.error(`  FAIL: ${file} — invalid JSON: ${err.message}`);
+      console.error(`  FAIL: ${file.label} — invalid JSON: ${err.message}`);
       errors++;
     }
   }
@@ -126,25 +132,44 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
 
   // ─── Phase 5: Check hook files ─────────────────────────────────────────
   console.log('\n  --- Hooks ---');
-  const requiredHooks = [
-    'session-start',
-    'protect-sensitive',
-    'protect-templates',
-    'guard-destructive-commands',
-    'warn-uncommitted',
-    'stop-build-check',
-  ];
-
-  for (const hook of requiredHooks) {
-    for (const ext of ['.sh', '.ps1']) {
-      const fullPath = resolve(projectRoot, '.claude', 'hooks', `${hook}${ext}`);
-      if (!existsSync(fullPath)) {
-        console.error(`  FAIL: Missing hook: .claude/hooks/${hook}${ext}`);
-        errors++;
+  // The invariant is that every hook script settings.json wires up exists on
+  // disk. Deriving the list from settings.json rather than hardcoding it keeps
+  // validation correct when feature gating legitimately omits a hook (see #185)
+  // — a hardcoded list fails such repos for a file they were never meant to get.
+  const settingsFile = resolve(projectRoot, '.claude', 'settings.json');
+  const wiredHookFiles = new Set();
+  if (existsSync(settingsFile)) {
+    try {
+      const parsed = JSON.parse(readFileSync(settingsFile, 'utf-8'));
+      // Skip structurally malformed entries (null matchers, non-array hook
+      // lists) rather than throwing on them. Phase 7 only checks that each
+      // event maps to an array, so these shapes go unreported — but this
+      // phase's job is the exists-on-disk invariant, and aborting here would
+      // drop the valid hooks alongside them.
+      // `parsed` may be null — `null` is valid JSON — so keep the catch
+      // reserved for genuine parse failures.
+      for (const matchers of Object.values(parsed?.hooks || {})) {
+        if (!Array.isArray(matchers)) continue;
+        for (const matcher of matchers) {
+          if (!matcher || !Array.isArray(matcher.hooks)) continue;
+          for (const hook of matcher.hooks) {
+            if (!hook) continue;
+            for (const file of extractHookFiles(hook.command)) wiredHookFiles.add(file);
+          }
+        }
       }
+    } catch {
+      /* invalid JSON is already reported by the JSON Files phase above */
     }
   }
-  console.log(`  Checked ${requiredHooks.length} hooks (sh + ps1)`);
+
+  for (const hookFile of wiredHookFiles) {
+    if (!existsSync(resolve(projectRoot, '.claude', 'hooks', hookFile))) {
+      console.error(`  FAIL: settings.json wires .claude/hooks/${hookFile}, which does not exist`);
+      errors++;
+    }
+  }
+  console.log(`  Checked ${wiredHookFiles.size} hook script(s) wired in settings.json`);
 
   // ─── Phase 6: Check generated headers ──────────────────────────────────
   console.log('\n  --- Generated Headers ---');

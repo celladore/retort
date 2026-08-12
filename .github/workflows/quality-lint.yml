@@ -1,6 +1,7 @@
 name: Quality Lint
 
-# Runs markdown lint checks on PRs. Prettier is validated in the test suite (ci.yml).
+# Runs markdown lint checks on PRs. Prettier is checked by the `Prettier` job in
+# ci.yml — it needs to run on every change, not just this workflow's path filters.
 # Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
 # Split from ci.yml so branch protection can enforce separately per branch.
 

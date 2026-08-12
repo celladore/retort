@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join, resolve } from 'path';
 import {
   EFFORT_LEVELS,
   IMPACT_LEVELS,
@@ -7,7 +10,6 @@ import {
   formatReportAsYaml,
   runExpansionAnalysis,
 } from '../expansion-analyzer.mjs';
-import { resolve } from 'path';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -213,5 +215,101 @@ describe('formatReportAsYaml', () => {
     const yml = formatReportAsYaml(report);
     expect(typeof yml).toBe('string');
     expect(yml).toContain('generatedAt');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Empty-project analysis — exercises the "missing X" branches in each analyzer
+// ---------------------------------------------------------------------------
+
+describe('runExpansionAnalysis on a near-empty project', () => {
+  let tempDir;
+  let agentkitDir;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'expansion-empty-'));
+    agentkitDir = join(tempDir, '.agentkit');
+    mkdirSync(join(agentkitDir, 'spec'), { recursive: true });
+    // No README, no CHANGELOG, no CONTRIBUTING, no docs/, no tests/, no security policy
+  });
+
+  afterEach(() => {
+    try {
+      rmSync(tempDir, { recursive: true, force: true });
+    } catch {
+      // ignore
+    }
+  });
+
+  it('produces documentation suggestions for a project missing README/CHANGELOG/CONTRIBUTING', async () => {
+    const report = await runExpansionAnalysis({
+      projectRoot: tempDir,
+      agentkitRoot: agentkitDir,
+      flags: { category: 'documentation', maxSuggestions: 50 },
+    });
+
+    const titles = report.suggestions.map((s) => s.title);
+    expect(titles.some((t) => /README/i.test(t))).toBe(true);
+    expect(titles.some((t) => /CHANGELOG/i.test(t))).toBe(true);
+    expect(titles.some((t) => /CONTRIBUTING/i.test(t))).toBe(true);
+  });
+
+  it('produces security suggestions for a project missing standard security files', async () => {
+    const report = await runExpansionAnalysis({
+      projectRoot: tempDir,
+      agentkitRoot: agentkitDir,
+      flags: { category: 'security', maxSuggestions: 50 },
+    });
+
+    expect(report.categoriesAnalyzed).toEqual(['security']);
+    // Should produce at least one security suggestion for a bare repo
+    expect(Array.isArray(report.suggestions)).toBe(true);
+  });
+
+  it('survives missing AGENT_BACKLOG.md (loadBacklogItems returns empty)', async () => {
+    const report = await runExpansionAnalysis({
+      projectRoot: tempDir,
+      agentkitRoot: agentkitDir,
+      flags: { maxSuggestions: 5 },
+    });
+    expect(report).toBeDefined();
+    expect(Array.isArray(report.suggestions)).toBe(true);
+  });
+
+  it('survives malformed AGENT_BACKLOG.md (returns empty rather than crashing)', async () => {
+    // Create a "binary" backlog file that defeats parsing
+    writeFileSync(join(tempDir, 'AGENT_BACKLOG.md'), 'plain text without bullet items\n');
+    const report = await runExpansionAnalysis({
+      projectRoot: tempDir,
+      agentkitRoot: agentkitDir,
+      flags: { maxSuggestions: 5 },
+    });
+    expect(report).toBeDefined();
+  });
+
+  it('formats markdown for a report with missing optional fields', () => {
+    const md = formatReportAsMarkdown({
+      generatedAt: '2026-03-04T00:00:00.000Z',
+      categoriesAnalyzed: [],
+      totalRawSuggestions: 0,
+      totalAfterDedup: 0,
+      suggestions: [
+        {
+          id: 'SUG-001',
+          category: 'documentation',
+          title: 'Bare suggestion',
+          rationale: 'Without artifacts',
+          impact: 'low',
+          effort: 'XS',
+          riskIfSkipped: 'low',
+          alignment: 'low',
+          score: 1,
+          // No suggestedArtifacts
+        },
+      ],
+    });
+    expect(md).toContain('Bare suggestion');
+    // No "Suggested artifacts" section since the field is absent
+    expect(md).not.toContain('Suggested artifacts');
   });
 });

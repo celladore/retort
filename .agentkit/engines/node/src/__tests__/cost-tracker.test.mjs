@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { vi } from 'vitest';
 import {
   endSession,
   generateReport,
@@ -10,6 +11,7 @@ import {
   initSession,
   logEvent,
   recordCommand,
+  runCost,
 } from '../cost-tracker.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -350,6 +352,176 @@ describe('cost-tracker', () => {
       expect(report.totalSessions).toBeDefined();
       expect(report.byUser).toBeDefined();
       expect(report.byCommand).toBeDefined();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // runCost() — CLI handler
+  // -------------------------------------------------------------------------
+
+  describe('runCost()', () => {
+    let logSpy;
+
+    beforeEach(() => {
+      logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
+    });
+
+    it('default output (no flags) prints command list and 30-day summary', async () => {
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: {},
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Usage tracking');
+      expect(out).toContain('Commands:');
+      expect(out).toContain('Sessions (last 30 days):');
+    });
+
+    it('default output reports total duration and files when sessions exist', async () => {
+      const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+      // End the session so it has duration
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session.sessionId,
+      });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: {},
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Total duration:');
+      expect(out).toContain('Total files modified:');
+    });
+
+    it('--summary prints "no sessions" when none exist', async () => {
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { summary: true },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Recent session summary');
+      expect(out).toContain('No sessions found');
+    });
+
+    it('--summary lists sessions when they exist', async () => {
+      const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session.sessionId,
+      });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { summary: true, last: '7d' },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Sessions (last 7d):');
+      expect(out).toContain(session.sessionId);
+    });
+
+    it('--sessions prints session list (table format)', async () => {
+      const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session.sessionId,
+      });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { sessions: true },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('session(s) found');
+      expect(out).toContain(session.sessionId);
+    });
+
+    it('--sessions --format json emits valid JSON', async () => {
+      initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { sessions: true, format: 'json' },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      // First call should be a JSON.stringify output
+      expect(() => JSON.parse(out.trim())).not.toThrow();
+      const parsed = JSON.parse(out.trim());
+      expect(Array.isArray(parsed)).toBe(true);
+    });
+
+    it('--report prints a table report', async () => {
+      const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session.sessionId,
+      });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { report: true },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('Cost & Usage Report');
+      expect(out).toContain('Sessions:');
+      expect(out).toContain('Files Modified:');
+    });
+
+    it('--report --format json emits valid JSON', async () => {
+      initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { report: true, format: 'json' },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      const parsed = JSON.parse(out.trim());
+      expect(parsed).toHaveProperty('month');
+      expect(parsed).toHaveProperty('totalSessions');
+    });
+
+    it('--report --format csv emits CSV header and rows', async () => {
+      const session = initSession({ agentkitRoot: TEST_AGENTKIT, projectRoot: TEST_PROJECT });
+      endSession({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        sessionId: session.sessionId,
+      });
+
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { report: true, format: 'csv' },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      expect(out).toContain('user,sessions,duration_ms,files_modified');
+    });
+
+    it('--report respects --month flag', async () => {
+      await runCost({
+        agentkitRoot: TEST_AGENTKIT,
+        projectRoot: TEST_PROJECT,
+        flags: { report: true, month: '2024-03', format: 'json' },
+      });
+      const out = logSpy.mock.calls.flat().join('\n');
+      const parsed = JSON.parse(out.trim());
+      expect(parsed.month).toBe('2024-03');
     });
   });
 });

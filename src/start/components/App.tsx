@@ -17,6 +17,7 @@ import { Box, Text, useApp, useInput } from 'ink';
 import StatusBar from './StatusBar.js';
 import MCPPanel from './MCPPanel.js';
 import TasksPanel from './TasksPanel.js';
+import WorktreesPanel from './WorktreesPanel.js';
 import ConversationFlow from './ConversationFlow.js';
 import CommandPalette from './CommandPalette.js';
 import type { RepoContext } from '../lib/detect.js';
@@ -113,6 +114,7 @@ function AppInner({ ctx }: AppProps) {
         </Box>
 
         <TasksPanel />
+        <WorktreesPanel />
         <MCPPanel />
         <StatusBar ctx={ctx} />
       </Box>
@@ -156,6 +158,7 @@ function AppInner({ ctx }: AppProps) {
       )}
 
       <TasksPanel />
+      <WorktreesPanel />
       <MCPPanel />
       <StatusBar ctx={ctx} />
     </Box>

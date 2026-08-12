@@ -352,4 +352,211 @@ describe('runRetortConfigWizard', () => {
     const { readRetortConfig } = await import('../retort-config.mjs');
     expect(readRetortConfig(projectRoot)).toBeNull();
   });
+
+  // -------------------------------------------------------------------------
+  // Interactive wizard branches — mock @clack/prompts to drive each step
+  // -------------------------------------------------------------------------
+
+  describe('interactive wizard with mocked @clack/prompts', () => {
+    let clackMock;
+    let originalIsTTY;
+
+    beforeEach(() => {
+      // Force isTTY to true so the wizard takes the interactive path
+      originalIsTTY = process.stdout.isTTY;
+      Object.defineProperty(process.stdout, 'isTTY', { value: true, configurable: true });
+
+      clackMock = {
+        intro: vi.fn(),
+        outro: vi.fn(),
+        cancel: vi.fn(),
+        text: vi.fn(),
+        select: vi.fn(),
+        multiselect: vi.fn(),
+        confirm: vi.fn(),
+        isCancel: vi.fn(() => false),
+        log: { success: vi.fn(), error: vi.fn() },
+        note: vi.fn(),
+      };
+      vi.doMock('@clack/prompts', () => clackMock);
+    });
+
+    afterEach(() => {
+      vi.doUnmock('@clack/prompts');
+      vi.resetModules();
+      Object.defineProperty(process.stdout, 'isTTY', {
+        value: originalIsTTY,
+        configurable: true,
+      });
+    });
+
+    it('happy path — answers every prompt and writes a complete config', async () => {
+      // Phase A: project metadata
+      clackMock.text
+        .mockResolvedValueOnce('my-app') // projectName
+        .mockResolvedValueOnce('service'); // projectType
+
+      // Stacks, compliance, then phases B and C
+      clackMock.multiselect
+        .mockResolvedValueOnce(['typescript', 'node']) // stacks
+        .mockResolvedValueOnce(['gdpr']) // compliance
+        .mockResolvedValueOnce(['backend']) // disabled agents
+        .mockResolvedValueOnce(['frontend']) // remap candidates
+        .mockResolvedValueOnce(['cost-tracking']); // selected features (default)
+
+      // Confirm dialogs:
+      clackMock.confirm
+        .mockResolvedValueOnce(true) // configure agents?
+        .mockResolvedValueOnce(true) // remap agents?
+        .mockResolvedValueOnce(true); // override features?
+
+      // Remap text prompt for the frontend agent
+      clackMock.text.mockResolvedValueOnce('quality');
+
+      vi.resetModules();
+      const { runRetortConfigWizard } = await import('../retort-config-wizard.mjs');
+
+      await runRetortConfigWizard({
+        agentkitRoot,
+        projectRoot,
+        flags: { force: true },
+        prefill: { projectName: 'pre', stacks: [], enabledFeatures: null },
+      });
+
+      const configPath = resolve(projectRoot, '.retortconfig');
+      expect(existsSync(configPath)).toBe(true);
+
+      const raw = readFileSync(configPath, 'utf-8');
+      const parsed = yaml.load(raw.replace(/^#.*$/gm, '').trim());
+
+      expect(parsed.project.name).toBe('my-app');
+      expect(parsed.project.type).toBe('service');
+      expect(parsed.project.stacks).toEqual(['typescript', 'node']);
+      expect(parsed.project.compliance).toEqual(['gdpr']);
+      expect(parsed.agents.backend).toBeNull(); // disabled
+      expect(parsed.agents.frontend).toEqual({ team: 'quality' }); // remapped
+
+      expect(clackMock.intro).toHaveBeenCalled();
+      expect(clackMock.outro).toHaveBeenCalled();
+    });
+
+    it('cancels at the project name prompt and writes nothing', async () => {
+      const cancelSym = Symbol('cancel');
+      clackMock.text.mockResolvedValueOnce(cancelSym);
+      clackMock.isCancel.mockImplementation((v) => v === cancelSym);
+
+      vi.resetModules();
+      const { runRetortConfigWizard } = await import('../retort-config-wizard.mjs');
+
+      await runRetortConfigWizard({
+        agentkitRoot,
+        projectRoot,
+        flags: { force: true },
+        prefill: { projectName: 'pre', stacks: [], enabledFeatures: null },
+      });
+
+      const configPath = resolve(projectRoot, '.retortconfig');
+      expect(existsSync(configPath)).toBe(false);
+      expect(clackMock.cancel).toHaveBeenCalled();
+    });
+
+    it('skips agent and feature configuration when user declines confirms', async () => {
+      // Phase A
+      clackMock.text
+        .mockResolvedValueOnce('skip-app') // projectName
+        .mockResolvedValueOnce('library'); // projectType
+
+      clackMock.multiselect
+        .mockResolvedValueOnce([]) // stacks
+        .mockResolvedValueOnce(['none']); // compliance — none filtered out
+
+      // Decline both opt-ins
+      clackMock.confirm
+        .mockResolvedValueOnce(false) // configure agents?
+        .mockResolvedValueOnce(false); // override features?
+
+      vi.resetModules();
+      const { runRetortConfigWizard } = await import('../retort-config-wizard.mjs');
+
+      await runRetortConfigWizard({
+        agentkitRoot,
+        projectRoot,
+        flags: { force: true },
+        prefill: { projectName: 'pre', stacks: [], enabledFeatures: null },
+      });
+
+      const configPath = resolve(projectRoot, '.retortconfig');
+      const raw = readFileSync(configPath, 'utf-8');
+      const parsed = yaml.load(raw.replace(/^#.*$/gm, '').trim());
+
+      expect(parsed.project.name).toBe('skip-app');
+      expect(parsed.project.type).toBe('library');
+      expect(parsed.agents).toBeUndefined();
+      expect(parsed.features).toBeUndefined();
+      expect(parsed.project.compliance).toBeUndefined(); // none filtered out
+    });
+
+    it('falls back to non-interactive mode when @clack/prompts is unavailable', async () => {
+      vi.resetModules();
+      vi.doUnmock('@clack/prompts');
+      vi.doMock('@clack/prompts', () => {
+        throw new Error('module not installed');
+      });
+
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const { runRetortConfigWizard } = await import('../retort-config-wizard.mjs');
+
+      await runRetortConfigWizard({
+        agentkitRoot,
+        projectRoot,
+        flags: { force: true },
+        prefill: { projectName: 'fallback', stacks: ['typescript'], enabledFeatures: null },
+      });
+
+      const configPath = resolve(projectRoot, '.retortconfig');
+      expect(existsSync(configPath)).toBe(true);
+      const raw = readFileSync(configPath, 'utf-8');
+      const parsed = yaml.load(raw.replace(/^#.*$/gm, '').trim());
+      expect(parsed.project.name).toBe('fallback');
+
+      const warnCalls = warnSpy.mock.calls.flat().join('\n');
+      expect(warnCalls).toContain('@clack/prompts not available');
+
+      warnSpy.mockRestore();
+    });
+
+    it('records feature deviations from defaults only', async () => {
+      // Phase A
+      clackMock.text.mockResolvedValueOnce('feat-app').mockResolvedValueOnce('application');
+      clackMock.multiselect
+        .mockResolvedValueOnce([]) // stacks
+        .mockResolvedValueOnce([]) // compliance
+        .mockResolvedValueOnce([]); // selected features — all off, drift-check matches default (off), cost-tracking deviates from on
+
+      clackMock.confirm
+        .mockResolvedValueOnce(false) // skip agents
+        .mockResolvedValueOnce(true); // configure features
+
+      vi.resetModules();
+      const { runRetortConfigWizard } = await import('../retort-config-wizard.mjs');
+
+      await runRetortConfigWizard({
+        agentkitRoot,
+        projectRoot,
+        flags: { force: true },
+        prefill: { projectName: 'p', stacks: [], enabledFeatures: null },
+      });
+
+      const configPath = resolve(projectRoot, '.retortconfig');
+      const raw = readFileSync(configPath, 'utf-8');
+      const parsed = yaml.load(raw.replace(/^#.*$/gm, '').trim());
+
+      // cost-tracking defaults to true; selecting [] turns it off — that is a deviation
+      expect(parsed.features).toBeDefined();
+      expect(parsed.features['cost-tracking']).toBe(false);
+      // drift-check defaults to false and stays false — no deviation, omitted
+      expect(parsed.features['drift-check']).toBeUndefined();
+    });
+  });
 });

@@ -23,9 +23,41 @@
 #   - use `pnpm ak:propose-skill <name>` to open a PR promoting a local skill to org-meta
 #
 # Optional fields:
-#   requiredFeature — only distributed when the feature is enabled in project.yaml
-#   tags            — semantic grouping for filtering and search
-#   alias           — alternate trigger names (future use)
+#   requiredFeature        — only distributed when the feature is enabled in project.yaml
+#   tags                   — semantic grouping for filtering and search
+#   alias                  — alternate trigger names (future use)
+#   category               — engineering | productivity | meta | internal
+#                            Used by the categorised skills layout (see settings
+#                            skills.categorised). When the layout is enabled,
+#                            skills render under .agents/skills/<category>/<name>/
+#                            and .claude/skills/<category>/<name>/. Default: meta.
+#   lifecycle              — active | in-progress | deprecated (default: active)
+#                            Skills with lifecycle: deprecated are excluded from
+#                            sync output. lifecycle: in-progress emits as normal
+#                            but logs a warning at sync time (no header is added
+#                            to the rendered SKILL.md).
+#   disableModelInvocation — true | false (default: false)
+#                            When true, the Claude SKILL.md template emits
+#                            `disable-model-invocation: true` in the rendered
+#                            frontmatter so the skill only fires on explicit
+#                            invocation. The variable is passed to every
+#                            target's template; only the Claude template
+#                            consumes it — other target templates (e.g. Codex)
+#                            ignore it by design.
+#   triggers               — string[] of "Use when…" phrases intended to be
+#                            composed into the rendered description, helping the
+#                            agent decide when to load the skill. NOTE: engine
+#                            wiring for triggers is not yet implemented; this
+#                            field is reserved for a later phase.
+#   companions             — string[] of additional .md files that live alongside
+#                            SKILL.md and must be copied during sync. Used for
+#                            progressive disclosure of deep skills (e.g. tdd ships
+#                            companions: [tests.md, mocking.md, deep-modules.md]).
+#                            Paths are relative to the skill directory in
+#                            ~/repos/org-meta/skills/<name>/ (or the configured
+#                            ORG_META_PATH).
+#   derivedFrom            — free-form attribution string for skills adapted from
+#                            an upstream source (e.g. "mattpocock/skills@<sha>").
 # =============================================================================
 
 skills:
@@ -233,6 +265,18 @@ skills:
       instead of calling pr-review-toolkit, coderabbit, or feature-dev
       review agents directly.
     tags: [plugins, routing, review]
+
+  - name: gh-bot-reader
+    scope: global
+    source: org-meta
+    description: >
+      Parse bot-authored PR comments and review threads (CodeRabbit, Copilot,
+      Renovate, Codecov, Sonatype, Claude review) into a structured BotFinding
+      list. Use when /cleanup, /preflight, /review, or /document-history need
+      to surface unresolved bot feedback without each command rolling its own
+      parser. Read-only; never replies or resolves threads.
+    tags: [pr, review, automation, bots]
+    companions: [adapter-coderabbit.md, adapter-codecov.md, adapter-renovate.md]
 
   - name: using-superpowers
     scope: global
@@ -620,6 +664,18 @@ skills:
       work completed in the current session. Auto-detects type and title
       from git history when invoked without arguments.
     tags: [retort, documentation, history]
+
+  - name: portfolio
+    scope: project
+    source: retort
+    description: >
+      Turns a hackathon or weekend project into a portfolio-ready case study.
+      Generates a PAARL-framed write-up (Problem, Approach, Architecture,
+      Results, Lessons), a README technical section, a 60-second demo video
+      plan, and a publish-ready LinkedIn post. Reads the repo and any
+      supplied notes/slides to ground every artifact in real project details.
+      Writes outputs to docs/portfolio/<slug>/ — never auto-publishes.
+    tags: [retort, documentation, portfolio, hackathon]
 
   - name: feature-configure
     scope: project

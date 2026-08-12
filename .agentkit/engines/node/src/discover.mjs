@@ -838,8 +838,16 @@ export async function detectCommitConvention(projectRoot, { currentConvention } 
     const { execFile } = await import('node:child_process');
     const { promisify } = await import('node:util');
     const execFileAsync = promisify(execFile);
+    // `cwd` alone does not pin git to projectRoot: these variables override it,
+    // and git exports them to hooks. Inheriting them would inspect the invoking
+    // repository instead of the project being discovered.
+    const env = { ...process.env };
+    for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY']) {
+      delete env[name];
+    }
     const { stdout } = await execFileAsync('git', ['log', '--pretty=format:%s', '-20'], {
       cwd: projectRoot,
+      env,
     });
     const subjects = stdout
       .split('\n')
@@ -1130,7 +1138,7 @@ export async function runDiscover({ agentkitRoot, projectRoot, flags }) {
   );
 
   const fwCountForEvent = Object.values(report.frameworks).flat().length;
-  emitEvent(
+  await emitEvent(
     projectRoot,
     'discover_completed',
     {

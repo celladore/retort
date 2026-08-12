@@ -65,6 +65,11 @@ documentation:
   historyPath: docs/history # path to retrospective/issue/lesson history docs
   hasBrandGuide: true # whether .agentkit/spec/brand.yaml exists
   brandGuidePath: .agentkit/spec/brand.yaml # path to brand spec
+  # Domain glossary — canonical project vocabulary maintained by grill-with-docs
+  # and consumed by zoom-out, to-prd, to-issues, etc. Single load-bearing file
+  # at the repo root by convention. Set to null to disable glossary references
+  # in skill bodies.
+  domainGlossaryPath: CONTEXT.md
 
 # Editor theme — generates workbench.colorCustomizations in .vscode/settings.json
 editorTheme:
@@ -180,6 +185,15 @@ process:
     escalation:
       securityCritical: [security, devops]
       blockedCrossTeam: [product]
+  # Triage labels — canonical state → repo label mapping. Consumed by triage,
+  # to-issues, and import-issues skills. Override defaults for repos that use
+  # different label strings.
+  triageLabels:
+    needsTriage: 'needs-triage'
+    needsInfo: 'needs-info'
+    readyForAgent: 'ready-for-agent'
+    readyForHuman: 'ready-for-human'
+    wontfix: 'wontfix'
 
 # Branch protection — GitHub branch protection & repository settings
 # These values feed into the generated setup-branch-protection script.
@@ -193,10 +207,16 @@ branchProtection:
 
   # Status checks
   strictStatusChecks: true # branch must be up-to-date before merge
+  # Each entry must be the status-check CONTEXT, which for GitHub Actions is the
+  # job's `name:` (or its job id when `name:` is omitted) — NOT "Workflow / Job".
+  # The "Workflow / Job" form only applies to reusable workflows called via
+  # `uses:` at job level. A context that never matches can never go green, which
+  # blocks every PR to the branch.
   requiredStatusChecks: # CI job names that must pass
-    - 'Test'
-    - 'Validate'
-    - 'Branch Protection / branch-rules'
+    - 'Test' # ci.yml -> jobs.test.name
+    - 'Validate' # ci.yml -> jobs.validate.name
+    - 'Prettier' # ci.yml -> jobs.prettier.name
+    - 'branch-rules' # branch-protection.yml -> jobs.branch-rules (no name:)
 
   # Branch rules
   enforceAdmins: false # apply rules to repo admins too
