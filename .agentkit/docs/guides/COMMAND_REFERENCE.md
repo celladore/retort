@@ -64,19 +64,19 @@ These seven commands form the core orchestration and lifecycle workflow.
 
 **One-line:** Master coordinator that runs the 5-phase lifecycle (discover, plan, implement, validate, ship) across all teams.
 
-#### When to use:
+#### When to use
 
 - You have a complex task that spans multiple teams or multiple files.
 - You want an end-to-end automated workflow from assessment through shipping.
 - You need to resume a previously started orchestration session.
 
-#### When NOT to use:
+#### When NOT to use
 
 - The task is small and fits within a single team's scope. Use `/team-<name>` instead.
 - You only need to check quality. Use `/check` instead.
 - You only need to understand the codebase. Use `/discover` instead.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                                                                |
 | ---------------- | ------------------------------------------------------------------------------------------ |
@@ -88,7 +88,7 @@ These seven commands form the core orchestration and lifecycle workflow.
 | `--dry-run`      | Show what would be done without making changes.                                            |
 | `--force-unlock` | Clear a stale lock from a previous crashed session.                                        |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /orchestrate --assess-only
@@ -96,7 +96,7 @@ These seven commands form the core orchestration and lifecycle workflow.
 /orchestrate "Add rate limiting to auth endpoints"
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Orchestration Summary
@@ -125,18 +125,18 @@ These seven commands form the core orchestration and lifecycle workflow.
 
 **One-line:** Scans the repository and produces a full codebase inventory including tech stacks, infrastructure, CI/CD, test frameworks, and issues.
 
-#### When to use:
+#### When to use
 
 - First time working in a repository.
 - The codebase has changed significantly and you need an updated map.
 - The orchestrator needs a fresh `AGENT_TEAMS.md` before planning.
 
-#### When NOT to use:
+#### When NOT to use
 
 - You already know the stack and just need to run checks. Use `/check`.
 - You want to fix something. Discovery is read-only.
 
-#### Flags:
+#### Flags
 
 | Flag                            | Description                                                           |
 | ------------------------------- | --------------------------------------------------------------------- |
@@ -144,14 +144,14 @@ These seven commands form the core orchestration and lifecycle workflow.
 | `--depth <n>`                   | Limit directory traversal depth during scanning.                      |
 | `--include-deps`                | Include dependency analysis in the discovery report.                  |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /discover
 /discover --output json
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Repository Profile
@@ -177,18 +177,18 @@ These seven commands form the core orchestration and lifecycle workflow.
 
 **One-line:** Pre-flight validation that verifies dependencies, build, lint, typecheck, and tests are all passing.
 
-#### When to use:
+#### When to use
 
 - Starting a new session and you want to confirm the project is in a working state.
 - Before running `/orchestrate` or `/plan` to establish a baseline.
 - After pulling changes to verify nothing is broken.
 
-#### When NOT to use:
+#### When NOT to use
 
 - You want to fix issues. Healthcheck only reports; it does not fix.
 - You need auto-fix capabilities. Use `/check --fix` instead.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                     |
 | ---------------- | ----------------------------------------------- |
@@ -196,13 +196,13 @@ These seven commands form the core orchestration and lifecycle workflow.
 | `--fix`          | Attempt to auto-fix issues found during checks. |
 | `--verbose`      | Show detailed output for each check step.       |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /healthcheck
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Healthcheck Report
@@ -230,19 +230,19 @@ These seven commands form the core orchestration and lifecycle workflow.
 
 **One-line:** Produces a structured implementation plan with steps, file touch list, validation commands, and rollback strategy before any code is written.
 
-#### When to use:
+#### When to use
 
 - A backlog item involves more than 2 files.
 - The change touches shared infrastructure, APIs, or database schemas.
 - The orchestrator requests a plan before delegating to teams.
 - You want to think through an approach before committing to code.
 
-#### When NOT to use:
+#### When NOT to use
 
 - The change is trivial (single config tweak, typo fix).
 - You are ready to implement and the path is obvious. Go directly to `/team-<name>`.
 
-#### Flags:
+#### Flags
 
 | Flag                            | Description                                    |
 | ------------------------------- | ---------------------------------------------- |
@@ -250,14 +250,14 @@ These seven commands form the core orchestration and lifecycle workflow.
 | `--output markdown\|yaml\|json` | Output format for the plan. Default: markdown. |
 | `--depth high\|medium\|low`     | Level of detail in the plan. Default: medium.  |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /plan "Add rate limiting to POST /api/auth/login"
 /plan P1: Fix auth middleware token validation
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Implementation Plan
@@ -302,18 +302,18 @@ after 5 failed attempts within 15 minutes per IP address.
 
 **One-line:** Universal quality gate that runs format, lint, typecheck, test, and build checks in a single pass with auto-detection.
 
-#### When to use:
+#### When to use
 
 - After making changes, before committing or creating a PR.
 - As a final validation step before shipping.
 - To get a full quality report on the current state of the codebase.
 
-#### When NOT to use:
+#### When NOT to use
 
 - You only need to run tests. Use `/test` for a faster, focused test run.
 - You only need to format. Use `/format` for formatting only.
 
-#### Flags:
+#### Flags
 
 | Flag              | Description                                                                     |
 | ----------------- | ------------------------------------------------------------------------------- |
@@ -322,7 +322,7 @@ after 5 failed attempts within 15 minutes per IP address.
 | `--stack <scope>` | Limit checks to a subdirectory or workspace (e.g., `frontend`, `packages/api`). |
 | `--bail`          | Stop at the first failing step instead of running all steps.                    |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /check
@@ -331,7 +331,7 @@ after 5 failed attempts within 15 minutes per IP address.
 /check --fix --bail
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Quality Gate Results
@@ -362,18 +362,18 @@ Lint errors:
 
 **One-line:** Structured code review that evaluates changes for correctness, security, performance, test coverage, and documentation quality.
 
-#### When to use:
+#### When to use
 
 - Before creating or merging a pull request.
 - After a team completes implementation and you want an automated review pass.
 - To catch security issues, missing tests, or logic errors.
 
-#### When NOT to use:
+#### When NOT to use
 
 - You want to run linters and formatters. Use `/check`.
 - You have not made any changes yet. Review operates on diffs.
 
-#### Flags:
+#### Flags
 
 | Flag                 | Description                                                                   |
 | -------------------- | ----------------------------------------------------------------------------- |
@@ -383,7 +383,7 @@ Lint errors:
 | `--focus <area>`     | Focus area: security, performance, correctness, style, or all. Default: all.  |
 | `--severity <level>` | Minimum severity to report: info, warning, error, critical. Default: warning. |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /review
@@ -391,7 +391,7 @@ Lint errors:
 /review --file src/auth/middleware.ts
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Code Review
@@ -420,18 +420,18 @@ Lint errors:
 
 **One-line:** Generates a session handoff document so the next session (human or AI) can pick up exactly where this one left off.
 
-#### When to use:
+#### When to use
 
 - You are ending a work session and want to preserve context.
 - You need to pass work to another developer or agent.
 - The orchestrator has completed a run and needs to record what happened.
 
-#### When NOT to use:
+#### When NOT to use
 
 - You are in the middle of active work. Finish or reach a stopping point first.
 - You have not done anything yet this session. There is nothing to hand off.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                                                                     |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
@@ -440,14 +440,14 @@ Lint errors:
 | `--include-diff` | Include a summary of all file changes in the handoff.                                           |
 | `--tag <tag>`    | Tag for categorizing the handoff (e.g., feature, bugfix, spike).                                |
 
-#### Example invocation:
+#### Example invocation
 
 ```text
 /handoff
 /handoff --save
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ````text
 # Session Handoff
@@ -502,7 +502,7 @@ Team commands invoke a specialized agent scoped to a particular domain. Each tea
 | --------------- | ------------------------------------------------------------ |
 | `--task <text>` | Specify a specific task instead of pulling from the backlog. |
 
-#### How team commands work:
+#### How team commands work
 
 1. The team agent activates with its predefined role, scope, and conventions.
 2. Without `--task`, it reads `AGENT_BACKLOG.md` and picks the highest-priority item within its scope.
@@ -511,7 +511,7 @@ Team commands invoke a specialized agent scoped to a particular domain. Each tea
 
 **What happens when no backlog items exist:** The team agent reports that no actionable items are in its scope and suggests running `/discover` or `/sync-backlog` to populate the backlog.
 
-#### Example invocations:
+#### Example invocations
 
 ```text
 /team-backend                              -- picks up highest-priority backend backlog items
@@ -533,7 +533,7 @@ These commands perform focused, single-purpose operations. They are often invoke
 
 Build the project with auto-detected stack. Supports scoped builds for monorepos.
 
-#### Flags:
+#### Flags
 
 | Flag               | Description                                                        |
 | ------------------ | ------------------------------------------------------------------ |
@@ -554,7 +554,7 @@ Build the project with auto-detected stack. Supports scoped builds for monorepos
 
 Run the test suite with auto-detected framework. Supports scoped runs, filters, watch mode, and coverage.
 
-#### Flags:
+#### Flags
 
 | Flag                 | Description                                        |
 | -------------------- | -------------------------------------------------- |
@@ -580,7 +580,7 @@ Run the test suite with auto-detected framework. Supports scoped runs, filters, 
 
 Run code formatters across the project. Defaults to write mode (applies fixes). Supports scoped formatting and staged-files-only mode.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                                             |
 | ---------------- | ----------------------------------------------------------------------- |
@@ -603,7 +603,7 @@ Run code formatters across the project. Defaults to write mode (applies fixes). 
 
 Deployment automation with safety checks, explicit confirmation gates, and rollback support. Requires user confirmation before executing any deployment.
 
-#### Flags:
+#### Flags
 
 | Flag                  | Description                                         |
 | --------------------- | --------------------------------------------------- |
@@ -626,7 +626,7 @@ Deployment automation with safety checks, explicit confirmation gates, and rollb
 
 Full security audit covering OWASP Top 10, dependency vulnerabilities, auth flow review, and hardcoded secrets scan.
 
-#### Flags:
+#### Flags
 
 | Flag                                        | Description                                             |
 | ------------------------------------------- | ------------------------------------------------------- |
@@ -648,7 +648,7 @@ Full security audit covering OWASP Top 10, dependency vulnerabilities, auth flow
 
 Updates `AGENT_BACKLOG.md` by gathering work items from discovery findings, healthcheck results, orchestrator state, code TODOs, and review findings. Prioritizes and assigns items to teams.
 
-#### Flags:
+#### Flags
 
 | Flag                           | Description                                                       |
 | ------------------------------ | ----------------------------------------------------------------- |
@@ -668,7 +668,7 @@ Updates `AGENT_BACKLOG.md` by gathering work items from discovery findings, heal
 
 Runs a comprehensive project-wide audit combining discovery, healthcheck, security scan, and quality gate checks into a single consolidated report. Use this for periodic full-project health assessments.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                                           |
 | ---------------- | --------------------------------------------------------------------- |
@@ -687,7 +687,7 @@ Runs a comprehensive project-wide audit combining discovery, healthcheck, securi
 
 Displays AI token usage summaries, session costs, and budget status. See [COST_TRACKING.md](../architecture/COST_TRACKING.md) for full details on cost tracking configuration.
 
-#### Flags:
+#### Flags
 
 | Flag                | Description                                                  |
 | ------------------- | ------------------------------------------------------------ |
@@ -716,13 +716,13 @@ These commands manage the delegated task system used by the orchestrator and tea
 
 **One-line:** List, filter, and inspect delegated tasks across all teams.
 
-#### When to use:
+#### When to use
 
 - You want to see what tasks are pending, in-progress, or completed.
 - You need to check the status of a specific task by ID.
 - You want to filter tasks by team, priority, or status before deciding what to work on next.
 
-#### Flags:
+#### Flags
 
 | Flag                 | Description                                                                                                                                                      |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -733,7 +733,7 @@ These commands manage the delegated task system used by the orchestrator and tea
 | `--priority <level>` | Filter by priority (P0, P1, P2, P3).                                                                                                                             |
 | `--process-handoffs` | Process handoff chains before listing tasks.                                                                                                                     |
 
-#### Example invocations:
+#### Example invocations
 
 ```text
 /tasks                                  -- list all tasks
@@ -742,7 +742,7 @@ These commands manage the delegated task system used by the orchestrator and tea
 /tasks --priority P0 --status submitted   -- show urgent unstarted work
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Delegated Tasks
@@ -762,13 +762,13 @@ Total: 3 tasks (1 completed, 1 in-progress, 1 pending)
 
 **One-line:** Create a new delegated task and assign it to a team with optional dependencies and handoff chains.
 
-#### When to use:
+#### When to use
 
 - You want to break a large effort into team-scoped tasks.
 - The orchestrator has identified work that should be routed to a specific team.
 - You need to set up task dependencies (task B waits for task A).
 
-#### Flags:
+#### Flags
 
 | Flag                     | Description                                                                          |
 | ------------------------ | ------------------------------------------------------------------------------------ |
@@ -781,7 +781,7 @@ Total: 3 tasks (1 completed, 1 in-progress, 1 pending)
 | `--scope <path>`         | File path or directory scope for the task.                                           |
 | `--description <text>`   | Detailed description of what needs to be done.                                       |
 
-#### Example invocations:
+#### Example invocations
 
 ```text
 /delegate --to backend --title "Add pagination to GET /api/users" --priority P1
@@ -789,7 +789,7 @@ Total: 3 tasks (1 completed, 1 in-progress, 1 pending)
 /delegate --to docs --title "Update API reference" --handoff-to quality --type document
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## Task Created
@@ -816,31 +816,31 @@ Task added to AGENT_BACKLOG.md. Run `/team-backend` to begin work.
 
 **One-line:** Runs AgentKit Forge diagnostics to verify your setup, configuration, and environment health.
 
-#### When to use:
+#### When to use
 
 - Something is not working and you need to identify the problem.
 - After initial setup to verify everything is configured correctly.
 - After upgrading AgentKit Forge to verify the migration succeeded.
 
-#### When NOT to use:
+#### When NOT to use
 
 - You want to check code quality. Use `/check` instead.
 - You want to validate generated outputs. Use `agentkit validate` (CLI) instead.
 
-#### Flags:
+#### Flags
 
 | Flag        | Description                      |
 | ----------- | -------------------------------- |
 | `--verbose` | Show detailed diagnostic output. |
 
-#### Example invocations:
+#### Example invocations
 
 ```text
 /doctor
 /doctor --verbose
 ```
 
-#### Expected output sample:
+#### Expected output sample
 
 ```text
 ## AgentKit Forge Diagnostics
@@ -875,12 +875,12 @@ These commands are available only as slash commands within AI coding tools. They
 
 **One-line:** Generates convention-aligned code skeletons (files, modules, components) based on project patterns and stack.
 
-#### When to use:
+#### When to use
 
 - You need to create a new file that should follow project conventions (component, service, test, migration).
 - You want boilerplate generated with correct imports, naming, and structure.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                                            |
 | ---------------- | ---------------------------------------------------------------------- |
@@ -889,7 +889,7 @@ These commands are available only as slash commands within AI coding tools. They
 | `--stack <name>` | Tech stack context (auto-detected if omitted).                         |
 | `--path <path>`  | Target directory for the generated file(s).                            |
 
-#### Example invocations:
+#### Example invocations
 
 ```text
 /scaffold --type component --name UserProfile
@@ -903,12 +903,12 @@ These commands are available only as slash commands within AI coding tools. They
 
 **One-line:** Release-readiness checks that verify the project is ready to ship, including changelog, version, tests, and documentation.
 
-#### When to use:
+#### When to use
 
 - Before cutting a release to verify all release criteria are met.
 - As part of a release checklist to catch missing items.
 
-#### Flags:
+#### Flags
 
 | Flag              | Description                                              |
 | ----------------- | -------------------------------------------------------- |
@@ -917,7 +917,7 @@ These commands are available only as slash commands within AI coding tools. They
 | `--range <range>` | Git commit range to check (e.g., v1.0.0..HEAD).          |
 | `--strict`        | Fail on warnings in addition to errors.                  |
 
-#### Example invocations:
+#### Example invocations
 
 ```text
 /preflight
@@ -939,13 +939,13 @@ These commands are available only as slash commands within AI coding tools. They
 
 **One-line:** Risk-aware infrastructure and codebase fitness evaluation scoring 8 weighted dimensions with hard gate enforcement.
 
-#### When to use:
+#### When to use
 
 - Quarterly reassessment of infrastructure health.
 - Pre-funding due diligence on technical maturity.
 - Before architectural decisions that affect reliability or cost.
 
-#### Flags:
+#### Flags
 
 | Flag             | Description                                                                                      |
 | ---------------- | ------------------------------------------------------------------------------------------------ |
@@ -956,7 +956,7 @@ These commands are available only as slash commands within AI coding tools. They
 | `--no-save`      | Do not save report.                                                                              |
 | `--gates-only`   | Run hard gate checks only (skip dimensional scoring).                                            |
 
-#### 8 evaluation dimensions (weighted):
+#### 8 evaluation dimensions (weighted)
 
 1. Reliability & Resilience (18%)
 2. Cost Efficiency (16%)
@@ -985,13 +985,13 @@ These commands are available only as slash commands within AI coding tools. They
 
 **One-line:** Brand management and editor theme generation from a centralized `brand.yaml` specification.
 
-#### When to use:
+#### When to use
 
 - Scaffolding a new brand identity for your repository.
 - Generating editor themes (VS Code, Cursor, Windsurf) from brand colors.
 - Auditing accessibility compliance (WCAG) of your color palette.
 
-#### Modes:
+#### Modes
 
 | Flag         | Description                                              |
 | ------------ | -------------------------------------------------------- |
@@ -1002,7 +1002,7 @@ These commands are available only as slash commands within AI coding tools. They
 | `--contrast` | Audit WCAG compliance of color combinations.             |
 | `--all`      | Run all validations and generation.                      |
 
-#### Key files:
+#### Key files
 
 - `.agentkit/spec/brand.yaml` — Brand identity specification (colors, typography, spacing, motion, accessibility)
 - `.agentkit/spec/editor-theme.yaml` — Maps brand colors to editor UI elements (light/dark mode)
@@ -1016,13 +1016,13 @@ These commands are available only as slash commands within AI coding tools. They
 
 **One-line:** Interactive workflow to configure which AgentKit Forge features are enabled for your repository.
 
-#### When to use:
+#### When to use
 
 - Initial setup to choose a feature preset (minimal, lean, standard, full).
 - Enabling or disabling specific features with dependency checking.
 - Previewing changes before applying with dry-run mode.
 
-#### Presets:
+#### Presets
 
 | Preset     | Features | Description                                          |
 | ---------- | -------- | ---------------------------------------------------- |
@@ -1031,12 +1031,12 @@ These commands are available only as slash commands within AI coding tools. They
 | `standard` | 12       | **Default** — teams + quality + docs + security      |
 | `full`     | 20       | Everything including cost tracking, MCP, healthcheck |
 
-#### Key files:
+#### Key files
 
 - `.agentkit/spec/features.yaml` — Canonical registry of all kit features with dependencies
 - `.agentkit/engines/node/src/feature-manager.mjs` — Feature resolution engine
 
-#### CLI equivalents:
+#### CLI equivalents
 
 ```bash
 agentkit features                          # List features and status
@@ -1053,13 +1053,13 @@ agentkit features preset <name>            # Apply preset
 
 **One-line:** End-to-end tracing of a feature from spec definition through template rendering to generated output.
 
-#### When to use:
+#### When to use
 
 - Debugging why a feature's generated output looks wrong.
 - Understanding the full resolution chain for a specific feature.
 - Verifying template variable injection is correct.
 
-#### Flags:
+#### Flags
 
 | Flag               | Description                                    |
 | ------------------ | ---------------------------------------------- |
@@ -1074,7 +1074,7 @@ agentkit features preset <name>            # Apply preset
 
 **One-line:** Audit feature configuration for consistency, recommend features based on codebase analysis, and detect stale configs.
 
-#### Flags:
+#### Flags
 
 | Flag          | Description                                                      |
 | ------------- | ---------------------------------------------------------------- |
@@ -1089,13 +1089,13 @@ agentkit features preset <name>            # Apply preset
 
 **One-line:** Session-aware retrospective mode that reviews conversation history to extract issues encountered and lessons learned.
 
-#### When to use:
+#### When to use
 
 - End of a sprint or development session to capture institutional knowledge.
 - After resolving a difficult bug to document the debugging process.
 - To build a library of lessons for future sessions.
 
-#### New `/review` flags (this branch):
+#### New `/review` flags (this branch)
 
 | Flag                    | Description                                                          |
 | ----------------------- | -------------------------------------------------------------------- |
@@ -1103,7 +1103,7 @@ agentkit features preset <name>            # Apply preset
 | `--open-issues`         | Automatically file issues in external tracker for critical findings. |
 | `--dry-run`             | Preview findings without writing files or creating issues.           |
 
-#### Expanded review criteria (7-10, new):
+#### Expanded review criteria (7-10, new)
 
 | #   | Criterion                 | Description                                                 |
 | --- | ------------------------- | ----------------------------------------------------------- |
@@ -1112,7 +1112,7 @@ agentkit features preset <name>            # Apply preset
 | 9   | Bug Detection             | Identifies latent bugs and race conditions                  |
 | 10  | Enhancement Opportunities | Non-blocking improvement suggestions                        |
 
-#### Output locations:
+#### Output locations
 
 - `docs/history/issues/` — Records of issues encountered during sessions
 - `docs/history/lessons-learned/` — Lessons extracted from retrospectives
@@ -1127,7 +1127,7 @@ agentkit features preset <name>            # Apply preset
 
 **What it adds:** Automated merge conflict resolution system for generated files. Not a slash command, but a supporting system.
 
-#### Key components:
+#### Key components
 
 - `scripts/resolve-merge.sh` / `.ps1` — Cross-platform resolution script
 - `.github/workflows/merge-conflict-detection.yml` — CI workflow that detects conflicts on open PRs and posts resolution instructions
