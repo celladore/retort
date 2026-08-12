@@ -110,8 +110,38 @@ Get-PSDrive C | Select-Object Used, Free
 while ($true) { "{0:u} {1:N1} GiB" -f (Get-Date), ((Get-PSDrive C).Free / 1GB); Start-Sleep 30 }
 ```
 
-A figure that keeps falling instead of flattening is a leak — stranded fixture roots in
-`$env:TEMP` are the usual cause, and they are safe to delete when no run is in progress.
+A figure that keeps falling instead of flattening is a leak. Note that the page file growing
+also consumes free space (see above), so check that before concluding the suite is leaking.
+
+**Where the space actually goes.** Do not assume — measure. Sizing the top-level entries of a
+directory on Windows:
+
+```powershell
+$root = $env:TEMP   # or a repo path
+Get-ChildItem -LiteralPath $root -Force | ForEach-Object {
+  $b = if ($_.PSIsContainer) {
+    (Get-ChildItem -LiteralPath $_.FullName -Force -Recurse -File -EA SilentlyContinue |
+      Measure-Object Length -Sum).Sum
+  } else { $_.Length }
+  [pscustomobject]@{ MiB = [math]::Round($b / 1MB, 1); Name = $_.Name }
+} | Sort-Object MiB -Descending | Select-Object -First 20
+```
+
+Baseline measured on the development host (2026-08-10), for scale:
+
+| Location                                | Size                               |
+| --------------------------------------- | ---------------------------------- |
+| `%TEMP%` total                          | 11.6 GiB (3,619 top-level entries) |
+| — of which agent/tooling scratch        | 5.6 GiB                            |
+| — of which **Retort fixture trees**     | **0.02 GiB** (26 trees)            |
+| `repos\retort` checkout (all worktrees) | 0.8 GiB                            |
+| `repos\retort-worktrees`                | 0.3 GiB                            |
+| all `node_modules` under both           | 0.9 GiB                            |
+
+**This project is a small part of any large shortfall.** Stranded fixture roots were the cause
+once ([ADR-12](../architecture/decisions/12-test-suite-reliability.md), 126 trees in `%TEMP%`),
+but that cleanup defect is fixed and they no longer accumulate — reaching for them again wastes
+the search. A double-digit GiB gap is almost certainly something else on the volume.
 
 **Commit limit and remaining commit** (KiB — `TotalVirtualMemorySize` _is_ the commit limit,
 physical plus page file):
@@ -167,7 +197,7 @@ simply has not grown yet is not flagged.
 
 | Symptom                                                         | Likely cause                         | First check                               |
 | --------------------------------------------------------------- | ------------------------------------ | ----------------------------------------- |
-| Every test file fails to load; suite looks completely broken    | `ENOSPC` — disk exhausted            | `Get-PSDrive C`                           |
+| Every test file fails to load; suite looks completely broken    | `ENOSPC` — disk exhausted            | `Get-PSDrive C`, then size the volume     |
 | `ERR_DLOPEN_FAILED` on a native module; "paging file too small" | Commit limit reached                 | `Win32_OperatingSystem.FreeVirtualMemory` |
 | `Worker exited unexpectedly`                                    | Commit limit reached                 | `Win32_OperatingSystem.FreeVirtualMemory` |
 | Failing **set** changes between runs of identical code          | Capacity, or I/O-contention timeouts | `pnpm preflight:capacity`, then ADR-12    |

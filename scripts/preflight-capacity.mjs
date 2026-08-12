@@ -297,9 +297,14 @@ export function evaluateCapacity(facts, config) {
           ? [
               'The suite creates ~27 GiB of fixture trees and reclaims them continuously.',
               'Below the floor a run hits ENOSPC and EVERY test file fails to load — that is',
-              'a full disk, not broken code. Free space before re-running:',
-              `  - clear stranded fixture roots in ${os.tmpdir()}`,
-              '  - remove stale coverage/ and node_modules/.cache directories',
+              'a full disk, not broken code.',
+              '',
+              'Measure before deleting. This project is a small part of any large shortfall:',
+              'the checkout, every worktree and all node_modules together measured ~2 GiB, and',
+              'fixture roots are transient (26 trees / 0.02 GiB when last sampled). Stranded',
+              'fixtures were the cause once, but that cleanup defect is fixed — assuming them',
+              'again wastes the search. A big gap is usually something else on the volume.',
+              'Sizing commands: docs/engineering/15_test_capacity_preflight.md',
             ].join('\n')
           : null,
     });
