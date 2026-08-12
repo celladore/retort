@@ -174,7 +174,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 **What you get:** An `AGENT_TEAMS.md` file in your repository root with a repository profile, team assignments tailored to your actual codebase, a folder map, and a list of detected issues.
 
-#### Example output:
+#### Example output
 
 ```text
 ## Repository Profile
@@ -204,7 +204,7 @@ Open Claude Code in your project directory and walk through this sequence. Each 
 
 **What you get:** A structured report showing pass/fail status for each check, with an overall health verdict of HEALTHY, DEGRADED, or BROKEN.
 
-#### Example output:
+#### Example output
 
 ```text
 ## Healthcheck Report

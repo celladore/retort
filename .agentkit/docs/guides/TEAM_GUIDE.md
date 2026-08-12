@@ -135,7 +135,7 @@ This is the standard feature lifecycle from requirements to verification.
                                                                          |  8. Report coverage gaps
 ```
 
-#### What gets handed off:
+#### What gets handed off
 
 - Product to Backend/Frontend: PRD document with user stories, acceptance criteria, and priority.
 - Backend/Frontend to Testing: Feature branch with implementation and unit tests. Testing uses the acceptance criteria from the PRD to write verification tests.
@@ -170,7 +170,7 @@ This pattern is used for security hardening and vulnerability remediation.
                                                                     | 10. Approve for merge
 ```
 
-#### What gets handed off:
+#### What gets handed off
 
 - Security to Backend: Audit report with severity-classified findings, exact file/line references, and remediation guidance.
 - Backend to Quality: Branch with fixes, tests, and documentation updates. Quality verifies the fixes are correct and complete.
