@@ -26,6 +26,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Automated quality gates and validation
 - Hook wiring generated from spec ([#575](../../pull/575), [history](docs/history/implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md))
 - Hook spec validation and windowsFirst emit filter ([history](docs/history/features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md))
+- Capacity preflight for full test-suite runs ([history](docs/history/features/0002-2026-08-10-capacity-preflight-for-full-test-suite-runs-feature.md))
 
 ### Changed
 

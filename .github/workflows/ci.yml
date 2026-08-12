@@ -48,6 +48,14 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: .agentkit
 
+      # Advisory on hosted runners: the ci profile uses a much lower disk floor
+      # than a developer host and never blocks (see scripts/preflight-capacity.mjs).
+      # It exists so a capacity-shaped failure is visible in the log as capacity
+      # rather than as a suite of unrelated test errors. Set
+      # RETORT_PREFLIGHT_ENFORCE=1 to make it blocking.
+      - name: Capacity preflight
+        run: node scripts/preflight-capacity.mjs --profile=ci
+
       - name: Run tests with coverage
         run: pnpm coverage
         working-directory: .agentkit

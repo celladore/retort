@@ -2,7 +2,7 @@
   "sequences": {
     "implementation": 11,
     "bugfix": 7,
-    "feature": 2,
+    "feature": 3,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -71,6 +71,14 @@
       "date": "2026-08-07",
       "pr": "581",
       "file": "bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
+    },
+    {
+      "number": 2,
+      "type": "feature",
+      "title": "Capacity preflight for full test-suite runs",
+      "date": "2026-08-10",
+      "pr": "",
+      "file": "features/0002-2026-08-10-capacity-preflight-for-full-test-suite-runs-feature.md"
     }
   ]
 }
