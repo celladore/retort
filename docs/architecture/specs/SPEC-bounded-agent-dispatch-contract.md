@@ -39,8 +39,10 @@ The JSON representation uses camelCase. YAML authoring uses the same field names
   "version": "org.dispatch.v1",
   "dispatchId": "018f2f4a-9f89-7ee0-a9e1-4d91ab7fd123",
   "rootDispatchId": "018f2f4a-9f89-7ee0-a9e1-4d91ab7fd123",
-  "parentDispatchId": null,
-  "parentPolicyRef": null,
+  "causedByDispatchId": null,
+  "authorityParentDispatchId": null,
+  "continuationOfDispatchId": null,
+  "policyBasisRef": null,
   "operationKind": "agent_dispatch",
   "objective": "Review the authentication handler for authorization regressions.",
   "constraints": ["Do not edit files or trigger external effects."],
@@ -73,7 +75,8 @@ The JSON representation uses camelCase. YAML authoring uses the same field names
     "currentDepth": 0,
     "maxDelegationDepth": 2,
     "isolation": "worktree",
-    "externalEffects": "deny"
+    "externalEffects": "deny",
+    "authorityDecisionRef": null
   },
   "routing": {
     "capability": "security-review",
@@ -102,32 +105,47 @@ The JSON representation uses camelCase. YAML authoring uses the same field names
 
 ### 4.1 Identity and lineage
 
-| Field              | Required   | Rules                                                              |
-| ------------------ | ---------- | ------------------------------------------------------------------ |
-| `version`          | Yes        | Exact supported major version; initial value `org.dispatch.v1`     |
-| `dispatchId`       | Yes        | Opaque UUID or ULID; globally unique                               |
-| `rootDispatchId`   | Yes        | Root uses its own `dispatchId`; every descendant preserves it      |
-| `parentDispatchId` | Child only | Required when `currentDepth > 0` or context mode is `continuation` |
-| `parentPolicyRef`  | Child only | Authenticated authoritative record plus immutable policy digest    |
-| `operationKind`    | Yes        | `agent_dispatch`, `agent_continuation`, or `agent_handoff`         |
+| Field                       | Required | Rules                                                            |
+| --------------------------- | -------- | ---------------------------------------------------------------- |
+| `version`                   | Yes      | Exact supported major version; initial value `org.dispatch.v1`   |
+| `dispatchId`                | Yes      | Opaque UUID or ULID; globally unique                             |
+| `rootDispatchId`            | Yes      | Root uses its own `dispatchId`; every related dispatch keeps it  |
+| `causedByDispatchId`        | Non-root | Immediate causal predecessor; does not imply delegated authority |
+| `authorityParentDispatchId` | Child    | Present only when new delegated authority is created             |
+| `continuationOfDispatchId`  | Continue | Same-agent logical run being resumed                             |
+| `policyBasisRef`            | Non-root | Authoritative record and digest used for monotonicity checks     |
+| `operationKind`             | Yes      | `agent_dispatch`, `agent_continuation`, or `agent_handoff`       |
 
 Identifiers MUST NOT encode user identity, task text, repository names, or secrets.
 
-`parentDispatchId` is never trusted as a caller assertion by itself. `parentPolicyRef` is an object
+The three lineage relationships are intentionally independent. A newly delegated specialist sets
+both `causedByDispatchId` and `authorityParentDispatchId` to the delegating dispatch and increments
+authority depth. A same-agent continuation sets `causedByDispatchId` and
+`continuationOfDispatchId` to the prior dispatch, preserves that dispatch's authority parent, and
+keeps the same authority depth. An equivalent-authority handoff sets `causedByDispatchId`, leaves
+`continuationOfDispatchId` absent, preserves the authority parent and depth, and is identified by
+`operationKind=agent_handoff`. Repeated root-launched fan-out or swarm rounds therefore remain
+direct authority children at depth one rather than forming an artificial depth chain.
+
+Lineage IDs are never trusted as caller assertions by themselves. `policyBasisRef` is an object
 with `recordUri` and `policyDigest`; supported URI schemes are registered per deployment and MUST
 NOT embed bearer credentials. It identifies an authoritative run record and includes its immutable
 canonical-policy digest. The receiving boundary
-resolves that record using its own service identity, verifies the caller may continue or delegate
-from it, compares the digest, and obtains the effective parent policy from the trusted record. A
-caller-supplied parent snapshot is ignored. In-process runtimes may use protected local run state,
+resolves that record using its own service identity, verifies that it matches the declared causal,
+authority, or continuation relationship and that the caller may act from it, compares the digest,
+and obtains the effective basis policy from the trusted record. A caller-supplied policy snapshot is
+ignored. In-process runtimes may use protected local run state,
 but MUST persist the same digest before forwarding across a service boundary. An unresolved,
-unauthorized, expired, or mismatched parent fails closed.
+unauthorized, expired, or mismatched lineage or policy basis fails closed.
 
-`dispatchId` is also the idempotency key. Repeating an ID with the same canonical envelope digest
-returns the existing run/result and MUST NOT repeat external effects. Reusing an ID with different
-content returns `DISPATCH_ID_CONFLICT`. Authoritative stores define checkpoint expiry and completed
-run retention; a continuation after expiry returns `DISPATCH_CHECKPOINT_EXPIRED` rather than
-silently starting new work.
+`dispatchId` is also the idempotency key. Before launch, the authoritative store MUST atomically
+reserve `dispatchId` with `envelopeDigest`, the authenticated requester, and the effective trace ID.
+Concurrent same-digest requests attach to that reservation and MUST NOT repeat external effects. A
+same-digest replay re-authorizes the authenticated caller against the stored run/result before
+returning it; matching `requestedBy` claims are insufficient. Reusing an ID with different content
+returns `DISPATCH_ID_CONFLICT`. Authoritative stores define checkpoint expiry and completed run
+retention; a continuation after expiry returns `DISPATCH_CHECKPOINT_EXPIRED` rather than silently
+starting new work.
 
 ### 4.1.1 Canonical digests
 
@@ -135,16 +153,19 @@ All implementations use RFC 8785 JSON Canonicalization Scheme serialized as UTF-
 SHA-256. Digests use `sha256:` followed by 64 lowercase hexadecimal characters.
 
 - `envelopeDigest` hashes the complete received v1 envelope after JSON parsing and before runtime
-  resolution. The digest field itself is not part of the envelope. Unknown additive v1 fields remain
-  in this digest, so replay detection cannot ignore changed input.
+  resolution or server-generated fields are inserted. The digest field itself is not part of the
+  envelope. If a root omits `correlation.traceId`, that absence is therefore stable input to the
+  digest; the atomic reservation creates and stores one trace ID, and all same-digest retries reuse
+  it. Unknown additive v1 fields remain in this digest, so replay detection cannot ignore changed
+  input.
 - `policyDigest` hashes a normalized effective-policy projection containing `version`, canonicalized
   `scope`, `context.mode`, artifact/checkpoint identifiers and classifications, `execution`,
-  `routing`, `completion.closeoutRequirement`, root/parent identity, and the authenticated requester
+  `routing`, `completion.closeoutRequirement`, root/lineage identity, and the authenticated requester
   principal. It excludes objective prose, constraint prose, expected-output prose, timestamps, and
   runtime resolution data.
 
 Resource paths and registered policy IDs are normalized and resolved before `policyDigest` is
-computed. The authoritative store persists both digests. `parentPolicyRef.policyDigest` always means
+computed. The authoritative store persists both digests. `policyBasisRef.policyDigest` always means
 this effective-policy digest; idempotent replay comparison always uses `envelopeDigest`. The
 canonical JSON schema and fixtures include exact digest vectors shared by Node, .NET, and Python.
 
@@ -210,11 +231,15 @@ parent/root lineage and agent identity, and rejects expired or inaccessible chec
 - `uri`: stable URI or repository-relative reference;
 - `purpose`: short reason the child needs it;
 - `classification`: `public`, `internal`, `confidential`, or `restricted`;
-- `digest`: optional immutable content digest;
+- `digest`: immutable content digest, optional only on an unresolved same-boundary request;
 - `mediaType`: optional MIME type.
 
 A reference does not confer access. The dispatcher or child MUST authorize artifact access using the
-owning system's policy.
+owning system's policy. Before launch, every artifact is resolved to immutable content and its digest
+is persisted in the effective policy and replay record. Cross-boundary, confidential, or restricted
+references MUST carry a digest in the forwarded request. A mutable reference whose current content
+cannot be resolved and matched to the recorded digest is rejected; reclassification alone does not
+establish content identity.
 
 The portable classification lattice is `public < internal < confidential < restricted`. Local
 classes require a versioned mapping to this lattice before dispatch; unknown or unmapped classes are
@@ -229,14 +254,23 @@ data policy; it is never routed under a weaker caller declaration.
 
 ### 4.4 Execution
 
-`currentDepth` is zero for a root dispatch and increments exactly once per child edge.
-`maxDelegationDepth` is inherited and MAY be narrowed. It MUST NOT increase in a child.
+`currentDepth` and `maxDelegationDepth` are required non-negative integers. A root authority grant
+starts at zero; only same-agent continuation or equivalent-authority handoff that preserves that
+root authority may also remain at zero. Depth increments exactly once when a dispatch creates a true
+delegated child authority relationship. Continuation and handoff preserve the prior depth.
+`maxDelegationDepth` is inherited and MAY be narrowed; it MUST NOT increase.
 
 `isolation` is `none`, `process`, `workspace`, `worktree`, or `runtime_default`. Code-writing work
 SHOULD resolve to `worktree` when supported.
 
 `externalEffects` is `deny`, `approval_required`, or `allow_declared`. A child cannot receive a more
 permissive value than its parent. This field does not replace service-specific authorization.
+
+`authorityDecisionRef` is optional and is never a bearer capability. It may reference an
+authoritative human or owning-service decision for a specifically enumerated context broadening or
+otherwise incomparable responsibility scope. The receiver resolves and authorizes it independently;
+it cannot override explicit denies or expand resources, actions, external effects, routing grants,
+data policy, or delegation depth.
 
 ### 4.5 Routing
 
@@ -249,17 +283,24 @@ free-form provider instruction. `dataResidency` is likewise a registered policy 
 crosses a service boundary.
 
 `dataClassification` and `dataResidency` constrain routing. `maxInputTokens` is optional in local
-dispatches and exists only when an owner has selected a quantitative ceiling. Before a model-gateway
-call, the adapter resolves a numeric ceiling from the request and registered routing profile, using
-the lower value when both exist. Absence MUST NOT be interpreted as an unlimited financial budget.
+dispatches and exists only when an owner has selected a quantitative ceiling. The effective value is
+the request ceiling when only it is present, the registered profile ceiling when only it is present,
+and the lower value when both are present. If both are absent, the dispatch has no contract-level
+input-token ceiling, although provider and service limits still apply. A child omission inherits any
+effective basis-policy ceiling and never widens it. Absence MUST NOT be interpreted as an unlimited
+input-token ceiling when an inherited or registered ceiling exists.
 
 ### 4.6 Completion and correlation
 
-`expectedOutputs` is a non-empty list drawn from the task contract. `closeoutRequirement` may reuse a
-Batonesque value such as `tests`, `pr_merged`, `deployment_verified`, `handoff`, or `none`.
+`expectedOutputs` is a non-empty list drawn from the task contract. The normative v1
+`closeoutRequirement` vocabulary is `tests`, `pr_merged`, `deployment_verified`,
+`screenshot_evidence`, `baton_update`, `handoff`, and `none`. Unknown values are rejected; adding a
+value changes the versioned vocabulary and its shared digest fixtures.
 
-`taskId`, `runId`, and `traceId` are opaque correlation identifiers. `traceId` is required for every
-dispatch and is generated at the root before validation when the caller has not supplied one.
+`taskId`, `runId`, and `traceId` are opaque correlation identifiers. Every effective dispatch has a
+trace ID. A non-root request MUST supply the root trace ID. A root may omit it; after structural
+validation and envelope hashing, the atomic dispatch reservation generates and stores one stable
+trace ID before policy validation or launch. Same-digest retries reuse the stored value.
 
 `requestedBy.claimedAgentId` and `requestedBy.runtime` are routing/audit claims, not authentication.
 At every service boundary the receiver binds them to an independently authenticated principal from
@@ -273,40 +314,61 @@ Validators run in this order so callers receive deterministic errors:
 
 1. Parse and structural validation.
 2. Contract major-version support.
-3. Required identity, objective, constraints, scope, expected output, and trace correlation.
+3. Required identity, objective, constraints, scope, expected output, operation kind,
+   `execution.currentDepth`, and `execution.maxDelegationDepth`; reject invalid integer/depth forms.
 4. Context-mode invariants.
-5. Authenticated parent resolution, lineage, idempotency, and depth.
-6. Authority monotonicity against the parent.
-7. Artifact/checkpoint syntax, access, digest, expiry, and effective classification.
-8. Runtime capability and isolation resolution.
-9. Provider, data-residency, and model policy.
-10. Audit record creation.
-11. Launch or forward.
+5. Canonical envelope digest and atomic dispatch-ID reservation, including root trace generation or
+   reuse and replay authorization.
+6. Authenticated policy-basis resolution, causal/authority/continuation lineage, and depth semantics.
+7. Authority and context monotonicity against the trusted basis policy.
+8. Artifact/checkpoint syntax, access, immutable digest, expiry, and effective classification.
+9. Runtime capability and isolation resolution.
+10. Provider, data-residency, and model policy.
+11. Audit record creation.
+12. Launch or forward.
 
-No external work starts before steps 1-10 succeed.
+No external work starts before steps 1-11 succeed.
 
 ## 6. Authority comparison
 
-The dispatcher computes an effective parent policy and verifies:
+The dispatcher computes an effective trusted basis policy and verifies:
 
 ```text
-child.resources       subset-of parent.resources
-child.allowedActions  subset-of parent.allowedActions
-child.deniedActions   superset-of parent.deniedActions
-child.rootDispatchId  equal-to parent.rootDispatchId
-child.currentDepth    equal-to parent.currentDepth + 1
-child.currentDepth    <= parent.maxDelegationDepth
-child.currentDepth    <= child.maxDelegationDepth
-child.maxDepth        <= parent.maxDelegationDepth
-child.dataClass       no-more-sensitive-than parent/provider allowance
-child.dataResidency   subset-of parent/provider allowed regions
-child.routingProfile  subset-of parent/provider capability, model, and provider grants
-child.maxInputTokens  <= effective parent/profile ceiling
-child.externalEffects no-more-permissive-than parent.externalEffects
+request.resources            subset-of basis.resources
+request.allowedActions       subset-of basis.allowedActions
+request.deniedActions        superset-of basis.deniedActions
+request.rootDispatchId       equal-to basis.rootDispatchId
+delegated.currentDepth       equal-to basis.currentDepth + 1
+continuation.currentDepth    equal-to basis.currentDepth
+handoff.currentDepth         equal-to basis.currentDepth
+request.currentDepth         <= basis.maxDelegationDepth
+request.currentDepth         <= request.maxDelegationDepth
+request.maxDelegationDepth   <= basis.maxDelegationDepth
+request.dataClass            no-more-sensitive-than basis/provider allowance
+request.dataResidency        subset-of basis/provider allowed regions
+request.routingProfile       subset-of basis/provider capability, model, and provider grants
+request.effectiveInputTokens <= effective basis/profile ceiling
+request.externalEffects      no-more-permissive-than basis.externalEffects
 ```
 
-Where scopes cannot be compared mechanically, the dispatcher requires an explicit human or owning
-service decision and records the reason. It MUST NOT silently assume the child is narrower.
+`scope.mode` is validated together with resources and actions: `read_only` forbids write, commit,
+push, deploy, external-message, and data-mutation authority; `coordination_only` permits only
+responsibility resources and read/dispatch actions; `write_bounded` is valid only when its write
+actions and resources remain subsets of the basis policy. A `write_bounded` request under a
+`read_only` or `coordination_only` basis is rejected.
+
+For context, `isolated` is narrower than `recent`; `recentTurnLimit` and the authoritative selected
+turn references MUST be subsets of the basis policy's permitted history. `continuation` is not
+ordered as broader or narrower: it is valid only for the same agent identity, verified checkpoint,
+and declared `continuationOfDispatchId`. Any otherwise permitted context broadening requires a
+resolved authoritative approval reference. The run record stores the approval decision ID,
+authenticated approver, bounded reason code, and old/new context projection. Caller prose alone is
+not approval. Explicit denies, artifact authorization, classification, and resource/action bounds
+cannot be overridden by this decision.
+
+Where responsibility scopes cannot be compared mechanically, the dispatcher requires an explicit
+human or owning-service decision and records the bounded reason. It MUST NOT silently assume the
+request is narrower.
 
 ## 7. Runtime adapter mappings
 
@@ -346,7 +408,7 @@ and turn count defined for Codex.
 
 `AgentTask` gains a typed dispatch policy. Before creating a child task, Cognitive Mesh:
 
-1. validates authority and depth;
+1. validates causal, authority, continuation, policy-basis, and depth relationships;
 2. projects permitted context instead of reusing the parent context dictionary;
 3. resolves agent/model routing under classification and residency constraints;
 4. records requested and resolved policy;
@@ -354,9 +416,9 @@ and turn count defined for Codex.
 
 ### 7.4 MCP dispatchers and forwarders
 
-Dispatch-capable tool input schemas accept a `dispatch` object or a `dispatchRef` resolvable from the
-authoritative task/run store. The server validates the effective envelope before queuing or
-forwarding. Passive tools do not require the field.
+Dispatch-capable tool input schemas use a `oneOf` rule that accepts exactly one of a `dispatch`
+object or a `dispatchRef` resolvable from the authoritative task/run store. Supplying both or neither
+is rejected before queuing or forwarding. Passive tools do not require either field.
 
 `dispatchRef` is an opaque record reference, not a bearer capability. The MCP server resolves it
 with server credentials, authorizes the calling principal against the referenced task/run, verifies
@@ -373,7 +435,9 @@ Sluice MUST NOT receive the full envelope as request metadata. Agent workflow re
   "dispatch_policy": "org.dispatch.v1",
   "dispatch_id": "opaque-id",
   "root_dispatch_id": "opaque-id",
-  "parent_dispatch_id": "opaque-id-or-absent",
+  "caused_by_dispatch_id": "opaque-id-or-absent",
+  "authority_parent_dispatch_id": "opaque-id-or-absent",
+  "continuation_of_dispatch_id": "opaque-id-or-absent",
   "operation_kind": "agent_dispatch",
   "capability": "security-review",
   "context_mode": "isolated",
@@ -389,7 +453,8 @@ Sluice MUST NOT receive the full envelope as request metadata. Agent workflow re
 
 Rules:
 
-- Values are enumerated or opaque identifiers with bounded length.
+- Values are enumerated or opaque identifiers with bounded length. Per-dispatch identifiers are
+  event correlation fields only; they are never metric labels.
 - `routing_profile` and `data_residency` are server-registered bounded policy IDs, not free-form
   descriptions. Sluice resolves them against the authenticated virtual key and requested capability
   alias. The intersection of those policies is authoritative; a request cannot broaden it.
@@ -402,7 +467,10 @@ Rules:
 - Existing `app`, `agent`, `workflow`, `stage`, and request correlation fields remain in force.
 - Any `operation_kind` in `agent_dispatch`, `agent_continuation`, or `agent_handoff` activates
   dispatch-policy validation. Ordinary inference remains unaffected.
-- Sluice records resolved model/provider and usage against `dispatch_id` and `trace_id`.
+- Sluice records resolved model/provider and usage against `dispatch_id` and `trace_id` in audit,
+  trace, or usage-event fields, never metric labels. Metric labels are restricted to bounded
+  enumerations and registered IDs such as `dispatch_policy`, `operation_kind`, `capability`,
+  `context_mode`, `routing_profile`, `data_classification`, and `data_residency`.
 - Gateway policy may narrow routing but cannot widen a caller's model, provider, residency, or
   classification allowance.
 
@@ -417,15 +485,17 @@ references the task rather than duplicating its complete description.
 Minimum run fields:
 
 - `dispatch_policy_version`;
-- `dispatch_id`, `parent_dispatch_id`, and root dispatch ID;
+- dispatch, root, causal predecessor, authority parent, and continuation IDs;
 - `envelope_digest` and `policy_digest`;
 - claimed requester identity and authenticated principal;
-- requested/resolved context mode;
+- requested/resolved context mode and selected-turn references;
 - resolved history mechanism and turn count;
 - current/max depth;
 - requested/resolved agent and model hints;
 - trace ID;
 - validation outcome and reason code;
+- resolved authority-decision ID, authenticated approver, bounded reason code, and old/new policy
+  projection when an explicit decision was required;
 - timestamps.
 
 ### mcp-org
@@ -472,7 +542,10 @@ must be able to branch on the portable code.
 
 - Additive optional fields remain within `org.dispatch.v1`.
 - Removing or changing field meaning requires `org.dispatch.v2`.
-- Unknown optional fields are preserved where practical and ignored by v1 consumers.
+- A v1 consumer may ignore unknown optional fields, but a forwarder MUST preserve every unknown
+  field name and value without semantic change so canonical reserialization produces the same
+  envelope digest. If it cannot, it MUST reject the request or create a new dispatch ID and envelope
+  rather than altering the existing dispatch under the same digest.
 - Unknown major versions are recorded in observe mode and rejected in enforce mode.
 - A forwarder MUST NOT downgrade a major version silently.
 - Runtime-specific resolution data lives under the run/audit record, not in the portable request.
@@ -504,13 +577,16 @@ Every dispatcher or forwarder implements shared fixtures for:
 2. Valid recent dispatch with one and three turns.
 3. Rejection above the organization maximum of three turns, plus rejection above any configured
    lower runtime ceiling.
-4. Valid continuation using a parent dispatch and durable checkpoint.
-5. Rejection of continuation without parent/checkpoint.
-6. Rejection of missing objective, constraints, scope, expected output, or trace ID generation
-   failure.
-7. Rejection of child write scope outside the parent scope.
+4. Valid continuation using a causal predecessor, continuation relationship, policy basis, and
+   durable checkpoint.
+5. Rejection of continuation without predecessor, continuation relationship, policy basis, or
+   checkpoint.
+6. Rejection of missing objective, constraints, scope, expected output, required depth fields, or
+   trace ID generation failure.
+7. Rejection of delegated write scope outside the basis scope.
 8. Rejection of external-effect escalation.
-9. Rejection of skipped/falsified depth, depth overflow, and child max-depth increase.
+9. Rejection of skipped/falsified depth, depth overflow, and child max-depth increase; continuation
+   and equivalent-authority handoff retain depth, while a true delegated child increments once.
 10. Unsupported major version in observe and enforce modes.
 11. Artifact reference access denial.
 12. Safe Sluice projection excludes content fields.
@@ -518,18 +594,30 @@ Every dispatcher or forwarder implements shared fixtures for:
 14. Requested and resolved policies correlate across task, run, gateway usage, and audit records.
 15. Logs and metrics contain no objective, prompt, credential, personal data, path, or artifact
     content.
-16. Parent lookup rejects unauthorized, missing, expired, or digest-mismatched records.
-17. Duplicate dispatch IDs are idempotent for the same digest and conflict for different content.
+16. Policy-basis lookup rejects unauthorized, missing, expired, lineage-inconsistent, or
+    digest-mismatched records.
+17. Duplicate dispatch IDs are atomically reserved: concurrent same-digest claims launch once,
+    authorized retries attach to the run, unauthorized replays are denied, and different content
+    conflicts. Root retries with omitted trace IDs reuse the reserved trace.
 18. Effective classification rises when a more sensitive artifact is loaded and routing is
     revalidated.
     The same fixtures cover under-classified objective/constraints, recent turns, checkpoint
     content, tool results, and unknown content treated as restricted or rejected.
-19. Broader routing profile, capability/model/provider grant, residency, or input-token ceiling is
-    rejected.
+19. Broader routing profile, capability/model/provider grant, residency, or effective input-token
+    ceiling is rejected; omitted request/profile ceilings cover each inheritance combination.
 20. Gateway validation activates for dispatch, continuation, and handoff operation kinds.
 21. RFC 8785/SHA-256 digest vectors match in Node, .NET, and Python implementations.
+22. Context and scope mode monotonicity covers permitted narrowing, rejected write scope under a
+    read-only basis, and authorized context broadening with a persisted decision.
+23. Dispatch-capable MCP inputs reject both `dispatch` and `dispatchRef`; reference resolution and
+    inline dispatch validation cannot select different policies.
+24. Mutable artifacts are resolved to recorded immutable digests before launch and mismatches fail.
+25. Unknown optional v1 fields survive forwarding unchanged, or the forwarder rejects/creates a new
+    dispatch instead of mutating the existing envelope.
+26. Metric-label fixtures reject all per-dispatch/root/causal/authority/continuation/trace IDs while
+    allowing them in bounded audit, trace, and usage-event fields.
 
-The canonical fixtures SHOULD be serialized as implementation-neutral JSON and reused by Node,
+The canonical fixtures MUST be serialized as implementation-neutral JSON and reused by Node,
 .NET, and Python consumers.
 
 ## 14. Implementation sequence
