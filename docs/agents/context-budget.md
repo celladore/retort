@@ -16,16 +16,16 @@ rule or agent.
 ## The multiplier
 
 Startup context is not paid once. A subagent gets a fresh context window — it does **not**
-inherit the parent conversation — but it *does* re-pay the global overhead:
+inherit the parent conversation — but it _does_ re-pay the global overhead:
 
-| Component                          | Re-paid per subagent dispatch?                          |
-| ---------------------------------- | -------------------------------------------------------- |
-| `CLAUDE.md`, `AGENTS.md`           | **Yes**                                                  |
-| `.claude/rules/`                   | **Yes**                                                  |
-| Directory-scoped `CLAUDE.md`       | Only when files in that directory are touched            |
-| Agent frontmatter (the roster)     | No — but paid every session at startup                   |
-| Agent **body**                     | Only on dispatch                                         |
-| MCP tool names                     | Gated by that agent's `tools:` allowlist                 |
+| Component                      | Re-paid per subagent dispatch?                |
+| ------------------------------ | --------------------------------------------- |
+| `CLAUDE.md`, `AGENTS.md`       | **Yes**                                       |
+| `.claude/rules/`               | **Yes**                                       |
+| Directory-scoped `CLAUDE.md`   | Only when files in that directory are touched |
+| Agent frontmatter (the roster) | No — but paid every session at startup        |
+| Agent **body**                 | Only on dispatch                              |
+| MCP tool names                 | Gated by that agent's `tools:` allowlist      |
 
 A session that dispatches six specialists pays for root memory **seven times**. That single
 fact should decide where every piece of instruction goes.
@@ -33,13 +33,13 @@ fact should decide where every piece of instruction goes.
 ## Where things belong
 
 | If it is…                              | Put it in…            | Cost                        |
-| ---------------------------------------- | --------------------- | --------------------------- |
-| True everywhere, needed often            | Root `CLAUDE.md`      | Every session × every agent |
-| An enforceable rule, needed everywhere   | `.claude/rules/`      | Every session × every agent |
-| True only under one directory            | `<dir>/CLAUDE.md`     | Only sessions touching it   |
-| Reference, looked up occasionally        | `docs/`               | Only when read              |
-| How one agent does its job               | That agent's **body** | Only on dispatch            |
-| Why a rule exists, a post-mortem         | Traces / history      | Only when read              |
+| -------------------------------------- | --------------------- | --------------------------- |
+| True everywhere, needed often          | Root `CLAUDE.md`      | Every session × every agent |
+| An enforceable rule, needed everywhere | `.claude/rules/`      | Every session × every agent |
+| True only under one directory          | `<dir>/CLAUDE.md`     | Only sessions touching it   |
+| Reference, looked up occasionally      | `docs/`               | Only when read              |
+| How one agent does its job             | That agent's **body** | Only on dispatch            |
+| Why a rule exists, a post-mortem       | Traces / history      | Only when read              |
 
 The recurring mistake is putting the last three categories in the first two.
 
@@ -62,13 +62,13 @@ it to ~14 KB with no loss of capability.
 
 ### Rules carry rules; rationale goes elsewhere
 
-A post-mortem explaining *why* a rule exists is read once and paid on every dispatch. Keep the
+A post-mortem explaining _why_ a rule exists is read once and paid on every dispatch. Keep the
 obligation in `.claude/rules/`, and link the trace for the reasoning.
 
 ### Every agent declares an explicit `tools:` allowlist
 
 The key is **`tools:`**. A file using `allowed-tools:` is silently ignored, and that agent is
-then granted the *entire* tool registry — including every deferred MCP name. This was live in
+then granted the _entire_ tool registry — including every deferred MCP name. This was live in
 mystira-workspace on its most frequently dispatched exploration agent, which made it the single
 largest source of per-dispatch overhead. It failed silently in both directions: nothing warned
 that the key was wrong, and nothing warned that the agent was over-privileged.
@@ -86,9 +86,9 @@ automated reviewer caught it. Scan for **the tool names each server provides**, 
 
 ### Keep the default MCP config lean
 
-Tool deferral keeps *schemas* out of context, but names still cost. A server earns a place in
+Tool deferral keeps _schemas_ out of context, but names still cost. A server earns a place in
 the always-loaded config only if it offers reach the built-ins do not. A filesystem MCP server
-alongside Read/Write/Edit costs names *and* a decision on every file operation.
+alongside Read/Write/Edit costs names _and_ a decision on every file operation.
 
 Put situational servers behind a profile loaded per session with `--mcp-config`, and register
 each server exactly once — split by secret, with token-reading servers in settings and
@@ -96,13 +96,13 @@ secret-free stdio servers in the committed config.
 
 ### Aggregation is not context reduction
 
-A gateway re-exporting N servers still surfaces N × tools. Only a task-shaped *facade* reduces
+A gateway re-exporting N servers still surfaces N × tools. Only a task-shaped _facade_ reduces
 the count, and it trades away the tool descriptions the model uses to choose correctly. Reach
 for denial, lean defaults, and per-agent allowlists first.
 
 ### Scope only as a relocation
 
-Add a directory-scoped `CLAUDE.md` when you are moving instruction *out of* something
+Add a directory-scoped `CLAUDE.md` when you are moving instruction _out of_ something
 always-loaded. Creating one for content that was not previously in root **adds** cost for every
 session in that directory.
 
@@ -114,12 +114,12 @@ Measured against `dev` at `871b6b7` on 2026-08-13 (identical on `main`). Re-meas
 
 ### Always-loaded memory is ~95 KB
 
-| File                     | Bytes      |
-| ------------------------ | ---------- |
-| `CLAUDE.md`              | 12,289     |
-| `AGENTS.md`              | 2,853      |
-| `.claude/rules/**/*.md`  | 80,075     |
-| **Total**                | **95,217** |
+| File                    | Bytes      |
+| ----------------------- | ---------- |
+| `CLAUDE.md`             | 12,289     |
+| `AGENTS.md`             | 2,853      |
+| `.claude/rules/**/*.md` | 80,075     |
+| **Total**               | **95,217** |
 
 Roughly 24k tokens before any work begins, re-paid on every subagent dispatch.
 
