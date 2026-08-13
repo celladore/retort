@@ -53,12 +53,19 @@ Only frontmatter loads at startup; the body loads on dispatch. A `description:` 
 routing entry — domain, trigger, and sibling disambiguation where that is load-bearing. Worked
 examples belong in the body under a `## When to invoke` heading.
 
-**Retort already follows this** — 27 agents, ~712 bytes of frontmatter each, zero `<example>`
-blocks. It is written down here so onboarded projects inherit the convention rather than
-rediscovering it. For contrast, mystira-workspace had grown three to five worked example
-dialogues per description: 47,894 bytes of routing index paid every session, while 876 KB of
-actual agent knowledge sat correctly deferred in the bodies. Compacting to routing entries cut
-it to ~14 KB with no loss of capability.
+For contrast, mystira-workspace had grown three to five worked example dialogues per
+description: 47,894 bytes of routing index paid every session, while 876 KB of actual agent
+knowledge sat correctly deferred in the bodies. Compacting to routing entries cut it to ~14 KB
+with no loss of capability.
+
+**Retort partially follows this.** All 27 `agents/*.md` carry an `Examples:` list inside the
+frontmatter — trigger phrasings rather than full dialogues, which is why the roster is
+comparatively light at ~712 bytes per agent. But they are still worked examples living in the
+index, and the convention above says they belong in the body. Moving them is the same change
+mystira-workspace made, at a smaller scale.
+
+Note this is _not_ currently a startup cost — see "The roster is not registered" below — but it
+becomes one the moment that is fixed.
 
 ### Rules carry rules; rationale goes elsewhere
 
@@ -112,7 +119,7 @@ session in that directory.
 
 Measured against `dev` at `871b6b7` on 2026-08-13 (identical on `main`). Re-measure before acting.
 
-### Always-loaded memory is ~95 KB
+### Memory files total ~95 KB
 
 | File                    | Bytes      |
 | ----------------------- | ---------- |
@@ -122,6 +129,26 @@ Measured against `dev` at `871b6b7` on 2026-08-13 (identical on `main`). Re-meas
 | **Total**               | **95,217** |
 
 Roughly 24k tokens before any work begins, re-paid on every subagent dispatch.
+
+This counts memory files only. The agent roster is the other startup contributor, and it is
+covered separately below because in this repository it currently costs nothing — for a reason
+worth fixing.
+
+### The roster is not registered
+
+None of the 39 `.claude/agents/*.md` files carry YAML frontmatter — they begin with an HTML
+comment banner and a `#` heading. Claude Code registers a subagent from its frontmatter `name`
+and `description`, so as written **none of them register**, and ~200 KB of agent personas is
+inert rather than dispatchable.
+
+The properly-formed definitions live in `agents/*.md` at the repo root — 27 files with
+`description`, `model` and `tools` — which is not a directory Claude Code reads. Both are
+generated: `platform-syncer.mjs` writes `.claude/agents/<id>.md` from the agents spec.
+
+So the roster costs 0 bytes at startup today, and that is the symptom, not the win. Confirm
+against a live session (`/agents`, or check whether the personas are dispatchable at all)
+before acting — if they are in fact reachable by some path not visible in the repo, this
+finding is void and the 27 frontmatter blocks become a real ~19 KB startup cost instead.
 
 ### Ten rules files are duplicated across two directories, with divergent content
 
@@ -142,12 +169,42 @@ of the pairs are identical**:
 | `typescript.md`            | 1,529            | 4,147                      |
 
 This is a **correctness problem before it is a context problem**: there are two versions of the
-testing rule and two of the security rule, and nothing indicates which governs. Worth resolving
-regardless of the token cost.
+testing rule and two of the security rule, and nothing indicates which governs.
 
-**Verify first** whether the loader recurses into `.claude/rules/languages/` — check `/context`
-in a live session. If it does not, the subdirectory reads as authoritative while being inert;
-if it does, every session pays for both copies.
+**Neither copy is stale — both are generated, from two different sources.** `synchronize.mjs`
+runs two tasks per target under the `coding-rules` feature flag:
+
+| Generator call             | Source                                   | Output                     |
+| -------------------------- | ---------------------------------------- | -------------------------- |
+| `syncDirectCopy`           | `.agentkit/templates/claude/rules/` (13) | `.claude/rules/*.md`       |
+| `syncLanguageInstructions` | `.agentkit/spec/rules.yaml`              | `.claude/rules/languages/` |
+
+The two sets were never meant to overlap, but ten domain names now appear in both. The split is:
+
+- **Both** (10): agent-conduct, ci-cd, dependency-management, documentation, git-workflow, iac,
+  security, template-protection, testing, typescript
+- **Template only** (5): agent-delegation, hookify, pr-base-branch, quality, worktree-isolation
+- **Spec only** (3): ai-cost-ops, finops, plus the generated `README.md`
+
+The two versions are also structurally different, not near-duplicates. `.claude/rules/testing.md`
+is prose (`## Test Pyramid`, `## Coverage`, `## Mocking & Isolation`); the spec-generated one is
+schema-shaped (`## Applies To`, `## Enforcement Rules`, `## Advisory Rules`). They are different
+documents about the same subject.
+
+**The fix does not belong in the generated files** — every one is marked `DO NOT EDIT` and would
+be restored by the next `pnpm --dir .agentkit retort:sync`. It belongs in `.agentkit`, and it is
+a design decision for the maintainers:
+
+1. **Spec wins** — drop the 10 colliding files from `templates/claude/rules/`, keeping the 5
+   template-only ones. Makes `rules.yaml` the single source for any domain it covers.
+2. **Templates win** — drop those domains from `rules.yaml`, keeping it for genuine
+   language rules. Note the directory is named `languages/` but already carries non-language
+   domains (testing, iac, finops), which is what let the collision happen.
+3. **Namespace the output** — keep both and stop the name collision, accepting that two
+   documents cover each domain.
+
+Also verify whether the loader recurses into `.claude/rules/languages/`, since that decides
+whether the duplicate is inert-but-authoritative-looking or genuinely charged twice per session.
 
 ### No directory-scoped `CLAUDE.md`
 
@@ -158,14 +215,20 @@ Only the root file and a template. Candidates, if any guidance is subtree-specif
 
 ## Suggested sequence
 
-1. Resolve the duplicated rules directories — correctness first, context second.
-2. Measure `/context` before and after; record the number.
-3. Move rationale and post-mortems out of `.claude/rules/` into docs or history.
-4. Add two mechanical checks to the quality gates so onboarded projects cannot regress:
-   - an agent file using `allowed-tools:` instead of `tools:`, or declaring no tools at all
+1. **Confirm the roster registers at all.** Everything else is secondary if 39 agent files are
+   inert. Fix in `platform-syncer.mjs` by emitting `name`/`description` frontmatter.
+2. **Resolve the duplicated rules directories** — pick one of the three options above and change
+   `.agentkit`, not the generated output. Correctness first, context second.
+3. Measure `/context` before and after; record the number.
+4. Move rationale and post-mortems out of `.claude/rules/` into docs or history.
+5. Move the `Examples:` trigger lists from `agents/*.md` frontmatter into the bodies — after
+   step 1, since that is when they start costing anything.
+6. Add three mechanical checks to the quality gates so onboarded projects cannot regress:
+   - an agent file with no frontmatter, or using `allowed-tools:` instead of `tools:`, or
+     declaring no tools at all
    - an agent body referencing a tool outside its own allowlist (match on server tool names,
      not just the `mcp__` prefix)
-5. Keep the lean-description convention documented, since Retort already gets it right.
+   - a generated filename colliding across two generator outputs
 
 ## Checking the budget
 
