@@ -1,4 +1,4 @@
-# ADR-08: Split-Brain Analysis — Script-Based vs Agent-Directive Enforcement
+# ADR-13: Split-Brain Analysis — Script-Based vs Agent-Directive Enforcement
 
 **Status**: proposed
 **Date**: 2026-03-04

@@ -825,6 +825,16 @@ export async function syncClaudeSettings(
     await collectHookExtensions(join(templatesDir, 'claude', 'hooks'), vars)
   );
   if (specHooks) settings.hooks = specHooks;
+  // Subagent spawn depth (ADR-15 §4). Emitted here rather than in the template
+  // because the template is parsed as JSON, not rendered — a {{placeholder}}
+  // would survive verbatim into the generated file. Env values must be strings.
+  const spawnDepth = vars?.maxSubagentSpawnDepth;
+  if (spawnDepth !== undefined && spawnDepth !== null && spawnDepth !== '') {
+    settings.env = {
+      ...(settings.env || {}),
+      CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH: String(spawnDepth),
+    };
+  }
   // Keep hook wiring in step with the hooks sync actually emits
   if (hookFeatureMap && settings.hooks) {
     settings.hooks = filterHooksToEmitted(settings.hooks, hookFeatureMap, vars);
@@ -964,6 +974,16 @@ export async function syncClaudeAgents(
       agentVars.retortRemapTarget = remapTarget || '';
 
       const rendered = renderTemplate(template, agentVars, tplPath);
+      // Claude Code only registers a subagent when YAML frontmatter is the very first
+      // thing in the file. insertHeader places the GENERATED comment after the closing
+      // `---`; without frontmatter it lands at position 0 instead and the file silently
+      // degrades to a prose persona that never becomes a dispatchable agent type.
+      if (!rendered.startsWith('---')) {
+        console.warn(
+          `[agentkit:sync] Warning: agent '${agent.id}' rendered without YAML frontmatter — ` +
+            'it will not register as a Claude Code subagent'
+        );
+      }
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
     }

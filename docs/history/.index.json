@@ -2,7 +2,7 @@
   "sequences": {
     "implementation": 11,
     "bugfix": 10,
-    "feature": 3,
+    "feature": 4,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -103,6 +103,14 @@
       "date": "2026-08-11",
       "pr": "589",
       "file": "features/0002-2026-08-11-test-run-reconciliation-gate-feature.md"
+    },
+    {
+      "number": 3,
+      "type": "feature",
+      "title": "Native agent dispatch",
+      "date": "2026-08-07",
+      "pr": "574",
+      "file": "features/0003-2026-08-07-native-agent-dispatch-feature.md"
     }
   ]
 }

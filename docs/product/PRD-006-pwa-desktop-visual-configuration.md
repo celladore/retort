@@ -628,5 +628,5 @@ first-mover opportunity for non-developer personas.
   parent PRD covering the full hybrid delivery strategy
 - [ADR-07: Delivery Strategy (Refined)](../architecture/decisions/07-delivery-strategy.md) —
   architectural decision record
-- [ADR-01: Adopt Retort](../architecture/decisions/01-adopt-retort.md)
+- [ADR-01: Adopt Retort](../architecture/decisions/01-adopt-agentkit-forge.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)
