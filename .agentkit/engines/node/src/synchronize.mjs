@@ -26,7 +26,7 @@ import {
   loadFeatureSpec,
   resolveFeatures,
 } from './feature-manager.mjs';
-import { ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
+import { applyUtf8Bom, ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
 import {
   cleanStaleFiles,
   clearTemplateMeta,
@@ -1114,6 +1114,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           if (err?.code === 'ENOENT') continue;
           throw err;
         }
+        // Match what the writer actually puts on disk. writeScaffoldOutputs runs
+        // content through applyUtf8Bom, so after one sync the generated .ps1 files
+        // carry a BOM while their temp-tree counterparts do not. Comparing raw made
+        // every PowerShell hook look updated: `sync --diff` reported changes a real
+        // sync then skipped, and interactive sync prompted for them.
+        newContent = applyUtf8Bom(destFile, newContent);
         if (!existsSync(destFile)) {
           createCount++;
           log(`  create ${normPath}`);
@@ -1180,6 +1186,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           if (err?.code === 'ENOENT') continue;
           throw err;
         }
+        // Match what the writer actually puts on disk. writeScaffoldOutputs runs
+        // content through applyUtf8Bom, so after one sync the generated .ps1 files
+        // carry a BOM while their temp-tree counterparts do not. Comparing raw made
+        // every PowerShell hook look updated: `sync --diff` reported changes a real
+        // sync then skipped, and interactive sync prompted for them.
+        newContent = applyUtf8Bom(destFile, newContent);
 
         if (!existsSync(destFile)) {
           changeList.push({ relPath: normPath, action: 'create', newContent });

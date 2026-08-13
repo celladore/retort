@@ -1,6 +1,6 @@
 # ADR-11: Eliminate Generated-File Churn in Sync Output
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-08-06
 **Deciders:** JustAGhosT
 **Related:** PRs #478 / #479 (overlay-miss regressions), issue #420 (EOL normalisation), [worktree-isolation rule](../../../.claude/rules/worktree-isolation.md)
@@ -197,6 +197,47 @@ Replace the silent `__TEMPLATE__` fallback with explicit resolution:
 3. Otherwise **abort with a non-zero exit** naming the missing marker and the available overlays.
 
 `__TEMPLATE__` remains selectable, but only when named explicitly — never as an implicit default.
+
+#### Implemented (2026-08-08)
+
+`resolveOverlaySelection` (`overlay-resolver.mjs`) now resolves in this order and throws when it
+reaches the end: `--overlay` flag → marker at the sync root → marker in the primary worktree →
+overlay matching the project root directory name → abort. The CLI's top-level handler turns the
+throw into exit 1.
+
+Two deviations from the text above, both deliberate:
+
+- **The directory-name inference step was kept**, sitting after the primary-worktree lookup. It
+  was pre-existing behaviour with test coverage, and unlike the `__TEMPLATE__` fallback it can
+  only ever select an overlay that genuinely exists — so it resolves rather than guesses. It is
+  ranked below both marker sources because a marker is a declaration and a directory name is a
+  coincidence.
+
+  This turned out to be load-bearing rather than merely conservative. `.agentkit-repo` is
+  **gitignored** (`.gitignore:51`) — deliberately, since the marker is per-checkout — so a CI
+  runner never has one. `ci.yml` runs the drift check as `cli.mjs sync` from a checkout directory
+  named `retort`, and inference against the `retort` overlay is the only thing that resolves it.
+  Removing that step as the decision text literally reads would have aborted the drift check on
+  every run. Anyone tightening this further needs to give CI a marker or an explicit `--overlay`
+  first.
+
+- **The resolved name is now validated**, whatever source produced it. A name that does not
+  address `overlays/<name>/settings.yaml` aborts with the same guidance, which also closes a
+  typo'd marker silently rendering base templates only, and a marker containing `..` walking out
+  of the overlays directory.
+
+The abort message names the missing marker, whether a primary worktree was consulted, the
+available overlays, and four ways to fix it (`retort init`, `--overlay`, writing the marker,
+`retort worktree create`).
+
+Test coverage is in `__tests__/overlay-resolver.test.mjs` — 15 cases including two that create a
+real linked git worktree to exercise the `--git-common-dir` path rather than mocking it.
+
+Three existing suites relied on the removed fallback and now name `__TEMPLATE__` explicitly:
+`sync-integration` and `sync-agent-features` sync into randomly-named temp project roots with no
+marker, and one `--no-clean` case built a partial agentkit root that omitted `overlays/`
+entirely. In each case the previous behaviour was `__TEMPLATE__`, so the rendered output is
+unchanged — the tests were depending on the fallback without saying so.
 
 ### Sequencing
 

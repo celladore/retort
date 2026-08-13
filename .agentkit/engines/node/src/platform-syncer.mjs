@@ -16,7 +16,7 @@ import {
   validateThemeSpec,
 } from './brand-resolver.mjs';
 
-import { isUnsafePathSegment, SAFE_HOOK_STEM } from './fs-utils.mjs';
+import { applyUtf8Bom, isUnsafePathSegment, SAFE_HOOK_STEM } from './fs-utils.mjs';
 import { normalizeForComparison, threeWayMerge } from './scaffold-merge.mjs';
 import { readYaml } from './spec-loader.mjs';
 import { insertHeader, parseTemplateFrontmatter, renderTemplate } from './template-utils.mjs';
@@ -43,7 +43,7 @@ async function ensureDir(dirPath) {
 
 async function writeOutput(filePath, content) {
   await ensureDir(dirname(filePath));
-  await writeFile(filePath, content, 'utf-8');
+  await writeFile(filePath, applyUtf8Bom(filePath, content), 'utf-8');
 }
 
 async function* walkDir(dir) {
@@ -478,15 +478,35 @@ export async function syncEditorTheme(
   for (const [tool, outputPath] of Object.entries(outputs)) {
     if (!outputPath) continue; // null = skip this target
 
+    // Path traversal protection — resolve and verify the output stays inside tmpDir.
+    // This runs BEFORE the scaffold-once carry-forward below, which also resolves a
+    // destination and writes to it. Guarding only the render path left that branch
+    // able to read a tracked project file and write it outside tmpDir.
+    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
+    const settingsPath = resolve(tmpDir, normalizedPath);
+    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
+      log(`[retort:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
+      continue;
+    }
+
     // Scaffold-once: target already exists in projectRoot (unless --overwrite/--force).
     // Copy the existing content into tmpDir so it appears in the new manifest and
     // survives orphan cleanup. Without this carry-forward, the second sync run
     // sees the file in previousManifest, never in newManifestFiles, and deletes it.
     if (skipOutputs && skipOutputs.has(outputPath)) {
-      const normalizedRel = String(outputPath).replace(/^\/+/, '');
       if (projectRoot) {
-        const existingPath = resolve(projectRoot, normalizedRel);
-        const destFile = resolve(tmpDir, normalizedRel);
+        const resolvedProjectRoot = resolve(projectRoot);
+        const existingPath = resolve(projectRoot, normalizedPath);
+        // The source side needs the same containment check: without it a crafted
+        // path reads a file from outside projectRoot.
+        if (
+          !existingPath.startsWith(resolvedProjectRoot + sep) &&
+          existingPath !== resolvedProjectRoot
+        ) {
+          log(`[retort:sync] BLOCKED: editor theme source path traversal detected — ${outputPath}`);
+          continue;
+        }
+        const destFile = settingsPath;
         if (existsSync(existingPath)) {
           writePromises.push(
             (async () => {
@@ -507,14 +527,6 @@ export async function syncEditorTheme(
         // projectRoot to opt into the fix.
         log(`[retort:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
       }
-      continue;
-    }
-
-    // Path traversal protection — resolve and verify the output stays inside tmpDir
-    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
-    const settingsPath = resolve(tmpDir, normalizedPath);
-    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
-      log(`[retort:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
       continue;
     }
 

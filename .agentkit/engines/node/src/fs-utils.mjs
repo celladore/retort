@@ -5,7 +5,47 @@
  */
 import { existsSync } from 'fs';
 import { mkdir, readdir, writeFile } from 'fs/promises';
-import { dirname, join } from 'path';
+import { dirname, extname, join } from 'path';
+
+/**
+ * UTF-8 byte order mark, as the single code point Node writes as EF BB BF.
+ * Written as an escape rather than a literal — a literal BOM is invisible in an
+ * editor and trivially deleted or duplicated by accident.
+ */
+export const UTF8_BOM = '\uFEFF';
+
+/**
+ * Extensions whose output must carry a UTF-8 BOM.
+ *
+ * Windows PowerShell 5.1 — still the default shell on Windows — decodes a
+ * BOM-less script as ANSI/Windows-1252 rather than UTF-8. Any non-ASCII byte
+ * sequence (em-dashes in comments, `ℹ️` in Write-Host strings) is then mangled
+ * into replacement characters that can swallow a string terminator, and the
+ * file fails to parse in its entirety. PowerShell 7+ defaults to UTF-8 and is
+ * unaffected, which is why this only shows up under 5.1.
+ *
+ * The BOM is applied unconditionally rather than only when the content happens
+ * to contain non-ASCII: a template that gains an em-dash later must not
+ * silently become unparseable, and a deterministic rule avoids BOM churn as
+ * content changes. Safe here because nothing execs a `.ps1` via its shebang —
+ * hooks are invoked as `pwsh -File ...` and only `.sh` output gets `chmod +x`.
+ */
+const BOM_EXTENSIONS = new Set(['.ps1']);
+
+/** True when `filePath`'s extension requires a UTF-8 BOM. */
+export function needsUtf8Bom(filePath) {
+  return BOM_EXTENSIONS.has(extname(String(filePath)).toLowerCase());
+}
+
+/**
+ * Prefixes `content` with a UTF-8 BOM when `filePath` requires one.
+ * Idempotent — content that already starts with a BOM is returned unchanged.
+ */
+export function applyUtf8Bom(filePath, content) {
+  if (typeof content !== 'string') return content;
+  if (!needsUtf8Bom(filePath)) return content;
+  return content.startsWith(UTF8_BOM) ? content : UTF8_BOM + content;
+}
 
 export async function runConcurrent(items, fn, concurrency = 50) {
   const chunks = [];
@@ -23,7 +63,7 @@ export async function ensureDir(dirPath) {
 
 export async function writeOutput(filePath, content) {
   await ensureDir(dirname(filePath));
-  await writeFile(filePath, content, 'utf-8');
+  await writeFile(filePath, applyUtf8Bom(filePath, content), 'utf-8');
 }
 
 /**

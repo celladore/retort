@@ -3,7 +3,10 @@
 # Regenerate: pnpm -C .agentkit retort:sync
 #
 # Lints and validates documentation quality for history records.
-# Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
+# Hard error on every branch. This previously errored only when the PR targeted
+# `main`, which under a dev-based release train meant the gate could fire only on
+# the aggregate promote-to-main PR — the worst possible place to discover a docs
+# defect. Enforcement now happens on the PR that introduces the defect.
 
 name: Documentation Quality
 
@@ -68,8 +71,6 @@ jobs:
 
       - name: Report results
         if: steps.mdlint.outcome == 'failure' || steps.doc-structure.outcome == 'failure' || steps.doc-numbering.outcome == 'failure'
-        env:
-          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
         run: |
           {
             echo "## Documentation Quality Issues"
@@ -93,9 +94,5 @@ jobs:
               echo '```'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$TARGET_BRANCH" = "main" ]; then
-            echo "::error::Documentation quality checks failed on main."
-            exit 1
-          else
-            echo "::warning::Documentation quality issues found. These must be fixed before merging to main."
-          fi
+          echo "::error::Documentation quality checks failed."
+          exit 1

@@ -1,0 +1,12 @@
+{
+  "contract": "harness.neuralliquid.dev/v1alpha1",
+  "schemaVersion": "0.1.0",
+  "lifecycle": "specified",
+  "sourceRepository": "phoenixvc/org-meta",
+  "sourceRevision": "f916826fa77519ae15e3e1c82d2e009cbd9ca3d0",
+  "sourcePath": "architecture/schemas/agent-harnessing-v1.schema.json",
+  "canonicalId": "https://raw.githubusercontent.com/phoenixvc/org-meta/master/architecture/schemas/agent-harnessing-v1.schema.json",
+  "vendoredPath": "contracts/agent-harnessing-v1.schema.json",
+  "sha256": "4284457fa16bb481d42916ebe23ec0036fec9659d7557b2144a297a3a71a51d2",
+  "authorityPromotion": false
+}

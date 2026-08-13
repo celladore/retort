@@ -1,7 +1,10 @@
 name: Quality Lint
 
-# Runs markdown lint checks on PRs. Prettier is validated in the test suite (ci.yml).
-# Required on main (hard error). Warning-only on dev (surfaces issues without blocking).
+# Runs markdown lint checks on PRs. Prettier is checked by the `Prettier` job in
+# ci.yml — it needs to run on every change, not just this workflow's path filters.
+# Hard error on every branch. This previously errored only when the PR targeted
+# `main`, which under a dev-based release train meant the gate could fire only on
+# the aggregate promote-to-main PR — the worst possible place to find lint debt.
 # Split from ci.yml so branch protection can enforce separately per branch.
 
 on:
@@ -53,8 +56,6 @@ jobs:
 
       - name: Report results
         if: steps.mdlint.outcome == 'failure'
-        env:
-          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
         run: |
           {
             echo "## Markdown Lint Issues"
@@ -69,9 +70,5 @@ jobs:
             head -50 /tmp/mdlint-output.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$TARGET_BRANCH" = "main" ]; then
-            echo "::error::Markdown lint failed. Fix lint issues before merging to main."
-            exit 1
-          else
-            echo "::warning::Markdown lint issues found. These must be fixed before merging to main."
-          fi
+          echo "::error::Markdown lint failed."
+          exit 1

@@ -13,6 +13,15 @@ import { renderTemplate, replacePlaceholders } from '../template-utils.mjs';
 
 const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
 
+/**
+ * Overlay these syncs render from. The project directory is named
+ * `agentkit-forge`, which stopped matching an overlay when the repo was renamed
+ * to retort, so nothing here is resolvable by name. Since ADR-11 decision 3 that
+ * aborts rather than silently defaulting to `__TEMPLATE__` — naming it keeps the
+ * rendered output identical to what these assertions were written against.
+ */
+const TEMPLATE_OVERLAY = '__TEMPLATE__';
+
 function makeTmpDir() {
   const dir = resolve(
     tmpdir(),
@@ -231,7 +240,7 @@ describe('P0 + P2 Integration: sync generates agent personas and shared sections
       await runSync({
         agentkitRoot: AGENTKIT_ROOT,
         projectRoot,
-        flags: { quiet: false },
+        flags: { overlay: TEMPLATE_OVERLAY, quiet: false },
       });
     } finally {
       console.log = originalLog;
@@ -301,7 +310,7 @@ describe('P7: Concurrency protocol simplification', () => {
       await runSync({
         agentkitRoot: AGENTKIT_ROOT,
         projectRoot,
-        flags: { quiet: false },
+        flags: { overlay: TEMPLATE_OVERLAY, quiet: false },
       });
     } finally {
       console.log = originalLog;

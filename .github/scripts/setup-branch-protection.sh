@@ -80,7 +80,7 @@ PAYLOAD=$(cat <<ENDJSON
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["Test","Validate","branch-rules"]
+    "contexts": ["Test","Validate","Prettier","branch-rules"]
   },
   "enforce_admins": false,
   "required_pull_request_reviews": {
