@@ -1,5 +1,11 @@
 # Native agent dispatch Launch - Historical Summary
 
+> **Contract note (2026-08-13):** This feature supplies Claude's native adapter capability; it does
+> not itself implement the portable
+> [`org.dispatch.v1`](../../architecture/specs/SPEC-bounded-agent-dispatch-contract.md) envelope or
+> validators. Static frontmatter, process spawn depth, and task-file handoff depth remain distinct
+> from per-invocation context, authority lineage, and delegation depth.
+
 **Launched**: 2026-08-07
 **PR**: #574
 **Feature Type**: New Feature

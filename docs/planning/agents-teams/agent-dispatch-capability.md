@@ -5,6 +5,14 @@
 **ADR:** [ADR-15 Native Agent Dispatch](../../architecture/decisions/15-native-agent-dispatch.md)
 **Target:** Retort v3.2.0
 
+**Portability boundary:** This specification implements Claude's native agent-type adapter and
+task-file execution bridge. It does not implement the portable
+[`org.dispatch.v1`](../../architecture/specs/SPEC-bounded-agent-dispatch-contract.md) envelope,
+conformance fixtures, validation, or resolved-policy persistence. Frontmatter `dispatch` fields are
+static adapter configuration, while each invocation's context, authority, lineage, and audit policy
+belong to the portable contract. Until that implementation lands, this path participates as a legacy
+caller in the bounded contract's staged rollout.
+
 > **Implementation status.** All four phases have landed:
 >
 > - All 38 agents emit valid subagent frontmatter, with `isolation: worktree` on 14
@@ -149,13 +157,12 @@ Per-agent `dispatch.can-dispatch: true` overrides. Emission:
 > parenthesised type list is ignored. Restricting _which_ agents may be spawned must go
 > through `permissions.deny: ["Agent(<name>)"]` in `settings.json`.
 
-> **Corrected during implementation.** The third row above would emit `tools:` _and_
-> `disallowedTools:` for a read-only agent in allowlist mode — the same restriction stated
-> twice, in two languages, with no documented precedence between them. As shipped,
-> `tools:` is the single authority in allowlist mode: the read-only denials are subtracted
-> from the list and `disallowedTools` is omitted. An allowlist that resolves to nothing
-> falls back to `inherit` with a warning rather than emitting an empty `tools:`, which
-> would launch a subagent with no tools at all.
+**Corrected during implementation:** The third row above would emit `tools:` _and_
+`disallowedTools:` for a read-only agent in allowlist mode — the same restriction stated twice, in
+two languages, with no documented precedence between them. As shipped, `tools:` is the single
+authority in allowlist mode: the read-only denials are subtracted from the list and
+`disallowedTools` is omitted. An allowlist that resolves to nothing falls back to `inherit` with a
+warning rather than emitting an empty `tools:`, which would launch a subagent with no tools at all.
 
 ### `model`
 

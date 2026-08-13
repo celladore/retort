@@ -4,7 +4,7 @@
 [#574](https://github.com/phoenixvc/retort/pull/574)
 **Date:** 2026-08-07
 **Deciders:** JustAGhosT
-**Related:** [ADR-10 Tool-Neutral Agent Hub](./10-tool-neutral-agent-hub.md), [Implementation spec](../../planning/agents-teams/agent-dispatch-capability.md), [Worktree isolation rule](../../../.claude/rules/worktree-isolation.md)
+**Related:** [ADR-10 Tool-Neutral Agent Hub](./10-tool-neutral-agent-hub.md), [Implementation spec](../../planning/agents-teams/agent-dispatch-capability.md), [Bounded dispatch contract](../specs/SPEC-bounded-agent-dispatch-contract.md), [Worktree isolation rule](../../../.claude/rules/worktree-isolation.md)
 
 ## Context
 
@@ -125,6 +125,25 @@ Both protocols are kept, with clear roles:
 
 A `dispatchMode` setting selects the backend: `native` on Claude Code, `task-file` elsewhere.
 The spec stays single-source, consistent with ADR-10's tool-neutral direction.
+
+### 7. Native dispatch is an adapter, not the portable invocation contract
+
+The generated `dispatch:` frontmatter controls a Claude agent type's static runtime capability:
+whether it may spawn, which tools and model it receives, and whether it starts in a worktree. It is
+not an `org.dispatch.v1` envelope and MUST NOT carry invocation-specific objective, context,
+authority, lineage, or provider policy.
+
+Each native invocation is governed separately by the bounded dispatch contract. In particular,
+`max-subagent-spawn-depth` is a process safety cap, not `execution.currentDepth`;
+`maxHandoffChainDepth` limits sequential task-file workflow, not authority nesting; and native reuse
+does not decide whether an operation is a delegated child, same-agent continuation, or
+equivalent-authority handoff. The portable envelope and authoritative run record make those
+decisions before the adapter launches work.
+
+This PR provides the native adapter surface but does not claim the R13 schema, fixtures, validators,
+or resolved-policy persistence. Until those land, Retort treats this path as a legacy caller in the
+contract's staged observe/warn rollout. Existing authorization, tool, worktree, and task-scope
+controls remain mandatory and are never bypassed by rollout mode.
 
 ## Consequences
 
