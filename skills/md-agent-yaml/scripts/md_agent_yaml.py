@@ -373,7 +373,7 @@ def map_gaps(changed: list[Path], root: Path) -> tuple[list[Path], list[tuple[Pa
             if listed_in_map(directory, parent_dir, listed, skip):
                 covered = True
                 break
-            if listed or skip:
+            if listed:
                 stale_parents.append((map_path, repo_rel(directory, root)))
                 covered = True
                 break
