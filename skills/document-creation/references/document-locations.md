@@ -51,18 +51,18 @@ The sync-agent monitors drift between the two.
 
 ## Technical Reference Documents
 
-| Type                    | Location                  | Naming                            | Notes                                     |
-| ----------------------- | ------------------------- | --------------------------------- | ----------------------------------------- |
-| README                  | Package / app root        | `README.md`                       | Paired with `.readme.yaml` plus `README.agent.yaml` |
-| Directory map           | Directory being mapped    | `.readme.yaml`                    | No-LSP exploration map — Dual-File Convention below |
-| Document sidecar        | Same dir as the markdown  | `{stem}.agent.yaml`               | md-agent/v1 — `skills/md-agent-yaml/schema.yaml`    |
-| CLAUDE.md               | Repo root or `.claude/`   | Fixed                             | AI agent instructions; do not auto-create |
-| Runbook                 | `docs/runbooks/`          | `topic.md`                        | Stable; update in place                   |
-| Onboarding guide        | `docs/onboarding/`        | `topic.md` or `README.md`         |                                           |
-| API reference           | `docs/api/`               | `service-name.md` or OpenAPI yaml |                                           |
-| OpenAPI spec            | `openapi/` or `docs/api/` | `service-name.yaml`               |                                           |
-| Migration guide         | `docs/migrations/`        | `vX-to-vY.md`                     |                                           |
-| Contributing guide      | Repo root                 | `CONTRIBUTING.md`                 | Fixed name                                |
+| Type               | Location                  | Naming                            | Notes                                               |
+| ------------------ | ------------------------- | --------------------------------- | --------------------------------------------------- |
+| README             | Package / app root        | `README.md`                       | Paired with `.readme.yaml` plus `README.agent.yaml` |
+| Directory map      | Directory being mapped    | `.readme.yaml`                    | No-LSP exploration map — Dual-File Convention below |
+| Document sidecar   | Same dir as the markdown  | `{stem}.agent.yaml`               | md-agent/v1 — `skills/md-agent-yaml/schema.yaml`    |
+| CLAUDE.md          | Repo root or `.claude/`   | Fixed                             | AI agent instructions; do not auto-create           |
+| Runbook            | `docs/runbooks/`          | `topic.md`                        | Stable; update in place                             |
+| Onboarding guide   | `docs/onboarding/`        | `topic.md` or `README.md`         |                                                     |
+| API reference      | `docs/api/`               | `service-name.md` or OpenAPI yaml |                                                     |
+| OpenAPI spec       | `openapi/` or `docs/api/` | `service-name.yaml`               |                                                     |
+| Migration guide    | `docs/migrations/`        | `vX-to-vY.md`                     |                                                     |
+| Contributing guide | Repo root                 | `CONTRIBUTING.md`                 | Fixed name                                          |
 
 ---
 

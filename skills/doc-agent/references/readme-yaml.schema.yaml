@@ -4,21 +4,21 @@
 # Purpose: walk the tree, read this file, know what is here and where to go next.
 
 schema: readme-map/v1
-kind: leaf                    # leaf | index
-name: mystira-app-pwa         # directory / package name
-purpose: "One sentence: what lives in this directory."
-type: app                     # app | library | package | service | infrastructure | tool | index
+kind: leaf # leaf | index
+name: mystira-app-pwa # directory / package name
+purpose: 'One sentence: what lives in this directory.'
+type: app # app | library | package | service | infrastructure | tool | index
 stack: [dotnet, blazor]
-entry_points:                 # leaf: where to start without LSP
+entry_points: # leaf: where to start without LSP
   - Mystira.App.PWA.csproj
   - Program.cs
-children:                     # index: next hop for an explorer
+children: # index: next hop for an explorer
   - name: publisher
     path: apps/publisher
     stack: typescript
-    description: "Publisher frontend SPA"
-skip:                         # do not crawl
+    description: 'Publisher frontend SPA'
+skip: # do not crawl
   - bin
   - obj
   - artifacts
-last_synced: "2026-08-14"
+last_synced: '2026-08-14'

@@ -11,10 +11,10 @@ Do not invent a different shape. Use `schema.yaml` in this skill.
 
 ## Two YAML contracts
 
-| File | Scope | Schema |
-| --- | --- | --- |
-| `.readme.yaml` | No-LSP directory map | `skills/doc-agent/references/readme-yaml-convention.md` |
-| `{stem}.agent.yaml` | One durable markdown file | `schema.yaml` in this skill |
+| File                | Scope                     | Schema                                                  |
+| ------------------- | ------------------------- | ------------------------------------------------------- |
+| `.readme.yaml`      | No-LSP directory map      | `skills/doc-agent/references/readme-yaml-convention.md` |
+| `{stem}.agent.yaml` | One durable markdown file | `schema.yaml` in this skill                             |
 
 Never write md-agent fields into `.readme.yaml`. Never write exploration-map fields (`children`, `entry_points`, `skip`) into `{stem}.agent.yaml`.
 

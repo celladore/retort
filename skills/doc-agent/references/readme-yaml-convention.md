@@ -21,15 +21,15 @@ directory itself needs a further map.
 
 ## Required fields
 
-| Field | Index | Leaf |
-| --- | --- | --- |
-| `schema` | `readme-map/v1` | `readme-map/v1` |
-| `kind` | `index` | `leaf` |
-| `purpose` | yes | yes |
-| `children` | yes | no |
-| `entry_points` | optional | yes |
-| `skip` | recommended | recommended |
-| `last_synced` | yes | yes |
+| Field          | Index           | Leaf            |
+| -------------- | --------------- | --------------- |
+| `schema`       | `readme-map/v1` | `readme-map/v1` |
+| `kind`         | `index`         | `leaf`          |
+| `purpose`      | yes             | yes             |
+| `children`     | yes             | no              |
+| `entry_points` | optional        | yes             |
+| `skip`         | recommended     | recommended     |
+| `last_synced`  | yes             | yes             |
 
 Optional on either: `name`, `type`, `stack`, `status`, `owner`, `depends_on`,
 `deployment`. Those help orientation; they do not replace `children` / `entry_points`.
@@ -40,19 +40,19 @@ Optional on either: `name`, `type`, `stack`, `status`, `owner`, `depends_on`,
 schema: readme-map/v1
 kind: index
 name: apps
-purpose: "Application projects for the Mystira platform"
+purpose: 'Application projects for the Mystira platform'
 children:
   - name: publisher
     path: apps/publisher
     stack: typescript
-    description: "Publisher frontend SPA"
+    description: 'Publisher frontend SPA'
   - name: identity
     path: apps/identity
     stack: dotnet
-    description: "Identity/auth service"
+    description: 'Identity/auth service'
 skip:
   - publish
-last_synced: "2026-08-14"
+last_synced: '2026-08-14'
 ```
 
 ## Leaf example
@@ -61,7 +61,7 @@ last_synced: "2026-08-14"
 schema: readme-map/v1
 kind: leaf
 name: shared-ts
-purpose: "Shared TypeScript utilities — dates, errors, validation."
+purpose: 'Shared TypeScript utilities — dates, errors, validation.'
 type: package
 stack: [typescript]
 entry_points:
@@ -69,7 +69,7 @@ entry_points:
 skip:
   - dist
   - node_modules
-last_synced: "2026-08-14"
+last_synced: '2026-08-14'
 ```
 
 ## Explorer rule
