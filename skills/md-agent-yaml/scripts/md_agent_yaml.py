@@ -311,12 +311,30 @@ def parse_map_lists(text: str) -> tuple[set[str], set[str]]:
     return listed, skip
 
 
-def listed_in_map(child: Path, parent: Path, listed: set[str], skip: set[str]) -> bool:
-    rel = posix(child.relative_to(parent)) if child != parent else child.name
-    names = {child.name, rel, posix(child)}
-    if names & skip:
-        return True
-    return bool(names & listed)
+def _norm_key(value: str) -> str:
+    return value.replace("\\", "/").strip("/")
+
+
+def listed_in_map(
+    child: Path,
+    parent: Path,
+    listed: set[str],
+    skip: set[str],
+    root: Path | None = None,
+) -> bool:
+    rel_parent = _norm_key(posix(child.relative_to(parent))) if child != parent else child.name
+    needles = {rel_parent}
+    if root is not None:
+        try:
+            needles.add(_norm_key(posix(child.relative_to(root))))
+        except ValueError:
+            pass
+    hay = {_norm_key(item) for item in listed | skip if item}
+    for item in hay:
+        for needle in needles:
+            if needle == item or needle.startswith(item + "/") or item.endswith("/" + needle):
+                return True
+    return False
 
 
 def ancestor_maps(directory: Path, root: Path) -> list[Path]:
@@ -370,7 +388,7 @@ def map_gaps(changed: list[Path], root: Path) -> tuple[list[Path], list[tuple[Pa
                 continue
             listed, skip = parse_map_lists(text)
             parent_dir = map_path.parent
-            if listed_in_map(directory, parent_dir, listed, skip):
+            if listed_in_map(directory, parent_dir, listed, skip, root):
                 covered = True
                 break
             if listed:
@@ -479,11 +497,28 @@ def check_stop() -> int:
     return 0
 
 
+def selftest() -> int:
+    root = Path("C:/repo")
+    parent = root / "apps"
+    listed = {"publisher", "apps/publisher", "admin-api", "apps/admin/api", "apps/app"}
+    skip = {"publish"}
+    assert listed_in_map(parent / "publisher", parent, listed, skip, root)
+    assert listed_in_map(parent / "admin" / "api", parent, listed, skip, root)
+    assert listed_in_map(parent / "app" / "src" / "Mystira.App.PWA", parent, listed, skip, root)
+    assert listed_in_map(parent / "publish", parent, listed, skip, root)
+    assert not listed_in_map(parent / "newapp", parent, listed, skip, root)
+    leaf_listed, _ = parse_map_lists("schema: readme-map/v1\nkind: leaf\nskip:\n  - dist\n")
+    assert leaf_listed == set()
+    print("selftest ok")
+    return 0
+
+
 def usage() -> str:
     return (
         "usage: md_agent_yaml.py convert [--repo] [paths...]\n"
         "       md_agent_yaml.py check [--repo] [paths...]\n"
-        "       md_agent_yaml.py check-stop"
+        "       md_agent_yaml.py check-stop\n"
+        "       md_agent_yaml.py selftest"
     )
 
 
@@ -513,6 +548,8 @@ def main(argv: list[str]) -> int:
     try:
         if command == "check-stop":
             return check_stop()
+        if command == "selftest":
+            return selftest()
 
         start = Path.cwd()
         root = git_root(start)

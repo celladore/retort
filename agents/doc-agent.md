@@ -34,7 +34,7 @@ skill. Handles all other documentation tasks directly.
 Every documented component should have two files:
 
 - `README.md` — human-readable, markdown prose
-- `.readme.yaml` — agent-readable structured metadata
+- `.readme.yaml` — no-LSP directory exploration map
 
 When creating or updating docs for any module, maintain both. Read
 `skills/doc-agent/references/readme-yaml-convention.md` for the directory-card
