@@ -25,10 +25,14 @@ document lives from memory; always consult the location map.
 Every documented component should maintain two files in parallel:
 
 - `README.md` — human-readable, markdown prose
-- `.readme.yaml` — agent-readable structured metadata
+- `.readme.yaml` — directory exploration map (children / entry_points / skip)
 
 Schema and examples: `references/readme-yaml-convention.md` or the `document-creation`
 skill's `references/document-locations.md § Dual-File Convention`.
+
+Durable markdown itself (`README.md`, `docs/**`, ADRs, specs) also gets a sibling
+`{stem}.agent.yaml` in the md-agent/v1 shape. That is a different contract — see
+`skills/md-agent-yaml/schema.yaml`. Do not write md-agent fields into `.readme.yaml`.
 
 ## When to Write What
 
@@ -60,5 +64,6 @@ To assess what's missing:
 
 ### Reference Files
 
-- **`references/readme-yaml-convention.md`** — Full .readme.yaml schema and examples
+- **`references/readme-yaml-convention.md`** — .readme.yaml exploration-map schema (`readme-map/v1`)
+- **`skills/md-agent-yaml/`** — Per-document `{stem}.agent.yaml` schema and converter
 - **`document-creation` skill** → **`references/document-locations.md`** — Canonical location map for all document types

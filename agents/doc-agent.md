@@ -4,7 +4,8 @@ description: >
   "document this feature", "create a history document", "update CLAUDE.md", "generate
   API docs", "review doc gaps", "write an ADR", or "document what we just built".
   Delegates to retort's document-history skill for session history. Maintains dual-file
-  convention (README.md + .readme.yaml) across all repos.
+  convention (README.md + .readme.yaml) and md-agent/v1 document sidecars
+  ({stem}.agent.yaml) across all repos.
 
   Examples:
   - "document what we just built"
@@ -36,7 +37,9 @@ Every documented component should have two files:
 - `.readme.yaml` — agent-readable structured metadata
 
 When creating or updating docs for any module, maintain both. Read
-`skills/doc-agent/references/readme-yaml-convention.md` for schema and examples.
+`skills/doc-agent/references/readme-yaml-convention.md` for the directory-card
+schema. Durable markdown also gets `{stem}.agent.yaml` — see
+`skills/md-agent-yaml/schema.yaml`. Do not mix the two shapes.
 
 ## Task Routing
 

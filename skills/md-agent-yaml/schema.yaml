@@ -1,0 +1,19 @@
+# md-agent/v1 — agent sidecar for one durable markdown file
+#
+# Sibling file: {stem}.agent.yaml next to {stem}.md
+# Example: docs/specs/SPEC-006.md → docs/specs/SPEC-006.agent.yaml
+#
+# Do not write this schema into .readme.yaml (directory cards) or
+# .agent-summary.yaml (repo summaries). Those are different contracts.
+
+schema: md-agent/v1
+source: docs/example.md          # repo-relative path of the markdown file
+title: "Short document title"    # usually the first H1
+purpose: "One or two sentences on what this document is for."
+audience:                        # who should read the sidecar
+  - agent
+  - human
+facts:                           # durable claims an agent can trust without parsing the markdown
+  - "Concrete fact 1"
+  - "Concrete fact 2"
+last_synced: "2026-08-14"        # ISO date the sidecar was last aligned to the markdown

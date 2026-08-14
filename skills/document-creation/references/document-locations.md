@@ -53,8 +53,9 @@ The sync-agent monitors drift between the two.
 
 | Type                    | Location                  | Naming                            | Notes                                     |
 | ----------------------- | ------------------------- | --------------------------------- | ----------------------------------------- |
-| README                  | Package / app root        | `README.md`                       | Always paired with `.readme.yaml`         |
-| Agent-readable metadata | Same dir as README        | `.readme.yaml`                    | See Dual-File Convention below            |
+| README                  | Package / app root        | `README.md`                       | Paired with `.readme.yaml` plus `README.agent.yaml` |
+| Directory map           | Directory being mapped    | `.readme.yaml`                    | No-LSP exploration map — Dual-File Convention below |
+| Document sidecar        | Same dir as the markdown  | `{stem}.agent.yaml`               | md-agent/v1 — `skills/md-agent-yaml/schema.yaml`    |
 | CLAUDE.md               | Repo root or `.claude/`   | Fixed                             | AI agent instructions; do not auto-create |
 | Runbook                 | `docs/runbooks/`          | `topic.md`                        | Stable; update in place                   |
 | Onboarding guide        | `docs/onboarding/`        | `topic.md` or `README.md`         |                                           |
@@ -102,81 +103,24 @@ The sync-agent monitors drift between the two.
 
 ## Dual-File Convention
 
-Every component, app, package, or service that has a README should also have a `.readme.yaml` partner:
+`.readme.yaml` is a no-LSP exploration map for a directory. Schema and examples:
+`skills/doc-agent/references/readme-yaml-convention.md` (`readme-map/v1`).
 
 ```
-component/
-├── README.md        # Human-readable prose
-└── .readme.yaml     # Agent-readable structured metadata
+apps/
+├── .readme.yaml     # index: children + skip
+└── publisher/
+    ├── README.md
+    └── .readme.yaml # leaf, only if this folder needs its own map
 ```
 
-### `.readme.yaml` Required Fields
+An index that already lists a child does not require a leaf card in that child.
 
-```yaml
-name: string # canonical name (matches directory/package name)
-type: app | library | service | infrastructure | tool | package
-description: string # one sentence
-status: active | deprecated | planned | experimental
-stack: [string] # primary technologies
-owner: string # GitHub team or individual (e.g. phoenixvc/backend)
-```
+### Document sidecars (md-agent/v1)
 
-### `.readme.yaml` Optional Fields
-
-```yaml
-version: string # semver if versioned
-repo: string # GitHub URL
-deployment:
-  environments: [dev, staging, prod]
-  url_pattern: https://...
-  platform: azure-app-service | azure-swa | container-app | vercel | cloudflare
-depends_on: [string] # other services/packages this depends on
-deprecated:
-  reason: string
-  replacement: string
-  sunset_date: YYYY-MM-DD
-client-doc: string # Notion URL if a client-facing counterpart exists
-```
-
-### Type-specific Examples
-
-**Library / shared package:**
-
-```yaml
-name: shared-messaging
-type: library
-description: Domain event types and message bus abstraction for Mystira services.
-status: active
-stack: [dotnet, csharp]
-owner: phoenixvc/backend
-```
-
-**App / service:**
-
-```yaml
-name: story-generator
-type: service
-description: AI story generation API for Mystira interactive narratives.
-status: active
-stack: [dotnet, csharp, openai]
-owner: phoenixvc/backend
-deployment:
-  environments: [dev, staging, prod]
-  url_pattern: https://mys-{env}-story-gen.azurewebsites.net
-  platform: azure-app-service
-depends_on: [identity, shared-messaging]
-```
-
-**Infrastructure module:**
-
-```yaml
-name: infra-identity
-type: infrastructure
-description: Terraform module for the Mystira Identity service (Container App + Key Vault).
-status: active
-stack: [terraform, azure]
-owner: phoenixvc/infra
-```
+Durable markdown also gets a sibling `{stem}.agent.yaml` (`SPEC-001.md` → `SPEC-001.agent.yaml`).
+Fields: `title`, `purpose`, `audience`, `facts`, `last_synced`. Schema:
+`skills/md-agent-yaml/schema.yaml`. Do not put those fields in `.readme.yaml`.
 
 ---
 
