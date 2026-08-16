@@ -28,6 +28,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Hook spec validation and windowsFirst emit filter ([#582](../../pull/582), [history](docs/history/features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md))
 - Test-run reconciliation gate ([#589](../../pull/589), [history](docs/history/features/0002-2026-08-11-test-run-reconciliation-gate-feature.md))
 - Native agent dispatch ([#574](../../pull/574), [history](docs/history/features/0003-2026-08-07-native-agent-dispatch-feature.md))
+- Capacity preflight for full test-suite runs ([history](docs/history/features/0002-2026-08-10-capacity-preflight-for-full-test-suite-runs-feature.md))
 
 ### Changed
 

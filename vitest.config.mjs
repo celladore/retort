@@ -2,12 +2,12 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.{js,jsx}'],
+    include: ['src/**/*.test.{js,jsx}', 'scripts/**/*.test.mjs'],
     testTimeout: 15_000,
     environment: 'node',
     coverage: {
       provider: 'v8',
-      include: ['src/start/**'],
+      include: ['src/start/**', 'scripts/preflight-capacity.mjs'],
       thresholds: {
         statements: 80,
         branches: 80,

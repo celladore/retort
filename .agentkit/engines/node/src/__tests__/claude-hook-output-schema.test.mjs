@@ -47,7 +47,7 @@ import { renderTemplate } from '../template-utils.mjs';
 
 const AGENTKIT_ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
 const HOOKS_DIR = resolve(AGENTKIT_ROOT, 'templates', 'claude', 'hooks');
-const SETTINGS_TEMPLATE = resolve(AGENTKIT_ROOT, 'templates', 'claude', 'settings.json');
+const SETTINGS_TEMPLATE = resolve(AGENTKIT_ROOT, '..', '.claude', 'settings.json');
 
 /** Hook events that may carry a `hookSpecificOutput` payload. */
 const KNOWN_HOOK_EVENTS = [
