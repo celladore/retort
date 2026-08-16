@@ -262,9 +262,20 @@ describe('claude hook output schema', () => {
       (name) => {
         // Arrange
         const rendered = renderHook(name, vars);
+        const stem = basename(name, extname(name));
 
         // Act
         const blocks = extractHookSpecificOutputBlocks(rendered);
+
+        // Assert — session-start hooks must emit at least one payload (they are
+        // wired to SessionStart, which requires additionalContext). If blocks is
+        // empty, the for-loop body never executes and the test passes vacuously.
+        if (stem === 'session-start') {
+          expect(
+            blocks.length,
+            `${name}: session-start must emit at least one hookSpecificOutput payload`
+          ).toBeGreaterThan(0);
+        }
 
         // Assert — this is the exact defect from #192.
         for (const block of blocks) {
