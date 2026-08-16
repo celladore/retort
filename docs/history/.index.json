@@ -73,14 +73,6 @@
       "file": "bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
     },
     {
-      "number": 2,
-      "type": "feature",
-      "title": "Capacity preflight for full test-suite runs",
-      "date": "2026-08-10",
-      "pr": "",
-      "file": "features/0002-2026-08-10-capacity-preflight-for-full-test-suite-runs-feature.md"
-    },
-    {
       "number": 7,
       "type": "bugfix",
       "title": "Real process spawns behind a mocked commandExists",
