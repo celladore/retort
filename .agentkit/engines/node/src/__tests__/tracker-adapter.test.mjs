@@ -21,15 +21,19 @@ vi.mock('../linear-adapter.mjs', () => ({
 const { createAdapter } = await import('../tracker-adapter.mjs');
 
 describe('createAdapter', () => {
+  // Both adapters expose fetchIssues, so asserting that alone cannot tell them
+  // apart — the identity check is what pins each tracker to its own class.
   it('creates a GitHubAdapter for "github" tracker', async () => {
+    const { GitHubAdapter } = await import('../github-adapter.mjs');
     const adapter = await createAdapter('github', '/fake/root');
-    expect(adapter).toBeDefined();
+    expect(adapter).toBeInstanceOf(GitHubAdapter);
     expect(adapter.fetchIssues).toBeDefined();
   });
 
   it('creates a LinearAdapter for "linear" tracker', async () => {
+    const { LinearAdapter } = await import('../linear-adapter.mjs');
     const adapter = await createAdapter('linear', '/fake/root');
-    expect(adapter).toBeDefined();
+    expect(adapter).toBeInstanceOf(LinearAdapter);
     expect(adapter.fetchIssues).toBeDefined();
   });
 

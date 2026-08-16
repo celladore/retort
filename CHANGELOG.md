@@ -24,6 +24,10 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Support for Claude Code, Cursor, Windsurf, Copilot, and MCP/A2A
 - Hook-based safety guardrails
 - Automated quality gates and validation
+- Hook wiring generated from spec ([#575](../../pull/575), [history](docs/history/implementations/0010-2026-08-07-hook-wiring-generated-from-spec-implementation.md))
+- Hook spec validation and windowsFirst emit filter ([#582](../../pull/582), [history](docs/history/features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md))
+- Test-run reconciliation gate ([#589](../../pull/589), [history](docs/history/features/0002-2026-08-11-test-run-reconciliation-gate-feature.md))
+- Native agent dispatch ([#574](../../pull/574), [history](docs/history/features/0003-2026-08-07-native-agent-dispatch-feature.md))
 
 ### Changed
 
@@ -32,8 +36,15 @@ Activate the commit template: `git config commit.template .gitmessage`
 ### Fixed
 
 - SessionStart hook schema and duplicate Python detection ([history](bug-fixes/0001-2026-08-06-sessionstart-hook-schema-and-duplicate-python-detection-bugfix.md))
+- Harden create-doc against a corrupted history index, render PR references as links, and widen numbering validation to all six subdirectories ([#576](../../pull/576), [history](docs/history/bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md))
+- Silently broken CI config defects ([#579](../../pull/579), [history](docs/history/bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md))
+- Generated PowerShell scripts fail to parse under Windows PowerShell 5.1 ([#581](../../pull/581), [history](docs/history/bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md))
+- Real process spawns behind a mocked commandExists ([#590](../../pull/590), [history](docs/history/bug-fixes/0007-2026-08-10-real-process-spawns-behind-a-mocked-commandexists-bugfix.md))
+- Windows test flakiness from subprocess startup cost ([#591](../../pull/591), [history](docs/history/bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md))
+- Tests passing without executing their subject ([#594](../../pull/594), [history](docs/history/bug-fixes/0009-2026-08-11-tests-passing-without-executing-their-subject-bugfix.md))
 
-- (none yet)
+- Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
+- Orphaned hook scripts never wired in generated Claude settings ([#577](../../pull/577), [history](docs/history/bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md))
 
 ### Removed
 

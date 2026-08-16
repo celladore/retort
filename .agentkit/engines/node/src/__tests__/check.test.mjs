@@ -2,8 +2,29 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// runCheck() spawns two processes per step: commandExists() shells out to `where`
+// on Windows, then execCommand() runs the step itself. On the Windows host where
+// this suite flakes, `where` measured 1.2–2.6s per call and `node -e ""` 0.7–1.9s
+// — at idle. The default fixture below builds three steps, so a single runCheck()
+// paid six spawns and 6–12s against a 20s budget, leaving no room for suite
+// contention. None of the assertions here need a real process: they are about
+// which steps get built and how exit codes map to statuses. Stubbing the runner
+// removes every spawn from this file. Real end-to-end execCommand behaviour is
+// covered by runner.test.mjs, which exercises it against actual processes.
+// See ADR-12.
+vi.mock('../runner.mjs', async () => {
+  const actual = await vi.importActual('../runner.mjs');
+  return {
+    ...actual,
+    commandExists: vi.fn(() => true),
+    execCommand: vi.fn(() => ({ exitCode: 0, stdout: '', stderr: '', durationMs: 0 })),
+  };
+});
+
+const { commandExists, execCommand } = await import('../runner.mjs');
+const {
   ALLOWED_FORMATTER_BASES,
   ALLOWED_LINTER_BASES,
   ALLOWED_NPX_PACKAGES,
@@ -13,13 +34,20 @@ import {
   resolveFormatter,
   resolveLinter,
   runCheck,
-} from '../check.mjs';
+} = await import('../check.mjs');
+
+const OK = { exitCode: 0, stdout: '', stderr: '', durationMs: 0 };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PROJECT_ROOT = resolve(AGENTKIT_ROOT, '..');
 
-function createCheckFixture({ withBuild = true, formatter = null, withPrettierBin = false } = {}) {
+function createCheckFixture({
+  withBuild = true,
+  formatter = null,
+  withPrettierBin = false,
+  testCommand = null,
+} = {}) {
   const root = mkdtempSync(resolve(tmpdir(), 'agentkit-check-test-'));
   const agentkitRoot = resolve(root, '.agentkit');
   const projectRoot = resolve(root, 'project');
@@ -37,14 +65,18 @@ function createCheckFixture({ withBuild = true, formatter = null, withPrettierBi
 
   const buildLine = withBuild ? '    buildCommand: "node -e \\\"\\\""\n' : '';
   const formatterLine = formatter ? `    formatter: "${formatter}"\n` : '';
+  // Default to a no-op node one-liner so steps are cheap. Tests that need a
+  // recognisable runner (so resolveCoverageCommand returns a command) override it.
+  const testLine = testCommand
+    ? `    testCommand: ${JSON.stringify(testCommand)}\n`
+    : '    testCommand: "node -e \\\"\\\""\n';
   const teamsYaml = `techStacks:
   - name: test-stack
     detect:
       - package.json
 ${formatterLine}
     typecheck: "node -e \\\"\\\""
-    testCommand: "node -e \\\"\\\""
-${buildLine}`;
+${testLine}${buildLine}`;
 
   writeFileSync(resolve(agentkitRoot, 'spec', 'teams.yaml'), teamsYaml, 'utf-8');
   return { root, agentkitRoot, projectRoot };
@@ -55,6 +87,11 @@ function cleanupFixture(root) {
     rmSync(root, { recursive: true, force: true });
   }
 }
+
+beforeEach(() => {
+  vi.mocked(commandExists).mockReset().mockReturnValue(true);
+  vi.mocked(execCommand).mockReset().mockReturnValue(OK);
+});
 
 describe('runCheck()', () => {
   afterEach(() => {
@@ -128,6 +165,11 @@ describe('runCheck()', () => {
   it('resolves prettier path from agentkitRoot when roots are split', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    // #590 left execCommand real here so the PASS status would prove the resolved
+    // path is executable. The file-wide mock replaces that: the assertion below
+    // reads the command string handed to the runner, which pins the agentkitRoot
+    // path exactly rather than proving that *something* ran. Executing the
+    // fixture's own `process.exit(0)` stub tested Node, not the path resolution.
 
     const fixture = createCheckFixture({
       withBuild: false,
@@ -156,6 +198,39 @@ describe('runCheck()', () => {
 
       const formatStep = result.stacks[0]?.steps.find((step) => step.step === 'format');
       expect(formatStep?.status).toBe('PASS');
+
+      // Assert the split-roots path actually reaches the runner. This is stronger
+      // than the status check alone, which cannot distinguish the agentkitRoot
+      // copy from any other prettier that happened to run.
+      const commands = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(commands).toContain(`node "${expectedPrettierBin}" --check .`);
+    } finally {
+      cleanupFixture(fixture.root);
+    }
+  }, 20_000);
+
+  it('maps a non-zero step exit code to FAIL', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: 'boom',
+      durationMs: 0,
+    });
+
+    const fixture = createCheckFixture({ withBuild: false });
+    try {
+      const result = await runCheck({
+        agentkitRoot: fixture.agentkitRoot,
+        projectRoot: fixture.projectRoot,
+        flags: { fast: true },
+      });
+
+      const testStep = result.stacks[0].steps.find((step) => step.step === 'test');
+      expect(testStep.status).toBe('FAIL');
+      expect(testStep.stderr).toContain('boom');
+      expect(result.overallPassed).toBe(false);
     } finally {
       cleanupFixture(fixture.root);
     }
@@ -410,7 +485,22 @@ describe('runCheck() — additional branches', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
 
-    const fixture = createCheckFixture();
+    // The coverage step has no command-exists guard: whatever
+    // resolveCoverageCommand returns is handed straight to execCommand. The
+    // module-level mock already keeps that from spawning a real coverage run,
+    // whose 300s default timeout would outlast this test's 20s budget; this
+    // return value is what lets parseCoveragePercentage find a number.
+    vi.mocked(execCommand).mockReturnValue({
+      exitCode: 0,
+      stdout: 'All files |   85.5 |',
+      stderr: '',
+      durationMs: 0,
+    });
+
+    // A bare `node -e ""` matches no runner, so resolveCoverageCommand returns
+    // a null command and the coverage step never runs — naming a real runner is
+    // what makes this test exercise coverage at all.
+    const fixture = createCheckFixture({ testCommand: 'npx vitest run' });
     try {
       // project.yaml with coverage threshold
       writeFileSync(
@@ -425,9 +515,15 @@ describe('runCheck() — additional branches', () => {
         flags: { fast: true, coverage: true },
       });
 
-      expect(result).toBeDefined();
-      // The coverage attempt should at least be present in some form
-      expect(Array.isArray(result.coverage)).toBe(true);
+      const executed = vi.mocked(execCommand).mock.calls.map(([command]) => command);
+      expect(executed).toContain('npx vitest run --coverage');
+      expect(result.coverage).toHaveLength(1);
+      expect(result.coverage[0]).toMatchObject({
+        stack: 'test-stack',
+        percentage: 85.5,
+        threshold: 50,
+        status: 'PASS',
+      });
     } finally {
       cleanupFixture(fixture.root);
     }

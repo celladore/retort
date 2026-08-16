@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------
+﻿# ---------------------------------------------------------------------------
 # reset-state.ps1 — Clean stale tasks, archive completed/rejected, validate
 #                   orchestrator state. (Windows PowerShell version)
 #

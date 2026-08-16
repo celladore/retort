@@ -8,10 +8,14 @@ import { existsSync, readFileSync } from 'fs';
 import { parseArgs } from 'node:util';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import {
+  baseFlagTypes,
+  buildParseOptions,
+  CLI_INTERNAL_FLAGS,
+  loadCommandFlags,
+} from './cli-flags.mjs';
 import { VALID_COMMANDS } from './commands-registry.mjs';
-
-// Lazy-loaded after ensureDependencies() — js-yaml may not be installed yet
-let yaml;
+import { findMissingRuntimeDependencies } from './dependency-bootstrap.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,187 +40,10 @@ const WORKFLOW_COMMANDS = ['orchestrate', 'plan', 'check', 'review', 'handoff', 
 // Commands that are slash-command-only (no CLI handler)
 const SLASH_ONLY_COMMANDS = ['project-review', 'scaffold', 'preflight'];
 
-// ---------------------------------------------------------------------------
-// Dynamic flag loading from commands.yaml
-// ---------------------------------------------------------------------------
-// Flags for CLI-internal commands not defined in commands.yaml
-const CLI_INTERNAL_FLAGS = {
-  init: [
-    'repoName',
-    'force',
-    'non-interactive',
-    'ci',
-    'preset',
-    'external-knowledge',
-    'external-mode',
-    'windsurf-guides-path',
-    'mystira-docs-path',
-    'external-markdown-files',
-    'external-git-repos',
-    'external-target-platforms',
-    'config-only',
-    'skip-retortconfig',
-    'write-retortconfig',
-    'help',
-  ],
-  sync: [
-    'overlay',
-    'only',
-    'dry-run',
-    'overwrite',
-    'force',
-    'quiet',
-    'verbose',
-    'no-clean',
-    'diff',
-    'yes',
-    'no-prompt',
-    'help',
-  ],
-  validate: ['auto-task', 'help'],
-  'spec-validate': ['help'],
-  tasks: ['status', 'assignee', 'type', 'priority', 'id', 'process-handoffs', 'help'],
-  delegate: [
-    'to',
-    'title',
-    'description',
-    'type',
-    'priority',
-    'depends-on',
-    'handoff-to',
-    'scope',
-    'help',
-  ],
-  add: ['help'],
-  remove: ['clean', 'help'],
-  list: ['help'],
-  features: ['verbose', 'help'],
-  'analyze-agents': ['output', 'matrix', 'format', 'help'],
-  worktree: ['base', 'no-setup', 'dry-run', 'help'],
-  run: ['id', 'assignee', 'dry-run', 'json', 'help'],
-};
-
-const CLI_INTERNAL_FLAG_TYPES = {
-  // init flags
-  repoName: 'string',
-  preset: 'string',
-  'external-mode': 'string',
-  'windsurf-guides-path': 'string',
-  'mystira-docs-path': 'string',
-  'external-markdown-files': 'string',
-  'external-git-repos': 'string',
-  'external-target-platforms': 'string',
-  'non-interactive': 'boolean',
-  ci: 'boolean',
-  'external-knowledge': 'boolean',
-  'config-only': 'boolean',
-  'skip-retortconfig': 'boolean',
-  'write-retortconfig': 'boolean',
-  // sync flags
-  overlay: 'string',
-  only: 'string',
-  overwrite: 'boolean',
-  force: 'boolean',
-  'dry-run': 'boolean',
-  'no-clean': 'boolean',
-  diff: 'boolean',
-  yes: 'boolean',
-  'no-prompt': 'boolean',
-  // validate flags
-  'auto-task': 'boolean',
-  // tasks flags
-  assignee: 'string',
-  id: 'string',
-  'process-handoffs': 'boolean',
-  // delegate flags
-  to: 'string',
-  title: 'string',
-  description: 'string',
-  type: 'string',
-  priority: 'string',
-  scope: 'string',
-  'depends-on': 'string',
-  'handoff-to': 'string',
-  // remove flags
-  clean: 'boolean',
-  // analyze-agents flags
-  output: 'string',
-  matrix: 'string',
-  format: 'string',
-  // worktree flags
-  base: 'string',
-  'no-setup': 'boolean',
-  json: 'boolean',
-};
-
-/**
- * Load command flag definitions from commands.yaml.
- * Returns { validFlags, flagTypes } merged with CLI-internal definitions.
- */
-function loadCommandFlags(agentkitRoot) {
-  const validFlags = { ...CLI_INTERNAL_FLAGS };
-  const flagTypes = {
-    help: 'boolean',
-    quiet: 'boolean',
-    verbose: 'boolean',
-    ...CLI_INTERNAL_FLAG_TYPES,
-  };
-
-  const specPath = resolve(agentkitRoot, 'spec', 'commands.yaml');
-  if (!existsSync(specPath)) return { validFlags, flagTypes };
-
-  try {
-    const raw = readFileSync(specPath, 'utf-8');
-    const spec = yaml.load(raw);
-    if (!spec?.commands || !Array.isArray(spec.commands)) return { validFlags, flagTypes };
-
-    for (const cmd of spec.commands) {
-      if (!cmd.name || !Array.isArray(cmd.flags)) continue;
-      const names = [];
-      for (const flag of cmd.flags) {
-        const name = (flag.name || '').replace(/^--/, '');
-        if (!name) continue;
-        names.push(name);
-        const yamlType = (flag.type || 'string').toLowerCase();
-        const parseType = yamlType === 'boolean' ? 'boolean' : 'string';
-        if (!flagTypes[name]) flagTypes[name] = parseType;
-      }
-      if (!names.includes('help')) names.push('help');
-      const existing = validFlags[cmd.name] ?? [];
-      validFlags[cmd.name] = [...new Set([...existing, ...names])];
-    }
-  } catch {
-    // If YAML parsing fails, fall back to whatever we have
-  }
-
-  // Self-validation: ensure every flag in validFlags has a type in flagTypes.
-  // 'status' is special-cased in parseFlags and doesn't need a FLAG_TYPES entry.
-  const specialCased = new Set(['status']);
-  for (const [cmd, flags] of Object.entries(validFlags)) {
-    for (const flag of flags) {
-      if (!flagTypes[flag] && !specialCased.has(flag)) {
-        console.warn(
-          `[retort] Warning: flag "--${flag}" is listed for command "${cmd}" ` +
-            `but has no type definition. Add it to CLI_INTERNAL_FLAG_TYPES or commands.yaml.`
-        );
-      }
-    }
-  }
-
-  return { validFlags, flagTypes };
-}
-
-// Populated lazily in main() after ensureDependencies + yaml import
+// Populated lazily in main() after ensureDependencies + commands.yaml load
 let VALID_FLAGS = { ...CLI_INTERNAL_FLAGS };
-let FLAG_TYPES = {
-  help: 'boolean',
-  quiet: 'boolean',
-  verbose: 'boolean',
-  ...CLI_INTERNAL_FLAG_TYPES,
-};
+let FLAG_TYPES = baseFlagTypes();
 
-// Global flags that apply to all commands
-const GLOBAL_FLAGS = ['help', 'quiet', 'verbose'];
 const args = process.argv.slice(2);
 const command = args[0];
 // Strip the bare `--` separator injected by `npm run`/`pnpm run` when the
@@ -227,31 +54,7 @@ if (commandArgs[0] === '--') commandArgs = commandArgs.slice(1);
 
 function parseFlags(command, args) {
   try {
-    // Scope options to flags valid for this command plus global flags
-    const commandFlags = VALID_FLAGS[command] ?? [];
-    const allFlags = new Set([...GLOBAL_FLAGS, ...commandFlags]);
-
-    const options = {};
-    for (const flagName of allFlags) {
-      // --status is handled separately with a command-specific type
-      if (flagName === 'status') continue;
-      const type = FLAG_TYPES[flagName];
-      if (!type) {
-        throw new Error(
-          `Internal CLI configuration error: flag "--${flagName}" is listed as valid for ` +
-            `command "${command}" but has no entry in FLAG_TYPES.`
-        );
-      }
-      options[flagName] = { type };
-      if (flagName === 'quiet') options[flagName].short = 'q';
-      if (flagName === 'verbose') options[flagName].short = 'v';
-    }
-
-    // Only add --status for commands that support it, with the correct type:
-    // orchestrate: boolean flag, tasks: string value
-    if (commandFlags.includes('status')) {
-      options.status = { type: command === 'orchestrate' ? 'boolean' : 'string' };
-    }
+    const options = buildParseOptions(command, VALID_FLAGS, FLAG_TYPES);
 
     const { values, positionals, tokens } = parseArgs({
       args,
@@ -360,6 +163,12 @@ Task Delegation:
 Diagnostics:
   doctor          Run Retort diagnostics and setup checks
                   --verbose         Include detailed diagnostics
+  harness doctor  Verify the vendored Agent Harnessing contract lock and schema
+  harness validate --document <path>
+                  Validate a contract document offline against the pinned schema
+  harness options:
+                  --document <path> Document to validate (validate only)
+                  --json            Emit machine-readable output (both actions)
 
 Backlog & Issue Tracking:
   import-issues   Import issues from external tracker into local backlog
@@ -444,20 +253,20 @@ Environment:
 }
 
 function ensureDependencies(agentkitRoot) {
-  const jsYamlPath = resolve(agentkitRoot, 'node_modules', 'js-yaml', 'package.json');
-  if (existsSync(jsYamlPath)) {
-    return true;
-  }
   const pkgPath = resolve(agentkitRoot, 'package.json');
   if (!existsSync(pkgPath)) {
     return true;
   }
+  const missingDependencies = findMissingRuntimeDependencies(agentkitRoot);
+  if (missingDependencies.length === 0) return true;
+
   const hasPnpm =
     spawnSync('pnpm', ['--version'], { encoding: 'utf8', windowsHide: true }).status === 0;
   const installCmd = hasPnpm ? 'pnpm' : 'npm';
   const installArgs = hasPnpm ? ['install'] : ['install'];
   console.warn(
-    `[retort] Dependencies not installed. Running ${installCmd} install in .agentkit...`
+    `[retort] Missing dependencies (${missingDependencies.join(', ')}). ` +
+      `Running ${installCmd} install in .agentkit...`
   );
   const r = spawnSync(installCmd, installArgs, {
     cwd: agentkitRoot,
@@ -496,8 +305,7 @@ async function main() {
     process.exit(1);
   }
 
-  yaml = (await import('js-yaml')).default;
-  const loaded = loadCommandFlags(AGENTKIT_ROOT);
+  const loaded = await loadCommandFlags(AGENTKIT_ROOT);
   VALID_FLAGS = loaded.validFlags;
   FLAG_TYPES = loaded.flagTypes;
 
@@ -602,6 +410,16 @@ async function main() {
       case 'doctor': {
         const { runDoctor } = await import('./doctor.mjs');
         const result = await runDoctor({
+          agentkitRoot: AGENTKIT_ROOT,
+          projectRoot: PROJECT_ROOT,
+          flags,
+        });
+        if (!result.ok) process.exit(1);
+        break;
+      }
+      case 'harness': {
+        const { runHarness } = await import('./harness-contract.mjs');
+        const result = await runHarness({
           agentkitRoot: AGENTKIT_ROOT,
           projectRoot: PROJECT_ROOT,
           flags,

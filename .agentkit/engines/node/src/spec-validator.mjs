@@ -7,7 +7,16 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import yaml from 'js-yaml';
 import { resolve } from 'path';
 import { validateAffectsTemplates, validateFeatureSpec } from './feature-manager.mjs';
+import { SAFE_HOOK_STEM } from './fs-utils.mjs';
 import { VALID_TASK_TYPES } from './task-types.mjs';
+import {
+  AGENT_ISOLATION_MODES,
+  AGENT_NAME_PATTERN,
+  AGENT_TOOLS_MODES,
+  DISPATCH_MODES,
+  MAX_SUBAGENT_SPAWN_DEPTH,
+  MIN_SUBAGENT_SPAWN_DEPTH,
+} from './var-builders.mjs';
 
 // ---------------------------------------------------------------------------
 // Schema definitions (lightweight — no external deps needed)
@@ -61,6 +70,18 @@ function validate(value, schema, path = '') {
       for (const [key, propSchema] of Object.entries(schema.properties)) {
         errors.push(...validate(value[key], propSchema, `${path}.${key}`));
       }
+      // Opt-in, so every existing schema keeps accepting keys it does not
+      // declare. Set it only where an unrecognised key means a typo rather
+      // than an extension point: silently ignoring one is how a mis-keyed
+      // hook event vanishes from generated wiring without a word.
+      if (schema.additionalProperties === false) {
+        const declared = Object.keys(schema.properties);
+        for (const key of Object.keys(value)) {
+          if (!declared.includes(key)) {
+            errors.push(`${path}.${key}: unknown key (expected one of [${declared.join(', ')}])`);
+          }
+        }
+      }
     }
   }
 
@@ -70,6 +91,10 @@ function validate(value, schema, path = '') {
 
   if (schema.minLength && typeof value === 'string' && value.length < schema.minLength) {
     errors.push(`${path}: must be at least ${schema.minLength} characters`);
+  }
+
+  if (schema.pattern && typeof value === 'string' && !schema.pattern.test(value)) {
+    errors.push(`${path}: "${value}" must match ${schema.pattern}`);
   }
 
   return errors;
@@ -116,6 +141,63 @@ const agentSchema = {
     responsibilities: { type: 'array', required: true, items: { type: 'string' } },
   },
 };
+
+/**
+ * Schema for the optional per-agent `dispatch` block (ADR-15). Every field is
+ * optional; the block itself is optional.
+ */
+const agentDispatchSchema = {
+  type: 'object',
+  properties: {
+    'when-to-use': { type: 'string' },
+    'can-dispatch': { type: 'boolean' },
+    'tools-mode': { type: 'string', enum: AGENT_TOOLS_MODES },
+    model: { type: 'string' },
+    isolation: { type: 'string', enum: AGENT_ISOLATION_MODES },
+    background: { type: 'boolean' },
+    color: { type: 'string' },
+  },
+};
+
+/**
+ * Validates the parts of an agent that decide whether Claude Code can register
+ * and launch it. These are the failure modes that produce a file which looks
+ * correct and registers as nothing, or a subagent that launches with no tools.
+ */
+function validateAgentDispatch(agent, category) {
+  const errors = [];
+  if (!agent || typeof agent !== 'object') return errors;
+
+  const where = `agents.yaml: agent "${agent.id}"`;
+
+  // `name:` in the emitted frontmatter is the agent id. Claude Code silently
+  // skips a file whose name breaks this pattern, logging only to the debug log.
+  if (typeof agent.id === 'string' && !AGENT_NAME_PATTERN.test(agent.id)) {
+    errors.push(
+      `${where} (category "${category}") id must match ${AGENT_NAME_PATTERN} to be dispatchable — ` +
+        'Claude Code skips agent files with a non-conforming name'
+    );
+  }
+
+  const dispatch = agent.dispatch;
+  if (dispatch === undefined || dispatch === null) return errors;
+
+  errors.push(...validate(dispatch, agentDispatchSchema, `${where} dispatch`));
+
+  // An allowlist that resolves to nothing emits `tools:` with no tools, and the
+  // subagent fails at its first tool call rather than at sync time.
+  if (dispatch['tools-mode'] === 'allowlist') {
+    const preferred = agent['preferred-tools'] || agent.tools;
+    if (!Array.isArray(preferred) || preferred.filter(Boolean).length === 0) {
+      errors.push(
+        `${where} sets dispatch.tools-mode: allowlist but has no preferred-tools — ` +
+          'an empty allowlist launches the subagent with no tools'
+      );
+    }
+  }
+
+  return errors;
+}
 
 // ---------------------------------------------------------------------------
 // Schema: commands.yaml
@@ -262,6 +344,30 @@ const ruleDomainSchema = {
 // ---------------------------------------------------------------------------
 // Schema: settings.yaml
 // ---------------------------------------------------------------------------
+/**
+ * One entry in `preToolUse` / `postToolUse`. `hook` names a script by stem;
+ * `matcher` is the regex tested against the tool name and is optional.
+ *
+ * buildHooksFromSpec() skips an entry whose `hook` is missing or unnamed rather
+ * than throwing, so without this schema a `hoook:` typo produced a settings.json
+ * quietly missing that guard. additionalProperties catches exactly that.
+ */
+const hookEntrySchema = {
+  type: 'object',
+  properties: {
+    matcher: { type: 'string', minLength: 1 },
+    hook: { type: 'string', required: true, minLength: 1, pattern: SAFE_HOOK_STEM },
+  },
+  additionalProperties: false,
+};
+
+/**
+ * The `hooks:` block was `{ type: 'object' }` — validated as "is an object" and
+ * nothing more, which is how the spec and the hook templates drifted apart
+ * unnoticed. Each lifecycle event is now checked for shape, and an unknown key
+ * is an error: a mis-keyed event (`preToolUsage:`) would otherwise be dropped in
+ * silence, emitting settings.json with that guard simply absent.
+ */
 const settingsSchema = {
   type: 'object',
   properties: {
@@ -273,7 +379,24 @@ const settingsSchema = {
         deny: { type: 'array', required: true, items: { type: 'string' } },
       },
     },
-    hooks: { type: 'object', required: true },
+    hooks: {
+      type: 'object',
+      required: true,
+      properties: {
+        sessionStart: { type: 'string', minLength: 1, pattern: SAFE_HOOK_STEM },
+        stop: { type: 'string', minLength: 1, pattern: SAFE_HOOK_STEM },
+        preToolUse: { type: 'array', items: hookEntrySchema },
+        postToolUse: { type: 'array', items: hookEntrySchema },
+      },
+      additionalProperties: false,
+    },
+    // ADR-15 §6 — which delegation backend the generated commands describe
+    dispatch: {
+      type: 'object',
+      properties: {
+        mode: { type: 'string', enum: DISPATCH_MODES },
+      },
+    },
   },
 };
 
@@ -1203,6 +1326,22 @@ export function validateSpec(agentkitRoot) {
     if (teams.intake !== undefined && teams.intake !== null) {
       errors.push(...validate(teams.intake, teamsIntakeSchema, 'teams.yaml.intake'));
     }
+    // Nested subagent contexts (ADR-15 §4) — deliberately not derived from
+    // max-handoff-chain-depth, whose cost is additive rather than multiplicative.
+    const spawnDepth = teams['max-subagent-spawn-depth'];
+    const spawnDepthErrors = validate(
+      spawnDepth,
+      { type: 'number', min: MIN_SUBAGENT_SPAWN_DEPTH, max: MAX_SUBAGENT_SPAWN_DEPTH },
+      'teams.yaml.max-subagent-spawn-depth'
+    );
+    if (spawnDepthErrors.length === 0 && spawnDepth !== undefined && spawnDepth !== null) {
+      if (!Number.isInteger(spawnDepth)) {
+        spawnDepthErrors.push(
+          `teams.yaml.max-subagent-spawn-depth: must be an integer, got ${spawnDepth}`
+        );
+      }
+    }
+    errors.push(...spawnDepthErrors);
   }
 
   // Validate agents.yaml
@@ -1219,6 +1358,7 @@ export function validateSpec(agentkitRoot) {
           errors.push(
             ...validate(agentList[i], agentSchema, `agents.yaml.agents.${category}[${i}]`)
           );
+          errors.push(...validateAgentDispatch(agentList[i], category));
         }
       }
     }

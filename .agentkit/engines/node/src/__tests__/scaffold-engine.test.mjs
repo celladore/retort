@@ -128,6 +128,21 @@ describe('writeScaffoldOutputs', () => {
     expect(content).toBe('# New File\n');
   });
 
+  it('writes ordinary .ps1 scaffold output with a BOM and hashes the written bytes', async () => {
+    const content = '#!/usr/bin/env pwsh\nWrite-Host "done — safely"\n';
+    const srcFile = join(tmpDir, 'scripts', 'normal.ps1');
+    writeSync(srcFile, content);
+    const newManifestFiles = { 'scripts/normal.ps1': { hash: sha256(content) } };
+
+    const { count } = await run({ allTmpFiles: [srcFile], newManifestFiles });
+
+    expect(count).toBe(1);
+    const written = await readFile(join(projectRoot, 'scripts', 'normal.ps1'));
+    expect(written.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(written.toString('utf-8').slice(1)).toBe(content);
+    expect(newManifestFiles['scripts/normal.ps1'].hash).toBe(sha256(written));
+  });
+
   it('returns count=0 when no files are provided', async () => {
     const { count, writtenFiles } = await run({ allTmpFiles: [] });
     expect(count).toBe(0);
@@ -183,9 +198,10 @@ describe('writeScaffoldOutputs', () => {
     const { count, writtenFiles } = await run({ allTmpFiles: [srcFile], newManifestFiles });
 
     expect(count).toBe(0);
-    // writtenFiles still contains the file so runPostSyncPrettier can format it
-    // (guards files written before post-sync formatting was introduced)
-    expect(writtenFiles).toEqual([destFile]);
+    // Unchanged files are not queued for formatting: temp output is already
+    // formatted before this step, so a hash match means the file on disk is
+    // correct. Queueing it would rewrite identical bytes and bump mtime.
+    expect(writtenFiles).toEqual([]);
   });
 
   it('overwrites when --force flag is set regardless of scaffold:once', async () => {

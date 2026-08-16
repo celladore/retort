@@ -1,119 +1,83 @@
 # .readme.yaml Convention
 
-Every documented component carries two files:
+`.readme.yaml` is a **directory exploration map**. An agent with no LSP / Serena
+reads it instead of listing the tree or parsing `README.md`.
 
-- `README.md` — human-readable prose
-- `.readme.yaml` — agent-readable structured metadata
+It is not a conversion of the README. Compact YAML for durable documents is
+`{stem}.agent.yaml` (`skills/md-agent-yaml/schema.yaml`). Do not mix the shapes.
 
-The `.readme.yaml` exists so that agents can scan the workspace quickly without parsing
-markdown prose. It is the machine-readable source of truth for what a component is,
-its stack, status, and key contacts.
+Machine schema: `readme-yaml.schema.yaml` (`schema: readme-map/v1`).
 
-## Required Fields
+## Two kinds
+
+**Index** (`apps/`, `packages/`, repo root of a monorepo): lists `children` so the
+next hop is obvious.
+
+**Leaf** (one app, package, or service): `entry_points` and `skip` so the agent
+opens the right file instead of crawling.
+
+A child listed on an index does not need its own `.readme.yaml` until that
+directory itself needs a further map.
+
+## Required fields
+
+| Field          | Index           | Leaf            |
+| -------------- | --------------- | --------------- |
+| `schema`       | `readme-map/v1` | `readme-map/v1` |
+| `kind`         | `index`         | `leaf`          |
+| `purpose`      | yes             | yes             |
+| `children`     | yes             | no              |
+| `entry_points` | optional        | yes             |
+| `skip`         | recommended     | recommended     |
+| `last_synced`  | yes             | yes             |
+
+Optional on either: `name`, `type`, `stack`, `status`, `owner`, `depends_on`,
+`deployment`. Those help orientation; they do not replace `children` / `entry_points`.
+
+## Index example
 
 ```yaml
-name: string # Same as the directory/package name
-type: string # app | library | package | service | infrastructure | tool
-description: string # One sentence. What does this do?
-status: string # active | deprecated | experimental | archived
-stack: [string] # e.g. [dotnet, csharp, ef-core] or [typescript, react, vite]
-owner: string # GitHub handle or team name
+schema: readme-map/v1
+kind: index
+name: apps
+purpose: 'Application projects for the Mystira platform'
+children:
+  - name: publisher
+    path: apps/publisher
+    stack: typescript
+    description: 'Publisher frontend SPA'
+  - name: identity
+    path: apps/identity
+    stack: dotnet
+    description: 'Identity/auth service'
+skip:
+  - publish
+last_synced: '2026-08-14'
 ```
 
-## Full Schema
+## Leaf example
 
 ```yaml
-name: mystira-app-pwa
-type: app
-description: 'Blazor WebAssembly PWA — the main player-facing client application.'
-status: active
-stack:
-  - dotnet
-  - blazor
-  - webassembly
-  - pwa
-owner: phoenixvc
-
-# Optional but recommended
-version: '1.0.0'
-repo: https://github.com/phoenixvc/mystira-workspace
-path: apps/app/src/Mystira.App.PWA
-
-# Relationships
-depends_on:
-  - name: Mystira.App.Core
-    type: package
-    local: true
-  - name: Mystira.App.API
-    type: service
-    local: true
-
-# Deployment (services/apps)
-deployment:
-  environment: azure-static-web-apps
-  url: https://app.mystira.io
-  ci_workflow: .github/workflows/deploy-app.yml
-
-# Docs
-docs:
-  adr_dir: docs/architecture/decisions
-  history_dir: docs/history
-  prd_dir: docs/product/prd
-
-# Deprecation (if status: deprecated)
-deprecated:
-  reason: 'Replaced by apps/publisher'
-  successor: apps/publisher
-  deadline: '2026-06-01'
-```
-
-## Examples by Component Type
-
-### Library / Package
-
-```yaml
+schema: readme-map/v1
+kind: leaf
 name: shared-ts
+purpose: 'Shared TypeScript utilities — dates, errors, validation.'
 type: package
-description: 'Shared TypeScript utilities — date formatting, error types, validation helpers.'
-status: active
 stack: [typescript]
-owner: phoenixvc
-version: '2.3.1'
+entry_points:
+  - src/index.ts
+skip:
+  - dist
+  - node_modules
+last_synced: '2026-08-14'
 ```
 
-### .NET API Service
+## Explorer rule
 
-```yaml
-name: Mystira.App.API
-type: service
-description: 'Main application REST API — story sessions, user profiles, AI companion.'
-status: active
-stack: [dotnet, csharp, ef-core, postgresql]
-owner: phoenixvc
-deployment:
-  environment: azure-container-apps
-  url: https://api.mystira.io
-  ci_workflow: .github/workflows/deploy-api.yml
-depends_on:
-  - name: Mystira.App.Core
-    type: package
-    local: true
-  - name: Mystira.App.Infrastructure.Data
-    type: package
-    local: true
-```
-
-### Infrastructure Module
-
-```yaml
-name: infra-identity
-type: infrastructure
-description: 'Terraform module provisioning Azure resources for the identity service.'
-status: active
-stack: [terraform, azure]
-owner: phoenixvc
-path: infra/modules/identity
-```
+1. Read `.readme.yaml` in the current directory (or the nearest ancestor).
+2. Follow `children` or open `entry_points`.
+3. Do not recurse into `skip`.
+4. Use LSP / Serena only after the map has pointed at a symbol or file.
 
 ## ADR Format
 

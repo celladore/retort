@@ -184,7 +184,7 @@ Session knowledge capture agent activated via `/review --focus=retrospective`. E
 
 Kit feature management agent that helps teams choose, configure, and audit feature presets. Activated via `/feature-configure`, `/feature-flow`, and `/feature-review`.
 
-#### When these branches merge, update:
+#### When these branches merge, update
 
 1. The agent count heading from "19" to "21"
 2. Add a "Feature Management" category (1 agent) to the category tables

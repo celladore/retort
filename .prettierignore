@@ -12,6 +12,7 @@ yarn.lock
 # Generated root docs managed by agentkit:sync
 AGENTS.md
 COMMAND_GUIDE.md
+CLAUDE.md
 
 # Template files — contain Handlebars syntax that Prettier may reformat
 # (#419: YAML templates use {{...}} blocks that are invalid YAML/Prettier syntax)
@@ -28,7 +29,8 @@ COMMAND_GUIDE.md
 .claude/commands/**
 .claude/agents/**
 .claude/skills/**
-.claude/rules/languages/**
+.claude/rules/**
+.claude/settings.json
 .agents/skills/**
 .cursor/rules/**
 .cursor/rules/languages/**
@@ -58,3 +60,12 @@ COMMAND_GUIDE.md
 # Runtime state — generated at runtime, not source files
 .claude/state/**
 .agentkit/state/**
+
+# Immutable canonical contract snapshots retain org-meta byte formatting
+.agentkit/contracts/*.schema.json
+
+# Local assistant/tool metadata
+.serena/**
+
+# Python scripts — Prettier does not parse Python
+*.py

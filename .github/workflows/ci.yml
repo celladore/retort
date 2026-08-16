@@ -10,12 +10,32 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# Branch protection depends on these check names. If you rename a job's `name:`
-# field, update branch protection rules for dev and main to match.
-# Current required checks: Test, Validate, YAML Lint,
-# branch-rules (from branch-protection.yml).
-# Quality checks (Markdown Lint, Prettier) are in quality-lint.yml —
-# required on main, warning-only on dev.
+# Branch protection depends on these check names. A required context is the job's
+# `name:` — or its job id when `name:` is omitted — never "Workflow / Job" (that
+# form is only for reusable workflows called via `uses:` at job level). A context
+# that never matches can never go green, which blocks every PR to the branch.
+#
+# The required set is declared in .agentkit/spec/project.yaml under
+# branchProtection.requiredStatusChecks and applied by the generated
+# .github/scripts/setup-branch-protection.sh — update the spec, not this comment,
+# then re-run that script.
+#
+# Current required checks: Test (below), Validate (below), Prettier (below),
+# branch-rules (branch-protection.yml — job id, no `name:` field).
+#
+# `Prettier` (below) moved here from the Vitest suite (ADR-12 decision 3) and was
+# promoted to a required check once it was confirmed reliably green. Note that a
+# repo-wide `prettier --check .` run from inside a `.claude/worktrees/` agent
+# worktree on Windows reports ~18 false positives: the harness seeds `.claude/**`
+# and `CLAUDE.md` with CRLF, bypassing the `eol=lf` filters in .gitattributes.
+# Those never reach CI — `text eol=lf` normalises CRLF→LF on staging — so a red
+# Prettier job here is a genuine formatting regression, not that artifact.
+#
+# `Quarantined Tests` (below) is NOT a required check by design (ADR-12
+# decision 5): a quarantined test is a known flake with a tracking issue, so it
+# must stay visible without blocking merges. If it were required, quarantine
+# would be indistinguishable from leaving the flake in the blocking suite.
+# Markdown Lint lives in quality-lint.yml — required on main, warning-only on dev.
 jobs:
   test:
     name: Test
@@ -39,6 +59,30 @@ jobs:
 
       - name: Run tests with coverage
         run: pnpm coverage
+        working-directory: .agentkit
+
+      # Machine-readable per-test results (ADR-12 decision 5). Console scrollback
+      # is not inspectable after the fact; these are. Uploaded before the
+      # reconciliation gate so the evidence survives a failing gate.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: test-results
+          path: .agentkit/test-results/
+          retention-days: 14
+          if-no-files-found: warn
+
+      # A Vitest run can drop tests and still print a passing summary: when a
+      # worker dies mid-file, the tests it had collected stay in the reported
+      # total but land in none of the pass/fail/skip buckets. One observed run
+      # printed "Tests 2273 passed | 1 skipped (2327)" — 53 tests and a whole
+      # file silently gone, with Vitest's own warning that this "might cause
+      # false positive tests". This step fails when the outcomes do not add up.
+      # A run that does not reconcile is void, not green.
+      - name: Reconcile test results
+        if: always()
+        run: pnpm test:reconcile
         working-directory: .agentkit
 
       - name: Coverage summary
@@ -176,3 +220,77 @@ jobs:
             echo "Checking $f..."
             SPEC_FILE="$f" node --input-type=module -e "import yaml from 'js-yaml'; import fs from 'fs'; yaml.load(fs.readFileSync(process.env.SPEC_FILE,'utf8'));"
           done
+
+  # Runs only the files listed in .agentkit/test-quarantine.json — confirmed
+  # flakes, each with a tracking issue, excluded from the blocking `Test` job.
+  # Exits immediately when the registry is empty, which is the healthy state.
+  # Non-blocking: the point of quarantine is to keep a known flake visible
+  # without letting it corrupt the merge signal (ADR-12 decision 5).
+  quarantined-tests:
+    name: Quarantined Tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+          cache-dependency-path: .agentkit/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .agentkit
+
+      - name: Run quarantined tests
+        run: pnpm test:quarantine
+        working-directory: .agentkit
+
+      - name: Upload quarantined test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quarantined-test-results
+          path: .agentkit/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+          cache-dependency-path: .agentkit/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .agentkit
+
+      # Whole-repo format check. This used to live in the Vitest suite
+      # (prettier.test.mjs), where it scanned the entire repository from inside
+      # the unit run — ~90s of runtime that raced with the sync-heavy suites
+      # creating and deleting files mid-scan. That test carried an explicit
+      # retry-once workaround documenting exactly that race. A format check is
+      # lint, not a unit test; it belongs here. See ADR-12 decision 3.
+      # Runs from the repository root, not .agentkit: Prettier resolves
+      # .prettierignore relative to the working directory, so invoking it from
+      # .agentkit would silently ignore the root .prettierignore and start
+      # flagging pnpm-lock.yaml and friends.
+      - name: Check formatting
+        run: node .agentkit/node_modules/prettier/bin/prettier.cjs --check .
