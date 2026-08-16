@@ -324,6 +324,104 @@ closes the PR #584 repeatability gate on the environment that exposed the defect
 claim that every remaining Windows-only contention source in the wider suite has been
 eliminated.
 
+## Revision (2026-08-10): host capacity is a precondition, not a test result
+
+Two host limits produce failures indistinguishable from flaky application code. Neither names
+itself in its own error output, and both invalidate the run rather than degrading it — a suite
+started below either floor is not reporting on the code. They are recorded here as decision 7
+and implemented as a preflight that refuses to start a full run.
+
+### Headroom 1 — disk
+
+Sampling free space every 30 seconds through a full run shows it drop about **27 GiB below
+idle and then hold flat**. Fixture trees are created and reclaimed continuously, so this is a
+**steady-state working set, not a leak** — the distinction matters, because a leak would be
+fixable and a working set is not.
+
+A run started with **17.4 GiB free produced `ENOSPC`**, and the symptom was that **every test
+file failed to load**. That reads as catastrophic breakage rather than as a full disk, which is
+why it was misdiagnosed. It also means failure counts from such a run describe disk state, not
+code state — the same caution the 2026-08-08 revision records for the 126 stranded fixture
+trees, but arising from the working set itself rather than from the cleanup defect.
+
+**A run starting below roughly 30 GiB free cannot produce a valid result.** That is the floor:
+27 GiB measured, plus margin.
+
+### Headroom 2 — memory commit
+
+The host has 32 GiB of RAM and had, at the time of this observation, a **fixed 8 GiB page file**
+(it has since been reconfigured — see the correction below). A full run forks a worker per
+test file, and committed memory across that fleet can exceed physical plus page file **even
+while physical RAM still looks free** — Windows charges commit at reservation time, not at
+first touch. When the commit limit is reached, forks die:
+
+- `ERR_DLOPEN_FAILED` loading `@rollup/rollup-win32-x64-msvc`, caused by "The paging file is
+  too small for this operation to complete"
+- `Worker exited unexpectedly`, in a separate run
+
+Both point at a dependency or at Vitest. Neither mentions memory.
+
+The discriminating diagnostic is `Win32_PageFileUsage`: `AllocatedBaseSize` against
+`PeakUsage`. A peak **far below** the allocation — 160 MiB against 8 GiB here — means the
+ceiling being hit is the **commit limit**, not the page file's working size. The page file looks
+idle precisely because processes died at reservation time, before touching pages. Growing it
+therefore buys real headroom despite appearing unused.
+
+#### Correction: the page file is not static, and the two limits are coupled
+
+Implementing the preflight surfaced an error in the framing above. `AllocatedBaseSize` is the
+page file's size **at the moment of reading**, not its configuration, and
+`AutomaticManagedPagefile: false` means "not system-managed" — **not** "fixed". The development
+host is configured `InitialSize` 8 GiB / `MaximumSize` 24 GiB (`Win32_PageFileSetting`), so the
+file grows on demand and the commit limit rises with it. Successive readings during this work
+showed 8, 17.1 and 24 GiB.
+
+Two consequences the original framing missed:
+
+1. **Instantaneous available commit understates headroom.** A first implementation read
+   `FreeVirtualMemory` alone and reported 0.6 GiB available — a failure — on a host with 16 GiB
+   of unclaimed page-file growth. Pending growth must be counted.
+2. **Growth is paid for in disk, on the volume the fixtures need.** In one session free disk
+   fell 19.9 → 8.4 GiB as the page file expanded, then recovered when it shrank. Headroom 1 and
+   Headroom 2 are therefore not independent: a low-disk host cannot grow its way out of commit
+   pressure, and a host that passes the disk check at start can fail it mid-run.
+
+The preflight credits pending page-file growth toward available commit, capped by free disk
+**headroom remaining above the fixture floor** (the 30 GiB steady-state working set), and judges
+page-file configuration by its **maximum** rather than its current size.
+
+### Decision 7 — fail fast on insufficient capacity
+
+`scripts/preflight-capacity.mjs` checks free disk and available commit before a full run and
+exits non-zero naming the shortfall. It is wired into `pnpm test` and `pnpm test:coverage`, and
+runs advisorily in CI under a lighter profile — hosted runners have far less disk, no Windows
+commit limit to speak of, and the suite is green there.
+
+| Threshold           | `full` | `ci`   | Provenance                                               |
+| ------------------- | ------ | ------ | -------------------------------------------------------- |
+| Free disk           | 30 GiB | 8 GiB  | Measured — 27 GiB working set plus margin                |
+| Available commit    | 12 GiB | 4 GiB  | **Provisional** — no sampled peak-commit figure exists   |
+| Page-file max < RAM | advice | advice | Structural: the configured maximum caps the commit limit |
+
+Available commit is free commit **plus** unclaimed page-file growth, capped by free disk headroom
+remaining above the 30 GiB fixture floor — see the correction above.
+
+The asymmetry is deliberate and worth stating rather than smoothing over. The disk floor is
+empirical, in the same class as the sync measurement this ADR has learned to trust. The commit
+floor is **not** — it is the smallest value that passes on an idle host with a reasonable page
+file while failing fast on a loaded one. It should be tightened when a peak-commit sample
+exists. Thresholds are overridable per host (`RETORT_PREFLIGHT_MIN_FREE_DISK_GB`,
+`RETORT_PREFLIGHT_MIN_COMMIT_GB`) and the whole check is skippable
+(`RETORT_PREFLIGHT_SKIP=1`).
+
+**Recommendation for Windows development hosts:** set the page file to system-managed, or fix
+it at no less than physical RAM. The preflight raises this as an advisory rather than a failure,
+since the right value depends on the host and on what else runs there.
+
+Thresholds, diagnostic commands, and a symptom-to-cause table live in
+[docs/engineering/15_test_capacity_preflight.md](../../engineering/15_test_capacity_preflight.md),
+so the next person seeing a moving failure set checks capacity before reading stack traces.
+
 ### The criterion does not hold on merged `dev`
 
 Re-running the gate on 2026-08-09 against `dev` at `6848f3f7` — that is, after #584 merged and

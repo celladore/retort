@@ -11,4 +11,5 @@
 - [03_changelog.md](./03_changelog.md)
 - [04_contributing.md](./04_contributing.md)
 - [05_project_yaml_reference.md](./05_project_yaml_reference.md)
-- [ai_handoffs/](./ai_handoffs/)
+
+Session handoff documents live in their own top-level category: [../handoffs/](../handoffs/).

@@ -89,13 +89,11 @@ project that has such an agent, defer to it for this information rather than gen
 
 ### Cached Metadata Locations
 
-<!-- TODO: Document where the project's cached structural metadata lives — .readme.yaml
-     files, CLAUDE.md indexes, Serena project memory files. Reading these first avoids
-     redundant Serena calls for already-documented structure.
+Read `.readme.yaml` before any LSP/Serena call. Index files list `children`; leaf
+files list `entry_points` and `skip`. Schema:
+`skills/doc-agent/references/readme-yaml-convention.md`.
 
-     Implemented for: mystira-workspace → .claude/agents/mystira-explorer.md
-     § "Orientation: Read Metadata First" (repo root .readme.yaml, apps/.readme.yaml,
-       packages/.readme.yaml) + ~/.serena/memories/ for cross-session Serena memory -->
+Mystira: repo root, `apps/.readme.yaml`, `packages/.readme.yaml`.
 
 _Not populated. Metadata cache locations are project-specific._
 

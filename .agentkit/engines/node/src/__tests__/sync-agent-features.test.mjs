@@ -264,13 +264,18 @@ describe('P0 + P2 Integration: sync generates agent personas and shared sections
     expect(teamProduct).toContain('**Role:**');
   });
 
-  it('team-backend.md does NOT contain agent personas (no backend agent category)', () => {
+  it('team-backend.md resolves its persona by agent id when no category matches', () => {
     const teamBackend = readFileSync(
       resolve(projectRoot, '.claude', 'commands', 'team-backend.md'),
       'utf-8'
     );
 
-    expect(teamBackend).not.toContain('## Agent Personas');
+    // There is no `backend` agent *category* — the agent lives under
+    // `engineering` with the id `backend`. This previously left the team with no
+    // personas at all, which resolveTeamAgents' id fallback now fixes (ADR-15).
+    expect(teamBackend).toContain('## Agent Personas');
+    expect(teamBackend).toContain('Backend Engineer');
+    expect(teamBackend).toContain('**Role:**');
   });
 
   it('generated agent files contain shared sections from sections.yaml', () => {

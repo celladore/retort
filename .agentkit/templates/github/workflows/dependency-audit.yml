@@ -45,6 +45,10 @@ jobs:
   audit-node:
     name: Node.js dependency audit
     runs-on: ubuntu-latest
+    # No job-level `if:` file guard — hashFiles() needs a checked-out workspace and
+    # is only available in step-level `if`. At job level GitHub rejects the whole
+    # file with "Unrecognized function: 'hashFiles'", so the workflow never runs at
+    # all. The job is continue-on-error and every step tolerates missing files.
     continue-on-error: true
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -116,6 +120,8 @@ jobs:
   audit-rust:
     name: Rust dependency audit
     runs-on: ubuntu-latest
+    # Gated at generation time by the hasLanguageRust conditional — a runtime
+    # hashFiles() guard would be redundant, and is invalid at job level anyway.
     continue-on-error: true
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -143,6 +149,8 @@ jobs:
   audit-python:
     name: Python dependency audit
     runs-on: ubuntu-latest
+    # Gated at generation time by the hasLanguagePython conditional — a runtime
+    # hashFiles() guard would be redundant, and is invalid at job level anyway.
     continue-on-error: true
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

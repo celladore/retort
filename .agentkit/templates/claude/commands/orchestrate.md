@@ -195,15 +195,64 @@ Execute the following loop. Each iteration corresponds to one phase:
 
 ### Phase 3 — Implementation (Task Delegation)
 
-Delegate work using the **task protocol** (`.claude/state/tasks/`):
+Delegation has two halves, and they are not alternatives:
 
-**Worktree isolation** — when dispatching code-writing agents (task types
-`implement`, `fix`, `refactor`, `migration`, `test`), pass
-`isolation: "worktree"` in the Agent tool call. Read-only agents (`review`,
-`investigate`, `discover`, `audit`) are exempt. Name agent branches using the
-convention `feat/agent-<agent-name>/<task-slug>` (adjust prefix to match the
-Conventional Commits type). See `.claude/rules/worktree-isolation.md` for the
-full pattern including `EnterWorktree`/`ExitWorktree` usage.
+- The **task file** in `.claude/state/tasks/` is the durable record. It is
+  portable, survives the session, and is the only representation that works on
+  tools without native subagents.
+- **Dispatch** is the execution mechanism. It is what makes a second agent
+  actually run, in its own context window.
+
+Write the record first, then dispatch. The subagent's returned summary is the
+only thing that enters your context; the task file is what survives.
+
+**Dispatch mode for this repo: `{{dispatchMode}}`** (set `dispatch.mode` in
+`settings.yaml`, or `dispatchMode` in the repo overlay).
+
+{{#if dispatchNative}}
+
+```text
+orchestrator
+  ├─ 1. write .claude/state/tasks/<id>.json   (status: submitted)   ← durable record
+  ├─ 2. Agent(subagent_type: <agent>, prompt: "...taskId: <id>...") ← execution
+  │       ├─ reads its task file, acquires the lease, status → working
+  │       ├─ does the work in its own context window
+  │       └─ writes artifacts, status → completed, returns a summary
+  └─ 3. reads the returned summary; processes handoffTo from the task file
+```
+
+**Dispatch by agent id, not team id.** They coincide for some teams and not
+others — the `testing` team's lead agent is `test-lead`, and dispatching
+`testing` fails. Use this table:
+
+| Team | Lead agent (`subagent_type`) | All agents |
+| ---- | ---------------------------- | ---------- |
+{{teamDispatchTable}}
+
+**Do not pass `isolation` in the Agent call.** Worktree isolation is a property
+of the agent definition — agents that accept a code-writing task type
+(`implement`, `fix`, `refactor`, `migration`, `test`) carry
+`isolation: worktree` in their own frontmatter, and read-only agents carry
+`disallowedTools: Write, Edit, NotebookEdit`. Both are derived from `accepts`
+at sync time, so the guardrail holds whether or not the caller remembers it.
+Branch naming stays `feat/agent-<agent-name>/<task-slug>` (adjust the prefix to
+match the Conventional Commits type); see `.claude/rules/worktree-isolation.md`.
+
+**Nesting is capped at {{maxSubagentSpawnDepth}} levels**
+(`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` in `.claude/settings.json`, from
+`max-subagent-spawn-depth` in teams.yaml). Only coordinator agents hold the
+`Agent` tool; the rest carry `disallowedTools: Agent` and cannot fan out. This
+is a spawn tree, not a handoff chain — its cost multiplies per level, where
+`MAX_HANDOFF_CHAIN_DEPTH` describes sequential hops whose cost merely adds.
+
+{{else}}
+
+This repo is in `task-file` mode: write the task file and carry out the work
+yourself. No `Agent` dispatch. The lifecycle below still applies — you are
+playing both the delegator and the executor role, so transition the statuses
+honestly rather than skipping to `completed`.
+
+{{/if}}
 
 1. Ensure `.claude/state/` and `.claude/state/tasks/` exist before creating task files.
 2. For each planned work item, create a task JSON file:
@@ -238,12 +287,21 @@ full pattern including `EnterWorktree`/`ExitWorktree` usage.
    ```
 
 3. For **parallel work**, create independent tasks for each team.
+   {{#if dispatchNative}}Dispatch them in a single message with multiple Agent
+   tool calls so they run concurrently; one call per message serialises them.{{/if}}
 4. For **sequential work**, set `dependsOn` so downstream tasks are blocked until upstream completes.
+   {{#if dispatchNative}}Dispatch only tasks whose derived `blockedBy` is empty —
+   a dispatched agent starts work immediately and does not wait on the graph.{{/if}}
    - `blockedBy` is runtime-derived state from `dependsOn`; do not author it manually.
    - **Cycle detection (run once at start):** Before deriving `blockedBy`, run a single DFS-based detection pass over the graph formed by `task.dependsOn`. Perform DFS from every unvisited task following `dependsOn` edges; detect back edges to extract each cycle's member path (including self-loops, multi-node cycles, and disjoint cycles). If any cycle is found: (1) assign a unique `cycleId` (e.g., SHA-256 of sorted member IDs truncated to 12 characters); (2) emit an `events.log` entry per cycle member with `eventType:"CANCELED"`, `taskId`, `reason:"dependency-cycle"`, `cycleId`, `cycleMembers`, `actor:"orchestrator"`, `timestamp` (ISO-8601); (3) set cycle members' status to `canceled`; (4) abort the derivation pass and surface a clear error. Do not proceed with `blockedBy` derivation until cycles are resolved. References: `dependsOn`, `optionalDependsOn`, `blockedBy`, `strictDependsOnValidation`.
    - **Derivation algorithm:** For each task at the start of each delegation round, compute `blockedBy` from its `dependsOn` array by: (1) taking the task IDs in `dependsOn` (excluding any listed in the task's `optionalDependsOn`), (2) for IDs that refer to tasks in terminal states: if status is `completed`, remove from `blockedBy`; if status is `failed`, `rejected`, or `canceled`, **do NOT remove** — keep the ID in `blockedBy` and record `blockedReason: "canceled"` (or set downstream status to `BLOCKED_ON_CANCELED` when all blockers are canceled), (3) for IDs that refer to in-progress tasks, keep in `blockedBy`. Empty `blockedBy` means unblocked. **Option 2 (no transitive cancellation):** This document uses Option 2. Downstream tasks that depend on cycle-canceled tasks remain explicitly blocked until manual descoping or retry. Do NOT perform transitive cancellation. **Validation pass:** For each `dependsOn` ID that does not match any known task ID: if `strictDependsOnValidation` is true (default), treat missing IDs as **fatal** — halt delegation and surface an error; if false, emit a warning and treat as non-blocking. IDs in `optionalDependsOn` may be missing without fatal error; still log missing references. Unit tests must cover: self-loops, single cycles, multiple disjoint cycles, and downstream tasks (verify `blockedBy` contains canceled IDs and downstream status is `BLOCKED_ON_CANCELED`).
 5. Immediately after task creation, run cycle detection once, then the dependency derivation pass once to populate `blockedBy` from `dependsOn` before the first execution round.
-6. Each team should:
+6. {{#if dispatchNative}}Dispatch each unblocked task with
+   `Agent(subagent_type: <lead agent>, prompt: "<instructions>. taskId: <id>")`.
+   The prompt must name the `taskId` — that is what turns a generic persona into
+   an executor for this specific unit of work, and what lets the agent skip
+   scanning the queue. Then the dispatched agent{{else}}Then, acting as the
+   team{{/if}} should:
    - Accept or reject the task (update `status` and add a message).
    - Make minimal, backwards-compatible changes.
    - Add or adjust tests for any changed behavior.
