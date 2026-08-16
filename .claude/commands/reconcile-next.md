@@ -39,11 +39,9 @@ operations. Reject any command that could modify state:
 
 ### 1) Select the next ticket
 
-1. Run `task_check` for open Retort-facing work.
-2. If `task_check` fails or returns no candidates, return an explicit no-work result and stop processing immediately. Do not continue with an unverified ticket or emit a handoff summary.
-3. If a ticket ID is provided, run `get_task` for that ID and skip discovery.
-4. If `get_task` lookup fails, return an explicit lookup-failure result and stop processing immediately. Do not continue with an unverified ticket or emit a handoff summary.
-5. Pick the single highest-priority candidate and do not switch tickets until this one is closed out of this session.
+1. If a ticket ID is provided as an argument, run `get_task` directly for that ID and skip discovery. If `get_task` fails, return an explicit lookup-failure result and stop processing immediately. Do not continue with an unverified ticket or emit a handoff summary.
+2. If no ticket ID is provided, run `task_check` for open Retort-facing work. If `task_check` fails or returns no candidates, return an explicit no-work result and stop processing immediately. Do not continue with an unverified ticket or emit a handoff summary.
+3. Pick the single highest-priority candidate and do not switch tickets until this one is closed out of this session.
 
 ### 2) Recheck session scope and project
 
@@ -77,7 +75,11 @@ operations. Reject any command that could modify state:
 
 ## Exit condition for this command
 
-- One-ticket reconciliation summary logged on the ticket.
-- Explicit Retort/UI note: scope confirmed or re-framed for next action.
-- No implementation done in this run.
-- `ready for handoff to implementation later` present only if the log write was acknowledged.
+All outcomes share one requirement: **no implementation done in this run**.
+
+Distinct exit criteria per outcome:
+
+- **Successful reconciliation**: requires a verified ticket, a logged reconciliation summary, an explicit Retort/UI note (scope confirmed or re-framed for next action), and `ready for handoff to implementation later` present only if the log write was acknowledged.
+- **No-work**: requires only the explicit no-work result; no summary log needed.
+- **Lookup-failure**: requires only the explicit lookup-failure result; no summary log needed.
+- **Drift**: requires the drift note documented per section 2, step 3; may log a minimal field update per section 3, step 5, but does not require the full reconciliation summary.
