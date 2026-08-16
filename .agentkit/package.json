@@ -50,12 +50,14 @@
     "lint:md:fix": "markdownlint-cli2 --fix --config ../.markdownlint.json \"../docs/prd/**/*.md\" \"../docs/README.md\" \"../CONTRIBUTING.md\" \"docs/**/*.md\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:reconcile": "node scripts/reconcile-test-results.mjs",
+    "test:quarantine": "node scripts/run-quarantined-tests.mjs",
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "4.1.0",
     "markdownlint-cli2": "^0.18.1",
     "prettier": "^3.5.3",
-    "vitest": "^4.1.0"
+    "vitest": "4.1.0"
   }
 }

@@ -65,7 +65,7 @@ All slugs: lowercase kebab-case. No spaces. No version numbers in filenames (ver
 
 - **Internal only** → commit to repo in the canonical location
 - **Client-facing** → goes to Notion or the configured external system; do NOT commit to repo
-- **AI-readable** → pair a `.readme.yaml` or use YAML frontmatter; see dual-file convention
+- **AI-readable** → directory card is `.readme.yaml`; durable markdown also gets `{stem}.agent.yaml` (md-agent/v1)
 - **Public** → consider if it belongs in a docs site rather than repo markdown
 
 If a document spans audiences (e.g. a spec that's both client-facing AND needs to feed
@@ -83,12 +83,15 @@ Before creating a new file:
 
 ## Creating a README (Dual-File Convention)
 
-Every documented component maintains two files:
+Every documented component requires either a same-directory `.readme.yaml` or coverage from an ancestor index map. A child listed on a parent `.readme.yaml` does not need its own local `.readme.yaml` until that directory itself needs a further map.
+
+When a local `.readme.yaml` is required, maintain both files:
 
 - `README.md` — human prose
-- `.readme.yaml` — structured agent-readable metadata
+- `.readme.yaml` — no-LSP directory map
 
-See `references/document-locations.md § Dual-File Convention` for the full schema.
+Durable docs (`README.md`, `docs/**`, ADRs, specs) also get `{stem}.agent.yaml`.
+See `references/document-locations.md` and `skills/md-agent-yaml/schema.yaml`.
 
 ## Creating an ADR
 

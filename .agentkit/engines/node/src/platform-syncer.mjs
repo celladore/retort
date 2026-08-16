@@ -478,15 +478,35 @@ export async function syncEditorTheme(
   for (const [tool, outputPath] of Object.entries(outputs)) {
     if (!outputPath) continue; // null = skip this target
 
+    // Path traversal protection — resolve and verify the output stays inside tmpDir.
+    // This runs BEFORE the scaffold-once carry-forward below, which also resolves a
+    // destination and writes to it. Guarding only the render path left that branch
+    // able to read a tracked project file and write it outside tmpDir.
+    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
+    const settingsPath = resolve(tmpDir, normalizedPath);
+    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
+      log(`[retort:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
+      continue;
+    }
+
     // Scaffold-once: target already exists in projectRoot (unless --overwrite/--force).
     // Copy the existing content into tmpDir so it appears in the new manifest and
     // survives orphan cleanup. Without this carry-forward, the second sync run
     // sees the file in previousManifest, never in newManifestFiles, and deletes it.
     if (skipOutputs && skipOutputs.has(outputPath)) {
-      const normalizedRel = String(outputPath).replace(/^\/+/, '');
       if (projectRoot) {
-        const existingPath = resolve(projectRoot, normalizedRel);
-        const destFile = resolve(tmpDir, normalizedRel);
+        const resolvedProjectRoot = resolve(projectRoot);
+        const existingPath = resolve(projectRoot, normalizedPath);
+        // The source side needs the same containment check: without it a crafted
+        // path reads a file from outside projectRoot.
+        if (
+          !existingPath.startsWith(resolvedProjectRoot + sep) &&
+          existingPath !== resolvedProjectRoot
+        ) {
+          log(`[retort:sync] BLOCKED: editor theme source path traversal detected — ${outputPath}`);
+          continue;
+        }
+        const destFile = settingsPath;
         if (existsSync(existingPath)) {
           writePromises.push(
             (async () => {
@@ -507,14 +527,6 @@ export async function syncEditorTheme(
         // projectRoot to opt into the fix.
         log(`[retort:sync] Editor theme: ${outputPath} exists (scaffold-once) — skipping`);
       }
-      continue;
-    }
-
-    // Path traversal protection — resolve and verify the output stays inside tmpDir
-    const normalizedPath = String(outputPath).replace(/^\/+/, ''); // strip leading slashes
-    const settingsPath = resolve(tmpDir, normalizedPath);
-    if (!settingsPath.startsWith(resolvedTmpDir + sep) && settingsPath !== resolvedTmpDir) {
-      log(`[retort:sync] BLOCKED: editor theme output path traversal detected — ${outputPath}`);
       continue;
     }
 
@@ -813,6 +825,16 @@ export async function syncClaudeSettings(
     await collectHookExtensions(join(templatesDir, 'claude', 'hooks'), vars)
   );
   if (specHooks) settings.hooks = specHooks;
+  // Subagent spawn depth (ADR-15 §4). Emitted here rather than in the template
+  // because the template is parsed as JSON, not rendered — a {{placeholder}}
+  // would survive verbatim into the generated file. Env values must be strings.
+  const spawnDepth = vars?.maxSubagentSpawnDepth;
+  if (spawnDepth !== undefined && spawnDepth !== null && spawnDepth !== '') {
+    settings.env = {
+      ...(settings.env || {}),
+      CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH: String(spawnDepth),
+    };
+  }
   // Keep hook wiring in step with the hooks sync actually emits
   if (hookFeatureMap && settings.hooks) {
     settings.hooks = filterHooksToEmitted(settings.hooks, hookFeatureMap, vars);
@@ -952,6 +974,16 @@ export async function syncClaudeAgents(
       agentVars.retortRemapTarget = remapTarget || '';
 
       const rendered = renderTemplate(template, agentVars, tplPath);
+      // Claude Code only registers a subagent when YAML frontmatter is the very first
+      // thing in the file. insertHeader places the GENERATED comment after the closing
+      // `---`; without frontmatter it lands at position 0 instead and the file silently
+      // degrades to a prose persona that never becomes a dispatchable agent type.
+      if (!rendered.startsWith('---')) {
+        console.warn(
+          `[agentkit:sync] Warning: agent '${agent.id}' rendered without YAML frontmatter — ` +
+            'it will not register as a Claude Code subagent'
+        );
+      }
       const withHeader = insertHeader(rendered, '.md', version, repoName);
       await writeOutput(join(tmpDir, '.claude', 'agents', `${agent.id}.md`), withHeader);
     }

@@ -215,6 +215,7 @@ branchProtection:
   requiredStatusChecks: # CI job names that must pass
     - 'Test' # ci.yml -> jobs.test.name
     - 'Validate' # ci.yml -> jobs.validate.name
+    - 'Prettier' # ci.yml -> jobs.prettier.name
     - 'branch-rules' # branch-protection.yml -> jobs.branch-rules (no name:)
 
   # Branch rules

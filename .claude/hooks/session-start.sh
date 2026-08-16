@@ -131,13 +131,14 @@ env_summary=$(printf 'Session: %s\nWorking directory: %s\nLanguage profile sourc
 if command -v jq &>/dev/null; then
   jq -n --arg ctx "$env_summary" '{
       hookSpecificOutput: {
+          hookEventName: "SessionStart",
           additionalContext: $ctx
       }
   }'
 else
   # Fallback: manually construct JSON (escape backslashes, quotes, and newlines)
   escaped_summary=$(printf '%s' "$env_summary" | awk '{gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); printf "%s\\n", $0}' | sed '$ s/\\n$//')
-  printf '{"hookSpecificOutput":{"additionalContext":"%s"}}\n' "$escaped_summary"
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$escaped_summary"
 fi
 
 exit 0

@@ -51,9 +51,7 @@ $changeCount = @($statusOutput).Count
 # -- Emit warning when threshold exceeded ----------------------------------
 if ($changeCount -ge $Threshold) {
     $output = @{
-        hookSpecificOutput = @{
-            systemMessage = "WARNING: There are $changeCount uncommitted changes (threshold: $Threshold). Consider committing your work to avoid losing changes."
-        }
+        systemMessage = "WARNING: There are $changeCount uncommitted changes (threshold: $Threshold). Consider committing your work to avoid losing changes."
     } | ConvertTo-Json -Depth 5
 
     Write-Output $output

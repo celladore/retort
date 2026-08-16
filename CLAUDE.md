@@ -14,38 +14,41 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 - **Default Branch**: main
 - **Integration Branch** (PR target): dev
 - **Framework Version**: 3.1.0
+  
 
 - **Phase**: active
 
 ## Tech Stack
 
 - **Languages**: javascript, yaml, markdown
+  
   - **Backend**: node.js
+  
   - **ORM**: none
   - **Database**: none
   - **Messaging**: none
   - **Architecture**: monolith
   - **API Style**: mixed
+  
+  
 
 ## Quick Reference
 
-| Command             | Purpose                                  |
-| ------------------- | ---------------------------------------- | -------------------------------------------- |
-| `/start`            | New user entry point — guided next steps |
-|                     | `/orchestrate`                           | Master coordinator — assess, plan, delegate  |
-|                     | `/discover`                              | Scan codebase, detect tech stacks            |
-|                     | `/review`                                | Code review with quality gates               |
-|                     | `/check`                                 | Universal quality gate (lint + test + build) |
-|                     | `/plan`                                  | Structured planning before implementation    |
-| `/build`            | Build project (auto-detects stack)       |
-| `/test`             | Run tests (auto-detects stack)           |
-| `/format`           | Format code (auto-detects stack)         |
-| `/deploy`           | Deployment automation                    |
-| `/security`         | Security audit                           |
-| `/sync-backlog`     | Update AGENT_BACKLOG.md                  |
-| `/document-history` | Create history doc for completed work    |
-
-|
+| Command | Purpose |
+| ------- | ------- |
+| `/start` | New user entry point — guided next steps |
+| `/orchestrate` | Master coordinator — assess, plan, delegate |
+| `/discover` | Scan codebase, detect tech stacks |
+| `/review` | Code review with quality gates |
+| `/check` | Universal quality gate (lint + test + build) |
+| `/plan` | Structured planning before implementation |
+| `/build` | Build project (auto-detects stack) |
+| `/test` | Run tests (auto-detects stack) |
+| `/format` | Format code (auto-detects stack) |
+| `/deploy` | Deployment automation |
+| `/security` | Security audit |
+| `/sync-backlog` | Update AGENT_BACKLOG.md |
+| `/document-history` | Create history doc for completed work |
 
 ## Team Commands
 
@@ -160,12 +163,16 @@ All project documentation follows a domain-driven structure in `docs/`:
   - **Default region**: global
   - **Organisation prefix**: akf
   - **Preferred IaC toolchain**: terraform, terragrunt
+  
+  
   - **Mandatory tags** (required on every taggable resource): `environment, project, owner, cost_center`
   - **Optional tags** (recommended): `team, created_by, managed_by`
 
 > **Tagging is enforced.** When creating or modifying IaC resources, always include
 > the mandatory tags listed above. Use a shared `locals` block or Terragrunt `inputs`
 > for consistency. See `.claude/rules/iac.md` for examples.
+> 
+> 
 
 ## Task Delegation Protocol
 
