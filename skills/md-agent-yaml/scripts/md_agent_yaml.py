@@ -279,7 +279,7 @@ def is_component_signal(path: Path) -> bool:
 def parse_map_lists(text: str) -> tuple[list[str], list[str], set[str]]:
     listed: list[str] = []
     skip: list[str] = []
-    seen_names: set[str] = set()
+    seen: set[str] = set()
     mode: str | None = None
     for raw in text.splitlines():
         if not raw.strip() or raw.lstrip().startswith("#"):
@@ -303,18 +303,18 @@ def parse_map_lists(text: str) -> tuple[list[str], list[str], set[str]]:
         if mode == "children":
             match = re.search(r"\b(?:name|path):\s*['\"]?([^'\"#]+)", stripped)
             if match:
-                name = match.group(1).strip()
-                if name in seen_names:
-                    print(f"warning: duplicate child entry: {name}", file=sys.stderr)
+                value = match.group(1).strip()
+                if value in seen:
+                    print(f"warning: duplicate child entry: {value}", file=sys.stderr)
                 else:
-                    seen_names.add(name)
-                listed.append(name)
+                    seen.add(value)
+                listed.append(value)
         elif mode == "skip":
             item = stripped[1:].strip() if stripped.startswith("-") else stripped
             item = item.split(":", 1)[-1].strip().strip("'\"")
             if item:
                 skip.append(item)
-    return listed, skip, seen_names
+    return listed, skip, seen
 
 
 def _norm_key(value: str) -> str:
@@ -367,19 +367,27 @@ def working_readme_maps(root: Path, changed: list[Path]) -> list[Path]:
 
 def validate_map_file(text: str) -> bool:
     """Validate that a .readme.yaml file has required fields and correct structure."""
-    if "schema:" not in text or "readme-map" not in text:
+    schema_match = re.search(r"^schema:\s*(.+)$", text, re.MULTILINE)
+    if not schema_match or schema_match.group(1).strip().strip("'\"") != "readme-map/v1":
         return False
-    has_kind = "kind:" in text
-    if not has_kind:
+    kind_match = re.search(r"^kind:\s*(.+)$", text, re.MULTILINE)
+    if not kind_match:
         return False
-    is_index = "kind: index" in text or "kind:index" in text
-    is_leaf = "kind: leaf" in text or "kind:leaf" in text
-    if not (is_index or is_leaf):
+    kind = kind_match.group(1).strip().strip("'\"")
+    if kind not in {"index", "leaf"}:
         return False
-    if is_index and "children:" not in text and "apps:" not in text and "packages:" not in text:
+    if "purpose:" not in text:
         return False
-    if is_leaf and ("children:" in text or "apps:" in text or "packages:" in text):
+    if "last_synced:" not in text:
         return False
+    if kind == "index":
+        if "children:" not in text and "apps:" not in text and "packages:" not in text:
+            return False
+    else:
+        if "entry_points:" not in text:
+            return False
+        if "children:" in text or "apps:" in text or "packages:" in text:
+            return False
     return True
 
 def map_gaps(changed: list[Path], root: Path) -> tuple[list[Path], list[tuple[Path, str]]]:

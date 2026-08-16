@@ -22,7 +22,9 @@ document lives from memory; always consult the location map.
 
 ## Dual-File Convention
 
-Every documented component should maintain two files in parallel:
+Every documented component requires either a same-directory `.readme.yaml` or coverage from an ancestor index map. A child listed on a parent `.readme.yaml` does not need its own local `.readme.yaml` until that directory itself needs a further map.
+
+When a local `.readme.yaml` is required, maintain it alongside:
 
 - `README.md` — human-readable, markdown prose
 - `.readme.yaml` — directory exploration map (children / entry_points / skip)

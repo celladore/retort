@@ -83,7 +83,9 @@ Before creating a new file:
 
 ## Creating a README (Dual-File Convention)
 
-Every documented component maintains two files:
+Every documented component requires either a same-directory `.readme.yaml` or coverage from an ancestor index map. A child listed on a parent `.readme.yaml` does not need its own local `.readme.yaml` until that directory itself needs a further map.
+
+When a local `.readme.yaml` is required, maintain both files:
 
 - `README.md` — human prose
 - `.readme.yaml` — no-LSP directory map

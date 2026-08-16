@@ -31,15 +31,9 @@ skill. Handles all other documentation tasks directly.
 
 ## Dual-File Convention
 
-Every documented component should have two files:
+Every documented component requires either a same-directory `.readme.yaml` or coverage from an ancestor index map. A child listed on an ancestor `.readme.yaml` does not need its own local `.readme.yaml` until that directory itself needs a further map.
 
-- `README.md` — human-readable, markdown prose
-- `.readme.yaml` — no-LSP directory exploration map
-
-When creating or updating docs for any module, maintain both. Read
-`skills/doc-agent/references/readme-yaml-convention.md` for the directory-card
-schema. Durable markdown also gets `{stem}.agent.yaml` — see
-`skills/md-agent-yaml/schema.yaml`. Do not mix the two shapes.
+When creating or updating docs for any module, maintain both `README.md` and `.readme.yaml` in the same directory unless an ancestor index already covers it. Read `skills/doc-agent/references/readme-yaml-convention.md` for the directory-card schema. Durable markdown also gets `{stem}.agent.yaml` — see `skills/md-agent-yaml/schema.yaml`. Do not mix the two shapes.
 
 ## Task Routing
 
