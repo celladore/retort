@@ -42,9 +42,7 @@ if [[ "$CHANGE_COUNT" -ge "$THRESHOLD" ]]; then
     jq -n --arg count "$CHANGE_COUNT" \
         --arg threshold "$THRESHOLD" \
         '{
-            hookSpecificOutput: {
-                systemMessage: ("WARNING: There are " + $count + " uncommitted changes (threshold: " + $threshold + "). Consider committing your work to avoid losing changes.")
-            }
+            systemMessage: ("WARNING: There are " + $count + " uncommitted changes (threshold: " + $threshold + "). Consider committing your work to avoid losing changes.")
         }'
 fi
 

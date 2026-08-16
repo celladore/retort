@@ -63,8 +63,13 @@ Test-Tool -Name "dotnet"   -Command "dotnet"
 Test-Tool -Name "Cargo"    -Command "cargo"
 {{/if}}
 {{#if hasLanguagePythonEffective}}
+# Only fall back to `python` when `python3` yielded no usable version. This also
+# covers Windows hosts where `python3` resolves to a Store alias stub.
+$pythonProbeCount = $toolsFound.Count
 Test-Tool -Name "Python"   -Command "python3"
-Test-Tool -Name "Python"   -Command "python"
+if ($toolsFound.Count -eq $pythonProbeCount) {
+    Test-Tool -Name "Python"   -Command "python"
+}
 {{/if}}
 {{#if hasAnyInfraConfig}}
 Test-Tool -Name "Docker"   -Command "docker"
@@ -116,6 +121,7 @@ $gitSummary
 # -- Return structured output ----------------------------------------------
 $output = @{
     hookSpecificOutput = @{
+        hookEventName     = "SessionStart"
         additionalContext = $envSummary
     }
 } | ConvertTo-Json -Depth 5

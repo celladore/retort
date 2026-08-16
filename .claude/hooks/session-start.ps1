@@ -106,6 +106,7 @@ $gitSummary
 # -- Return structured output ----------------------------------------------
 $output = @{
     hookSpecificOutput = @{
+        hookEventName     = "SessionStart"
         additionalContext = $envSummary
     }
 } | ConvertTo-Json -Depth 5

@@ -35,6 +35,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 
 ### Fixed
 
+- SessionStart hook schema and duplicate Python detection ([history](bug-fixes/0001-2026-08-06-sessionstart-hook-schema-and-duplicate-python-detection-bugfix.md))
 - Harden create-doc against a corrupted history index, render PR references as links, and widen numbering validation to all six subdirectories ([#576](../../pull/576), [history](docs/history/bug-fixes/0003-2026-08-07-harden-create-doc-and-widen-numbering-validation-bugfix.md))
 - Silently broken CI config defects ([#579](../../pull/579), [history](docs/history/bug-fixes/0005-2026-08-07-silently-broken-ci-config-defects-bugfix.md))
 - Generated PowerShell scripts fail to parse under Windows PowerShell 5.1 ([#581](../../pull/581), [history](docs/history/bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md))
