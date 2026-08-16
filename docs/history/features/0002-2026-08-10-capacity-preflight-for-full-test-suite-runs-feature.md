@@ -1,7 +1,7 @@
 # Capacity preflight for full test-suite runs Launch - Historical Summary
 
 **Launched**: 2026-08-10
-**PR**: [#PR-Number]
+**PR**: [#607](https://github.com/JustAGhosT/retort/pull/607)
 **Feature Type**: New Feature
 
 ## Feature Overview
@@ -52,10 +52,11 @@ in this repo carry for Windows PowerShell 5.1.
   `MaximumSize` range. Queried through `pwsh`, falling back to `powershell`.
 
 A page file with `InitialSize` below `MaximumSize` grows on demand, so the commit limit is not
-static. The probe credits unclaimed growth toward available commit — capped by free disk, since
-growth consumes the same volume the fixtures need — and judges page-file configuration by its
-maximum rather than its current allocation. An earlier revision read only `AllocatedBaseSize`
-and raised a false failure on a host with 16 GiB of unclaimed growth.
+static. The probe credits unclaimed growth toward available commit — capped by free disk
+**headroom remaining above the fixture floor** (since page-file growth consumes the same volume
+the fixtures need) — and judges page-file configuration by its maximum rather than its current
+allocation. An earlier revision read only `AllocatedBaseSize` and raised a false failure on a
+host with 16 GiB of unclaimed growth.
 
 ### API Changes
 

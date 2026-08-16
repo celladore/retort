@@ -7,7 +7,7 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      include: ['src/start/**'],
+      include: ['src/start/**', 'scripts/preflight-capacity.mjs'],
       thresholds: {
         statements: 80,
         branches: 80,
