@@ -1,6 +1,6 @@
 ---
 description: 'Reconcile the next Retort backlog item in read-only mode'
-allowed-tools: Bash(git *), Bash(gh *), Bash(pnpm *), Bash(node *)
+allowed-tools: Bash(git status), Bash(git diff*), Bash(git log*), Bash(git show*), Bash(gh issue list), Bash(gh issue view*), Bash(pnpm --version), Bash(node --version)
 generated_by: 'retort'
 last_model: 'sync-engine'
 last_updated: '2026-08-15'
@@ -23,7 +23,7 @@ Use this command to start a session that should only reconcile one Retort ticket
 
 1. Do not implement code, touch infrastructure, or modify project source.
 2. Process exactly one ticket per session unless the user explicitly asks to continue.
-3. Keep the work scope strictly `Retort` unless the ticket metadata confirms another scope.
+3. Keep the work scope strictly `Retort` only.
 
 ## Reconciliation flow
 
@@ -31,7 +31,9 @@ Use this command to start a session that should only reconcile one Retort ticket
 
 1. Run `task_check` for open Retort-facing work.
 2. If a ticket ID is provided, run `get_task` for that ID and skip discovery.
-3. Pick the single highest-priority candidate and do not switch tickets until this one is closed out of this session.
+3. If no candidates are found, return a no-work result and stop.
+4. If `get_task` lookup fails, return a lookup-failure result and stop.
+5. Pick the single highest-priority candidate and do not switch tickets until this one is closed out of this session.
 
 ### 2) Recheck session scope and project
 
@@ -57,9 +59,11 @@ Use this command to start a session that should only reconcile one Retort ticket
 ### 4) Log and close the reconciliation cycle
 
 1. Use `log_agent_message` with an explicit reconciliation summary and evidence references.
-2. Include the exact phrase in the summary:
+2. Confirm the log write succeeded before proceeding.
+3. Include the exact phrase in the summary only if the log write was confirmed:
    - `ready for handoff to implementation later`
-3. End with a crisp one-ticket conclusion.
+4. If the log write fails or ticket confirmation is absent, state that reconciliation is incomplete instead.
+5. End with a crisp one-ticket conclusion.
 
 ## Exit condition for this command
 

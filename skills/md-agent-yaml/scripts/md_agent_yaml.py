@@ -159,13 +159,13 @@ def emit_sidecar(payload: dict) -> str:
     audience = payload.get("audience") or ["agent"]
     audience_block = "[" + ", ".join(yaml_string(item) for item in audience) + "]"
     return (
-        f"schema: {SCHEMA}\n"
-        f"source: {payload['source']}\n"
+        f"schema: {yaml_string(SCHEMA)}\n"
+        f"source: {yaml_string(payload['source'])}\n"
         f"title: {yaml_string(payload['title'])}\n"
         f"purpose: {yaml_string(payload['purpose'])}\n"
         f"audience: {audience_block}\n"
         f"facts:\n{facts_block}\n"
-        f"last_synced: {payload['last_synced']}\n"
+        f"last_synced: {yaml_string(payload['last_synced'])}\n"
     )
 
 
@@ -276,9 +276,10 @@ def is_component_signal(path: Path) -> bool:
     return path.suffix.lower() in COMPONENT_SUFFIXES
 
 
-def parse_map_lists(text: str) -> tuple[set[str], set[str]]:
-    listed: set[str] = set()
-    skip: set[str] = set()
+def parse_map_lists(text: str) -> tuple[list[str], list[str], set[str]]:
+    listed: list[str] = []
+    skip: list[str] = []
+    seen_names: set[str] = set()
     mode: str | None = None
     for raw in text.splitlines():
         if not raw.strip() or raw.lstrip().startswith("#"):
@@ -294,7 +295,7 @@ def parse_map_lists(text: str) -> tuple[set[str], set[str]]:
             if key == "skip":
                 mode = "skip"
                 if rest.startswith("["):
-                    skip.update(item.strip(" '\"") for item in rest.strip("[]").split(",") if item.strip())
+                    skip.extend(item.strip(" '\"") for item in rest.strip("[]").split(",") if item.strip())
                     mode = None
                 continue
             mode = None
@@ -302,13 +303,18 @@ def parse_map_lists(text: str) -> tuple[set[str], set[str]]:
         if mode == "children":
             match = re.search(r"\b(?:name|path):\s*['\"]?([^'\"#]+)", stripped)
             if match:
-                listed.add(match.group(1).strip())
+                name = match.group(1).strip()
+                if name in seen_names:
+                    print(f"warning: duplicate child entry: {name}", file=sys.stderr)
+                else:
+                    seen_names.add(name)
+                listed.append(name)
         elif mode == "skip":
             item = stripped[1:].strip() if stripped.startswith("-") else stripped
             item = item.split(":", 1)[-1].strip().strip("'\"")
             if item:
-                skip.add(item)
-    return listed, skip
+                skip.append(item)
+    return listed, skip, seen_names
 
 
 def _norm_key(value: str) -> str:
@@ -318,8 +324,8 @@ def _norm_key(value: str) -> str:
 def listed_in_map(
     child: Path,
     parent: Path,
-    listed: set[str],
-    skip: set[str],
+    listed: list[str],
+    skip: list[str],
     root: Path | None = None,
 ) -> bool:
     rel_parent = _norm_key(posix(child.relative_to(parent))) if child != parent else child.name
@@ -329,7 +335,7 @@ def listed_in_map(
             needles.add(_norm_key(posix(child.relative_to(root))))
         except ValueError:
             pass
-    hay = {_norm_key(item) for item in listed | skip if item}
+    hay = {_norm_key(item) for item in (listed + skip) if item}
     for item in hay:
         for needle in needles:
             if needle == item or needle.startswith(item + "/") or item.endswith("/" + needle):
@@ -359,6 +365,23 @@ def working_readme_maps(root: Path, changed: list[Path]) -> list[Path]:
     return maps
 
 
+def validate_map_file(text: str) -> bool:
+    """Validate that a .readme.yaml file has required fields and correct structure."""
+    if "schema:" not in text or "readme-map" not in text:
+        return False
+    has_kind = "kind:" in text
+    if not has_kind:
+        return False
+    is_index = "kind: index" in text or "kind:index" in text
+    is_leaf = "kind: leaf" in text or "kind:leaf" in text
+    if not (is_index or is_leaf):
+        return False
+    if is_index and "children:" not in text and "apps:" not in text and "packages:" not in text:
+        return False
+    if is_leaf and ("children:" in text or "apps:" in text or "packages:" in text):
+        return False
+    return True
+
 def map_gaps(changed: list[Path], root: Path) -> tuple[list[Path], list[tuple[Path, str]]]:
     if not working_readme_maps(root, changed):
         return [], []
@@ -376,7 +399,14 @@ def map_gaps(changed: list[Path], root: Path) -> tuple[list[Path], list[tuple[Pa
         if directory in seen_dirs:
             continue
         seen_dirs.add(directory)
-        if (directory / README_MAP).is_file():
+        local_map = directory / README_MAP
+        if local_map.is_file():
+            try:
+                text = local_map.read_text(encoding="utf-8", errors="replace")
+                if not validate_map_file(text):
+                    print(f"warning: invalid .readme.yaml at {repo_rel(local_map, root)}", file=sys.stderr)
+            except OSError:
+                pass
             continue
 
         ancestors = ancestor_maps(directory.parent, root)
@@ -386,7 +416,10 @@ def map_gaps(changed: list[Path], root: Path) -> tuple[list[Path], list[tuple[Pa
                 text = map_path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            listed, skip = parse_map_lists(text)
+            if not validate_map_file(text):
+                print(f"warning: invalid .readme.yaml at {repo_rel(map_path, root)}", file=sys.stderr)
+                continue
+            listed, skip, _ = parse_map_lists(text)
             parent_dir = map_path.parent
             if listed_in_map(directory, parent_dir, listed, skip, root):
                 covered = True
@@ -500,15 +533,15 @@ def check_stop() -> int:
 def selftest() -> int:
     root = Path("C:/repo")
     parent = root / "apps"
-    listed = {"publisher", "apps/publisher", "admin-api", "apps/admin/api", "apps/app"}
-    skip = {"publish"}
+    listed = ["publisher", "apps/publisher", "admin-api", "apps/admin/api", "apps/app"]
+    skip = ["publish"]
     assert listed_in_map(parent / "publisher", parent, listed, skip, root)
     assert listed_in_map(parent / "admin" / "api", parent, listed, skip, root)
     assert listed_in_map(parent / "app" / "src" / "Mystira.App.PWA", parent, listed, skip, root)
     assert listed_in_map(parent / "publish", parent, listed, skip, root)
     assert not listed_in_map(parent / "newapp", parent, listed, skip, root)
-    leaf_listed, _ = parse_map_lists("schema: readme-map/v1\nkind: leaf\nskip:\n  - dist\n")
-    assert leaf_listed == set()
+    leaf_listed, _, _ = parse_map_lists("schema: readme-map/v1\nkind: leaf\nskip:\n  - dist\n")
+    assert leaf_listed == []
     print("selftest ok")
     return 0
 
