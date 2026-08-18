@@ -116,9 +116,15 @@ export function probeDisk(targets, { platform = process.platform, statfs = fs.st
     // statfs gives no mount point, so identify the volume by drive letter on
     // Windows and by size fingerprint elsewhere. A false merge only collapses
     // two identical-size filesystems into one line of output.
+    //
+    // path.win32, not the platform-default `path`: the default import follows
+    // the *host* OS, not the injected `platform` option, so on a POSIX host
+    // (e.g. Linux CI) `path.parse('D:\\Temp')` never recognises the drive
+    // root and every target collapses to the same key. Only surfaced once
+    // this suite actually ran on Linux CI for the first time.
     const key =
       platform === 'win32'
-        ? path.parse(path.resolve(dir)).root.toUpperCase()
+        ? path.win32.parse(path.win32.resolve(dir)).root.toUpperCase()
         : `${stats.blocks}:${stats.bsize}`;
 
     const existing = seen.get(key);
