@@ -70,8 +70,18 @@ jobs:
       # for reasons unrelated to this suite. Wiring --coverage in here would flip a
       # required check red over a pre-existing, out-of-scope gap. `pnpm test:coverage`
       # remains available locally once that gap is addressed on its own.
-      - name: Run tests with coverage
-        run: pnpm test:start && pnpm -C .agentkit coverage
+      #
+      # Two steps, not one `&&`-chained run: line, and the second is forced to run
+      # even after the first fails. A single `&&` step means a root-suite failure
+      # skips .agentkit's suite entirely, so it never writes test-results/results.json
+      # — and the Reconcile step below then fails on a missing report instead of on
+      # the real failure, hiding the actual signal behind a second, misleading one.
+      - name: Run root suite
+        run: pnpm test:start
+
+      - name: Run .agentkit tests with coverage
+        if: success() || failure()
+        run: pnpm -C .agentkit coverage
 
       # Machine-readable per-test results (ADR-12 decision 5). Console scrollback
       # is not inspectable after the fact; these are. Uploaded before the
