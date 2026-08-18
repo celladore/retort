@@ -65,9 +65,13 @@ jobs:
       - name: Capacity preflight
         run: node scripts/preflight-capacity.mjs --profile=ci
 
+      # Root suite runs without --coverage: its coverage thresholds (vitest.config.mjs)
+      # cover src/start/** too, which currently sits well under 80% branch coverage
+      # for reasons unrelated to this suite. Wiring --coverage in here would flip a
+      # required check red over a pre-existing, out-of-scope gap. `pnpm test:coverage`
+      # remains available locally once that gap is addressed on its own.
       - name: Run tests with coverage
-        run: pnpm coverage
-        working-directory: .agentkit
+        run: pnpm test:start && pnpm -C .agentkit coverage
 
       # Machine-readable per-test results (ADR-12 decision 5). Console scrollback
       # is not inspectable after the fact; these are. Uploaded before the
