@@ -29,7 +29,7 @@ Two independent causes:
    `$GITHUB_BASE_REF`, so it still fired.
 
 Squash-merging is the underlying trigger: it collapses `dev`'s commits into a single commit on
-`main`, so `main` and `dev` end up with matching *content* but diverging *commit ancestry* —
+`main`, so `main` and `dev` end up with matching _content_ but diverging _commit ancestry_ —
 exactly the condition GitHub's reverse-merge auto-PR exists to reconcile. Recommending "create a
 merge commit" instead did not stick (GitHub's UI defaulted to squash again on the next PR), so
 this can recur.
@@ -41,7 +41,7 @@ this can recur.
    requirement.
 2. Fixed `.github/workflows/branch-protection.yml`'s `branch-rules` job to check
    `$GITHUB_BASE_REF` explicitly (the PR's actual base branch), rather than relying on
-   `head_ref`/`base_ref` string comparisons alone — so it only blocks a *genuine* main→main PR
+   `head_ref`/`base_ref` string comparisons alone — so it only blocks a _genuine_ main→main PR
    in the same repo, not a legitimate `main`→`dev` reverse-merge.
 
 ### Code Changes
@@ -56,7 +56,7 @@ this can recur.
 - **Unit Tests**: none — this is CI/workflow configuration, not application code.
 - **Integration Tests**: N/A.
 - **Manual Testing**: re-ran the `branch-rules` check on PR #621 after the fix landed on `dev`;
-  confirmed it passed. Note: `pull_request`-triggered workflow step *scripts* resolve from the
+  confirmed it passed. Note: `pull_request`-triggered workflow step _scripts_ resolve from the
   PR's head branch, not the base — so the fix had to be present on whichever branch was
   checked out at the time the check ran, not just merged to `dev`.
 
@@ -97,7 +97,7 @@ gate would have blocked everything else regardless). Affected only this repo's m
 
 ## Lessons Learned
 
-- A `pull_request`-triggered workflow's step *script* content resolves from the PR's HEAD
+- A `pull_request`-triggered workflow's step _script_ content resolves from the PR's HEAD
   branch, not the base branch and not a merge of both — a fix merged to `dev` does not apply to
   a PR whose head is `main`, even after a fresh `pull_request: edited` event.
 - `gh api` PATCH vs PUT matters for rulesets — a partial update needs `PUT` with the full rule
