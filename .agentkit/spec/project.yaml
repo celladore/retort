@@ -263,7 +263,7 @@ branchProtection:
 testing:
   unit: [vitest] # e.g. [vitest, xunit, pytest]
   integration: [vitest] # e.g. [vitest, supertest, testcontainers]
-  e2e: [] # e.g. [playwright, cypress]
+  e2e: [playwright] # e.g. [playwright, cypress]
   coverage: 80 # Target coverage percentage (0-100)
   mutation: null # e.g. stryker, pitest — mutation testing tool (null to disable)
   staticAnalysis: [semgrep] # e.g. [semgrep, eslint, sonarqube] — static analysis tools
