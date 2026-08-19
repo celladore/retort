@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 12,
+    "bugfix": 13,
     "feature": 5,
     "migration": 1,
     "issue": 1,
@@ -135,6 +135,14 @@
       "date": "2026-08-19",
       "pr": "",
       "file": "bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md"
+    },
+    {
+      "number": 12,
+      "type": "bugfix",
+      "title": "Reverse-merge PR blocked by main-to-main branch-rules check",
+      "date": "2026-08-19",
+      "pr": "622",
+      "file": "bug-fixes/0012-2026-08-19-reverse-merge-pr-blocked-by-main-to-main-branch-rules-check-bugfix.md"
     }
   ]
 }
