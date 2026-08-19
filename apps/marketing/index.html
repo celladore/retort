@@ -1,0 +1,2159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>retort — One YAML spec, every AI agent config</title>
+    <meta
+      name="description"
+      content="Describe your project, teams, commands and rules once. retort sync generates project-aware AI agent configs for Claude Code, Cursor, Copilot, Gemini CLI and a dozen more — instead of hand-maintaining each one until they drift apart."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%231976D2'/%3E%3Crect x='9' y='9' width='6' height='6' rx='1.5' fill='%23FFD54F'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #fff;
+        --surface: #f4f6f8;
+        --card: #fff;
+        --deep: #18232a;
+        --fg: #222a30;
+        --muted: #474e57;
+        --headerBg: rgba(255, 255, 255, 0.88);
+        --lineSoft: rgba(34, 42, 48, 0.08);
+        --line: rgba(34, 42, 48, 0.1);
+        --lineStrong: rgba(34, 42, 48, 0.18);
+        --accentText: #1976d2;
+      }
+      body[data-theme='dark'] {
+        --bg: #18232a;
+        --surface: #1f2c34;
+        --card: #23303a;
+        --deep: #101a20;
+        --fg: #f7f9fb;
+        --muted: #c4cdd4;
+        --headerBg: rgba(24, 35, 42, 0.9);
+        --lineSoft: rgba(247, 249, 251, 0.08);
+        --line: rgba(247, 249, 251, 0.12);
+        --lineStrong: rgba(247, 249, 251, 0.22);
+        --accentText: #7fc0f5;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--muted);
+        font-family: Inter, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: #1976d2;
+        text-decoration: none;
+      }
+      a:hover {
+        color: #155fa8;
+        text-decoration: underline;
+      }
+      :focus-visible {
+        outline: 2px solid #1976d2;
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      button {
+        font-family: inherit;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .r-fade {
+          transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            border-color 0.18s ease,
+            background 0.18s ease,
+            color 0.18s ease;
+        }
+      }
+      .r-fade:hover {
+        background: var(--r-hover-bg, inherit);
+        border-color: var(--r-hover-border, inherit);
+        color: var(--r-hover-color, inherit);
+        transform: var(--r-hover-transform, none);
+      }
+    </style>
+  </head>
+  <body>
+    <div style="width: 100%; background: var(--card)">
+      <header
+        style="
+          position: sticky;
+          top: 0;
+          z-index: 20;
+          background: var(--headerBg);
+          backdrop-filter: blur(8px);
+          border-bottom: 1px solid var(--lineSoft);
+        "
+      >
+        <div
+          style="
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div
+              style="
+                width: 22px;
+                height: 22px;
+                border-radius: 4px;
+                background: #1976d2;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <div style="width: 8px; height: 8px; border-radius: 2px; background: #ffd54f"></div>
+            </div>
+            <span
+              style="
+                font:
+                  600 16px/1 Inter,
+                  sans-serif;
+                color: var(--fg);
+                letter-spacing: -0.01em;
+              "
+              >retort</span
+            >
+            <span
+              style="
+                font:
+                  500 11px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--muted);
+                background: var(--surface);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                padding: 4px 6px;
+              "
+              >v1.0.0</span
+            >
+          </div>
+          <nav
+            style="
+              margin-left: auto;
+              display: flex;
+              align-items: center;
+              gap: 28px;
+              font:
+                500 14px/1 Inter,
+                sans-serif;
+            "
+          >
+            <a href="#how" style="color: var(--muted)">How it works</a>
+            <a href="#targets" style="color: var(--muted)">Targets</a>
+            <a href="#quickstart" style="color: var(--muted)">Quick start</a>
+            <button
+              type="button"
+              id="theme-toggle"
+              aria-pressed="false"
+              aria-label="Toggle dark mode"
+              class="r-fade"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: var(--surface);
+                border: 1px solid var(--line);
+                border-radius: 100px;
+                padding: 7px 12px 7px 8px;
+                cursor: pointer;
+                font:
+                  500 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--muted);
+                --r-hover-border: #1976d2;
+                --r-hover-color: var(--fg);
+              "
+            >
+              <span
+                id="theme-dot"
+                style="
+                  width: 14px;
+                  height: 14px;
+                  border-radius: 50%;
+                  background: #222a30;
+                  display: block;
+                "
+              ></span
+              ><span id="theme-label">dark</span>
+            </button>
+            <a
+              href="https://github.com/phoenixvc/retort"
+              style="
+                color: var(--fg);
+                border: 1px solid var(--lineStrong);
+                border-radius: 8px;
+                padding: 9px 14px;
+              "
+              >GitHub</a
+            >
+          </nav>
+        </div>
+      </header>
+
+      <section
+        style="
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 88px 32px 72px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 56px;
+          align-items: center;
+        "
+      >
+        <div style="flex: 1 1 460px; min-width: 320px; max-width: 560px">
+          <div
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: 100px;
+              padding: 6px 12px 6px 8px;
+              margin-bottom: 24px;
+            "
+          >
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #23bfaa"></span>
+            <span
+              style="
+                font:
+                  500 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--muted);
+              "
+              >16 generated targets · one spec</span
+            >
+          </div>
+          <h1
+            style="
+              margin: 0 0 20px;
+              font:
+                600 clamp(36px, 4.4vw, 48px)/1.1 Inter,
+                sans-serif;
+              letter-spacing: -0.025em;
+              color: var(--fg);
+              text-wrap: balance;
+            "
+          >
+            One YAML spec.<br />Consistent AI agent configs for every tool your team uses.
+          </h1>
+          <p
+            style="
+              margin: 0 0 32px;
+              font:
+                400 17px/1.6 Inter,
+                sans-serif;
+              color: var(--muted);
+              max-width: 46ch;
+              text-wrap: pretty;
+            "
+          >
+            Describe your project, teams, commands and rules once.
+            <span
+              style="
+                font:
+                  500 15px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--fg);
+              "
+              >retort sync</span
+            >
+            generates project-aware configs for Claude Code, Cursor, Copilot, Gemini CLI and a dozen
+            more — instead of hand-maintaining each one until they
+            <span
+              style="
+                background: #ffd54f;
+                color: #222a30;
+                padding: 1px 5px;
+                border-radius: 4px;
+                box-decoration-break: clone;
+                -webkit-box-decoration-break: clone;
+              "
+              >drift apart</span
+            >.
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px">
+            <a
+              href="#quickstart"
+              class="r-fade"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                background: #1976d2;
+                color: #fff;
+                border-radius: 8px;
+                padding: 14px 20px;
+                font:
+                  500 15px/1 Inter,
+                  sans-serif;
+                box-shadow: 0 1px 2px rgba(25, 118, 210, 0.3);
+                --r-hover-bg: #155fa8;
+              "
+            >
+              <span
+                style="
+                  font:
+                    500 14px/1 'IBM Plex Mono',
+                    monospace;
+                "
+                >pnpm -C .agentkit retort:init</span
+              >
+              <span style="opacity: 0.7">→</span>
+            </a>
+            <a
+              href="https://github.com/phoenixvc/retort"
+              class="r-fade"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--fg);
+                border: 1px solid var(--lineStrong);
+                border-radius: 8px;
+                padding: 14px 20px;
+                font:
+                  500 15px/1 Inter,
+                  sans-serif;
+                background: var(--card);
+                --r-hover-border: #23bfaa;
+              "
+              >View on GitHub</a
+            >
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px 20px;
+              font:
+                400 13px/1.5 Inter,
+                sans-serif;
+              color: var(--muted);
+            "
+          >
+            <span style="display: flex; align-items: center; gap: 7px"
+              ><span style="width: 5px; height: 5px; border-radius: 50%; background: #1976d2"></span
+              >Idempotent sync</span
+            >
+            <span style="display: flex; align-items: center; gap: 7px"
+              ><span style="width: 5px; height: 5px; border-radius: 50%; background: #23bfaa"></span
+              >Drift detection on generated files</span
+            >
+            <span style="display: flex; align-items: center; gap: 7px"
+              ><span style="width: 5px; height: 5px; border-radius: 50%; background: #fd8369"></span
+              >80% test coverage, CI quality gates</span
+            >
+          </div>
+        </div>
+
+        <div style="flex: 1 1 440px; min-width: 320px">
+          <div
+            style="
+              background: var(--deep);
+              border-radius: 16px;
+              padding: 18px;
+              box-shadow:
+                0 24px 48px -24px rgba(34, 42, 48, 0.4),
+                0 2px 6px rgba(34, 42, 48, 0.12);
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; padding: 2px 6px 14px">
+              <span
+                style="width: 10px; height: 10px; border-radius: 50%; background: #fd8369"
+              ></span>
+              <span
+                style="width: 10px; height: 10px; border-radius: 50%; background: #ffd54f"
+              ></span>
+              <span
+                style="width: 10px; height: 10px; border-radius: 50%; background: #23bfaa"
+              ></span>
+              <span
+                style="
+                  margin-left: 8px;
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: #8a97a0;
+                "
+                >.agentkit/spec/project.yaml</span
+              >
+            </div>
+            <!-- prettier-ignore -->
+            <div
+              style="
+                background: #23303a;
+                border-radius: 8px;
+                padding: 18px;
+                overflow: auto;
+                font:
+                  400 13px/1.75 'IBM Plex Mono',
+                  monospace;
+                color: #f7f9fb;
+                white-space: pre;
+              "
+            >
+              <div style="color: #8a97a0"># describe the project once</div>
+              <div><span style="color: #23bfaa">name</span>: retort</div>
+              <div><span style="color: #23bfaa">language</span>: typescript</div>
+              <div><span style="color: #23bfaa">packageManager</span>: pnpm</div>
+              <div><span style="color: #23bfaa">commands</span>:</div>
+              <div><span style="color: #23bfaa">test</span>: <span style="color: #ffd54f">pnpm test --coverage</span></div>
+              <div><span style="color: #23bfaa">lint</span>: <span style="color: #ffd54f">pnpm lint</span></div>
+              <div><span style="color: #23bfaa">rules</span>:</div>
+              <div>- <span style="color: #ffd54f">never edit generated/ by hand</span></div>
+              <div>- <span style="color: #ffd54f">conventional commits</span></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 14px 6px 12px">
+              <span
+                style="
+                  font:
+                    500 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  background: rgba(25, 118, 210, 0.22);
+                  border: 1px solid rgba(25, 118, 210, 0.5);
+                  border-radius: 6px;
+                  padding: 6px 8px;
+                "
+                >retort sync</span
+              >
+              <span
+                style="
+                  flex: 1;
+                  height: 1px;
+                  background: linear-gradient(
+                    90deg,
+                    rgba(25, 118, 210, 0.6),
+                    rgba(35, 191, 170, 0.5)
+                  );
+                "
+              ></span>
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: #8a97a0;
+                "
+                >16 files written</span
+              >
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px">
+              <span
+                style="
+                  font:
+                    400 12px/1.4 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >CLAUDE.md</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1.4 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >.cursor/rules/</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1.4 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >GEMINI.md</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1.4 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >.windsurf/rules/</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1.4 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >copilot-instructions.md</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1.4 'IBM Plex Mono',
+                    monospace;
+                  color: #8a97a0;
+                  background: rgba(247, 249, 251, 0.04);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >+ 11 more</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="how"
+        style="
+          background: var(--surface);
+          border-top: 1px solid var(--lineSoft);
+          border-bottom: 1px solid var(--lineSoft);
+        "
+      >
+        <div style="max-width: 1200px; margin: 0 auto; padding: 80px 32px">
+          <div style="max-width: 620px; margin-bottom: 44px">
+            <span
+              style="
+                font:
+                  500 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--accentText);
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+              "
+              >How it works</span
+            >
+            <h2
+              style="
+                margin: 14px 0 12px;
+                font:
+                  600 32px/1.2 Inter,
+                  sans-serif;
+                letter-spacing: -0.02em;
+                color: var(--fg);
+              "
+            >
+              Spec in, generated configs out
+            </h2>
+            <p
+              style="
+                margin: 0;
+                font:
+                  400 16px/1.6 Inter,
+                  sans-serif;
+                color: var(--muted);
+                text-wrap: pretty;
+              "
+            >
+              Four steps, all of them repeatable. Sync is idempotent, so running it twice changes
+              nothing and CI can fail the build when a generated file has drifted from the spec.
+            </p>
+          </div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+              gap: 16px;
+            "
+          >
+            <div
+              class="r-fade"
+              style="
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 24px;
+                --r-hover-border: rgba(25, 118, 210, 0.4);
+                --r-hover-transform: translateY(-2px);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 18px;
+                "
+              >
+                <span
+                  style="
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
+                    background: #1976d2;
+                    color: #fff;
+                    font:
+                      600 13px/28px Inter,
+                      sans-serif;
+                    text-align: center;
+                  "
+                  >1</span
+                >
+                <span
+                  style="
+                    font:
+                      400 11px/1 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                  "
+                  >.agentkit/spec/*.yaml</span
+                >
+              </div>
+              <h3
+                style="
+                  margin: 0 0 8px;
+                  font:
+                    600 17px/1.3 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+              >
+                Describe
+              </h3>
+              <p
+                style="
+                  margin: 0;
+                  font:
+                    400 14px/1.6 Inter,
+                    sans-serif;
+                  color: var(--muted);
+                "
+              >
+                project.yaml, teams.yaml, commands.yaml and rules.yaml hold the facts about your
+                repo — stack, owners, scripts, conventions.
+              </p>
+            </div>
+            <div
+              class="r-fade"
+              style="
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 24px;
+                --r-hover-border: rgba(25, 118, 210, 0.4);
+                --r-hover-transform: translateY(-2px);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 18px;
+                "
+              >
+                <span
+                  style="
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
+                    background: #1976d2;
+                    color: #fff;
+                    font:
+                      600 13px/28px Inter,
+                      sans-serif;
+                    text-align: center;
+                  "
+                  >2</span
+                >
+                <span
+                  style="
+                    font:
+                      400 11px/1 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                  "
+                  >retort validate</span
+                >
+              </div>
+              <h3
+                style="
+                  margin: 0 0 8px;
+                  font:
+                    600 17px/1.3 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+              >
+                Validate
+              </h3>
+              <p
+                style="
+                  margin: 0;
+                  font:
+                    400 14px/1.6 Inter,
+                    sans-serif;
+                  color: var(--muted);
+                "
+              >
+                The spec is schema-checked before anything is written, so a typo surfaces as an
+                error instead of a broken agent config.
+              </p>
+            </div>
+            <div
+              class="r-fade"
+              style="
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 24px;
+                --r-hover-border: rgba(25, 118, 210, 0.4);
+                --r-hover-transform: translateY(-2px);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 18px;
+                "
+              >
+                <span
+                  style="
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
+                    background: #23bfaa;
+                    color: #18232a;
+                    font:
+                      600 13px/28px Inter,
+                      sans-serif;
+                    text-align: center;
+                  "
+                  >3</span
+                >
+                <span
+                  style="
+                    font:
+                      400 11px/1 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                  "
+                  >retort sync</span
+                >
+              </div>
+              <h3
+                style="
+                  margin: 0 0 8px;
+                  font:
+                    600 17px/1.3 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+              >
+                Sync
+              </h3>
+              <p
+                style="
+                  margin: 0;
+                  font:
+                    400 14px/1.6 Inter,
+                    sans-serif;
+                  color: var(--muted);
+                "
+              >
+                One pass renders every enabled target to its native location and format. Same spec,
+                same output, every time.
+              </p>
+            </div>
+            <div
+              class="r-fade"
+              style="
+                background: var(--card);
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 24px;
+                --r-hover-border: rgba(25, 118, 210, 0.4);
+                --r-hover-transform: translateY(-2px);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 18px;
+                "
+              >
+                <span
+                  style="
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
+                    background: #fd8369;
+                    color: #18232a;
+                    font:
+                      600 13px/28px Inter,
+                      sans-serif;
+                    text-align: center;
+                  "
+                  >4</span
+                >
+                <span
+                  style="
+                    font:
+                      400 11px/1 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                  "
+                  >retort check</span
+                >
+              </div>
+              <h3
+                style="
+                  margin: 0 0 8px;
+                  font:
+                    600 17px/1.3 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+              >
+                Commit &amp; guard
+              </h3>
+              <p
+                style="
+                  margin: 0;
+                  font:
+                    400 14px/1.6 Inter,
+                    sans-serif;
+                  color: var(--muted);
+                "
+              >
+                Generated files are committed like any other artifact. Drift detection in CI catches
+                hand-edits before they diverge.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="targets" style="max-width: 1200px; margin: 0 auto; padding: 80px 32px">
+        <div
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 36px;
+          "
+        >
+          <div style="max-width: 560px">
+            <span
+              style="
+                font:
+                  500 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--accentText);
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+              "
+              >Supported targets</span
+            >
+            <h2
+              style="
+                margin: 14px 0 12px;
+                font:
+                  600 32px/1.2 Inter,
+                  sans-serif;
+                letter-spacing: -0.02em;
+                color: var(--fg);
+              "
+            >
+              16 config targets, generated in their native format
+            </h2>
+            <p
+              style="
+                margin: 0;
+                font:
+                  400 16px/1.6 Inter,
+                  sans-serif;
+                color: var(--muted);
+                text-wrap: pretty;
+              "
+            >
+              Each target gets the file it expects, in the place it looks for it. Enable or disable
+              any of them per repo.
+            </p>
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 20px;
+              font:
+                400 13px/1.4 Inter,
+                sans-serif;
+              color: var(--muted);
+              padding-bottom: 4px;
+            "
+          >
+            <span style="display: flex; flex-direction: column; gap: 4px"
+              ><span
+                style="
+                  font:
+                    600 20px/1 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+                >16</span
+              >files written</span
+            >
+            <span style="width: 1px; background: var(--line)"></span>
+            <span style="display: flex; flex-direction: column; gap: 4px"
+              ><span
+                style="
+                  font:
+                    600 20px/1 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+                >13</span
+              >integrations</span
+            >
+            <span style="width: 1px; background: var(--line)"></span>
+            <span style="display: flex; flex-direction: column; gap: 4px"
+              ><span
+                style="
+                  font:
+                    600 20px/1 Inter,
+                    sans-serif;
+                  color: var(--fg);
+                "
+                >0</span
+              >manual edits</span
+            >
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 28px" id="targets-groups">
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px">
+              <span
+                style="
+                  font:
+                    500 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: var(--fg);
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+                >Agents</span
+              >
+              <span style="flex: 1; height: 1px; background: var(--line)"></span>
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: var(--muted);
+                "
+                >10 targets</span
+              >
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+                gap: 12px;
+              "
+            >
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Claude Code</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  CLAUDE.md
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Cursor</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .cursor/rules/*.mdc
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Windsurf</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .windsurf/rules/
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >GitHub Copilot</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .github/copilot-instructions.md
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Gemini CLI</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  GEMINI.md
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Codex</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  AGENTS.md
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Junie</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .junie/guidelines.md
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Cline</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .clinerules/
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Roo</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .roo/rules/
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Warp</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  WARP.md
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px">
+              <span
+                style="
+                  font:
+                    500 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: var(--fg);
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+                >Editors &amp; CI</span
+              >
+              <span style="flex: 1; height: 1px; background: var(--line)"></span>
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: var(--muted);
+                "
+                >3 targets</span
+              >
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+                gap: 12px;
+              "
+            >
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >VS Code</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .vscode/settings.json
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >VS Code extensions</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .vscode/extensions.json
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >GitHub Actions</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .github/workflows/
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px">
+              <span
+                style="
+                  font:
+                    500 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: var(--fg);
+                  letter-spacing: 0.04em;
+                  text-transform: uppercase;
+                "
+                >Protocols &amp; docs</span
+              >
+              <span style="flex: 1; height: 1px; background: var(--line)"></span>
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: var(--muted);
+                "
+                >3 targets</span
+              >
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+                gap: 12px;
+              "
+            >
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >MCP</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .mcp/servers.json
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >A2A</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  .mcp/a2a-config.json
+                </div>
+              </div>
+              <div
+                class="r-fade"
+                style="
+                  background: var(--card);
+                  padding: 20px;
+                  border: 1px solid var(--line);
+                  border-radius: 12px;
+                  --r-hover-bg: var(--surface);
+                  --r-hover-border: rgba(25, 118, 210, 0.4);
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
+                  <span
+                    style="width: 6px; height: 6px; border-radius: 2px; background: #1976d2"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        600 15px/1.2 Inter,
+                        sans-serif;
+                      color: var(--fg);
+                    "
+                    >Docs</span
+                  >
+                </div>
+                <div
+                  style="
+                    font:
+                      400 12px/1.5 'IBM Plex Mono',
+                      monospace;
+                    color: var(--muted);
+                    word-break: break-all;
+                  "
+                >
+                  docs/agents/
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p
+          style="
+            margin: 20px 0 0;
+            font:
+              400 13px/1.6 Inter,
+              sans-serif;
+            color: var(--muted);
+            max-width: 70ch;
+          "
+        >
+          Targets are counted as written files: a few tools receive more than one artifact — rules
+          plus editor settings, for instance — which is how thirteen integrations produce sixteen
+          generated files.
+        </p>
+      </section>
+
+      <section id="quickstart" style="background: var(--deep)">
+        <div
+          style="
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 56px;
+            align-items: center;
+          "
+        >
+          <div style="flex: 1 1 380px; min-width: 300px; max-width: 460px">
+            <span
+              style="
+                font:
+                  500 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: #23bfaa;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+              "
+              >Quick start</span
+            >
+            <h2
+              style="
+                margin: 14px 0 14px;
+                font:
+                  600 32px/1.2 Inter,
+                  sans-serif;
+                letter-spacing: -0.02em;
+                color: #f7f9fb;
+              "
+            >
+              Four commands from empty repo to synced configs
+            </h2>
+            <p
+              style="
+                margin: 0 0 28px;
+                font:
+                  400 16px/1.6 Inter,
+                  sans-serif;
+                color: #c4cdd4;
+                text-wrap: pretty;
+              "
+            >
+              No global install, no config server, nothing to host. The spec and the generated files
+              live in your repository.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 12px">
+              <div style="display: flex; gap: 12px; align-items: flex-start">
+                <span
+                  style="
+                    font:
+                      500 12px/1.6 'IBM Plex Mono',
+                      monospace;
+                    color: #23bfaa;
+                  "
+                  >01</span
+                ><span
+                  style="
+                    font:
+                      400 14px/1.6 Inter,
+                      sans-serif;
+                    color: #c4cdd4;
+                  "
+                  >Scaffold the four spec files with sensible defaults detected from your
+                  repo.</span
+                >
+              </div>
+              <div style="display: flex; gap: 12px; align-items: flex-start">
+                <span
+                  style="
+                    font:
+                      500 12px/1.6 'IBM Plex Mono',
+                      monospace;
+                    color: #23bfaa;
+                  "
+                  >02</span
+                ><span
+                  style="
+                    font:
+                      400 14px/1.6 Inter,
+                      sans-serif;
+                    color: #c4cdd4;
+                  "
+                  >Edit the YAML, then validate before generating anything.</span
+                >
+              </div>
+              <div style="display: flex; gap: 12px; align-items: flex-start">
+                <span
+                  style="
+                    font:
+                      500 12px/1.6 'IBM Plex Mono',
+                      monospace;
+                    color: #23bfaa;
+                  "
+                  >03</span
+                ><span
+                  style="
+                    font:
+                      400 14px/1.6 Inter,
+                      sans-serif;
+                    color: #c4cdd4;
+                  "
+                  >Sync, review the diff, commit the generated configs.</span
+                >
+              </div>
+              <div style="display: flex; gap: 12px; align-items: flex-start">
+                <span
+                  style="
+                    font:
+                      500 12px/1.6 'IBM Plex Mono',
+                      monospace;
+                    color: #23bfaa;
+                  "
+                  >04</span
+                ><span
+                  style="
+                    font:
+                      400 14px/1.6 Inter,
+                      sans-serif;
+                    color: #c4cdd4;
+                  "
+                  >Add
+                  <span style="font-family: 'IBM Plex Mono', monospace; color: #f7f9fb"
+                    >retort check</span
+                  >
+                  to CI for quality gates, and diff sync output there to catch drift before it
+                  merges.</span
+                >
+              </div>
+            </div>
+          </div>
+          <div style="flex: 1 1 460px; min-width: 320px">
+            <div
+              style="
+                background: #23303a;
+                border: 1px solid rgba(247, 249, 251, 0.1);
+                border-radius: 16px;
+                overflow: hidden;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding: 14px 18px;
+                  border-bottom: 1px solid rgba(247, 249, 251, 0.1);
+                "
+              >
+                <span
+                  style="
+                    font:
+                      400 12px/1 'IBM Plex Mono',
+                      monospace;
+                    color: #8a97a0;
+                  "
+                  >terminal</span
+                >
+                <button
+                  type="button"
+                  id="copy-btn"
+                  class="r-fade"
+                  style="
+                    font:
+                      500 11px/1 'IBM Plex Mono',
+                      monospace;
+                    color: #f7f9fb;
+                    background: transparent;
+                    border: 1px solid rgba(247, 249, 251, 0.2);
+                    border-radius: 6px;
+                    padding: 6px 8px;
+                    cursor: pointer;
+                    --r-hover-border: #23bfaa;
+                  "
+                >
+                  copy
+                </button>
+              </div>
+              <!-- prettier-ignore -->
+              <div
+                style="
+                  padding: 20px;
+                  overflow: auto;
+                  font:
+                    400 13.5px/2 'IBM Plex Mono',
+                    monospace;
+                  color: #f7f9fb;
+                  white-space: pre;
+                "
+                id="terminal-block"
+              >
+                <div><span style="color: #23bfaa">$</span> pnpm -C .agentkit retort:init</div>
+                <div style="color: #8a97a0">created .agentkit/spec/{project,teams,commands,rules}.yaml</div>
+                <div style="height: 16px"></div>
+                <div><span style="color: #23bfaa">$</span> pnpm -C .agentkit retort:validate</div>
+                <div style="color: #8a97a0">spec ok — 13 integrations enabled</div>
+                <div style="height: 16px"></div>
+                <div><span style="color: #23bfaa">$</span> pnpm -C .agentkit retort:sync</div>
+                <div style="color: #8a97a0">wrote 16 files · 0 unchanged skipped</div>
+                <div style="height: 16px"></div>
+                <div><span style="color: #23bfaa">$</span> pnpm -C .agentkit retort:check</div>
+                <div style="color: #8a97a0">format · lint · typecheck · test · build — all green</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px">
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: #c4cdd4;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >node ≥ 22</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: #c4cdd4;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >zero runtime deps in generated output</span
+              >
+              <span
+                style="
+                  font:
+                    400 12px/1 'IBM Plex Mono',
+                    monospace;
+                  color: #c4cdd4;
+                  background: rgba(247, 249, 251, 0.06);
+                  border-radius: 6px;
+                  padding: 8px 10px;
+                "
+                >MIT</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width: 1200px; margin: 0 auto; padding: 80px 32px 0">
+        <div
+          style="
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 48px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+          "
+        >
+          <div style="max-width: 520px">
+            <h2
+              style="
+                margin: 0 0 10px;
+                font:
+                  600 28px/1.25 Inter,
+                  sans-serif;
+                letter-spacing: -0.02em;
+                color: var(--fg);
+              "
+            >
+              Try it on one repo
+            </h2>
+            <p
+              style="
+                margin: 0;
+                font:
+                  400 16px/1.6 Inter,
+                  sans-serif;
+                color: var(--muted);
+                text-wrap: pretty;
+              "
+            >
+              Run it against an existing project, read the generated diff, keep it or delete it.
+              Nothing outside your working tree changes.
+            </p>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px">
+            <a
+              href="#quickstart"
+              class="r-fade"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                background: #1976d2;
+                color: #fff;
+                border-radius: 8px;
+                padding: 14px 20px;
+                font:
+                  500 15px/1 'IBM Plex Mono',
+                  monospace;
+                --r-hover-bg: #155fa8;
+              "
+              >pnpm -C .agentkit retort:init</a
+            >
+            <a
+              href="https://github.com/phoenixvc/retort#readme"
+              class="r-fade"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--fg);
+                border: 1px solid var(--lineStrong);
+                border-radius: 8px;
+                padding: 14px 20px;
+                font:
+                  500 15px/1 Inter,
+                  sans-serif;
+                background: var(--card);
+                --r-hover-border: #23bfaa;
+              "
+              >Read the docs</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <footer style="max-width: 1200px; margin: 0 auto; padding: 56px 32px 48px">
+        <div
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--line);
+            padding-top: 28px;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div
+              style="
+                width: 18px;
+                height: 18px;
+                border-radius: 4px;
+                background: #1976d2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <div style="width: 6px; height: 6px; border-radius: 2px; background: #ffd54f"></div>
+            </div>
+            <span
+              style="
+                font:
+                  600 14px/1 Inter,
+                  sans-serif;
+                color: var(--fg);
+              "
+              >retort</span
+            >
+            <span
+              style="
+                font:
+                  400 13px/1 Inter,
+                  sans-serif;
+                color: var(--muted);
+              "
+              >Spec-driven AI agent configuration</span
+            >
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              gap: 20px;
+              font:
+                400 13px/1 Inter,
+                sans-serif;
+            "
+          >
+            <a href="https://github.com/phoenixvc/retort" style="color: var(--muted)">GitHub</a>
+            <a href="#targets" style="color: var(--muted)">Targets</a>
+            <a href="#quickstart" style="color: var(--muted)">Quick start</a>
+            <span
+              style="
+                font:
+                  400 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--muted);
+                background: var(--surface);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                padding: 5px 7px;
+              "
+              >MIT</span
+            >
+            <span
+              style="
+                font:
+                  400 12px/1 'IBM Plex Mono',
+                  monospace;
+                color: var(--muted);
+                background: var(--surface);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                padding: 5px 7px;
+              "
+              >v1.0.0</span
+            >
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var THEME_KEY = 'retort-theme';
+        var dotEl = document.getElementById('theme-dot');
+        var labelEl = document.getElementById('theme-label');
+        var toggleBtn = document.getElementById('theme-toggle');
+
+        function applyTheme(dark) {
+          document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
+          document.body.style.colorScheme = dark ? 'dark' : 'light';
+          toggleBtn.setAttribute('aria-pressed', String(dark));
+          labelEl.textContent = dark ? 'light' : 'dark';
+          dotEl.style.background = dark ? '#FFD54F' : '#222A30';
+        }
+
+        var saved = null;
+        try {
+          saved = localStorage.getItem(THEME_KEY);
+        } catch (e) {}
+        applyTheme(saved === 'dark');
+
+        toggleBtn.addEventListener('click', function () {
+          var next = document.body.getAttribute('data-theme') !== 'dark';
+          try {
+            localStorage.setItem(THEME_KEY, next ? 'dark' : 'light');
+          } catch (e) {}
+          applyTheme(next);
+        });
+
+        var copyBtn = document.getElementById('copy-btn');
+        var terminalBlock = document.getElementById('terminal-block');
+        if (copyBtn && terminalBlock && navigator.clipboard) {
+          copyBtn.addEventListener('click', function () {
+            var text = terminalBlock.innerText
+              .replace(/^\s*\$\s?/gm, '')
+              .split('\n')
+              .filter(function (l) {
+                return (
+                  l.trim().length &&
+                  !l.trim().startsWith('created') &&
+                  !l.includes('—') &&
+                  !l.includes('wrote') &&
+                  !l.includes('spec ok')
+                );
+              })
+              .join('\n');
+            navigator.clipboard.writeText(text).then(function () {
+              var original = copyBtn.textContent;
+              copyBtn.textContent = 'copied';
+              setTimeout(function () {
+                copyBtn.textContent = original;
+              }, 1500);
+            });
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

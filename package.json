@@ -19,6 +19,8 @@
     "test:coverage": "node scripts/preflight-capacity.mjs && pnpm test:start:coverage && pnpm -C .agentkit coverage",
     "test:start": "vitest run --config vitest.config.mjs",
     "test:start:coverage": "vitest run --config vitest.config.mjs --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "build": "pnpm -C .agentkit retort:validate",
     "lint:md": "pnpm -C .agentkit lint:md",
     "lint:md:fix": "pnpm -C .agentkit lint:md:fix",
@@ -43,6 +45,7 @@
     "react": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@vitest/coverage-v8": "4.1.0",
     "esbuild": "0.28.1",
     "ink-testing-library": "4.0.0",
