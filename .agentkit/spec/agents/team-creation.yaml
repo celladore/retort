@@ -61,6 +61,9 @@ team-creation:
     role: >
       Designs individual agent roles, responsibilities, dependencies, and notification chains for a new team. Produces
       complete agent entries for agents.yaml following the established schema.
+    dispatch:
+      # aicost-model-routing: a badly designed role is inherited by every repo
+      model: opus
     accepts:
       - plan
     depends-on:
@@ -147,6 +150,9 @@ team-creation:
     role: >
       Quality gate — validates the complete team spec for consistency, conflicts, and completeness. Cross-references
       agents, teams, and commands to ensure everything is properly wired.
+    dispatch:
+      # aicost-model-routing: last gate before a spec ships downstream
+      model: opus
     accepts:
       - review
       - investigate

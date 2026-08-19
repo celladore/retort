@@ -57,9 +57,31 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: .agentkit
 
-      - name: Run tests with coverage
-        run: pnpm coverage
-        working-directory: .agentkit
+      # Advisory on hosted runners: the ci profile uses a much lower disk floor
+      # than a developer host and never blocks (see scripts/preflight-capacity.mjs).
+      # It exists so a capacity-shaped failure is visible in the log as capacity
+      # rather than as a suite of unrelated test errors. Set
+      # RETORT_PREFLIGHT_ENFORCE=1 to make it blocking.
+      - name: Capacity preflight
+        run: node scripts/preflight-capacity.mjs --profile=ci
+
+      # Root suite runs without --coverage: its coverage thresholds (vitest.config.mjs)
+      # cover src/start/** too, which currently sits well under 80% branch coverage
+      # for reasons unrelated to this suite. Wiring --coverage in here would flip a
+      # required check red over a pre-existing, out-of-scope gap. `pnpm test:coverage`
+      # remains available locally once that gap is addressed on its own.
+      #
+      # Two steps, not one `&&`-chained run: line, and the second is forced to run
+      # even after the first fails. A single `&&` step means a root-suite failure
+      # skips .agentkit's suite entirely, so it never writes test-results/results.json
+      # — and the Reconcile step below then fails on a missing report instead of on
+      # the real failure, hiding the actual signal behind a second, misleading one.
+      - name: Run root suite
+        run: pnpm test:start
+
+      - name: Run .agentkit tests with coverage
+        if: success() || failure()
+        run: pnpm -C .agentkit coverage
 
       # Machine-readable per-test results (ADR-12 decision 5). Console scrollback
       # is not inspectable after the fact; these are. Uploaded before the

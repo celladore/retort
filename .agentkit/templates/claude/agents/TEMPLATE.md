@@ -1,6 +1,17 @@
+---
+name: {{agentDispatchName}}
+description: {{escapeYamlString agentDescription}}
+{{#if agentModel}}model: {{agentModel}}
+{{/if}}{{#if agentTools}}tools: {{agentTools}}
+{{/if}}{{#if agentDisallowedTools}}disallowedTools: {{agentDisallowedTools}}
+{{/if}}{{#if agentIsolation}}isolation: {{agentIsolation}}
+{{/if}}{{#if agentBackground}}background: {{agentBackground}}
+{{/if}}{{#if agentColor}}color: {{agentColor}}
+{{/if}}---
+
 <!-- generated_by: {{lastAgent}} | last_model: {{lastModel}} | last_updated: {{syncDate}} -->
-<!-- Format: Plain Markdown agent persona definition. -->
-<!-- Docs: https://docs.anthropic.com/en/docs/claude-code/memory -->
+<!-- Format: YAML frontmatter + Markdown body. Claude Code subagent definition. -->
+<!-- Docs: https://docs.anthropic.com/en/docs/claude-code/sub-agents -->
 
 # {{agentName}}
 

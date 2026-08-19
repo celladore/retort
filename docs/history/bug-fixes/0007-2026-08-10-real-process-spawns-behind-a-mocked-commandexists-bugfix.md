@@ -141,7 +141,7 @@ Both rewrites were mutation-checked rather than assumed.
 
 Restoring the old coverage fixture fails with:
 
-```
+```text
 AssertionError: expected [ 'node -e ""', 'node -e ""' ] to include 'npx vitest run --coverage'
 ```
 

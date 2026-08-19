@@ -1,4 +1,4 @@
-# ADR-08: Directive Classification — Type and Phase Scoping
+# ADR-14: Directive Classification — Type and Phase Scoping
 
 ## Status
 
@@ -154,4 +154,4 @@ conventions:
 - [rules.yaml](../../../.agentkit/spec/rules.yaml) — canonical rule definitions
 - [spec-validator.mjs](../../../.agentkit/engines/node/src/spec-validator.mjs) — schema validation
 - [synchronize.mjs](../../../.agentkit/engines/node/src/synchronize.mjs) — template rendering
-- [ADR-01: Adopt Retort](./01-adopt-retort.md)
+- [ADR-01: Adopt Retort](./01-adopt-agentkit-forge.md)

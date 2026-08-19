@@ -53,6 +53,9 @@ testing:
     role: >
       Test coverage analysis specialist monitoring code coverage metrics, identifying untested code paths, and enforcing
       coverage thresholds across the codebase.
+    dispatch:
+      # aicost-model-routing: reading coverage reports, not designing tests
+      model: haiku
     accepts:
       - investigate
       - review

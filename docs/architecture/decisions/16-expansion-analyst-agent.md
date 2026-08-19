@@ -1,4 +1,4 @@
-# ADR-08: Introduce Expansion Analyst Agent
+# ADR-16: Introduce Expansion Analyst Agent
 
 ## Status
 

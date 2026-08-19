@@ -577,7 +577,7 @@ drift detection across AI tooling. This is a first-mover opportunity.
 ### Related Documents
 
 - [ADR-07: Delivery Strategy (Refined)](../architecture/decisions/07-delivery-strategy.md)
-- [ADR-01: Adopt Retort](../architecture/decisions/01-adopt-retort.md)
+- [ADR-01: Adopt Retort](../architecture/decisions/01-adopt-agentkit-forge.md)
 - [ADR-03: Tooling Strategy](../architecture/decisions/03-tooling-strategy.md)
 - [Architecture Overview](../architecture/01_overview.md)
 - [PRD-001: LLM Decision Engine](PRD-001-llm-decision-engine.md)

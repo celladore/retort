@@ -40,23 +40,23 @@ This repository uses **Retort** to manage AI agent team workflows across multipl
 
 ## Quick Reference
 
-| Command                        | Purpose                                  |
-| ------------------------------ | ---------------------------------------- | -------------------------------------------- |
-| `/start`                       | New user entry point — guided next steps |
-| {{#if hasTeamOrchestration}}   | `/orchestrate`                           | Master coordinator — assess, plan, delegate  |
-| {{/if}}                        | `/discover`                              | Scan codebase, detect tech stacks            |
-| {{#if hasHealthcheck}}         | `/healthcheck`                           | Pre-flight validation                        |
-| {{/if}}{{#if hasCodeReview}}   | `/review`                                | Code review with quality gates               |
-| {{/if}}{{#if hasQualityGates}} | `/check`                                 | Universal quality gate (lint + test + build) |
-| {{/if}}                        | `/plan`                                  | Structured planning before implementation    |
-| `/build`                       | Build project (auto-detects stack)       |
-| `/test`                        | Run tests (auto-detects stack)           |
-| `/format`                      | Format code (auto-detects stack)         |
-| `/deploy`                      | Deployment automation                    |
-| `/security`                    | Security audit                           |
-| `/sync-backlog`                | Update AGENT_BACKLOG.md                  |
-| `/document-history`            | Create history doc for completed work    |
-| {{#if hasSessionHandoff}}      | `/handoff`                               | Session handoff summary                      |
+| Command | Purpose |
+| ------- | ------- |
+| `/start` | New user entry point — guided next steps |
+{{#if hasTeamOrchestration}}| `/orchestrate` | Master coordinator — assess, plan, delegate |
+{{/if}}| `/discover` | Scan codebase, detect tech stacks |
+{{#if hasHealthcheck}}| `/healthcheck` | Pre-flight validation |
+{{/if}}{{#if hasCodeReview}}| `/review` | Code review with quality gates |
+{{/if}}{{#if hasQualityGates}}| `/check` | Universal quality gate (lint + test + build) |
+{{/if}}| `/plan` | Structured planning before implementation |
+| `/build` | Build project (auto-detects stack) |
+| `/test` | Run tests (auto-detects stack) |
+| `/format` | Format code (auto-detects stack) |
+| `/deploy` | Deployment automation |
+| `/security` | Security audit |
+| `/sync-backlog` | Update AGENT_BACKLOG.md |
+| `/document-history` | Create history doc for completed work |
+{{#if hasSessionHandoff}}| `/handoff` | Session handoff summary |
 
 {{/if}}{{/if}}
 
