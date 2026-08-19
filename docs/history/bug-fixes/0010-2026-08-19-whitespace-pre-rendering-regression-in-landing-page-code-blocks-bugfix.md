@@ -9,7 +9,7 @@
 
 `apps/marketing/index.html` has two code-mockup blocks (a YAML spec preview
 in the hero, and a terminal-output walkthrough in Quick Start) styled with
-`white-space: pre`, which makes the browser render HTML *source*
+`white-space: pre`, which makes the browser render HTML _source_
 whitespace — indentation, line breaks — literally, exactly as if it were a
 `<pre>` element. A prior formatting pass ran Prettier's `--write` over the
 file to fix CI's Prettier check. Prettier reflows long or multi-span
@@ -72,7 +72,7 @@ Verified both quantitatively and visually, not just "tests still pass":
 `<!-- prettier-ignore -->` is a structural guard, not a one-time content
 fix — it prevents the next `prettier --write` from reintroducing the same
 class of bug on these two blocks specifically. It does not, on its own,
-prevent a similar bug on a *new* `white-space: pre` block added later
+prevent a similar bug on a _new_ `white-space: pre` block added later
 without the same annotation (see Prevention Measures).
 
 ## Impact Assessment
