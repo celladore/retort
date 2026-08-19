@@ -34,6 +34,7 @@
         --line: rgba(34, 42, 48, 0.1);
         --lineStrong: rgba(34, 42, 48, 0.18);
         --accentText: #1976d2;
+        --accentTeal: #0f766e;
       }
       body[data-theme='dark'] {
         --bg: #18232a;
@@ -47,6 +48,7 @@
         --line: rgba(247, 249, 251, 0.12);
         --lineStrong: rgba(247, 249, 251, 0.22);
         --accentText: #7fc0f5;
+        --accentTeal: #23bfaa;
       }
       body {
         margin: 0;
@@ -1676,7 +1678,14 @@
         </p>
       </section>
 
-      <section id="quickstart" style="background: var(--deep)">
+      <section
+        id="quickstart"
+        style="
+          background: var(--surface);
+          border-top: 1px solid var(--lineSoft);
+          border-bottom: 1px solid var(--lineSoft);
+        "
+      >
         <div
           style="
             max-width: 1200px;
@@ -1694,7 +1703,7 @@
                 font:
                   500 12px/1 'IBM Plex Mono',
                   monospace;
-                color: #23bfaa;
+                color: var(--accentTeal);
                 letter-spacing: 0.06em;
                 text-transform: uppercase;
               "
@@ -1707,7 +1716,7 @@
                   600 32px/1.2 Inter,
                   sans-serif;
                 letter-spacing: -0.02em;
-                color: #f7f9fb;
+                color: var(--fg);
               "
             >
               Four commands from empty repo to synced configs
@@ -1718,7 +1727,7 @@
                 font:
                   400 16px/1.6 Inter,
                   sans-serif;
-                color: #c4cdd4;
+                color: var(--muted);
                 text-wrap: pretty;
               "
             >
@@ -1732,7 +1741,7 @@
                     font:
                       500 12px/1.6 'IBM Plex Mono',
                       monospace;
-                    color: #23bfaa;
+                    color: var(--accentTeal);
                   "
                   >01</span
                 ><span
@@ -1740,7 +1749,7 @@
                     font:
                       400 14px/1.6 Inter,
                       sans-serif;
-                    color: #c4cdd4;
+                    color: var(--muted);
                   "
                   >Scaffold the four spec files with sensible defaults detected from your
                   repo.</span
@@ -1752,7 +1761,7 @@
                     font:
                       500 12px/1.6 'IBM Plex Mono',
                       monospace;
-                    color: #23bfaa;
+                    color: var(--accentTeal);
                   "
                   >02</span
                 ><span
@@ -1760,7 +1769,7 @@
                     font:
                       400 14px/1.6 Inter,
                       sans-serif;
-                    color: #c4cdd4;
+                    color: var(--muted);
                   "
                   >Edit the YAML, then validate before generating anything.</span
                 >
@@ -1771,7 +1780,7 @@
                     font:
                       500 12px/1.6 'IBM Plex Mono',
                       monospace;
-                    color: #23bfaa;
+                    color: var(--accentTeal);
                   "
                   >03</span
                 ><span
@@ -1779,7 +1788,7 @@
                     font:
                       400 14px/1.6 Inter,
                       sans-serif;
-                    color: #c4cdd4;
+                    color: var(--muted);
                   "
                   >Sync, review the diff, commit the generated configs.</span
                 >
@@ -1790,7 +1799,7 @@
                     font:
                       500 12px/1.6 'IBM Plex Mono',
                       monospace;
-                    color: #23bfaa;
+                    color: var(--accentTeal);
                   "
                   >04</span
                 ><span
@@ -1798,10 +1807,10 @@
                     font:
                       400 14px/1.6 Inter,
                       sans-serif;
-                    color: #c4cdd4;
+                    color: var(--muted);
                   "
                   >Add
-                  <span style="font-family: 'IBM Plex Mono', monospace; color: #f7f9fb"
+                  <span style="font-family: 'IBM Plex Mono', monospace; color: var(--fg)"
                     >retort check</span
                   >
                   to CI for quality gates, and diff sync output there to catch drift before it
@@ -1889,8 +1898,9 @@
                   font:
                     400 12px/1 'IBM Plex Mono',
                     monospace;
-                  color: #c4cdd4;
-                  background: rgba(247, 249, 251, 0.06);
+                  color: var(--muted);
+                  background: var(--card);
+                  border: 1px solid var(--line);
                   border-radius: 6px;
                   padding: 8px 10px;
                 "
@@ -1901,8 +1911,9 @@
                   font:
                     400 12px/1 'IBM Plex Mono',
                     monospace;
-                  color: #c4cdd4;
-                  background: rgba(247, 249, 251, 0.06);
+                  color: var(--muted);
+                  background: var(--card);
+                  border: 1px solid var(--line);
                   border-radius: 6px;
                   padding: 8px 10px;
                 "
@@ -1913,8 +1924,9 @@
                   font:
                     400 12px/1 'IBM Plex Mono',
                     monospace;
-                  color: #c4cdd4;
-                  background: rgba(247, 249, 251, 0.06);
+                  color: var(--muted);
+                  background: var(--card);
+                  border: 1px solid var(--line);
                   border-radius: 6px;
                   padding: 8px 10px;
                 "

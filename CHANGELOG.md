@@ -45,6 +45,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Windows test flakiness from subprocess startup cost ([#591](../../pull/591), [history](docs/history/bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md))
 - Tests passing without executing their subject ([#594](../../pull/594), [history](docs/history/bug-fixes/0009-2026-08-11-tests-passing-without-executing-their-subject-bugfix.md))
 - Whitespace-Pre Rendering Regression in Landing Page Code Blocks ([#616](../../pull/616), [history](docs/history/bug-fixes/0010-2026-08-19-whitespace-pre-rendering-regression-in-landing-page-code-blocks-bugfix.md))
+- Quick Start Section Ignores Light/Dark Theme Toggle ([history](docs/history/bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md))
 
 - Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
 - Orphaned hook scripts never wired in generated Claude settings ([#577](../../pull/577), [history](docs/history/bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md))
