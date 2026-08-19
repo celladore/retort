@@ -43,8 +43,9 @@ render as literal monospace text without a `<pre>` tag's default styling.
 - **Targets grid** — 16 supported tool targets grouped by category (agents,
   editors & CI, protocols & docs), plus an integrations/files-written
   summary strip.
-- **Quick start** (dark section) — 4-step numbered list + terminal-output
-  mockup card.
+- **Quick start** (theme-aware section) — 4-step numbered list + a
+  terminal-output mockup card that stays dark by convention in both themes
+  (matching the hero's code-preview card).
 - **CTA footer** — "try it on one repo" callout + site footer.
 
 ### API Changes
@@ -111,6 +112,10 @@ N/A.
 - [0010-2026-08-19 — Whitespace-pre rendering regression in landing page code blocks](../bug-fixes/0010-2026-08-19-whitespace-pre-rendering-regression-in-landing-page-code-blocks-bugfix.md) —
   a rendering bug introduced during formatting cleanup of this same page,
   found and fixed within this PR.
+- [0011-2026-08-19 — Quick Start section ignores light/dark theme toggle](../bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md) —
+  the Quick Start section's background and interior colors were hardcoded
+  for a dark backdrop, so it never followed the toggle. Found from a
+  light-mode screenshot and fixed within this PR.
 
 ---
 
