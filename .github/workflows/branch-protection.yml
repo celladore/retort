@@ -101,7 +101,8 @@ jobs:
 
             const isAgentkitForgeRepo =
               (context.repo.owner.toLowerCase() === 'justaghost' ||
-               context.repo.owner.toLowerCase() === 'phoenixvc') &&
+               context.repo.owner.toLowerCase() === 'phoenixvc' ||
+               context.repo.owner.toLowerCase() === 'celladore') &&
               context.repo.repo.toLowerCase() === 'retort';
 
             if (isAgentkitForgeRepo) {
@@ -110,12 +111,12 @@ jobs:
             }
 
             const body = pr.body || '';
-            const hasUpstreamIssueLink = /https:\/\/github\.com\/JustAGhosT\/retort\/issues\/\d+/i.test(body);
+            const hasUpstreamIssueLink = /https:\/\/github\.com\/(JustAGhosT|celladore)\/retort\/issues\/\d+/i.test(body);
 
             if (!hasUpstreamIssueLink) {
               core.setFailed(
                 'This PR modifies .agentkit/** and must include an upstream issue link in the PR body.\n' +
-                'Required format example: https://github.com/JustAGhosT/retort/issues/170'
+                'Required format example: https://github.com/celladore/retort/issues/170'
               );
               return;
             }
