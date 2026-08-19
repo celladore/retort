@@ -25,8 +25,9 @@ jobs:
 
       - name: Check PR is not targeting main from main
         run: |
-          # Only block same-repo PRs from main to main; allow fork PRs with a main branch
-          if [ "$GITHUB_HEAD_REF" = "main" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+          # Only block same-repo PRs from main to main; allow fork PRs with a main branch,
+          # and allow legitimate reverse-merge PRs (main -> dev) after a release promotion.
+          if [ "$GITHUB_HEAD_REF" = "main" ] && [ "$GITHUB_BASE_REF" = "main" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
             echo "::error::Cannot create a PR from main to main in the same repository"
             exit 1
           fi
