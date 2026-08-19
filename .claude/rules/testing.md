@@ -16,7 +16,6 @@ These rules apply to all test files and quality assurance activities in
 | ----- | ---- | -------- | ----- |
 | Unit | vitest | `**/*.test.*` / `**/*.spec.*` | Fast, isolated, no I/O |
 | Integration | vitest | `tests/integration/` | Module interactions |
-| E2E | playwright | `tests/e2e/` / `e2e/` | Full user workflows |
 
 ## Coverage
 
@@ -78,15 +77,6 @@ describe('PaymentService', () => {
 - Integration tests must clean up all side-effects (files, queues, database rows).
 - Keep integration tests in a separate suite from unit tests so CI can run
   them independently.
-
-## End-to-End Tests
-
-- Tag smoke tests (`@smoke`) so the critical path subset runs on every deploy.
-- Quarantine flaky tests immediately — move to a separate suite and fix within
-  two sprints.
-- Use explicit waits and retry strategies; never use arbitrary sleep.
-- Scope E2E tests to user-visible behaviour, not internal implementation.
-  
 
 ## Quality Gates
 

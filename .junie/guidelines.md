@@ -47,7 +47,7 @@ Provider: custom-jwt, strategy: jwt-bearer. RBAC is enforced.
 
 - **Unit**: vitest
 - **Integration**: vitest
-- **E2E**: playwright
+
 - **Coverage target**: 80%
 
 Always run the full test suite before creating a pull request.

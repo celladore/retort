@@ -6,9 +6,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LANDING_PAGE = pathToFileURL(
-  path.resolve(__dirname, '../apps/marketing/index.html')
-).href;
+const LANDING_PAGE = pathToFileURL(path.resolve(__dirname, '../apps/marketing/index.html')).href;
 
 const SCREENSHOT_DIR = path.resolve(__dirname, 'screenshots');
 fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -36,14 +34,10 @@ test('loads with the expected title and hero heading', async ({ page }) => {
   await expect(hero).toContainText('One YAML spec', { ignoreCase: true });
 });
 
-test('does not contain any of the corrected factual inaccuracies', async ({
-  page,
-}) => {
+test('does not contain any of the corrected factual inaccuracies', async ({ page }) => {
   const bodyText = await page.locator('body').innerText();
   for (const forbidden of FORBIDDEN_STRINGS) {
-    expect(bodyText, `page text should not contain "${forbidden}"`).not.toContain(
-      forbidden
-    );
+    expect(bodyText, `page text should not contain "${forbidden}"`).not.toContain(forbidden);
   }
   // Bare `.mcp.json` is a distinct check from the real `.mcp/servers.json` and
   // `.mcp/a2a-config.json` paths the page legitimately references — a plain
@@ -52,9 +46,7 @@ test('does not contain any of the corrected factual inaccuracies', async ({
   expect(bodyText).not.toContain('.mcp.json');
 });
 
-test('all github.com links point at the real repo, not a placeholder', async ({
-  page,
-}) => {
+test('all github.com links point at the real repo, not a placeholder', async ({ page }) => {
   const githubLinks = page.locator('a[href*="github.com"]');
   const count = await githubLinks.count();
   expect(count).toBeGreaterThan(0);
@@ -67,9 +59,7 @@ test('all github.com links point at the real repo, not a placeholder', async ({
   expect(placeholderLinks).toBe(0);
 });
 
-test('theme toggle switches data-theme and aria-pressed both ways', async ({
-  page,
-}) => {
+test('theme toggle switches data-theme and aria-pressed both ways', async ({ page }) => {
   const toggle = page.locator('#theme-toggle');
   const body = page.locator('body');
 

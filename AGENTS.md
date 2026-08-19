@@ -48,7 +48,7 @@ Provider: custom-jwt, strategy: jwt-bearer. Role-based access control (RBAC) is 
 
 - **Unit**: vitest
 - **Integration**: vitest
-- **E2E**: playwright
+
 - **Coverage target**: 80%
 
 Always run the full test suite before creating a pull request. Never disable or skip existing tests without explicit justification.
