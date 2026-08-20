@@ -431,10 +431,19 @@ export async function runValidate({ agentkitRoot, projectRoot, flags }) {
   }
 }
 
+// Directories that must never be recursed into: node_modules/.git for the
+// usual reasons, and 'worktrees' because .claude/worktrees/ (this repo's own
+// convention — see .claude/rules/worktree-isolation.md) nests a full repo
+// copy per worktree. Left unfiltered, a checkout with a dozen accumulated
+// worktrees scans tens of thousands of duplicate files and blows past the
+// test timeout (measured: 16k+ files under .claude alone, 47s+ per run).
+const SCAN_SKIP_DIRS = new Set(['node_modules', '.git', 'worktrees']);
+
 function scanForPatterns(dir, patterns, onMatch, onCount) {
   if (!existsSync(dir)) return;
   let count = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && SCAN_SKIP_DIRS.has(entry.name)) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
       scanForPatterns(full, patterns, onMatch, onCount);
