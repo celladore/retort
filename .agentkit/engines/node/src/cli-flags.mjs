@@ -66,7 +66,7 @@ export const CLI_INTERNAL_FLAGS = {
   'analyze-agents': ['output', 'matrix', 'format', 'help'],
   worktree: ['base', 'no-setup', 'dry-run', 'help'],
   run: ['id', 'assignee', 'dry-run', 'json', 'help'],
-  harness: ['document', 'json', 'help'],
+  harness: ['document', 'output', 'dry-run', 'diff', 'json', 'help'],
 };
 
 export const CLI_INTERNAL_FLAG_TYPES = {

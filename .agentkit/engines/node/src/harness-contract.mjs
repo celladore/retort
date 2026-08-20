@@ -136,16 +136,7 @@ export function loadHarnessContract(agentkitRoot) {
   };
 }
 
-export function validateHarnessDocument(agentkitRoot, documentPath) {
-  const contract = loadHarnessContract(agentkitRoot);
-  if (!contract.ok) return contract;
-
-  const documentResult = readJson(documentPath);
-  if (documentResult.error) {
-    return { ...contract, ok: false, errors: [documentResult.error], documentPath };
-  }
-
-  const document = documentResult.value;
+function validateAgainstContract(contract, document) {
   const schemaValid = contract.validate(document);
   const errors = schemaValid ? [] : [formatAjvErrors(contract.validate.errors)];
   if (schemaValid) errors.push(...validateDocumentSemantics(document));
@@ -155,8 +146,24 @@ export function validateHarnessDocument(agentkitRoot, documentPath) {
     ok: errors.length === 0,
     errors,
     document,
-    documentPath,
   };
+}
+
+export function validateHarnessDocument(agentkitRoot, documentPath) {
+  const contract = loadHarnessContract(agentkitRoot);
+  if (!contract.ok) return contract;
+  const documentResult = readJson(documentPath);
+  if (documentResult.error) {
+    return { ...contract, ok: false, errors: [documentResult.error], documentPath };
+  }
+
+  return { ...validateAgainstContract(contract, documentResult.value), documentPath };
+}
+
+export function validateHarnessValue(agentkitRoot, document) {
+  const contract = loadHarnessContract(agentkitRoot);
+  if (!contract.ok) return contract;
+  return validateAgainstContract(contract, document);
 }
 
 export async function runHarness({ agentkitRoot, projectRoot, flags = {} }) {
@@ -172,6 +179,9 @@ export async function runHarness({ agentkitRoot, projectRoot, flags = {} }) {
     } else {
       result = validateHarnessDocument(agentkitRoot, resolve(projectRoot, requestedPath));
     }
+  } else if (action === 'generate') {
+    const { generateHarnessManifest } = await import('./harness-onboarding.mjs');
+    result = generateHarnessManifest({ agentkitRoot, projectRoot, flags });
   } else {
     result = { ok: false, errors: [`unknown harness action: ${action}`] };
   }
@@ -184,11 +194,21 @@ export async function runHarness({ agentkitRoot, projectRoot, flags = {} }) {
     sourceRevision: result.lock?.sourceRevision ?? null,
     lifecycle: result.lock?.lifecycle ?? null,
     authorityPromotion: result.lock?.authorityPromotion ?? null,
+    changed: result.changed ?? null,
+    written: result.written ?? null,
+    outputPath: result.outputPath ?? null,
+    preservedExtensionKeys: result.preservedExtensionKeys ?? [],
+    provenance: result.provenance ?? null,
+    diff: result.diff ?? null,
     errors: result.errors,
   };
 
   if (flags.json) {
     console.log(JSON.stringify(output));
+  } else if (result.ok && action === 'generate') {
+    const disposition = result.changed ? (result.written ? 'wrote' : 'would write') : 'unchanged';
+    console.log(`[retort:harness] generate ${disposition} ${result.relativeOutputPath}`);
+    if (result.diff) console.log(result.diff);
   } else if (result.ok) {
     console.log(
       `[retort:harness] ${action} passed — ${output.contract} @ ${output.sourceRevision}`
