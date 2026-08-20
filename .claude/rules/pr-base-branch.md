@@ -42,9 +42,10 @@ gh pr create --base main --title "type(scope): description"
 
 The integration branch is configured in `.agentkit/overlays/retort/settings.yaml`:
 
+<!-- prettier-ignore -->
 ```yaml
-defaultBranch: { { defaultBranch } }
-integrationBranch: { { integrationBranch } }
+defaultBranch: main
+integrationBranch: dev
 ```
 
 To change the integration branch, update `settings.yaml` and run `pnpm --dir .agentkit retort:sync`.
