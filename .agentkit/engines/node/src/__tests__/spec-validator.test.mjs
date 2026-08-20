@@ -5,6 +5,7 @@ import {
   validateSpec,
   validateProjectYaml,
   validateMappingCoverage,
+  validateOverlaySettings,
   PROJECT_ENUMS,
   VALID_PHASES,
 } from '../spec-validator.mjs';
@@ -1458,5 +1459,108 @@ describe('validateSpec() — ADR-15 dispatch settings', () => {
     expectErrors({ agents: agentsWith({ id: 'forge:backend' }) }, (errors) =>
       expect(errors.some((e) => e.includes('dispatchable'))).toBe(true)
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateOverlaySettings() — the one spec surface that was never validated
+//
+// Type violations are errors because they change behaviour silently; unknown
+// keys are warnings so an overlay written for a newer engine still syncs.
+// ---------------------------------------------------------------------------
+describe('validateOverlaySettings()', () => {
+  function withOverlay(yamlText, name = 'demo') {
+    const root = mkdtempSync(resolve(tmpdir(), 'agentkit-overlay-'));
+    const dir = resolve(root, 'overlays', name);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(resolve(dir, 'settings.yaml'), yamlText);
+    try {
+      return validateOverlaySettings(root);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  it('should accept a well-formed overlay', () => {
+    const r = withOverlay(
+      [
+        'repoName: demo',
+        'defaultBranch: main',
+        'integrationBranch: dev',
+        'windowsFirst: true',
+        'agentBranchPrefix: feat',
+        'worktreeIsolation: advisory',
+        'syncDateMode: none',
+        'featurePreset: standard',
+        'renderTargets: [claude, cursor]',
+      ].join('\n')
+    );
+    expect(r.errors).toEqual([]);
+    expect(r.warnings).toEqual([]);
+  });
+
+  it('should require repoName', () => {
+    const r = withOverlay('defaultBranch: main');
+    expect(r.errors.some((e) => e.includes('repoName') && e.includes('required'))).toBe(true);
+  });
+
+  it('should reject a quoted boolean, which would otherwise be truthy', () => {
+    // 'false' is a non-empty string — windowsFirst !== false, so it would have
+    // silently enabled the very thing the author was disabling
+    const r = withOverlay('repoName: demo\nwindowsFirst: "false"');
+    expect(r.errors.some((e) => e.includes('windowsFirst') && e.includes('expected boolean'))).toBe(
+      true
+    );
+  });
+
+  it('should reject an out-of-range enum value', () => {
+    const r = withOverlay('repoName: demo\nworktreeIsolation: sorta');
+    expect(r.errors.some((e) => e.includes('worktreeIsolation'))).toBe(true);
+  });
+
+  it('should reject a branch prefix carrying a separator', () => {
+    // `feat/` would render as `feat//agent-<name>/<slug>`
+    const r = withOverlay('repoName: demo\nagentBranchPrefix: feat/');
+    expect(r.errors.some((e) => e.includes('agentBranchPrefix'))).toBe(true);
+  });
+
+  it('should warn rather than error on an unknown setting', () => {
+    const r = withOverlay('repoName: demo\nwindowsFrist: false');
+    expect(r.errors).toEqual([]);
+    expect(r.warnings.some((w) => w.includes('windowsFrist') && w.includes('unknown'))).toBe(true);
+  });
+
+  it('should warn on an unknown render target', () => {
+    const r = withOverlay('repoName: demo\nrenderTargets: [claude, emacs]');
+    expect(r.errors).toEqual([]);
+    expect(r.warnings.some((w) => w.includes('emacs'))).toBe(true);
+  });
+
+  it('should report invalid YAML without throwing', () => {
+    const r = withOverlay('repoName: [unclosed');
+    expect(r.errors.some((e) => e.includes('invalid YAML'))).toBe(true);
+  });
+
+  it('should report a non-mapping overlay without throwing', () => {
+    const r = withOverlay('- just\n- a list');
+    expect(r.errors.some((e) => e.includes('mapping'))).toBe(true);
+  });
+
+  it('should return empty results when no overlays directory exists', () => {
+    const root = mkdtempSync(resolve(tmpdir(), 'agentkit-overlay-none-'));
+    try {
+      expect(validateOverlaySettings(root)).toEqual({ errors: [], warnings: [] });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('should accept every setting the shipped overlays actually use', () => {
+    // Guards the schema against the real overlays: a key added to an overlay
+    // without being declared here shows up as a warning, which is the check
+    // that windowsFirst and aiSynthesisLayer both evaded
+    const r = validateOverlaySettings(AGENTKIT_ROOT);
+    expect(r.errors).toEqual([]);
+    expect(r.warnings).toEqual([]);
   });
 });
