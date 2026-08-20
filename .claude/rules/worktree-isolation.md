@@ -15,17 +15,17 @@ agent task a reviewable branch, and enables clean rollback if a task goes wrong.
 Pass `isolation: "worktree"` when invoking an agent via the Agent tool for any
 **code-writing** task type:
 
-| Task type      | Requires worktree? |
-| -------------- | ------------------ |
-| `implement`    | Yes                |
-| `fix`          | Yes                |
-| `refactor`     | Yes                |
-| `migration`    | Yes                |
-| `test`         | Yes (adds/changes files) |
-| `review`       | No — read-only     |
-| `investigate`  | No — read-only     |
-| `discover`     | No — read-only     |
-| `audit`        | No — read-only     |
+| Task type     | Requires worktree?       |
+| ------------- | ------------------------ |
+| `implement`   | Yes                      |
+| `fix`         | Yes                      |
+| `refactor`    | Yes                      |
+| `migration`   | Yes                      |
+| `test`        | Yes (adds/changes files) |
+| `review`      | No — read-only           |
+| `investigate` | No — read-only           |
+| `discover`    | No — read-only           |
+| `audit`       | No — read-only           |
 
 ## Branch Naming Convention
 
@@ -53,15 +53,15 @@ example `backend`, `frontend`, `data`, `test-lead`, `security-auditor`:
 ```js
 // Code-writing agent — always isolated
 Agent({
-  subagent_type: 'backend',
+  subagent_type: 'feature-dev:code-architect',
   isolation: 'worktree',
   prompt: 'Implement the payment endpoint described in task-20260327-001',
 });
 
 // Read-only agent — no isolation needed
 Agent({
-  subagent_type: 'security-auditor',
-  prompt: 'Audit the auth module for missing authorisation checks',
+  subagent_type: 'Explore',
+  prompt: 'Investigate the auth module structure',
 });
 ```
 
