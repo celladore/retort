@@ -3,26 +3,45 @@ import { execFileSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildParseOptions, CLI_INTERNAL_FLAGS, loadCommandFlags } from '../cli-flags.mjs';
+import { VALID_COMMANDS } from '../commands-registry.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CLI_PATH = resolve(__dirname, '..', 'cli.mjs');
+const AGENTKIT_ROOT = resolve(__dirname, '..', '..', '..', '..');
 const PKG_VERSION = JSON.parse(
-  readFileSync(resolve(__dirname, '..', '..', '..', '..', 'package.json'), 'utf-8')
+  readFileSync(resolve(AGENTKIT_ROOT, 'package.json'), 'utf-8')
 ).version;
+
+// Backstop only — not a budget. execFileSync blocks the worker synchronously, so
+// Vitest's per-test timeout cannot preempt it; this cap is what actually fires if
+// a child hangs. The heaviest command here (`harness doctor`) measured 6.8s at
+// idle on Windows, so the previous 10s cap had no headroom under suite load — and
+// when it fired it surfaced as `expected null to be 0` rather than as a timeout,
+// because execFileSync reports a killed child with a null status. See ADR-12.
+const CHILD_TIMEOUT_MS = 60_000;
 
 function run(...args) {
   try {
     return {
       stdout: execFileSync('node', [CLI_PATH, ...args], {
         encoding: 'utf-8',
-        timeout: 10_000,
+        timeout: CHILD_TIMEOUT_MS,
       }),
       exitCode: 0,
+      timedOut: false,
     };
   } catch (err) {
+    // err.status is null when the child was killed rather than exiting. Report
+    // that as a timeout so a slow machine does not masquerade as a wrong exit code.
+    const timedOut = err.status === null || err.status === undefined;
     return {
-      stdout: (err.stdout || '') + (err.stderr || ''),
+      stdout:
+        (err.stdout || '') +
+        (err.stderr || '') +
+        (timedOut ? `\n[test] child killed after ${CHILD_TIMEOUT_MS}ms: ${err.message}` : ''),
       exitCode: err.status,
+      timedOut,
     };
   }
 }
@@ -80,95 +99,80 @@ describe('CLI', () => {
     expect(result.exitCode).toBe(0);
   });
 
+  // These assertions run in-process against cli-flags.mjs rather than spawning the
+  // CLI once per command.
+  //
+  // The spawn-per-command version could never have detected a flag configuration
+  // error in the first place: main() short-circuits `--help` before it calls
+  // loadCommandFlags()/parseFlags(), so `<cmd> --help` never builds an option
+  // table. Verified directly — `cli.mjs sync --bogus-flag --help` emits no
+  // unrecognized-flag warning, which only parseFlags produces. It cost 26 Node
+  // startups (21.7s measured at idle, against a 30s budget) to assert command-name
+  // membership and that cli.mjs boots. Calling buildParseOptions directly tests
+  // what the name promises, covers commands.yaml-derived flags the old version
+  // never reached, and spawns nothing. See ADR-12.
   describe('VALID_FLAGS / FLAG_TYPES consistency', () => {
-    it('every CLI-internal flag has a corresponding type entry (dynamic flags loaded from commands.yaml)', () => {
-      // Parse cli.mjs source to extract VALID_FLAGS and FLAG_TYPES
-      const src = readFileSync(CLI_PATH, 'utf-8');
+    it('every command can build a parseArgs option table without a configuration error', async () => {
+      const { validFlags, flagTypes } = await loadCommandFlags(AGENTKIT_ROOT);
 
-      // Extract FLAG_TYPES keys
-      const ftMatch = src.match(/const CLI_INTERNAL_FLAG_TYPES = \{([\s\S]*?)\n\};/);
-      expect(ftMatch, 'Could not find CLI_INTERNAL_FLAG_TYPES in cli.mjs').toBeTruthy();
-      const flagTypeKeys = new Set();
-      for (const line of ftMatch[1].split('\n')) {
-        const m = line.match(/^\s*'([a-zA-Z][\w-]*)'\s*:/);
-        if (m) flagTypeKeys.add(m[1]);
-        const m2 = line.match(/^\s*([a-zA-Z][\w-]*)\s*:/);
-        if (m2) flagTypeKeys.add(m2[1]);
+      // loadCommandFlags swallows a missing or unparseable commands.yaml and falls
+      // back to the CLI-internal tables alone. Without this guard the assertions
+      // below would still pass while covering a fraction of the flag surface.
+      expect(
+        Object.keys(validFlags).length,
+        'commands.yaml contributed no flags — loadCommandFlags fell back to CLI-internal only'
+      ).toBeGreaterThan(Object.keys(CLI_INTERNAL_FLAGS).length);
+
+      for (const cmd of VALID_COMMANDS) {
+        expect(
+          () => buildParseOptions(cmd, validFlags, flagTypes),
+          `"${cmd}" has a flag listed in VALID_FLAGS with no entry in FLAG_TYPES`
+        ).not.toThrow();
       }
+    });
 
-      // Extract VALID_FLAGS per-command arrays
-      const vfMatch = src.match(/const CLI_INTERNAL_FLAGS = \{([\s\S]*?)\n\};/);
-      expect(vfMatch, 'Could not find CLI_INTERNAL_FLAGS in cli.mjs').toBeTruthy();
-      const cmdPattern = /['"]?([\w-]+)['"]?\s*:\s*\[([\s\S]*?)\]/g;
-      let match;
-      const missing = [];
-      // Global flags defined in loadCommandFlags() (not in CLI_INTERNAL_FLAG_TYPES)
-      flagTypeKeys.add('help');
-      flagTypeKeys.add('quiet');
-      flagTypeKeys.add('verbose');
-
-      // Special-cased flags that are handled inline in parseFlags (not in FLAG_TYPES)
+    it('every flag listed for a command has a type entry', async () => {
+      const { validFlags, flagTypes } = await loadCommandFlags(AGENTKIT_ROOT);
+      // --status is special-cased in buildParseOptions with a per-command type.
       const specialCased = new Set(['status']);
-      while ((match = cmdPattern.exec(vfMatch[1])) !== null) {
-        const cmd = match[1];
-        for (const fm of match[2].matchAll(/'([a-zA-Z][\w-]*)'/g)) {
-          const flag = fm[1];
-          if (!flagTypeKeys.has(flag) && !specialCased.has(flag)) {
+
+      const missing = [];
+      for (const [cmd, flags] of Object.entries(validFlags)) {
+        for (const flag of flags) {
+          if (!flagTypes[flag] && !specialCased.has(flag)) {
             missing.push(`--${flag} (command: ${cmd})`);
           }
         }
       }
 
-      expect(
-        missing,
-        `Flags in CLI_INTERNAL_FLAGS missing from CLI_INTERNAL_FLAG_TYPES:\n${missing.join('\n')}`
-      ).toHaveLength(0);
+      expect(missing, `Flags with no type definition:\n${missing.join('\n')}`).toHaveLength(0);
     });
 
-    it(
-      'every command can be invoked with --help without a flag configuration error',
-      { timeout: 30_000 },
-      () => {
-        const commands = [
-          'sync',
-          'init',
-          'validate',
-          'discover',
-          'spec-validate',
-          'orchestrate',
-          'plan',
-          'check',
-          'review',
-          'handoff',
-          'healthcheck',
-          'cost',
-          'tasks',
-          'delegate',
-          'doctor',
-          'import-issues',
-          'backlog',
-          'sync-backlog',
-          'scaffold',
-          'preflight',
-          'project-review',
-          'add',
-          'remove',
-          'list',
-          'features',
-          'harness',
-        ];
-        for (const cmd of commands) {
-          const result = run(cmd, '--help');
-          expect(
-            result.exitCode,
-            `"${cmd} --help" exited with code ${result.exitCode}. Output:\n${result.stdout.slice(0, 300)}`
-          ).toBe(0);
-        }
-      }
-    );
+    it('types --status per command: boolean for orchestrate, string for tasks', async () => {
+      const { validFlags, flagTypes } = await loadCommandFlags(AGENTKIT_ROOT);
 
-    it('runs harness doctor against the pinned offline contract', () => {
+      expect(buildParseOptions('orchestrate', validFlags, flagTypes).status).toEqual({
+        type: 'boolean',
+      });
+      expect(buildParseOptions('tasks', validFlags, flagTypes).status).toEqual({ type: 'string' });
+      // A command that does not declare --status must not get one.
+      expect(buildParseOptions('spec-validate', validFlags, flagTypes).status).toBeUndefined();
+    });
+
+    it('throws a legible error when a listed flag has no type', () => {
+      // Global flags are always merged in, so they must be typed for the
+      // untyped command flag to be the one that trips.
+      const globals = { help: 'boolean', quiet: 'boolean', verbose: 'boolean' };
+      expect(() => buildParseOptions('sync', { sync: ['mystery-flag'] }, globals)).toThrow(
+        /flag "--mystery-flag" is listed as valid for command "sync"/
+      );
+    });
+
+    it('runs harness doctor against the pinned offline contract', { timeout: 90_000 }, () => {
+      // The single heaviest spawn in this file — measured 6.8s at idle on Windows.
+      // Budgeted well above that so suite contention does not turn it red.
       const result = run('harness', 'doctor', '--json');
+      expect(result.timedOut, `child timed out:\n${result.stdout.slice(0, 300)}`).toBe(false);
       expect(result.exitCode).toBe(0);
       expect(JSON.parse(result.stdout).status).toBe('passed');
     });

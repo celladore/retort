@@ -1,8 +1,8 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 7,
-    "feature": 2,
+    "bugfix": 13,
+    "feature": 5,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -12,9 +12,9 @@
       "number": 1,
       "type": "bugfix",
       "title": "Infra-Eval Review Fixes",
-      "date": "2026-03-04",
+      "date": "2026-08-06",
       "pr": "",
-      "file": "bug-fixes/0001-2026-03-04-infra-eval-review-fixes-bugfix.md"
+      "file": "bug-fixes/0001-2026-08-06-sessionstart-hook-schema-and-duplicate-python-detection-bugfix.md"
     },
     {
       "number": 2,
@@ -61,7 +61,7 @@
       "type": "feature",
       "title": "Hook spec validation and windowsFirst emit filter",
       "date": "2026-08-08",
-      "pr": "",
+      "pr": "582",
       "file": "features/0001-2026-08-08-hook-spec-validation-and-windowsfirst-emit-filter-feature.md"
     },
     {
@@ -71,6 +71,78 @@
       "date": "2026-08-07",
       "pr": "581",
       "file": "bug-fixes/0006-2026-08-07-generated-powershell-scripts-fail-to-parse-under-windows-powershell-5-1-bugfix.md"
+    },
+    {
+      "number": 7,
+      "type": "bugfix",
+      "title": "Real process spawns behind a mocked commandExists",
+      "date": "2026-08-10",
+      "pr": "590",
+      "file": "bug-fixes/0007-2026-08-10-real-process-spawns-behind-a-mocked-commandexists-bugfix.md"
+    },
+    {
+      "number": 8,
+      "type": "bugfix",
+      "title": "Windows test flakiness from subprocess startup cost",
+      "date": "2026-08-10",
+      "pr": "591",
+      "file": "bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md"
+    },
+    {
+      "number": 9,
+      "type": "bugfix",
+      "title": "Tests passing without executing their subject",
+      "date": "2026-08-11",
+      "pr": "594",
+      "file": "bug-fixes/0009-2026-08-11-tests-passing-without-executing-their-subject-bugfix.md"
+    },
+    {
+      "number": 2,
+      "type": "feature",
+      "title": "Test-run reconciliation gate",
+      "date": "2026-08-11",
+      "pr": "589",
+      "file": "features/0002-2026-08-11-test-run-reconciliation-gate-feature.md"
+    },
+    {
+      "number": 3,
+      "type": "feature",
+      "title": "Native agent dispatch",
+      "date": "2026-08-07",
+      "pr": "574",
+      "file": "features/0003-2026-08-07-native-agent-dispatch-feature.md"
+    },
+    {
+      "number": 4,
+      "type": "feature",
+      "title": "Marketing Landing Page",
+      "date": "2026-08-19",
+      "pr": "616",
+      "file": "features/0004-2026-08-19-marketing-landing-page-feature.md"
+    },
+    {
+      "number": 10,
+      "type": "bugfix",
+      "title": "Whitespace-Pre Rendering Regression in Landing Page Code Blocks",
+      "date": "2026-08-19",
+      "pr": "616",
+      "file": "bug-fixes/0010-2026-08-19-whitespace-pre-rendering-regression-in-landing-page-code-blocks-bugfix.md"
+    },
+    {
+      "number": 11,
+      "type": "bugfix",
+      "title": "Quick Start Section Ignores Light/Dark Theme Toggle",
+      "date": "2026-08-19",
+      "pr": "",
+      "file": "bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md"
+    },
+    {
+      "number": 12,
+      "type": "bugfix",
+      "title": "Reverse-merge PR blocked by main-to-main branch-rules check",
+      "date": "2026-08-19",
+      "pr": "622",
+      "file": "bug-fixes/0012-2026-08-19-reverse-merge-pr-blocked-by-main-to-main-branch-rules-check-bugfix.md"
     }
   ]
 }

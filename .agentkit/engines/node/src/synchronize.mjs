@@ -26,7 +26,7 @@ import {
   loadFeatureSpec,
   resolveFeatures,
 } from './feature-manager.mjs';
-import { ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
+import { applyUtf8Bom, ensureDir, runConcurrent, walkDir, writeOutput } from './fs-utils.mjs';
 import {
   cleanStaleFiles,
   clearTemplateMeta,
@@ -62,6 +62,7 @@ import {
   buildCollaboratorsSection,
   buildCommandVars,
   buildRuleVars,
+  buildTeamDispatchTable,
   buildTeamsList,
   buildTeamVars,
   formatConventionLine,
@@ -70,6 +71,8 @@ import {
   isFeatureEnabled,
   isItemFeatureEnabled,
   resolveCommandPath,
+  resolveDispatchMode,
+  resolveMaxSubagentSpawnDepth,
   resolveTeamAgents,
 } from './var-builders.mjs';
 import { clearTemplateTextCache } from './spec-loader.mjs';
@@ -427,6 +430,9 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     }
   }
 
+  // Resolved once — calling the resolver twice would warn twice on a bad value
+  const dispatchMode = resolveDispatchMode(overlaySettings, settingsSpec);
+
   const vars = {
     ...mergedDefaults,
     ...featureVars,
@@ -441,6 +447,14 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     intakeSecurityEscalationTeams: securityEscalationTeams,
     intakeBlockedEscalationTeams: blockedEscalationTeams,
     intakeAreaRoutingTable: buildAreaRoutingTable(teamsIntake),
+    // Nested subagent contexts, not handoff hops — see ADR-15 §4 for why this is
+    // a separate setting from max-handoff-chain-depth rather than derived from it.
+    maxSubagentSpawnDepth: resolveMaxSubagentSpawnDepth(teamsSpec),
+    // Delegation backend (ADR-15 §6). `dispatchNative` is the {{#if}} handle;
+    // `dispatchMode` is the literal for prose.
+    dispatchMode,
+    dispatchNative: dispatchMode === 'native',
+    teamDispatchTable: buildTeamDispatchTable(teamsSpec, agentsSpec),
     version,
     overlayTemplatesDir: resolve(overlayDir, 'templates'),
     repoName:
@@ -1100,6 +1114,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           if (err?.code === 'ENOENT') continue;
           throw err;
         }
+        // Match what the writer actually puts on disk. writeScaffoldOutputs runs
+        // content through applyUtf8Bom, so after one sync the generated .ps1 files
+        // carry a BOM while their temp-tree counterparts do not. Comparing raw made
+        // every PowerShell hook look updated: `sync --diff` reported changes a real
+        // sync then skipped, and interactive sync prompted for them.
+        newContent = applyUtf8Bom(destFile, newContent);
         if (!existsSync(destFile)) {
           createCount++;
           log(`  create ${normPath}`);
@@ -1166,6 +1186,12 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
           if (err?.code === 'ENOENT') continue;
           throw err;
         }
+        // Match what the writer actually puts on disk. writeScaffoldOutputs runs
+        // content through applyUtf8Bom, so after one sync the generated .ps1 files
+        // carry a BOM while their temp-tree counterparts do not. Comparing raw made
+        // every PowerShell hook look updated: `sync --diff` reported changes a real
+        // sync then skipped, and interactive sync prompted for them.
+        newContent = applyUtf8Bom(destFile, newContent);
 
         if (!existsSync(destFile)) {
           changeList.push({ relPath: normPath, action: 'create', newContent });

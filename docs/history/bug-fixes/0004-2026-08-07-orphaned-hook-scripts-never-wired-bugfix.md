@@ -76,7 +76,7 @@ per event.
 The defining invariant is checked programmatically against generated output
 rather than asserted by inspection:
 
-```
+```text
 wired: 14   on disk: 14
 ORPHANS (emitted, never wired): none
 DANGLING (wired, not emitted): none

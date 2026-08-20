@@ -64,8 +64,13 @@ detect_tool "Cargo"    "cargo"
 {{/if}}
 
 {{#if hasLanguagePythonEffective}}
+# Only fall back to `python` when `python3` yielded no usable version, so hosts
+# with both installed report a single Python entry.
+python_probe_count=${#tools_found[@]}
 detect_tool "Python"   "python3"
-detect_tool "Python"   "python"   # fallback if python3 is absent
+if [[ ${#tools_found[@]} -eq $python_probe_count ]]; then
+    detect_tool "Python"   "python"
+fi
 {{/if}}
 
 {{#if hasAnyInfraConfig}}
@@ -145,13 +150,14 @@ env_summary=$(printf 'Session: %s\nWorking directory: %s\n{{#if showLanguageProf
 if command -v jq &>/dev/null; then
   jq -n --arg ctx "$env_summary" '{
       hookSpecificOutput: {
+          hookEventName: "SessionStart",
           additionalContext: $ctx
       }
   }'
 else
   # Fallback: manually construct JSON (escape backslashes, quotes, and newlines)
   escaped_summary=$(printf '%s' "$env_summary" | awk '{gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); printf "%s\\n", $0}' | sed '$ s/\\n$//')
-  printf '{"hookSpecificOutput":{"additionalContext":"%s"}}\n' "$escaped_summary"
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$escaped_summary"
 fi
 
 exit 0

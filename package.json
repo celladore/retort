@@ -11,12 +11,16 @@
   },
   "scripts": {
     "start": "node dist/start/index.js",
-    "start:build": "esbuild src/start/index.js --bundle --platform=node --format=esm --outfile=dist/start/index.js --jsx=automatic --external:ink --external:react --external:ink-text-input --external:ink-select-input --external:fuse.js",
+    "start:build": "esbuild src/start/index.ts --bundle --platform=node --format=esm --outfile=dist/start/index.js --jsx=automatic --external:ink --external:react --external:ink-text-input --external:ink-select-input --external:fuse.js",
     "start:dev": "pnpm run start:build && node dist/start/index.js",
     "typecheck": "node -e \"\"",
-    "test": "pnpm -C .agentkit test",
+    "preflight:capacity": "node scripts/preflight-capacity.mjs",
+    "test": "node scripts/preflight-capacity.mjs && pnpm test:start && pnpm -C .agentkit test",
+    "test:coverage": "node scripts/preflight-capacity.mjs && pnpm test:start:coverage && pnpm -C .agentkit coverage",
     "test:start": "vitest run --config vitest.config.mjs",
     "test:start:coverage": "vitest run --config vitest.config.mjs --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "build": "pnpm -C .agentkit retort:validate",
     "lint:md": "pnpm -C .agentkit lint:md",
     "lint:md:fix": "pnpm -C .agentkit lint:md:fix",
@@ -41,7 +45,8 @@
     "react": "19.2.4"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "4.0.18",
+    "@playwright/test": "1.62.1",
+    "@vitest/coverage-v8": "4.1.0",
     "esbuild": "0.28.1",
     "ink-testing-library": "4.0.0",
     "vitest": "4.1.0"

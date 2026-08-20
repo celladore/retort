@@ -31,7 +31,7 @@ Where `{NNN}` is a zero-padded sequential number and `{slug}` is a lowercase-hyp
 
 ## Current P1 product backlog
 
-From the [Agent Backlog](../../AGENT_BACKLOG.md) (synced from GitHub), the following P1 items are assigned to product and not yet covered by a PRD:
+From the [Agent Backlog](../../../AGENT_BACKLOG.md) (synced from GitHub), the following P1 items are assigned to product and not yet covered by a PRD:
 
 | Issue                                                             | Title                                                                   | Notes                                                                                                                                                                             |
 | ----------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

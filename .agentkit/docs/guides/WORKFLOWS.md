@@ -46,14 +46,14 @@ Use this flow for medium-to-large features that touch multiple parts of the code
 /discover
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Scans the entire repository for languages, frameworks, build tools, and folder structure
 - Detects Node.js and Express (or whatever framework is present)
 - Identifies existing test frameworks (Vitest, Jest, etc.)
 - Creates or updates `AGENT_TEAMS.md` with team assignments based on your actual code
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Repository Profile
@@ -87,13 +87,13 @@ Use this flow for medium-to-large features that touch multiple parts of the code
 /plan Add JWT-based user authentication with login and registration endpoints, password hashing with bcrypt, and a React login form
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reads the codebase to understand existing patterns (routing style, middleware conventions, database layer)
 - Produces a structured plan with: goal, assumptions, ordered implementation steps, file touch list, validation commands, rollback plan, and risks
 - Does NOT write any code -- planning only
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## 1. Goal
@@ -155,7 +155,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 /team-backend Implement auth service, login and registration endpoints, and JWT middleware per the plan above
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reads the plan and the relevant source files
 - Creates the auth service with password hashing and token generation
@@ -165,7 +165,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 - Runs the quality gate (format, lint, typecheck, test) on changed files
 - Stays within the backend scope -- does not touch frontend files
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Backend Report
@@ -202,7 +202,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 /team-frontend Implement login and registration forms that connect to the auth API endpoints
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reads the API endpoints created by the backend team
 - Creates React components for Login and Registration pages
@@ -211,7 +211,7 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 - Adds tests for the new components
 - Runs the quality gate on frontend files
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Frontend Report
@@ -245,13 +245,13 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 /check
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Runs the full quality gate across the entire project (not just the files changed by one team)
 - Executes in order: format check, lint, typecheck, unit tests, build
 - Reports any issues, including cross-team integration problems that individual team checks might miss
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Quality Gate Results
@@ -277,14 +277,14 @@ Add JWT-based authentication with login (POST /api/auth/login) and registration
 /review
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Diffs all changes since the orchestration began
 - Reviews every changed file against six criteria: correctness, security, performance, tests and coverage, documentation and readability, compatibility and standards
 - Classifies findings by severity: CRITICAL, HIGH, MEDIUM, LOW
 - Produces a verdict: APPROVE, REQUEST_CHANGES, or NEEDS_DISCUSSION
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Code Review
@@ -320,14 +320,14 @@ correct, passwords are properly hashed with bcrypt, and test coverage is thoroug
 /handoff
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Collects the current state: git branch, last commit, orchestrator state, events log
 - Writes a structured handoff document with: what was done, current blockers, next 3 actions, validation commands, and open risks
 - Saves the handoff to `docs/ai_handoffs/` (if the directory exists)
 - Logs the handoff event to `.claude/state/events.log`
 
-#### Expected output:
+##### Expected output
 
 ```text
 # Session Handoff
@@ -394,7 +394,7 @@ Use this flow for focused bug fixes where you already know the symptom. The emph
 /discover
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Scans the repository for database-related files, connection configuration, and ORM setup
 - Identifies the database stack (PostgreSQL + Prisma, MySQL + Knex, etc.)
@@ -417,7 +417,7 @@ PostgreSQL and we use Prisma. Please investigate the connection handling,
 pool configuration, and any timeout settings.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reads the database configuration files (Prisma schema, environment variables, connection string format)
 - Examines the connection pool settings
@@ -425,7 +425,7 @@ pool configuration, and any timeout settings.
 - Reviews error handling in the affected endpoint
 - Reports findings with specific file and line references
 
-#### Expected findings:
+#### Expected findings
 
 ```text
 Investigation Results:
@@ -458,7 +458,7 @@ Fix the database connection timeout issue:
 3. Add a connect_timeout=5 parameter to the DATABASE_URL
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Makes minimal, targeted changes to fix the specific issue
 - Updates the Prisma configuration with pool settings
@@ -473,13 +473,13 @@ Fix the database connection timeout issue:
 /check --fast
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Runs format, lint, and typecheck only (skips the full build to save time)
 - The `--fast` flag is designed for quick iterations during bug fixes
 - Confirms the fix compiles and passes static analysis
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Quality Gate Results
@@ -509,14 +509,14 @@ Then run the full check to make sure nothing else broke:
 /review
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Diffs the changes you just made
 - Checks specifically for regressions: did the fix break any existing behavior?
 - Verifies the fix actually addresses the root cause (not just the symptom)
 - Checks for security implications of the changes
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Code Review
@@ -552,7 +552,7 @@ backwards-compatible. Transaction error handling now properly releases connectio
 
 Total time: 5-10 minutes for a focused bug fix.
 
-#### Tips for fast bug fixes:
+#### Tips for fast bug fixes
 
 - Skip `/discover` if you already have a recent `AGENT_TEAMS.md`
 - Use `/check --fast` for quick iterations while developing the fix
@@ -579,25 +579,25 @@ Use this flow when you need a thorough understanding of a project's health, qual
 /project-review
 ```
 
-#### What the AI does
+##### What the AI does
 
 The `/project-review` command runs a comprehensive multi-phase analysis of the entire project. It combines several checks into a single, structured assessment:
 
-#### Phase A -- Discovery and Inventory:
+#### Phase A -- Discovery and Inventory
 
 - Full codebase scan (same as `/discover`)
 - Technology stack identification
 - Dependency inventory with version currency
 - Folder structure mapping
 
-#### Phase B -- Health Validation:
+#### Phase B -- Health Validation
 
 - Build status (same as `/healthcheck`)
 - Test suite status and coverage
 - Lint and typecheck status
 - Dependency vulnerability scan
 
-#### Phase C -- Code Quality Assessment:
+#### Phase C -- Code Quality Assessment
 
 - Architecture pattern analysis
 - Code duplication detection
@@ -605,14 +605,14 @@ The `/project-review` command runs a comprehensive multi-phase analysis of the e
 - Test quality evaluation
 - Documentation coverage
 
-#### Phase D -- Security Review:
+#### Phase D -- Security Review
 
 - OWASP top 10 check (same as `/security`)
 - Hardcoded secrets scan
 - Dependency vulnerability audit
 - Authentication flow review
 
-#### Expected output -- Findings Table:
+##### Expected output -- Findings Table
 
 ```text
 ## Project Review: my-project
@@ -664,7 +664,7 @@ Let's focus on the top 3 items: the SQL injection, the hardcoded JWT secret,
 and the missing payment tests. Deprioritize the lint debt for now.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Acknowledges the priority adjustment
 - Focuses subsequent planning on the selected items
@@ -678,14 +678,14 @@ and the missing payment tests. Deprioritize the lint debt for now.
 /plan Fix the top 3 findings from the project review: SQL injection in user search, hardcoded JWT secret, and missing payment processing tests
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Creates a structured implementation plan for each finding
 - Orders the steps by dependency (security fixes first, then tests)
 - Identifies the specific files and lines to change
 - Provides validation commands for each fix
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## 1. Goal
@@ -721,7 +721,7 @@ From here, you can either delegate to teams or fix manually:
 /orchestrate Fix the SQL injection, hardcoded JWT secret, and add payment tests per the plan
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Enters the 5-phase lifecycle starting from Implementation (since discovery and planning are done)
 - Delegates the security fixes to the relevant team
@@ -745,7 +745,7 @@ From here, you can either delegate to teams or fix manually:
 
 Total time: 20-40 minutes for the full assessment, plus implementation time for fixes.
 
-#### Tips for project assessments:
+#### Tips for project assessments
 
 - Run `/project-review` with a fresh eye -- do not assume you know what it will find
 - Share the findings table with your team. It is a useful conversation starter about technical debt
@@ -781,13 +781,13 @@ Read the most recent handoff document from docs/ai_handoffs/ and
 summarize where we left off.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Lists files in the `docs/ai_handoffs/` directory
 - Reads the most recent handoff (sorted by date)
 - Summarizes the key information: what was done, what is blocked, and what the next actions are
 
-#### Expected handoff content:
+#### Expected handoff content
 
 ```text
 # Session Handoff
@@ -832,14 +832,14 @@ summarize where we left off.
 /orchestrate --status
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reads `.claude/state/orchestrator.json`
 - Reads the recent entries from `.claude/state/events.log`
 - Reports the current phase, active teams, completed work, and pending items
 - Does NOT make any changes -- this is read-only
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Orchestrator Status
@@ -894,7 +894,7 @@ You can now pick up exactly where the previous session left off.
 /team-frontend Build the NotificationBell and NotificationList components, and the WebSocket client hook for real-time notification updates. The backend API is already complete -- see src/api/notifications.ts for the endpoints.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reads the handoff and orchestrator state for full context
 - Reads the backend API endpoints to understand the contract
@@ -903,7 +903,7 @@ You can now pick up exactly where the previous session left off.
 - Writes tests for all new components
 - Runs the quality gate on changed files
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Frontend Report
@@ -956,13 +956,13 @@ Review all changes made across both sessions (backend + frontend).
 /handoff --save
 ```
 
-#### What the AI does with `--save`:
+##### What the AI does with `--save`
 
 - Writes the handoff document to console AND to `docs/ai_handoffs/`
 - Updates the orchestrator state to Phase 5 (Ship)
 - Logs the session completion to events.log
 
-#### Expected handoff:
+#### Expected handoff
 
 ```text
 # Session Handoff
@@ -1038,7 +1038,7 @@ Human-readable markdown files with structured summaries. These serve as the "col
 
 Total time: 10-15 minutes for the continuation session.
 
-#### Tips for multi-session work:
+#### Tips for multi-session work
 
 - Always run `/handoff` at the end of every session. Even if you plan to continue immediately, the handoff is your safety net
 - Read the handoff BEFORE checking orchestrator state. The handoff is written for humans and gives you context faster
@@ -1083,14 +1083,14 @@ Run a full quality gate to establish a passing baseline. Refactoring should star
 /plan Refactor src/services/orderService.ts into smaller modules: extract payment processing, inventory management, and notification logic into separate service files. Maintain all existing behavior and test coverage.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Analyzes the existing file to identify logical boundaries
 - Maps all imports and dependents that reference `orderService`
 - Produces a plan with extraction steps, new file locations, and updated imports
 - Includes a validation strategy to confirm no behavior changes
 
-#### Expected plan highlights:
+#### Expected plan highlights
 
 ```text
 ## Steps
@@ -1114,7 +1114,7 @@ Run a full quality gate to establish a passing baseline. Refactoring should star
 /team-backend Refactor orderService.ts per the plan: extract paymentService, inventoryService, and notificationService. Update all imports. Do NOT change any test files -- all existing tests must pass as-is.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Extracts each module one at a time, running tests after each extraction
 - Updates import paths in all dependent files
@@ -1145,7 +1145,7 @@ Review the changes specifically for correctness — are the extracted modules fu
 /handoff --save --tag refactoring
 ```
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## What Was Done
@@ -1195,7 +1195,7 @@ Use this flow when responding to security audit findings, penetration test repor
 /security
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Scans for OWASP Top 10 vulnerabilities
 - Checks dependency vulnerabilities via `npm audit` or equivalent
@@ -1203,7 +1203,7 @@ Use this flow when responding to security audit findings, penetration test repor
 - Reviews authentication and authorization flows
 - Reports findings by severity
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## Security Audit
@@ -1235,7 +1235,7 @@ Use this flow when responding to security audit findings, penetration test repor
 /team-security Fix the SQL injection vulnerability in src/api/search.ts, restrict CORS configuration to allowed origins, and add rate limiting to /api/auth/* endpoints
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Replaces raw SQL with parameterized queries
 - Configures CORS with an explicit allowlist read from environment variables
@@ -1251,7 +1251,7 @@ Use this flow when responding to security audit findings, penetration test repor
 /security --scan-type deps --fix
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Identifies packages with known vulnerabilities
 - Upgrades to patched versions where available
@@ -1328,14 +1328,14 @@ Run discovery and healthcheck to establish a baseline. You need to know what is 
 /plan Upgrade React from v18 to v19. Identify all breaking changes, deprecated APIs in use, and files that need migration. Include a rollback strategy.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reviews the changelog and migration guide for the target version
 - Scans the codebase for deprecated patterns and breaking change impacts
 - Produces a file-by-file migration plan
 - Lists specific API changes (e.g., removed hooks, changed signatures)
 
-#### Expected plan highlights:
+#### Expected plan highlights
 
 ```text
 ## Breaking Changes Affecting This Project
@@ -1377,7 +1377,7 @@ Option B — use a single team for a more controlled approach:
 /team-frontend Upgrade React from v18 to v19. Start by updating package.json and running pnpm install, then migrate each breaking change one at a time, running tests after each change.
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Updates the dependency version in `package.json`
 - Applies each migration step incrementally
@@ -1429,7 +1429,7 @@ Preview what would be deployed to catch any deployment-specific issues from the 
 /handoff --save --tag dependency-upgrade
 ```
 
-#### Expected output:
+##### Expected output
 
 ```text
 ## What Was Done
@@ -1464,7 +1464,7 @@ Preview what would be deployed to catch any deployment-specific issues from the 
 /handoff --save      Document the session
 ```
 
-#### Tips for major dependency upgrades:
+#### Tips for major dependency upgrades
 
 - Always start from a clean, passing baseline. Run `/healthcheck` first.
 - Make changes incrementally and test after each step. Do not update everything at once.
@@ -1518,7 +1518,7 @@ evaluation:
 /infra-eval
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Scans the repository for evidence across all 8 dimensions
 - Scores each dimension on a 0–5 scale
@@ -1590,7 +1590,7 @@ Use this flow when onboarding a new repository, when a solo developer wants to d
 /feature-review
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Lists all features by category with current enabled/disabled status
 - Highlights dependency issues or conflicts
@@ -1598,7 +1598,7 @@ Use this flow when onboarding a new repository, when a solo developer wants to d
 
 #### Step 2: Choose a Preset or Customize
 
-#### Option A — Apply a preset:
+#### Option A — Apply a preset
 
 ```text
 /feature-configure
@@ -1606,7 +1606,7 @@ Use this flow when onboarding a new repository, when a solo developer wants to d
 
 The AI walks you through an interactive preset selection with diff preview.
 
-#### Option B — CLI direct:
+#### Option B — CLI direct
 
 ```bash
 agentkit features preset lean              # Solo developer, no team overhead
@@ -1625,7 +1625,7 @@ agentkit sync                              # Regenerate configs with new feature
 /feature-review --audit
 ```
 
-#### What the AI does
+##### What the AI does
 
 - Checks that every enabled feature has corresponding generated files
 - Flags stale configurations (enabled features with missing output)
@@ -1637,7 +1637,7 @@ agentkit sync                              # Regenerate configs with new feature
 /feature-flow team-orchestration --show-output
 ```
 
-#### What the AI does for tracing
+##### What the AI does for tracing
 
 - Shows the full resolution chain: spec definition → overlay config → template variables → generated output
 - Useful for debugging why a command or agent is missing from generated configs
@@ -1688,7 +1688,7 @@ Finish whatever task you were working on. The retrospective works best when ther
 /review --focus=retrospective
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Reviews the full conversation history for the current session
 - Identifies issues encountered (bugs, blockers, misunderstandings, tooling failures)
@@ -1751,7 +1751,7 @@ Use this flow when you want consistent visual identity in your editor workspace,
 /brand --init
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Creates `.agentkit/spec/brand.yaml` with a template brand identity
 - Creates `.agentkit/spec/editor-theme.yaml` with default color mappings
@@ -1774,7 +1774,7 @@ Edit `.agentkit/spec/brand.yaml` with your brand's colors, fonts, and identity a
 /brand --contrast
 ```
 
-#### What the AI does:
+##### What the AI does
 
 - Validates required fields and color format
 - Previews the resolved color palette

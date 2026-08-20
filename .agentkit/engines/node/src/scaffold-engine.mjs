@@ -565,7 +565,14 @@ export async function writeGeneratedManifest({ agentkitRoot, version, overlay })
     if (existsSync(dest) && (await readFile(dest, 'utf-8')) === content) return false;
     await writeFile(dest, content, 'utf-8');
     return true;
-  } catch {
+  } catch (err) {
+    // GENERATED.json is the sole version/spec provenance record. Swallowing a
+    // write failure here let the generated tree be updated while provenance went
+    // stale, and runSync reported success regardless. Surface it instead.
+    console.warn(
+      `[retort:sync] WARNING: could not write provenance manifest ${dest}: ${err?.message ?? err}\n` +
+        '  The generated output may not match the recorded version/spec hash.'
+    );
     return false;
   }
 }

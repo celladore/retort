@@ -152,5 +152,5 @@ Two workflows support this process:
 
 ## References
 
-- [History Index](../../history/README.md)
+- [History Index](../history/README.md)
 - [Git Workflow](./04_git_workflow.md)

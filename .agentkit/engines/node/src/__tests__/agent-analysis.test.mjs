@@ -122,6 +122,17 @@ teams:
     handoff-chain: []
 `;
 
+// Every team in MINIMAL_TEAMS owns a distinct scope, so it yields no
+// consolidation opportunities. This variant adds one team that duplicates
+// backend's scope, giving findConsolidationOpps exactly one pair to report.
+const OVERLAPPING_TEAMS = `${MINIMAL_TEAMS}
+  - id: platform
+    name: PLATFORM
+    scope: ['apps/api/**']
+    accepts: [implement]
+    handoff-chain: []
+`;
+
 // ---------------------------------------------------------------------------
 // Tests — Graph loading
 // ---------------------------------------------------------------------------
@@ -403,11 +414,25 @@ agents:
   });
 
   it('should find consolidation opportunities (overlapping scope)', () => {
-    const graph = loadMinimalGraph();
+    const dir = makeTmpAgentkit();
+    writeYaml(dir, 'agents.yaml', MINIMAL_AGENTS);
+    writeYaml(dir, 'teams.yaml', OVERLAPPING_TEAMS);
+    const graph = loadFullAgentGraph(dir);
+    rmSync(dir, { recursive: true, force: true });
+
     const opps = findConsolidationOpps(graph);
-    // quality has scope '**/*' which overlaps with testing '**/*.test.*'
-    // but exact string match only — no overlap in our minimal spec
-    expect(Array.isArray(opps)).toBe(true);
+
+    expect(opps).toHaveLength(1);
+    expect([opps[0].teamA, opps[0].teamB].sort()).toEqual(['backend', 'platform']);
+    expect(opps[0].overlappingScopes).toEqual(['apps/api/**']);
+    expect(opps[0].overlapRatio).toBe(1);
+  });
+
+  it('should report no consolidation opportunities when scopes are disjoint', () => {
+    // Matching is exact-string, so quality's '**/*' does not overlap
+    // testing's '**/*.test.*' — MINIMAL_TEAMS has no duplicate scope entry.
+    const graph = loadMinimalGraph();
+    expect(findConsolidationOpps(graph)).toEqual([]);
   });
 
   it('should compute cross-team coupling', () => {

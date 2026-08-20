@@ -167,7 +167,16 @@ export function buildTeamsList(rawTeams) {
 
 /**
  * Resolves which agent personas should be loaded for a given team.
- * Priority: 1) explicit `agents` list in teams.yaml, 2) category match.
+ *
+ * Priority: 1) explicit `agents` list in teams.yaml, 2) category match,
+ * 3) a single agent whose id equals the team id.
+ *
+ * Step 3 exists because agent categories and team ids are different
+ * vocabularies. The `testing` team matches the `testing` category, but the
+ * `backend` team's agent lives under the `engineering` category with the id
+ * `backend` — so category matching alone left 8 of 13 teams with no personas at
+ * all, and no way to name a `subagent_type` for native dispatch.
+ *
  * Returns an array of { id, name, role, category } objects.
  */
 export function resolveTeamAgents(teamId, team, agentsSpec) {
@@ -175,7 +184,7 @@ export function resolveTeamAgents(teamId, team, agentsSpec) {
   const result = [];
 
   // If the team has an explicit agents list, use it
-  if (Array.isArray(team.agents) && team.agents.length > 0) {
+  if (Array.isArray(team?.agents) && team.agents.length > 0) {
     for (const agentId of team.agents) {
       // Search across all categories for this agent ID
       for (const [category, agents] of Object.entries(allAgents)) {
@@ -194,6 +203,17 @@ export function resolveTeamAgents(teamId, team, agentsSpec) {
   if (Array.isArray(allAgents[teamId])) {
     for (const agent of allAgents[teamId]) {
       result.push({ id: agent.id, name: agent.name, role: agent.role, category: teamId });
+    }
+    return result;
+  }
+
+  // Last resort: the agent named after the team, wherever it is categorised
+  for (const [category, agents] of Object.entries(allAgents)) {
+    if (!Array.isArray(agents)) continue;
+    const found = agents.find((a) => a.id === teamId);
+    if (found) {
+      result.push({ id: found.id, name: found.name, role: found.role, category });
+      break;
     }
   }
 
@@ -441,6 +461,318 @@ function buildAgentLookaheadSection(la) {
   return lines.join('\n');
 }
 
+// ---------------------------------------------------------------------------
+// Agent dispatch derivation (ADR-15 — native agent dispatch)
+// ---------------------------------------------------------------------------
+
+/**
+ * Task types implying the agent produces file changes of any kind.
+ * An agent accepting none of these is structurally read-only.
+ */
+export const WRITE_TASK_TYPES = Object.freeze([
+  'implement',
+  'fix',
+  'refactor',
+  'migration',
+  'test',
+  'document',
+]);
+
+/**
+ * Task types implying the agent writes source code, which is what makes worktree
+ * isolation worthwhile (see .claude/rules/worktree-isolation.md). Strict subset of
+ * WRITE_TASK_TYPES — `document` writes prose, which does not need a branch.
+ */
+export const CODE_WRITING_TASK_TYPES = Object.freeze([
+  'implement',
+  'fix',
+  'refactor',
+  'migration',
+  'test',
+]);
+
+/**
+ * Categories whose agents coordinate other agents. Leaf executors default to
+ * non-dispatching so a specialist cannot fan out and multiply the token budget.
+ */
+export const DISPATCH_CAPABLE_CATEGORIES = Object.freeze([
+  'team-creation',
+  'strategic-operations',
+  'project-management',
+]);
+
+/** Tools withheld from an agent whose `accepts` contains no write-capable type. */
+export const READ_ONLY_DENIED_TOOLS = Object.freeze(['Write', 'Edit', 'NotebookEdit']);
+
+/** Accepted values for `dispatch.tools-mode`. */
+export const AGENT_TOOLS_MODES = Object.freeze(['inherit', 'allowlist']);
+
+/** Accepted values for `dispatch.isolation`. */
+export const AGENT_ISOLATION_MODES = Object.freeze(['auto', 'worktree', 'none']);
+
+/**
+ * Bounds for `max-subagent-spawn-depth` (teams.yaml) → the
+ * `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` env var in settings.json.
+ *
+ * Default 2 covers orchestrator → team agent → specialist, which is every
+ * fan-out pattern retort models. This is deliberately NOT derived from
+ * `max-handoff-chain-depth` (ADR-15 §4): a handoff chain is sequential and
+ * additive, a spawn tree nests and multiplies. Deriving it would emit 7 for a
+ * 13-team repo, which blows the `aicost-token-budget` rule on the first run.
+ */
+export const DEFAULT_SUBAGENT_SPAWN_DEPTH = 2;
+export const MIN_SUBAGENT_SPAWN_DEPTH = 1;
+export const MAX_SUBAGENT_SPAWN_DEPTH = 3;
+
+/** Claude Code subagent accent colour per agent category. */
+export const AGENT_CATEGORY_COLORS = Object.freeze({
+  engineering: 'blue',
+  testing: 'green',
+  operations: 'orange',
+  product: 'purple',
+  design: 'pink',
+  marketing: 'yellow',
+  'cost-operations': 'cyan',
+  'feature-management': 'cyan',
+  'project-management': 'yellow',
+  'strategic-operations': 'red',
+  'team-creation': 'purple',
+});
+
+/**
+ * Claude Code refuses to register a subagent whose `name` breaks this pattern
+ * (notably any name containing `:`), and logs the rejection only to the debug log.
+ */
+export const AGENT_NAME_PATTERN = /^[a-z][a-z0-9-]*$/;
+
+/** Claude Code truncates longer descriptions; do it here so output stays predictable. */
+export const MAX_AGENT_DESCRIPTION_LENGTH = 500;
+
+function normalizeWhitespace(value) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
+}
+
+function truncateDescription(text) {
+  if (text.length <= MAX_AGENT_DESCRIPTION_LENGTH) return text;
+  return text.slice(0, MAX_AGENT_DESCRIPTION_LENGTH - 3).trimEnd() + '...';
+}
+
+/** First sentence of a role statement, normalised to one line and terminated. */
+function firstRoleSentence(role) {
+  const normalized = normalizeWhitespace(role);
+  if (!normalized) return '';
+  const head = normalized.split(/\.\s+/)[0].trim();
+  if (!head) return '';
+  return head.endsWith('.') ? head : `${head}.`;
+}
+
+/**
+ * Resolves the `description:` frontmatter value — the field Claude matches against
+ * when selecting a subagent, so it must read as a trigger, not a capability statement.
+ *
+ * 1. `dispatch.when-to-use` verbatim when authored.
+ * 2. Otherwise derived from `accepts`, the first three `focus` globs, and the first
+ *    sentence of `role`.
+ *
+ * Always returns a non-empty single-line string — an agent without a description is
+ * silently unregistered.
+ */
+export function deriveAgentDescription(agent) {
+  const spec = agent || {};
+  const dispatch = spec.dispatch || {};
+
+  const whenToUse = normalizeWhitespace(dispatch['when-to-use']);
+  if (whenToUse) return truncateDescription(whenToUse);
+
+  const accepts = (Array.isArray(spec.accepts) ? spec.accepts : []).filter(Boolean);
+  const focus = (Array.isArray(spec.focus) ? spec.focus : []).filter(Boolean);
+  const sentence = firstRoleSentence(spec.role);
+
+  let lead = '';
+  if (accepts.length > 0 && focus.length > 0) {
+    lead = `Use for ${accepts.join(', ')} work in ${focus.slice(0, 3).join(', ')}.`;
+  } else if (accepts.length > 0) {
+    lead = `Use for ${accepts.join(', ')} work.`;
+  } else if (focus.length > 0) {
+    lead = `Use for work in ${focus.slice(0, 3).join(', ')}.`;
+  }
+
+  const derived = [lead, sentence].filter(Boolean).join(' ');
+  if (derived) return truncateDescription(derived);
+
+  return truncateDescription(`Retort ${spec.name || spec.id || 'agent'} persona.`);
+}
+
+/**
+ * Derives `isolation:` from `accepts`. Code-writing agents get their own git
+ * worktree, turning .claude/rules/worktree-isolation.md from an instruction the
+ * caller must remember into a property of the agent definition.
+ *
+ * `dispatch.isolation` overrides: `worktree` forces it on, `none` forces it off,
+ * `auto` (or absent) derives. An unrecognised value falls through to derivation —
+ * the spec validator is where a typo is reported, not here.
+ *
+ * Returns '' (not 'none') when isolation should be omitted, so the template
+ * conditional drops the key rather than emitting an empty value.
+ */
+export function deriveAgentIsolation(accepts, dispatch) {
+  const override = dispatch ? dispatch.isolation : undefined;
+  if (override === 'worktree') return 'worktree';
+  if (override === 'none') return '';
+
+  const list = Array.isArray(accepts) ? accepts : [];
+  return list.some((type) => CODE_WRITING_TASK_TYPES.includes(type)) ? 'worktree' : '';
+}
+
+/**
+ * Derives `disallowedTools:` from `accepts`. Restriction is subtractive — agents
+ * inherit the full subagent toolset and lose capability explicitly, rather than
+ * being allowlisted into a tool set that would silently drop Agent/Skill/MCP tools.
+ *
+ * `canDispatch` defaults to true so a caller that has not resolved dispatch
+ * capability never accidentally withholds the `Agent` tool.
+ */
+export function deriveDisallowedTools(accepts, canDispatch = true) {
+  const list = Array.isArray(accepts) ? accepts : [];
+  const denied = [];
+  if (!list.some((type) => WRITE_TASK_TYPES.includes(type))) {
+    denied.push(...READ_ONLY_DENIED_TOOLS);
+  }
+  if (canDispatch === false) denied.push('Agent');
+  return denied.join(', ');
+}
+
+/**
+ * Resolves whether an agent may spawn other agents. Defaults by category; a
+ * per-agent `dispatch.can-dispatch` boolean overrides in either direction.
+ */
+export function deriveCanDispatch(category, dispatch) {
+  const explicit = dispatch ? dispatch['can-dispatch'] : undefined;
+  if (typeof explicit === 'boolean') return explicit;
+  return DISPATCH_CAPABLE_CATEGORIES.includes(category);
+}
+
+/**
+ * Derives `tools:` for agents that opt into `dispatch.tools-mode: allowlist`.
+ *
+ * Returns '' for the default `inherit` mode, where the key is omitted entirely
+ * and capability is removed subtractively via `disallowedTools` instead.
+ *
+ * In allowlist mode `tools:` is authoritative, so the read-only guardrail is
+ * applied by *subtraction from the list* rather than by also emitting
+ * `disallowedTools` — one key, one description of what the agent may do.
+ * `Agent` is appended only when the agent may dispatch.
+ *
+ * An allowlist that resolves to nothing returns '' and warns: an empty `tools:`
+ * launches a subagent with no tools at all, which fails at the first tool call
+ * rather than at sync time. Falling back to `inherit` keeps the agent usable and
+ * leaves the hard error to the spec validator.
+ */
+export function deriveAgentTools(agent, canDispatch) {
+  const spec = agent || {};
+  const dispatch = spec.dispatch || {};
+  if (dispatch['tools-mode'] !== 'allowlist') return '';
+
+  const accepts = Array.isArray(spec.accepts) ? spec.accepts : [];
+  const readOnly = !accepts.some((type) => WRITE_TASK_TYPES.includes(type));
+
+  const allowed = (spec['preferred-tools'] || spec.tools || [])
+    .filter((tool) => typeof tool === 'string' && tool.trim() !== '')
+    .map((tool) => tool.trim())
+    .filter((tool) => !(readOnly && READ_ONLY_DENIED_TOOLS.includes(tool)));
+
+  if (canDispatch && !allowed.includes('Agent')) allowed.push('Agent');
+
+  if (allowed.length === 0) {
+    console.warn(
+      `[agentkit:sync] Warning: agent '${spec.id || spec.name || 'unknown'}' sets ` +
+        "dispatch.tools-mode: allowlist but resolves to no tools — falling back to 'inherit'. " +
+        'Populate preferred-tools or drop tools-mode.'
+    );
+    return '';
+  }
+
+  return allowed.join(', ');
+}
+
+/**
+ * Resolves `max-subagent-spawn-depth` from teams.yaml into the value emitted as
+ * `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`.
+ *
+ * An out-of-range value falls back to the default with a warning rather than
+ * being clamped. Clamping 7 to 3 would emit a plausible-looking number nobody
+ * asked for; the spec validator reports the real error.
+ */
+export function resolveMaxSubagentSpawnDepth(teamsSpec) {
+  const raw = teamsSpec ? teamsSpec['max-subagent-spawn-depth'] : undefined;
+  if (raw === undefined || raw === null) return DEFAULT_SUBAGENT_SPAWN_DEPTH;
+
+  if (!Number.isInteger(raw) || raw < MIN_SUBAGENT_SPAWN_DEPTH || raw > MAX_SUBAGENT_SPAWN_DEPTH) {
+    console.warn(
+      `[agentkit:sync] Warning: teams.yaml max-subagent-spawn-depth must be an integer ` +
+        `between ${MIN_SUBAGENT_SPAWN_DEPTH} and ${MAX_SUBAGENT_SPAWN_DEPTH}, got ${JSON.stringify(raw)} — ` +
+        `using ${DEFAULT_SUBAGENT_SPAWN_DEPTH}`
+    );
+    return DEFAULT_SUBAGENT_SPAWN_DEPTH;
+  }
+
+  return raw;
+}
+
+/** Accepted values for the delegation backend (ADR-15 §6). */
+export const DISPATCH_MODES = Object.freeze(['native', 'task-file']);
+export const DEFAULT_DISPATCH_MODE = 'native';
+
+/**
+ * Resolves which delegation backend the generated commands describe.
+ *
+ * `native` writes the task file and then dispatches a subagent with the taskId;
+ * `task-file` writes the task file only and is the behaviour of every tool
+ * without registrable subagents. The overlay wins over the shared spec so a repo
+ * can opt out without forking settings.yaml.
+ */
+export function resolveDispatchMode(overlaySettings, settingsSpec) {
+  const raw = overlaySettings?.dispatchMode ?? settingsSpec?.dispatch?.mode;
+  if (raw === undefined || raw === null || raw === '') return DEFAULT_DISPATCH_MODE;
+
+  if (!DISPATCH_MODES.includes(raw)) {
+    console.warn(
+      `[agentkit:sync] Warning: dispatch mode must be one of [${DISPATCH_MODES.join(', ')}], ` +
+        `got ${JSON.stringify(raw)} — using '${DEFAULT_DISPATCH_MODE}'`
+    );
+    return DEFAULT_DISPATCH_MODE;
+  }
+
+  return raw;
+}
+
+/**
+ * Builds the team → `subagent_type` routing table the orchestrator needs in
+ * order to dispatch natively.
+ *
+ * Without this the orchestrator has to guess an agent id from a team id, which
+ * only coincidentally works (`backend` team → `backend` agent) and silently
+ * fails everywhere else (`testing` team → `test-lead`, not `testing`).
+ *
+ * The lead is the team's first resolved agent — teams.yaml lists them in
+ * priority order. `isolation` is deliberately not included: it is a property of
+ * the agent definition now, not something the caller passes.
+ */
+export function buildTeamDispatchTable(teamsSpec, agentsSpec) {
+  const teams = teamsSpec?.teams || [];
+  const rows = [];
+
+  for (const team of teams) {
+    const agents = resolveTeamAgents(team.id, team, agentsSpec);
+    if (agents.length === 0) continue;
+    rows.push(
+      `| \`${team.id}\` | \`${agents[0].id}\` | ${agents.map((a) => `\`${a.id}\``).join(', ')} |`
+    );
+  }
+
+  return rows.join('\n');
+}
+
 export function buildAgentVars(agent, category, vars, registry = new Map()) {
   const focus = agent.focus || [];
   const responsibilities = agent.responsibilities || [];
@@ -449,11 +781,40 @@ export function buildAgentVars(agent, category, vars, registry = new Map()) {
   const examples = agent.examples || [];
   const antiPatterns = agent['anti-patterns'] || [];
   const domainRules = agent['domain-rules'] || [];
+  const accepts = Array.isArray(agent.accepts) ? agent.accepts : [];
+  const dispatch = agent.dispatch || {};
+
+  if (agent.id && !AGENT_NAME_PATTERN.test(agent.id)) {
+    console.warn(
+      `[agentkit:sync] Warning: agent id '${agent.id}' does not match ${AGENT_NAME_PATTERN} — ` +
+        'Claude Code will skip this file instead of registering a subagent'
+    );
+  }
+
+  const canDispatch = deriveCanDispatch(category, dispatch);
+  // `preferred-tools` is prose by default — promoting it to an allowlist would strip
+  // Agent/Skill/WebSearch/MCP tools from every agent. Only `tools-mode: allowlist`
+  // opts in, and when it does `tools:` becomes the single authority, so the
+  // subtractive `disallowedTools` is dropped to avoid describing the same
+  // restriction twice in two languages.
+  const agentTools = deriveAgentTools(agent, canDispatch);
 
   return {
     ...vars,
     agentName: agent.name,
     agentId: agent.id,
+    // --- Dispatch frontmatter (ADR-15) ---
+    agentDispatchName: agent.id || '',
+    agentDescription: deriveAgentDescription(agent),
+    agentModel: normalizeWhitespace(dispatch.model) || 'inherit',
+    agentTools,
+    agentDisallowedTools: agentTools ? '' : deriveDisallowedTools(accepts, canDispatch),
+    agentIsolation: deriveAgentIsolation(accepts, dispatch),
+    // Background subagents keep a fixed subset of built-in tools regardless of
+    // frontmatter, so this is opt-in per agent rather than derived.
+    agentBackground: dispatch.background === true ? 'true' : '',
+    agentColor: normalizeWhitespace(dispatch.color) || AGENT_CATEGORY_COLORS[category] || '',
+    agentCanDispatch: canDispatch,
     agentCategory: category,
     agentRole: typeof agent.role === 'string' ? agent.role.trim() : agent.role || '',
     agentFocusList: focus.map((f) => `- ${f}`).join('\n'),
@@ -531,7 +892,7 @@ export function buildRuleVars(rule, vars) {
   const appliesTo = rule['applies-to'] || [];
   const conventions = rule.conventions || [];
   const enforcement = conventions.filter((c) => c.type === 'enforcement');
-  // Conventions without an explicit type default to advisory (see ADR-08)
+  // Conventions without an explicit type default to advisory (see ADR-14)
   const advisory = conventions.filter((c) => c.type !== 'enforcement');
   return {
     ...vars,

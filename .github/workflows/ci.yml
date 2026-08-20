@@ -20,12 +20,21 @@ concurrency:
 # .github/scripts/setup-branch-protection.sh — update the spec, not this comment,
 # then re-run that script.
 #
-# Current required checks: Test (below), Validate (below),
+# Current required checks: Test (below), Validate (below), Prettier (below),
 # branch-rules (branch-protection.yml — job id, no `name:` field).
 #
-# `Prettier` (below) is NOT currently a required check. It moved here from the
-# Vitest suite (ADR-12 decision 3); adding it to branchProtection.requiredStatusChecks
-# is a separate decision, since doing so makes formatting block merges.
+# `Prettier` (below) moved here from the Vitest suite (ADR-12 decision 3) and was
+# promoted to a required check once it was confirmed reliably green. Note that a
+# repo-wide `prettier --check .` run from inside a `.claude/worktrees/` agent
+# worktree on Windows reports ~18 false positives: the harness seeds `.claude/**`
+# and `CLAUDE.md` with CRLF, bypassing the `eol=lf` filters in .gitattributes.
+# Those never reach CI — `text eol=lf` normalises CRLF→LF on staging — so a red
+# Prettier job here is a genuine formatting regression, not that artifact.
+#
+# `Quarantined Tests` (below) is NOT a required check by design (ADR-12
+# decision 5): a quarantined test is a known flake with a tracking issue, so it
+# must stay visible without blocking merges. If it were required, quarantine
+# would be indistinguishable from leaving the flake in the blocking suite.
 # Markdown Lint lives in quality-lint.yml — required on main, warning-only on dev.
 jobs:
   test:
@@ -48,8 +57,54 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: .agentkit
 
-      - name: Run tests with coverage
-        run: pnpm coverage
+      # Advisory on hosted runners: the ci profile uses a much lower disk floor
+      # than a developer host and never blocks (see scripts/preflight-capacity.mjs).
+      # It exists so a capacity-shaped failure is visible in the log as capacity
+      # rather than as a suite of unrelated test errors. Set
+      # RETORT_PREFLIGHT_ENFORCE=1 to make it blocking.
+      - name: Capacity preflight
+        run: node scripts/preflight-capacity.mjs --profile=ci
+
+      # Root suite runs without --coverage: its coverage thresholds (vitest.config.mjs)
+      # cover src/start/** too, which currently sits well under 80% branch coverage
+      # for reasons unrelated to this suite. Wiring --coverage in here would flip a
+      # required check red over a pre-existing, out-of-scope gap. `pnpm test:coverage`
+      # remains available locally once that gap is addressed on its own.
+      #
+      # Two steps, not one `&&`-chained run: line, and the second is forced to run
+      # even after the first fails. A single `&&` step means a root-suite failure
+      # skips .agentkit's suite entirely, so it never writes test-results/results.json
+      # — and the Reconcile step below then fails on a missing report instead of on
+      # the real failure, hiding the actual signal behind a second, misleading one.
+      - name: Run root suite
+        run: pnpm test:start
+
+      - name: Run .agentkit tests with coverage
+        if: success() || failure()
+        run: pnpm -C .agentkit coverage
+
+      # Machine-readable per-test results (ADR-12 decision 5). Console scrollback
+      # is not inspectable after the fact; these are. Uploaded before the
+      # reconciliation gate so the evidence survives a failing gate.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: test-results
+          path: .agentkit/test-results/
+          retention-days: 14
+          if-no-files-found: warn
+
+      # A Vitest run can drop tests and still print a passing summary: when a
+      # worker dies mid-file, the tests it had collected stay in the reported
+      # total but land in none of the pass/fail/skip buckets. One observed run
+      # printed "Tests 2273 passed | 1 skipped (2327)" — 53 tests and a whole
+      # file silently gone, with Vitest's own warning that this "might cause
+      # false positive tests". This step fails when the outcomes do not add up.
+      # A run that does not reconcile is void, not green.
+      - name: Reconcile test results
+        if: always()
+        run: pnpm test:reconcile
         working-directory: .agentkit
 
       - name: Coverage summary
@@ -187,6 +242,45 @@ jobs:
             echo "Checking $f..."
             SPEC_FILE="$f" node --input-type=module -e "import yaml from 'js-yaml'; import fs from 'fs'; yaml.load(fs.readFileSync(process.env.SPEC_FILE,'utf8'));"
           done
+
+  # Runs only the files listed in .agentkit/test-quarantine.json — confirmed
+  # flakes, each with a tracking issue, excluded from the blocking `Test` job.
+  # Exits immediately when the registry is empty, which is the healthy state.
+  # Non-blocking: the point of quarantine is to keep a known flake visible
+  # without letting it corrupt the merge signal (ADR-12 decision 5).
+  quarantined-tests:
+    name: Quarantined Tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+          cache-dependency-path: .agentkit/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .agentkit
+
+      - name: Run quarantined tests
+        run: pnpm test:quarantine
+        working-directory: .agentkit
+
+      - name: Upload quarantined test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quarantined-test-results
+          path: .agentkit/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
 
   prettier:
     name: Prettier

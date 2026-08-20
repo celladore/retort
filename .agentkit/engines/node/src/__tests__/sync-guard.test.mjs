@@ -136,12 +136,12 @@ describe('checkDirtyProtectedFiles', () => {
     expect(result.files.every((f) => !f.includes(' -> '))).toBe(true);
   });
 
-  it('handles short porcelain lines (length <= 3) by skipping them', () => {
-    // The internal filter drops lines too short to be valid porcelain entries.
-    // A clean tree exits via that filter; assert it does not throw and returns
-    // an array.
+  it('reports a clean tree as not dirty, dropping git’s trailing blank line', () => {
+    // A clean tree still yields one empty line from splitting git's output.
+    // The length > 3 filter is what keeps that blank out of `files` — asserting
+    // the exact result is what makes this test able to fail if the filter goes.
     const result = checkDirtyProtectedFiles(tempDir, ['.agentkit/spec']);
-    expect(Array.isArray(result.files)).toBe(true);
+    expect(result).toEqual({ dirty: false, files: [] });
   });
 });
 

@@ -27,6 +27,8 @@ These rules are hard constraints — violations block CI or are prevented by hoo
 
 - **[qa-coverage-threshold]** Test coverage must meet or exceed the project target. No PR may decrease overall coverage. Enforce the threshold in CI so that the build fails when coverage drops below the configured minimum.
  _(enforcement · phase: validation)_
+- **[qa-run-reconciliation]** Every CI test run must emit a machine-readable report (JUnit or JSON) as an uploaded artifact, and the build must fail when the reported outcomes do not reconcile with the reported total — when passed + failed + skipped + todo does not equal the number of tests collected. A crashed worker leaves its already-collected tests in the total but in none of the outcome buckets, so the run prints a passing summary while silently dropping tests. A run that does not reconcile is void, not green: it must never satisfy a required check.
+ _(enforcement · phase: validation)_
 
 ## Advisory Rules
 
