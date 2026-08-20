@@ -76,10 +76,10 @@ the full `.agentkit` test suite to confirm no regressions.
 
 ### Before/After Comparison
 
-| Scenario                                   | Before  | After  |
-| ------------------------------------------- | ------- | ------ |
-| `runValidate()` vs. real bloated checkout    | 47,007ms (isolated) / ~118,744ms (full-suite contention) | 949ms |
-| Full `.agentkit` suite                       | 1 timeout failure | 2700 passed / 1 skipped / 0 failed |
+| Scenario                                  | Before                                                   | After                              |
+| ----------------------------------------- | -------------------------------------------------------- | ---------------------------------- |
+| `runValidate()` vs. real bloated checkout | 47,007ms (isolated) / ~118,744ms (full-suite contention) | 949ms                              |
+| Full `.agentkit` suite                    | 1 timeout failure                                        | 2700 passed / 1 skipped / 0 failed |
 
 ### Regression Testing
 
