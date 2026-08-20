@@ -30,6 +30,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Native agent dispatch ([#574](../../pull/574), [history](docs/history/features/0003-2026-08-07-native-agent-dispatch-feature.md))
 - Capacity preflight for full test-suite runs ([history](docs/history/features/0002-2026-08-10-capacity-preflight-for-full-test-suite-runs-feature.md))
 - Marketing Landing Page ([#616](../../pull/616), [history](docs/history/features/0004-2026-08-19-marketing-landing-page-feature.md))
+- Overlay Settings Schema Validation ([history](docs/history/implementations/0011-2026-08-20-overlay-settings-schema-validation-implementation.md))
 
 ### Changed
 

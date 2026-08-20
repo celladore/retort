@@ -9,6 +9,13 @@ primaryStack: auto
 # contributors, the .sh is the fallback on runners without pwsh.
 windowsFirst: true
 
+# Conventional Commits type prefixing agent worktree branches
+# (feat/agent-<name>/<slug>). Rendered into .claude/rules/worktree-isolation.md.
+agentBranchPrefix: feat
+# advisory — worktree isolation is recommended; solo sessions may skip it
+# enforced — the generated rule states it as a hard requirement for agents
+worktreeIsolation: advisory
+
 aiSynthesisLayer: false
 
 renderTargets:

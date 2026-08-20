@@ -485,6 +485,19 @@ export async function runSync({ agentkitRoot, projectRoot, flags }) {
     // stop emitting PowerShell files it would never execute. See
     // isWindowsFirst() in platform-syncer.mjs for why the filter is one-directional.
     windowsFirst: overlaySettings.windowsFirst ?? settingsSpec.sync?.windowsFirst ?? true,
+    // agentBranchPrefix is the Conventional Commits type used for the branches
+    // agents create under worktree isolation (feat/agent-<name>/<slug>). The
+    // worktree-isolation rule documents it as configurable, so it has to be
+    // rendered from the setting rather than hardcoded in the template prose.
+    agentBranchPrefix: overlaySettings.agentBranchPrefix || 'feat',
+    // worktreeIsolation selects how strongly the worktree-isolation rule reads:
+    // 'advisory' (default) recommends isolation; 'enforced' states it as a hard
+    // requirement. Rules are instructions to agents, so this is the enforcement
+    // mechanism — the generated text is what an agent actually obeys.
+    worktreeIsolation: overlaySettings.worktreeIsolation === 'enforced' ? 'enforced' : 'advisory',
+    // Boolean companion for {{#if}} in templates — the string above is truthy
+    // for both values, so it cannot drive a conditional on its own.
+    worktreeIsolationEnforced: overlaySettings.worktreeIsolation === 'enforced',
     // skillsCategorised opts the repo into the layered skills layout:
     //   .claude/skills/<category>/<name>/SKILL.md
     //   .agents/skills/<category>/<name>/SKILL.md
