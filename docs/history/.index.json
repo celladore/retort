@@ -1,7 +1,7 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 13,
+    "bugfix": 14,
     "feature": 5,
     "migration": 1,
     "issue": 1,
@@ -143,6 +143,14 @@
       "date": "2026-08-19",
       "pr": "622",
       "file": "bug-fixes/0012-2026-08-19-reverse-merge-pr-blocked-by-main-to-main-branch-rules-check-bugfix.md"
+    },
+    {
+      "number": 13,
+      "type": "bugfix",
+      "title": "Secret scan recursion into accumulated worktrees causes validate timeout",
+      "date": "2026-08-20",
+      "pr": "627",
+      "file": "bug-fixes/0013-2026-08-20-secret-scan-recursion-into-accumulated-worktrees-causes-validate-timeout-bugfix.md"
     }
   ]
 }
