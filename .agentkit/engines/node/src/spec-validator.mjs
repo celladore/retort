@@ -430,6 +430,8 @@ const overlaySettingsSchema = {
     windowsFirst: { type: 'boolean' },
     aiSynthesisLayer: { type: 'boolean' },
     autoSyncOnPush: { type: 'boolean' },
+    autoSyncAfterInit: { type: 'boolean' },
+    autoSyncAfterFeatureChange: { type: 'boolean' },
     syncDateMode: { type: 'string', enum: ['run', 'version', 'none'] },
     // Conventional Commits type, so a bare lowercase word — it is interpolated
     // into a branch name, and `feat/` with a stray slash would nest a level
