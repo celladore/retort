@@ -42,7 +42,7 @@ Based on `$ARGUMENTS`, perform the appropriate configuration action:
 2. Show the diff between current features and the preset
 3. Ask for confirmation
 4. Run: `node .agentkit/engines/node/src/cli.mjs features preset <name>`
-5. Verify the sync completed successfully
+5. Verify the change was applied. The sync behavior is determined by the effective `autoSyncAfterFeatureChange` setting: the overlay value takes precedence if defined; otherwise the spec default from `sync.autoSyncAfterFeatureChange` in `.agentkit/spec/settings.yaml` applies (defaulting to `false` if neither is set). If the effective value is `true`, confirm the sync completed successfully; otherwise, instruct the user to run `/sync` manually to regenerate AI tool configs
 
 ### With `--category <name>`: Category-Scoped Configuration
 
@@ -53,6 +53,7 @@ Based on `$ARGUMENTS`, perform the appropriate configuration action:
    - Show dependencies (if any)
 3. Ask the user which features they want to change
 4. Apply changes via CLI: `node .agentkit/engines/node/src/cli.mjs features enable/disable <ids>`
+5. The sync behavior is determined by the effective `autoSyncAfterFeatureChange` setting: the overlay value takes precedence if defined; otherwise the spec default from `sync.autoSyncAfterFeatureChange` in `.agentkit/spec/settings.yaml` applies (defaulting to `false` if neither is set). If the effective value is `true`, verify sync completed; otherwise, instruct the user to run `/sync` manually
 
 ### With `--dry-run`: Preview Changes
 
@@ -107,6 +108,6 @@ node .agentkit/engines/node/src/cli.mjs features preset <minimal|lean|standard|f
 ## Rules
 
 - Always show the user what will change before making changes
-- Run sync automatically after feature changes (the CLI does this)
+- Sync runs automatically after feature changes based on the effective `autoSyncAfterFeatureChange` setting. Resolution order: (1) overlay settings value if defined, (2) spec default from `sync.autoSyncAfterFeatureChange` in `.agentkit/spec/settings.yaml`, (3) `false` if neither is set. Only skip instructing the user to run `/sync` manually when the effective value is `true`
 - Never edit `features.yaml` — only modify overlay `settings.yaml` through the CLI
 - Verify changes took effect by reading the overlay settings after modification

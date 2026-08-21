@@ -873,10 +873,24 @@ async function finalizeInit({
   writeFileSync(markerPath, repoName + '\n', 'utf-8');
   console.log(`[agentkit:init] Created .agentkit-repo marker`);
 
-  // 5. Run sync
-  console.log(`[agentkit:init] Running sync...`);
+  // 5. Run sync (opt-in, controlled by autoSyncAfterInit in overlay settings,
+  //    falling back to spec/settings.yaml sync.autoSyncAfterInit)
   const { runSync } = await import('./synchronize.mjs');
-  await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  const currentSettings = yaml.load(readFileSync(settingsPath, 'utf-8')) || {};
+  const settingsSpecPath = resolve(agentkitRoot, 'spec', 'settings.yaml');
+  const settingsSpec = existsSync(settingsSpecPath)
+    ? yaml.load(readFileSync(settingsSpecPath, 'utf-8')) || {}
+    : {};
+  const autoSyncAfterInit =
+    currentSettings.autoSyncAfterInit ?? settingsSpec.sync?.autoSyncAfterInit ?? false;
+  if (autoSyncAfterInit) {
+    console.log(`[agentkit:init] Running sync...`);
+    await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  } else {
+    console.log(
+      `[agentkit:init] Sync skipped (autoSyncAfterInit is false). Run "agentkit sync" manually when ready.`
+    );
+  }
 
   // 6. Auto-import issues if enabled
   try {

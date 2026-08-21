@@ -782,7 +782,7 @@ describe('runInit dry-run', () => {
     mkdirSync(resolve(agentkitRoot, 'overlays', '__TEMPLATE__'), { recursive: true });
     writeFileSync(
       resolve(agentkitRoot, 'overlays', '__TEMPLATE__', 'settings.yaml'),
-      'repoName: __TEMPLATE__\n',
+      'repoName: __TEMPLATE__\nrenderTargets: []\nautoSyncAfterInit: true\n',
       'utf-8'
     );
     logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -964,7 +964,7 @@ describe('runInit interactive wizard', () => {
         'schemaVersion: 1',
         'features:',
         '  - { id: core, name: Core, category: core, alwaysOn: true }',
-        '  - { id: extra, name: Extra, category: optional, default: true }',
+        '  - { id: extra, name: Extra, category: optional, default: false }',
         'presets:',
         '  minimal: { label: Minimal, features: [core] }',
         '  standard: { label: Standard, features: [core, extra] }',
@@ -1349,7 +1349,7 @@ describe('runInit preset edge cases', () => {
     mkdirSync(resolve(agentkitRoot, 'overlays', '__TEMPLATE__'), { recursive: true });
     writeFileSync(
       resolve(agentkitRoot, 'overlays', '__TEMPLATE__', 'settings.yaml'),
-      'repoName: __TEMPLATE__\nrenderTargets: []\n',
+      'repoName: __TEMPLATE__\nrenderTargets: []\nautoSyncAfterInit: true\n',
       'utf-8'
     );
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -1529,5 +1529,34 @@ describe('runInit preset edge cases', () => {
     // Assert
     expect(importMock).toHaveBeenCalledTimes(1);
     expect(warnSpy.mock.calls.flat().join(' ')).toContain('Issue import failed');
+  });
+
+  it('skips sync when autoSyncAfterInit is absent or false', async () => {
+    const syncMock = vi.fn().mockResolvedValue(undefined);
+    vi.doMock('../synchronize.mjs', () => ({
+      runSync: syncMock,
+    }));
+    vi.doMock('../discover.mjs', () => ({
+      runDiscover: vi.fn().mockResolvedValue(makeMinimalReport({ techStacks: [] })),
+    }));
+
+    // Override template to omit autoSyncAfterInit
+    writeFileSync(
+      resolve(agentkitRoot, 'overlays', '__TEMPLATE__', 'settings.yaml'),
+      'repoName: __TEMPLATE__\nrenderTargets: []\n',
+      'utf-8'
+    );
+
+    const { runInit } = await import('../init.mjs');
+
+    await runInit({
+      agentkitRoot,
+      projectRoot,
+      flags: { repoName: 'no-sync', 'non-interactive': true },
+    });
+
+    expect(syncMock).not.toHaveBeenCalled();
+    const marker = readFileSync(resolve(projectRoot, '.agentkit-repo'), 'utf-8').trim();
+    expect(marker).toBe('no-sync');
   });
 });

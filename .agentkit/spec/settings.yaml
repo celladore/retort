@@ -245,3 +245,13 @@ sync:
   # Set autoSyncOnPush: true in the repo's overlay settings to restore the
   # previous always-on behaviour.
   autoSyncOnPush: false
+  # Whether to run agentkit sync automatically at the end of `agentkit init`.
+  # Defaults to false — init writes the overlay and project.yaml, then stops.
+  # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
+  #   autoSyncAfterInit: true
+  autoSyncAfterInit: false
+  # Whether to run agentkit sync automatically after feature enable/disable/preset.
+  # Defaults to false — feature changes update the overlay settings, then stop.
+  # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
+  #   autoSyncAfterFeatureChange: true
+  autoSyncAfterFeatureChange: false

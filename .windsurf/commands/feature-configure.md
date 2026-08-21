@@ -5,7 +5,7 @@
 <!-- Format: Plain Markdown. Windsurf command template. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
-# /feature-configure — Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.
+# /feature-configure — Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Runs sync after changes only when autoSyncAfterFeatureChange is true; otherwise, instructs the user to run /sync manually.
 
 ## When to Use
 
@@ -14,7 +14,7 @@ Invoke this command when the user requests or implies the
 
 ## Purpose
 
-Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.
+Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Runs sync after changes only when autoSyncAfterFeatureChange is true; otherwise, instructs the user to run /sync manually.
 
 ## Shared State
 
