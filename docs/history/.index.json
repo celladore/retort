@@ -1,8 +1,8 @@
 {
   "sequences": {
     "implementation": 11,
-    "bugfix": 10,
-    "feature": 4,
+    "bugfix": 12,
+    "feature": 5,
     "migration": 1,
     "issue": 1,
     "lesson": 1
@@ -111,6 +111,30 @@
       "date": "2026-08-07",
       "pr": "574",
       "file": "features/0003-2026-08-07-native-agent-dispatch-feature.md"
+    },
+    {
+      "number": 4,
+      "type": "feature",
+      "title": "Marketing Landing Page",
+      "date": "2026-08-19",
+      "pr": "616",
+      "file": "features/0004-2026-08-19-marketing-landing-page-feature.md"
+    },
+    {
+      "number": 10,
+      "type": "bugfix",
+      "title": "Whitespace-Pre Rendering Regression in Landing Page Code Blocks",
+      "date": "2026-08-19",
+      "pr": "616",
+      "file": "bug-fixes/0010-2026-08-19-whitespace-pre-rendering-regression-in-landing-page-code-blocks-bugfix.md"
+    },
+    {
+      "number": 11,
+      "type": "bugfix",
+      "title": "Quick Start Section Ignores Light/Dark Theme Toggle",
+      "date": "2026-08-19",
+      "pr": "",
+      "file": "bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md"
     }
   ]
 }

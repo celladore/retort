@@ -386,8 +386,9 @@ Two consequences the original framing missed:
    Headroom 2 are therefore not independent: a low-disk host cannot grow its way out of commit
    pressure, and a host that passes the disk check at start can fail it mid-run.
 
-The preflight credits pending page-file growth toward available commit, capped by free disk, and
-judges page-file configuration by its **maximum** rather than its current size.
+The preflight credits pending page-file growth toward available commit, capped by free disk
+**headroom remaining above the fixture floor** (the 30 GiB steady-state working set), and judges
+page-file configuration by its **maximum** rather than its current size.
 
 ### Decision 7 — fail fast on insufficient capacity
 
@@ -402,8 +403,8 @@ commit limit to speak of, and the suite is green there.
 | Available commit    | 12 GiB | 4 GiB  | **Provisional** — no sampled peak-commit figure exists   |
 | Page-file max < RAM | advice | advice | Structural: the configured maximum caps the commit limit |
 
-Available commit is free commit **plus** unclaimed page-file growth, capped by free disk — see
-the correction above.
+Available commit is free commit **plus** unclaimed page-file growth, capped by free disk headroom
+remaining above the 30 GiB fixture floor — see the correction above.
 
 The asymmetry is deliberate and worth stating rather than smoothing over. The disk floor is
 empirical, in the same class as the sync measurement this ADR has learned to trust. The commit

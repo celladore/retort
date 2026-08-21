@@ -29,6 +29,7 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Test-run reconciliation gate ([#589](../../pull/589), [history](docs/history/features/0002-2026-08-11-test-run-reconciliation-gate-feature.md))
 - Native agent dispatch ([#574](../../pull/574), [history](docs/history/features/0003-2026-08-07-native-agent-dispatch-feature.md))
 - Capacity preflight for full test-suite runs ([history](docs/history/features/0002-2026-08-10-capacity-preflight-for-full-test-suite-runs-feature.md))
+- Marketing Landing Page ([#616](../../pull/616), [history](docs/history/features/0004-2026-08-19-marketing-landing-page-feature.md))
 
 ### Changed
 
@@ -43,6 +44,8 @@ Activate the commit template: `git config commit.template .gitmessage`
 - Real process spawns behind a mocked commandExists ([#590](../../pull/590), [history](docs/history/bug-fixes/0007-2026-08-10-real-process-spawns-behind-a-mocked-commandexists-bugfix.md))
 - Windows test flakiness from subprocess startup cost ([#591](../../pull/591), [history](docs/history/bug-fixes/0008-2026-08-10-windows-test-flakiness-from-subprocess-startup-cost-bugfix.md))
 - Tests passing without executing their subject ([#594](../../pull/594), [history](docs/history/bug-fixes/0009-2026-08-11-tests-passing-without-executing-their-subject-bugfix.md))
+- Whitespace-Pre Rendering Regression in Landing Page Code Blocks ([#616](../../pull/616), [history](docs/history/bug-fixes/0010-2026-08-19-whitespace-pre-rendering-regression-in-landing-page-code-blocks-bugfix.md))
+- Quick Start Section Ignores Light/Dark Theme Toggle ([history](docs/history/bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md))
 
 - Dangling hook wiring in generated Claude settings ([history](docs/history/bug-fixes/0002-2026-08-07-dangling-hook-wiring-in-generated-claude-settings-bugfix.md))
 - Orphaned hook scripts never wired in generated Claude settings ([#577](../../pull/577), [history](docs/history/bug-fixes/0004-2026-08-07-orphaned-hook-scripts-never-wired-bugfix.md))

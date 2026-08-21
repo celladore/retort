@@ -116,9 +116,15 @@ export function probeDisk(targets, { platform = process.platform, statfs = fs.st
     // statfs gives no mount point, so identify the volume by drive letter on
     // Windows and by size fingerprint elsewhere. A false merge only collapses
     // two identical-size filesystems into one line of output.
+    //
+    // path.win32, not the platform-default `path`: the default import follows
+    // the *host* OS, not the injected `platform` option, so on a POSIX host
+    // (e.g. Linux CI) `path.parse('D:\\Temp')` never recognises the drive
+    // root and every target collapses to the same key. Only surfaced once
+    // this suite actually ran on Linux CI for the first time.
     const key =
       platform === 'win32'
-        ? path.parse(path.resolve(dir)).root.toUpperCase()
+        ? path.win32.parse(path.win32.resolve(dir)).root.toUpperCase()
         : `${stats.blocks}:${stats.bsize}`;
 
     const existing = seen.get(key);
@@ -200,8 +206,16 @@ export function probeCommit({ platform = process.platform, query = runPowerShell
     return { supported: false, reason: 'could not read Win32_OperatingSystem via pwsh/powershell' };
   }
 
-  const kib = (value) => (Number(value) * 1024) / GIB;
-  const mib = (value) => (Number(value) * 1024 * 1024) / GIB;
+  // Validate numeric inputs so missing or non-finite CIM values are treated as
+  // unmeasured rather than producing NaN metrics.
+  const kib = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? (parsed * 1024) / GIB : null;
+  };
+  const mib = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? (parsed * 1024 * 1024) / GIB : null;
+  };
   const settings = new Map(
     (raw.pageFileSettings ?? []).map((s) => [
       s.Name,
@@ -225,22 +239,41 @@ export function probeCommit({ platform = process.platform, query = runPowerShell
     };
   });
 
-  const sum = (key) => pageFiles.reduce((total, pf) => total + pf[key], 0);
+  const sum = (key) =>
+    pageFiles.reduce((total, pf) => {
+      const val = pf[key];
+      return val !== null && total !== null ? total + val : null;
+    }, 0);
   const pageFileAllocatedGb = sum('allocatedGb');
   const pageFileMaximumGb = sum('maximumGb');
 
+  const commitLimitGb = kib(raw.os.TotalVirtualMemorySize);
+  const commitAvailableGb = kib(raw.os.FreeVirtualMemory);
+  const physicalGb = kib(raw.os.TotalVisibleMemorySize);
+
+  // If critical metrics are missing or non-finite, treat the probe as unsupported.
+  if (commitLimitGb === null || commitAvailableGb === null || physicalGb === null) {
+    return {
+      supported: false,
+      reason: 'CIM returned non-numeric or missing values for critical metrics',
+    };
+  }
+
   return {
     supported: true,
-    commitLimitGb: kib(raw.os.TotalVirtualMemorySize),
-    commitAvailableGb: kib(raw.os.FreeVirtualMemory),
-    physicalGb: kib(raw.os.TotalVisibleMemorySize),
+    commitLimitGb,
+    commitAvailableGb,
+    physicalGb,
     automaticManagedPageFile: raw.system?.AutomaticManagedPagefile === true,
     pageFiles,
-    pageFileAllocatedGb,
-    pageFileMaximumGb,
+    pageFileAllocatedGb: pageFileAllocatedGb ?? 0,
+    pageFileMaximumGb: pageFileMaximumGb ?? 0,
     // How much the commit limit can still rise by growing the page file.
-    pageFileGrowthGb: Math.max(0, pageFileMaximumGb - pageFileAllocatedGb),
-    pageFilePeakGb: pageFiles.reduce((max, pf) => Math.max(max, pf.peakGb), 0),
+    pageFileGrowthGb:
+      pageFileMaximumGb !== null && pageFileAllocatedGb !== null
+        ? Math.max(0, pageFileMaximumGb - pageFileAllocatedGb)
+        : 0,
+    pageFilePeakGb: pageFiles.reduce((max, pf) => Math.max(max, pf.peakGb ?? 0), 0),
   };
 }
 
@@ -320,14 +353,17 @@ export function evaluateCapacity(facts, config) {
     });
   } else {
     // Growing the page file raises the commit limit, so pending growth is real
-    // headroom — but only to the extent the disk can absorb the larger file.
-    // The two limits are coupled: a low-disk host cannot grow its way out of
-    // commit pressure, and a growing page file eats the space the fixtures need.
+    // headroom — but only to the extent the disk can absorb the larger file
+    // ABOVE THE FIXTURE FLOOR. The two limits are coupled: a low-disk host
+    // cannot grow its way out of commit pressure, and a growing page file eats
+    // the space the fixtures need.
     const freeDiskGb = Math.min(
       ...facts.disk.filter((volume) => !volume.error).map((volume) => volume.freeGb),
       Infinity
     );
-    const usableGrowthGb = Math.min(commit.pageFileGrowthGb, freeDiskGb);
+    // Only disk headroom above the fixture floor can be used for page-file growth.
+    const diskHeadroomGb = Math.max(0, freeDiskGb - config.minFreeDiskGb);
+    const usableGrowthGb = Math.min(commit.pageFileGrowthGb, diskHeadroomGb);
     const effectiveGb = commit.commitAvailableGb + usableGrowthGb;
     const short = config.minCommitGb - effectiveGb;
 
@@ -339,9 +375,9 @@ export function evaluateCapacity(facts, config) {
         `${gb(commit.commitAvailableGb)} available of a ${gb(commit.commitLimitGb)} commit limit ` +
         `(${gb(commit.physicalGb)} RAM + ${gb(commit.pageFileAllocatedGb)} page file)` +
         (usableGrowthGb > 0.05
-          ? `, plus ${gb(usableGrowthGb)} the page file can still grow into = ${gb(effectiveGb)} effective`
+          ? `, plus ${gb(usableGrowthGb)} the page file can still grow into (from ${gb(diskHeadroomGb)} disk headroom above the ${gb(config.minFreeDiskGb)} fixture floor) = ${gb(effectiveGb)} effective`
           : commit.pageFileGrowthGb > 0.05
-            ? `; its ${gb(commit.pageFileGrowthGb)} of configured growth is unusable — only ${gb(freeDiskGb)} of disk left`
+            ? `; its ${gb(commit.pageFileGrowthGb)} of configured growth is unusable — only ${gb(diskHeadroomGb)} of disk headroom above the fixture floor`
             : ' and the page file is at its configured maximum') +
         `, floor ${gb(config.minCommitGb)}` +
         (short > 0 ? ` — short by ${gb(short)}` : ''),
@@ -353,7 +389,7 @@ export function evaluateCapacity(facts, config) {
               'is too small for this operation to complete") or "Worker exited unexpectedly" —',
               'even while physical RAM still looks free. Close committed-memory consumers',
               '(browsers, containers, IDEs), or raise the page file maximum — but note that',
-              'growing it consumes the same volume the fixtures need.',
+              'growing it consumes disk headroom above the fixture floor, not just raw free space.',
             ].join('\n')
           : null,
     });

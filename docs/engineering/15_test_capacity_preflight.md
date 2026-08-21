@@ -61,7 +61,9 @@ the commit limit is not static — it rises as Windows expands the file. Two con
 
 So a low-disk host cannot grow its way out of commit pressure, and a host that passes the disk
 check at the start can fail it mid-run because the page file grew underneath it. The preflight
-caps credited growth at the free disk available to absorb it.
+caps credited page-file growth at the **free disk headroom remaining above the 30 GiB fixture
+floor** — growth is only usable to the extent the disk can absorb the larger file while still
+leaving room for the fixture working set.
 
 ## Thresholds
 
@@ -72,9 +74,10 @@ caps credited growth at the free disk available to absorb it.
 | Page-file max < RAM | advisory       | advisory     | Structural — the configured maximum, not the current size, caps the commit limit |
 
 "Available commit" is measured as free commit **plus** whatever the page file can still grow
-into, capped by free disk. Judging it on the instantaneous `FreeVirtualMemory` alone produces
-false alarms: a page file sitting at its initial size reports almost no headroom right up until
-Windows expands it.
+into, capped by **free disk headroom remaining above the 30 GiB fixture floor** (since growth
+consumes the same volume the fixtures need). Judging it on the instantaneous `FreeVirtualMemory`
+alone produces false alarms: a page file sitting at its initial size reports almost no headroom
+right up until Windows expands it.
 
 The disk floor is empirical and can be trusted. The commit floor is not measured the same way:
 there is no equivalent sampled figure for peak commit during a run. 12 GiB is chosen as the

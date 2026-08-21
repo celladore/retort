@@ -443,8 +443,9 @@ describe('evaluateCapacity', () => {
   });
 
   it('should not credit page-file growth the disk cannot absorb', () => {
-    // Arrange — same commit position, but only 3 GiB of disk to grow into.
-    const facts = makeGrowableFacts({ availableGb: 2.5, growthGb: 16, freeDiskGb: 3 });
+    // Arrange — same commit position, but only 3 GiB of disk headroom above
+    // the fixture floor (fullConfig.minFreeDiskGb is 30) to grow into.
+    const facts = makeGrowableFacts({ availableGb: 2.5, growthGb: 16, freeDiskGb: 33 });
 
     // Act
     const result = evaluateCapacity(facts, fullConfig);
