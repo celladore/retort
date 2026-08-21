@@ -61,30 +61,30 @@ function standardFeatures() {
     ...coreFeatures(),
     makeFeature({
       id: 'team-orchestration',
-      default: true,
+      default: false,
       templateVars: ['hasTeamOrchestration'],
     }),
     makeFeature({
       id: 'agent-personas',
-      default: true,
+      default: false,
       dependencies: ['team-orchestration'],
       templateVars: ['hasAgentPersonas'],
     }),
     makeFeature({
       id: 'quality-gates',
-      default: true,
+      default: false,
       category: 'quality',
       templateVars: ['hasQualityGates'],
     }),
     makeFeature({
       id: 'coding-rules',
-      default: true,
+      default: false,
       category: 'quality',
       templateVars: ['hasCodingRules'],
     }),
     makeFeature({
       id: 'doc-scaffolding',
-      default: true,
+      default: false,
       category: 'docs',
       templateVars: ['hasDocScaffolding'],
     }),
@@ -207,11 +207,13 @@ describe('resolveFeatures()', () => {
       expect(result.has('team-orchestration')).toBe(false);
     });
 
-    it('uses default: true when neither set (precedence 3)', () => {
+    it('uses default: false when neither set (precedence 3)', () => {
       const result = resolveFeatures(features, {}, presets);
-      expect(result.has('team-orchestration')).toBe(true);
-      expect(result.has('quality-gates')).toBe(true);
+      expect(result.has('team-orchestration')).toBe(false);
+      expect(result.has('quality-gates')).toBe(false);
       expect(result.has('mcp-integration')).toBe(false);
+      expect(result.has('spec-sync')).toBe(true);
+      expect(result.has('project-context')).toBe(true);
     });
   });
 
@@ -287,8 +289,9 @@ describe('resolveFeatures()', () => {
   describe('unknown preset', () => {
     it('falls back to defaults for unknown preset name', () => {
       const result = resolveFeatures(features, { featurePreset: 'nonexistent' }, presets);
-      // Falls through to default: true
-      expect(result.has('team-orchestration')).toBe(true);
+      // Falls through to default: false — only alwaysOn features remain
+      expect(result.has('team-orchestration')).toBe(false);
+      expect(result.has('spec-sync')).toBe(true);
     });
   });
 });
@@ -943,10 +946,10 @@ describe('CLI handlers', () => {
 describe('resolveFeatures() dependency resurrection', () => {
   it('warns when a disabled feature is resurrected by dependency', () => {
     const features = [
-      makeFeature({ id: 'a', dependencies: ['b'], default: true }),
+      makeFeature({ id: 'a', dependencies: ['b'], default: false }),
       makeFeature({ id: 'b', default: false }),
     ];
-    const overlay = { disabledFeatures: ['b'] };
+    const overlay = { enabledFeatures: ['a'], disabledFeatures: ['b'] };
     const logs = [];
     const result = resolveFeatures(features, overlay, {}, { log: (msg) => logs.push(msg) });
 
@@ -956,10 +959,10 @@ describe('resolveFeatures() dependency resurrection', () => {
 
   it('does not warn when disabled feature has no dependents', () => {
     const features = [
-      makeFeature({ id: 'a', default: true }),
-      makeFeature({ id: 'b', default: true }),
+      makeFeature({ id: 'a', default: false }),
+      makeFeature({ id: 'b', default: false }),
     ];
-    const overlay = { disabledFeatures: ['b'] };
+    const overlay = { enabledFeatures: ['a', 'b'], disabledFeatures: ['b'] };
     const logs = [];
     resolveFeatures(features, overlay, {}, { log: (msg) => logs.push(msg) });
 

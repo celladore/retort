@@ -55,3 +55,15 @@ featurePreset: standard
 #   - permission-guards
 #   - sensitive-file-protection
 #   - ci-automation
+
+# ---------------------------------------------------------------------------
+# Sync behaviour — opt-in by default
+# ---------------------------------------------------------------------------
+# Whether init automatically runs sync after generating the overlay.
+# false — init writes overlay + project.yaml + marker, then stops.
+# true  — init also regenerates all AI tool configs immediately.
+autoSyncAfterInit: false
+# Whether feature changes automatically run sync.
+# false — features enable/disable/preset update settings only.
+# true  — features changes also regenerate all AI tool configs immediately.
+autoSyncAfterFeatureChange: false

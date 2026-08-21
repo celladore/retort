@@ -69,7 +69,7 @@ function setupAgentkitRoot(dir) {
           name: 'Cost Tracking',
           category: 'infra',
           alwaysOn: false,
-          default: true,
+          default: false,
         },
         {
           id: 'drift-check',
@@ -552,11 +552,8 @@ describe('runRetortConfigWizard', () => {
       const raw = readFileSync(configPath, 'utf-8');
       const parsed = yaml.load(raw.replace(/^#.*$/gm, '').trim());
 
-      // cost-tracking defaults to true; selecting [] turns it off — that is a deviation
-      expect(parsed.features).toBeDefined();
-      expect(parsed.features['cost-tracking']).toBe(false);
-      // drift-check defaults to false and stays false — no deviation, omitted
-      expect(parsed.features['drift-check']).toBeUndefined();
+      // All non-core features default to false; selecting [] means all stay at default — no deviations
+      expect(parsed.features).toBeUndefined();
     });
   });
 });

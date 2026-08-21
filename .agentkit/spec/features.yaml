@@ -63,7 +63,7 @@
 #
 #   1. enabledFeatures (explicit list in overlay settings.yaml)  — wins if present
 #   2. featurePreset   (named preset from this file)             — used if no explicit list
-#   3. default: true   (per-feature defaults)                    — fallback
+#   3. default: false  (per-feature defaults)                   — fallback
 #
 # After the base set is determined:
 #   4. disabledFeatures are subtracted (cannot subtract alwaysOn)
@@ -190,7 +190,7 @@ features:
       Multi-team coordination with team definitions, handoff chains,
       and delegated task management across agent personas.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasTeamOrchestration
@@ -206,7 +206,7 @@ features:
       Specialized agent definitions with roles, responsibilities,
       conventions, and anti-patterns for focused task delegation.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: [team-orchestration]
     templateVars:
       - hasAgentPersonas
@@ -221,7 +221,7 @@ features:
       Custom AI tool commands (e.g., /orchestrate, /plan, /check)
       with typed flags, allowed tools, and workflow routing.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasSlashCommands
@@ -251,7 +251,7 @@ features:
       Automated quality checks including linting, formatting,
       type checking, testing, and build verification.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasQualityGates
@@ -265,7 +265,7 @@ features:
       Automated review checks for secrets, large files, TODOs,
       and code quality with configurable severity levels.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasCodeReview
@@ -277,7 +277,7 @@ features:
       Convention enforcement via rules.yaml — naming patterns,
       error handling, performance budgets, and security guardrails.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasCodingRules
@@ -295,7 +295,7 @@ features:
       Generate documentation structure (PRD, ADR, API docs, tech specs)
       with convention-aligned templates and paths.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasDocScaffolding
@@ -339,7 +339,7 @@ features:
       Allow/deny permission model for tool commands with
       pre-tool-use hooks that block destructive operations.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasPermissionGuards
@@ -354,7 +354,7 @@ features:
       Pre-tool-use hooks that prevent AI agents from modifying
       sensitive files (.env, credentials, CI configs).
     alwaysOn: false
-    default: true
+    default: false
     dependencies: [permission-guards]
     templateVars:
       - hasSensitiveFileProtection
@@ -383,7 +383,7 @@ features:
       GitHub Actions workflows, issue templates, PR templates,
       and CI profile configurations.
     alwaysOn: false
-    default: true
+    default: false
     dependencies: []
     templateVars:
       - hasCiAutomation

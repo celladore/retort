@@ -279,7 +279,7 @@ describe('runRetortConfigWizard — interactive path', () => {
             alwaysOn: true,
             default: true,
           },
-          { id: 'cost-tracking', name: 'Cost', category: 'infra', alwaysOn: false, default: true },
+          { id: 'cost-tracking', name: 'Cost', category: 'infra', alwaysOn: false, default: false },
           {
             id: 'drift-check',
             name: 'Drift',
@@ -345,8 +345,8 @@ describe('runRetortConfigWizard — interactive path', () => {
     expect(parsed.agents.frontend).toEqual({ team: 'quality' });
     // drift-check is OFF by default but user enabled it → recorded as true
     expect(parsed.features['drift-check']).toBe(true);
-    // cost-tracking is ON by default and user disabled it (not in selectedFeatures) → recorded as false
-    expect(parsed.features['cost-tracking']).toBe(false);
+    // cost-tracking defaults to false and user did not select it → no deviation, omitted
+    expect(parsed.features['cost-tracking']).toBeUndefined();
   });
 
   it('cancel at projectName prompt aborts', async () => {
@@ -629,8 +629,8 @@ describe('runRetortConfigWizard — interactive path', () => {
   });
 
   it('feature deviations from defaults are recorded; matches are omitted', async () => {
-    // Defaults: cost-tracking=on, drift-check=off
-    // User selects only drift-check → cost-tracking off (deviation), drift-check on (deviation)
+    // Defaults: cost-tracking=off, drift-check=off
+    // User selects only drift-check → drift-check on (deviation), cost-tracking off (no deviation)
     const mock = makeClackMock([
       'p',
       's',
@@ -653,7 +653,7 @@ describe('runRetortConfigWizard — interactive path', () => {
       readFileSync(resolve(projectRoot, '.retortconfig'), 'utf-8').replace(/^#.*$/gm, '').trim()
     );
     expect(parsed.features['drift-check']).toBe(true);
-    expect(parsed.features['cost-tracking']).toBe(false);
+    expect(parsed.features['cost-tracking']).toBeUndefined();
   });
 
   it('no agent overrides written when configureAgents = no', async () => {

@@ -494,10 +494,17 @@ export async function runFeatureEnable({ agentkitRoot, projectRoot, flags }) {
     console.log(`[agentkit:features] Auto-enabled dependencies: ${autoEnabled.join(', ')}`);
   }
 
-  // Trigger sync
-  console.log(`[agentkit:features] Running sync...`);
+  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings)
   const { runSync } = await import('./synchronize.mjs');
-  await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  const autoSyncAfterFeatureChange = settings.autoSyncAfterFeatureChange ?? false;
+  if (autoSyncAfterFeatureChange) {
+    console.log(`[agentkit:features] Running sync...`);
+    await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  } else {
+    console.log(
+      `[agentkit:features] Sync skipped (autoSyncAfterFeatureChange is false). Run "agentkit sync" manually when ready.`
+    );
+  }
 }
 
 /**
@@ -575,10 +582,17 @@ export async function runFeatureDisable({ agentkitRoot, projectRoot, flags }) {
   saveOverlaySettings(settingsPath, settings);
   console.log(`[agentkit:features] Disabled: ${featureIds.join(', ')}`);
 
-  // Trigger sync
-  console.log(`[agentkit:features] Running sync...`);
+  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings)
   const { runSync } = await import('./synchronize.mjs');
-  await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  const autoSyncAfterFeatureChange = settings.autoSyncAfterFeatureChange ?? false;
+  if (autoSyncAfterFeatureChange) {
+    console.log(`[agentkit:features] Running sync...`);
+    await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  } else {
+    console.log(
+      `[agentkit:features] Sync skipped (autoSyncAfterFeatureChange is false). Run "agentkit sync" manually when ready.`
+    );
+  }
 }
 
 /**
@@ -610,10 +624,17 @@ export async function runFeaturePreset({ agentkitRoot, projectRoot, flags }) {
   console.log(`[agentkit:features] Applied preset: ${presets[presetName].label}`);
   console.log(`[agentkit:features] Enabled ${enabled.size} features.`);
 
-  // Trigger sync
-  console.log(`[agentkit:features] Running sync...`);
+  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings)
   const { runSync } = await import('./synchronize.mjs');
-  await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  const autoSyncAfterFeatureChange = settings.autoSyncAfterFeatureChange ?? false;
+  if (autoSyncAfterFeatureChange) {
+    console.log(`[agentkit:features] Running sync...`);
+    await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
+  } else {
+    console.log(
+      `[agentkit:features] Sync skipped (autoSyncAfterFeatureChange is false). Run "agentkit sync" manually when ready.`
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
