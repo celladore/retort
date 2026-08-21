@@ -166,9 +166,14 @@ Diagnostics:
   harness doctor  Verify the vendored Agent Harnessing contract lock and schema
   harness validate --document <path>
                   Validate a contract document offline against the pinned schema
+  harness generate [--output <path>] [--dry-run] [--diff]
+                  Generate or update a conservative repo-local HarnessManifest
   harness options:
                   --document <path> Document to validate (validate only)
-                  --json            Emit machine-readable output (both actions)
+                  --output <path>   Output path (default: .agentkit/harness/manifest.json)
+                  --dry-run         Preview generation without writing
+                  --diff            Include the proposed manifest diff
+                  --json            Emit machine-readable output
 
 Backlog & Issue Tracking:
   import-issues   Import issues from external tracker into local backlog

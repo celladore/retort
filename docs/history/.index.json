@@ -1,7 +1,7 @@
 {
   "sequences": {
-    "implementation": 11,
-    "bugfix": 12,
+    "implementation": 12,
+    "bugfix": 14,
     "feature": 5,
     "migration": 1,
     "issue": 1,
@@ -135,6 +135,30 @@
       "date": "2026-08-19",
       "pr": "",
       "file": "bug-fixes/0011-2026-08-19-quick-start-section-ignores-light-dark-theme-toggle-bugfix.md"
+    },
+    {
+      "number": 12,
+      "type": "bugfix",
+      "title": "Reverse-merge PR blocked by main-to-main branch-rules check",
+      "date": "2026-08-19",
+      "pr": "622",
+      "file": "bug-fixes/0012-2026-08-19-reverse-merge-pr-blocked-by-main-to-main-branch-rules-check-bugfix.md"
+    },
+    {
+      "number": 13,
+      "type": "bugfix",
+      "title": "Secret scan recursion into accumulated worktrees causes validate timeout",
+      "date": "2026-08-20",
+      "pr": "627",
+      "file": "bug-fixes/0013-2026-08-20-secret-scan-recursion-into-accumulated-worktrees-causes-validate-timeout-bugfix.md"
+    },
+    {
+      "number": 11,
+      "type": "implementation",
+      "title": "Overlay Settings Schema Validation",
+      "date": "2026-08-20",
+      "pr": "",
+      "file": "implementations/0011-2026-08-20-overlay-settings-schema-validation-implementation.md"
     }
   ]
 }

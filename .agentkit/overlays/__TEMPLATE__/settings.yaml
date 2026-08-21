@@ -11,6 +11,14 @@ primaryStack: auto
 #         runs hooks on Windows. Hooks that ship no .ps1 are unaffected.
 windowsFirst: true
 
+# Conventional Commits type prefixing agent worktree branches
+# (feat/agent-<name>/<slug>). Rendered into .claude/rules/worktree-isolation.md.
+agentBranchPrefix: feat
+# How strongly the worktree-isolation rule is written for agents.
+# advisory — recommended; solo interactive sessions may skip it
+# enforced — stated as a hard requirement, with only the listed exemptions
+worktreeIsolation: advisory
+
 # After template + overlay are combined, run an LLM synthesis pass that produces
 # AI-optimised output targeted at agent consumers (denser context, resolved conflicts,
 # decision trees).  The synthesised result is committed and only regenerated when inputs

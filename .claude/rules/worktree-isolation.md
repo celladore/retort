@@ -15,17 +15,17 @@ agent task a reviewable branch, and enables clean rollback if a task goes wrong.
 Pass `isolation: "worktree"` when invoking an agent via the Agent tool for any
 **code-writing** task type:
 
-| Task type      | Requires worktree? |
-| -------------- | ------------------ |
-| `implement`    | Yes                |
-| `fix`          | Yes                |
-| `refactor`     | Yes                |
-| `migration`    | Yes                |
-| `test`         | Yes (adds/changes files) |
-| `review`       | No — read-only     |
-| `investigate`  | No — read-only     |
-| `discover`     | No — read-only     |
-| `audit`        | No — read-only     |
+| Task type     | Requires worktree?       |
+| ------------- | ------------------------ |
+| `implement`   | Yes                      |
+| `fix`         | Yes                      |
+| `refactor`    | Yes                      |
+| `migration`   | Yes                      |
+| `test`        | Yes (adds/changes files) |
+| `review`      | No — read-only           |
+| `investigate` | No — read-only           |
+| `discover`    | No — read-only           |
+| `audit`       | No — read-only           |
 
 ## Branch Naming Convention
 
@@ -41,8 +41,9 @@ Examples:
 - `feat/agent-testing/coverage-auth-module`
 - `feat/agent-data/migrate-user-schema`
 
-The prefix `feat/` is the default. For bug fixes use `fix/agent-<name>/<slug>`;
-for chores use `chore/agent-<name>/<slug>` — match the Conventional Commits type.
+The prefix `feat/` is this repo's configured default. For bug fixes use
+`fix/agent-<name>/<slug>`; for chores use `chore/agent-<name>/<slug>` — match the
+Conventional Commits type.
 
 ## Usage Pattern (Agent tool)
 
@@ -52,15 +53,15 @@ example `backend`, `frontend`, `data`, `test-lead`, `security-auditor`:
 ```js
 // Code-writing agent — always isolated
 Agent({
-  subagent_type: 'backend',
+  subagent_type: 'feature-dev:code-architect',
   isolation: 'worktree',
   prompt: 'Implement the payment endpoint described in task-20260327-001',
 });
 
 // Read-only agent — no isolation needed
 Agent({
-  subagent_type: 'security-auditor',
-  prompt: 'Audit the auth module for missing authorisation checks',
+  subagent_type: 'Explore',
+  prompt: 'Investigate the auth module structure',
 });
 ```
 
@@ -122,11 +123,13 @@ The following scenarios are exempt from worktree isolation:
 
 ## Configuration
 
-The branch prefix and naming convention can be customised per-repo via
-`.agentkit/overlays/retort/settings.yaml`:
+The branch prefix and enforcement level are set per-repo in
+`.agentkit/overlays/retort/settings.yaml`. This repo's current values:
 
+<!-- prettier-ignore -->
 ```yaml
-agentBranchPrefix: feat  # default; change to match your workflow
+agentBranchPrefix: feat # Conventional Commits type for agent branches
+worktreeIsolation: advisory # advisory | enforced
 ```
 
 After updating, run `pnpm --dir .agentkit retort:sync` to regenerate.
@@ -135,5 +138,7 @@ After updating, run `pnpm --dir .agentkit retort:sync` to regenerate.
 
 This rule is **advisory (warn)**, not a hard block. Worktree isolation is
 strongly recommended for multi-agent parallel workloads but may be skipped in
-solo interactive sessions without penalty. A future version may promote this to
-`block` for repos that opt in via `worktreeIsolation: enforced` in settings.
+solo interactive sessions without penalty.
+
+Promote it to a hard requirement by setting `worktreeIsolation: enforced` in the
+overlay settings and re-running sync.

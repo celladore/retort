@@ -6,7 +6,7 @@
 
 # Worktree Isolation — Agent Branch Conventions
 
-Code-writing agents **should** operate in isolated git worktrees rather than
+Code-writing agents {{#if worktreeIsolationEnforced}}**must**{{else}}**should**{{/if}} operate in isolated git worktrees rather than
 directly on the active branch. This prevents dirty-tree collisions, gives each
 agent task a reviewable branch, and enables clean rollback if a task goes wrong.
 
@@ -15,34 +15,35 @@ agent task a reviewable branch, and enables clean rollback if a task goes wrong.
 Pass `isolation: "worktree"` when invoking an agent via the Agent tool for any
 **code-writing** task type:
 
-| Task type      | Requires worktree? |
-| -------------- | ------------------ |
-| `implement`    | Yes                |
-| `fix`          | Yes                |
-| `refactor`     | Yes                |
-| `migration`    | Yes                |
-| `test`         | Yes (adds/changes files) |
-| `review`       | No — read-only     |
-| `investigate`  | No — read-only     |
-| `discover`     | No — read-only     |
-| `audit`        | No — read-only     |
+| Task type     | Requires worktree?       |
+| ------------- | ------------------------ |
+| `implement`   | Yes                      |
+| `fix`         | Yes                      |
+| `refactor`    | Yes                      |
+| `migration`   | Yes                      |
+| `test`        | Yes (adds/changes files) |
+| `review`      | No — read-only           |
+| `investigate` | No — read-only           |
+| `discover`    | No — read-only           |
+| `audit`       | No — read-only           |
 
 ## Branch Naming Convention
 
 Agent worktree branches follow this pattern:
 
 ```text
-feat/agent-<agent-name>/<task-slug>
+{{agentBranchPrefix}}/agent-<agent-name>/<task-slug>
 ```
 
 Examples:
 
-- `feat/agent-backend/add-payment-endpoint`
-- `feat/agent-testing/coverage-auth-module`
-- `feat/agent-data/migrate-user-schema`
+- `{{agentBranchPrefix}}/agent-backend/add-payment-endpoint`
+- `{{agentBranchPrefix}}/agent-testing/coverage-auth-module`
+- `{{agentBranchPrefix}}/agent-data/migrate-user-schema`
 
-The prefix `feat/` is the default. For bug fixes use `fix/agent-<name>/<slug>`;
-for chores use `chore/agent-<name>/<slug>` — match the Conventional Commits type.
+The prefix `{{agentBranchPrefix}}/` is this repo's configured default. For bug fixes use
+`fix/agent-<name>/<slug>`; for chores use `chore/agent-<name>/<slug>` — match the
+Conventional Commits type.
 
 ## Usage Pattern (Agent tool)
 
@@ -52,15 +53,15 @@ example `backend`, `frontend`, `data`, `test-lead`, `security-auditor`:
 ```js
 // Code-writing agent — always isolated
 Agent({
-  subagent_type: 'backend',
+  subagent_type: 'feature-dev:code-architect',
   isolation: 'worktree',
   prompt: 'Implement the payment endpoint described in task-20260327-001',
 });
 
 // Read-only agent — no isolation needed
 Agent({
-  subagent_type: 'security-auditor',
-  prompt: 'Audit the auth module for missing authorisation checks',
+  subagent_type: 'Explore',
+  prompt: 'Investigate the auth module structure',
 });
 ```
 
@@ -122,18 +123,28 @@ The following scenarios are exempt from worktree isolation:
 
 ## Configuration
 
-The branch prefix and naming convention can be customised per-repo via
-`.agentkit/overlays/{{repoName}}/settings.yaml`:
+The branch prefix and enforcement level are set per-repo in
+`.agentkit/overlays/{{repoName}}/settings.yaml`. This repo's current values:
 
+<!-- prettier-ignore -->
 ```yaml
-agentBranchPrefix: feat  # default; change to match your workflow
+agentBranchPrefix: {{agentBranchPrefix}} # Conventional Commits type for agent branches
+worktreeIsolation: {{worktreeIsolation}} # advisory | enforced
 ```
 
 After updating, run `pnpm --dir .agentkit retort:sync` to regenerate.
 
 ## Enforcement
 
-This rule is **advisory (warn)**, not a hard block. Worktree isolation is
+{{#if worktreeIsolationEnforced}}This repo sets `worktreeIsolation: enforced`. Worktree isolation is **required**
+for every code-writing task — the exemptions above are the only cases where it
+may be skipped, and "it is a small change" is not one of them. Start a task that
+writes code without an isolated worktree and you are violating this rule.
+
+Relax it by setting `worktreeIsolation: advisory` in the overlay settings and
+re-running sync.{{else}}This rule is **advisory (warn)**, not a hard block. Worktree isolation is
 strongly recommended for multi-agent parallel workloads but may be skipped in
-solo interactive sessions without penalty. A future version may promote this to
-`block` for repos that opt in via `worktreeIsolation: enforced` in settings.
+solo interactive sessions without penalty.
+
+Promote it to a hard requirement by setting `worktreeIsolation: enforced` in the
+overlay settings and re-running sync.{{/if}}

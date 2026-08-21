@@ -9,7 +9,14 @@ Retort vendors immutable schema snapshots so clean machines and CI can validate 
 ```sh
 pnpm --dir .agentkit retort:harness doctor --json
 pnpm --dir .agentkit retort:harness validate --document path/to/harness.json --json
+pnpm --dir .agentkit retort:harness generate --dry-run --diff
 ```
+
+`harness generate` creates or updates `.agentkit/harness/manifest.json` from the
+project and agent specs. Generated roles start read-only, with external effects
+and merge denied. The command validates the candidate against this pinned schema
+before writing, preserves namespaced local extensions, records deterministic spec
+provenance, and is idempotent. Use `--output` for another path inside the project.
 
 ## Update
 

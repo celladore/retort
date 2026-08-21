@@ -17,6 +17,7 @@ import {
   MAX_SUBAGENT_SPAWN_DEPTH,
   MIN_SUBAGENT_SPAWN_DEPTH,
 } from './var-builders.mjs';
+import { ALL_RENDER_TARGETS } from './template-utils.mjs';
 
 // ---------------------------------------------------------------------------
 // Schema definitions (lightweight — no external deps needed)
@@ -399,6 +400,100 @@ const settingsSchema = {
     },
   },
 };
+
+// ---------------------------------------------------------------------------
+// Schema: overlays/<repo>/settings.yaml
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-repo overlay settings — the one spec surface that was never validated at
+ * all. That is how four keys came to sit in overlays and adopter docs being read
+ * by nothing: windowsFirst, aiSynthesisLayer, agentBranchPrefix and
+ * worktreeIsolation. There was no declared list of valid keys, so neither a dead
+ * knob nor a typo like `windowsFrist: false` had anywhere to surface.
+ *
+ * This schema is that list. Adding a key here without wiring it is still
+ * possible, but it is now a deliberate act in a file that exists to say what the
+ * engine reads.
+ *
+ * Unknown keys are reported as warnings rather than errors: overlays are
+ * user-owned, and one written for a newer engine must not fail an older sync.
+ */
+const overlaySettingsSchema = {
+  type: 'object',
+  properties: {
+    repoName: { type: 'string', required: true, minLength: 1 },
+    defaultBranch: { type: 'string', minLength: 1 },
+    integrationBranch: { type: 'string', minLength: 1 },
+    primaryStack: { type: 'string', minLength: 1 },
+    commandPrefix: { type: 'string' },
+    windowsFirst: { type: 'boolean' },
+    aiSynthesisLayer: { type: 'boolean' },
+    autoSyncOnPush: { type: 'boolean' },
+    syncDateMode: { type: 'string', enum: ['run', 'version', 'none'] },
+    // Conventional Commits type, so a bare lowercase word — it is interpolated
+    // into a branch name, and `feat/` with a stray slash would nest a level
+    agentBranchPrefix: { type: 'string', minLength: 1, pattern: /^[a-z]+$/ },
+    worktreeIsolation: { type: 'string', enum: ['advisory', 'enforced'] },
+    featurePreset: { type: 'string', enum: ['minimal', 'lean', 'standard', 'full'] },
+    renderTargets: { type: 'array', items: { type: 'string' } },
+    enabledFeatures: { type: 'array', items: { type: 'string' } },
+    disabledFeatures: { type: 'array', items: { type: 'string' } },
+    permissions: { type: 'object' },
+    skills: { type: 'object', properties: { categorised: { type: 'boolean' } } },
+  },
+};
+
+/**
+ * Validates every overlay's settings.yaml. Returns { errors, warnings }.
+ *
+ * Type violations are errors — a string where a boolean is expected changes
+ * behaviour silently (`windowsFirst: "false"` is truthy). Unknown keys and
+ * unknown render targets are warnings, so a newer overlay still syncs.
+ */
+export function validateOverlaySettings(agentkitRoot) {
+  const errors = [];
+  const warnings = [];
+  const overlaysDir = resolve(agentkitRoot, 'overlays');
+  if (!existsSync(overlaysDir)) return { errors, warnings };
+
+  const declared = Object.keys(overlaySettingsSchema.properties);
+
+  for (const entry of readdirSync(overlaysDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const file = resolve(overlaysDir, entry.name, 'settings.yaml');
+    if (!existsSync(file)) continue;
+    const label = `overlays/${entry.name}/settings.yaml`;
+
+    let parsed;
+    try {
+      parsed = yaml.load(readFileSync(file, 'utf-8'));
+    } catch (err) {
+      errors.push(`${label}: invalid YAML — ${err.message}`);
+      continue;
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      errors.push(`${label}: expected a mapping of settings`);
+      continue;
+    }
+
+    errors.push(...validate(parsed, overlaySettingsSchema, label));
+
+    for (const key of Object.keys(parsed)) {
+      if (!declared.includes(key)) {
+        warnings.push(`${label}: unknown setting "${key}" — nothing reads it`);
+      }
+    }
+
+    for (const target of parsed.renderTargets || []) {
+      if (typeof target === 'string' && !ALL_RENDER_TARGETS.includes(target)) {
+        warnings.push(`${label}: unknown render target "${target}"`);
+      }
+    }
+  }
+
+  return { errors, warnings };
+}
 
 // ---------------------------------------------------------------------------
 // Schema: project.yaml — enum value sets
@@ -1406,6 +1501,15 @@ export function validateSpec(agentkitRoot) {
   // Validate settings.yaml
   if (settings) {
     errors.push(...validate(settings, settingsSchema, 'settings.yaml'));
+  }
+
+  // Validate every overlay's settings.yaml. Unknown keys surface as warnings —
+  // that is the check that would have caught windowsFirst and aiSynthesisLayer
+  // sitting in overlays wired to nothing.
+  {
+    const overlay = validateOverlaySettings(agentkitRoot);
+    errors.push(...overlay.errors);
+    warnings.push(...overlay.warnings);
   }
 
   // Validate aliases.yaml

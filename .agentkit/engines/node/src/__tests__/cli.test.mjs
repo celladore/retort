@@ -55,9 +55,8 @@ describe('CLI', () => {
     expect(result.stdout).toContain('init');
     expect(result.stdout).toContain('sync');
     expect(result.stdout).toContain('validate');
-    expect(result.stdout).toContain(
-      '--json            Emit machine-readable output (both actions)'
-    );
+    expect(result.stdout).toContain('harness generate');
+    expect(result.stdout).toContain('--json            Emit machine-readable output');
   });
 
   it('shows help with -h', () => {
