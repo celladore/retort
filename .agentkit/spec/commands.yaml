@@ -1603,8 +1603,9 @@ commands:
     description: >
       Interactive feature configuration workflow. Walks through each feature
       category, explains what each feature provides, shows current status,
-      and applies changes via the overlay settings.yaml. Triggers a sync
-      after changes are applied.
+      and applies changes via the overlay settings.yaml. Runs sync after
+      changes only when autoSyncAfterFeatureChange is true; otherwise,
+      instructs the user to run /sync manually.
     flags:
       - name: --category
         description: 'Configure only features in a specific category'
@@ -1739,7 +1740,7 @@ commands:
       ## Post-Init
 
       1. Review the generated `spec/project.yaml` — fill in any `null` fields
-      2. Set `autoSyncAfterInit: true` in `.agentkit/overlays/<repo>/settings.yaml` if you want auto-sync
+      2. To enable auto-sync for this init, set `autoSyncAfterInit: true` in `.agentkit/overlays/__TEMPLATE__/settings.yaml` before running init; setting it in the generated overlay only applies on subsequent `/sync` runs
       3. Run `/sync` to regenerate all AI tool configurations
       4. Run `/validate` to verify generated outputs are well-formed
       5. Commit both the spec and generated outputs together

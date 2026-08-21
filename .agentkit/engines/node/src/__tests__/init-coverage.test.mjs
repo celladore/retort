@@ -1530,4 +1530,33 @@ describe('runInit preset edge cases', () => {
     expect(importMock).toHaveBeenCalledTimes(1);
     expect(warnSpy.mock.calls.flat().join(' ')).toContain('Issue import failed');
   });
+
+  it('skips sync when autoSyncAfterInit is absent or false', async () => {
+    const syncMock = vi.fn().mockResolvedValue(undefined);
+    vi.doMock('../synchronize.mjs', () => ({
+      runSync: syncMock,
+    }));
+    vi.doMock('../discover.mjs', () => ({
+      runDiscover: vi.fn().mockResolvedValue(makeMinimalReport({ techStacks: [] })),
+    }));
+
+    // Override template to omit autoSyncAfterInit
+    writeFileSync(
+      resolve(agentkitRoot, 'overlays', '__TEMPLATE__', 'settings.yaml'),
+      'repoName: __TEMPLATE__\nrenderTargets: []\n',
+      'utf-8'
+    );
+
+    const { runInit } = await import('../init.mjs');
+
+    await runInit({
+      agentkitRoot,
+      projectRoot,
+      flags: { repoName: 'no-sync', 'non-interactive': true },
+    });
+
+    expect(syncMock).not.toHaveBeenCalled();
+    const marker = readFileSync(resolve(projectRoot, '.agentkit-repo'), 'utf-8').trim();
+    expect(marker).toBe('no-sync');
+  });
 });

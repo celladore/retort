@@ -1,6 +1,6 @@
 ---
 
-description: 'Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.'
+description: 'Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Runs sync after changes only when autoSyncAfterFeatureChange is true; otherwise, instructs the user to run /sync manually.'
 allowed-tools: Bash(node *agentkit* features*)
 generated_by: "retort"
 last_model: "sync-engine"

@@ -60,7 +60,7 @@ Optional kits (iac, finops, ai-cost-ops) are presented for explicit opt-in.
 ## Post-Init
 
 1. Review the generated `spec/project.yaml` — fill in any `null` fields
-2. Set `autoSyncAfterInit: true` in `.agentkit/overlays/<repo>/settings.yaml` if you want auto-sync
+2. To enable auto-sync for this init, set `autoSyncAfterInit: true` in `.agentkit/overlays/__TEMPLATE__/settings.yaml` before running init; setting it in the generated overlay only applies on subsequent `/sync` runs
 3. Run `/sync` to regenerate all AI tool configurations
 4. Run `/validate` to verify generated outputs are well-formed
 5. Commit both the spec and generated outputs together

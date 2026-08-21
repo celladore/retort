@@ -494,9 +494,13 @@ export async function runFeatureEnable({ agentkitRoot, projectRoot, flags }) {
     console.log(`[agentkit:features] Auto-enabled dependencies: ${autoEnabled.join(', ')}`);
   }
 
-  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings)
+  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings,
+  //    falling back to spec/settings.yaml sync.autoSyncAfterFeatureChange)
   const { runSync } = await import('./synchronize.mjs');
-  const autoSyncAfterFeatureChange = settings.autoSyncAfterFeatureChange ?? false;
+  const settingsSpecPath = resolve(agentkitRoot, 'spec', 'settings.yaml');
+  const settingsSpec = existsSync(settingsSpecPath) ? yaml.load(readFileSync(settingsSpecPath, 'utf-8')) || {} : {};
+  const autoSyncAfterFeatureChange =
+    settings.autoSyncAfterFeatureChange ?? settingsSpec.sync?.autoSyncAfterFeatureChange ?? false;
   if (autoSyncAfterFeatureChange) {
     console.log(`[agentkit:features] Running sync...`);
     await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
@@ -582,9 +586,13 @@ export async function runFeatureDisable({ agentkitRoot, projectRoot, flags }) {
   saveOverlaySettings(settingsPath, settings);
   console.log(`[agentkit:features] Disabled: ${featureIds.join(', ')}`);
 
-  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings)
+  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings,
+  //    falling back to spec/settings.yaml sync.autoSyncAfterFeatureChange)
   const { runSync } = await import('./synchronize.mjs');
-  const autoSyncAfterFeatureChange = settings.autoSyncAfterFeatureChange ?? false;
+  const settingsSpecPath = resolve(agentkitRoot, 'spec', 'settings.yaml');
+  const settingsSpec = existsSync(settingsSpecPath) ? yaml.load(readFileSync(settingsSpecPath, 'utf-8')) || {} : {};
+  const autoSyncAfterFeatureChange =
+    settings.autoSyncAfterFeatureChange ?? settingsSpec.sync?.autoSyncAfterFeatureChange ?? false;
   if (autoSyncAfterFeatureChange) {
     console.log(`[agentkit:features] Running sync...`);
     await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });
@@ -624,9 +632,13 @@ export async function runFeaturePreset({ agentkitRoot, projectRoot, flags }) {
   console.log(`[agentkit:features] Applied preset: ${presets[presetName].label}`);
   console.log(`[agentkit:features] Enabled ${enabled.size} features.`);
 
-  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings)
+  // Sync (opt-in, controlled by autoSyncAfterFeatureChange in overlay settings,
+  //    falling back to spec/settings.yaml sync.autoSyncAfterFeatureChange)
   const { runSync } = await import('./synchronize.mjs');
-  const autoSyncAfterFeatureChange = settings.autoSyncAfterFeatureChange ?? false;
+  const settingsSpecPath = resolve(agentkitRoot, 'spec', 'settings.yaml');
+  const settingsSpec = existsSync(settingsSpecPath) ? yaml.load(readFileSync(settingsSpecPath, 'utf-8')) || {} : {};
+  const autoSyncAfterFeatureChange =
+    settings.autoSyncAfterFeatureChange ?? settingsSpec.sync?.autoSyncAfterFeatureChange ?? false;
   if (autoSyncAfterFeatureChange) {
     console.log(`[agentkit:features] Running sync...`);
     await runSync({ agentkitRoot, projectRoot, flags: { overlay: repoName } });

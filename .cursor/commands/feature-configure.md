@@ -7,7 +7,7 @@
 
 # feature-configure
 
-Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Triggers a sync after changes are applied.
+Interactive feature configuration workflow. Walks through each feature category, explains what each feature provides, shows current status, and applies changes via the overlay settings.yaml. Runs sync after changes only when autoSyncAfterFeatureChange is true; otherwise, instructs the user to run /sync manually.
 
 ## Instructions
 
