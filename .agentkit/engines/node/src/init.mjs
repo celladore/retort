@@ -878,7 +878,9 @@ async function finalizeInit({
   const { runSync } = await import('./synchronize.mjs');
   const currentSettings = yaml.load(readFileSync(settingsPath, 'utf-8')) || {};
   const settingsSpecPath = resolve(agentkitRoot, 'spec', 'settings.yaml');
-  const settingsSpec = existsSync(settingsSpecPath) ? yaml.load(readFileSync(settingsSpecPath, 'utf-8')) || {} : {};
+  const settingsSpec = existsSync(settingsSpecPath)
+    ? yaml.load(readFileSync(settingsSpecPath, 'utf-8')) || {}
+    : {};
   const autoSyncAfterInit =
     currentSettings.autoSyncAfterInit ?? settingsSpec.sync?.autoSyncAfterInit ?? false;
   if (autoSyncAfterInit) {

@@ -247,9 +247,11 @@ sync:
   autoSyncOnPush: false
   # Whether to run agentkit sync automatically at the end of `agentkit init`.
   # Defaults to false — init writes the overlay and project.yaml, then stops.
-  # Set autoSyncAfterInit: true to regenerate all AI tool configs immediately.
+  # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
+  #   autoSyncAfterInit: true
   autoSyncAfterInit: false
   # Whether to run agentkit sync automatically after feature enable/disable/preset.
   # Defaults to false — feature changes update the overlay settings, then stop.
-  # Set autoSyncAfterFeatureChange: true to regenerate AI tool configs immediately.
+  # Override per-repo in .agentkit/overlays/<repoName>/settings.yaml:
+  #   autoSyncAfterFeatureChange: true
   autoSyncAfterFeatureChange: false

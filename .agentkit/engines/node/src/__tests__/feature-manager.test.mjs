@@ -712,7 +712,10 @@ describe('CLI handlers', () => {
   let projectRoot;
   const origLog = console.log;
 
-  function setupCliFixture(overlaySettings = {}) {
+  function setupCliFixture(
+    overlaySettings = {},
+    specSync = { autoSyncAfterInit: false, autoSyncAfterFeatureChange: false }
+  ) {
     tmpDir = mkdtempSync(resolve(tmpdir(), 'fm-cli-'));
     agentkitRoot = resolve(tmpDir, '.agentkit');
     projectRoot = tmpDir;
@@ -783,7 +786,7 @@ describe('CLI handlers', () => {
 
     writeFileSync(
       resolve(agentkitRoot, 'spec', 'settings.yaml'),
-      yaml.dump({ sync: { autoSyncAfterInit: false, autoSyncAfterFeatureChange: false } }),
+      yaml.dump({ sync: specSync }),
       'utf-8'
     );
 
@@ -893,6 +896,8 @@ describe('CLI handlers', () => {
 
     it('skips sync when autoSyncAfterFeatureChange is false', async () => {
       setupCliFixture({ autoSyncAfterFeatureChange: false });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
       const syncMock = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../synchronize.mjs', () => ({
         runSync: syncMock,
@@ -905,6 +910,42 @@ describe('CLI handlers', () => {
       });
 
       expect(syncMock).not.toHaveBeenCalled();
+      expect(logs.join('\n')).toContain('Sync skipped');
+    });
+
+    it('runs sync from spec default when overlay omits autoSyncAfterFeatureChange', async () => {
+      setupCliFixture({}, { autoSyncAfterFeatureChange: true });
+      const syncMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: syncMock,
+      }));
+
+      await runFeatureEnable({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['optional-feature'] },
+      });
+
+      expect(syncMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('overlay false overrides spec true for autoSyncAfterFeatureChange', async () => {
+      setupCliFixture({ autoSyncAfterFeatureChange: false }, { autoSyncAfterFeatureChange: true });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+      const syncMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: syncMock,
+      }));
+
+      await runFeatureEnable({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['optional-feature'] },
+      });
+
+      expect(syncMock).not.toHaveBeenCalled();
+      expect(logs.join('\n')).toContain('Sync skipped');
     });
   });
 
@@ -942,7 +983,10 @@ describe('CLI handlers', () => {
     });
 
     it('runs sync when autoSyncAfterFeatureChange is true', async () => {
-      setupCliFixture({ enabledFeatures: ['test-feature', 'optional-feature'], autoSyncAfterFeatureChange: true });
+      setupCliFixture({
+        enabledFeatures: ['test-feature', 'optional-feature'],
+        autoSyncAfterFeatureChange: true,
+      });
       const syncMock = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../synchronize.mjs', () => ({
         runSync: syncMock,
@@ -958,7 +1002,12 @@ describe('CLI handlers', () => {
     });
 
     it('skips sync when autoSyncAfterFeatureChange is false', async () => {
-      setupCliFixture({ enabledFeatures: ['test-feature', 'optional-feature'], autoSyncAfterFeatureChange: false });
+      setupCliFixture({
+        enabledFeatures: ['test-feature', 'optional-feature'],
+        autoSyncAfterFeatureChange: false,
+      });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
       const syncMock = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../synchronize.mjs', () => ({
         runSync: syncMock,
@@ -971,6 +1020,51 @@ describe('CLI handlers', () => {
       });
 
       expect(syncMock).not.toHaveBeenCalled();
+      expect(logs.join('\n')).toContain('Sync skipped');
+    });
+
+    it('runs sync from spec default when overlay omits autoSyncAfterFeatureChange', async () => {
+      setupCliFixture(
+        { enabledFeatures: ['test-feature', 'optional-feature'] },
+        { autoSyncAfterFeatureChange: true }
+      );
+      const syncMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: syncMock,
+      }));
+
+      await runFeatureDisable({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['optional-feature'] },
+      });
+
+      expect(syncMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('overlay false overrides spec true for autoSyncAfterFeatureChange', async () => {
+      setupCliFixture(
+        {
+          enabledFeatures: ['test-feature', 'optional-feature'],
+          autoSyncAfterFeatureChange: false,
+        },
+        { autoSyncAfterFeatureChange: true }
+      );
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+      const syncMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: syncMock,
+      }));
+
+      await runFeatureDisable({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['optional-feature'] },
+      });
+
+      expect(syncMock).not.toHaveBeenCalled();
+      expect(logs.join('\n')).toContain('Sync skipped');
     });
   });
 
@@ -1025,6 +1119,8 @@ describe('CLI handlers', () => {
 
     it('skips sync when autoSyncAfterFeatureChange is false', async () => {
       setupCliFixture({ autoSyncAfterFeatureChange: false });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
       const syncMock = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../synchronize.mjs', () => ({
         runSync: syncMock,
@@ -1037,6 +1133,42 @@ describe('CLI handlers', () => {
       });
 
       expect(syncMock).not.toHaveBeenCalled();
+      expect(logs.join('\n')).toContain('Sync skipped');
+    });
+
+    it('runs sync from spec default when overlay omits autoSyncAfterFeatureChange', async () => {
+      setupCliFixture({}, { autoSyncAfterFeatureChange: true });
+      const syncMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: syncMock,
+      }));
+
+      await runFeaturePreset({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['minimal'] },
+      });
+
+      expect(syncMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('overlay false overrides spec true for autoSyncAfterFeatureChange', async () => {
+      setupCliFixture({ autoSyncAfterFeatureChange: false }, { autoSyncAfterFeatureChange: true });
+      const logs = [];
+      console.log = (...args) => logs.push(args.join(' '));
+      const syncMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock('../synchronize.mjs', () => ({
+        runSync: syncMock,
+      }));
+
+      await runFeaturePreset({
+        agentkitRoot,
+        projectRoot,
+        flags: { _args: ['minimal'] },
+      });
+
+      expect(syncMock).not.toHaveBeenCalled();
+      expect(logs.join('\n')).toContain('Sync skipped');
     });
   });
 });
