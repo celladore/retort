@@ -5,7 +5,7 @@
 <!-- Format: Plain Markdown. Windsurf command template. -->
 <!-- Docs: https://docs.windsurf.com/windsurf/cascade -->
 
-# /init — Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Supports --dry-run to preview without writing.
+# /init — Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Sync is opt-in — set autoSyncAfterInit: true in overlay settings to regenerate AI tool configs immediately after init. Supports --dry-run to preview without writing.
 
 ## When to Use
 
@@ -14,7 +14,7 @@ Invoke this command when the user requests or implies the
 
 ## Purpose
 
-Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Supports --dry-run to preview without writing.
+Initialise the current repository as a Retort project. Runs the interactive setup wizard to detect the tech stack, select language kits, choose AI tools, and generate the initial project.yaml and overlay configuration. Sync is opt-in — set autoSyncAfterInit: true in overlay settings to regenerate AI tool configs immediately after init. Supports --dry-run to preview without writing.
 
 ## Role
 
@@ -56,9 +56,10 @@ Optional kits (iac, finops, ai-cost-ops) are presented for explicit opt-in.
 ## Post-Init
 
 1. Review the generated `spec/project.yaml` — fill in any `null` fields
-2. Run `/sync` to regenerate all AI tool configurations
-3. Run `/validate` to verify generated outputs are well-formed
-4. Commit both the spec and generated outputs together
+2. Set `autoSyncAfterInit: true` in `.agentkit/overlays/<repo>/settings.yaml` if you want auto-sync
+3. Run `/sync` to regenerate all AI tool configurations
+4. Run `/validate` to verify generated outputs are well-formed
+5. Commit both the spec and generated outputs together
 
 ## Related Commands
 
